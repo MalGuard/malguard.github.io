@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050607">
+<meta name="description" content="MalGuard - Gaming security built to help protect gamers from malicious mods, dangerous files, scams and suspicious links.">
+<title>MalGuard | Protect Gamers. Protect Games.</title>
+<style>
+:root{
+  --bg:#050607;
+  --bg2:#090c0f;
+  --panel:#0d1115;
+  --panel2:#11161b;
+  --text:#f4f7f8;
+  --muted:#89949d;
+  --green:#35f28a;
+  --green2:#18c96c;
+  --line:rgba(255,255,255,.08);
+  --danger:#ff5364;
+  --warning:#ffc857;
+  --radius:22px;
+  --max:1180px;
+}
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+html{
+  scroll-behavior:smooth;
+}
+body{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at 80% 10%,rgba(53,242,138,.08),transparent 25%),
+    radial-gradient(circle at 15% 35%,rgba(36,120,255,.06),transparent 25%),
+    var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  overflow-x:hidden;
+}
+a{
+  color:inherit;
+  text-decoration:none;
+}
+button{
+  font:inherit;
+}
+.container{
+  width:min(calc(100% - 40px),var(--max));
+  margin:auto;
+}
+/* NAV */
+.nav{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:1000;
+  border-bottom:1px solid transparent;
+  transition:.3s;
+}
+.nav.scrolled{
+  background:rgba(5,6,7,.82);
+  backdrop-filter:blur(18px);
+  border-color:var(--line);
+}
+.nav-inner{
+  height:76px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:900;
+  letter-spacing:.08em;
+  font-size:19px;
+}
+.logo-mark{
+  width:34px;
+  height:34px;
+  border:1px solid rgba(53,242,138,.55);
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  background:rgba(53,242,138,.07);
+  box-shadow:0 0 30px rgba(53,242,138,.08);
+}
+.logo-mark::before{
+  content:"";
+  width:14px;
+  height:17px;
+  border:2px solid var(--green);
+  border-radius:8px 8px 9px 9px;
+  transform:translateY(-1px);
+}
+.nav-links{
+  display:flex;
+  align-items:center;
+  gap:30px;
+  color:#aeb7bd;
+  font-size:14px;
+}
+.nav-links a{
+  transition:.2s;
+}
+.nav-links a:hover{
+  color:white;
+}
+.nav-download{
+  padding:10px 17px;
+  border:1px solid rgba(53,242,138,.35);
+  border-radius:10px;
+  color:var(--green)!important;
+  background:rgba(53,242,138,.05);
+}
+.menu{
+  display:none;
+  background:none;
+  border:0;
+  color:white;
+  font-size:26px;
+  cursor:pointer;
+}
+/* HERO */
+.hero{
+  min-height:900px;
+  display:flex;
+  align-items:center;
+  padding:150px 0 90px;
+  position:relative;
+}
+.hero-grid{
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:70px;
+  align-items:center;
+}
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  border:1px solid rgba(53,242,138,.2);
+  background:rgba(53,242,138,.05);
+  color:var(--green);
+  padding:7px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.status-dot{
+  width:7px;
+  height:7px;
+  background:var(--green);
+  border-radius:50%;
+  box-shadow:0 0 12px var(--green);
+}
+.hero h1{
+  margin-top:25px;
+  font-size:clamp(52px,7vw,90px);
+  line-height:.94;
+  letter-spacing:-.055em;
+  max-width:780px;
+}
+.hero h1 span{
+  color:var(--green);
+}
+.hero-text{
+  color:var(--muted);
+  font-size:18px;
+  max-width:650px;
+  margin-top:26px;
+}
+.hero-actions{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:34px;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  min-height:50px;
+  padding:0 20px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  font-weight:800;
+  font-size:14px;
+  cursor:pointer;
+  transition:.25s;
+}
+.btn-primary{
+  color:#031009;
+  background:var(--green);
+  border-color:var(--green);
+  box-shadow:0 10px 40px rgba(53,242,138,.14);
+}
+.btn-primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 45px rgba(53,242,138,.22);
+}
+.btn-secondary{
+  color:white;
+  background:rgba(255,255,255,.035);
+}
+.btn-secondary:hover{
+  background:rgba(255,255,255,.07);
+  transform:translateY(-2px);
+}
+/* HERO VISUAL */
+.hero-visual{
+  position:relative;
+  min-height:500px;
+  display:grid;
+  place-items:center;
+}
+.radar{
+  position:absolute;
+  width:410px;
+  height:410px;
+  border-radius:50%;
+  border:1px solid rgba(53,242,138,.12);
+  box-shadow:
+    0 0 0 50px rgba(53,242,138,.018),
+    0 0 0 100px rgba(53,242,138,.012);
+}
+.radar::before,
+.radar::after{
+  content:"";
+  position:absolute;
+  inset:12%;
+  border:1px solid rgba(53,242,138,.08);
+  border-radius:50%;
+}
+.radar::after{
+  inset:25%;
+}
+.scan-line{
+  position:absolute;
+  width:2px;
+  height:47%;
+  top:3%;
+  left:50%;
+  transform-origin:bottom;
+  background:linear-gradient(to top,rgba(53,242,138,.65),transparent);
+  animation:scan 4s linear infinite;
+}
+@keyframes scan{
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
+}
+.shield{
+  width:230px;
+  height:270px;
+  position:relative;
+  display:grid;
+  place-items:center;
+  filter:drop-shadow(0 0 35px rgba(53,242,138,.15));
+}
+.shield-shape{
+  width:190px;
+  height:220px;
+  background:linear-gradient(145deg,#15231c,#07100b);
+  border:1px solid rgba(53,242,138,.65);
+  clip-path:polygon(50% 0%,92% 15%,86% 63%,73% 82%,50% 100%,27% 82%,14% 63%,8% 15%);
+  position:relative;
+}
+.shield-shape::after{
+  content:"✓";
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:var(--green);
+  font-size:64px;
+  font-weight:300;
+  text-shadow:0 0 30px rgba(53,242,138,.7);
+}
+.scan-card{
+  position:absolute;
+  width:240px;
+  padding:17px;
+  border:1px solid var(--line);
+  background:rgba(11,15,18,.84);
+  backdrop-filter:blur(14px);
+  border-radius:15px;
+  box-shadow:0 25px 70px rgba(0,0,0,.4);
+}
+.card-top{
+  display:flex;
+  justify-content:space-between;
+  color:#87929a;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+.card-file{
+  margin:14px 0;
+  font-weight:700;
+  font-size:13px;
+}
+.progress{
+  height:5px;
+  border-radius:5px;
+  background:#1b2328;
+  overflow:hidden;
+}
+.progress span{
+  display:block;
+  height:100%;
+  width:78%;
+  background:var(--green);
+  box-shadow:0 0 12px rgba(53,242,138,.5);
+}
+.card-result{
+  margin-top:12px;
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+}
+.safe{
+  color:var(--green);
+}
+.scan-card.one{
+  left:0;
+  top:70px;
+  animation:float 5s ease-in-out infinite;
+}
+.scan-card.two{
+  right:0;
+  bottom:65px;
+  animation:float 5s ease-in-out 1.5s infinite;
+}
+@keyframes float{
+  50%{transform:translateY(-12px);}
+}
+/* TRUST BAR */
+.trust{
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  background:rgba(255,255,255,.015);
+}
+.trust-inner{
+  min-height:92px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:25px;
+}
+.trust-item{
+  color:#8d989f;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+.trust-item strong{
+  display:block;
+  color:#dbe2e5;
+  margin-top:3px;
+  font-size:13px;
+}
+/* SECTIONS */
+section{
+  padding:120px 0;
+}
+.section-label{
+  color:var(--green);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  margin-bottom:13px;
+}
+.section-title{
+  font-size:clamp(35px,5vw,58px);
+  letter-spacing:-.045em;
+  line-height:1;
+}
+.section-description{
+  color:var(--muted);
+  max-width:620px;
+  margin-top:18px;
+}
+/* PRODUCTS */
+.products-grid{
+  margin-top:55px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+.product{
+  min-height:360px;
+  padding:28px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012));
+  position:relative;
+  overflow:hidden;
+  transition:.3s;
+}
+.product:hover{
+  transform:translateY(-5px);
+  border-color:rgba(53,242,138,.24);
+}
+.product-number{
+  color:#657078;
+  font-size:11px;
+  letter-spacing:.12em;
+}
+.product-icon{
+  width:54px;
+  height:54px;
+  margin-top:42px;
+  border:1px solid rgba(53,242,138,.25);
+  border-radius:15px;
+  display:grid;
+  place-items:center;
+  color:var(--green);
+  font-size:25px;
+  background:rgba(53,242,138,.045);
+}
+.product h3{
+  font-size:25px;
+  margin-top:22px;
+}
+.product p{
+  color:var(--muted);
+  margin-top:10px;
+  font-size:14px;
+}
+.product-link{
+  position:absolute;
+  left:28px;
+  bottom:28px;
+  color:var(--green);
+  font-size:13px;
+  font-weight:800;
+}
+/* HOW */
+.how{
+  background:linear-gradient(180deg,transparent,rgba(255,255,255,.018),transparent);
+}
+.steps{
+  margin-top:60px;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+}
+.step{
+  padding:25px 18px;
+  border-top:1px solid var(--line);
+}
+.step-number{
+  color:var(--green);
+  font-size:12px;
+  font-weight:900;
+}
+.step h3{
+  margin-top:35px;
+  font-size:18px;
+}
+.step p{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:8px;
+}
+/* THREAT */
+.threat-layout{
+  margin-top:55px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+.threat-panel{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:30px;
+  background:var(--panel);
+}
+.threat-panel h3{
+  font-size:21px;
+}
+.threat-list{
+  margin-top:25px;
+  display:grid;
+  gap:10px;
+}
+.threat-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:rgba(255,255,255,.018);
+  font-size:13px;
+}
+.badge{
+  font-size:10px;
+  font-weight:900;
+  padding:5px 8px;
+  border-radius:7px;
+}
+.badge-safe{
+  color:var(--green);
+  background:rgba(53,242,138,.08);
+}
+.badge-warning{
+  color:var(--warning);
+  background:rgba(255,200,87,.08);
+}
+.badge-danger{
+  color:var(--danger);
+  background:rgba(255,83,100,.08);
+}
+/* FREE PRO */
+.pricing{
+  margin-top:55px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.price-card{
+  padding:32px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:var(--panel);
+}
+.price-card.pro{
+  border-color:rgba(53,242,138,.3);
+  background:linear-gradient(145deg,rgba(53,242,138,.07),rgba(255,255,255,.02));
+}
+.price-card h3{
+  font-size:25px;
+}
+.price-card p{
+  color:var(--muted);
+  margin-top:7px;
+}
+.feature-list{
+  margin:25px 0;
+  display:grid;
+  gap:12px;
+}
+.feature{
+  display:flex;
+  gap:10px;
+  font-size:14px;
+}
+.feature span{
+  color:var(--green);
+}
+/* LABS */
+.labs{
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.lab-grid{
+  margin-top:50px;
+  display:grid;
+  grid-template-columns:1.4fr .6fr;
+  gap:16px;
+}
+.lab-main{
+  min-height:300px;
+  padding:32px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:
+    radial-gradient(circle at 80% 20%,rgba(53,242,138,.08),transparent 30%),
+    var(--panel);
+}
+.lab-main h3{
+  margin-top:80px;
+  font-size:30px;
+}
+.lab-main p{
+  max-width:600px;
+  color:var(--muted);
+  margin-top:10px;
+}
+.lab-side{
+  display:grid;
+  gap:16px;
+}
+.mini-card{
+  padding:25px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:var(--panel);
+}
+.mini-card strong{
+  font-size:24px;
+}
+.mini-card p{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:5px;
+}
+/* DOWNLOAD */
+.download{
+  text-align:center;
+}
+.download-box{
+  margin:50px auto 0;
+  max-width:820px;
+  padding:55px 30px;
+  border:1px solid rgba(53,242,138,.18);
+  border-radius:28px;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(53,242,138,.09),transparent 40%),
+    var(--panel);
+}
+.download-box h3{
+  font-size:38px;
+  letter-spacing:-.04em;
+}
+.download-box p{
+  color:var(--muted);
+  max-width:580px;
+  margin:12px auto 25px;
+}
+/* FEEDBACK */
+.feedback-grid{
+  margin-top:50px;
+  display:grid;
+  grid-template-columns:.8fr 1.2fr;
+  gap:16px;
+}
+.feedback-info,
+.feedback-form{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  background:var(--panel);
+  padding:30px;
+}
+.feedback-info h3{
+  font-size:28px;
+}
+.feedback-info p{
+  color:var(--muted);
+  margin-top:10px;
+}
+.feedback-types{
+  margin-top:25px;
+  display:grid;
+  gap:9px;
+}
+.feedback-type{
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  font-size:13px;
+}
+.form-group{
+  margin-bottom:15px;
+}
+.form-group label{
+  display:block;
+  font-size:12px;
+  color:#9aa4aa;
+  margin-bottom:7px;
+}
+input,
+select,
+textarea{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#080b0e;
+  color:white;
+  padding:13px;
+  outline:none;
+}
+textarea{
+  min-height:125px;
+  resize:vertical;
+}
+input:focus,
+select:focus,
+textarea:focus{
+  border-color:rgba(53,242,138,.45);
+}
+/* FOOTER */
+footer{
+  border-top:1px solid var(--line);
+  padding:45px 0;
+}
+.footer-inner{
+  display:flex;
+  justify-content:space-between;
+  gap:30px;
+}
+.footer-copy{
+  color:#69747b;
+  font-size:12px;
+  margin-top:12px;
+}
+.footer-links{
+  display:flex;
+  gap:25px;
+  color:#89939a;
+  font-size:13px;
+}
+.footer-links a:hover{
+  color:white;
+}
+/* RESPONSIVE */
+@media(max-width:900px){
+  .nav-links{
+    position:absolute;
+    top:76px;
+    left:20px;
+    right:20px;
+    padding:18px;
+    border:1px solid var(--line);
+    border-radius:15px;
+    background:rgba(7,9,11,.96);
+    backdrop-filter:blur(18px);
+    display:none;
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .nav-links.active{
+    display:flex;
+  }
+  .menu{
+    display:block;
+  }
+  .hero-grid,
+  .threat-layout,
+  .lab-grid,
+  .feedback-grid{
+    grid-template-columns:1fr;
+  }
+  .hero{
+    min-height:auto;
+  }
+  .hero-visual{
+    min-height:430px;
+  }
+  .products-grid{
+    grid-template-columns:1fr;
+  }
+  .steps{
+    grid-template-columns:1fr 1fr;
+  }
+  .pricing{
+    grid-template-columns:1fr;
+  }
+  .trust-inner{
+    flex-wrap:wrap;
+    padding:22px 0;
+  }
+}
+@media(max-width:600px){
+  .container{
+    width:min(calc(100% - 28px),var(--max));
+  }
+  section{
+    padding:80px 0;
+  }
+  .hero{
+    padding-top:125px;
+  }
+  .hero h1{
+    font-size:51px;
+  }
+  .hero-text{
+    font-size:16px;
+  }
+  .radar{
+    width:300px;
+    height:300px;
+  }
+  .shield-shape{
+    width:145px;
+    height:175px;
+  }
+  .scan-card{
+    width:185px;
+    padding:13px;
+  }
+  .scan-card.one{
+    left:-5px;
+  }
+  .scan-card.two{
+    right:-5px;
+  }
+  .steps{
+    grid-template-columns:1fr;
+  }
+  .footer-inner{
+    flex-direction:column;
+  }
+  .footer-links{
+    flex-wrap:wrap;
+  }
+}
+</style>
+</head>
+<body>
+<header class="nav" id="navbar">
+  <div class="container nav-inner">
+    <a href="#home" class="logo">
+      <span class="logo-mark"></span>
+      MALGUARD
+    </a>
+    <button class="menu" id="menuBtn" aria-label="Open menu">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <a href="#products">Products</a>
+      <a href="#how">How It Works</a>
+      <a href="#labs">Labs</a>
+      <a href="#feedback">Feedback</a>
+      <a href="#download" class="nav-download">Download</a>
+    </nav>
+  </div>
+</header>
+<main>
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow">
+        <span class="status-dot"></span>
+        Gaming Security Platform
+      </div>
+      <h1>
+        Protect your game.<br>
+        <span>Protect your play.</span>
+      </h1>
+      <p class="hero-text">
+        MalGuard builds security tools designed for gamers.
+        From dangerous mods and files to suspicious gaming links,
+        we help you check what you download before you trust it.
+      </p>
+      <div class="hero-actions">
+        <a href="#products" class="btn btn-primary">
+          Explore MalGuard →
+        </a>
+        <a href="#download" class="btn btn-secondary">
+          Download
+        </a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="radar">
+        <div class="scan-line"></div>
+      </div>
+      <div class="shield">
+        <div class="shield-shape"></div>
+      </div>
+      <div class="scan-card one">
+        <div class="card-top">
+          <span>MalGuard Scan</span>
+          <span>LIVE</span>
+        </div>
+        <div class="card-file">
+          gta5_mod.asi
+        </div>
+        <div class="progress">
+          <span></span>
+        </div>
+        <div class="card-result">
+          <span>Analysis</span>
+          <strong class="safe">ACTIVE</strong>
+        </div>
+      </div>
+      <div class="scan-card two">
+        <div class="card-top">
+          <span>Security</span>
+          <span>RESULT</span>
+        </div>
+        <div class="card-file">
+          Suspicious Link
+        </div>
+        <div class="card-result">
+          <span>Threat level</span>
+          <strong style="color:var(--warning)">REVIEW</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- TRUST -->
+<div class="trust">
+  <div class="container trust-inner">
+    <div class="trust-item">
+      Built for
+      <strong>Gamers</strong>
+    </div>
+    <div class="trust-item">
+      Focus
+      <strong>Game Security</strong>
+    </div>
+    <div class="trust-item">
+      First Platform
+      <strong>GTA 5</strong>
+    </div>
+    <div class="trust-item">
+      Expanding
+      <strong>More Games</strong>
+    </div>
+  </div>
+</div>
+<!-- PRODUCTS -->
+<section id="products">
+  <div class="container">
+    <div class="section-label">01 / Products</div>
+    <h2 class="section-title">
+      Security for the<br>
+      gaming world.
+    </h2>
+    <p class="section-description">
+      MalGuard is being built as a family of security tools.
+      GTA is where we start. Gaming security is where we're going.
+    </p>
+    <div class="products-grid">
+      <article class="product">
+        <div class="product-number">PRODUCT 01</div>
+        <div class="product-icon">🎮</div>
+        <h3>GTA Guard</h3>
+        <p>
+          Security scanning for GTA files and mods,
+          starting with GTA 5.
+        </p>
+        <a class="product-link" href="#download">
+          Explore GTA Guard →
+        </a>
+      </article>
+      <article class="product">
+        <div class="product-number">PRODUCT 02</div>
+        <div class="product-icon">⛏</div>
+        <h3>Minecraft Mod Guard</h3>
+        <p>
+          Analyze Minecraft mods and downloaded game
+          files before you run them.
+        </p>
+        <a class="product-link" href="#download">
+          Coming Soon →
+        </a>
+      </article>
+      <article class="product">
+        <div class="product-number">PRODUCT 03</div>
+        <div class="product-icon">🔗</div>
+        <h3>Game Scam Guard</h3>
+        <p>
+          Help identify suspicious gaming websites,
+          links, offers and phishing attempts.
+        </p>
+        <a class="product-link" href="#download">
+          Coming Soon →
+        </a>
+      </article>
+    </div>
+  </div>
+</section>
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="section-label">02 / How It Works</div>
+    <h2 class="section-title">
+      Check before<br>
+      you trust.
+    </h2>
+    <p class="section-description">
+      The MalGuard experience is built around a simple idea:
+      give gamers useful security information before they open,
+      install or trust something.
+    </p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">01</div>
+        <h3>Choose</h3>
+        <p>Select the file, mod or link you want to check.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">02</div>
+        <h3>Scan</h3>
+        <p>MalGuard analyzes the submitted item.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">03</div>
+        <h3>Analyze</h3>
+        <p>Security indicators are evaluated.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">04</div>
+        <h3>Result</h3>
+        <p>The user receives an understandable result.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">05</div>
+        <h3>Decide</h3>
+        <p>You decide what to do with the information.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- THREAT -->
+<section>
+  <div class="container">
+    <div class="section-label">03 / Security</div>
+    <h2 class="section-title">
+      Security results<br>
+      made readable.
+    </h2>
+    <p class="section-description">
+      Security should not require a cybersecurity degree.
+      MalGuard presents findings in a simple format gamers can understand.
+    </p>
+    <div class="threat-layout">
+      <div class="threat-panel">
+        <h3>Example scan</h3>
+        <div class="threat-list">
+          <div class="threat-row">
+            <span>File integrity</span>
+            <span class="badge badge-safe">SAFE</span>
+          </div>
+          <div class="threat-row">
+            <span>Suspicious behavior</span>
+            <span class="badge badge-warning">REVIEW</span>
+          </div>
+          <div class="threat-row">
+            <span>Known threat indicators</span>
+            <span class="badge badge-safe">CLEAR</span>
+          </div>
+          <div class="threat-row">
+            <span>Overall result</span>
+            <span class="badge badge-warning">SUSPICIOUS</span>
+          </div>
+        </div>
+      </div>
+      <div class="threat-panel">
+        <h3>Three simple states</h3>
+        <div class="threat-list">
+          <div class="threat-row">
+            <span>🟢 Safe</span>
+            <span>Low concern</span>
+          </div>
+          <div class="threat-row">
+            <span>🟡 Suspicious</span>
+            <span>Needs review</span>
+          </div>
+          <div class="threat-row">
+            <span>🔴 Threat Detected</span>
+            <span>High concern</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- FREE / PRO -->
+<section>
+  <div class="container">
+    <div class="section-label">04 / Plans</div>
+    <h2 class="section-title">
+      Free for everyone.<br>
+      More for those who need it.
+    </h2>
+    <p class="section-description">
+      MalGuard can grow with a Free and Pro experience while keeping
+      the core mission focused on protecting gamers.
+    </p>
+    <div class="pricing">
+      <div class="price-card">
+        <h3>Free</h3>
+        <p>Essential protection for gamers.</p>
+        <div class="feature-list">
+          <div class="feature"><span>✓</span> Core scanning</div>
+          <div class="feature"><span>✓</span> Basic security results</div>
+          <div class="feature"><span>✓</span> Access to supported tools</div>
+          <div class="feature"><span>✓</span> Community feedback</div>
+        </div>
+        <a href="#download" class="btn btn-secondary">
+          Get Free
+        </a>
+      </div>
+      <div class="price-card pro">
+        <h3>Pro</h3>
+        <p>Advanced features for serious users.</p>
+        <div class="feature-list">
+          <div class="feature"><span>✓</span> Advanced scanning</div>
+          <div class="feature"><span>✓</span> Extended analysis</div>
+          <div class="feature"><span>✓</span> Detailed reports</div>
+          <div class="feature"><span>✓</span> Future Pro features</div>
+        </div>
+        <a href="#download" class="btn btn-primary">
+          MalGuard Pro
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- LABS -->
+<section class="labs" id="labs">
+  <div class="container">
+    <div class="section-label">05 / MalGuard Labs</div>
+    <h2 class="section-title">
+      Research behind<br>
+      the protection.
+    </h2>
+    <div class="lab-grid">
+      <div class="lab-main">
+        <div class="eyebrow">
+          Security Research
+        </div>
+        <h3>Understanding threats in gaming.</h3>
+        <p>
+          MalGuard Labs is the research and education side of the project,
+          focused on gaming threats, malicious downloads, scams,
+          suspicious mods and safer gaming practices.
+        </p>
+      </div>
+      <div class="lab-side">
+        <div class="mini-card">
+          <strong>GTA</strong>
+          <p>Mod & file security research</p>
+        </div>
+        <div class="mini-card">
+          <strong>Minecraft</strong>
+          <p>Mod security research</p>
+        </div>
+        <div class="mini-card">
+          <strong>Scams</strong>
+          <p>Gaming scam awareness</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- DOWNLOAD -->
+<section class="download" id="download">
+  <div class="container">
+    <div class="section-label">06 / Download</div>
+    <h2 class="section-title">
+      Your game.<br>
+      Your security.
+    </h2>
+    <div class="download-box">
+      <h3>MalGuard for GTA 5</h3>
+      <p>
+        The first MalGuard release is focused on helping protect
+        GTA 5 players and their downloaded game files and mods.
+      </p>
+      <!-- Replace this link with your real program download later -->
+      <a href="#" class="btn btn-primary" onclick="downloadPlaceholder(event)">
+        Download MalGuard
+      </a>
+      <p style="font-size:11px;margin-top:18px;">
+        Official release • Windows • File verification information will be provided with releases
+      </p>
+    </div>
+  </div>
+</section>
+<!-- FEEDBACK -->
+<section id="feedback">
+  <div class="container">
+    <div class="section-label">07 / Feedback</div>
+    <h2 class="section-title">
+      Help build<br>
+      better protection.
+    </h2>
+    <p class="section-description">
+      Found a bug? Got a feature idea? Think a result is wrong?
+      Tell the MalGuard team.
+    </p>
+    <div class="feedback-grid">
+      <div class="feedback-info">
+        <h3>Your feedback matters.</h3>
+        <p>
+          Every useful report can help improve the experience
+          and make MalGuard more useful for gamers.
+        </p>
+        <div class="feedback-types">
+          <div class="feedback-type">🐞 Report a Bug</div>
+          <div class="feedback-type">💡 Suggest a Feature</div>
+          <div class="feedback-type">⚠️ Report a False Positive</div>
+          <div class="feedback-type">🔐 Report a Security Issue</div>
+          <div class="feedback-type">❤️ General Feedback</div>
+        </div>
+      </div>
+      <form class="feedback-form" id="feedbackForm">
+        <div class="form-group">
+          <label>Feedback type</label>
+          <select id="feedbackType">
+            <option>General Feedback</option>
+            <option>Report a Bug</option>
+            <option>Suggest a Feature</option>
+            <option>False Positive</option>
+            <option>Security Issue</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Your email (optional)</label>
+          <input id="feedbackEmail" type="email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label>Your message</label>
+          <textarea id="feedbackMessage" required placeholder="Tell us what happened..."></textarea>
+        </div>
+        <button class="btn btn-primary" type="submit">
+          Send Feedback →
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+</main>
+<footer>
+  <div class="container footer-inner">
+    <div>
+      <a href="#home" class="logo">
+        <span class="logo-mark"></span>
+        MALGUARD
+      </a>
+      <div class="footer-copy">
+        © 2026 MalGuard. Gaming security built for gamers.
+      </div>
+    </div>
+    <div class="footer-links">
+      <a href="#products">Products</a>
+      <a href="#labs">Labs</a>
+      <a href="#feedback">Feedback</a>
+      <a href="#download">Download</a>
+      <a href="https://github.com/MalGuard" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</footer>
+<script>
+const navbar = document.getElementById("navbar");
+const menuBtn = document.getElementById("menuBtn");
+const navLinks = document.getElementById("navLinks");
+window.addEventListener("scroll", () => {
+  navbar.classList.toggle("scrolled", window.scrollY > 20);
+});
+menuBtn.addEventListener("click", () => {
+  navLinks.classList.toggle("active");
+});
+document.querySelectorAll(".nav-links a").forEach(link => {
+  link.addEventListener("click", () => {
+    navLinks.classList.remove("active");
+  });
+});
+function downloadPlaceholder(event){
+  event.preventDefault();
+  alert("The official MalGuard release will be available here soon.");
+}
+document.getElementById("feedbackForm").addEventListener("submit", function(event){
+  event.preventDefault();
+  const type = document.getElementById("feedbackType").value;
+  const email = document.getElementById("feedbackEmail").value;
+  const message = document.getElementById("feedbackMessage").value.trim();
+  if(!message){
+    alert("Please enter your feedback.");
+    return;
+  }
+  /*
+    This is only the visual front-end.
+    Connect this form to your backend / database later.
+  */
+  const subject = encodeURIComponent("MalGuard Feedback - " + type);
+  const body = encodeURIComponent(
+    "Feedback type: " + type +
+    "\nEmail: " + (email || "Not provided") +
+    "\n\nMessage:\n" + message
+  );
+  window.location.href =
+    "mailto:malguard@example.com?subject=" + subject + "&body=" + body;
+});
+</script>
+</body>
+</html>
