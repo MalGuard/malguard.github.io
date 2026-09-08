@@ -1,0 +1,38 @@
+name: MalGuard brand finalizer
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  finalize:
+    if: ${{ !contains(github.event.head_commit.message, '[malguard-brand-final]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace legacy shield and brand markup
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          s,n=re.subn(r'<svg class="brand-mark".*?</svg>', '<img class="brand-mark" src="assets/malguard-logo.svg" alt="MalGuard logo">', s, count=1, flags=re.S)
+          s=s.replace('<span class="brand-word">MALGUARD<small>GAMING SECURITY</small></span>','<span class="brand-word"><span class="brand-name">MALGUARD</span><small>GAMING SECURITY</small></span>',1)
+          s,m=re.subn(r'<div class="shield">.*?</div>\s*(?=<div class="scan-card one">)', '<div class="hero-logo"><img src="assets/malguard-logo.svg" alt="MalGuard gaming security logo"></div>', s, count=1, flags=re.S)
+          s=s.replace('<div class="product-icon">G</div><div class="product-status">AVAILABLE</div><h3>GTA Guard</h3>','<div class="product-icon logo"><img src="assets/malguard-logo.svg" alt="MalGuard logo"></div><div class="product-status">AVAILABLE</div><h3>GTA Guard</h3>',1)
+          gta='<div class="product-page-header"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status">AVAILABLE PRODUCT</div>'
+          s=s.replace(gta,'<div class="product-page-header"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-page-brand"><img src="assets/malguard-logo.svg" alt="MalGuard logo"></div><div class="product-hero-status">AVAILABLE PRODUCT</div>',1)
+          coming='<div class="product-page-header"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status coming">COMING SOON</div>'
+          s=s.replace(coming,'<div class="product-page-header"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-page-brand"><img src="assets/malguard-logo.svg" alt="MalGuard logo"></div><div class="product-hero-status coming">COMING SOON</div>')
+          p.write_text(s,encoding='utf-8')
+          print('brand svg replaced:',n,'shield replaced:',m,'old shield remains:', '<div class="shield">' in s)
+      - name: Commit and remove finalizer
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git rm -f .github/workflows/brand-final.yml
+          git commit -m "Finalize MalGuard gaming logo placement [malguard-brand-final]"
+          git push
