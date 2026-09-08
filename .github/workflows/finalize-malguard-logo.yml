@@ -1,0 +1,44 @@
+name: Finalize MalGuard logo placement
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: ${{ !contains(github.event.head_commit.message, '[logo-final]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace old shield and brand with real SVG logo
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          logo='assets/malguard-logo.svg'
+          brand_pattern=r'<svg class="brand-mark".*?</svg><span class="brand-word">MALGUARD<small>GAMING SECURITY</small></span>'
+          brand_repl='<img class="brand-mark" src="assets/malguard-logo.svg" alt="MalGuard logo"><span class="brand-word"><span class="brand-name">MALGUARD</span><small>GAMING SECURITY</small></span>'
+          s,n=re.subn(brand_pattern,brand_repl,s,count=1,flags=re.S)
+          shield_pattern=r'<div class="shield">.*?</div></div><div class="scan-card one">'
+          shield_repl='<div class="hero-logo"><img src="assets/malguard-logo.svg" alt="MalGuard gaming security logo"></div></div><div class="scan-card one">'
+          s,m=re.subn(shield_pattern,shield_repl,s,count=1,flags=re.S)
+          s=s.replace('<div class="product-icon">G</div><div class="product-status">AVAILABLE</div><h3>GTA Guard</h3>','<div class="product-icon logo"><img src="assets/malguard-logo.svg" alt="MalGuard logo"></div><div class="product-status">AVAILABLE</div><h3>GTA Guard</h3>',1)
+          gta=r'(<section class="product-page" id="page-gta-guard">.*?<div class="product-page-header"><button class="back-button" onclick="showHome\(\)">← Back to MalGuard</button>)'
+          s=re.sub(gta,r'\1<div class="product-page-brand"><img src="assets/malguard-logo.svg" alt="MalGuard logo"></div>',s,count=1,flags=re.S)
+          s=s.replace('<div class="product-page-header"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status coming">COMING SOON</div>','<div class="product-page-header"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-page-brand"><img src="assets/malguard-logo.svg" alt="MalGuard logo"></div><div class="product-hero-status coming">COMING SOON</div>')
+          p.write_text(s,encoding='utf-8')
+          print('brand',n,'shield',m)
+      - name: Commit and remove workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git rm -f .github/workflows/finalize-malguard-logo.yml
+          git commit -m "Finalize MalGuard logo placement [logo-final]"
+          git push
