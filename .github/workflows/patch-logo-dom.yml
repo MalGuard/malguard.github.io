@@ -1,0 +1,41 @@
+name: Patch MalGuard logo DOM
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: ${{ !contains(github.event.head_commit.message, '[logo-dom-patched]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch
+        run: |
+          python - <<'PY2'
+          from pathlib import Path
+          import re
+          p=Path('index.html'); s=p.read_text(encoding='utf-8')
+          print('len',len(s))
+          print('brand marker',s.count('class="brand-mark"'))
+          print('shield marker',s.count('class="shield"'))
+          print('gta marker',s.count('GTA Guard'))
+          s=re.sub(r'<svg class="brand-mark"[^>]*>.*?</svg>', '<img class="brand-mark" src="assets/malguard-logo.svg" alt="MalGuard logo">', s, count=1, flags=re.S)
+          s=s.replace('<span class="brand-word">MALGUARD<small>GAMING SECURITY</small></span>', '<span class="brand-word"><span class="brand-name">MALGUARD</span><small>GAMING SECURITY</small></span>', 1)
+          a=s.find('<div class="shield">'); b=s.find('<div class="scan-card one">',a)
+          if a>=0 and b>0: s=s[:a]+'<div class="hero-logo"><img src="assets/malguard-logo.svg" alt="MalGuard gaming security logo"></div>'+s[b:]
+          s=s.replace('<div class="product-icon">G</div><div class="product-status">AVAILABLE</div><h3>GTA Guard</h3>', '<div class="product-icon logo"><img src="assets/malguard-logo.svg" alt="MalGuard logo"></div><div class="product-status">AVAILABLE</div><h3>GTA Guard</h3>', 1)
+          s=s.replace('<div class="product-page-header"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status">AVAILABLE PRODUCT</div>', '<div class="product-page-header"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-page-brand"><img src="assets/malguard-logo.svg" alt="MalGuard logo"></div><div class="product-hero-status">AVAILABLE PRODUCT</div>', 1)
+          s=s.replace('<div class="product-page-header"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status coming">COMING SOON</div>', '<div class="product-page-header"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-page-brand"><img src="assets/malguard-logo.svg" alt="MalGuard logo"></div><div class="product-hero-status coming">COMING SOON</div>')
+          p.write_text(s,encoding='utf-8')
+          print('after brand',s.count('class="brand-mark"'),'after shield',s.count('class="shield"'))
+          PY2
+      - name: Commit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add index.html
+          git rm -f .github/workflows/patch-logo-dom.yml
+          git commit -m 'Patch MalGuard logo DOM [logo-dom-patched]'
+          git push
