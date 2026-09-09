@@ -24,18 +24,18 @@ jobs:
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          # Keep the new three-prong mark in the navbar and radar.
-          s = s.replace('assets/malguard-logo.svg', 'assets/malguard-logo.svg')
+          # The navbar and radar both use the same timeless three-prong core mark.
+          s = s.replace('assets/malguard-site-logo.svg', 'assets/malguard-logo.svg')
+          s = s.replace('assets/malguard-shield.svg', 'assets/malguard-logo.svg')
 
-          # Replace text-only product icons with the same brand mark.
+          # Replace the old text-only product icons with the branded mark.
           s = re.sub(
-              r'<span class="product-icon">.*?</span>',
-              '<span class="product-icon"><img src="assets/malguard-logo.svg" alt="MalGuard"></span>',
+              r'<(?:span|div) class="product-icon">(?:G|M|S)</(?:span|div)>',
+              '<div class="product-icon"><img src="assets/malguard-logo.svg" alt="MalGuard"></div>',
               s,
-              flags=re.S,
           )
 
-          # Add a document-ready brand class for any product/document header that uses it.
+          # Give product/document headers a reusable logo treatment when present.
           marker = '.product-brand-logo{'
           if marker not in s:
               s = s.replace('</style>', '.product-brand-logo{width:76px;height:76px;object-fit:contain;display:block;margin-bottom:16px}.document-brand-logo{width:58px;height:58px;object-fit:contain;display:block}\n</style>', 1)
