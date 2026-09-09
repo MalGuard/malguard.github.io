@@ -1,0 +1,30 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cubeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#43bfff;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="topGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#43bfff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00e5ff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Cube Front Face -->
+  <path d="M 70 80 L 130 80 L 130 140 L 70 140 Z" fill="#0b1014" stroke="url(#cubeGradient)" stroke-width="2"/>
+  
+  <!-- Cube Top Face -->
+  <path d="M 70 80 L 100 50 L 160 50 L 130 80 Z" fill="url(#topGradient)" stroke="#43bfff" stroke-width="2"/>
+  
+  <!-- Cube Right Face -->
+  <path d="M 130 80 L 160 50 L 160 110 L 130 140 Z" fill="#043b57" stroke="url(#cubeGradient)" stroke-width="2"/>
+  
+  <!-- Top Point/Spike -->
+  <path d="M 100 50 L 100 20 L 105 50 Z" fill="#00e5ff" stroke="#00e5ff" stroke-width="1.5"/>
+  <path d="M 100 50 L 100 20 L 95 50 Z" fill="#43bfff" stroke="#43bfff" stroke-width="1.5"/>
+  
+  <!-- Inner Lines for Tech Effect -->
+  <line x1="85" y1="95" x2="115" y2="95" stroke="#00e5ff" stroke-width="1.5" opacity="0.8"/>
+  <line x1="85" y1="115" x2="115" y2="115" stroke="#00e5ff" stroke-width="1.5" opacity="0.8"/>
+  <line x1="100" y1="80" x2="100" y2="140" stroke="#43bfff" stroke-width="1.5" opacity="0.6"/>
+</svg>
