@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 116" role="img" aria-labelledby="title desc">
+  <title id="title">MalGuard logo</title>
+  <desc id="desc">Angular M mark inside a technical gaming security shield</desc>
+  <defs>
+    <linearGradient id="edge" x1="12" y1="8" x2="88" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e8fbff"/>
+      <stop offset=".42" stop-color="#9aeaff"/>
+      <stop offset="1" stop-color="#2477b7"/>
+    </linearGradient>
+    <linearGradient id="core" x1="22" y1="18" x2="78" y2="98" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#102b3a"/>
+      <stop offset="1" stop-color="#050a0f"/>
+    </linearGradient>
+    <filter id="glow" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="2.2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <path d="M50 3 91 18v40c0 25-16 43-41 54C25 101 9 83 9 58V18Z" fill="url(#core)" stroke="url(#edge)" stroke-width="3"/>
+  <path d="M25 72 35 33l15 19 15-19 10 39-12-6-13 12-13-12Z" fill="none" stroke="#00e5ff" stroke-width="6" stroke-linejoin="round" filter="url(#glow)"/>
+  <path d="M22 16h56" stroke="#ff2bd6" stroke-width="2" opacity=".75"/>
+  <path d="M18 28h8M74 28h8" stroke="#9aeaff" stroke-width="2" opacity=".7"/>
+</svg>
