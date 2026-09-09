@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="MalGuard app icon">
+<defs><linearGradient id="g" x1="30" y1="20" x2="226" y2="236" gradientUnits="userSpaceOnUse"><stop stop-color="#9AEAFF"/><stop offset=".45" stop-color="#00E5FF"/><stop offset="1" stop-color="#1768D8"/></linearGradient></defs>
+<rect x="10" y="10" width="236" height="236" rx="54" fill="#07121A" stroke="#1768D8" stroke-width="8"/>
+<path d="M128 28 94 78 64 53 35 94l31 110 62 28 62-28 31-110-29-41-30 25Z" fill="#07121A" stroke="url(#g)" stroke-width="9" stroke-linejoin="round"/>
+<path d="M128 40 110 78 128 100 146 78Z" fill="url(#g)"/>
+<path d="M69 83 95 104l33 31 33-31 26-21-13 111-46 21-46-21Z" fill="none" stroke="url(#g)" stroke-width="10"/>
+<path d="M89 116v57M167 116v57M89 116l39 36 39-36M128 152v41" fill="none" stroke="url(#g)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
