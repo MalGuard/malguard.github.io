@@ -1,0 +1,84 @@
+/* MalGuard Gaming Font Integration */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+/* Xirod Font - Gaming Style */
+@font-face {
+  font-family: 'Xirod';
+  src: url('/assets/fonts/xirod-regular.woff2') format('woff2'),
+       url('/assets/fonts/xirod-regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Xirod';
+  src: url('/assets/fonts/xirod-bold.woff2') format('woff2'),
+       url('/assets/fonts/xirod-bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* MalGuard Branding with New Font */
+:root {
+  --font-gaming: 'Xirod', 'Orbitron', sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Gaming Brand Font */
+.brand,
+.brand strong,
+h1, h2, h3,
+.title,
+.label {
+  font-family: var(--font-gaming);
+  letter-spacing: 0.05em;
+  font-weight: bold;
+}
+
+/* Hero Section with Gaming Font */
+.hero h1 {
+  font-family: var(--font-gaming);
+  font-size: 3.5rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #00e5ff, #43bfff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+/* Section Titles */
+.section .title {
+  font-family: var(--font-gaming);
+  font-size: 2.5rem;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+}
+
+/* Product Page Titles */
+.product-page h1 {
+  font-family: var(--font-gaming);
+  font-size: 2.8rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+/* Button and CTA Text */
+.btn, button, .cta {
+  font-family: var(--font-gaming);
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Nav Brand */
+.nav .brand strong {
+  font-family: var(--font-gaming);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
