@@ -1,23 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 116" role="img" aria-labelledby="title desc">
-  <title id="title">MalGuard logo</title>
-  <desc id="desc">Angular M mark inside a technical gaming security shield</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">MalGuard mark</title>
+  <desc id="desc">A simple three-pronged MalGuard security mark with an M at its center.</desc>
   <defs>
-    <linearGradient id="edge" x1="12" y1="8" x2="88" y2="108" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#e8fbff"/>
-      <stop offset=".42" stop-color="#9aeaff"/>
-      <stop offset="1" stop-color="#2477b7"/>
+    <linearGradient id="mg" x1="42" y1="28" x2="214" y2="228" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9AEAFF"/>
+      <stop offset="0.45" stop-color="#00E5FF"/>
+      <stop offset="1" stop-color="#1768D8"/>
     </linearGradient>
-    <linearGradient id="core" x1="22" y1="18" x2="78" y2="98" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#102b3a"/>
-      <stop offset="1" stop-color="#050a0f"/>
-    </linearGradient>
-    <filter id="glow" x="-35%" y="-35%" width="170%" height="170%">
-      <feGaussianBlur stdDeviation="2.2" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
   </defs>
-  <path d="M50 3 91 18v40c0 25-16 43-41 54C25 101 9 83 9 58V18Z" fill="url(#core)" stroke="url(#edge)" stroke-width="3"/>
-  <path d="M25 72 35 33l15 19 15-19 10 39-12-6-13 12-13-12Z" fill="none" stroke="#00e5ff" stroke-width="6" stroke-linejoin="round" filter="url(#glow)"/>
-  <path d="M22 16h56" stroke="#ff2bd6" stroke-width="2" opacity=".75"/>
-  <path d="M18 28h8M74 28h8" stroke="#9aeaff" stroke-width="2" opacity=".7"/>
+  <path d="M128 18 91 75 62 49 30 92l34 118 64 28 64-28 34-118-32-43-29 26Z" fill="#07121A" stroke="url(#mg)" stroke-width="9" stroke-linejoin="round"/>
+  <path d="M128 31 108 76 128 101 148 76Z" fill="url(#mg)"/>
+  <path d="M64 77 91 100l37 35 37-35 27-23-14 117-50 22-50-22Z" fill="none" stroke="url(#mg)" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M84 111v66M172 111v66M84 111l44 40 44-40M128 151v45" fill="none" stroke="url(#mg)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
