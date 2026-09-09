@@ -1,0 +1,51 @@
+name: Apply MalGuard brand system
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  brand:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply logo variants to site
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Keep the new three-prong mark in the navbar and radar.
+          s = s.replace('assets/malguard-logo.svg', 'assets/malguard-logo.svg')
+
+          # Replace text-only product icons with the same brand mark.
+          s = re.sub(
+              r'<span class="product-icon">.*?</span>',
+              '<span class="product-icon"><img src="assets/malguard-logo.svg" alt="MalGuard"></span>',
+              s,
+              flags=re.S,
+          )
+
+          # Add a document-ready brand class for any product/document header that uses it.
+          marker = '.product-brand-logo{'
+          if marker not in s:
+              s = s.replace('</style>', '.product-brand-logo{width:76px;height:76px;object-fit:contain;display:block;margin-bottom:16px}.document-brand-logo{width:58px;height:58px;object-fit:contain;display:block}\n</style>', 1)
+
+          p.write_text(s, encoding='utf-8')
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/malguard-logo.svg assets/malguard-app.svg assets/malguard-document.svg
+          git diff --cached --quiet || git commit -m "Apply MalGuard brand system to site"
+          git push
