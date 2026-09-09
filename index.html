@@ -11,9 +11,9 @@
 <title>MalGuard | Scan Smart. Play Safe.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700&family=Sora:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#050607;--panel:#0b1014;--panel2:#10171c;--text:#f4f7f8;--muted:#89949d;--blue:#43bfff;--blue2:#9aeaff;--cyan:#00e5ff;--green:#35f28a;--magenta:#ff2bd6;--silver:#e8edf1;--danger:#ff5364;--warning:#ffc857;--line:rgba(255,255,255,.08);--radius:22px;--max:1180px;--display:"Orbitron",sans-serif;--body:"Rajdhani",sans-serif}
+:root{--bg:#050607;--panel:#0b1014;--panel2:#10171c;--text:#f4f7f8;--muted:#89949d;--blue:#43bfff;--blue2:#9aeaff;--cyan:#00e5ff;--green:#35f28a;--magenta:#ff2bd6;--silver:#e8edf1;--danger:#ff5364;--warning:#ffc857;--line:rgba(255,255,255,.08);--radius:22px;--max:1180px;--display:"Sora",sans-serif;--body:"Space Grotesk",sans-serif;--product:"Oxanium",sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{background:radial-gradient(circle at 50% -10%,rgba(0,229,255,.07),transparent 34%),var(--bg);color:var(--text);font-family:var(--body);line-height:1.6;overflow-x:hidden}body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);background-size:50px 50px;mask-image:linear-gradient(to bottom,#000,transparent 78%)}a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}button{cursor:pointer}.container{width:min(calc(100% - 40px),var(--max));margin:auto}
 .nav{position:fixed;top:0;left:0;width:100%;z-index:1000;padding:16px 0;transition:.25s}.nav.scrolled{background:rgba(5,6,7,.86);border-bottom:1px solid var(--line);backdrop-filter:blur(18px)}.nav-inner{display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:11px;font:900 13px var(--display);letter-spacing:.12em}.brand-mark{width:38px;height:38px;filter:drop-shadow(0 0 9px rgba(67,191,255,.2))}.brand-word{display:flex;flex-direction:column}.brand-word small{font:700 7px var(--display);letter-spacing:.2em;color:var(--blue2);margin-top:2px}.nav-links{display:flex;gap:25px}.nav-links a{font:700 10px var(--display);letter-spacing:.06em;color:#c8d0d5}.nav-links a:hover{color:var(--blue2)}.menu-btn{display:none;width:42px;height:42px;border:1px solid var(--line);border-radius:12px;background:#0b1014;color:#fff}
 .hero{min-height:900px;padding:145px 0 95px;display:grid;align-items:center}.hero-grid{display:grid;grid-template-columns:.92fr 1.08fr;gap:55px;align-items:center}.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid rgba(67,191,255,.18);border-radius:999px;background:rgba(67,191,255,.045);font:700 9px var(--display);letter-spacing:.14em;color:var(--blue2);text-transform:uppercase}.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 12px rgba(53,242,138,.7)}h1{margin-top:23px;max-width:650px;font:900 clamp(48px,6vw,82px)/.98 var(--display);letter-spacing:-.055em}h1 span{display:block;color:var(--blue2);text-shadow:0 0 25px rgba(67,191,255,.12)}.hero-description{max-width:620px;margin-top:24px;color:var(--muted);font-size:17px;font-weight:500}.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}.btn{min-height:48px;padding:0 20px;border:1px solid rgba(255,255,255,.1);border-radius:13px;display:inline-flex;align-items:center;justify-content:center;font:700 10px var(--display);letter-spacing:.07em;transition:.2s}.btn:hover{transform:translateY(-2px)}.btn-primary{background:var(--green);color:#03120a;border-color:rgba(53,242,138,.5);box-shadow:0 10px 35px rgba(53,242,138,.1)}.btn-secondary{background:rgba(255,255,255,.025);color:#dbeaf0}.btn-secondary:hover{border-color:rgba(67,191,255,.3);background:rgba(67,191,255,.05)}
@@ -35,6 +35,92 @@ footer{border-top:1px solid var(--line);padding:35px 0}.footer-inner{display:fle
 .hero-logo:hover{transform:translate(-50%,-50%) scale(1.025);filter:drop-shadow(0 0 5px #000) drop-shadow(0 0 28px rgba(0,229,255,.42))}
 .brand-mark{object-fit:contain}
 @media (max-width:680px){.hero-logo{width:150px}}
+</style><style>
+/* MALGUARD FUTURE GLASS UI */
+:root{
+  --future-cyan:#6ee7ff;
+  --future-blue:#4f8cff;
+  --future-violet:#9b7cff;
+  --future-white:#eef8ff;
+  --glass:rgba(14,24,38,.48);
+  --glass-line:rgba(160,225,255,.16);
+}
+body{
+  background:
+    radial-gradient(circle at 72% 8%,rgba(79,140,255,.13),transparent 28%),
+    radial-gradient(circle at 18% 20%,rgba(155,124,255,.09),transparent 24%),
+    radial-gradient(circle at 50% 65%,rgba(110,231,255,.045),transparent 35%),
+    var(--bg);
+}
+.brand{font-family:"Sora",sans-serif;letter-spacing:.08em}
+.brand-word{font-weight:800}
+.brand-word small{font-family:"Space Grotesk",sans-serif;letter-spacing:.18em}
+h1,.section-title,.labs-panel h3,.download-panel h3,.product-page-header h1{font-family:"Sora",sans-serif}
+h1{font-weight:800;letter-spacing:-.065em}
+h1 span{
+  background:linear-gradient(100deg,var(--future-cyan),#fff 45%,var(--future-violet));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:none;
+}
+.eyebrow,.btn,.nav-links a,.section-label,.product-status,.product-link,.plan-label,.trust-number,.step-number,.scan-card-value{font-family:"Space Grotesk",sans-serif}
+.products-grid{align-items:stretch}
+.product-card{
+  overflow:hidden;
+  min-height:350px;
+  border:1px solid var(--glass-line);
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.018) 45%,rgba(79,140,255,.035)),
+    var(--glass);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 20px 55px rgba(0,0,0,.24);
+  backdrop-filter:blur(24px) saturate(145%);
+  -webkit-backdrop-filter:blur(24px) saturate(145%);
+}
+.product-card:before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(120deg,rgba(255,255,255,.13),transparent 22%,transparent 72%,rgba(110,231,255,.06));
+}
+.product-card.available{
+  border-color:rgba(110,231,255,.30);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 22px 70px rgba(41,122,255,.12);
+}
+.product-card.available:after{
+  content:"";position:absolute;left:24px;right:24px;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--future-cyan),var(--future-violet),transparent);
+  opacity:.85;
+}
+.product-icon{
+  width:58px;height:58px;border-radius:18px;
+  background:linear-gradient(145deg,rgba(110,231,255,.11),rgba(155,124,255,.08));
+  border:1px solid rgba(166,225,255,.20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 10px 30px rgba(0,0,0,.18);
+}
+.product-icon img{width:39px;height:43px;filter:drop-shadow(0 0 10px rgba(110,231,255,.35))}
+.product-card h3{
+  position:relative;z-index:1;
+  font-family:"Oxanium",sans-serif;
+  font-weight:600;letter-spacing:.015em;
+}
+.product-card.available h3{
+  background:linear-gradient(100deg,#f4fcff 0%,var(--future-cyan) 48%,#8b9dff 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.product-card p{position:relative;z-index:1;color:#9fb3c2}
+.product-status{z-index:2;color:#89a8ba}
+.product-card.available .product-status{color:#78edc2}
+.product-link{position:relative;z-index:2}
+.hero-visual{filter:drop-shadow(0 25px 70px rgba(38,118,255,.08))}
+.radar{border-color:rgba(110,231,255,.26);box-shadow:0 0 100px rgba(79,140,255,.10),inset 0 0 80px rgba(110,231,255,.035),0 0 0 1px rgba(0,0,0,.9)}
+.scan-card,.radar-node{
+  background:rgba(7,15,25,.60);
+  border-color:rgba(150,220,255,.17);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 15px 35px rgba(0,0,0,.18);
+  backdrop-filter:blur(20px) saturate(140%);
+  -webkit-backdrop-filter:blur(20px) saturate(140%);
+}
+.section-title{font-weight:700}
+.btn-primary{background:linear-gradient(100deg,#67e8f9,#78a7ff);color:#03101a;border:0;box-shadow:0 12px 35px rgba(78,157,255,.18)}
+.btn-secondary{background:rgba(255,255,255,.035);border-color:rgba(160,225,255,.15);backdrop-filter:blur(12px)}
+@media(max-width:700px){.product-card{min-height:320px}}
 </style></head>
 <body>
 <header class="nav" id="navbar"><div class="container nav-inner"><a href="#home" class="brand" onclick="showHome()" aria-label="MalGuard home"><img class="brand-mark" src="assets/malguard-logo.svg" alt="MalGuard logo"><span class="brand-word">MALGUARD<small>GAMING SECURITY</small></span></a><nav class="nav-links" id="navLinks"><a href="#products">Products</a><a href="#how-it-works">How It Works</a><a href="#security-engine">Security</a><a href="#labs">Labs</a><a href="#plans">Plans</a><a href="#feedback">Feedback</a><a href="#download">Download</a></nav><button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button></div></header>
