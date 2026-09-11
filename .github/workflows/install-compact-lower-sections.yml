@@ -86,7 +86,6 @@ jobs:
               s = s.replace('</body>', js + '\n</body>', 1)
 
           p.write_text(s, encoding='utf-8')
-          PY
 
       - name: Commit compact layout
         run: |
