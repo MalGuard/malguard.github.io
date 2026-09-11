@@ -1,0 +1,97 @@
+name: Install compact lower sections
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  compact:
+    if: ${{ !contains(github.event.head_commit.message, 'Compact lower sections') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compact long lower sections
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          how = '''<section class="section compact-lower-section" id="how-it-works"><div class="container"><details class="fold-card workflow-fold">
+          <summary class="fold-summary"><div class="fold-copy"><div class="section-label">How It Works</div><h2>Inspect before you trust.</h2><p>Five security steps, kept compact until you want the full workflow.</p></div><span class="fold-action"><span class="when-closed">View workflow</span><span class="when-open">Close</span><b>+</b></span></summary>
+          <div class="fold-body"><div class="compact-steps"><div class="mini-step"><span>01</span><h3>Choose</h3><p>Select a supported GTA file or mod.</p></div><div class="mini-step"><span>02</span><h3>Scan</h3><p>Identify the input and inspect its structure.</p></div><div class="mini-step"><span>03</span><h3>Analyze</h3><p>Apply security rules and deeper analysis.</p></div><div class="mini-step"><span>04</span><h3>Result</h3><p>Aggregate findings into a security assessment.</p></div><div class="mini-step"><span>05</span><h3>Decide</h3><p>Review the result before using the file.</p></div></div></div>
+          </details></div></section>'''
+
+          plans = '''<section class="section compact-lower-section" id="plans"><div class="container"><div class="compact-heading"><div class="section-label">Plans</div><h2 class="section-title">Start simple. Go deeper when needed.</h2><p class="section-description">Choose the analysis level first. Open a card only when you want the full feature list.</p></div><div class="compact-plans-grid">
+          <details class="fold-card plan-fold free-fold"><summary class="fold-summary plan-summary"><div class="plan-summary-main"><span class="plan-label">STANDARD</span><h3>Free</h3><p>Core scanning for supported GTA Guard workflows.</p><div class="summary-pills"><span>Core Scan</span><span>Basic Results</span><span>GTA Guard</span></div></div><span class="fold-action"><span class="when-closed">View details</span><span class="when-open">Close</span><b>+</b></span></summary><div class="fold-body plan-fold-body"><ul class="compact-feature-list"><li>Core scanning</li><li>Basic security results</li><li>Supported GTA Guard tools</li><li>Community feedback</li></ul><a href="#download" class="btn btn-secondary">View Release Status</a></div></details>
+          <details class="fold-card plan-fold pro-fold"><summary class="fold-summary plan-summary"><div class="plan-summary-main"><span class="plan-label">DEEP ANALYSIS</span><h3>Pro</h3><p>Planned deeper analysis for cases where a standard scan is not enough.</p><div class="summary-pills"><span>Advanced Scan</span><span>Detailed Reports</span><span>Planned</span></div></div><span class="fold-action"><span class="when-closed">View details</span><span class="when-open">Close</span><b>+</b></span></summary><div class="fold-body plan-fold-body"><ul class="compact-feature-list"><li>Advanced scanning</li><li>Extended analysis</li><li>Detailed security reports</li><li>Future Pro capabilities</li></ul><button class="btn btn-secondary" type="button" onclick="showToast('Pro capabilities are planned and are not being sold yet.')">Planned</button></div></details>
+          </div></div></section>'''
+
+          s, n1 = re.subn(r'<section class="section" id="how-it-works">.*?</section>', how, s, count=1, flags=re.S)
+          s, n2 = re.subn(r'<section class="section" id="plans">.*?</section>', plans, s, count=1, flags=re.S)
+          if n1 != 1 or n2 != 1:
+              raise SystemExit(f'Expected one How It Works and one Plans section, got {n1=} {n2=}')
+
+          css = r'''<style>
+          /* MALGUARD COMPACT LOWER UI */
+          #how-it-works,#security-engine,#plans,#labs,#download,#feedback{padding:66px 0}
+          .compact-heading{max-width:760px;margin-bottom:26px}
+          .compact-heading .section-description{margin-top:10px}
+          .fold-card{position:relative;display:block;border:1px solid rgba(132,176,210,.16);border-radius:24px;background:linear-gradient(145deg,rgba(18,25,33,.94),rgba(5,8,12,.98));box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 24px 65px rgba(0,0,0,.28);overflow:hidden}
+          .fold-card:before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,#2f6bff,#00bdf4,transparent);opacity:.78;pointer-events:none}
+          .fold-card[open]{border-color:rgba(47,107,255,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.065),0 28px 72px rgba(0,0,0,.34),0 0 35px rgba(47,107,255,.045)}
+          .fold-summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:28px;padding:27px 30px;cursor:pointer;user-select:none}
+          .fold-summary::-webkit-details-marker{display:none}
+          .fold-copy h2{margin-top:7px;font:800 clamp(27px,3vw,39px)/1.08 var(--display);letter-spacing:-.035em}
+          .fold-copy p,.plan-summary-main p{margin-top:8px;color:#8795a3;font-size:13px;max-width:650px}
+          .fold-action{flex:0 0 auto;display:inline-flex;align-items:center;gap:11px;min-height:40px;padding:0 13px;border:1px solid rgba(76,146,255,.2);border-radius:12px;background:rgba(47,107,255,.07);color:#a8eaff;font:700 9px var(--display);letter-spacing:.07em;text-transform:uppercase}
+          .fold-action b{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(0,189,244,.11);font-size:17px;line-height:1;transition:transform .25s}
+          .when-open{display:none}.fold-card[open] .when-closed{display:none}.fold-card[open] .when-open{display:inline}.fold-card[open] .fold-action b{transform:rotate(45deg)}
+          .fold-body{padding:0 30px 30px;border-top:1px solid rgba(132,176,210,.09)}
+          .compact-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding-top:24px}
+          .mini-step{min-height:150px;padding:18px;border:1px solid rgba(134,173,201,.11);border-radius:17px;background:linear-gradient(145deg,rgba(255,255,255,.028),rgba(255,255,255,.008))}
+          .mini-step span{font:700 9px var(--display);color:#66d8ff;letter-spacing:.11em}.mini-step h3{margin-top:24px;font:700 15px var(--display)}.mini-step p{margin-top:7px;color:#7f8d99;font-size:11px;line-height:1.55}
+          .compact-plans-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+          .plan-fold{--plan-accent:47,107,255}.pro-fold{--plan-accent:0,189,244}
+          .plan-fold:before{background:linear-gradient(90deg,transparent,rgba(var(--plan-accent),.9),transparent)}
+          .plan-summary{min-height:218px;align-items:flex-start}
+          .plan-summary-main h3{margin-top:7px;font:800 31px var(--display);letter-spacing:-.04em}
+          .summary-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:17px}.summary-pills span{padding:6px 8px;border:1px solid rgba(var(--plan-accent),.16);border-radius:999px;background:rgba(var(--plan-accent),.045);color:#aebdca;font-size:9px}
+          .plan-fold-body{display:flex;flex-direction:column;align-items:flex-start;gap:20px;padding-top:23px}
+          .compact-feature-list{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px 24px;width:100%}.compact-feature-list li{color:#c7d1d9;font-size:12px}.compact-feature-list li:before{content:"✓";margin-right:9px;color:#5dd9ff}
+          #security-engine .section-header{margin-bottom:28px}
+          #labs .labs-panel,#download .download-panel{padding:32px 36px}
+          #feedback .feedback-grid{gap:24px}
+          @media(max-width:900px){.compact-steps{grid-template-columns:repeat(2,1fr)}.compact-steps .mini-step:last-child{grid-column:1/-1}.compact-plans-grid{grid-template-columns:1fr}}
+          @media(max-width:680px){#how-it-works,#security-engine,#plans,#labs,#download,#feedback{padding:52px 0}.fold-summary{padding:22px;align-items:flex-start;flex-direction:column}.fold-action{width:100%;justify-content:space-between}.fold-body{padding:0 22px 22px}.compact-steps{grid-template-columns:1fr}.compact-steps .mini-step:last-child{grid-column:auto}.mini-step{min-height:auto}.plan-summary{min-height:auto}.compact-feature-list{grid-template-columns:1fr}.compact-heading{margin-bottom:20px}}
+          </style>'''
+          if 'MALGUARD COMPACT LOWER UI' not in s:
+              s = s.replace('</head>', css + '\n</head>', 1)
+
+          js = r'''<script>
+          /* MALGUARD COMPACT LOWER UI BEHAVIOR */
+          document.querySelectorAll('.plan-fold').forEach(card=>card.addEventListener('toggle',()=>{
+            if(!card.open)return;
+            document.querySelectorAll('.plan-fold[open]').forEach(other=>{if(other!==card)other.open=false});
+          }));
+          </script>'''
+          if 'MALGUARD COMPACT LOWER UI BEHAVIOR' not in s:
+              s = s.replace('</body>', js + '\n</body>', 1)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit compact layout
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Compact lower sections"
+          git push
