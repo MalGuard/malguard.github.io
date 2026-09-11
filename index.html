@@ -39,92 +39,6 @@ footer{border-top:1px solid var(--line);padding:35px 0}.footer-inner{display:fle
 .brand-mark{object-fit:contain}
 @media (max-width:680px){.hero-logo{width:150px}}
 </style><style>
-/* MALGUARD FUTURE GLASS UI */
-:root{
-  --future-cyan:#6ee7ff;
-  --future-blue:#4f8cff;
-  --future-violet:#9b7cff;
-  --future-white:#eef8ff;
-  --glass:rgba(14,24,38,.48);
-  --glass-line:rgba(160,225,255,.16);
-}
-body{
-  background:
-    radial-gradient(circle at 72% 8%,rgba(79,140,255,.13),transparent 28%),
-    radial-gradient(circle at 18% 20%,rgba(155,124,255,.09),transparent 24%),
-    radial-gradient(circle at 50% 65%,rgba(110,231,255,.045),transparent 35%),
-    var(--bg);
-}
-.brand{font-family:"Sora",sans-serif;letter-spacing:.08em}
-.brand-word{font-weight:800}
-.brand-word small{font-family:"Space Grotesk",sans-serif;letter-spacing:.18em}
-h1,.section-title,.labs-panel h3,.download-panel h3,.product-page-header h1{font-family:"Sora",sans-serif}
-h1{font-weight:800;letter-spacing:-.065em}
-h1 span{
-  background:linear-gradient(100deg,var(--future-cyan),#fff 45%,var(--future-violet));
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  text-shadow:none;
-}
-.eyebrow,.btn,.nav-links a,.section-label,.product-status,.product-link,.plan-label,.trust-number,.step-number,.scan-card-value{font-family:"Space Grotesk",sans-serif}
-.products-grid{align-items:stretch}
-.product-card{
-  overflow:hidden;
-  min-height:350px;
-  border:1px solid var(--glass-line);
-  background:
-    linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.018) 45%,rgba(79,140,255,.035)),
-    var(--glass);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 20px 55px rgba(0,0,0,.24);
-  backdrop-filter:blur(24px) saturate(145%);
-  -webkit-backdrop-filter:blur(24px) saturate(145%);
-}
-.product-card:before{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(120deg,rgba(255,255,255,.13),transparent 22%,transparent 72%,rgba(110,231,255,.06));
-}
-.product-card.available{
-  border-color:rgba(110,231,255,.30);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 22px 70px rgba(41,122,255,.12);
-}
-.product-card.available:after{
-  content:"";position:absolute;left:24px;right:24px;top:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--future-cyan),var(--future-violet),transparent);
-  opacity:.85;
-}
-.product-icon{
-  width:58px;height:58px;border-radius:18px;
-  background:linear-gradient(145deg,rgba(110,231,255,.11),rgba(155,124,255,.08));
-  border:1px solid rgba(166,225,255,.20);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 10px 30px rgba(0,0,0,.18);
-}
-.product-icon img{width:39px;height:43px;filter:drop-shadow(0 0 10px rgba(110,231,255,.35))}
-.product-card h3{
-  position:relative;z-index:1;
-  font-family:"Oxanium",sans-serif;
-  font-weight:600;letter-spacing:.015em;
-}
-.product-card.available h3{
-  background:linear-gradient(100deg,#f4fcff 0%,var(--future-cyan) 48%,#8b9dff 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-}
-.product-card p{position:relative;z-index:1;color:#9fb3c2}
-.product-status{z-index:2;color:#89a8ba}
-.product-card.available .product-status{color:#78edc2}
-.product-link{position:relative;z-index:2}
-.hero-visual{filter:drop-shadow(0 25px 70px rgba(38,118,255,.08))}
-.radar{border-color:rgba(110,231,255,.26);box-shadow:0 0 100px rgba(79,140,255,.10),inset 0 0 80px rgba(110,231,255,.035),0 0 0 1px rgba(0,0,0,.9)}
-.scan-card,.radar-node{
-  background:rgba(7,15,25,.60);
-  border-color:rgba(150,220,255,.17);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 15px 35px rgba(0,0,0,.18);
-  backdrop-filter:blur(20px) saturate(140%);
-  -webkit-backdrop-filter:blur(20px) saturate(140%);
-}
-.section-title{font-weight:700}
-.btn-primary{background:linear-gradient(100deg,#67e8f9,#78a7ff);color:#03101a;border:0;box-shadow:0 12px 35px rgba(78,157,255,.18)}
-.btn-secondary{background:rgba(255,255,255,.035);border-color:rgba(160,225,255,.15);backdrop-filter:blur(12px)}
-@media(max-width:700px){.product-card{min-height:320px}}
-</style><style>
 /* MALGUARD REFINED LOGO FIT */
 .brand{gap:0}
 .brand-site-logo{display:block;height:40px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px rgba(0,189,244,.16))}
@@ -133,13 +47,119 @@ h1 span{
 .product-icon img{width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(0,189,244,.30))}
 .product-brand-logo{width:92px;height:92px;object-fit:contain;display:block;margin-bottom:18px;filter:drop-shadow(0 0 16px rgba(0,189,244,.24))}
 @media(max-width:760px){.brand-site-logo{height:35px}.hero-logo{width:150px;height:150px}.product-brand-logo{width:80px;height:80px}}
+</style><style>
+/* MALGUARD METALLIC GAMING UI */
+:root{
+  --bg:#030507;--panel:#080d12;--panel2:#0c1218;--text:#f4f7fb;--muted:#8a96a3;
+  --blue:#2f6bff;--blue2:#00bdf4;--cyan:#00d9ff;--line:rgba(160,195,225,.11);
+}
+body{
+  background:
+    radial-gradient(circle at 78% -8%,rgba(47,107,255,.14),transparent 30%),
+    radial-gradient(circle at 18% 6%,rgba(0,189,244,.055),transparent 24%),
+    linear-gradient(180deg,#020304 0%,#070b0f 48%,#030507 100%);
+  color:var(--text);
+}
+body:before{opacity:.42;background-size:64px 64px}
+.nav.scrolled{background:rgba(3,5,7,.91);border-bottom-color:rgba(0,189,244,.13);box-shadow:0 12px 45px rgba(0,0,0,.34)}
+.nav-links a{color:#b6c2cd}.nav-links a:hover{color:#7adfff}
+.eyebrow{background:rgba(47,107,255,.07);border-color:rgba(67,142,255,.2);color:#79dfff}.eyebrow i{background:#00bdf4;box-shadow:0 0 13px rgba(0,189,244,.58)}
+h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
+.btn-primary{background:linear-gradient(135deg,#2f6bff,#00aee8);color:#fff;border-color:rgba(89,166,255,.55);box-shadow:0 12px 34px rgba(47,107,255,.18)}
+.btn-secondary{background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.018));border-color:rgba(132,177,210,.16);color:#d9e6ef}
+.btn-secondary:hover{background:rgba(47,107,255,.08);border-color:rgba(65,143,255,.3)}
+.radar{background:radial-gradient(circle,rgba(47,107,255,.09),rgba(0,189,244,.02) 44%,transparent 70%);border-color:rgba(67,143,255,.25);box-shadow:0 0 85px rgba(25,82,185,.1),inset 0 0 70px rgba(0,189,244,.025)}
+.scan-card,.security-panel,.plan,.info-card,.labs-panel,.download-panel{background:linear-gradient(145deg,rgba(18,25,33,.92),rgba(6,10,14,.94));border-color:rgba(137,172,198,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 18px 50px rgba(0,0,0,.22)}
+.trust-bar{background:rgba(255,255,255,.01);border-color:rgba(130,170,200,.1)}
+.trust-number,.section-label,.step-number{color:#70d9ff}
+.section-title{color:#f5f8fb}.section-description{color:#8493a1}
+.plan.pro{border-color:rgba(47,107,255,.22);background:linear-gradient(145deg,rgba(47,107,255,.055),rgba(7,11,15,.96))}
+
+.game-products{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start}
+.game-card{--accent:#2f6bff;--accent2:#00bdf4;--accent-rgb:47,107,255;position:relative;border:1px solid rgba(var(--accent-rgb),.25);border-radius:24px;background:linear-gradient(145deg,rgba(21,28,36,.96),rgba(5,8,11,.98));overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 28px 75px rgba(0,0,0,.34);transition:border-color .28s,box-shadow .28s,transform .28s}
+.game-card:hover{transform:translateY(-4px);border-color:rgba(var(--accent-rgb),.48);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 32px 85px rgba(0,0,0,.42),0 0 36px rgba(var(--accent-rgb),.07)}
+.game-card.expanded{grid-column:1/-1;transform:none;border-color:rgba(var(--accent-rgb),.48)}
+.game-card:before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent);opacity:.9;z-index:3}
+.gta-card{--accent:#8ee84f;--accent2:#d9f7c7;--accent-rgb:142,232,79}
+.minecraft-card{--accent:#65b94f;--accent2:#a77a4f;--accent-rgb:101,185,79}
+.scam-card{--accent:#ff5b5b;--accent2:#ffb64d;--accent-rgb:255,91,91}
+.game-card-summary{position:relative;min-height:238px;padding:25px;display:flex;flex-direction:column;background:linear-gradient(125deg,rgba(var(--accent-rgb),.065),transparent 38%),linear-gradient(145deg,rgba(255,255,255,.028),transparent 55%)}
+.game-card-summary:after{content:"";position:absolute;right:-55px;top:-70px;width:190px;height:190px;border:1px solid rgba(var(--accent-rgb),.12);border-radius:50%;box-shadow:0 0 0 28px rgba(var(--accent-rgb),.018),0 0 0 56px rgba(var(--accent-rgb),.012);pointer-events:none}
+.card-top,.card-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:2}
+.card-brand{display:flex;align-items:center;gap:10px;font:700 11px var(--display);letter-spacing:.08em;color:#dce5eb}.card-brand img{width:32px;height:32px;object-fit:contain}.card-status{padding:6px 9px;border-radius:999px;border:1px solid rgba(var(--accent-rgb),.2);background:rgba(var(--accent-rgb),.065);color:var(--accent);font:700 8px var(--display);letter-spacing:.09em}
+.bank-chip{width:43px;height:31px;margin-top:20px;border:1px solid rgba(224,233,240,.26);border-radius:8px;background:linear-gradient(145deg,#1b242c,#0c1116);display:grid;grid-template-columns:repeat(3,1fr);overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.5)}.bank-chip i{border-right:1px solid rgba(222,231,237,.12)}.bank-chip i:last-child{border:0}
+.card-main{margin-top:auto;padding-top:25px;position:relative;z-index:2}.card-kicker{font:700 8px var(--display);letter-spacing:.17em;color:var(--accent)}.card-main h3{margin-top:7px;font:800 24px/1.08 var(--display);letter-spacing:-.035em;color:#f6f8fa}.card-main p{margin-top:8px;max-width:330px;color:#82909b;font-size:12px}
+.card-bottom{margin-top:20px;color:#74818b;font:700 8px var(--display);letter-spacing:.09em}.card-more{margin-left:auto;border:1px solid rgba(var(--accent-rgb),.27);border-radius:10px;background:rgba(var(--accent-rgb),.07);color:#e7eef3;padding:9px 11px;font:700 8px var(--display);letter-spacing:.06em;transition:.2s}.card-more:hover{background:rgba(var(--accent-rgb),.14);border-color:rgba(var(--accent-rgb),.5);color:#fff}
+.game-card-details{max-height:0;overflow:hidden;opacity:0;border-top:1px solid transparent;transition:max-height .55s ease,opacity .25s,border-color .25s}.game-card.expanded .game-card-details{max-height:2200px;opacity:1;border-top-color:rgba(var(--accent-rgb),.14)}
+.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:22px}.detail-block,.rules-box{padding:20px;border:1px solid rgba(157,182,201,.1);border-radius:17px;background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(255,255,255,.008))}.detail-label{display:block;color:var(--accent);font:700 8px var(--display);letter-spacing:.14em;text-transform:uppercase}.detail-block h4,.rules-box h4{margin-top:8px;font:700 16px var(--display);color:#edf3f6}.detail-block p,.rules-box li{color:#8e9ba6;font-size:12px}.detail-block p{margin-top:9px}.detail-block ul,.rules-box ul{list-style:none;margin-top:12px;display:grid;gap:8px}.detail-block li,.rules-box li{position:relative;padding-left:15px}.detail-block li:before,.rules-box li:before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(var(--accent-rgb),.4)}
+.spec-pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}.spec-pills span{padding:7px 9px;border:1px solid rgba(var(--accent-rgb),.16);border-radius:999px;background:rgba(var(--accent-rgb),.045);color:#c9d4dc;font-size:10px}.detail-note{font-size:10px!important;color:#6f7c86!important}.spec-list{margin-top:10px;display:grid;gap:7px}.spec-list div{display:flex;justify-content:space-between;gap:20px;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,.05)}.spec-list dt{color:#76838e;font-size:10px}.spec-list dd{margin:0;color:#d2dce2;font-size:10px;text-align:right}
+.rules-box{margin:0 22px 22px}.download-strip{margin:0 22px 22px;padding:20px;display:flex;align-items:center;justify-content:space-between;gap:22px;border:1px solid rgba(var(--accent-rgb),.18);border-radius:17px;background:linear-gradient(110deg,rgba(var(--accent-rgb),.07),rgba(255,255,255,.012))}.download-strip strong{display:block;margin-top:6px;color:#eef4f7;font:700 14px var(--display)}.download-strip p{margin-top:5px;color:#7f8c97;font-size:11px}.download-action{min-width:170px;min-height:44px;border:1px solid rgba(var(--accent-rgb),.22);border-radius:12px;background:rgba(255,255,255,.025);color:#70808b;font:700 9px var(--display);letter-spacing:.06em}.download-action:disabled{cursor:not-allowed;opacity:.65}
+@media(max-width:1000px){.game-products{grid-template-columns:1fr}.game-card.expanded{grid-column:auto}.game-card-summary{min-height:225px}}
+@media(max-width:700px){.detail-grid{grid-template-columns:1fr;padding:16px}.rules-box,.download-strip{margin-left:16px;margin-right:16px}.download-strip{align-items:stretch;flex-direction:column}.download-action{width:100%}.card-bottom{flex-wrap:wrap}.card-more{width:100%;margin-left:0}.game-card-summary{padding:21px}}
 </style></head>
 <body>
 <header class="nav" id="navbar"><div class="container nav-inner"><a href="#home" class="brand" onclick="showHome()" aria-label="MalGuard home"><img class="brand-site-logo" src="assets/malguard-site-logo.svg" alt="MalGuard"></a><nav class="nav-links" id="navLinks"><a href="#products">Products</a><a href="#how-it-works">How It Works</a><a href="#security-engine">Security</a><a href="#labs">Labs</a><a href="#plans">Plans</a><a href="#feedback">Feedback</a><a href="#download">Download</a></nav><button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button></div></header>
 <main class="home-content" id="homeContent">
-<section class="hero" id="home"><div class="container hero-grid"><div class="hero-copy"><div class="eyebrow"><i></i> Gaming Security Platform</div><h1>SCAN SMART.<span>PLAY SAFE.</span></h1><p class="hero-description">MalGuard builds gaming security tools designed to help you inspect suspicious mods, dangerous files, scams and gaming-related threats before they become a problem.</p><div class="hero-actions"><a href="#products" class="btn btn-primary">Explore MalGuard</a><a href="#download" class="btn btn-secondary">Download</a></div></div><div class="hero-visual" aria-label="MalGuard security radar"><div class="radar" id="radar"><div class="radar-grid"></div><div class="radar-cross"></div><div class="scan-sweep" id="scanSweep"></div><div class="scan-line" id="scanLine"></div><button class="radar-node gta node-gta" data-angle="0" onclick="openProduct('gta-guard')"><span class="node-dot"></span><span><span class="node-name">GTA GUARD</span><span class="node-status">Preview</span></span></button><button class="radar-node node-minecraft" data-angle="72" onclick="openProduct('minecraft-mod-guard')"><span class="node-dot"></span><span><span class="node-name">MINECRAFT</span><span class="node-status">Coming Soon</span></span></button><button class="radar-node node-scam" data-angle="144" onclick="openProduct('game-scam-guard')"><span class="node-dot"></span><span><span class="node-name">SCAM GUARD</span><span class="node-status">Coming Soon</span></span></button><button class="radar-node node-future" data-angle="216" onclick="showToast('Future MalGuard product. No release has been published yet.')"><span class="node-dot"></span><span><span class="node-name">FUTURE</span><span class="node-status">Planned</span></span></button><button class="radar-node node-research" data-angle="288" onclick="location.hash='labs'"><span class="node-dot"></span><span><span class="node-name">LABS</span><span class="node-status">Research</span></span></button><img class="hero-logo" src="assets/malguard-logo.svg" alt="MalGuard gaming security logo"></div><div class="scan-card one"><div class="scan-card-title">Security Engine</div><div class="scan-card-value blue">ANALYSIS READY</div></div><div class="scan-card two"><div class="scan-card-title">GTA Guard</div><div class="scan-card-value green">PREVIEW</div></div></div></div></section>
+<section class="hero" id="home"><div class="container hero-grid"><div class="hero-copy"><div class="eyebrow"><i></i> Gaming Security Platform</div><h1>SCAN SMART.<span>PLAY SAFE.</span></h1><p class="hero-description">MalGuard builds gaming security tools designed to help you inspect suspicious mods, dangerous files, scams and gaming-related threats before they become a problem.</p><div class="hero-actions"><a href="#products" class="btn btn-primary">Explore MalGuard</a><a href="#download" class="btn btn-secondary">Download</a></div></div><div class="hero-visual" aria-label="MalGuard security radar"><div class="radar" id="radar"><div class="radar-grid"></div><div class="radar-cross"></div><div class="scan-sweep" id="scanSweep"></div><div class="scan-line" id="scanLine"></div><button class="radar-node gta node-gta" data-angle="0" onclick="focusProduct('gta-card')"><span class="node-dot"></span><span><span class="node-name">GTA GUARD</span><span class="node-status">Preview</span></span></button><button class="radar-node node-minecraft" data-angle="72" onclick="focusProduct('minecraft-card')"><span class="node-dot"></span><span><span class="node-name">MINECRAFT</span><span class="node-status">Coming Soon</span></span></button><button class="radar-node node-scam" data-angle="144" onclick="focusProduct('scam-card')"><span class="node-dot"></span><span><span class="node-name">SCAM GUARD</span><span class="node-status">Coming Soon</span></span></button><button class="radar-node node-future" data-angle="216" onclick="showToast('Future MalGuard product. No release has been published yet.')"><span class="node-dot"></span><span><span class="node-name">FUTURE</span><span class="node-status">Planned</span></span></button><button class="radar-node node-research" data-angle="288" onclick="location.hash='labs'"><span class="node-dot"></span><span><span class="node-name">LABS</span><span class="node-status">Research</span></span></button><img class="hero-logo" src="assets/malguard-logo.svg" alt="MalGuard gaming security logo"></div><div class="scan-card one"><div class="scan-card-title">Security Engine</div><div class="scan-card-value blue">ANALYSIS READY</div></div><div class="scan-card two"><div class="scan-card-title">GTA Guard</div><div class="scan-card-value green">PREVIEW</div></div></div></div></section>
 <div class="trust-bar"><div class="container trust-grid"><div class="trust-item"><div class="trust-number">BUILT FOR</div><div class="trust-label">Gamers</div></div><div class="trust-item"><div class="trust-number">FOCUS</div><div class="trust-label">Game Security</div></div><div class="trust-item"><div class="trust-number">FIRST PLATFORM</div><div class="trust-label">GTA 5</div></div><div class="trust-item"><div class="trust-number">EXPANDING</div><div class="trust-label">More Games</div></div></div></div>
-<section class="section" id="products"><div class="container"><div class="section-header"><div class="section-label">Products</div><h2 class="section-title">Security for the gaming ecosystem.</h2><p class="section-description">MalGuard starts with GTA 5 and is designed to expand into other gaming security problems over time.</p></div><div class="products-grid"><article class="product-card available"><div class="product-icon"><img src="assets/malguard-logo.svg" alt="GTA Guard"></div><div class="product-status">AVAILABLE</div><h3>GTA Guard</h3><p>Security analysis for GTA 5 mods and supported game files, designed to identify suspicious structures and potentially dangerous content.</p><button class="product-link" onclick="openProduct('gta-guard')">Open GTA Guard →</button></article><article class="product-card"><div class="product-icon"><img src="assets/malguard-logo.svg" alt="Minecraft Mod Guard"></div><div class="product-status">COMING SOON</div><h3>Minecraft Mod Guard</h3><p>A planned security layer for Minecraft mods, mod files and related downloads.</p><button class="product-link" onclick="openProduct('minecraft-mod-guard')">View Product →</button></article><article class="product-card"><div class="product-icon"><img src="assets/malguard-logo.svg" alt="Game Scam Guard"></div><div class="product-status">COMING SOON</div><h3>Game Scam Guard</h3><p>A planned product focused on suspicious gaming links, scams and unsafe gaming-related destinations.</p><button class="product-link" onclick="openProduct('game-scam-guard')">View Product →</button></article></div></div></section>
+<section class="section" id="products"><div class="container"><div class="section-header"><div class="section-label">Products</div><h2 class="section-title">Purpose-built protection for games.</h2><p class="section-description">A restrained metallic interface with one identity color per product. Open a card only when you want the full technical details, rules and release status.</p></div><div class="products-grid game-products">
+<article class="game-card gta-card" id="gta-card">
+  <div class="game-card-summary">
+    <div class="card-top"><div class="card-brand"><img src="assets/malguard-logo.svg" alt="MalGuard"><span>MalGuard</span></div><span class="card-status">PREVIEW</span></div>
+    <div class="bank-chip" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="card-main"><span class="card-kicker">GTA 5 SECURITY</span><h3>GTA Guard</h3><p>Security analysis for GTA 5 mods and supported game files.</p></div>
+    <div class="card-bottom"><span>WINDOWS</span><span>MOD ANALYSIS</span><button class="card-more" type="button" aria-expanded="false" onclick="openGameCard('gta-card')">View Details</button></div>
+  </div>
+  <div class="game-card-details">
+    <div class="detail-grid">
+      <section class="detail-block"><span class="detail-label">Overview</span><h4>What it does</h4><p>GTA Guard is designed to inspect supported GTA 5 mod files before use and present understandable security findings instead of a single unexplained score.</p></section>
+      <section class="detail-block"><span class="detail-label">Analysis</span><h4>Security layers</h4><ul><li>File and type identification</li><li>Structure inspection</li><li>Rule-based security signals</li><li>Suspicious indicator aggregation</li><li>Final security verdict</li></ul></section>
+      <section class="detail-block"><span class="detail-label">Compatibility</span><h4>Supported inputs</h4><div class="spec-pills"><span>.ASI</span><span>.DLL</span><span>.ZIP</span><span>GTA mod archives</span></div><p class="detail-note">Support can change as the product develops.</p></section>
+      <section class="detail-block"><span class="detail-label">Product</span><h4>Current specification</h4><dl class="spec-list"><div><dt>Platform</dt><dd>Windows</dd></div><div><dt>Stage</dt><dd>Preview</dd></div><div><dt>Modes</dt><dd>Standard / deeper analysis planned</dd></div><div><dt>Focus</dt><dd>GTA 5 mod security</dd></div></dl></section>
+    </div>
+    <div class="rules-box"><span class="detail-label">Rules & safety</span><h4>Before using a release</h4><ul><li>Download MalGuard only from an official MalGuard release source.</li><li>Keep a backup of original game files before changing or installing mods.</li><li>A scan reduces risk but cannot guarantee that every possible threat is detected.</li><li>Follow the game, platform and mod creator rules that apply to the files you use.</li><li>Do not upload private, personal or confidential files for analysis.</li><li>When a release is published, verify its version and integrity information before running it.</li></ul></div>
+    <div class="download-strip"><div><span class="detail-label">Download</span><strong>Release not published yet</strong><p>The download button will activate only when a real verified build is published.</p></div><button class="download-action" type="button" disabled>Download unavailable</button></div>
+  </div>
+</article>
+
+<article class="game-card minecraft-card" id="minecraft-card">
+  <div class="game-card-summary">
+    <div class="card-top"><div class="card-brand"><img src="assets/malguard-logo.svg" alt="MalGuard"><span>MalGuard</span></div><span class="card-status">COMING SOON</span></div>
+    <div class="bank-chip" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="card-main"><span class="card-kicker">MINECRAFT SECURITY</span><h3>Minecraft Mod Guard</h3><p>Planned protection for Minecraft mods and related downloads.</p></div>
+    <div class="card-bottom"><span>PLANNED</span><span>MOD SECURITY</span><button class="card-more" type="button" aria-expanded="false" onclick="openGameCard('minecraft-card')">View Details</button></div>
+  </div>
+  <div class="game-card-details">
+    <div class="detail-grid">
+      <section class="detail-block"><span class="detail-label">Overview</span><h4>Planned purpose</h4><p>Help players inspect Minecraft mods and related files before installing or using them.</p></section>
+      <section class="detail-block"><span class="detail-label">Planned analysis</span><h4>Security direction</h4><ul><li>Mod file inspection</li><li>Suspicious structure detection</li><li>Security indicators</li><li>Clear risk results</li></ul></section>
+      <section class="detail-block"><span class="detail-label">Identity</span><h4>Minecraft-inspired card</h4><p>The green accent represents grass while the restrained brown undertone references dirt blocks without turning the whole site green.</p></section>
+      <section class="detail-block"><span class="detail-label">Product</span><h4>Current specification</h4><dl class="spec-list"><div><dt>Stage</dt><dd>Planned</dd></div><div><dt>Release</dt><dd>None yet</dd></div><div><dt>Focus</dt><dd>Minecraft mod security</dd></div></dl></section>
+    </div>
+    <div class="rules-box"><span class="detail-label">Rules & safety</span><h4>Before using a future release</h4><ul><li>Use only an official MalGuard build.</li><li>Keep backups of worlds and game files before installing mods.</li><li>Security analysis cannot replace safe download habits.</li><li>Respect Minecraft, launcher, server and mod licensing rules.</li></ul></div>
+    <div class="download-strip"><div><span class="detail-label">Download</span><strong>Product not released</strong><p>No official download exists yet.</p></div><button class="download-action" type="button" disabled>Coming soon</button></div>
+  </div>
+</article>
+
+<article class="game-card scam-card" id="scam-card">
+  <div class="game-card-summary">
+    <div class="card-top"><div class="card-brand"><img src="assets/malguard-logo.svg" alt="MalGuard"><span>MalGuard</span></div><span class="card-status">COMING SOON</span></div>
+    <div class="bank-chip" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="card-main"><span class="card-kicker">LINK & SCAM SECURITY</span><h3>Game Scam Guard</h3><p>Planned analysis for suspicious gaming links and scam indicators.</p></div>
+    <div class="card-bottom"><span>PLANNED</span><span>WEB RISK</span><button class="card-more" type="button" aria-expanded="false" onclick="openGameCard('scam-card')">View Details</button></div>
+  </div>
+  <div class="game-card-details">
+    <div class="detail-grid">
+      <section class="detail-block"><span class="detail-label">Overview</span><h4>Planned purpose</h4><p>Help players evaluate suspicious gaming-related destinations before interacting with them.</p></section>
+      <section class="detail-block"><span class="detail-label">Planned analysis</span><h4>Risk signals</h4><ul><li>Suspicious link analysis</li><li>Scam indicator detection</li><li>Risk classification</li><li>Safer browsing guidance</li></ul></section>
+      <section class="detail-block"><span class="detail-label">Identity</span><h4>Warning accent</h4><p>Red and amber are used only as warning colors for this product, while the surrounding interface stays metallic black.</p></section>
+      <section class="detail-block"><span class="detail-label">Product</span><h4>Current specification</h4><dl class="spec-list"><div><dt>Stage</dt><dd>Planned</dd></div><div><dt>Release</dt><dd>None yet</dd></div><div><dt>Focus</dt><dd>Gaming scam risk</dd></div></dl></section>
+    </div>
+    <div class="rules-box"><span class="detail-label">Rules & safety</span><h4>Safe use principles</h4><ul><li>Never enter passwords or payment information into a site solely because a scanner appears to approve it.</li><li>Verify the official domain of a game, publisher or store before signing in.</li><li>Risk analysis can miss newly created or highly targeted scams.</li><li>Do not use the service to probe private systems or links you are not authorized to test.</li></ul></div>
+    <div class="download-strip"><div><span class="detail-label">Download</span><strong>Product not released</strong><p>No official download exists yet.</p></div><button class="download-action" type="button" disabled>Coming soon</button></div>
+  </div>
+</article>
+</div></div></section>
 <section class="section" id="how-it-works"><div class="container"><div class="section-header"><div class="section-label">How It Works</div><h2 class="section-title">Inspect before you trust.</h2><p class="section-description">The workflow moves from file identification to deeper analysis and finally to a clear security result.</p></div><div class="steps"><div class="step"><div class="step-number">01</div><h3>Choose</h3><p>Select a supported GTA file or mod.</p></div><div class="step"><div class="step-number">02</div><h3>Scan</h3><p>Identify the input and inspect its structure.</p></div><div class="step"><div class="step-number">03</div><h3>Analyze</h3><p>Apply security rules and deeper analysis.</p></div><div class="step"><div class="step-number">04</div><h3>Result</h3><p>Aggregate findings into a security assessment.</p></div><div class="step"><div class="step-number">05</div><h3>Decide</h3><p>Review the result before using the file.</p></div></div></div></section>
 <section class="section" id="security-engine"><div class="container"><div class="section-header"><div class="section-label">Security Engine</div><h2 class="section-title">Multiple signals. One result.</h2><p class="section-description">The interface represents a security-analysis workflow. Example results are clearly marked as previews and are not presented as live malware intelligence.</p></div><div class="security-grid"><div class="security-panel"><span class="preview-badge">EXAMPLE / UI PREVIEW</span><h3>Example scan</h3><div class="security-list"><div class="security-row"><span>File integrity</span><strong class="status-safe">SAFE</strong></div><div class="security-row"><span>Suspicious behavior</span><strong class="status-review">REVIEW</strong></div><div class="security-row"><span>Known threat indicators</span><strong class="status-clear">CLEAR</strong></div><div class="security-row"><span>Overall result</span><strong class="status-review">SUSPICIOUS</strong></div></div></div><div class="security-panel"><div class="security-states"><div class="state safe"><strong>Safe</strong><span>No significant suspicious indicators found by the available analysis.</span></div><div class="state suspicious"><strong>Suspicious</strong><span>One or more signals require additional review.</span></div><div class="state threat"><strong>Threat Detected</strong><span>Strong malicious indicators are identified by the security engine.</span></div></div></div></div></div></section>
 <section class="section" id="plans"><div class="container"><div class="section-header"><div class="section-label">Plans</div><h2 class="section-title">Start simple. Go deeper when needed.</h2><p class="section-description">Two analysis levels keep the experience simple for everyday users while leaving room for deeper security analysis.</p></div><div class="plans-grid"><article class="plan"><div class="plan-label">STANDARD</div><h3>Free</h3><p>A lighter security workflow for supported scanning.</p><ul><li>Core scanning</li><li>Basic security results</li><li>Supported GTA Guard tools</li><li>Community feedback</li></ul><a href="#download" class="btn btn-secondary">View Release Status</a></article><article class="plan pro"><div class="plan-label">DEEP ANALYSIS</div><h3>Pro</h3><p>Designed for deeper analysis when the standard scan is not enough.</p><ul><li>Advanced scanning</li><li>Extended analysis</li><li>Detailed security reports</li><li>Future Pro capabilities</li></ul><button class="btn btn-secondary" onclick="showToast('Pro capabilities are planned and are not being sold yet.')">Planned</button></article></div></div></section>
@@ -158,5 +178,18 @@ function openProduct(id){homeContent.classList.add('hidden');productPages.forEac
 const scanLine=document.getElementById('scanLine'),scanSweep=document.getElementById('scanSweep'),nodes=document.querySelectorAll('.radar-node');let angle=0,last=0;function diff(a,b){let d=Math.abs(a-b);return d>180?360-d:d}function animate(t){if(!last)last=t;angle=(angle+(t-last)*.06)%360;last=t;scanLine.style.transform=`translate(-50%,-100%) rotate(${angle}deg)`;scanSweep.style.transform=`rotate(${angle}deg)`;nodes.forEach(n=>{n.classList.toggle('visible',diff(angle,Number(n.dataset.angle))<=14)});requestAnimationFrame(animate)}requestAnimationFrame(animate);
 const toast=document.getElementById('toast');let toastTimer;function showToast(m){toast.textContent=m;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),3000)}document.addEventListener('click',e=>{if(!navLinks.contains(e.target)&&!menuBtn.contains(e.target))navLinks.classList.remove('active')});
 const form=document.getElementById('feedbackForm'),msg=document.getElementById('formMessage');form.addEventListener('submit',e=>{e.preventDefault();if(!document.getElementById('feedbackMessage').value.trim()){msg.textContent='Please enter your feedback.';msg.style.display='block';return}msg.textContent='Your feedback was prepared successfully, but the backend is not connected yet. Nothing was sent.';msg.style.display='block';form.reset()});
+
+function openGameCard(id){
+  const selected=document.getElementById(id);if(!selected)return;
+  document.querySelectorAll('.game-card.expanded').forEach(card=>{if(card!==selected){card.classList.remove('expanded');const b=card.querySelector('.card-more');if(b){b.setAttribute('aria-expanded','false');b.textContent='View Details'}}});
+  const opening=!selected.classList.contains('expanded');selected.classList.toggle('expanded',opening);
+  const btn=selected.querySelector('.card-more');if(btn){btn.setAttribute('aria-expanded',String(opening));btn.textContent=opening?'Close Details':'View Details'}
+  if(opening)setTimeout(()=>selected.scrollIntoView({behavior:'smooth',block:'center'}),80);
+}
+function focusProduct(id){
+  const products=document.getElementById('products');if(products)products.scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(()=>{const card=document.getElementById(id);if(card&&!card.classList.contains('expanded'))openGameCard(id)},420);
+}
+
 </script>
 </body></html>
