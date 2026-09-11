@@ -1,8 +1,6 @@
 name: Apply MalGuard brand system
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
