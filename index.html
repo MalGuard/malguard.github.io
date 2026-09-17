@@ -736,6 +736,15 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
   .logo-wordmark-cyan{filter:none!important;text-shadow:0 0 7px rgba(0,224,255,.58)!important}
   .hero-feature-rail{margin-top:0!important}
 }
+
+/* iPhone: keep the complete illuminated Earth visible instead of zooming into one city. */
+@media(max-width:760px){
+  .nasa-earth-photo{background-image:linear-gradient(180deg,rgba(1,6,15,.20) 0%,rgba(1,7,18,.46) 38%,rgba(1,7,18,.76) 74%,#020815 100%),radial-gradient(ellipse at 50% 18%,rgba(31,161,255,.12),transparent 47%),url("https://assets.science.nasa.gov/content/dam/science/esd/eo/content-feature/nightlights/images/media/BlackMarble_2016_Americas_composite_tn.png/jcr:content/renditions/cq5dam.web.1280.1280.png") 50% 8%/145% auto no-repeat!important;filter:brightness(.86) saturate(1.18)!important;transform:none!important}
+  .hero-entry .hero-actions{max-width:356px!important;grid-template-columns:minmax(0,1fr) 128px!important}
+  .hero-actions-logo{width:128px!important;height:130px!important}
+  .hero-actions-logo .button-logo{width:100px!important;height:100px!important;flex-basis:100px!important}
+  .logo-wordmark{max-width:128px!important;font-size:21px!important}
+}
 </style>
 </head>
 <body>
