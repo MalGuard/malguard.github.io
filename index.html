@@ -664,7 +664,7 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 @media(prefers-reduced-motion:reduce){.logo-segment{animation:none!important;opacity:0!important}}
 </style>
 <style id="malguard-clean-hero">
-/* Clean mobile hero: one compact logo before the two actions, with the Earth behind the copy. */
+/* iPhone hero: the logo occupies the deliberate empty space beside the two real action links. */
 .hero-earth-backdrop{background:linear-gradient(180deg,rgba(1,7,17,.50),rgba(1,7,17,.73) 38%,rgba(1,7,17,.88) 78%,#020815),url("assets/malguard-earth-background.png") center 24%/min(1900px,148vw) auto no-repeat!important;filter:brightness(.48) saturate(.78)!important;opacity:.96!important}
 .hero-entry .hero-grid{min-height:735px!important}
 .hero-entry .hero-copy{z-index:2!important;padding:132px 0 0!important}
@@ -674,7 +674,16 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 .button-logo-blue{opacity:.94}
 .button-logo-cyan{opacity:.78;transform-box:fill-box;transform-origin:center;filter:drop-shadow(0 0 4px rgba(0,189,244,.35));animation:malguardButtonHeartbeat 1.18s ease-in-out infinite}
 @keyframes malguardButtonHeartbeat{0%,100%{opacity:.70;filter:drop-shadow(0 0 3px rgba(0,189,244,.28))}12%{opacity:1;filter:drop-shadow(0 0 10px rgba(0,189,244,.92))}25%{opacity:.76;filter:drop-shadow(0 0 4px rgba(0,189,244,.36))}38%{opacity:.98;filter:drop-shadow(0 0 8px rgba(0,189,244,.78))}55%,72%{opacity:.72;filter:drop-shadow(0 0 3px rgba(0,189,244,.25))}}
-@media(max-width:760px){.hero-earth-backdrop{background:linear-gradient(180deg,rgba(1,6,14,.46),rgba(1,6,14,.72) 38%,rgba(1,6,14,.90) 78%,#020815),url("assets/malguard-earth-background.png") center 8%/auto 980px no-repeat!important;filter:brightness(.43) saturate(.74)!important}.hero-entry .hero-grid{min-height:820px!important}.hero-entry .hero-copy{padding:174px 28px 0!important}.hero-actions-logo{grid-column:1!important;justify-self:center!important;width:56px!important;height:56px!important;margin:0 0 1px!important}}
+@media(max-width:760px){
+  .hero-earth-backdrop{background:linear-gradient(180deg,rgba(1,6,14,.46),rgba(1,6,14,.72) 38%,rgba(1,6,14,.90) 78%,#020815),url("assets/malguard-earth-background.png") center 8%/auto 980px no-repeat!important;filter:brightness(.43) saturate(.74)!important}
+  .hero-entry .hero-grid{min-height:820px!important}
+  .hero-entry .hero-copy{padding:174px 28px 0!important}
+  .hero-entry .hero-actions{display:grid!important;grid-template-columns:minmax(0,1.08fr) minmax(96px,.62fr)!important;grid-template-rows:56px 56px!important;align-items:stretch!important;width:min(100%,390px)!important;gap:14px 12px!important}
+  .hero-entry .hero-actions .btn{grid-column:1!important;min-width:0!important;max-width:none!important;width:100%!important;margin:0!important}
+  .hero-entry .hero-actions .btn-secondary{grid-row:1!important}
+  .hero-entry .hero-actions .btn-primary{grid-row:2!important}
+  .hero-actions-logo{grid-column:2!important;grid-row:1 / span 2!important;justify-self:center!important;align-self:center!important;width:118px!important;height:118px!important;margin:0!important}
+}
 @media(prefers-reduced-motion:reduce){.button-logo-cyan{animation:none!important;opacity:.86!important;filter:none!important}}
 </style>
 </head>
