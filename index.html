@@ -236,46 +236,104 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 }
 </style>
 <style>
-/* EXACT MOBILE OPENING HERO — source artwork is rendered unchanged */
-.exact-mobile-hero-wrap{
-  display:none;position:relative;width:100%;max-width:1024px;margin:0 auto;line-height:0;
+/* MALGUARD RESPONSIVE EARTH LANDING */
+.nav-actions{display:flex;align-items:center;gap:10px}
+.nav-icon,.nav-download{
+  width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(67,191,255,.22);
+  border-radius:12px;background:rgba(7,15,22,.76);color:#effbff;font:700 22px/1 var(--display);
+  transition:.2s
 }
-.exact-mobile-hero{
-  display:block;width:100%;height:auto;margin:0;border:0;outline:0;box-shadow:none;
-}
-.exact-hit{
-  position:absolute;z-index:10;display:block;background:transparent;border:0;outline:0;
-  cursor:pointer;-webkit-tap-highlight-color:transparent;
-}
-.exact-hit-gta{left:39%;top:17%;width:22%;height:14%}
-.exact-hit-malware{left:15%;top:33%;width:25%;height:16%}
-.exact-hit-scam{right:14%;top:33%;width:27%;height:16%}
-.exact-hit-get{left:21%;top:81%;width:31%;height:8%}
-.exact-hit-learn{left:51%;top:81%;width:31%;height:8%}
+.nav-download{font-size:27px;color:var(--blue2)}
+.nav-icon:hover,.nav-download:hover{border-color:rgba(0,229,255,.7);color:#fff;transform:translateY(-1px)}
 @media(max-width:760px){
-  body:has(.home-content:not(.hidden)) .nav{display:none}
-  body:has(.home-content.hidden) .nav{display:block}
-  .hero{min-height:0;padding:0}
-  .hero-grid{display:block;width:100%}
-  .hero-copy{display:none}
-  .hero-visual{display:block;width:100%;min-height:0;filter:none}
-  .exact-mobile-hero-wrap{display:block;width:100%;max-width:none}
-  .earth-scene{display:none}
+  .nav{display:block;top:0;padding:10px 0}
+  .nav-inner{gap:8px}
+  .nav-actions{gap:7px}
+  .nav-icon,.nav-download,.nav-actions .menu-btn{width:42px;height:42px}
+  .nav-actions .menu-btn{display:grid;place-items:center;padding:0;font-size:24px;line-height:1}
+  .hero{min-height:0;padding:78px 0 0}
+  .hero .container{width:100%}
+  .hero-grid{display:flex;flex-direction:column;gap:0}
+  .hero-visual{order:1;display:block;width:100%;min-height:0;filter:none}
+  .hero-copy{
+    order:2;display:flex;flex-direction:column;align-items:center;text-align:center;
+    padding:34px 21px 64px
+  }
+  .hero-copy .eyebrow{font-size:9px;letter-spacing:.16em}
+  .hero-copy h1{max-width:390px;margin-top:18px;font-size:clamp(39px,11.7vw,56px);line-height:1.01}
+  .hero-description{max-width:390px;margin-top:20px;font-size:15px;line-height:1.55}
+  .hero-actions{width:100%;justify-content:center;margin-top:25px;gap:10px}
+  .hero-actions .btn{flex:1;max-width:190px;min-height:50px}
+  .earth-scene{
+    width:100%;height:min(700px,172vw);min-height:610px;margin:0;
+    border:0;border-radius:0;background-position:center 40%;
+    box-shadow:none
+  }
+  .earth-scene .hero-logo{width:126px;height:126px;top:53%;filter:drop-shadow(0 0 5px #000) drop-shadow(0 0 25px rgba(0,189,244,.48))}
+  .earth-radar-static{
+    position:absolute;left:50%;top:53%;width:min(286px,72vw);aspect-ratio:1;
+    transform:translate(-50%,-50%);z-index:2;border:1px solid rgba(77,200,255,.42);
+    border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.10),rgba(0,85,170,.04) 47%,transparent 72%);
+    box-shadow:0 0 0 13px rgba(0,168,255,.04),0 0 0 29px rgba(0,168,255,.025),0 0 42px rgba(0,189,244,.22)
+  }
+  .earth-radar-static:before,.earth-radar-static:after{
+    content:"";position:absolute;border:1px solid rgba(76,200,255,.23);border-radius:50%;inset:10%
+  }
+  .earth-radar-static:after{
+    inset:25%;border-style:dashed;border-color:rgba(76,200,255,.25);
+    background:linear-gradient(90deg,transparent 49.5%,rgba(76,200,255,.22) 50%,transparent 50.5%),linear-gradient(0deg,transparent 49.5%,rgba(76,200,255,.22) 50%,transparent 50.5%)
+  }
+  .earth-product{
+    min-width:104px;padding:0;gap:6px;display:flex;flex-direction:column;
+    border:0;background:transparent;box-shadow:none;backdrop-filter:none;text-align:center
+  }
+  .earth-product:hover{transform:none;border:0;box-shadow:none}
+  .earth-product strong{font-size:10px;letter-spacing:.02em}
+  .earth-product small{display:none}
+  .earth-product-dot{
+    width:68px;height:68px;display:grid;place-items:center;position:relative;
+    border:2px solid var(--blue2);background:rgba(2,10,18,.7);
+    box-shadow:0 0 0 6px rgba(0,189,244,.06),0 0 24px rgba(0,189,244,.45)
+  }
+  .earth-product-dot:after{content:"V";font:900 32px/1 var(--display);color:#68ff78;text-shadow:0 0 13px rgba(53,242,138,.8)}
+  .earth-malware .earth-product-dot{border-color:#24dcff;box-shadow:0 0 0 6px rgba(0,189,244,.06),0 0 24px rgba(0,189,244,.5)}
+  .earth-malware .earth-product-dot:after{content:"AI";font-size:15px;color:#31e8ff;text-shadow:0 0 12px rgba(0,229,255,.8)}
+  .earth-scam .earth-product-dot{border-color:#ff9e3d;box-shadow:0 0 0 6px rgba(255,151,56,.05),0 0 24px rgba(255,151,56,.43)}
+  .earth-scam .earth-product-dot:after{content:"!";font-size:34px;color:#ffad4b;text-shadow:0 0 12px rgba(255,151,56,.85)}
+  .earth-gta{top:15%;left:50%;transform:translateX(-50%)}
+  .earth-gta:hover{transform:translateX(-50%)}
+  .earth-malware{left:3%;top:39%}
+  .earth-scam{right:3%;top:39%}
+  .earth-scan-card{
+    position:absolute;z-index:8;bottom:7%;display:flex;align-items:center;gap:8px;
+    width:42%;min-height:82px;padding:10px 9px;border:1px solid rgba(118,215,255,.42);
+    border-radius:14px;background:linear-gradient(145deg,rgba(6,27,45,.9),rgba(2,8,15,.88));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 14px 28px rgba(0,0,0,.35);
+    backdrop-filter:blur(10px)
+  }
+  .earth-scan-one{left:4%}.earth-scan-two{right:4%}
+  .earth-scan-icon{
+    width:30px;height:30px;display:grid;place-items:center;flex:0 0 auto;border:1px solid #1edcff;
+    border-radius:9px;color:#21dcff;font:700 18px/1 var(--display)
+  }
+  .earth-scan-card small,.earth-scan-card strong,.earth-scan-card em{display:block}
+  .earth-scan-card small{color:#f1f9ff;font:600 9px var(--display);white-space:nowrap}
+  .earth-scan-card strong{margin-top:2px;color:#fff;font:800 18px/1 var(--display)}
+  .earth-scan-card em{margin-top:5px;color:#7eb4ca;font:600 6px/1 var(--display);font-style:normal;letter-spacing:.08em;white-space:nowrap}
+}
+@media(max-width:380px){
+  .earth-scan-card{width:44%;padding-inline:7px}
+  .earth-scan-card small{font-size:8px}.earth-scan-card strong{font-size:16px}
+  .earth-scan-icon{width:26px;height:26px}
 }
 </style>
 </head>
 <body>
-<header class="nav" id="navbar"><div class="container nav-inner"><a href="#home" class="brand" onclick="showHome()" aria-label="MalGuard home"><img class="brand-site-logo" src="assets/malguard-site-logo.svg" alt="MalGuard"></a><nav class="nav-links" id="navLinks"><a href="#products">Products</a><a href="#how-it-works">How It Works</a><a href="#security-engine">Security</a><a href="#labs">Labs</a><a href="#plans">Plans</a><a href="#feedback">Feedback</a><a href="#download">Download</a></nav><button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button></div></header>
+<header class="nav" id="navbar"><div class="container nav-inner"><a href="#home" class="brand" onclick="showHome()" aria-label="MalGuard home"><img class="brand-site-logo" src="assets/malguard-site-logo.svg" alt="MalGuard"></a><nav class="nav-links" id="navLinks"><a href="#products">Products</a><a href="#how-it-works">How It Works</a><a href="#security-engine">Security</a><a href="#labs">Labs</a><a href="#plans">Plans</a><a href="#feedback">Feedback</a><a href="#download">Download</a></nav><div class="nav-actions"><button class="nav-icon" type="button" aria-label="Search" onclick="showToast('Search is coming soon.')">⌕</button><a class="nav-download" href="#download" aria-label="Download MalGuard">↓</a><button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button></div></div></header>
 <main class="home-content" id="homeContent">
-<section class="hero" id="home"><div class="container hero-grid"><div class="hero-copy"><div class="eyebrow"><i></i> Gaming Security Platform</div><h1>SCAN SMART.<span>PLAY SAFE.</span></h1><p class="hero-description">MalGuard builds gaming security tools designed to help you inspect suspicious mods, dangerous files, scams and gaming-related threats before they become a problem.</p><div class="hero-actions"><a href="#products" class="btn btn-primary">Get MalGuard</a><a href="#how-it-works" class="btn btn-secondary">Learn More</a></div></div><div class="hero-visual" aria-label="MalGuard security environment">
-  <div class="exact-mobile-hero-wrap" aria-label="MalGuard mobile homepage">
-    <img class="exact-mobile-hero" src="assets/malguard-mobile-hero-exact.jpeg" alt="MalGuard mobile homepage preview">
-    <a class="exact-hit exact-hit-gta" href="#gta-guard" onclick="openProduct('gta-guard');return false;" aria-label="Open GTA Guard"></a>
-    <a class="exact-hit exact-hit-malware" href="#malware-ai" onclick="openProduct('malware-ai');return false;" aria-label="Open Malware AI"></a>
-    <a class="exact-hit exact-hit-scam" href="#game-scam-guard" onclick="openProduct('game-scam-guard');return false;" aria-label="Open Game Scam Guard"></a>
-    <a class="exact-hit exact-hit-get" href="#products" aria-label="View MalGuard products"></a>
-    <a class="exact-hit exact-hit-learn" href="#how-it-works" aria-label="Learn how MalGuard works"></a>
-  </div><div class="earth-scene">
+<section class="hero" id="home"><div class="container hero-grid"><div class="hero-copy"><div class="eyebrow"><i></i> SCAN SMART. PLAY SAFE.</div><h1>A Safer Gaming <span>Community</span> Starts Here.</h1><p class="hero-description">MalGuard detects, blocks, and prevents cheats, mods, scams, and malicious tools — so you can focus on what matters most: gaming.</p><div class="hero-actions"><a href="#products" class="btn btn-primary">Get MalGuard</a><a href="#how-it-works" class="btn btn-secondary">Learn More</a></div></div><div class="hero-visual" aria-label="MalGuard security environment">
+  <div class="earth-scene">
+    <div class="earth-radar-static" aria-hidden="true"></div>
     <img class="hero-logo" src="assets/malguard-logo.svg" alt="MalGuard gaming security logo">
     <button class="earth-product earth-gta" type="button" onclick="openProduct('gta-guard')" aria-label="Open GTA Guard">
       <span class="earth-product-dot"></span><span><strong>GTA Guard</strong><small>Open product</small></span>
@@ -286,6 +344,12 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
     <button class="earth-product earth-scam" type="button" onclick="openProduct('game-scam-guard')" aria-label="Open Game Scam Guard">
       <span class="earth-product-dot"></span><span><strong>Game Scam Guard</strong><small>Open product</small></span>
     </button>
+    <div class="earth-scan-card earth-scan-one" aria-label="Threats blocked">
+      <span class="earth-scan-icon">盾</span><span><small>Threats Blocked</small><strong>12,453</strong><em>REAL-TIME PROTECTION</em></span>
+    </div>
+    <div class="earth-scan-card earth-scan-two" aria-label="Scans today">
+      <span class="earth-scan-icon">⌕</span><span><small>Scans Today</small><strong>8,921</strong><em>DETECTING MORE THREATS</em></span>
+    </div>
   </div>
 </div></div></div></section>
 <div class="trust-bar"><div class="container trust-grid"><div class="trust-item"><div class="trust-number">BUILT FOR</div><div class="trust-label">Gamers</div></div><div class="trust-item"><div class="trust-number">FOCUS</div><div class="trust-label">Game Security</div></div><div class="trust-item"><div class="trust-number">FIRST PLATFORM</div><div class="trust-label">GTA 5</div></div><div class="trust-item"><div class="trust-number">EXPANDING</div><div class="trust-label">More Games</div></div></div></div>
