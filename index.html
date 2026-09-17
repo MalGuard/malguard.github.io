@@ -235,12 +235,47 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
   .earth-gta{top:18%}.earth-malware{left:3%;top:47%}.earth-scam{right:3%;top:47%}
 }
 </style>
+<style>
+/* EXACT MOBILE OPENING HERO — source artwork is rendered unchanged */
+.exact-mobile-hero-wrap{
+  display:none;position:relative;width:100%;max-width:1024px;margin:0 auto;line-height:0;
+}
+.exact-mobile-hero{
+  display:block;width:100%;height:auto;margin:0;border:0;outline:0;box-shadow:none;
+}
+.exact-hit{
+  position:absolute;z-index:10;display:block;background:transparent;border:0;outline:0;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.exact-hit-gta{left:39%;top:17%;width:22%;height:14%}
+.exact-hit-malware{left:15%;top:33%;width:25%;height:16%}
+.exact-hit-scam{right:14%;top:33%;width:27%;height:16%}
+.exact-hit-get{left:21%;top:81%;width:31%;height:8%}
+.exact-hit-learn{left:51%;top:81%;width:31%;height:8%}
+@media(max-width:760px){
+  body:has(.home-content:not(.hidden)) .nav{display:none}
+  body:has(.home-content.hidden) .nav{display:block}
+  .hero{min-height:0;padding:0}
+  .hero-grid{display:block;width:100%}
+  .hero-copy{display:none}
+  .hero-visual{display:block;width:100%;min-height:0;filter:none}
+  .exact-mobile-hero-wrap{display:block;width:100%;max-width:none}
+  .earth-scene{display:none}
+}
+</style>
 </head>
 <body>
 <header class="nav" id="navbar"><div class="container nav-inner"><a href="#home" class="brand" onclick="showHome()" aria-label="MalGuard home"><img class="brand-site-logo" src="assets/malguard-site-logo.svg" alt="MalGuard"></a><nav class="nav-links" id="navLinks"><a href="#products">Products</a><a href="#how-it-works">How It Works</a><a href="#security-engine">Security</a><a href="#labs">Labs</a><a href="#plans">Plans</a><a href="#feedback">Feedback</a><a href="#download">Download</a></nav><button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button></div></header>
 <main class="home-content" id="homeContent">
 <section class="hero" id="home"><div class="container hero-grid"><div class="hero-copy"><div class="eyebrow"><i></i> Gaming Security Platform</div><h1>SCAN SMART.<span>PLAY SAFE.</span></h1><p class="hero-description">MalGuard builds gaming security tools designed to help you inspect suspicious mods, dangerous files, scams and gaming-related threats before they become a problem.</p><div class="hero-actions"><a href="#products" class="btn btn-primary">Get MalGuard</a><a href="#how-it-works" class="btn btn-secondary">Learn More</a></div></div><div class="hero-visual" aria-label="MalGuard security environment">
-  <div class="earth-scene">
+  <div class="exact-mobile-hero-wrap" aria-label="MalGuard mobile homepage">
+    <img class="exact-mobile-hero" src="assets/malguard-mobile-hero-exact.jpeg" alt="MalGuard mobile homepage preview">
+    <a class="exact-hit exact-hit-gta" href="#gta-guard" onclick="openProduct('gta-guard');return false;" aria-label="Open GTA Guard"></a>
+    <a class="exact-hit exact-hit-malware" href="#malware-ai" onclick="openProduct('malware-ai');return false;" aria-label="Open Malware AI"></a>
+    <a class="exact-hit exact-hit-scam" href="#game-scam-guard" onclick="openProduct('game-scam-guard');return false;" aria-label="Open Game Scam Guard"></a>
+    <a class="exact-hit exact-hit-get" href="#products" aria-label="View MalGuard products"></a>
+    <a class="exact-hit exact-hit-learn" href="#how-it-works" aria-label="Learn how MalGuard works"></a>
+  </div><div class="earth-scene">
     <img class="hero-logo" src="assets/malguard-logo.svg" alt="MalGuard gaming security logo">
     <button class="earth-product earth-gta" type="button" onclick="openProduct('gta-guard')" aria-label="Open GTA Guard">
       <span class="earth-product-dot"></span><span><strong>GTA Guard</strong><small>Open product</small></span>
