@@ -755,37 +755,34 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 <section class="hero hero-entry" id="home">
   <div class="hero-earth-backdrop" aria-hidden="true">
   <svg class="digital-earth-svg" viewBox="0 0 1000 900" preserveAspectRatio="xMidYMid slice" focusable="false" aria-hidden="true">
-    <defs>
-      <radialGradient id="earthOcean" cx="38%" cy="28%" r="72%"><stop offset="0" stop-color="#0b4d91"/><stop offset=".42" stop-color="#062b5e"/><stop offset=".78" stop-color="#03132c"/><stop offset="1" stop-color="#010711"/></radialGradient>
-      <radialGradient id="earthLight" cx="50%" cy="50%" r="52%"><stop offset=".72" stop-color="#0e91e2" stop-opacity="0"/><stop offset=".9" stop-color="#22caff" stop-opacity=".4"/><stop offset="1" stop-color="#54e4ff" stop-opacity="0"/></radialGradient>
-      <linearGradient id="earthShade" x1="0" y1="0" x2="1" y2=".86"><stop stop-color="#0a4d8a" stop-opacity=".05"/><stop offset=".52" stop-color="#020b1d" stop-opacity=".08"/><stop offset="1" stop-color="#00050e" stop-opacity=".87"/></linearGradient>
-      <linearGradient id="land" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#117bb6"/><stop offset=".55" stop-color="#075183"/><stop offset="1" stop-color="#03294c"/></linearGradient>
-      <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      <filter id="cityGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      <clipPath id="earthClip"><circle cx="500" cy="438" r="406"/></clipPath>
-    </defs>
-    <rect width="1000" height="900" fill="#020815"/>
-    <g opacity=".75"><circle cx="74" cy="125" r="1.2" fill="#77dcff"/><circle cx="170" cy="244" r="1.5" fill="#3ebcff"/><circle cx="869" cy="151" r="1.1" fill="#79e4ff"/><circle cx="929" cy="334" r="1.4" fill="#33bfff"/><circle cx="824" cy="631" r="1.2" fill="#54d3ff"/><circle cx="115" cy="706" r="1.3" fill="#58ceff"/></g>
-    <circle cx="500" cy="438" r="430" fill="none" stroke="#079ee7" stroke-opacity=".14" stroke-width="3" filter="url(#softGlow)"/>
-    <circle cx="500" cy="438" r="414" fill="url(#earthOcean)"/>
-    <circle cx="500" cy="438" r="419" fill="url(#earthLight)" opacity=".9"/>
-    <g clip-path="url(#earthClip)">
-      <path d="M185 214c48-50 112-82 183-87l37 22 5 37-39 29-21 53-42 8-22 34-56 11-25-33 5-73zM343 315l62 13 28 37-17 34 21 41-26 35-45-9-25-46-32-27 18-42zM255 448l55 13 26 42-9 50 30 56-29 69-41-15-14-51-38-24-5-62z" fill="url(#land)" opacity=".72"/>
-      <path d="M451 190l56-28 53 19 11 37-25 27 2 34-39 25-35-16-11-51-42-11zM527 323l58 7 32 31-17 45 23 44-24 26-48-24-25-50 1-79zM596 473l55 17 25 48-21 28 15 50-36 61-48-34-12-62 22-47z" fill="url(#land)" opacity=".82"/>
-      <path d="M664 229l53 17 34 43-11 42-49 6-33-35-2-47zM720 371l54 8 21 36-22 37-52-14-22-43zM699 492l40 12 25 44-21 47-35-17-21-46z" fill="url(#land)" opacity=".63"/>
-      <g fill="none" stroke="#36ceff" stroke-opacity=".17" stroke-width="1">
-        <ellipse cx="500" cy="438" rx="401" ry="74"/><ellipse cx="500" cy="438" rx="401" ry="162"/><ellipse cx="500" cy="438" rx="401" ry="264"/>
-        <ellipse cx="500" cy="438" rx="122" ry="404"/><ellipse cx="500" cy="438" rx="245" ry="404"/>
-      </g>
-      <g fill="#39d9ff" filter="url(#cityGlow)">
-        <circle cx="284" cy="255" r="3"/><circle cx="351" cy="342" r="2.3"/><circle cx="393" cy="402" r="2.2"/><circle cx="477" cy="239" r="2.4"/><circle cx="530" cy="276" r="3"/><circle cx="567" cy="369" r="2.5"/><circle cx="622" cy="437" r="3"/><circle cx="700" cy="291" r="2.4"/><circle cx="742" cy="407" r="2.4"/><circle cx="607" cy="553" r="2.5"/>
-      </g>
-    </g>
-    <circle cx="500" cy="438" r="406" fill="url(#earthShade)"/>
-    <circle cx="500" cy="438" r="406" fill="none" stroke="#43d9ff" stroke-opacity=".48" stroke-width="2"/>
-    <ellipse cx="500" cy="840" rx="360" ry="34" fill="#00adf2" fill-opacity=".11" filter="url(#softGlow)"/>
-    <rect width="1000" height="900" fill="url(#earthShade)" opacity=".35"/>
-  </svg>
+  <defs>
+    <radialGradient id="space" cx="50%" cy="10%" r="100%"><stop stop-color="#08264a"/><stop offset=".42" stop-color="#031326"/><stop offset="1" stop-color="#010711"/></radialGradient>
+    <radialGradient id="globeOcean" cx="44%" cy="13%" r="88%"><stop stop-color="#176ea9"/><stop offset=".23" stop-color="#0a4f88"/><stop offset=".61" stop-color="#052950"/><stop offset="1" stop-color="#010c20"/></radialGradient>
+    <linearGradient id="globeShade" x1=".1" y1=".05" x2=".86" y2=".9"><stop stop-color="#0a5c97" stop-opacity=".02"/><stop offset=".52" stop-color="#021328" stop-opacity=".2"/><stop offset="1" stop-color="#01040c" stop-opacity=".94"/></linearGradient>
+    <linearGradient id="landGlow" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#176e9f"/><stop offset=".5" stop-color="#0b416e"/><stop offset="1" stop-color="#031f3e"/></linearGradient>
+    <filter id="rimGlow" x="-35%" y="-35%" width="170%" height="170%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="lightGlow" x="-300%" y="-300%" width="700%" height="700%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="cityTexture" width="22" height="20" patternUnits="userSpaceOnUse"><circle cx="3" cy="4" r="1.1" fill="#38cfff"/><circle cx="11" cy="8" r=".8" fill="#74e3ff"/><circle cx="18" cy="3" r=".7" fill="#139bdf"/><circle cx="6" cy="16" r=".6" fill="#1aaeea"/><circle cx="16" cy="15" r="1" fill="#54dfff"/></pattern>
+    <clipPath id="globeClip"><circle cx="500" cy="683" r="620"/></clipPath>
+  </defs>
+  <rect width="1000" height="900" fill="url(#space)"/>
+  <g fill="#72dcff" opacity=".62"><circle cx="72" cy="80" r="1.1"/><circle cx="149" cy="168" r=".8"/><circle cx="239" cy="72" r="1.2"/><circle cx="791" cy="58" r="1.1"/><circle cx="905" cy="181" r=".9"/><circle cx="948" cy="331" r="1.2"/><circle cx="78" cy="548" r=".8"/><circle cx="921" cy="586" r="1"/></g>
+  <circle cx="500" cy="683" r="637" fill="none" stroke="#20cfff" stroke-opacity=".16" stroke-width="4" filter="url(#rimGlow)"/>
+  <circle cx="500" cy="683" r="620" fill="url(#globeOcean)"/>
+  <g clip-path="url(#globeClip)">
+    <path d="M-50 361C83 267 193 214 319 198c98-12 167 23 216 62l-47 45-72-3-43 42-80 13-53 36-87 5-86 49-77-2z" fill="url(#landGlow)" opacity=".76"/>
+    <path d="M519 213c91-58 182-47 245-13l-8 45 75 37 33 58-51 24-39-19-53 17-49-37-69-5-35-52z" fill="url(#landGlow)" opacity=".82"/>
+    <path d="M334 387l80-16 51 47-9 45 59 69-22 73-75-21-57-64-31-72zM599 377l66 20 51 64-29 57 20 69-65 66-59-43-12-81 28-75zM742 385l95 37 56 77-33 40-77-18-49-70z" fill="url(#landGlow)" opacity=".72"/>
+    <path d="M-40 325C170 208 301 187 470 230c-111 9-228 52-356 147zM492 200c167-44 357 36 545 166v-55C855 155 668 117 492 200z" fill="url(#cityTexture)" opacity=".62"/>
+    <path d="M103 324c109-69 206-105 314-102l40 55-80 23-56 42-102 4-82 37zM543 222c73-29 151-13 225 30l-5 38-65 10-57 36-57-37zM315 411l105-25 60 86-37 62-89-39zM579 399l86 35 43 87-57 62-68-56zM720 407l118 52 42 74-109-33z" fill="url(#cityTexture)" opacity=".9"/>
+    <g fill="#45d6ff" filter="url(#lightGlow)"><circle cx="145" cy="333" r="2.4"/><circle cx="186" cy="311" r="1.8"/><circle cx="232" cy="295" r="2.5"/><circle cx="278" cy="280" r="1.8"/><circle cx="335" cy="263" r="2.6"/><circle cx="390" cy="278" r="2"/><circle cx="438" cy="295" r="2.5"/><circle cx="565" cy="262" r="2.4"/><circle cx="614" cy="248" r="1.9"/><circle cx="672" cy="264" r="2.6"/><circle cx="728" cy="288" r="2.2"/><circle cx="782" cy="320" r="2.5"/><circle cx="843" cy="362" r="1.9"/><circle cx="337" cy="428" r="2.2"/><circle cx="402" cy="454" r="2.6"/><circle cx="440" cy="495" r="2"/><circle cx="612" cy="431" r="2.6"/><circle cx="658" cy="478" r="2.3"/><circle cx="746" cy="449" r="2.4"/></g>
+    <g fill="none" stroke="#1bbefa" stroke-opacity=".13" stroke-width="1.2"><path d="M-80 413Q500 95 1080 413"/><path d="M-70 501Q500 216 1070 501"/><path d="M-35 602Q500 349 1035 602"/><path d="M76 709Q500 525 924 709"/></g>
+  </g>
+  <circle cx="500" cy="683" r="620" fill="url(#globeShade)"/>
+  <path d="M0 371Q500 62 1000 371" fill="none" stroke="#45ddff" stroke-opacity=".68" stroke-width="3" filter="url(#rimGlow)"/>
+  <path d="M0 377Q500 77 1000 377" fill="none" stroke="#0e83cf" stroke-opacity=".7" stroke-width="9"/>
+  <rect width="1000" height="900" fill="url(#space)" opacity=".18"/>
+</svg>
 </div>
   <div class="container hero-grid">
     <div class="hero-copy">
