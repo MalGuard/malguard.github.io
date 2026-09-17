@@ -719,6 +719,23 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 .nasa-earth-photo{position:absolute!important;inset:-1px!important;display:block!important;background:linear-gradient(180deg,rgba(1,6,15,.34) 0%,rgba(1,7,18,.50) 36%,rgba(1,7,18,.72) 70%,#020815 100%),url("https://assets.science.nasa.gov/content/dam/science/esd/eo/content-feature/nightlights/images/media/BlackMarble_2016_Americas_composite_tn.png/jcr:content/renditions/cq5dam.web.1280.1280.png") center 16%/cover no-repeat!important;filter:brightness(.78) saturate(1.12)!important;transform:scale(1.025)!important}
 .digital-earth-svg{display:none!important}
 @media(max-width:760px){.nasa-earth-photo{background-position:50% 10%!important;background-size:auto 100%!important;filter:brightness(.72) saturate(1.1)!important;transform:scale(1.08)!important}}
+
+/* Final iPhone hero repair: preserve the side-by-side action layout without clipping the brand. */
+@media(max-width:760px){
+  .hero-entry{padding-bottom:30px!important}
+  .hero-entry .hero-grid{min-height:690px!important}
+  .hero-entry .hero-copy{padding:144px 22px 0!important}
+  .hero-entry h1{font-size:clamp(46px,13vw,56px)!important;line-height:1.01!important}
+  .hero-entry .hero-description{margin-top:20px!important;font-size:16px!important;line-height:1.55!important}
+  .hero-entry .hero-actions{width:100%!important;max-width:356px!important;grid-template-columns:minmax(0,1fr) 118px!important;grid-template-rows:58px 58px!important;gap:14px 10px!important;margin-top:28px!important}
+  .hero-entry .btn{min-height:58px!important;padding:0 17px!important;font-size:16px!important}
+  .hero-actions-logo{width:118px!important;height:126px!important;overflow:visible!important}
+  .hero-actions-logo .button-logo{width:88px!important;height:88px!important;flex-basis:88px!important}
+  .logo-wordmark{max-width:118px!important;margin-top:1px!important;font-size:19px!important;letter-spacing:-.065em!important;line-height:1!important;overflow:visible!important}
+  .logo-wordmark-blue{filter:none!important}
+  .logo-wordmark-cyan{filter:none!important;text-shadow:0 0 7px rgba(0,224,255,.58)!important}
+  .hero-feature-rail{margin-top:0!important}
+}
 </style>
 </head>
 <body>
