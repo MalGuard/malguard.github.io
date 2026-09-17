@@ -671,16 +671,17 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 .hero-entry .hero-actions{position:relative!important;z-index:3!important;align-items:center!important}
 .hero-actions-logo{display:inline-grid!important;place-items:center!important;flex:0 0 58px!important;width:58px!important;height:58px!important;margin-right:2px!important}
 .button-logo{display:block;width:100%;height:100%;overflow:visible}
-.button-logo-blue{opacity:.94}
+.button-logo-blue{opacity:.78;filter:drop-shadow(0 0 3px rgba(47,107,255,.34));animation:malguardBlueGlow 3.2s ease-in-out infinite}
 .button-logo-cyan{opacity:.76;transform-box:fill-box;transform-origin:center;filter:drop-shadow(0 0 3px rgba(0,189,244,.28));animation:malguardCalmGlow 3.2s ease-in-out infinite}
-@keyframes malguardCalmGlow{0%,100%{opacity:.62;filter:drop-shadow(0 0 2px rgba(0,189,244,.18))}50%{opacity:1;filter:drop-shadow(0 0 12px rgba(0,189,244,.78))}}
-@keyframes malguardLabelGlow{0%,100%{opacity:.68;text-shadow:none}50%{opacity:1;text-shadow:0 0 11px rgba(31,207,255,.72)}}
+@keyframes malguardCalmGlow{0%,100%{opacity:.46;filter:brightness(.9) saturate(1.1) drop-shadow(0 0 2px rgba(0,189,244,.2))}50%{opacity:1;filter:brightness(1.7) saturate(1.65) drop-shadow(0 0 25px rgba(0,224,255,1))}}
+@keyframes malguardBlueGlow{0%,100%{opacity:.58;filter:brightness(.85) saturate(1.1) drop-shadow(0 0 2px rgba(47,107,255,.22))}50%{opacity:1;filter:brightness(1.6) saturate(1.55) drop-shadow(0 0 23px rgba(38,128,255,.96))}}
+@keyframes malguardLabelGlow{0%,100%{opacity:.55;color:#d7e8f5;text-shadow:none}50%{opacity:1;color:#fff;text-shadow:0 0 20px rgba(33,220,255,1),0 0 8px rgba(33,220,255,.9)}}
 .hero-feature-rail button>svg{animation:malguardCalmGlow 3.2s ease-in-out infinite!important}
 .hero-feature-rail button>span{animation:malguardLabelGlow 3.2s ease-in-out infinite!important}
 .hero-feature-rail .scam-feature>svg{animation-name:malguardScamGlow!important}
 .hero-feature-rail .scam-feature>span{animation-name:malguardScamLabelGlow!important}
-@keyframes malguardScamGlow{0%,100%{opacity:.62;filter:drop-shadow(0 0 2px rgba(255,157,41,.18))}50%{opacity:1;filter:drop-shadow(0 0 12px rgba(255,157,41,.78))}}
-@keyframes malguardScamLabelGlow{0%,100%{opacity:.68;text-shadow:none}50%{opacity:1;text-shadow:0 0 11px rgba(255,157,41,.72)}}
+@keyframes malguardScamGlow{0%,100%{opacity:.46;filter:brightness(.9) saturate(1.1) drop-shadow(0 0 2px rgba(255,157,41,.2))}50%{opacity:1;filter:brightness(1.7) saturate(1.65) drop-shadow(0 0 25px rgba(255,168,48,1))}}
+@keyframes malguardScamLabelGlow{0%,100%{opacity:.55;color:#e8dfd6;text-shadow:none}50%{opacity:1;color:#fff;text-shadow:0 0 20px rgba(255,164,39,1),0 0 8px rgba(255,164,39,.9)}}
 @media(max-width:760px){
   .hero-earth-backdrop{background:linear-gradient(180deg,rgba(1,6,14,.46),rgba(1,6,14,.72) 38%,rgba(1,6,14,.90) 78%,#020815),url("assets/malguard-earth-background.png") center 8%/auto 980px no-repeat!important;filter:brightness(.43) saturate(.74)!important}
   .hero-entry .hero-grid{min-height:820px!important}
@@ -691,7 +692,7 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
   .hero-entry .hero-actions .btn-primary{grid-row:2!important}
   .hero-actions-logo{grid-column:2!important;grid-row:1 / span 2!important;justify-self:center!important;align-self:center!important;width:128px!important;height:128px!important;margin:0!important}
 }
-@media(prefers-reduced-motion:reduce){.button-logo-cyan,.hero-feature-rail button>svg,.hero-feature-rail button>span{animation:none!important;opacity:.86!important;filter:none!important;text-shadow:none!important}}
+@media(prefers-reduced-motion:reduce){.button-logo-blue,.button-logo-cyan,.hero-feature-rail button>svg,.hero-feature-rail button>span{animation:none!important;opacity:.86!important;filter:none!important;text-shadow:none!important}}
 </style>
 </head>
 <body>
