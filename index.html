@@ -663,6 +663,35 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 @media(max-width:760px){.nav{top:0!important;padding:10px 0!important}.nav-inner{min-height:0!important;width:calc(100% - 28px)!important;padding:9px 10px 9px 13px!important;border-radius:18px!important}.brand-site-logo{width:151px!important}.nav-actions{gap:7px!important}.nav-icon,.nav-actions .menu-btn{display:grid!important;width:43px!important;height:43px!important;place-items:center!important;padding:0!important;border-radius:12px!important;font-size:23px!important}.nav-download{display:none!important}.nav-links{position:fixed!important;top:76px!important;left:14px!important;right:14px!important;z-index:1005!important;display:none!important;gap:0!important;padding:14px 18px!important;border:1px solid rgba(34,175,241,.52)!important;border-radius:19px!important;background:rgba(3,16,34,.98)!important;box-shadow:0 23px 60px rgba(0,0,0,.48)!important}.nav-links.active{display:flex!important;flex-direction:column!important}.nav-links a{padding:14px 2px!important;border-bottom:1px solid rgba(49,157,218,.22)!important;font-size:12px!important}.nav-links a:last-child{border-bottom:0!important}.menu-close{display:grid!important;width:38px!important;height:38px!important;place-items:center!important;justify-self:end!important;border:1px solid rgba(35,170,237,.44)!important;border-radius:10px!important;background:#061a32!important;color:#fff!important;font-size:27px!important;line-height:1!important}.hero-entry{padding:83px 0 38px!important}.hero-earth-backdrop{background:linear-gradient(180deg,rgba(1,6,14,.3),rgba(1,6,14,.57) 40%,rgba(1,6,14,.8) 69%,#020815),url("assets/malguard-earth-background.png") center 18%/auto 770px no-repeat!important;filter:brightness(.59) saturate(.78)!important}.hero-entry .container{width:100%!important}.hero-entry .hero-grid{min-height:867px!important}.hero-logo-anchor{top:124px!important;width:137px!important;height:137px!important}.hero-entry .hero-copy{max-width:none!important;padding:316px 36px 0!important;text-align:center!important}.hero-entry .eyebrow{font-size:10px!important;letter-spacing:.19em!important}.hero-entry h1{max-width:440px!important;margin-top:17px!important;font-size:clamp(43px,12.1vw,65px)!important;line-height:1.01!important;text-align:center!important}.hero-entry .hero-description{max-width:430px!important;margin-top:21px!important;font-size:16px!important;line-height:1.57!important;text-align:center!important}.hero-entry .hero-actions{display:grid!important;width:100%!important;grid-template-columns:1fr!important;gap:12px!important;margin-top:28px!important}.hero-entry .btn{width:100%!important;min-height:60px!important;font-size:17px!important}.hero-entry .btn-primary,.hero-entry .btn-secondary{min-width:0!important}.hero-feature-rail{width:calc(100% - 38px)!important;margin-top:0!important;padding:15px 0!important}.hero-feature-rail button{min-height:78px!important;gap:7px!important;font-size:11px!important}.hero-feature-rail svg{width:40px!important;height:40px!important}.search-dialog{margin-top:82px!important;padding:24px!important}.site-search-form button{padding:10px!important}}
 @media(prefers-reduced-motion:reduce){.logo-segment{animation:none!important;opacity:0!important}}
 </style>
+<style id="malguard-network-animation">
+/* Three lightweight data paths connect the Earth to the existing MalGuard mark. */
+.hero-logo-anchor{z-index:5!important;isolation:isolate!important}
+.data-network{position:absolute!important;left:50%!important;top:50%!important;width:min(700px,148vw)!important;height:min(700px,148vw)!important;overflow:visible!important;transform:translate(-50%,-50%)!important;z-index:1!important;pointer-events:none!important}
+.data-route{fill:none;stroke:#35d7ff;stroke-width:.34;stroke-linecap:round;stroke-dasharray:.12 .88;opacity:.42;filter:drop-shadow(0 0 1.8px rgba(0,215,255,.72));animation:malguardRoute 6.6s linear infinite}
+.data-route-secondary{fill:none;stroke:#1a9dc4;stroke-width:.16;stroke-linecap:round;stroke-dasharray:.03 .97;opacity:.23;animation:malguardRouteSecondary 6.6s linear infinite}
+.data-source{fill:#75eaff;opacity:.72;filter:drop-shadow(0 0 2.2px rgba(0,214,255,.92));animation:malguardSource 6.6s ease-in-out infinite}
+.data-target{fill:#b9f7ff;opacity:.45;filter:drop-shadow(0 0 2.5px rgba(0,225,255,.9));animation:malguardTarget 6.6s ease-in-out infinite}
+.data-packet{fill:#fff;opacity:.95;filter:drop-shadow(0 0 3px rgba(77,231,255,.95))}
+.data-packet.packet-left{animation-delay:0s}
+.data-packet.packet-center{animation-delay:2.2s}
+.data-packet.packet-right{animation-delay:4.4s}
+.data-route.route-center{animation-delay:2.2s}
+.data-route.route-right{animation-delay:4.4s}
+.data-route-secondary.route-center-secondary{animation-delay:2.2s}
+.data-route-secondary.route-right-secondary{animation-delay:4.4s}
+.data-source.source-center{animation-delay:2.2s}
+.data-source.source-right{animation-delay:4.4s}
+.data-target.target-center{animation-delay:2.2s}
+.data-target.target-right{animation-delay:4.4s}
+.logo-pulse{z-index:4!important}
+.logo-segment{animation-duration:6.6s!important;animation-timing-function:ease-in-out!important;animation-iteration-count:infinite!important}
+@keyframes malguardRoute{0%,5%{stroke-dashoffset:1;opacity:.22}17%,28%{stroke-dashoffset:.03;opacity:.88}42%,100%{stroke-dashoffset:-1;opacity:.22}}
+@keyframes malguardRouteSecondary{0%,7%{stroke-dashoffset:1;opacity:.08}18%,30%{stroke-dashoffset:.03;opacity:.35}43%,100%{stroke-dashoffset:-1;opacity:.08}}
+@keyframes malguardSource{0%,9%,100%{opacity:.35;r:1.05}17%,30%{opacity:1;r:1.5}42%{opacity:.35;r:1.05}}
+@keyframes malguardTarget{0%,10%,100%{opacity:.35;r:1.05}18%,34%{opacity:1;r:1.6}45%{opacity:.35;r:1.05}}
+@media(max-width:760px){.data-network{width:min(560px,150vw)!important;height:min(560px,150vw)!important}}
+@media(prefers-reduced-motion:reduce){.data-route,.data-route-secondary,.data-source,.data-target{animation:none!important}.data-route{opacity:.55!important}.data-route-secondary{opacity:.2!important}.data-source,.data-target{opacity:.8!important}.data-packet{display:none!important}.logo-segment{animation:none!important;opacity:0!important}}
+</style>
 </head>
 <body>
 <header class="nav" id="navbar">
@@ -711,6 +740,28 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
         <img class="logo-segment logo-segment-right" src="assets/malguard-logo.svg" alt="">
         <img class="logo-segment logo-segment-bottom" src="assets/malguard-logo.svg" alt="">
       </span>
+      <svg class="data-network" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+        <defs>
+          <path id="malguard-route-left" d="M 7 28 C 22 29, 34 36, 43 43" pathLength="1"></path>
+          <path id="malguard-route-center" d="M 50 7 C 50 20, 50 32, 50 40" pathLength="1"></path>
+          <path id="malguard-route-right" d="M 93 28 C 78 29, 66 36, 57 43" pathLength="1"></path>
+        </defs>
+        <path class="data-route route-left" d="M 7 28 C 22 29, 34 36, 43 43" pathLength="1"></path>
+        <path class="data-route route-center" d="M 50 7 C 50 20, 50 32, 50 40" pathLength="1"></path>
+        <path class="data-route route-right" d="M 93 28 C 78 29, 66 36, 57 43" pathLength="1"></path>
+        <path class="data-route-secondary route-left-secondary" d="M 7 28 C 23 27, 35 34, 43 43" pathLength="1"></path>
+        <path class="data-route-secondary route-center-secondary" d="M 50 7 C 49 21, 49 32, 50 40" pathLength="1"></path>
+        <path class="data-route-secondary route-right-secondary" d="M 93 28 C 77 27, 65 34, 57 43" pathLength="1"></path>
+        <circle class="data-source source-left" cx="7" cy="28" r="1.05"></circle>
+        <circle class="data-source source-center" cx="50" cy="7" r="1.05"></circle>
+        <circle class="data-source source-right" cx="93" cy="28" r="1.05"></circle>
+        <circle class="data-target target-left" cx="43" cy="43" r="1.05"></circle>
+        <circle class="data-target target-center" cx="50" cy="40" r="1.05"></circle>
+        <circle class="data-target target-right" cx="57" cy="43" r="1.05"></circle>
+        <circle class="data-packet packet-left" cx="7" cy="28" r=".72"><animateMotion dur="6.6s" begin="0s" repeatCount="indefinite" rotate="auto"><mpath href="#malguard-route-left"></mpath></animateMotion></circle>
+        <circle class="data-packet packet-center" cx="50" cy="7" r=".72"><animateMotion dur="6.6s" begin="2.2s" repeatCount="indefinite" rotate="auto"><mpath href="#malguard-route-center"></mpath></animateMotion></circle>
+        <circle class="data-packet packet-right" cx="93" cy="28" r=".72"><animateMotion dur="6.6s" begin="4.4s" repeatCount="indefinite" rotate="auto"><mpath href="#malguard-route-right"></mpath></animateMotion></circle>
+      </svg>
     </div>
     <div class="hero-copy">
       <div class="eyebrow">SCAN SMART. PLAY SAFE.</div>
