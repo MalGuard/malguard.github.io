@@ -651,36 +651,228 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
   .earth-product strong{font-size:10px!important}
 }
 </style>
+
+<style id="malguard-entry-landing">
+/* Entry landing: implemented as HTML, CSS, SVG, and JavaScript; no reference screenshot is used as a background. */
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.nav{padding:20px 0!important}
+.nav-inner{min-height:74px!important;padding:10px 14px 10px 18px!important;border:1px solid rgba(13,137,237,.56)!important;border-radius:20px!important;background:rgba(2,12,31,.72)!important;box-shadow:inset 0 1px 0 rgba(98,217,255,.13),0 14px 46px rgba(0,0,0,.25)!important;backdrop-filter:blur(15px)!important}
+.brand-site-logo{width:190px!important;height:auto!important}
+.nav-links{gap:24px!important}
+.nav-links a{color:#d5e6f4!important;font-size:10px!important}
+.nav-actions{gap:9px!important}
+.nav-icon,.nav-download{width:48px!important;height:48px!important;border-color:rgba(28,151,235,.68)!important;border-radius:14px!important;background:rgba(2,13,32,.84)!important;color:#fff!important}
+.nav-download{width:auto!important;min-width:142px!important;grid-auto-flow:column!important;gap:8px!important;padding:0 14px!important;font-size:12px!important}
+.download-glyph{font-size:25px!important;color:#16ceff!important}
+.download-label{font:700 10px var(--display)!important;letter-spacing:.04em!important}
+.menu-btn{display:none!important}
+.menu-close{display:none}
+.hero-entry{min-height:0!important;padding:135px 0 52px!important;background:linear-gradient(180deg,rgba(1,7,15,.22),rgba(1,7,15,.54) 68%,rgba(1,7,15,.96))!important}
+.hero-entry:before{display:none!important}
+.hero-entry .hero-grid{display:grid!important;grid-template-columns:minmax(0,.94fr) minmax(470px,1.06fr)!important;gap:22px!important;align-items:center!important}
+.hero-entry .hero-copy{display:block!important;order:initial!important;max-width:625px!important;padding:38px 0!important;text-align:left!important}
+.hero-entry .eyebrow{display:block!important;padding:0!important;border:0!important;border-radius:0!important;background:none!important;color:#29d6ff!important;font:800 12px var(--display)!important;letter-spacing:.2em!important}
+.hero-entry .eyebrow:before,.hero-entry .eyebrow:after{display:none!important}
+.hero-entry h1{max-width:650px!important;margin-top:18px!important;font:800 clamp(52px,6vw,82px)/.98 var(--display)!important;letter-spacing:-.06em!important}
+.hero-entry h1 span{color:#15c5fb!important;text-shadow:none!important}
+.hero-entry .hero-description{max-width:580px!important;margin-top:22px!important;color:#f0f7fd!important;font-size:17px!important;line-height:1.58!important}
+.hero-entry .hero-actions{gap:13px!important;margin-top:30px!important}
+.hero-entry .btn{min-height:55px!important;padding:0 21px!important;border-radius:13px!important;font:800 13px var(--display)!important;letter-spacing:0!important}
+.hero-entry .btn-primary{min-width:220px!important;justify-content:space-between!important;background:linear-gradient(110deg,#08baf2,#1cd8ff)!important;border-color:#24d9ff!important;box-shadow:0 14px 36px rgba(0,193,255,.23)!important;color:#021624!important}
+.hero-entry .btn-secondary{min-width:180px!important;justify-content:space-between!important;border:1.5px solid #16c8ff!important;background:rgba(3,23,46,.62)!important;color:#fff!important}
+.button-shield{font-size:23px!important;font-weight:900!important}
+.hero-entry .btn b{font:400 30px/1 Arial!important;color:inherit!important}
+.hero-entry .hero-visual{display:block!important;order:initial!important;width:100%!important;min-height:620px!important;height:620px!important;filter:none!important}
+.hero-entry .earth-scene{position:relative!important;width:100%!important;height:100%!important;min-height:0!important;overflow:hidden!important;isolation:isolate!important;border:0!important;border-radius:0!important;background:#020a18 url("assets/malguard-earth-background.png") center 42%/cover no-repeat!important;box-shadow:none!important}
+.hero-entry .earth-scene:before{display:block!important;inset:0!important;z-index:1!important;background:linear-gradient(180deg,rgba(2,8,20,.06),rgba(1,7,17,.06) 45%,rgba(1,6,15,.6)),radial-gradient(ellipse at 50% 45%,transparent 0 34%,rgba(0,0,0,.1) 70%,rgba(0,0,0,.4))!important}
+.hero-entry .earth-scene:after{display:none!important}
+.earth-radar-static{display:none!important}
+.data-exchange{position:absolute;inset:0;z-index:4;width:100%;height:100%;overflow:visible!important}
+.mg-data-path{fill:none;stroke:rgba(39,191,255,.42);stroke-width:1.25;vector-effect:non-scaling-stroke}
+.mg-data-flow{fill:none;stroke:#58e7ff;stroke-width:1.75;stroke-dasharray:9 150;stroke-dashoffset:160;opacity:0;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 4px rgba(31,217,255,.8))}
+.mg-flow-left{animation:mgRouteLeft 8.8s linear infinite}
+.mg-flow-center{animation:mgRouteCenter 8.8s linear infinite}
+.mg-flow-right{animation:mgRouteRight 8.8s linear infinite}
+.mg-city-node{fill:#16d4ff;filter:drop-shadow(0 0 4px #0bcaff)}
+.mg-packet{fill:#dcfcff;opacity:0}
+@keyframes mgRouteLeft{0%,3%,22%,100%{opacity:0;stroke-dashoffset:160}5%{opacity:.82}20%{opacity:.82;stroke-dashoffset:0}}
+@keyframes mgRouteCenter{0%,31%,50%,100%{opacity:0;stroke-dashoffset:160}33%{opacity:.82}48%{opacity:.82;stroke-dashoffset:0}}
+@keyframes mgRouteRight{0%,59%,78%,100%{opacity:0;stroke-dashoffset:160}61%{opacity:.82}76%{opacity:.82;stroke-dashoffset:0}}
+.hero-logo-wrap{position:absolute!important;left:50%!important;top:50%!important;z-index:6!important;width:220px!important;height:220px!important;transform:translate(-50%,-50%)!important}
+.hero-entry .hero-logo{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:1!important;transform:none!important;object-fit:contain!important;filter:drop-shadow(0 10px 22px rgba(0,0,0,.58))!important}
+.logo-pulse{position:absolute;inset:0;z-index:2;pointer-events:none}
+.logo-segment{position:absolute;inset:0;width:100%;height:100%;opacity:0;filter:brightness(1.62) saturate(1.3) drop-shadow(0 0 10px rgba(24,220,255,.68))}
+.logo-pulse.is-pulsing .logo-segment{animation:mgLogoPulse 860ms ease-out both}
+.logo-segment-left{clip-path:polygon(6% 36%,51% 46%,53% 76%,20% 57%,18% 43%,25% 45%,49% 65%,49% 48%)}
+.logo-segment-right{clip-path:polygon(49% 38%,96% 37%,96% 65%,80% 64%,72% 81%,54% 90%,49% 75%)}
+.logo-segment-bottom{clip-path:polygon(34% 76%,67% 76%,53% 97%,49% 99%,39% 90%)}
+@keyframes mgLogoPulse{0%{opacity:0}24%{opacity:.84}56%{opacity:.72}100%{opacity:0}}
+.hero-feature-rail{display:grid;grid-template-columns:repeat(3,1fr);width:min(800px,100%);margin:0 auto;padding:20px 0;border-top:1px solid rgba(27,183,248,.38);border-bottom:1px solid rgba(27,183,248,.38)}
+.hero-feature-rail button{display:grid;min-height:86px;place-items:center;align-content:center;gap:9px;border:0;border-right:1px solid rgba(27,183,248,.38);background:transparent;color:#f3fbff;font:700 14px var(--display);transition:background .18s,color .18s}
+.hero-feature-rail button:last-child{border-right:0}
+.hero-feature-rail button:hover{background:rgba(15,123,189,.13);color:#4be4ff}
+.hero-feature-rail svg{width:46px;height:46px;fill:none;stroke:#16ccff;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+.hero-feature-rail .scam-feature svg{stroke:#ff9d29}
+.site-search[hidden]{display:none!important}
+.site-search{position:fixed;inset:0;z-index:4000}
+.search-backdrop{position:absolute;inset:0;border:0;background:rgba(0,4,12,.74);backdrop-filter:blur(5px)}
+.search-dialog{position:relative;width:min(650px,calc(100% - 32px));margin:min(12vh,110px) auto 0;padding:31px;border:1px solid rgba(30,181,249,.63);border-radius:25px;background:#041426;box-shadow:0 28px 80px rgba(0,0,0,.58)}
+.search-dialog-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.search-dialog-heading span{color:#8ae3ff;font:800 10px var(--display);letter-spacing:.15em;text-transform:uppercase}
+.search-dialog h2{margin-top:7px;font:800 clamp(26px,4vw,38px)/1.05 var(--display);letter-spacing:-.05em}
+.search-close{width:43px;height:43px;border:1px solid rgba(47,177,238,.57);border-radius:12px;background:rgba(3,15,33,.7);color:#fff;font:400 30px/1 Arial}
+.site-search-form{display:flex;align-items:center;gap:10px;margin-top:25px;padding:8px 8px 8px 15px;border:1px solid rgba(47,177,238,.46);border-radius:14px;background:rgba(1,10,25,.8);color:#86e0ff}
+.site-search-form span{font-size:25px;line-height:1}
+.site-search-form input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:#fff;font-size:15px}
+.site-search-form button{border:0;border-radius:9px;padding:10px 14px;background:#15c8fa;color:#011321;font:800 12px var(--display)}
+.site-search-results{display:grid;gap:5px;margin-top:14px}
+.site-search-results button{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px;border:1px solid transparent;border-radius:13px;background:transparent;color:#f5fbff;text-align:left}
+.site-search-results button:hover{border-color:rgba(55,188,247,.38);background:rgba(14,90,141,.22)}
+.site-search-results strong{display:block;font:700 14px var(--display)}
+.site-search-results small{display:block;margin-top:3px;color:#91a9bd;font-size:11px;line-height:1.45}
+.site-search-results b{color:#5fe8ff;font-size:22px;font-weight:400}
+.site-search-results p{margin:18px 0;color:#a8bccd;font-size:13px}
+.search-hint{margin:17px 0 0;color:#718ca2;font-size:11px}
+@media(max-width:1000px){
+  .hero-entry .hero-grid{grid-template-columns:1fr!important;gap:0!important}
+  .hero-entry .hero-copy{order:2!important;margin:auto!important;text-align:center!important}
+  .hero-entry .hero-description{margin-left:auto!important;margin-right:auto!important}
+  .hero-entry .hero-actions{justify-content:center!important}
+  .hero-entry .hero-visual{order:1!important;width:min(720px,100%)!important;margin:auto!important}
+}
+@media(max-width:760px){
+  .nav{top:0!important;padding:10px 0!important}
+  .nav-inner{min-height:0!important;width:calc(100% - 28px)!important;padding:9px 10px 9px 13px!important;border-radius:18px!important}
+  .brand-site-logo{width:151px!important}
+  .nav-actions{gap:7px!important}
+  .nav-icon,.nav-actions .menu-btn{display:grid!important;width:43px!important;height:43px!important;place-items:center!important;padding:0!important;border-radius:12px!important;font-size:23px!important}
+  .nav-download{display:none!important}
+  .nav-links{position:fixed!important;top:76px!important;left:14px!important;right:14px!important;z-index:1005!important;display:none!important;gap:0!important;padding:14px 18px!important;border:1px solid rgba(34,175,241,.52)!important;border-radius:19px!important;background:rgba(3,16,34,.98)!important;box-shadow:0 23px 60px rgba(0,0,0,.48)!important}
+  .nav-links.active{display:flex!important;flex-direction:column!important}
+  .nav-links a{padding:14px 2px!important;border-bottom:1px solid rgba(49,157,218,.22)!important;font-size:12px!important}
+  .nav-links a:last-child{border-bottom:0!important}
+  .menu-close{display:grid!important;width:38px!important;height:38px!important;place-items:center!important;justify-self:end!important;border:1px solid rgba(35,170,237,.44)!important;border-radius:10px!important;background:#061a32!important;color:#fff!important;font-size:27px!important;line-height:1!important}
+  .hero-entry{padding:82px 0 38px!important;background:linear-gradient(180deg,rgba(1,6,13,.28),rgba(1,6,13,.68) 70%,rgba(1,6,13,.98))!important}
+  .hero-entry .container{width:100%!important}
+  .hero-entry .hero-visual{height:min(650px,151vw)!important;min-height:530px!important}
+  .hero-entry .earth-scene{background-position:center 40%!important}
+  .hero-entry .hero-copy{max-width:none!important;padding:13px 42px 0!important;text-align:left!important}
+  .hero-entry .eyebrow{font-size:10px!important;letter-spacing:.19em!important}
+  .hero-entry h1{max-width:420px!important;margin-top:17px!important;font-size:clamp(42px,12.2vw,65px)!important;line-height:1.01!important;text-align:left!important}
+  .hero-entry .hero-description{max-width:430px!important;margin-top:21px!important;font-size:16px!important;line-height:1.55!important;text-align:left!important}
+  .hero-entry .hero-actions{display:grid!important;width:100%!important;grid-template-columns:1fr!important;gap:12px!important;margin-top:28px!important}
+  .hero-entry .btn{width:100%!important;min-height:60px!important;font-size:17px!important}
+  .hero-entry .btn-primary,.hero-entry .btn-secondary{min-width:0!important}
+  .hero-logo-wrap{width:155px!important;height:155px!important;top:52%!important}
+  .hero-feature-rail{width:calc(100% - 38px)!important;margin-top:66px!important;padding:15px 0!important}
+  .hero-feature-rail button{min-height:78px!important;gap:7px!important;font-size:11px!important}
+  .hero-feature-rail svg{width:40px!important;height:40px!important}
+  .search-dialog{margin-top:82px!important;padding:24px!important}
+  .site-search-form button{padding:10px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .mg-data-flow{display:none!important}
+  .mg-packet{opacity:0!important}
+  .mg-data-path{stroke:rgba(38,192,255,.48)!important}
+  .logo-pulse.is-pulsing .logo-segment{animation:none!important}
+}
+</style>
 </head>
 <body>
-<header class="nav" id="navbar"><div class="container nav-inner"><a href="#home" class="brand" onclick="showHome()" aria-label="MalGuard home"><img class="brand-site-logo" src="assets/malguard-site-logo.svg" alt="MalGuard"></a><nav class="nav-links" id="navLinks"><a href="#products">Products</a><a href="#how-it-works">How It Works</a><a href="#security-engine">Security</a><a href="#labs">Labs</a><a href="#plans">Plans</a><a href="#feedback">Feedback</a><a href="#download">Download</a></nav><div class="nav-actions"><button class="nav-icon" type="button" aria-label="Search" onclick="showToast('Search is coming soon.')">⌕</button><a class="nav-download" href="#download" aria-label="Download MalGuard"><span class="download-glyph">↓</span><span class="download-label">Download Now</span></a><button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button></div></div></header>
-<main class="home-content" id="homeContent">
-<section class="hero" id="home"><div class="container hero-grid"><div class="hero-copy"><div class="eyebrow"><i></i> SCAN SMART. PLAY SAFE.</div><h1>A Safer Gaming <span>Community</span> Starts Here.</h1><p class="hero-description">MalGuard detects, blocks, and prevents cheats, mods, scams, and malicious tools — so you can focus on what matters most: gaming.</p><div class="hero-actions"><a href="#products" class="btn btn-primary">Get MalGuard</a><a href="#how-it-works" class="btn btn-secondary">Learn More</a></div>
-<div class="hero-proof" aria-label="MalGuard benefits">
-  <div class="hero-proof-item"><img src="assets/malguard-shield.svg" alt=""><span>Real-Time<br>Protection</span></div>
-  <div class="hero-proof-item"><img src="assets/malguard-app.svg" alt=""><span>Trusted<br>by Gamers</span></div>
-  <div class="hero-proof-item"><img src="assets/malguard-document.svg" alt=""><span>A Cleaner, Fairer<br>Community</span></div>
-</div></div><div class="hero-visual" aria-label="MalGuard security environment">
-  <div class="earth-scene">
-    <div class="earth-radar-static" aria-hidden="true"></div>
-    <img class="hero-logo" src="assets/malguard-logo.svg" alt="MalGuard gaming security logo">
-    <button class="earth-product earth-gta" type="button" onclick="openProduct('gta-guard')" aria-label="Open GTA Guard">
-      <span class="earth-product-dot earth-icon-gta" aria-hidden="true"><svg class="product-icon-svg" viewBox="0 0 64 78" role="img"><path d="M32 3 57 14v24c0 16-9 27-25 34C16 65 7 54 7 38V14Z" fill="#07120e" stroke="#62ff73" stroke-width="3"/><path d="M13 17 32 25 51 17" fill="none" stroke="#62ff73" stroke-width="2"/><text x="32" y="52" text-anchor="middle" fill="#62ff73" font-size="31" font-family="Arial,sans-serif" font-weight="900">V</text></svg></span><span><strong>GTA Guard</strong><small>Open product</small></span>
-    </button>
-    <button class="earth-product earth-malware" type="button" onclick="openProduct('malware-ai')" aria-label="Open Malware AI">
-      <span class="earth-product-dot earth-icon-malware" aria-hidden="true"><svg class="product-icon-svg" viewBox="0 0 78 78" role="img"><rect x="19" y="19" width="40" height="40" rx="8" fill="#06141d" stroke="#24dcff" stroke-width="3"/><path d="M28 13v8M39 13v8M50 13v8M28 59v8M39 59v8M50 59v8M13 28h8M13 39h8M13 50h8M59 28h8M59 39h8M59 50h8" stroke="#24dcff" stroke-width="3" stroke-linecap="round"/><text x="39" y="47" text-anchor="middle" fill="#24dcff" font-size="16" font-family="Arial,sans-serif" font-weight="900">AI</text></svg></span><span><strong>Malware AI</strong><small>Open product</small></span>
-    </button>
-    <button class="earth-product earth-scam" type="button" onclick="openProduct('game-scam-guard')" aria-label="Open Game Scam Guard">
-      <span class="earth-product-dot earth-icon-scam" aria-hidden="true"><svg class="product-icon-svg" viewBox="0 0 86 78" role="img"><path d="M17 25c-7 0-12 7-13 18-1 12 3 21 10 21 7 0 10-9 14-16h30c4 7 7 16 14 16 7 0 11-9 10-21-1-11-6-18-13-18l-13 6H30Z" fill="#11100a" stroke="#ffad4b" stroke-width="3"/><path d="M20 33v16M12 41h16" stroke="#ffad4b" stroke-width="3" stroke-linecap="round"/><path d="m65 25 9 16H56Z" fill="#11100a" stroke="#ffad4b" stroke-width="2"/><path d="M65 31v5M65 39v1" stroke="#ffad4b" stroke-width="2.5" stroke-linecap="round"/></svg></span><span><strong>Game Scam Guard</strong><small>Open product</small></span>
-    </button>
-    <div class="earth-scan-card earth-scan-one" aria-label="Threats blocked">
-      <span class="earth-scan-icon">盾</span><span><small>Threats Blocked</small><strong>12,453</strong><em>REAL-TIME PROTECTION</em></span>
-    </div>
-    <div class="earth-scan-card earth-scan-two" aria-label="Scans today">
-      <span class="earth-scan-icon">⌕</span><span><small>Scans Today</small><strong>8,921</strong><em>DETECTING MORE THREATS</em></span>
+<header class="nav" id="navbar">
+  <div class="container nav-inner">
+    <a href="#home" class="brand" onclick="showHome()" aria-label="MalGuard home"><img class="brand-site-logo" src="assets/malguard-site-logo.svg" alt="MalGuard"></a>
+    <nav class="nav-links" id="navLinks" aria-label="Primary navigation">
+      <button class="menu-close" id="menuClose" type="button" aria-label="Close navigation menu">×</button>
+      <a href="#products">Products</a>
+      <a href="#security-engine">Security</a>
+      <a href="#feedback">Support</a>
+      <a href="#labs">About</a>
+      <a href="#download">Download</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="nav-icon" id="searchButton" type="button" aria-label="Search MalGuard" aria-expanded="false" aria-controls="siteSearch">⌕</button>
+      <a class="nav-download" href="#download" aria-label="Get MalGuard"><span class="download-glyph">↓</span><span class="download-label">Get MalGuard</span></a>
+      <button class="menu-btn" id="menuBtn" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="navLinks">☰</button>
     </div>
   </div>
-</div></div></div></section>
+</header>
+<section class="site-search" id="siteSearch" role="dialog" aria-modal="true" aria-label="Search MalGuard" hidden>
+  <button class="search-backdrop" id="searchBackdrop" type="button" aria-label="Close search"></button>
+  <div class="search-dialog">
+    <div class="search-dialog-heading">
+      <div><span>Site search</span><h2>Find MalGuard information.</h2></div>
+      <button class="search-close" id="searchClose" type="button" aria-label="Close search">×</button>
+    </div>
+    <form id="siteSearchForm" class="site-search-form">
+      <label class="sr-only" for="siteSearchInput">Search MalGuard</label>
+      <span aria-hidden="true">⌕</span>
+      <input id="siteSearchInput" type="search" autocomplete="off" placeholder="Search products, security, support…">
+      <button type="submit">Search</button>
+    </form>
+    <div class="site-search-results" id="siteSearchResults" aria-live="polite"></div>
+    <p class="search-hint">Press Escape to close.</p>
+  </div>
+</section>
+<main class="home-content" id="homeContent">
+<section class="hero hero-entry" id="home">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow">SCAN SMART. PLAY SAFE.</div>
+      <h1>A Safer Gaming <span>Community</span> Starts Here.</h1>
+      <p class="hero-description">MalGuard detects, blocks, and prevents cheats, mods, scams, and malicious tools — so you can focus on what matters most: gaming.</p>
+      <div class="hero-actions">
+        <a href="#download" class="btn btn-primary"><span class="button-shield" aria-hidden="true">⌾</span><span>Get MalGuard</span><b aria-hidden="true">›</b></a>
+        <a href="#products" class="btn btn-secondary"><span>Learn More</span><b aria-hidden="true">›</b></a>
+      </div>
+    </div>
+    <div class="hero-visual" aria-label="MalGuard data exchange animation">
+      <div class="earth-scene">
+        <svg class="data-exchange" viewBox="0 0 600 560" role="img" aria-label="Three data packets travel from Earth nodes to the MalGuard logo in sequence.">
+          <defs>
+            <filter id="mgPacketGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="2.4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <path class="mg-data-path" d="M104 370 C139 312 174 267 225 235"/>
+          <path class="mg-data-path" d="M300 94 C300 130 300 166 300 205"/>
+          <path class="mg-data-path" d="M496 370 C461 312 426 267 375 235"/>
+          <path class="mg-data-flow mg-flow-left" d="M104 370 C139 312 174 267 225 235"/>
+          <path class="mg-data-flow mg-flow-center" d="M300 94 C300 130 300 166 300 205"/>
+          <path class="mg-data-flow mg-flow-right" d="M496 370 C461 312 426 267 375 235"/>
+          <circle class="mg-city-node" cx="104" cy="370" r="4.5"/>
+          <circle class="mg-city-node" cx="300" cy="94" r="4.5"/>
+          <circle class="mg-city-node" cx="496" cy="370" r="4.5"/>
+          <circle class="mg-packet" id="mgPacketLeft" r="4.4" filter="url(#mgPacketGlow)"/>
+          <circle class="mg-packet" id="mgPacketCenter" r="4.4" filter="url(#mgPacketGlow)"/>
+          <circle class="mg-packet" id="mgPacketRight" r="4.4" filter="url(#mgPacketGlow)"/>
+        </svg>
+        <div class="hero-logo-wrap">
+          <img class="hero-logo" src="assets/malguard-logo.svg" alt="MalGuard gaming security logo">
+          <span class="logo-pulse" id="logoPulse" aria-hidden="true">
+            <img class="logo-segment logo-segment-left" src="assets/malguard-logo.svg" alt="">
+            <img class="logo-segment logo-segment-right" src="assets/malguard-logo.svg" alt="">
+            <img class="logo-segment logo-segment-bottom" src="assets/malguard-logo.svg" alt="">
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="hero-feature-rail" aria-label="MalGuard products">
+      <button type="button" onclick="openProduct('malware-ai')" aria-label="Open Malware AI">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="17" y="17" width="30" height="30" rx="6"/><path d="M24 8v9M32 8v9M40 8v9M24 47v9M32 47v9M40 47v9M8 24h9M8 32h9M8 40h9M47 24h9M47 32h9M47 40h9"/><path d="M25 36c5-13 10 8 15-8"/></svg>
+        <span>Malware AI</span>
+      </button>
+      <button type="button" onclick="openProduct('gta-guard')" aria-label="Open GTA Guard">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 54 15v18c0 13-8 20-22 26C18 53 10 46 10 33V15Z"/><path d="m20 21 12 7 12-7M25 37l7 8 7-8"/></svg>
+        <span>GTA Guard</span>
+      </button>
+      <button class="scam-feature" type="button" onclick="openProduct('game-scam-guard')" aria-label="Open Game Scam Guard">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 54 15v18c0 13-8 20-22 26C18 53 10 46 10 33V15Z"/><path d="M32 21v16M32 45v1"/></svg>
+        <span>Game Scam Guard</span>
+      </button>
+    </div>
+  </div>
+</section>
 <div class="trust-bar"><div class="container trust-grid"><div class="trust-item"><div class="trust-number">BUILT FOR</div><div class="trust-label">Gamers</div></div><div class="trust-item"><div class="trust-number">FOCUS</div><div class="trust-label">Game Security</div></div><div class="trust-item"><div class="trust-number">FIRST PLATFORM</div><div class="trust-label">GTA 5</div></div><div class="trust-item"><div class="trust-number">EXPANDING</div><div class="trust-label">More Games</div></div></div></div>
 <section class="section" id="products"><div class="container"><div class="section-header"><div class="section-label">Products</div><h2 class="section-title">Purpose-built protection for games.</h2><p class="section-description">A restrained metallic interface with one identity color per product. Open a card only when you want the full technical details, rules and release status.</p></div><div class="products-grid game-products">
 <article class="game-card gta-card" id="gta-card">
@@ -784,5 +976,83 @@ document.querySelectorAll('.plan-fold').forEach(card=>card.addEventListener('tog
   if(!card.open)return;
   document.querySelectorAll('.plan-fold[open]').forEach(other=>{if(other!==card)other.open=false});
 }));
+</script>
+
+<script id="malguard-entry-behavior">
+(function(){
+  var searchPanel=document.getElementById('siteSearch');
+  var searchButton=document.getElementById('searchButton');
+  var searchClose=document.getElementById('searchClose');
+  var searchBackdrop=document.getElementById('searchBackdrop');
+  var searchInput=document.getElementById('siteSearchInput');
+  var searchForm=document.getElementById('siteSearchForm');
+  var searchResults=document.getElementById('siteSearchResults');
+  var menuClose=document.getElementById('menuClose');
+  var items=[
+    {name:'Products',detail:'Malware AI, GTA Guard, and Game Scam Guard',target:'#products',terms:'products malware ai gta guard game scam'},
+    {name:'Security',detail:'How MalGuard analyzes game-related threats',target:'#security-engine',terms:'security scan analyse analyze threat'},
+    {name:'Support',detail:'Safer-gaming guidance and feedback',target:'#feedback',terms:'support help feedback contact'},
+    {name:'About',detail:'MalGuard Labs and product research',target:'#labs',terms:'about labs research malguard'},
+    {name:'Download',detail:'Official release and installer status',target:'#download',terms:'download installer install release windows'},
+    {name:'Malware AI',detail:'Planned AI-assisted suspicious-file analysis',target:'#malware-ai',terms:'malware ai files threat'},
+    {name:'GTA Guard',detail:'Security analysis for GTA 5 mods',target:'#gta-guard',terms:'gta guard mods files'},
+    {name:'Game Scam Guard',detail:'Planned gaming-link and scam safety',target:'#game-scam-guard',terms:'game scam guard phishing links'}
+  ];
+  function closeSearch(){searchPanel.hidden=true;searchButton.setAttribute('aria-expanded','false');}
+  function openSearch(){searchPanel.hidden=false;searchButton.setAttribute('aria-expanded','true');renderResults(searchInput.value);setTimeout(function(){searchInput.focus();},0);}
+  function goTo(target){
+    closeSearch();
+    if(navLinks){navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false');}
+    location.hash=target;
+    if(typeof route==='function'){route();}
+    var element=document.querySelector(target);
+    if(element){setTimeout(function(){element.scrollIntoView({behavior:'smooth',block:'start'});},40);}
+  }
+  function renderResults(query){
+    var q=(query||'').trim().toLowerCase();
+    var shown=items.filter(function(item){return !q || (item.name+' '+item.detail+' '+item.terms).toLowerCase().indexOf(q)!==-1;});
+    searchResults.innerHTML=shown.length ? shown.map(function(item){return '<button type="button" data-target="'+item.target+'"><span><strong>'+item.name+'</strong><small>'+item.detail+'</small></span><b aria-hidden="true">›</b></button>';}).join('') : '<p>No matching MalGuard section was found. Try GTA, download, or support.</p>';
+    Array.prototype.forEach.call(searchResults.querySelectorAll('button[data-target]'),function(button){button.addEventListener('click',function(){goTo(button.getAttribute('data-target'));});});
+  }
+  searchButton.addEventListener('click',openSearch);
+  searchClose.addEventListener('click',closeSearch);
+  searchBackdrop.addEventListener('click',closeSearch);
+  searchInput.addEventListener('input',function(){renderResults(searchInput.value);});
+  searchForm.addEventListener('submit',function(event){event.preventDefault();var first=searchResults.querySelector('button[data-target]');if(first){goTo(first.getAttribute('data-target'));}});
+  menuClose.addEventListener('click',function(){navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false');menuBtn.focus();});
+  menuBtn.addEventListener('click',function(){setTimeout(function(){if(navLinks.classList.contains('active')){menuClose.focus();}},0);});
+  document.addEventListener('keydown',function(event){if(event.key==='Escape'){closeSearch();if(navLinks.classList.contains('active')){navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false');menuBtn.focus();}}});
+  renderResults('');
+
+  var reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+  if(reduceMotion.matches){return;}
+  var packets=[
+    {el:document.getElementById('mgPacketLeft'),start:.5,duration:1.6,p:[104,370,139,312,174,267,225,235]},
+    {el:document.getElementById('mgPacketCenter'),start:3,duration:1.6,p:[300,94,300,130,300,166,300,205]},
+    {el:document.getElementById('mgPacketRight'),start:5.5,duration:1.6,p:[496,370,461,312,426,267,375,235]}
+  ];
+  var pulse=document.getElementById('logoPulse'),cycle=8.8,started,previous=0,frame;
+  function point(p,t){
+    var u=1-t;
+    return {x:u*u*u*p[0]+3*u*u*t*p[2]+3*u*t*t*p[4]+t*t*t*p[6],y:u*u*u*p[1]+3*u*u*t*p[3]+3*u*t*t*p[5]+t*t*t*p[7]};
+  }
+  function passed(before,current,target){return before<=current ? before<target&&current>=target : before<target||current>=target;}
+  function triggerPulse(){pulse.classList.remove('is-pulsing');void pulse.offsetWidth;pulse.classList.add('is-pulsing');}
+  function animate(time){
+    if(started===undefined){started=time;}
+    var elapsed=((time-started)/1000)%cycle;
+    packets.forEach(function(packet){
+      var local=elapsed-packet.start;
+      if(local>=0&&local<=packet.duration){var position=point(packet.p,local/packet.duration);packet.el.setAttribute('cx',position.x.toFixed(2));packet.el.setAttribute('cy',position.y.toFixed(2));packet.el.style.opacity='1';}
+      else{packet.el.style.opacity='0';}
+      var arrival=(packet.start+packet.duration)%cycle;
+      if(passed(previous,elapsed,arrival)){triggerPulse();}
+    });
+    previous=elapsed;
+    frame=requestAnimationFrame(animate);
+  }
+  frame=requestAnimationFrame(animate);
+  window.addEventListener('pagehide',function(){if(frame){cancelAnimationFrame(frame);}});
+})();
 </script>
 </body></html>
