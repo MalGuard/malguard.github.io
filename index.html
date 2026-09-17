@@ -665,6 +665,11 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 </style>
 <style id="malguard-clean-hero">
 /* iPhone hero: the logo occupies the deliberate empty space beside the two real action links. */
+/* SVG-only digital Earth: a real DOM/SVG composition, never a flattened image. */
+.hero-earth-backdrop{background:#020815!important;filter:none!important;opacity:1!important}
+.digital-earth-svg{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important}
+@media(max-width:760px){.digital-earth-svg{width:152%!important;max-width:none!important;left:50%!important;transform:translateX(-50%)!important}.hero-earth-backdrop{background:#020815!important}}
+
 .hero-earth-backdrop{background:linear-gradient(180deg,rgba(1,7,17,.50),rgba(1,7,17,.73) 38%,rgba(1,7,17,.88) 78%,#020815),url("assets/malguard-earth-background.png") center 24%/min(1900px,148vw) auto no-repeat!important;filter:brightness(.48) saturate(.78)!important;opacity:.96!important}
 .hero-entry .hero-grid{min-height:735px!important}
 .hero-entry .hero-copy{z-index:2!important;padding:132px 0 0!important}
@@ -705,6 +710,9 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
   .logo-wordmark-cyan{color:#00bdf4!important;animation:malguardWordmarkGlow 3.2s ease-in-out infinite!important}
 }
 @media(prefers-reduced-motion:reduce){.button-logo-cyan,.logo-wordmark-cyan,.hero-feature-rail button>svg,.hero-feature-rail button>span{animation:none!important;opacity:.86!important;filter:none!important;text-shadow:none!important}}
+
+/* Final digital-Earth override: remove every legacy Earth image at all breakpoints. */
+.hero-earth-backdrop{background:#020815!important;filter:none!important;opacity:1!important}.digital-earth-svg{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important}@media(max-width:760px){.hero-earth-backdrop{background:#020815!important;filter:none!important;opacity:1!important}.digital-earth-svg{width:152%!important;max-width:none!important;left:50%!important;transform:translateX(-50%)!important}}
 </style>
 </head>
 <body>
@@ -745,7 +753,40 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 </section>
 <main class="home-content" id="homeContent">
 <section class="hero hero-entry" id="home">
-  <div class="hero-earth-backdrop" aria-hidden="true"></div>
+  <div class="hero-earth-backdrop" aria-hidden="true">
+  <svg class="digital-earth-svg" viewBox="0 0 1000 900" preserveAspectRatio="xMidYMid slice" focusable="false" aria-hidden="true">
+    <defs>
+      <radialGradient id="earthOcean" cx="38%" cy="28%" r="72%"><stop offset="0" stop-color="#0b4d91"/><stop offset=".42" stop-color="#062b5e"/><stop offset=".78" stop-color="#03132c"/><stop offset="1" stop-color="#010711"/></radialGradient>
+      <radialGradient id="earthLight" cx="50%" cy="50%" r="52%"><stop offset=".72" stop-color="#0e91e2" stop-opacity="0"/><stop offset=".9" stop-color="#22caff" stop-opacity=".4"/><stop offset="1" stop-color="#54e4ff" stop-opacity="0"/></radialGradient>
+      <linearGradient id="earthShade" x1="0" y1="0" x2="1" y2=".86"><stop stop-color="#0a4d8a" stop-opacity=".05"/><stop offset=".52" stop-color="#020b1d" stop-opacity=".08"/><stop offset="1" stop-color="#00050e" stop-opacity=".87"/></linearGradient>
+      <linearGradient id="land" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#117bb6"/><stop offset=".55" stop-color="#075183"/><stop offset="1" stop-color="#03294c"/></linearGradient>
+      <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="cityGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <clipPath id="earthClip"><circle cx="500" cy="438" r="406"/></clipPath>
+    </defs>
+    <rect width="1000" height="900" fill="#020815"/>
+    <g opacity=".75"><circle cx="74" cy="125" r="1.2" fill="#77dcff"/><circle cx="170" cy="244" r="1.5" fill="#3ebcff"/><circle cx="869" cy="151" r="1.1" fill="#79e4ff"/><circle cx="929" cy="334" r="1.4" fill="#33bfff"/><circle cx="824" cy="631" r="1.2" fill="#54d3ff"/><circle cx="115" cy="706" r="1.3" fill="#58ceff"/></g>
+    <circle cx="500" cy="438" r="430" fill="none" stroke="#079ee7" stroke-opacity=".14" stroke-width="3" filter="url(#softGlow)"/>
+    <circle cx="500" cy="438" r="414" fill="url(#earthOcean)"/>
+    <circle cx="500" cy="438" r="419" fill="url(#earthLight)" opacity=".9"/>
+    <g clip-path="url(#earthClip)">
+      <path d="M185 214c48-50 112-82 183-87l37 22 5 37-39 29-21 53-42 8-22 34-56 11-25-33 5-73zM343 315l62 13 28 37-17 34 21 41-26 35-45-9-25-46-32-27 18-42zM255 448l55 13 26 42-9 50 30 56-29 69-41-15-14-51-38-24-5-62z" fill="url(#land)" opacity=".72"/>
+      <path d="M451 190l56-28 53 19 11 37-25 27 2 34-39 25-35-16-11-51-42-11zM527 323l58 7 32 31-17 45 23 44-24 26-48-24-25-50 1-79zM596 473l55 17 25 48-21 28 15 50-36 61-48-34-12-62 22-47z" fill="url(#land)" opacity=".82"/>
+      <path d="M664 229l53 17 34 43-11 42-49 6-33-35-2-47zM720 371l54 8 21 36-22 37-52-14-22-43zM699 492l40 12 25 44-21 47-35-17-21-46z" fill="url(#land)" opacity=".63"/>
+      <g fill="none" stroke="#36ceff" stroke-opacity=".17" stroke-width="1">
+        <ellipse cx="500" cy="438" rx="401" ry="74"/><ellipse cx="500" cy="438" rx="401" ry="162"/><ellipse cx="500" cy="438" rx="401" ry="264"/>
+        <ellipse cx="500" cy="438" rx="122" ry="404"/><ellipse cx="500" cy="438" rx="245" ry="404"/>
+      </g>
+      <g fill="#39d9ff" filter="url(#cityGlow)">
+        <circle cx="284" cy="255" r="3"/><circle cx="351" cy="342" r="2.3"/><circle cx="393" cy="402" r="2.2"/><circle cx="477" cy="239" r="2.4"/><circle cx="530" cy="276" r="3"/><circle cx="567" cy="369" r="2.5"/><circle cx="622" cy="437" r="3"/><circle cx="700" cy="291" r="2.4"/><circle cx="742" cy="407" r="2.4"/><circle cx="607" cy="553" r="2.5"/>
+      </g>
+    </g>
+    <circle cx="500" cy="438" r="406" fill="url(#earthShade)"/>
+    <circle cx="500" cy="438" r="406" fill="none" stroke="#43d9ff" stroke-opacity=".48" stroke-width="2"/>
+    <ellipse cx="500" cy="840" rx="360" ry="34" fill="#00adf2" fill-opacity=".11" filter="url(#softGlow)"/>
+    <rect width="1000" height="900" fill="url(#earthShade)" opacity=".35"/>
+  </svg>
+</div>
   <div class="container hero-grid">
     <div class="hero-copy">
       <div class="eyebrow">SCAN SMART. PLAY SAFE.</div>
