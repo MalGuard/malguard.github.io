@@ -716,7 +716,7 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 
 /* NASA Black Marble still: a real Earth-at-night image across the whole hero and feature rail. */
 .hero-earth-backdrop{background:#020815!important;overflow:hidden!important}
-.nasa-earth-photo{position:absolute!important;inset:-1px!important;display:block!important;background:linear-gradient(180deg,rgba(1,6,15,.34) 0%,rgba(1,7,18,.50) 36%,rgba(1,7,18,.72) 70%,#020815 100%),url("https://assets.science.nasa.gov/content/dam/science/esd/eo/content-feature/nightlights/images/media/BlackMarble_2016_Americas_composite_tn.png/jcr:content/renditions/cq5dam.web.1280.1280.png") center 16%/cover no-repeat!important;filter:brightness(.78) saturate(1.12)!important;transform:scale(1.025)!important}
+.nasa-earth-photo{position:absolute!important;inset:-1px!important;display:block!important;background:linear-gradient(180deg,rgba(1,6,15,.34) 0%,rgba(1,7,18,.50) 36%,rgba(1,7,18,.72) 70%,#020815 100%),url("https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/content-feature/nightlights/images/media/BlackMarble_2016_Americas_composite.png?w=2000&h=1613&fit=clip&crop=faces%2Cfocalpoint") center 16%/cover no-repeat!important;filter:brightness(.78) saturate(1.12)!important;transform:scale(1.025)!important}
 .digital-earth-svg{display:none!important}
 @media(max-width:760px){.nasa-earth-photo{background-position:50% 10%!important;background-size:auto 100%!important;filter:brightness(.72) saturate(1.1)!important;transform:scale(1.08)!important}}
 
@@ -739,11 +739,18 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 
 /* iPhone: keep the complete illuminated Earth visible instead of zooming into one city. */
 @media(max-width:760px){
-  .nasa-earth-photo{background-image:linear-gradient(180deg,rgba(1,6,15,.20) 0%,rgba(1,7,18,.46) 38%,rgba(1,7,18,.76) 74%,#020815 100%),radial-gradient(ellipse at 50% 18%,rgba(31,161,255,.12),transparent 47%),url("https://assets.science.nasa.gov/content/dam/science/esd/eo/content-feature/nightlights/images/media/BlackMarble_2016_Americas_composite_tn.png/jcr:content/renditions/cq5dam.web.1280.1280.png") 50% 8%/145% auto no-repeat!important;filter:brightness(.86) saturate(1.18)!important;transform:none!important}
+  .nasa-earth-photo{background-image:linear-gradient(180deg,rgba(1,6,15,.20) 0%,rgba(1,7,18,.46) 38%,rgba(1,7,18,.76) 74%,#020815 100%),radial-gradient(ellipse at 50% 18%,rgba(31,161,255,.12),transparent 47%),url("https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/content-feature/nightlights/images/media/BlackMarble_2016_Americas_composite.png?w=2000&h=1613&fit=clip&crop=faces%2Cfocalpoint") 50% 8%/145% auto no-repeat!important;filter:brightness(.86) saturate(1.18)!important;transform:none!important}
   .hero-entry .hero-actions{max-width:356px!important;grid-template-columns:minmax(0,1fr) 128px!important}
   .hero-actions-logo{width:128px!important;height:130px!important}
   .hero-actions-logo .button-logo{width:100px!important;height:100px!important;flex-basis:100px!important}
   .logo-wordmark{max-width:128px!important;font-size:21px!important}
+}
+
+/* High-resolution NASA Black Marble Earth: bright enough to be visible behind the hero. */
+.nasa-earth-photo{filter:brightness(.94) contrast(1.1) saturate(1.2)!important}
+@media(max-width:760px){
+  .nasa-earth-photo{background-image:linear-gradient(180deg,rgba(1,6,15,.10) 0%,rgba(1,7,18,.30) 38%,rgba(1,7,18,.62) 74%,#020815 100%),radial-gradient(ellipse at 50% 18%,rgba(31,161,255,.18),transparent 50%),url("https://assets.science.nasa.gov/dynamicimage/assets/science/esd/eo/content-feature/nightlights/images/media/BlackMarble_2016_Americas_composite.png?w=2000&h=1613&fit=clip&crop=faces%2Cfocalpoint") 50% 8%/145% auto no-repeat!important;filter:brightness(1.08) contrast(1.1) saturate(1.25)!important}
+  .hero-actions-logo .button-logo{width:108px!important;height:108px!important;flex-basis:108px!important}
 }
 </style>
 </head>
