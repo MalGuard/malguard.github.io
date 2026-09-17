@@ -634,6 +634,23 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
   .hero-proof-item img{width:25px;height:28px}
 }
 </style>
+<style>
+/* PRODUCT ICONS AND MOBILE ORDER FIX */
+.earth-product-dot:after{content:none!important}
+.product-icon-svg{display:block;width:72%;height:72%;overflow:visible}
+.earth-icon-gta{border-color:#62ff73!important;background:rgba(4,22,12,.82)!important}
+.earth-icon-malware{border-color:#24dcff!important;background:rgba(2,15,24,.82)!important}
+.earth-icon-scam{border-color:#ffad4b!important;background:rgba(23,14,4,.82)!important}
+@media(max-width:760px){
+  .hero-grid{display:flex!important;flex-direction:column!important}
+  .hero-visual{order:1!important;display:block!important;min-height:670px!important;height:670px!important}
+  .earth-scene{height:670px!important;min-height:670px!important}
+  .hero-copy{order:2!important;display:flex!important}
+  .earth-product-dot{width:68px!important;height:68px!important}
+  .product-icon-svg{width:76%;height:76%}
+  .earth-product strong{font-size:10px!important}
+}
+</style>
 </head>
 <body>
 <header class="nav" id="navbar"><div class="container nav-inner"><a href="#home" class="brand" onclick="showHome()" aria-label="MalGuard home"><img class="brand-site-logo" src="assets/malguard-site-logo.svg" alt="MalGuard"></a><nav class="nav-links" id="navLinks"><a href="#products">Products</a><a href="#how-it-works">How It Works</a><a href="#security-engine">Security</a><a href="#labs">Labs</a><a href="#plans">Plans</a><a href="#feedback">Feedback</a><a href="#download">Download</a></nav><div class="nav-actions"><button class="nav-icon" type="button" aria-label="Search" onclick="showToast('Search is coming soon.')">⌕</button><a class="nav-download" href="#download" aria-label="Download MalGuard"><span class="download-glyph">↓</span><span class="download-label">Download Now</span></a><button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button></div></div></header>
@@ -648,13 +665,13 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
     <div class="earth-radar-static" aria-hidden="true"></div>
     <img class="hero-logo" src="assets/malguard-logo.svg" alt="MalGuard gaming security logo">
     <button class="earth-product earth-gta" type="button" onclick="openProduct('gta-guard')" aria-label="Open GTA Guard">
-      <span class="earth-product-dot"></span><span><strong>GTA Guard</strong><small>Open product</small></span>
+      <span class="earth-product-dot earth-icon-gta" aria-hidden="true"><svg class="product-icon-svg" viewBox="0 0 64 78" role="img"><path d="M32 3 57 14v24c0 16-9 27-25 34C16 65 7 54 7 38V14Z" fill="#07120e" stroke="#62ff73" stroke-width="3"/><path d="M13 17 32 25 51 17" fill="none" stroke="#62ff73" stroke-width="2"/><text x="32" y="52" text-anchor="middle" fill="#62ff73" font-size="31" font-family="Arial,sans-serif" font-weight="900">V</text></svg></span><span><strong>GTA Guard</strong><small>Open product</small></span>
     </button>
     <button class="earth-product earth-malware" type="button" onclick="openProduct('malware-ai')" aria-label="Open Malware AI">
-      <span class="earth-product-dot"></span><span><strong>Malware AI</strong><small>Open product</small></span>
+      <span class="earth-product-dot earth-icon-malware" aria-hidden="true"><svg class="product-icon-svg" viewBox="0 0 78 78" role="img"><rect x="19" y="19" width="40" height="40" rx="8" fill="#06141d" stroke="#24dcff" stroke-width="3"/><path d="M28 13v8M39 13v8M50 13v8M28 59v8M39 59v8M50 59v8M13 28h8M13 39h8M13 50h8M59 28h8M59 39h8M59 50h8" stroke="#24dcff" stroke-width="3" stroke-linecap="round"/><text x="39" y="47" text-anchor="middle" fill="#24dcff" font-size="16" font-family="Arial,sans-serif" font-weight="900">AI</text></svg></span><span><strong>Malware AI</strong><small>Open product</small></span>
     </button>
     <button class="earth-product earth-scam" type="button" onclick="openProduct('game-scam-guard')" aria-label="Open Game Scam Guard">
-      <span class="earth-product-dot"></span><span><strong>Game Scam Guard</strong><small>Open product</small></span>
+      <span class="earth-product-dot earth-icon-scam" aria-hidden="true"><svg class="product-icon-svg" viewBox="0 0 86 78" role="img"><path d="M17 25c-7 0-12 7-13 18-1 12 3 21 10 21 7 0 10-9 14-16h30c4 7 7 16 14 16 7 0 11-9 10-21-1-11-6-18-13-18l-13 6H30Z" fill="#11100a" stroke="#ffad4b" stroke-width="3"/><path d="M20 33v16M12 41h16" stroke="#ffad4b" stroke-width="3" stroke-linecap="round"/><path d="m65 25 9 16H56Z" fill="#11100a" stroke="#ffad4b" stroke-width="2"/><path d="M65 31v5M65 39v1" stroke="#ffad4b" stroke-width="2.5" stroke-linecap="round"/></svg></span><span><strong>Game Scam Guard</strong><small>Open product</small></span>
     </button>
     <div class="earth-scan-card earth-scan-one" aria-label="Threats blocked">
       <span class="earth-scan-icon">盾</span><span><small>Threats Blocked</small><strong>12,453</strong><em>REAL-TIME PROTECTION</em></span>
