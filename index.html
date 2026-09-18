@@ -767,6 +767,15 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 .hero-entry.lights-locked .hero-feature-rail .scam-feature>.product-app-icon{filter:brightness(1.2) saturate(1.25) drop-shadow(0 0 20px rgba(255,168,48,.88))!important}
 @media(max-width:760px){.hero-feature-rail .product-app-icon{width:46px!important;height:46px!important;border-radius:12px!important}}
 </style>
+
+<style>
+.hero-feature-rail .gta-feature .gta-guard-mark{width:50px!important;height:50px!important;display:block!important;object-fit:contain!important}
+.hero-feature-rail .gta-feature-label{display:block!important;white-space:nowrap!important}
+.hero-feature-rail .gta-feature-name{color:#19d9f5!important;animation:gta-card-name-pulse 3.6s ease-in-out infinite!important}
+.hero-feature-rail .gta-feature-guard{color:#225cae!important}
+@keyframes gta-card-name-pulse{0%,58%,100%{text-shadow:none;filter:brightness(1)}72%,84%{text-shadow:0 0 8px rgba(27,222,249,.85),0 0 18px rgba(18,151,255,.5);filter:brightness(1.35)}}
+@media (prefers-reduced-motion:reduce){.hero-feature-rail .gta-feature-name{animation:none!important;text-shadow:none!important;filter:none!important}}
+</style>
 </head>
 <body>
 <header class="nav" id="navbar">
@@ -824,7 +833,7 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
   <div class="container">
     <div class="hero-feature-rail" aria-label="MalGuard products">
       <button type="button" onclick="openProduct('malware-ai')" aria-label="Open Malware AI"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="17" y="17" width="30" height="30" rx="6"/><path d="M24 8v9M32 8v9M40 8v9M24 47v9M32 47v9M40 47v9M8 24h9M8 32h9M8 40h9M47 24h9M47 32h9M47 40h9"/><path d="M25 36c5-13 10 8 15-8"/></svg><span>Malware AI</span></button>
-      <button type="button" onclick="openProduct('gta-guard')" aria-label="Open GTA Guard"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 54 15v18c0 13-8 20-22 26C18 53 10 46 10 33V15Z"/><path d="m20 21 12 7 12-7M25 37l7 8 7-8"/></svg><span>GTA Guard</span></button>
+      <button class="gta-feature" type="button" onclick="openProduct('gta-guard')" aria-label="Open GTA Guard"><img class="gta-guard-mark" src="assets/gta-guard-monogram.svg" alt="" aria-hidden="true"><span class="gta-feature-label"><span class="gta-feature-name">GTA</span> <span class="gta-feature-guard">Guard</span></span></button>
       <button class="scam-feature" type="button" onclick="openProduct('game-scam-guard')" aria-label="Open Game Scam Guard"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 54 15v18c0 13-8 20-22 26C18 53 10 46 10 33V15Z"/><path d="M32 21v16M32 45v1"/></svg><span>Game Scam Guard</span></button>
     </div>
   </div>
