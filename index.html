@@ -776,6 +776,24 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 @keyframes gta-card-name-pulse{0%,58%,100%{text-shadow:none;filter:brightness(1)}72%,84%{text-shadow:0 0 8px rgba(27,222,249,.85),0 0 18px rgba(18,151,255,.5);filter:brightness(1.35)}}
 @media (prefers-reduced-motion:reduce){.hero-feature-rail .gta-feature-name{animation:none!important;text-shadow:none!important;filter:none!important}}
 </style>
+
+<style>
+.hero-feature-rail .product-mark{width:50px!important;height:50px!important;overflow:visible!important}
+.hero-feature-rail .product-mark .product-mark-shell{fill:#0c347a!important;stroke:none!important}
+.hero-feature-rail .product-mark .product-mark-accent{fill:#13c8f2!important;stroke:none!important}
+.hero-feature-rail .product-mark--gsg .product-mark-shell{fill:#a61724!important}
+.hero-feature-rail .product-mark--gsg .product-mark-accent{fill:#f2b719!important}
+.hero-feature-rail .product-mark-code{fill:#6bfbff!important;stroke:none!important;font:800 19px/1 Arial,sans-serif!important;letter-spacing:-1px!important;animation:product-code-pulse 3.6s ease-in-out infinite!important}
+.hero-feature-rail .product-mark--gsg .product-mark-code{fill:#fff24a!important}
+.hero-feature-rail .product-name{display:block!important;white-space:nowrap!important}
+.hero-feature-rail .product-name-code{animation:product-code-pulse 3.6s ease-in-out infinite!important}
+.hero-feature-rail .mai-feature .product-name-code,.hero-feature-rail .gta-feature .product-name-code{color:#18d8f5!important}
+.hero-feature-rail .mai-feature .product-name-guard,.hero-feature-rail .gta-feature .product-name-guard{color:#2a64b8!important}
+.hero-feature-rail .scam-feature .product-name-code{color:#ffd339!important}
+.hero-feature-rail .scam-feature .product-name-guard{color:#db3541!important}
+@keyframes product-code-pulse{0%,58%,100%{filter:brightness(1);text-shadow:none}72%,84%{filter:brightness(1.42);text-shadow:0 0 7px currentColor,0 0 16px currentColor}}
+@media (prefers-reduced-motion:reduce){.hero-feature-rail .product-mark-code,.hero-feature-rail .product-name-code{animation:none!important;filter:none!important;text-shadow:none!important}}
+</style>
 </head>
 <body>
 <header class="nav" id="navbar">
@@ -832,9 +850,9 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
   </div>
   <div class="container">
     <div class="hero-feature-rail" aria-label="MalGuard products">
-      <button type="button" onclick="openProduct('malware-ai')" aria-label="Open Malware AI"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="17" y="17" width="30" height="30" rx="6"/><path d="M24 8v9M32 8v9M40 8v9M24 47v9M32 47v9M40 47v9M8 24h9M8 32h9M8 40h9M47 24h9M47 32h9M47 40h9"/><path d="M25 36c5-13 10 8 15-8"/></svg><span>Malware AI</span></button>
-      <button class="gta-feature" type="button" onclick="openProduct('gta-guard')" aria-label="Open GTA Guard"><img class="gta-guard-mark" src="assets/gta-guard-monogram.svg" alt="" aria-hidden="true"><span class="gta-feature-label"><span class="gta-feature-name">GTA</span> <span class="gta-feature-guard">Guard</span></span></button>
-      <button class="scam-feature" type="button" onclick="openProduct('game-scam-guard')" aria-label="Open Game Scam Guard"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 54 15v18c0 13-8 20-22 26C18 53 10 46 10 33V15Z"/><path d="M32 21v16M32 45v1"/></svg><span>Game Scam Guard</span></button>
+      <button class="mai-feature" type="button" onclick="openProduct('malware-ai')" aria-label="Open Malware AI"><svg class="product-mark product-mark--mai" viewBox="0 0 100 100" aria-hidden="true"><path class="product-mark-shell" d="M50 4 88 21v27c0 23-15 39-38 48C27 87 12 71 12 48V21Z"/><path class="product-mark-accent" d="M22 28 50 15l28 13-7 8-21-10-21 10Zm0 26V33l9 8v17l19 19 19-19V41l9-8v21c0 14-9 25-28 34-19-9-28-20-28-34Z"/><text class="product-mark-code" x="50" y="59" text-anchor="middle">MAI</text></svg><span class="product-name"><span class="product-name-code">Malware</span> <span class="product-name-guard">AI</span></span></button>
+      <button class="gta-feature" type="button" onclick="openProduct('gta-guard')" aria-label="Open GTA Guard"><svg class="product-mark product-mark--gta" viewBox="0 0 100 100" aria-hidden="true"><path class="product-mark-shell" d="M50 4 88 21v27c0 23-15 39-38 48C27 87 12 71 12 48V21Z"/><path class="product-mark-accent" d="M22 28 50 15l28 13-7 8-21-10-21 10Zm0 26V33l9 8v17l19 19 19-19V41l9-8v21c0 14-9 25-28 34-19-9-28-20-28-34Z"/><text class="product-mark-code" x="50" y="59" text-anchor="middle">GTA</text></svg><span class="product-name"><span class="product-name-code">GTA</span> <span class="product-name-guard">Guard</span></span></button>
+      <button class="scam-feature" type="button" onclick="openProduct('game-scam-guard')" aria-label="Open Game Scam Guard"><svg class="product-mark product-mark--gsg" viewBox="0 0 100 100" aria-hidden="true"><path class="product-mark-shell" d="M50 4 88 21v27c0 23-15 39-38 48C27 87 12 71 12 48V21Z"/><path class="product-mark-accent" d="M22 28 50 15l28 13-7 8-21-10-21 10Zm0 26V33l9 8v17l19 19 19-19V41l9-8v21c0 14-9 25-28 34-19-9-28-20-28-34Z"/><text class="product-mark-code" x="50" y="59" text-anchor="middle">GSG</text></svg><span class="product-name"><span class="product-name-code">Game Scam</span> <span class="product-name-guard">Guard</span></span></button>
     </div>
   </div>
 </section><div class="trust-bar"><div class="container trust-grid"><div class="trust-item"><div class="trust-number">BUILT FOR</div><div class="trust-label">Gamers</div></div><div class="trust-item"><div class="trust-number">FOCUS</div><div class="trust-label">Game Security</div></div><div class="trust-item"><div class="trust-number">FIRST PLATFORM</div><div class="trust-label">GTA 5</div></div><div class="trust-item"><div class="trust-number">EXPANDING</div><div class="trust-label">More Games</div></div></div></div>
