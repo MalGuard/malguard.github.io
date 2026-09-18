@@ -794,6 +794,45 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
 @keyframes product-code-pulse{0%,58%,100%{filter:brightness(1);text-shadow:none}72%,84%{filter:brightness(1.42);text-shadow:0 0 7px currentColor,0 0 16px currentColor}}
 @media (prefers-reduced-motion:reduce){.hero-feature-rail .product-mark-code,.hero-feature-rail .product-name-code{animation:none!important;filter:none!important;text-shadow:none!important}}
 </style>
+
+<style id="product-code-logo-sync">
+/* Keep product codes and their names in the exact same glow rhythm as the hero monogram. */
+.hero-feature-rail .product-mark-code,
+.hero-feature-rail .product-name-code {
+  --product-pulse-rgb: 21, 211, 255;
+  animation: product-code-sync 2.65s ease-in-out infinite !important;
+}
+.hero-feature-rail .scam-feature .product-mark-code,
+.hero-feature-rail .scam-feature .product-name-code {
+  --product-pulse-rgb: 255, 211, 57;
+}
+@keyframes product-code-sync {
+  0%, 24%, 100% {
+    filter: brightness(1) saturate(1) drop-shadow(0 0 0 rgba(var(--product-pulse-rgb), 0));
+    text-shadow: none;
+  }
+  34% {
+    filter: brightness(1.67) saturate(1.37) drop-shadow(0 0 10px rgba(var(--product-pulse-rgb), .72));
+    text-shadow: 0 0 10px rgba(var(--product-pulse-rgb), .72);
+  }
+  44% {
+    filter: brightness(1.92) saturate(1.48) drop-shadow(0 0 15px rgba(var(--product-pulse-rgb), .92));
+    text-shadow: 0 0 15px rgba(var(--product-pulse-rgb), .92);
+  }
+  56% {
+    filter: brightness(1) saturate(1) drop-shadow(0 0 0 rgba(var(--product-pulse-rgb), 0));
+    text-shadow: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-feature-rail .product-mark-code,
+  .hero-feature-rail .product-name-code {
+    animation: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+  }
+}
+</style>
 </head>
 <body>
 <header class="nav" id="navbar">
