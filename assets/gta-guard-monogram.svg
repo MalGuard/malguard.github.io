@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+<title>GTA Guard</title>
+<defs>
+  <linearGradient id="shield" x1="76" y1="480" x2="438" y2="52" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#061743"/><stop offset="1" stop-color="#164eac"/>
+  </linearGradient>
+  <linearGradient id="letters" x1="120" y1="384" x2="390" y2="136" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#09aef5"/><stop offset=".55" stop-color="#14d6f4"/><stop offset="1" stop-color="#4df8e9"/>
+  </linearGradient>
+  <filter id="letterGlow" x="-40%" y="-40%" width="180%" height="180%">
+    <feGaussianBlur stdDeviation="3" result="soft"/><feMerge><feMergeNode in="soft"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <style>
+    .mark-letters{animation:gtaPulse 3.6s ease-in-out infinite;transform-origin:256px 256px}
+    @keyframes gtaPulse{0%,58%,100%{filter:none;opacity:.88}72%,84%{filter:url(#letterGlow);opacity:1}}
+    @media (prefers-reduced-motion:reduce){.mark-letters{animation:none;opacity:1}}
+  </style>
+</defs>
+<path fill="url(#shield)" d="M256 31 439 116v124c0 111-71 191-183 241C144 431 73 351 73 240V116Zm0 59-128 60v90c0 75 44 136 128 184 84-48 128-109 128-184v-90Z"/>
+<g class="mark-letters" fill="url(#letters)">
+  <path d="M109 184 210 145v44l-55 22v90l55 22v44l-101-39Z"/>
+  <path d="M177 166h160v45h-55v179l-26 21-26-21V211h-53Z"/>
+  <path d="m331 390 42-206h39l43 206h-46l-8-40h-47l-8 40Zm59-84h18l-9-49Z"/>
+</g>
+</svg>
