@@ -26,7 +26,7 @@ let history = [];
 let artifacts = [];
 let attachments = [];
 let activeController = null;
-let modelCache = { heavy: null, fast: null };
+let modelCache = { heavy: null, fast: null, gemini: null };
 let localGenerator = null;
 let localLoading = false;
 
@@ -253,7 +253,7 @@ async function resolveModel(tier) {
   let models = [];
   try { models = await puter.ai.listModels(); } catch (e) {}
   const ids = new Set(models.map(m => m.id));
-  const candidates = tier === "heavy"
+  const candidates = tier === "gemini"\n    ? ["google/gemini-3.8-flash", "gemini-3.8-flash"]\n    : tier === "heavy"
     ? ["gpt-5.6-luna", "openai/gpt-5.6-luna", "gpt-5.4", "openai/gpt-5.4", "google/gemini-3.8-flash"]
     : ["gpt-5-nano", "openai/gpt-5-nano", "gpt-5-mini", "openai/gpt-5-mini", "google/gemini-3.8-flash"];
   modelCache[tier] = candidates.find(x => ids.has(x)) || candidates[0];
