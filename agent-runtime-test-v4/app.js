@@ -995,6 +995,23 @@ if (window.puter && puter.auth && puter.auth.isSignedIn && puter.auth.isSignedIn
   setStatus("Connected", "ok");
 }
 
+
+// Stable two-mode tabs. Both modes share the same real agent runtime.
+let activeMode = "general";
+function setAppMode(mode) {
+  activeMode = mode === "malware" ? "malware" : "general";
+  const g = $("tabGeneral"), m = $("tabMalware"), intro = $("malwareIntro");
+  if (g) g.classList.toggle("active", activeMode === "general");
+  if (m) m.classList.toggle("active", activeMode === "malware");
+  if (intro) intro.classList.toggle("hidden", activeMode !== "malware");
+  if ($("prompt")) $("prompt").placeholder = activeMode === "malware"
+    ? "لینک، برنامه، مود، علائم یا نتیجه اسکن را بفرست…"
+    : "پیام بده...";
+}
+if ($("tabGeneral")) $("tabGeneral").addEventListener("click", () => setAppMode("general"));
+if ($("tabMalware")) $("tabMalware").addEventListener("click", () => setAppMode("malware"));
+setAppMode("general");
+
 bubble("v4 آماده است: 🎙 دیکته فقط صدا را به متن تبدیل می‌کند؛ Voice مکالمه‌ی زنده و خودکار با MalGuard است.", "system");
 
 
