@@ -1,4 +1,4 @@
-const API="https://malware-d4xnnwc2u-mcazarderakhsh-4187.vercel.app/api/chat";
+const API="https://malware-ai-gray.vercel.app/api/chat";
 const input=document.getElementById("prompt"),send=document.getElementById("send"),out=document.getElementById("output");
 const messages=[];
 async function chat(){
