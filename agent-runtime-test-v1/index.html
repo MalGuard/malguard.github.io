@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071012">
+<title>MalGuard Agent Runtime Test</title>
+<script src="https://js.puter.com/v2/"></script>
+<script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
+<style>
+:root{--bg:#071012;--p:#0d191c;--p2:#132326;--text:#eef8f6;--muted:#8da7a2;--a:#54e7d6;--d:#00211d;--g:#72e6ad;--y:#ffc66d;--r:#ff7b82}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Arial,sans-serif}
+button,textarea,select,input{font:inherit}.app{max-width:760px;margin:auto;min-height:100vh;padding:calc(env(safe-area-inset-top,0px)+14px) 14px calc(env(safe-area-inset-bottom,0px)+18px);background:radial-gradient(circle at 8% 0%,rgba(84,231,214,.10),transparent 28%),var(--bg)}
+.top{display:flex;gap:10px;justify-content:space-between;align-items:center}.brand h1{margin:0;color:var(--a);font-size:26px}.brand p{margin:4px 0 0;color:var(--muted);font-size:11px}.pill{font-size:10px;padding:7px 9px;border-radius:999px;background:var(--p2);color:var(--y)}.pill.ok{color:var(--g)}.pill.bad{color:var(--r)}
+.controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin:12px 0}.ctl{background:var(--p);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:8px}.ctl label{display:block;color:var(--muted);font-size:9px;margin-bottom:4px}.ctl select,.ctl button{width:100%;border:0;background:transparent;color:var(--text);font-size:12px;font-weight:800}.toggle{display:flex;align-items:center;justify-content:space-between;gap:6px}.toggle input{accent-color:var(--a)}
+.connect{background:var(--p);border:1px solid rgba(255,255,255,.06);border-radius:15px;padding:10px;margin-bottom:9px}.connect button{width:100%;padding:10px;border:0;border-radius:11px;background:var(--a);color:var(--d);font-weight:1000}
+.quick{display:flex;gap:7px;overflow:auto;margin-bottom:9px}.quick button{flex:0 0 auto;border:1px solid rgba(255,255,255,.07);background:var(--p2);color:var(--text);padding:8px 10px;border-radius:999px;font-size:10px}
+.chat{height:45vh;min-height:330px;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:2px}.msg{max-width:90%;padding:12px 13px;border-radius:18px;white-space:pre-wrap;line-height:1.58;font-size:14px}.user{align-self:flex-start;background:var(--a);color:var(--d);border-bottom-left-radius:6px}.assistant{align-self:flex-end;background:var(--p2);border-bottom-right-radius:6px}.system{align-self:center;background:#101d1f;color:var(--muted);border:1px dashed rgba(255,255,255,.08);max-width:96%;font-size:11px}
+.progress{max-width:92%;align-self:flex-end;color:#82cfc6;font-size:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;padding:2px 7px}.progress::before{content:"⌁ MALGUARD // AGENT  "}
+.artifacts{display:flex;gap:7px;overflow:auto;margin:8px 0}.artifact{flex:0 0 auto;background:var(--p);border:1px solid rgba(84,231,214,.2);padding:9px;border-radius:13px;font-size:10px}.artifact button{margin-top:6px;border:0;border-radius:9px;padding:7px 9px;background:var(--a);color:var(--d);font-weight:900}
+.composer{background:#091416;border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:8px}.composer textarea{width:100%;min-height:54px;max-height:145px;resize:none;border:0;outline:0;background:transparent;color:var(--text);padding:7px;line-height:1.5}.bar{display:flex;justify-content:space-between;gap:8px;align-items:center}.tools{display:flex;gap:6px}.ico{width:40px;height:40px;border:1px solid rgba(255,255,255,.07);background:var(--p2);color:var(--text);border-radius:12px}.send{width:44px;height:44px;border:0;border-radius:14px;background:var(--a);color:var(--d);font-size:20px;font-weight:1000}.send.stop{background:var(--r);color:#250006}
+.files{display:flex;gap:7px;overflow:auto;margin:7px 0}.file{flex:0 0 auto;background:var(--p2);padding:7px 9px;border-radius:11px;font-size:10px}
+.sheet{position:fixed;inset:auto 0 0;background:#0a1417;border-top:1px solid rgba(255,255,255,.09);border-radius:22px 22px 0 0;padding:16px max(16px,calc((100vw - 760px)/2 + 16px)) calc(env(safe-area-inset-bottom,0px)+16px);z-index:20;box-shadow:0 -20px 60px #000a}.sheet.hidden,.modal.hidden,.hidden{display:none!important}.sheet h3{margin:0 0 10px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.grid button,.close{border:1px solid rgba(255,255,255,.07);background:var(--p2);color:var(--text);border-radius:13px;padding:11px 6px}.close{width:100%;margin-top:9px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:30;padding:calc(env(safe-area-inset-top,0px)+16px) 12px calc(env(safe-area-inset-bottom,0px)+16px)}.modalCard{height:100%;background:#0b1518;border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:10px;display:flex;flex-direction:column}.modalTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.modal iframe{flex:1;width:100%;border:0;border-radius:12px;background:white}.modal button{border:0;border-radius:10px;padding:8px 10px;background:var(--p2);color:var(--text)}
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="top">
+    <div class="brand"><h1>MalGuard Agent</h1><p>Runtime Test v1 • Engine before UI</p></div>
+    <div id="status" class="pill">Not connected</div>
+  </div>
+
+  <div class="controls">
+    <div class="ctl"><label>THINKING</label><select id="thinking">
+      <option value="off">Off</option><option value="instant">Instant</option><option value="standard" selected>Standard</option><option value="high">High</option><option value="deep">Deep</option><option value="auto">Auto</option>
+    </select></div>
+    <div class="ctl"><label>ENGINE</label><select id="engine">
+      <option value="auto">Auto</option><option value="heavy">Heavy</option><option value="fast">Fast</option><option value="local">Local</option>
+    </select></div>
+    <div class="ctl"><label>TOOLS</label><div class="toggle"><span style="font-size:11px;font-weight:800">Web Search</span><input id="search" type="checkbox"></div></div>
+  </div>
+
+  <div id="connectBox" class="connect"><button id="connect">🔐 Connect AI</button></div>
+
+  <div class="quick">
+    <button data-prompt="یک ماشین حساب زیبا و واکنش‌گرا بساز. پروژه را اجرا و تست کن، خطاها را اصلاح کن و فایل ZIP بده.">🧮 Build Calculator</button>
+    <button data-prompt="یک صفحه تایمر مطالعه پومودورو بساز. پروژه را اجرا و تست کن و ZIP بده.">⏱ Build Pomodoro</button>
+    <button data-prompt="آخرین خبر مهم هوش مصنوعی امروز را با جست‌وجوی وب خلاصه کن و منبع بده.">🌐 Search Test</button>
+  </div>
+
+  <div id="chat" class="chat"></div>
+  <div id="progress" class="progress hidden"></div>
+  <div id="artifacts" class="artifacts"></div>
+  <div id="files" class="files"></div>
+
+  <div class="composer">
+    <textarea id="prompt" placeholder="مثلاً: یک برنامه ماشین حساب بساز و فایل ZIP بده..."></textarea>
+    <div class="bar">
+      <div class="tools">
+        <button class="ico" id="plus">＋</button>
+        <button class="ico" id="mic">🎤</button>
+        <button class="ico" id="preview">▶</button>
+      </div>
+      <button id="send" class="send">➤</button>
+    </div>
+  </div>
+</main>
+
+<div id="sheet" class="sheet hidden">
+  <h3>Tools</h3>
+  <div class="grid">
+    <button id="upload">📄<br>Import Text</button>
+    <button id="localInstall">📱<br>Install Local</button>
+    <button id="clearProject">🗑️<br>Clear Project</button>
+  </div>
+  <button id="closeSheet" class="close">بستن</button>
+</div>
+<input id="fileInput" type="file" multiple accept=".txt,.md,.json,.csv,.js,.ts,.html,.css,.py,.java,.kt,.xml,.yaml,.yml,text/*,application/json">
+
+<div id="previewModal" class="modal hidden">
+  <div class="modalCard">
+    <div class="modalTop"><b>Sandbox Preview</b><button id="closePreview">بستن</button></div>
+    <iframe id="previewFrame" sandbox="allow-scripts"></iframe>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const THINKING={
+  off:{steps:1,effort:"none",tools:false},
+  instant:{steps:2,effort:"minimal",tools:true},
+  standard:{steps:6,effort:"medium",tools:true},
+  high:{steps:10,effort:"high",tools:true},
+  deep:{steps:18,effort:"xhigh",tools:true},
+  auto:{steps:8,effort:"medium",tools:true}
+};
+const SYSTEM=\`You are MalGuard Agent, a helpful general-purpose AI assistant and project builder.
+Answer in the user's language.
+When the user asks you to BUILD, CREATE, MAKE or CODE an app, site, game, tool or project, do not merely print code. Use the project tools:
+1. project.write_files to create the actual files.
+2. project.validate_web to run and inspect the project when it is a web project.
+3. If validation reports errors, fix files and validate again.
+4. project.export_zip when the project is ready, so the user receives a real downloadable ZIP.
+You may explain briefly, but tools should do the work.
+When web search is enabled and the request needs fresh facts, use web search.
+For cybersecurity, stay defensive. Do not build malware, credential theft, persistence, evasion, or offensive tooling.
+Never claim a tool ran unless you actually called it.\`;
+
+let workspace=new Map();
+let history=[];
+let artifacts=[];
+let activeController=null;
+let localGenerator=null;
+let localLoading=false;
+let modelCache={heavy:null,fast:null};
+
+const TOOL_DEFS=[
+ {type:"function",function:{name:"project.write_files",description:"Create or replace multiple project text/code files.",parameters:{type:"object",required:["files"],properties:{files:{type:"array",items:{type:"object",required:["path","content"],properties:{path:{type:"string"},content:{type:"string"}}}}}}}},
+ {type:"function",function:{name:"project.read_file",description:"Read one project file.",parameters:{type:"object",required:["path"],properties:{path:{type:"string"}}}}},
+ {type:"function",function:{name:"project.list_files",description:"List project files.",parameters:{type:"object",properties:{}}}},
+ {type:"function",function:{name:"project.validate_web",description:"Run the current HTML/CSS/JavaScript project in an isolated no-network sandbox and return console errors/logs.",parameters:{type:"object",properties:{htmlPath:{type:"string"},cssPath:{type:"string"},jsPath:{type:"string"}}}}},
+ {type:"function",function:{name:"project.export_zip",description:"Package the current project into a downloadable ZIP file.",parameters:{type:"object",properties:{filename:{type:"string"}}}}}
+];
+
+function bubble(text,type){
+  const d=document.createElement("div");d.className="msg "+type;d.textContent=text;$("chat").appendChild(d);$("chat").scrollTop=$("chat").scrollHeight;return d;
+}
+function progress(text){
+  $("progress").textContent=text;$("progress").classList.toggle("hidden",!text);
+}
+function setStatus(text,state=""){
+  $("status").textContent=text;$("status").className="pill "+state;
+}
+function renderFiles(){
+  $("files").innerHTML="";
+  [...workspace.keys()].sort().forEach(name=>{const d=document.createElement("div");d.className="file";d.textContent="📄 "+name;$("files").appendChild(d)});
+}
+function renderArtifacts(){
+  $("artifacts").innerHTML="";
+  artifacts.forEach(a=>{
+    const d=document.createElement("div");d.className="artifact";d.innerHTML="<b>📦 "+a.filename+"</b><br>"+Math.ceil(a.blob.size/1024)+" KB";
+    const b=document.createElement("button");b.textContent="Download";b.onclick=()=>{const url=URL.createObjectURL(a.blob);const x=document.createElement("a");x.href=url;x.download=a.filename;x.click();setTimeout(()=>URL.revokeObjectURL(url),3000)};
+    d.appendChild(b);$("artifacts").appendChild(d);
+  });
+}
+function safePath(path){
+  if(!path||path.startsWith("/")||path.includes(".."))throw new Error("Invalid project path");
+  return path;
+}
+async function toolExecute(call,signal){
+  const name=call.name,args=call.arguments||{};
+  if(signal.aborted)throw new DOMException("Cancelled","AbortError");
+  if(name==="project.write_files"){
+    progress("Creating project files");
+    if(!Array.isArray(args.files)||!args.files.length)throw new Error("No files supplied");
+    args.files.forEach(f=>workspace.set(safePath(f.path),String(f.content??"")));
+    renderFiles();
+    return {written:args.files.map(f=>f.path),files:[...workspace.keys()]};
+  }
+  if(name==="project.read_file"){
+    progress("Reading project file");
+    const path=safePath(args.path);if(!workspace.has(path))throw new Error("File not found: "+path);
+    return {path,content:workspace.get(path)};
+  }
+  if(name==="project.list_files"){
+    progress("Checking project files");
+    return {files:[...workspace.keys()].sort()};
+  }
+  if(name==="project.validate_web"){
+    progress("Running project in sandbox");
+    return await runSandbox(args,signal);
+  }
+  if(name==="project.export_zip"){
+    progress("Packaging ZIP");
+    const data={};workspace.forEach((content,path)=>data[path]=fflate.strToU8(content));
+    const bytes=fflate.zipSync(data,{level:6});
+    const filename=(args.filename||"malguard-project.zip").replace(/[^a-zA-Z0-9._-]/g,"-");
+    const blob=new Blob([bytes],{type:"application/zip"});
+    artifacts.push({filename,blob});renderArtifacts();
+    return {artifact:{filename,bytes:blob.size},files:[...workspace.keys()]};
+  }
+  throw new Error("Unknown tool: "+name);
+}
+function makeWebDoc({htmlPath="index.html",cssPath="style.css",jsPath="app.js"}={}){
+  const html=workspace.get(htmlPath)||"<!doctype html><html><head></head><body><h1>Missing index.html</h1></body></html>";
+  const css=workspace.get(cssPath)||"";
+  const js=workspace.get(jsPath)||"";
+  const csp='<meta http-equiv="Content-Security-Policy" content="default-src \\'none\\'; connect-src \\'none\\'; img-src data: blob:; media-src data: blob:; font-src data:; style-src \\'unsafe-inline\\'; script-src \\'unsafe-inline\\';">';
+  const style="<style>"+css.replace(/<\\/style/gi,"<\\\\/style")+"</style>";
+  const script="<script>"+js.replace(/<\\/script/gi,"<\\\\/script")+"<\\/script>";
+  let out=html;
+  out=/<\\/head>/i.test(out)?out.replace(/<\\/head>/i,csp+style+"</head>"):csp+style+out;
+  out=/<\\/body>/i.test(out)?out.replace(/<\\/body>/i,script+"</body>"):out+script;
+  return out;
+}
+async function runSandbox(args,signal){
+  return new Promise((resolve,reject)=>{
+    const frame=document.createElement("iframe");
+    frame.setAttribute("sandbox","allow-scripts");frame.style.display="none";
+    const id="run-"+Date.now()+"-"+Math.random().toString(36).slice(2);
+    const logs=[],errors=[];
+    const userDoc=makeWebDoc(args);
+    const bridge='<script>(()=>{const id='+JSON.stringify(id)+';const send=(type,p={})=>parent.postMessage({__mg:id,type,...p},"*");["log","warn","error","info"].forEach(level=>{const old=console[level];console[level]=(...a)=>{send("console",{level,args:a.map(x=>{try{return typeof x==="string"?x:JSON.stringify(x)}catch{return String(x)}})});old&&old(...a)}});addEventListener("error",e=>send("error",{message:e.message||"Runtime error"}));addEventListener("unhandledrejection",e=>send("error",{message:String(e.reason||"Promise rejection")}));setTimeout(()=>send("done"),250)})();<\\/script>';
+    frame.srcdoc=userDoc.replace(/<body([^>]*)>/i,'<body$1>'+bridge);
+    const cleanup=()=>{removeEventListener("message",onMsg);signal.removeEventListener("abort",onAbort);frame.remove()};
+    const onAbort=()=>{cleanup();reject(new DOMException("Cancelled","AbortError"))};
+    const onMsg=e=>{
+      if(e.source!==frame.contentWindow||e.data?.__mg!==id)return;
+      if(e.data.type==="console")logs.push({level:e.data.level,args:e.data.args});
+      if(e.data.type==="error")errors.push(e.data.message);
+      if(e.data.type==="done"){cleanup();resolve({ok:errors.length===0,logs,errors})}
+    };
+    addEventListener("message",onMsg);signal.addEventListener("abort",onAbort,{once:true});document.body.appendChild(frame);
+    setTimeout(()=>{if(frame.isConnected){cleanup();resolve({ok:errors.length===0,logs,errors,warning:"sandbox timeout"})}},4500);
+  });
+}
+async function connectAI(){
+  if(!window.puter)throw new Error("Puter.js failed to load");
+  if(puter.auth.isSignedIn())return true;
+  await puter.auth.signIn({attempt_temp_user_creation:true});
+  return puter.auth.isSignedIn();
+}
+async function listModels(){
+  try{return await puter.ai.listModels()}catch{return []}
+}
+async function resolveModel(tier){
+  if(modelCache[tier])return modelCache[tier];
+  const models=await listModels();const ids=new Set(models.map(m=>m.id));
+  const candidates=tier==="heavy"
+    ?["gpt-5.6-luna","openai/gpt-5.6-luna","gpt-5.4","openai/gpt-5.4","gpt-5.2"]
+    :["gpt-5-nano","openai/gpt-5-nano","gpt-5-mini","openai/gpt-5-mini"];
+  modelCache[tier]=candidates.find(x=>ids.has(x))||candidates[0];
+  return modelCache[tier];
+}
+function chooseTier(thinking,engine){
+  if(engine!=="auto")return engine;
+  if(thinking==="off"||thinking==="instant")return "fast";
+  return "heavy";
+}
+async function ensureLocal(){
+  if(localGenerator)return localGenerator;
+  if(localLoading)throw new Error("Local model is still loading");
+  localLoading=true;
+  progress("Downloading Local model…");
+  try{
+    const mod=await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/+esm");
+    const options={dtype:"q4",progress_callback:p=>{if(p?.progress!=null)progress("Downloading Local model… "+Math.round(p.progress)+"%")}};
+    if(navigator.gpu)options.device="webgpu";
+    localGenerator=await mod.pipeline("text-generation","onnx-community/Qwen2.5-0.5B-Instruct",options);
+    progress("Local model ready");
+    setTimeout(()=>progress(""),1200);
+    return localGenerator;
+  }finally{localLoading=false}
+}
+async function callLocal(messages,signal){
+  const gen=await ensureLocal();if(signal.aborted)throw new DOMException("Cancelled","AbortError");
+  const out=await gen(messages,{max_new_tokens:320,do_sample:false});if(signal.aborted)throw new DOMException("Cancelled","AbortError");
+  const g=out?.[0]?.generated_text;return Array.isArray(g)?(g.at(-1)?.content||""):(typeof g==="string"?g:"");
+}
+function toPuterMessages(messages){
+  return messages.map(m=>{
+    if(m.role==="assistant"&&m.toolCalls)return{role:"assistant",content:m.content||null,tool_calls:m.toolCalls.map(c=>({id:c.id,type:"function",function:{name:c.name,arguments:JSON.stringify(c.arguments||{})}}))};
+    if(m.role==="tool")return{role:"tool",tool_call_id:m.toolCallId,name:m.name,content:m.content};
+    return{role:m.role,content:m.content};
+  });
+}
+async function callPuter(messages,{tier,thinking,toolsEnabled,searchEnabled,signal,onToken}){
+  const model=await resolveModel(tier);
+  const tools=[];
+  if(searchEnabled&&tier==="heavy")tools.push({type:"web_search"});
+  if(toolsEnabled)tools.push(...TOOL_DEFS);
+  const options={model,normalize:true,stream:true,reasoning_effort:THINKING[thinking].effort};
+  if(tools.length)options.tools=tools;
+  const stream=await raceAbort(puter.ai.chat(toPuterMessages(messages),options),signal);
+  let text="",toolCalls=[];
+  for await(const part of stream){
+    if(signal.aborted)throw new DOMException("Cancelled","AbortError");
+    if(part?.type==="error")throw new Error(part.message||"AI stream error");
+    if(part?.type==="text"&&part.text){text+=part.text;onToken(part.text)}
+    if(part?.type==="tool_use")toolCalls.push({id:part.id,name:part.name,arguments:part.input||{}});
+  }
+  return{text,toolCalls,model,tier};
+}
+function raceAbort(promise,signal){
+  if(signal.aborted)return Promise.reject(new DOMException("Cancelled","AbortError"));
+  return new Promise((resolve,reject)=>{
+    const a=()=>reject(new DOMException("Cancelled","AbortError"));signal.addEventListener("abort",a,{once:true});
+    Promise.resolve(promise).then(v=>{signal.removeEventListener("abort",a);resolve(v)},e=>{signal.removeEventListener("abort",a);reject(e)});
+  });
+}
+async function runAgent(userText){
+  if(activeController){activeController.abort();return}
+  const thinking=$("thinking").value,engine=$("engine").value,conf=THINKING[thinking],searchEnabled=$("search").checked;
+  if(engine!=="local"&&!puter.auth.isSignedIn()){bubble("اول Connect AI را بزن.","system");return}
+  activeController=new AbortController();const signal=activeController.signal;
+  $("send").textContent="■";$("send").classList.add("stop");
+  $("prompt").value="";
+  bubble(userText,"user");history.push({role:"user",content:userText});
+  const assistant=bubble("","assistant");
+  let transcript=[{role:"system",content:SYSTEM},...history.slice(-18)];
+  let finalText="";
+  try{
+    for(let step=0;step<conf.steps;step++){
+      if(signal.aborted)throw new DOMException("Cancelled","AbortError");
+      const tier=chooseTier(thinking,engine);
+      if(tier==="local"){
+        progress("Running Local model");
+        const text=await callLocal(transcript,signal);assistant.textContent+=text;finalText+=text;break;
+      }
+      progress(searchEnabled&&tier==="heavy"?"Thinking · Web search enabled":"Thinking");
+      let response;
+      try{
+        response=await callPuter(transcript,{tier,thinking,toolsEnabled:conf.tools,searchEnabled,signal,onToken:t=>{assistant.textContent+=t;finalText+=t;$("chat").scrollTop=$("chat").scrollHeight}});
+      }catch(e){
+        if(tier==="heavy"&&engine==="auto"){
+          progress("Heavy failed · Trying Fast");
+          response=await callPuter(transcript,{tier:"fast",thinking,toolsEnabled:conf.tools,searchEnabled:false,signal,onToken:t=>{assistant.textContent+=t;finalText+=t}});
+        }else throw e;
+      }
+      if(!response.toolCalls.length||!conf.tools)break;
+      transcript.push({role:"assistant",content:response.text||"",toolCalls:response.toolCalls});
+      for(const call of response.toolCalls){
+        const result=await toolExecute(call,signal);
+        transcript.push({role:"tool",name:call.name,toolCallId:call.id,content:JSON.stringify(result)});
+      }
+    }
+    history.push({role:"assistant",content:finalText||"Done"});
+    progress("Done");setTimeout(()=>progress(""),900);setStatus("Ready","ok");
+  }catch(e){
+    if(e?.name==="AbortError"){progress("Stopped");bubble("متوقف شد.","system");setStatus("Stopped","")}
+    else{progress("");bubble("خطا: "+(e?.message||e),"system");setStatus("Error","bad")}
+  }finally{
+    activeController=null;$("send").textContent="➤";$("send").classList.remove("stop");
+  }
+}
+$("connect").onclick=async()=>{
+  $("connect").disabled=true;setStatus("Connecting");
+  try{const ok=await connectAI();if(ok){$("connectBox").classList.add("hidden");setStatus("Connected","ok");bubble("AI متصل شد. حالا می‌تونی موتور رو تست کنی.","system")}}
+  catch(e){setStatus("Not connected","bad");bubble("اتصال انجام نشد: "+(e?.message||e),"system")}
+  finally{$("connect").disabled=false}
+};
+if(window.puter&&puter.auth?.isSignedIn?.()){$("connectBox").classList.add("hidden");setStatus("Connected","ok")}
+$("send").onclick=()=>{if(activeController){activeController.abort();return}const t=$("prompt").value.trim();if(t)runAgent(t)};
+$("prompt").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("send").click()}};
+document.querySelectorAll("[data-prompt]").forEach(b=>b.onclick=()=>{$("prompt").value=b.dataset.prompt;$("send").click()});
+$("plus").onclick=()=>$("sheet").classList.remove("hidden");$("closeSheet").onclick=()=>$("sheet").classList.add("hidden");
+$("upload").onclick=()=>{$("sheet").classList.add("hidden");$("fileInput").click()};
+$("fileInput").onchange=async e=>{for(const f of [...e.target.files]){try{workspace.set(safePath(f.name),await f.text())}catch{}}renderFiles()};
+$("clearProject").onclick=()=>{workspace.clear();artifacts=[];renderFiles();renderArtifacts();$("sheet").classList.add("hidden")};
+$("localInstall").onclick=async()=>{try{await ensureLocal();$("engine").value="local";bubble("Local آماده شد. این حالت ابزارهای پروژه و Search ندارد و فقط برای چت آفلاین/پشتیبان است.","system")}catch(e){bubble("Local load error: "+(e?.message||e),"system")}};
+$("mic").onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){bubble("Voice dictation در این مرورگر موجود نیست.","system");return}const r=new SR();r.lang="fa-IR";r.onresult=e=>$("prompt").value+=( $("prompt").value?" ":"")+e.results[0][0].transcript;r.start()};
+$("preview").onclick=()=>{if(!workspace.has("index.html")){bubble("هنوز index.html ساخته نشده.","system");return}$("previewFrame").srcdoc=makeWebDoc({});$("previewModal").classList.remove("hidden")};
+$("closePreview").onclick=()=>$("previewModal").classList.add("hidden");
+bubble("نسخه‌ی تست موتور آماده است. برای تست واقعی، Connect AI را بزن و بعد «Build Calculator» را امتحان کن.","system");
+</script>
+</body>
+</html>
