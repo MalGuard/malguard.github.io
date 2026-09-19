@@ -26,6 +26,7 @@ let history = [];
 let artifacts = [];
 let attachments = [];
 let activeController = null;
+let activeMode = "general";
 let modelCache = { heavy: null, fast: null, gemini: null };
 let localGenerator = null;
 let localLoading = false;
@@ -426,7 +427,10 @@ async function runAgent(userText) {
 
   const assistant = bubble("", "assistant");
   let finalText = "";
-  let transcript = [{ role: "system", content: SYSTEM }].concat(history.slice(-18));
+  const modeSystem = activeMode === "malware"
+    ? SYSTEM + " You are in Malware AI mode. Act as a defensive cybersecurity and malware-analysis assistant. Help interpret MalGuard scanner evidence, suspicious links/apps/mods, infection symptoms, screenshots and code. Never pretend to scan or execute something without scanner evidence. When scanner evidence is provided, summarize it as a clear security card with File, Risk, Reasons and Result."
+    : SYSTEM + " You are in General Chat mode. Help with general questions, learning, writing, coding, reasoning and projects.";
+  let transcript = [{ role: "system", content: modeSystem }].concat(history.slice(-18));
 
   try {
     const media = attachments.filter(a => a.url);
@@ -897,6 +901,17 @@ function activateVisualSession() {
   $("cameraInput").click();
   bubble("Visual Session فعلاً Beta است؛ یک عکس زنده از دوربین می‌گیرد و برای Vision ضمیمه می‌کند.", "system");
 }
+
+function setAppMode(mode) {
+  activeMode = mode === "malware" ? "malware" : "general";
+  $("tabGeneral").classList.toggle("active", activeMode === "general");
+  $("tabMalware").classList.toggle("active", activeMode === "malware");
+  $("malwareIntro").classList.toggle("hidden", activeMode !== "malware");
+  $("prompt").placeholder = activeMode === "malware" ? "لینک، برنامه، مود، علائم یا نتیجه اسکن را بفرست…" : "پیام بده...";
+}
+$("tabGeneral").onclick = () => setAppMode("general");
+$("tabMalware").onclick = () => setAppMode("malware");
+setAppMode("general");
 
 $("connect").onclick = async () => {
   $("connect").disabled = true;
