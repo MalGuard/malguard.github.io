@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071012">
+<title>MalGuard Agent Test v2</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://js.puter.com/v2/"></script>
+<script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div><h1>MalGuard Agent</h1><p>Engine Test v2</p></div>
+    <span id="status" class="pill">Not connected</span>
+  </header>
+
+  <section class="controls">
+    <label>Thinking<select id="thinking">
+      <option value="off">Off</option>
+      <option value="instant">Instant</option>
+      <option value="standard" selected>Standard</option>
+      <option value="high">High</option>
+      <option value="deep">Deep</option>
+      <option value="auto">Auto</option>
+    </select></label>
+    <label>Engine<select id="engine">
+      <option value="auto">Auto</option>
+      <option value="heavy">Heavy</option>
+      <option value="fast">Fast</option>
+      <option value="local">Local</option>
+    </select></label>
+    <label class="searchLabel">Web Search<input id="search" type="checkbox"></label>
+  </section>
+
+  <section id="connectBox" class="connect"><button id="connect">🔐 Connect AI</button></section>
+
+  <section class="quick">
+    <button data-prompt="یک ماشین حساب زیبا و واکنش‌گرا بساز. پروژه را اجرا و تست کن، خطاها را اصلاح کن و فایل ZIP بده.">🧮 Build Calculator</button>
+    <button data-prompt="یک تایمر مطالعه پومودورو بساز. اجرا و تست کن و ZIP بده.">⏱ Build Pomodoro</button>
+    <button data-prompt="آخرین خبر مهم هوش مصنوعی امروز را با جست‌وجوی وب خلاصه کن و منبع بده.">🌐 Search Test</button>
+  </section>
+
+  <section id="chat" class="chat"></section>
+  <div id="progress" class="progress hidden"></div>
+  <div id="artifacts" class="artifacts"></div>
+  <div id="files" class="files"></div>
+
+  <section class="composer">
+    <textarea id="prompt" placeholder="مثلاً: یک برنامه ماشین حساب بساز و فایل ZIP بده..."></textarea>
+    <div class="bar">
+      <div class="tools">
+        <button id="uploadBtn" class="ico">📄</button>
+        <button id="mic" class="ico">🎤</button>
+        <button id="preview" class="ico">▶</button>
+        <button id="localInstall" class="ico">📱</button>
+      </div>
+      <button id="send" class="send">➤</button>
+    </div>
+  </section>
+  <input id="fileInput" type="file" multiple accept=".txt,.md,.json,.csv,.js,.ts,.html,.css,.py,.java,.kt,.xml,.yaml,.yml,text/*,application/json">
+</main>
+
+<div id="previewModal" class="modal hidden">
+  <div class="modalCard">
+    <div class="modalTop"><b>Sandbox Preview</b><button id="closePreview">بستن</button></div>
+    <iframe id="previewFrame" sandbox="allow-scripts"></iframe>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
