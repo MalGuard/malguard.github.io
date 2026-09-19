@@ -996,3 +996,56 @@ if (window.puter && puter.auth && puter.auth.isSignedIn && puter.auth.isSignedIn
 }
 
 bubble("v4 آماده است: 🎙 دیکته فقط صدا را به متن تبدیل می‌کند؛ Voice مکالمه‌ی زنده و خودکار با MalGuard است.", "system");
+
+
+function switchMainMode(mode) {
+  const malware = mode === "malware";
+  $("chatMode").classList.toggle("hidden", malware);
+  $("malwareMode").classList.toggle("hidden", !malware);
+  document.querySelectorAll(".modeTab").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
+}
+document.querySelectorAll(".modeTab").forEach(b => b.addEventListener("click", () => switchMainMode(b.dataset.mode)));
+
+function parseScanReport(text) {
+  const lower = String(text || "").toLowerCase();
+  const explicit = lower.match(/(?:risk\s*score|score|ریسک)\s*[:=]?\s*(\d{1,3})/i);
+  let score = explicit ? Math.min(100, Number(explicit[1])) : 0;
+  const signals = [
+    ["malicious",35],["malware",30],["trojan",35],["ransom",45],["suspicious",24],
+    ["unknown signature",18],["signature: unknown",18],["reputation: suspicious",22],
+    ["unsigned",15],["phishing",35],["clean",-20],["trusted",-20]
+  ];
+  if (!explicit) signals.forEach(([k,v]) => { if (lower.includes(k)) score += v; });
+  score = Math.max(0, Math.min(100, score));
+  const verdict = score >= 75 ? "خطر بالا" : score >= 40 ? "نیازمند بررسی" : "ریسک پایین";
+  const reason = score >= 75 ? "گزارش چند نشانه پرخطر دارد. فایل را اجرا نکن و برای بررسی بیشتر از اسکنر معتبر استفاده کن." : score >= 40 ? "گزارش نشانه‌های مشکوک دارد اما برای نتیجه قطعی شواهد بیشتری لازم است." : "در متن گزارش نشانه پرخطر واضحی دیده نشد؛ این به معنی تضمین سالم بودن فایل نیست.";
+  return {score, verdict, reason};
+}
+$("analyzeScan").onclick = () => {
+  const report = $("scanReport").value.trim();
+  if (!report) return;
+  const r = parseScanReport(report);
+  $("scanVerdict").textContent = r.verdict;
+  $("scanScore").textContent = r.score + "/100";
+  $("scanReason").textContent = r.reason;
+  $("scanCard").classList.remove("hidden");
+};
+$("copyScanCard").onclick = async () => {
+  const text = $("scanVerdict").textContent + " · " + $("scanScore").textContent + "\n" + $("scanReason").textContent;
+  try { await navigator.clipboard.writeText(text); } catch(e) {}
+};
+$("downloadScanCard").onclick = () => {
+  const text = "MalGuard Security Card\n" + $("scanVerdict").textContent + " · " + $("scanScore").textContent + "\n" + $("scanReason").textContent;
+  const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a"); link.href=url; link.download="malguard-security-card.txt"; link.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+
+// Do not make a broken cloud sign-in block the whole test app.
+// Local mode remains usable without any account; cloud modes still require a real provider session.
+$("engine").addEventListener("change", () => {
+  const local = $("engine").value === "local";
+  $("connectBox").classList.toggle("hidden", local || (window.puter && puter.auth && puter.auth.isSignedIn && puter.auth.isSignedIn()));
+  if (local) setStatus("Local · no account needed", "ok");
+});
