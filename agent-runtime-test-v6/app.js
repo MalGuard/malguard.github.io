@@ -341,6 +341,13 @@ async function discoverFreeModes(force) {
 
   setModeAvailability("max", max);
   setModeAvailability("fast", fast);
+
+  const resolved = normalizeRequestedMode(selectedMode);
+  if (resolved !== selectedMode) {
+    selectedMode = resolved;
+    localStorage.setItem("malguard_mode", resolved);
+  }
+  if ($("engine")) $("engine").value = selectedMode === "max" ? "heavy" : selectedMode === "fast" ? "fast" : "local";
   updateModeButton();
   return modeModels;
 }
@@ -353,17 +360,28 @@ function updateModeButton() {
   });
 }
 
+function normalizeRequestedMode(mode) {
+  if (mode === "max" && !modeModels.max) return modeModels.fast ? "fast" : "lite";
+  if (mode === "fast" && !modeModels.fast) return "lite";
+  return mode;
+}
+
 function applyMode(mode, announce) {
   if (!["max","fast","lite"].includes(mode)) return;
-  selectedMode = mode;
-  localStorage.setItem("malguard_mode", mode);
-  if ($("engine")) $("engine").value = mode === "max" ? "heavy" : mode === "fast" ? "fast" : "local";
+  const requested = mode;
+  const resolved = normalizeRequestedMode(mode);
+  selectedMode = resolved;
+  localStorage.setItem("malguard_mode", resolved);
+  if ($("engine")) $("engine").value = resolved === "max" ? "heavy" : resolved === "fast" ? "fast" : "local";
   updateModeButton();
   if ($("modeSheet")) $("modeSheet").classList.add("hidden");
 
   if (announce) {
-    const modelName = mode === "lite" ? modeModelNames.lite : modeModelNames[mode];
-    bubble("Mode → " + (mode === "max" ? "Max" : mode === "fast" ? "Fast" : "Lite") + " · " + modelName, "system");
+    if (requested !== resolved) {
+      bubble("مود " + (requested === "max" ? "Max" : "Fast") + " در نسخه رایگان در دسترس نبود؛ MalGuard روی " + (resolved === "fast" ? "Fast" : "Lite") + " رفت.", "system");
+    }
+    const modelName = resolved === "lite" ? modeModelNames.lite : modeModelNames[resolved];
+    bubble("Mode → " + (resolved === "max" ? "Max" : resolved === "fast" ? "Fast" : "Lite") + " · " + modelName, "system");
   }
 }
 
