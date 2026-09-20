@@ -27,13 +27,3 @@ $("scan").onclick=async()=>{if(!file)return;if(file.size>32*1024*1024){alert("Cu
 function renderHistory(){let h=JSON.parse(localStorage.getItem("mgHistory")||"[]");$("historyList").innerHTML=h.length?h.map(x=>'<div class="item"><b>'+esc(x.name)+'</b><div class="muted">'+new Date(x.time).toLocaleString()+' · '+esc(x.mode||"standard")+'</div><div>'+esc(x.verdict)+'</div><div class="muted">'+esc(x.hash.slice(0,18))+'…</div></div>').join(""):'<p class="muted">No scans saved yet.</p>'}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 $("clearHistory").onclick=()=>{localStorage.removeItem("mgHistory");renderHistory()};
-
-// Internal browser-only validation hook. It creates a harmless in-memory
-// fixture so cloud-browser file-path limitations cannot mask the API test.
-if(new URLSearchParams(location.search).get("sandboxFixture")==="1"){
-  const fixtureText="// MalGuard harmless Sandbox validation fixture.\\nconst result=2+2;\\nconsole.log(result);\\n";
-  file=new File([fixtureText],"malguard-sandbox-browser-fixture.js",{type:"text/javascript"});
-  $("pick").textContent=file.name;
-  $("scan").disabled=false;
-  const c=cfg();c.mode="sandbox";saveCfg(c);sync();
-}
