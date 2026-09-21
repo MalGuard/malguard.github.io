@@ -29,6 +29,10 @@ jobs:
             about.html
             labs.html
             docs.html
+            download.html
+            scan-mods.html
+            ai-intelligence.html
+            scan-url.html
             404.html
             robots.txt
             sitemap.xml
@@ -49,6 +53,10 @@ jobs:
           grep -q "Standard, Plus and Pro" index.html
           grep -qi "local-first" trust.html
           grep -q "security.txt" trust.html
+          grep -q "Scan Mods" scan-mods.html
+          grep -q "AI Intelligence" ai-intelligence.html
+          grep -q "Scan URL" scan-url.html
+          grep -q "Download" download.html
           if grep -q "MalGuard detects, blocks, and prevents cheats" index.html; then
             echo "Overbroad legacy hero claim is still present."
             exit 1
