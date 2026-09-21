@@ -1097,6 +1097,158 @@ html.menu-open,body.menu-open{overflow:hidden}
   .apps-preview-platforms{grid-template-columns:1fr!important}
 }
 </style>
+<style id="final-hero-gta-correction-2026">
+/* Header Download is a simple cyan text action, not a boxed control. */
+.premium-nav .nav-download-text{
+  min-height:auto!important;
+  padding:5px 4px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#6ed9ed!important;
+  font:700 9px/1.1 var(--display)!important;
+  letter-spacing:.01em!important;
+}
+.premium-nav .nav-download-text:hover{
+  background:transparent!important;
+  color:#a8effa!important;
+  text-decoration:none!important;
+}
+
+/* Hero explanatory copy uses the clean system UI stack used by modern chat interfaces. */
+.hero-entry .hero-description{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif!important;
+  font-weight:500!important;
+  letter-spacing:-.012em!important;
+}
+
+/* Restore the earlier composition: logo beside the actions, MalGuard directly underneath it. */
+.hero-entry .hero-actions{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:auto!important;
+  max-width:none!important;
+  gap:13px!important;
+  margin:27px auto 0!important;
+}
+.hero-brand-stack{
+  order:0!important;
+  display:grid!important;
+  justify-items:center!important;
+  align-content:center!important;
+  flex:0 0 82px!important;
+  gap:0!important;
+  margin:0 2px 0 0!important;
+}
+.hero-brand-mark{
+  width:64px!important;
+  height:64px!important;
+  transform:none!important;
+}
+.hero-brand-mark .button-logo{
+  width:62px!important;
+  height:62px!important;
+}
+.hero-brand-name{
+  margin-top:-2px!important;
+  font:800 15px/1 var(--display)!important;
+  letter-spacing:-.055em!important;
+}
+.hero-action-buttons{
+  order:1!important;
+  display:flex!important;
+  width:auto!important;
+  gap:10px!important;
+}
+.hero-action-buttons .btn{
+  width:auto!important;
+  min-width:180px!important;
+}
+
+/* GTA is the one installable product: visible click affordance, still restrained. */
+.premium-product-rail .premium-product-gta-ready{
+  cursor:pointer!important;
+}
+.premium-product-rail .premium-product-gta-ready:hover{
+  background:rgba(105,218,241,.045)!important;
+}
+.premium-product-rail .premium-product-gta-ready small{
+  color:#82deef!important;
+}
+.compact-product-ready{
+  cursor:pointer!important;
+}
+.compact-product-ready:hover{
+  background:rgba(105,218,241,.035)!important;
+}
+.compact-product-ready .compact-product-top em{
+  color:#82deef!important;
+  border-color:rgba(105,214,235,.22)!important;
+}
+.gta-ready-status{
+  color:#82deef!important;
+  border-color:rgba(105,214,235,.24)!important;
+}
+
+/* Mobile: buttons stacked on the left, the MalGuard mark beside them, exactly like the earlier layout. */
+@media(max-width:760px){
+  .premium-nav .nav-download-text{
+    padding:4px 3px!important;
+    font-size:8px!important;
+  }
+  .hero-entry .hero-actions{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 112px!important;
+    grid-template-rows:54px 54px!important;
+    width:min(100%,356px)!important;
+    max-width:356px!important;
+    gap:10px 11px!important;
+    align-items:stretch!important;
+    margin-top:24px!important;
+  }
+  .hero-action-buttons{
+    grid-column:1!important;
+    grid-row:1 / span 2!important;
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    grid-template-rows:54px 54px!important;
+    gap:10px!important;
+    width:100%!important;
+  }
+  .hero-action-buttons .btn{
+    width:100%!important;
+    min-width:0!important;
+    min-height:54px!important;
+    margin:0!important;
+  }
+  .hero-brand-stack{
+    grid-column:2!important;
+    grid-row:1 / span 2!important;
+    order:0!important;
+    align-self:center!important;
+    justify-self:center!important;
+    width:112px!important;
+    height:118px!important;
+    margin:0!important;
+    transform:translateY(-7px)!important;
+  }
+  .hero-brand-mark{
+    width:92px!important;
+    height:92px!important;
+  }
+  .hero-brand-mark .button-logo{
+    width:90px!important;
+    height:90px!important;
+  }
+  .hero-brand-name{
+    margin-top:-4px!important;
+    font-size:18px!important;
+  }
+}
+</style>
 </head>
 <body>
 <a class="site-skip-link" href="#homeContent">Skip to main content</a>
@@ -1107,7 +1259,7 @@ html.menu-open,body.menu-open{overflow:hidden}
       <button class="nav-icon" id="searchButton" type="button" aria-label="Search MalGuard" aria-expanded="false" aria-controls="siteSearch">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.2"></circle><path d="m16 16 4 4"></path></svg>
       </button>
-      <a class="nav-download" href="/apps.html" aria-label="Download MalGuard"><span class="download-label">Download</span></a>
+      <a class="nav-download nav-download-text" href="/apps.html" aria-label="Download MalGuard">Download</a>
       <button class="menu-btn premium-menu-btn" id="menuBtn" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="navLinks"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -1185,10 +1337,10 @@ html.menu-open,body.menu-open{overflow:hidden}
   </div>
   <div class="container">
     <div class="hero-feature-rail premium-product-rail" aria-label="MalGuard products">
-      <div class="premium-product-link" aria-label="GTA Guard, preview">
+      <button class="premium-product-link premium-product-gta-ready" type="button" onclick="openProduct('gta-guard')" aria-label="Open GTA Guard, ready to install">
         <img src="assets/product-gta-guard.svg" alt="" aria-hidden="true">
-        <span><strong>GTA Guard</strong><small>PREVIEW</small></span>
-      </div>
+        <span><strong>GTA Guard</strong><small>READY TO INSTALL</small></span>
+      </button>
       <div class="premium-product-link" aria-label="Malware AI, planned">
         <img src="assets/product-malware-ai.svg" alt="" aria-hidden="true">
         <span><strong>Malware AI</strong><small>PLANNED</small></span>
@@ -1207,10 +1359,10 @@ html.menu-open,body.menu-open{overflow:hidden}
       <p>A quick view of the three protection areas inside the MalGuard ecosystem.</p>
     </div>
     <div class="compact-product-list" aria-label="MalGuard product overview">
-      <article class="compact-product compact-product-gta">
+      <button class="compact-product compact-product-gta compact-product-ready" type="button" onclick="openProduct('gta-guard')" aria-label="Open GTA Guard download and Windows specifications">
         <img src="assets/product-gta-guard.svg" alt="" aria-hidden="true">
-        <span class="compact-product-copy"><span class="compact-product-top"><strong>GTA Guard</strong><em>PREVIEW</em></span><small>GTA 5 mod security · file identity · static analysis · isolation routing</small><span class="compact-product-specs"><b>.ASI</b><b>.DLL</b><b>.ZIP</b><b>Standard / Plus / Pro</b></span></span>
-      </article>
+        <span class="compact-product-copy"><span class="compact-product-top"><strong>GTA Guard</strong><em>READY</em></span><small>GTA 5 mod security · Windows 10/11 x64 · ready to install</small><span class="compact-product-specs"><b>.ASI</b><b>.DLL</b><b>.ZIP</b><b>Standard / Plus / Pro</b></span></span>
+      </button>
       <article class="compact-product compact-product-malware">
         <img src="assets/product-malware-ai.svg" alt="" aria-hidden="true">
         <span class="compact-product-copy"><span class="compact-product-top"><strong>Malware AI</strong><em>PLANNED</em></span><small>Planned suspicious-file analysis · threat patterns · explainable findings</small><span class="compact-product-specs"><b>File inspection</b><b>Threat signals</b><b>AI-assisted</b></span></span>
@@ -1257,7 +1409,7 @@ html.menu-open,body.menu-open{overflow:hidden}
   </div>
 </section>
 </main>
-<section class="product-page" id="page-gta-guard"><div class="container"><div class="product-page-header"><img class="product-brand-logo" src="assets/malguard-logo.svg" alt="MalGuard"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status">PRODUCT PREVIEW</div><h1>GTA Guard</h1><p>MalGuard's first product, focused on security analysis for GTA 5 mods and supported game files.</p></div><div class="product-page-grid"><article class="info-card"><h3>What is GTA Guard?</h3><p>GTA Guard is designed to inspect GTA 5 mod files before you use them and present understandable security findings.</p></article><article class="info-card"><h3>Security analysis</h3><p>The product is designed around multiple analysis layers instead of one simple file check.</p><ul><li>File and type identification</li><li>Rule-based security analysis</li><li>Multi-layer analysis</li><li>Suspicious indicator aggregation</li><li>Final security verdict</li></ul></article><article class="info-card"><h3>Supported files</h3><p>Initial support focuses on common GTA mod formats and archive-based packages.</p><div class="file-types"><span class="file-type">.ASI</span><span class="file-type">.DLL</span><span class="file-type">.ZIP</span><span class="file-type">GTA Mod Archives</span></div></article><article class="info-card"><h3>Standard, Plus and Pro</h3><p>The desktop product defines three analysis models with different depth and isolation semantics.</p><ul><li>Standard: core supported scanning and static security signals</li><li>Plus: staged deeper analysis with sandbox routing for suspicious or inconclusive cases</li><li>Pro: isolation-first orchestration where release-grade host evidence is available</li></ul></article><article class="info-card"><h3>How to use</h3><p>When the release is published:</p><ul><li>Download GTA Guard from the official release</li><li>Open GTA Guard</li><li>Select a supported GTA mod/file</li><li>Choose Standard, Plus or Pro when that model is available on your release and host</li><li>Review the security result</li></ul></article><article class="info-card"><h3>Download</h3><p>Windows is the first supported release target. Version 0.6.1-beta.1 is available as an explicitly labeled Unsigned Preview.</p><div class="release-box"><strong>WINDOWS · UNSIGNED PREVIEW AVAILABLE</strong><span>Windows 10 / 11 · refreshed x64 build with the GTA Guard Sandbox routing fix. Unsigned Preview. Verify SHA-256: 671d38e17a9a2dbd5f77aa95f7da4c104c1dac4d9e5ed477a3309e321291bf0b.</span></div><div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-primary" href="/downloads/MalGuard-Setup-0.6.1-beta.1-windows-x64.exe">Download Windows x64</a></div><article class="info-card" style="margin-top:18px"><h3>iPhone Preview</h3><p>Try the mobile GTA Guard scanner preview directly on iPhone. It performs local SHA-256 hashing, file-type detection and bounded static risk checks without executing the selected file.</p><div class="release-box"><strong>IPHONE · TEST PREVIEW</strong><span>Browser-based test build. Windows-only process monitoring and VM isolation are not available on iOS.</span></div><div style="margin-top:20px"><a class="btn btn-primary" href="/ios-preview/">Open iPhone Preview</a></div></article></article></div></div></section>
+<section class="product-page" id="page-gta-guard"><div class="container"><div class="product-page-header"><img class="product-brand-logo" src="assets/malguard-logo.svg" alt="MalGuard"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status gta-ready-status">READY TO INSTALL</div><h1>GTA Guard</h1><p>MalGuard's first product, focused on security analysis for GTA 5 mods and supported game files.</p></div><div class="product-page-grid"><article class="info-card"><h3>What is GTA Guard?</h3><p>GTA Guard is designed to inspect GTA 5 mod files before you use them and present understandable security findings.</p></article><article class="info-card"><h3>Security analysis</h3><p>The product is designed around multiple analysis layers instead of one simple file check.</p><ul><li>File and type identification</li><li>Rule-based security analysis</li><li>Multi-layer analysis</li><li>Suspicious indicator aggregation</li><li>Final security verdict</li></ul></article><article class="info-card"><h3>Supported files</h3><p>Initial support focuses on common GTA mod formats and archive-based packages.</p><div class="file-types"><span class="file-type">.ASI</span><span class="file-type">.DLL</span><span class="file-type">.ZIP</span><span class="file-type">GTA Mod Archives</span></div></article><article class="info-card"><h3>Standard, Plus and Pro</h3><p>The desktop product defines three analysis models with different depth and isolation semantics.</p><ul><li>Standard: core supported scanning and static security signals</li><li>Plus: staged deeper analysis with sandbox routing for suspicious or inconclusive cases</li><li>Pro: isolation-first orchestration where release-grade host evidence is available</li></ul></article><article class="info-card"><h3>How to use</h3><p>The current Windows x64 build is available now:</p><ul><li>Download the Windows x64 build from this page</li><li>Open GTA Guard</li><li>Select a supported GTA mod/file</li><li>Choose Standard, Plus or Pro when that model is available on your release and host</li><li>Review the security result</li></ul></article><article class="info-card"><h3>Download</h3><p>Windows is the first supported release target. Version 0.6.1-beta.1 is available as an explicitly labeled Unsigned Preview.</p><div class="release-box"><strong>WINDOWS · UNSIGNED PREVIEW AVAILABLE</strong><span>Windows 10 / 11 · refreshed x64 build with the GTA Guard Sandbox routing fix. Unsigned Preview. Verify SHA-256: 671d38e17a9a2dbd5f77aa95f7da4c104c1dac4d9e5ed477a3309e321291bf0b.</span></div><div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-primary" href="/downloads/MalGuard-Setup-0.6.1-beta.1-windows-x64.exe">Download Windows x64</a></div><article class="info-card" style="margin-top:18px"><h3>iPhone Preview</h3><p>Try the mobile GTA Guard scanner preview directly on iPhone. It performs local SHA-256 hashing, file-type detection and bounded static risk checks without executing the selected file.</p><div class="release-box"><strong>IPHONE · TEST PREVIEW</strong><span>Browser-based test build. Windows-only process monitoring and VM isolation are not available on iOS.</span></div><div style="margin-top:20px"><a class="btn btn-primary" href="/ios-preview/">Open iPhone Preview</a></div></article></article></div></div></section>
 <section class="product-page" id="page-malware-ai"><div class="container"><div class="product-page-header"><img class="product-brand-logo" src="assets/malguard-logo.svg" alt="MalGuard"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status coming">PLANNED</div><h1>Malware AI</h1><p>A planned MalGuard AI product for detecting suspicious files, malware patterns and threat indicators.</p></div><div class="product-page-grid"><article class="info-card"><h3>Planned purpose</h3><p>Help users inspect suspicious files before opening or using them.</p></article><article class="info-card"><h3>Planned capabilities</h3><ul><li>File and sample inspection</li><li>Suspicious structure detection</li><li>Threat-pattern analysis</li><li>Understandable security results</li></ul></article><article class="info-card"><h3>Current status</h3><p>Malware AI is a planned product and is not being presented as an active security service.</p><div class="release-box"><strong>NO RELEASE YET</strong><span>This page describes a planned product only.</span></div></article><article class="info-card"><h3>Download</h3><p>There is currently no official download.</p><button class="btn btn-secondary disabled-btn" disabled style="margin-top:20px">Coming Soon</button></article></div></div></section>
 <section class="product-page" id="page-game-scam-guard"><div class="container"><div class="product-page-header"><img class="product-brand-logo" src="assets/malguard-logo.svg" alt="MalGuard"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status coming">COMING SOON</div><h1>Game Scam Guard</h1><p>A planned security product for suspicious gaming links, scams and unsafe gaming-related destinations.</p></div><div class="product-page-grid"><article class="info-card"><h3>Planned purpose</h3><p>Help players evaluate suspicious gaming-related links and scam indicators before interacting with them.</p></article><article class="info-card"><h3>Planned capabilities</h3><ul><li>Suspicious link analysis</li><li>Scam indicator detection</li><li>Risk classification</li><li>Safer browsing guidance</li></ul></article><article class="info-card"><h3>Current status</h3><p>This product is planned and is not being presented as an active security service.</p><div class="release-box"><strong>NO RELEASE YET</strong><span>Capabilities may change before an actual release.</span></div></article><article class="info-card"><h3>Download</h3><p>There is currently no official download.</p><button class="btn btn-secondary disabled-btn" disabled style="margin-top:20px">Coming Soon</button></article></div></div></section>
 <footer><div class="container footer-inner"><div class="footer-copy"><strong>© 2026 MalGuard. Scan Smart. Play Safe.</strong><span class="footer-disclaimer">Security analysis reduces risk. No scan can guarantee that a file, mod, link, or destination is harmless.</span></div><div class="footer-links"><a href="#products">Products</a><a href="/tools.html">Tools</a><a href="/about.html">About</a><a href="/docs.html">Docs</a><a href="/trust.html">Trust Center</a><a href="/privacy.html">Privacy</a><a href="/labs.html">Labs</a><a href="/support.html">Support</a><a href="/apps.html">Download</a><a href="https://github.com/MalGuard" target="_blank" rel="noopener">GitHub</a></div></div></footer><div class="toast" id="toast"></div>
