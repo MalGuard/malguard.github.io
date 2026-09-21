@@ -1,0 +1,41 @@
+name: False positive
+description: Report a supported file that MalGuard may have classified too aggressively.
+title: "[False Positive] "
+labels: ["false-positive"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not upload the file itself or any real malware. Share hashes and harmless reproduction details only.
+  - type: input
+    id: version
+    attributes:
+      label: MalGuard version
+    validations:
+      required: true
+  - type: input
+    id: file_type
+    attributes:
+      label: File type
+      placeholder: .asi, .dll, .zip, etc.
+    validations:
+      required: true
+  - type: input
+    id: sha256
+    attributes:
+      label: SHA-256
+      description: Paste the 64-character SHA-256 MalGuard displayed.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Where you obtained the file
+      description: Give a public source description or URL if appropriate. Do not upload the file.
+  - type: textarea
+    id: finding
+    attributes:
+      label: Result you disagree with
+      description: Include the verdict and specific finding.
+    validations:
+      required: true
