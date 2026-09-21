@@ -876,26 +876,146 @@ footer{padding:21px 0!important}.footer-inner{align-items:start!important}
 @media(max-width:760px){.hero{padding:102px 0 34px!important}.trust-grid{grid-template-columns:repeat(2,1fr)!important}.home-compact-section{padding:25px 0}.compact-home-heading{display:block}.compact-home-heading>p{margin-top:8px}.compact-product{grid-template-columns:43px minmax(0,1fr) 18px;padding:13px 12px;gap:10px}.compact-product img{width:40px;height:40px}.compact-product-top strong{font-size:15px}.compact-product-copy small{font-size:9px}.compact-product-specs b{font-size:7px}.compact-system-grid{gap:8px}.compact-system-grid article{padding:13px}.compact-download-main,.compact-platform-side{padding:14px}.download-title-row{display:block}.download-preview-pill{display:inline-flex;margin-top:9px}.download-facts{grid-template-columns:1fr 1fr}.download-hash,.download-source{grid-template-columns:1fr;gap:3px}.download-actions-compact{display:grid;grid-template-columns:1fr}.download-actions-compact .btn{width:100%}.home-support-inner{align-items:flex-start;flex-direction:column}.home-support-inner nav{justify-content:flex-start}}
 @media(max-width:420px){.download-facts{grid-template-columns:1fr}.compact-product-specs{display:none}.compact-product-copy small{font-size:8.5px}}
 </style>
+<style id="malguard-feature-hubs-2026">
+/* Chat-style system font for the explanatory line below Start Here. */
+.hero-entry .hero-description{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+  font-weight:500!important;
+  letter-spacing:-.012em!important;
+}
+
+/* Keep the original colors, remove only continuous neon/glow effects. */
+.hero-actions-logo-static{cursor:default!important;pointer-events:none!important}
+.hero-actions-logo-static .button-logo-cyan,
+.hero-actions-logo-static .logo-wordmark-cyan,
+.hero-feature-rail *,
+.feature-hub-rail *{
+  animation:none!important;
+  text-shadow:none!important;
+}
+.hero-actions-logo-static .button-logo,
+.hero-actions-logo-static .button-logo-blue,
+.hero-actions-logo-static .button-logo-cyan,
+.feature-hub-rail img{
+  filter:none!important;
+}
+.hero-entry.lights-locked .button-logo-cyan,
+.hero-entry.lights-locked .logo-wordmark-cyan,
+.hero-entry.lights-locked .hero-feature-rail *{
+  animation:none!important;filter:none!important;text-shadow:none!important
+}
+
+/* The three hero cards are quick capabilities, not duplicate products. */
+.feature-hub-rail{padding:12px 0!important;gap:0!important}
+.feature-hub{
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:11px!important;
+  min-height:74px!important;
+  padding:10px 18px!important;
+  border-right:1px solid rgba(27,183,248,.24)!important;
+  color:#eef8fc!important;
+  background:transparent!important;
+  text-align:left!important;
+  transition:background .16s,border-color .16s,color .16s!important;
+}
+.feature-hub:last-child{border-right:0!important}
+.feature-hub:hover,.feature-hub:focus-visible{
+  background:rgba(21,142,194,.07)!important;
+  color:#78e4f6!important;
+}
+.feature-hub img{width:39px!important;height:39px!important;object-fit:contain!important}
+.feature-hub strong{display:block!important;font:700 13px var(--display)!important}
+.feature-hub small{display:block!important;margin-top:3px!important;color:#8295a3!important;font-size:8px!important;line-height:1.35!important}
+
+/* Header: Logo + Search + small Download + hamburger. */
+.nav-inner>.feature-menu{display:none!important}
+.nav-inner>.feature-menu.active{
+  display:flex!important;
+  position:absolute!important;
+  top:calc(100% + 10px)!important;
+  right:0!important;
+  left:auto!important;
+  width:min(360px,calc(100vw - 28px))!important;
+  max-height:calc(100vh - 100px)!important;
+  overflow:auto!important;
+  flex-direction:column!important;
+  gap:0!important;
+  padding:14px 17px 18px!important;
+  border:1px solid rgba(34,175,241,.38)!important;
+  border-radius:18px!important;
+  background:rgba(3,16,34,.97)!important;
+  box-shadow:0 24px 65px rgba(0,0,0,.48)!important;
+  backdrop-filter:blur(18px)!important;
+}
+.nav-inner{position:relative!important}
+.nav-actions .menu-btn{display:grid!important;place-items:center!important}
+.nav-group-label{
+  display:block!important;
+  padding:13px 2px 6px!important;
+  color:#5f8298!important;
+  font:800 8px var(--display)!important;
+  letter-spacing:.14em!important;
+  text-transform:uppercase!important;
+}
+.feature-menu a{
+  padding:11px 2px!important;
+  border-bottom:1px solid rgba(49,157,218,.14)!important;
+  font-size:11px!important;
+}
+.feature-menu .menu-close{display:grid!important;margin-left:auto!important}
+.nav-download{
+  display:inline-flex!important;
+  min-height:39px!important;
+  padding:0 13px!important;
+  border-radius:10px!important;
+  font-size:9px!important;
+}
+.nav-download .download-glyph{display:none!important}
+
+/* No phantom empty home download section remains. */
+#download{display:none!important}
+
+@media(max-width:760px){
+  .nav-download{display:inline-flex!important;min-height:38px!important;padding:0 10px!important}
+  .feature-hub-rail{width:calc(100% - 22px)!important;padding:5px!important;border-radius:12px!important}
+  .feature-hub{grid-template-columns:29px minmax(0,1fr)!important;min-height:58px!important;padding:7px 7px!important;gap:6px!important}
+  .feature-hub img{width:27px!important;height:27px!important}
+  .feature-hub strong{font-size:9px!important}
+  .feature-hub small{font-size:6px!important}
+  .nav-inner>.feature-menu.active{top:calc(100% + 8px)!important;right:0!important;left:0!important;width:100%!important}
+}
+</style>
 </head>
 <body>
 <a class="site-skip-link" href="#homeContent">Skip to main content</a>
 <header class="nav" id="navbar">
   <div class="container nav-inner">
     <a href="#home" class="brand" onclick="showHome()" aria-label="MalGuard home"><img class="brand-site-logo" src="assets/malguard-site-logo.svg" alt="MalGuard"></a>
-    <nav class="nav-links" id="navLinks" aria-label="Primary navigation">
+    <nav class="nav-links feature-menu" id="navLinks" aria-label="Primary navigation">
       <button class="menu-close" id="menuClose" type="button" aria-label="Close navigation menu">×</button>
-      <a href="#products">Products</a>
-      <a href="#how-it-works">How It Works</a>
-      <a href="/tools.html">Tools</a>
-      <a href="/trust.html">Security</a>
-      <a href="/labs.html">Research</a>
+      <span class="nav-group-label">Quick tools</span>
+      <a href="/scan-mods.html">Scan Mods</a>
+      <a href="/ai-intelligence.html">AI Intelligence</a>
+      <a href="/scan-url.html">Scan URL</a>
+      <a href="/tools.html#file-fingerprint">File Fingerprint</a>
+      <a href="/tools.html#link-inspector">Link Inspector</a>
+      <span class="nav-group-label">Security & trust</span>
+      <a href="/trust.html">Trust Center</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/trust.html#release-integrity">Release Integrity</a>
+      <a href="/trust.html#limitations">Known Limitations</a>
+      <span class="nav-group-label">Resources</span>
+      <a href="/labs.html">Research / Labs</a>
       <a href="/docs.html">Docs</a>
+      <a href="/about.html">About</a>
       <a href="/support.html">Support</a>
-      <a href="#download">Download</a>
+      <a href="/download.html">Download</a>
     </nav>
     <div class="nav-actions">
       <button class="nav-icon" id="searchButton" type="button" aria-label="Search MalGuard" aria-expanded="false" aria-controls="siteSearch">⌕</button>
-      <a class="nav-download" href="#download" aria-label="Get MalGuard"><span class="download-glyph">↓</span><span class="download-label">Get MalGuard</span></a>
+      <a class="nav-download" href="/download.html" aria-label="Download MalGuard"><span class="download-label">Download</span></a>
       <button class="menu-btn" id="menuBtn" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="navLinks">☰</button>
     </div>
   </div>
@@ -928,17 +1048,26 @@ footer{padding:21px 0!important}.footer-inner{align-items:start!important}
       <h1>A Safer Gaming <span>Community</span> Starts Here.</h1>
       <p class="hero-description">MalGuard helps gamers inspect suspicious mods, files, links, scams, and gaming-related threats before use. GTA Guard is available as a Windows preview; Malware AI and Game Scam Guard remain in development.</p>
       <div class="hero-actions">
-        <button class="hero-actions-logo" type="button" aria-label="Keep MalGuard lights fully on" aria-pressed="false"><svg class="button-logo" xmlns="http://www.w3.org/2000/svg" viewBox="65 20 235 320" aria-hidden="true" focusable="false"><path class="button-logo-blue" fill="#2F6BFF" fill-rule="evenodd" d="M 154 286 L 156 285 L 158 287 L 159 287 L 161 289 L 162 289 L 164 291 L 165 291 L 167 293 L 173 296 L 176 299 L 180 301 L 185 299 L 188 296 L 191 295 L 205 285 L 206 285 L 207 287 L 202 292 L 202 293 L 197 298 L 197 299 L 192 304 L 192 305 L 187 310 L 187 311 L 182 316 L 182 317 L 180 318 L 179 316 L 174 311 L 174 310 L 169 305 L 169 304 L 158 292 L 158 291 L 154 287 Z M 289 70 L 265 87 L 201 125 L 194 131 L 188 140 L 185 150 L 185 224 L 189 232 L 208 248 L 219 237 L 233 217 L 214 217 L 210 213 L 210 157 L 211 154 L 219 146 L 261 121 L 263 122 L 263 150 L 289 150 Z M 72 69 L 72 185 L 82 222 L 100 253 L 121 278 L 153 307 L 181 327 L 222 295 L 257 258 L 277 226 L 288 193 L 265 193 L 253 223 L 234 249 L 205 276 L 179 292 L 143 265 L 118 238 L 102 210 L 96 187 L 96 120 L 98 119 L 177 195 L 177 92 L 139 124 Z M 265 80 L 263 78 L 260 77 L 258 75 L 255 74 L 253 72 L 250 71 L 248 69 L 245 68 L 243 66 L 240 65 L 213 48 L 208 46 L 191 35 L 186 33 L 181 29 L 167 37 L 165 39 L 155 44 L 153 46 L 150 47 L 148 49 L 145 50 L 143 52 L 140 53 L 138 55 L 133 57 L 131 59 L 128 60 L 126 62 L 123 63 L 96 80 L 109 91 L 116 95 L 118 93 L 123 91 L 140 80 L 145 78 L 147 76 L 180 57 L 184 58 L 186 60 L 189 61 L 191 63 L 206 71 L 208 73 L 211 74 L 213 76 L 216 77 L 218 79 L 228 84 L 230 86 L 244 94 L 259 84 L 262 83 Z"/><path class="button-logo-cyan" fill="#00bdf4" fill-rule="evenodd" d="M 153 285 L 170 304 L 170 305 L 175 310 L 175 311 L 180 316 L 180 317 L 181 317 L 181 316 L 186 311 L 186 310 L 191 305 L 191 304 L 196 299 L 196 298 L 201 293 L 201 292 L 207 286 L 208 284 L 206 286 L 205 286 L 203 288 L 202 288 L 200 290 L 199 290 L 197 292 L 196 292 L 194 294 L 188 297 L 185 300 L 181 302 L 176 300 L 173 297 L 170 296 L 153 284 Z M 97 119 L 97 187 L 107 219 L 128 249 L 150 270 L 179 291 L 182 291 L 205 275 L 233 249 L 252 223 L 265 192 L 288 192 L 289 162 L 240 162 L 217 184 L 247 185 L 243 201 L 237 213 L 220 237 L 199 257 L 180 270 L 160 255 L 140 235 L 126 215 L 116 187 L 116 161 L 118 160 L 177 217 L 177 196 Z"/></svg><span class="logo-wordmark" aria-hidden="true"><span class="logo-wordmark-blue">Mal</span><span class="logo-wordmark-cyan">Guard</span></span></button>
+        <div class="hero-actions-logo hero-actions-logo-static" aria-label="MalGuard"><svg class="button-logo" xmlns="http://www.w3.org/2000/svg" viewBox="65 20 235 320" aria-hidden="true" focusable="false"><path class="button-logo-blue" fill="#2F6BFF" fill-rule="evenodd" d="M 154 286 L 156 285 L 158 287 L 159 287 L 161 289 L 162 289 L 164 291 L 165 291 L 167 293 L 173 296 L 176 299 L 180 301 L 185 299 L 188 296 L 191 295 L 205 285 L 206 285 L 207 287 L 202 292 L 202 293 L 197 298 L 197 299 L 192 304 L 192 305 L 187 310 L 187 311 L 182 316 L 182 317 L 180 318 L 179 316 L 174 311 L 174 310 L 169 305 L 169 304 L 158 292 L 158 291 L 154 287 Z M 289 70 L 265 87 L 201 125 L 194 131 L 188 140 L 185 150 L 185 224 L 189 232 L 208 248 L 219 237 L 233 217 L 214 217 L 210 213 L 210 157 L 211 154 L 219 146 L 261 121 L 263 122 L 263 150 L 289 150 Z M 72 69 L 72 185 L 82 222 L 100 253 L 121 278 L 153 307 L 181 327 L 222 295 L 257 258 L 277 226 L 288 193 L 265 193 L 253 223 L 234 249 L 205 276 L 179 292 L 143 265 L 118 238 L 102 210 L 96 187 L 96 120 L 98 119 L 177 195 L 177 92 L 139 124 Z M 265 80 L 263 78 L 260 77 L 258 75 L 255 74 L 253 72 L 250 71 L 248 69 L 245 68 L 243 66 L 240 65 L 213 48 L 208 46 L 191 35 L 186 33 L 181 29 L 167 37 L 165 39 L 155 44 L 153 46 L 150 47 L 148 49 L 145 50 L 143 52 L 140 53 L 138 55 L 133 57 L 131 59 L 128 60 L 126 62 L 123 63 L 96 80 L 109 91 L 116 95 L 118 93 L 123 91 L 140 80 L 145 78 L 147 76 L 180 57 L 184 58 L 186 60 L 189 61 L 191 63 L 206 71 L 208 73 L 211 74 L 213 76 L 216 77 L 218 79 L 228 84 L 230 86 L 244 94 L 259 84 L 262 83 Z"/><path class="button-logo-cyan" fill="#00bdf4" fill-rule="evenodd" d="M 153 285 L 170 304 L 170 305 L 175 310 L 175 311 L 180 316 L 180 317 L 181 317 L 181 316 L 186 311 L 186 310 L 191 305 L 191 304 L 196 299 L 196 298 L 201 293 L 201 292 L 207 286 L 208 284 L 206 286 L 205 286 L 203 288 L 202 288 L 200 290 L 199 290 L 197 292 L 196 292 L 194 294 L 188 297 L 185 300 L 181 302 L 176 300 L 173 297 L 170 296 L 153 284 Z M 97 119 L 97 187 L 107 219 L 128 249 L 150 270 L 179 291 L 182 291 L 205 275 L 233 249 L 252 223 L 265 192 L 288 192 L 289 162 L 240 162 L 217 184 L 247 185 L 243 201 L 237 213 L 220 237 L 199 257 L 180 270 L 160 255 L 140 235 L 126 215 L 116 187 L 116 161 L 118 160 L 177 217 L 177 196 Z"/></svg><span class="logo-wordmark" aria-hidden="true"><span class="logo-wordmark-blue">Mal</span><span class="logo-wordmark-cyan">Guard</span></span></div>
         <a href="#products" class="btn btn-secondary"><span>Learn More</span><b aria-hidden="true">›</b></a>
-        <a href="#download" class="btn btn-primary"><span>Get MalGuard</span><b aria-hidden="true">›</b></a>
+        <a href="/download.html" class="btn btn-primary"><span>Get MalGuard</span><b aria-hidden="true">›</b></a>
       </div>
     </div>
   </div>
   <div class="container">
-    <div class="hero-feature-rail" aria-label="MalGuard products">
-      <button class="mai-feature" type="button" onclick="openProduct('malware-ai')" aria-label="Open Malware AI"><svg class="product-mark product-mark--mai" viewBox="0 0 100 100" aria-hidden="true"><path class="product-mark-shell" d="M50 4 88 21v27c0 23-15 39-38 48C27 87 12 71 12 48V21Z"/><path class="product-mark-accent" d="M22 28 50 15l28 13-7 8-21-10-21 10Zm0 26V33l9 8v17l19 19 19-19V41l9-8v21c0 14-9 25-28 34-19-9-28-20-28-34Z"/><text class="product-mark-code" x="50" y="59" text-anchor="middle">MAI</text></svg><span class="product-name"><span class="product-name-code">Malware</span> <span class="product-name-guard">AI</span></span></button>
-      <button class="gta-feature" type="button" onclick="openProduct('gta-guard')" aria-label="Open GTA Guard"><svg class="product-mark product-mark--gta" viewBox="0 0 100 100" aria-hidden="true"><path class="product-mark-shell" d="M50 4 88 21v27c0 23-15 39-38 48C27 87 12 71 12 48V21Z"/><path class="product-mark-accent" d="M22 28 50 15l28 13-7 8-21-10-21 10Zm0 26V33l9 8v17l19 19 19-19V41l9-8v21c0 14-9 25-28 34-19-9-28-20-28-34Z"/><text class="product-mark-code" x="50" y="59" text-anchor="middle">GTA</text></svg><span class="product-name"><span class="product-name-code">GTA</span> <span class="product-name-guard">Guard</span></span></button>
-      <button class="scam-feature" type="button" onclick="openProduct('game-scam-guard')" aria-label="Open Game Scam Guard"><svg class="product-mark product-mark--gsg" viewBox="0 0 100 100" aria-hidden="true"><path class="product-mark-shell" d="M50 4 88 21v27c0 23-15 39-38 48C27 87 12 71 12 48V21Z"/><path class="product-mark-accent" d="M22 28 50 15l28 13-7 8-21-10-21 10Zm0 26V33l9 8v17l19 19 19-19V41l9-8v21c0 14-9 25-28 34-19-9-28-20-28-34Z"/><text class="product-mark-code" x="50" y="59" text-anchor="middle">GSG</text></svg><span class="product-name"><span class="product-name-code">Game Scam</span> <span class="product-name-guard">Guard</span></span></button>
+    <div class="hero-feature-rail feature-hub-rail" aria-label="MalGuard quick security tools">
+      <a class="feature-hub" href="/scan-mods.html" aria-label="Open Scan Mods">
+        <img src="assets/feature-scan-mods.svg" alt="" aria-hidden="true">
+        <span><strong>Scan Mods</strong><small>GTA active · more games planned</small></span>
+      </a>
+      <a class="feature-hub" href="/ai-intelligence.html" aria-label="Open AI Intelligence">
+        <img src="assets/feature-ai-intelligence.svg" alt="" aria-hidden="true">
+        <span><strong>AI Intelligence</strong><small>Security AI modules</small></span>
+      </a>
+      <a class="feature-hub" href="/scan-url.html" aria-label="Open Scan URL">
+        <img src="assets/feature-scan-url.svg" alt="" aria-hidden="true">
+        <span><strong>Scan URL</strong><small>Link checks + fingerprints</small></span>
+      </a>
     </div>
   </div>
 </section><div class="trust-bar"><div class="container trust-grid"><div class="trust-item"><div class="trust-number">LOCAL-FIRST</div><div class="trust-label">Supported analysis stays on-device by default</div></div><div class="trust-item"><div class="trust-number">FAIL-CLOSED</div><div class="trust-label">Missing evidence does not become “safe”</div></div><div class="trust-item"><div class="trust-number">OPEN SOURCE</div><div class="trust-label">Core policies and engineering are public</div></div><div class="trust-item"><div class="trust-number">VERIFIABLE</div><div class="trust-label">Release hash and source commit are published</div></div></div></div>
@@ -975,29 +1104,6 @@ footer{padding:21px 0!important}.footer-inner{align-items:start!important}
     <article><span class="section-label">Security & Trust</span><h3>Local-first. Fail-closed. Verifiable.</h3><p>Privacy, limitations, release integrity and vulnerability reporting are published.</p><a href="/trust.html">Trust Center ›</a></article>
   </div>
 </section>
-<section class="home-compact-section" id="download">
-  <div class="container">
-    <div class="compact-download-shell">
-      <div class="compact-download-main">
-        <div class="download-title-row"><div><span class="download-status">GET MALGUARD</span><h2>Windows Preview</h2></div><span class="download-preview-pill">UNSIGNED PREVIEW</span></div>
-        <p class="download-summary">Version 0.6.1-beta.1 for Windows 10 / 11 x64. Includes the current GTA Guard sandbox-routing update.</p>
-        <div class="download-facts">
-          <span><b>Platform</b> Windows 10 / 11</span><span><b>Architecture</b> x64</span><span><b>Version</b> 0.6.1-beta.1</span><span><b>Signing</b> Not Authenticode-signed</span>
-        </div>
-        <div class="download-hash"><span>SHA-256</span><code>671d38e17a9a2dbd5f77aa95f7da4c104c1dac4d9e5ed477a3309e321291bf0b</code></div>
-        <div class="download-source"><span>Source commit</span><code>fabf1bf3dd3d96dbeaaa33a788dcb4de2959555c</code></div>
-        <div class="download-actions-compact"><a class="btn btn-primary" href="/downloads/MalGuard-Setup-0.6.1-beta.1-windows-x64.exe">Download Windows x64</a><button class="btn btn-secondary hash-copy" type="button" data-hash="671d38e17a9a2dbd5f77aa95f7da4c104c1dac4d9e5ed477a3309e321291bf0b">Copy SHA-256</button></div>
-        <small class="download-warning">Verify the published hash before running. This preview is not Authenticode-signed and no scan can guarantee a file is harmless.</small>
-      </div>
-      <div class="compact-platform-side">
-        <div class="compact-platform-mini"><span class="platform-symbol">⌘</span><span><strong>macOS</strong><small>Native release planned</small></span><em>COMING SOON</em></div>
-        <div class="compact-platform-mini"><span class="platform-symbol">▯</span><span><strong>Mobile</strong><small>iPhone & Android planned</small></span><em>COMING SOON</em></div>
-        <a class="compact-platform-link" href="/docs.html">Release & verification docs ›</a>
-      </div>
-    </div>
-  </div>
-</section>
-
 <section class="home-support-strip" id="feedback">
   <div class="container home-support-inner">
     <div><span class="section-label">Support</span><strong>Found a problem?</strong></div>
@@ -1008,7 +1114,7 @@ footer{padding:21px 0!important}.footer-inner{align-items:start!important}
 <section class="product-page" id="page-gta-guard"><div class="container"><div class="product-page-header"><img class="product-brand-logo" src="assets/malguard-logo.svg" alt="MalGuard"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status">PRODUCT PREVIEW</div><h1>GTA Guard</h1><p>MalGuard's first product, focused on security analysis for GTA 5 mods and supported game files.</p></div><div class="product-page-grid"><article class="info-card"><h3>What is GTA Guard?</h3><p>GTA Guard is designed to inspect GTA 5 mod files before you use them and present understandable security findings.</p></article><article class="info-card"><h3>Security analysis</h3><p>The product is designed around multiple analysis layers instead of one simple file check.</p><ul><li>File and type identification</li><li>Rule-based security analysis</li><li>Multi-layer analysis</li><li>Suspicious indicator aggregation</li><li>Final security verdict</li></ul></article><article class="info-card"><h3>Supported files</h3><p>Initial support focuses on common GTA mod formats and archive-based packages.</p><div class="file-types"><span class="file-type">.ASI</span><span class="file-type">.DLL</span><span class="file-type">.ZIP</span><span class="file-type">GTA Mod Archives</span></div></article><article class="info-card"><h3>Standard, Plus and Pro</h3><p>The desktop product defines three analysis models with different depth and isolation semantics.</p><ul><li>Standard: core supported scanning and static security signals</li><li>Plus: staged deeper analysis with sandbox routing for suspicious or inconclusive cases</li><li>Pro: isolation-first orchestration where release-grade host evidence is available</li></ul></article><article class="info-card"><h3>How to use</h3><p>When the release is published:</p><ul><li>Download GTA Guard from the official release</li><li>Open GTA Guard</li><li>Select a supported GTA mod/file</li><li>Choose Standard, Plus or Pro when that model is available on your release and host</li><li>Review the security result</li></ul></article><article class="info-card"><h3>Download</h3><p>Windows is the first supported release target. Version 0.6.1-beta.1 is available as an explicitly labeled Unsigned Preview.</p><div class="release-box"><strong>WINDOWS · UNSIGNED PREVIEW AVAILABLE</strong><span>Windows 10 / 11 · refreshed x64 build with the GTA Guard Sandbox routing fix. Unsigned Preview. Verify SHA-256: 671d38e17a9a2dbd5f77aa95f7da4c104c1dac4d9e5ed477a3309e321291bf0b.</span></div><div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-primary" href="/downloads/MalGuard-Setup-0.6.1-beta.1-windows-x64.exe">Download Windows x64</a></div><article class="info-card" style="margin-top:18px"><h3>iPhone Preview</h3><p>Try the mobile GTA Guard scanner preview directly on iPhone. It performs local SHA-256 hashing, file-type detection and bounded static risk checks without executing the selected file.</p><div class="release-box"><strong>IPHONE · TEST PREVIEW</strong><span>Browser-based test build. Windows-only process monitoring and VM isolation are not available on iOS.</span></div><div style="margin-top:20px"><a class="btn btn-primary" href="/ios-preview/">Open iPhone Preview</a></div></article></article></div></div></section>
 <section class="product-page" id="page-malware-ai"><div class="container"><div class="product-page-header"><img class="product-brand-logo" src="assets/malguard-logo.svg" alt="MalGuard"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status coming">PLANNED</div><h1>Malware AI</h1><p>A planned MalGuard AI product for detecting suspicious files, malware patterns and threat indicators.</p></div><div class="product-page-grid"><article class="info-card"><h3>Planned purpose</h3><p>Help users inspect suspicious files before opening or using them.</p></article><article class="info-card"><h3>Planned capabilities</h3><ul><li>File and sample inspection</li><li>Suspicious structure detection</li><li>Threat-pattern analysis</li><li>Understandable security results</li></ul></article><article class="info-card"><h3>Current status</h3><p>Malware AI is a planned product and is not being presented as an active security service.</p><div class="release-box"><strong>NO RELEASE YET</strong><span>This page describes a planned product only.</span></div></article><article class="info-card"><h3>Download</h3><p>There is currently no official download.</p><button class="btn btn-secondary disabled-btn" disabled style="margin-top:20px">Coming Soon</button></article></div></div></section>
 <section class="product-page" id="page-game-scam-guard"><div class="container"><div class="product-page-header"><img class="product-brand-logo" src="assets/malguard-logo.svg" alt="MalGuard"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status coming">COMING SOON</div><h1>Game Scam Guard</h1><p>A planned security product for suspicious gaming links, scams and unsafe gaming-related destinations.</p></div><div class="product-page-grid"><article class="info-card"><h3>Planned purpose</h3><p>Help players evaluate suspicious gaming-related links and scam indicators before interacting with them.</p></article><article class="info-card"><h3>Planned capabilities</h3><ul><li>Suspicious link analysis</li><li>Scam indicator detection</li><li>Risk classification</li><li>Safer browsing guidance</li></ul></article><article class="info-card"><h3>Current status</h3><p>This product is planned and is not being presented as an active security service.</p><div class="release-box"><strong>NO RELEASE YET</strong><span>Capabilities may change before an actual release.</span></div></article><article class="info-card"><h3>Download</h3><p>There is currently no official download.</p><button class="btn btn-secondary disabled-btn" disabled style="margin-top:20px">Coming Soon</button></article></div></div></section>
-<footer><div class="container footer-inner"><div class="footer-copy"><strong>© 2026 MalGuard. Scan Smart. Play Safe.</strong><span class="footer-disclaimer">Security analysis reduces risk. No scan can guarantee that a file, mod, link, or destination is harmless.</span></div><div class="footer-links"><a href="#products">Products</a><a href="/tools.html">Tools</a><a href="/about.html">About</a><a href="/docs.html">Docs</a><a href="/trust.html">Trust Center</a><a href="/privacy.html">Privacy</a><a href="/labs.html">Labs</a><a href="/support.html">Support</a><a href="#download">Download</a><a href="https://github.com/MalGuard" target="_blank" rel="noopener">GitHub</a></div></div></footer><div class="toast" id="toast"></div>
+<footer><div class="container footer-inner"><div class="footer-copy"><strong>© 2026 MalGuard. Scan Smart. Play Safe.</strong><span class="footer-disclaimer">Security analysis reduces risk. No scan can guarantee that a file, mod, link, or destination is harmless.</span></div><div class="footer-links"><a href="#products">Products</a><a href="/tools.html">Tools</a><a href="/about.html">About</a><a href="/docs.html">Docs</a><a href="/trust.html">Trust Center</a><a href="/privacy.html">Privacy</a><a href="/labs.html">Labs</a><a href="/support.html">Support</a><a href="/download.html">Download</a><a href="https://github.com/MalGuard" target="_blank" rel="noopener">GitHub</a></div></div></footer><div class="toast" id="toast"></div>
 <script>
 const navbar=document.getElementById('navbar'),menuBtn=document.getElementById('menuBtn'),navLinks=document.getElementById('navLinks'),homeContent=document.getElementById('homeContent'),productPages=document.querySelectorAll('.product-page');
 window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',scrollY>20));menuBtn.addEventListener('click',()=>{const a=navLinks.classList.toggle('active');menuBtn.setAttribute('aria-expanded',String(a))});document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>{navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false')}));
@@ -1041,7 +1147,20 @@ document.querySelectorAll('.plan-fold').forEach(card=>card.addEventListener('tog
 <script id="malguard-entry-behavior">
 (function(){
   var searchPanel=document.getElementById('siteSearch'),searchButton=document.getElementById('searchButton'),searchClose=document.getElementById('searchClose'),searchBackdrop=document.getElementById('searchBackdrop'),searchInput=document.getElementById('siteSearchInput'),searchForm=document.getElementById('siteSearchForm'),searchResults=document.getElementById('siteSearchResults'),menuClose=document.getElementById('menuClose');
-  var items=[{name:'Products',detail:'Malware AI, GTA Guard, and Game Scam Guard',target:'#products',terms:'products malware ai gta guard game scam'},{name:'How It Works',detail:'Compact MalGuard analysis workflow',target:'#how-it-works',terms:'how works scan identify inspect analyze decide'},{name:'Tools',detail:'Local file fingerprint and URL-text inspector',target:'/tools.html',terms:'tools sha256 hash link inspector local'},{name:'Security',detail:'Trust Center, privacy, integrity and limitations',target:'/trust.html',terms:'security trust privacy signing integrity limitations'},{name:'Support',detail:'Security reports, false positives, bugs and feedback',target:'#feedback',terms:'support help feedback vulnerability false positive bug'},{name:'Research',detail:'MalGuard Labs and defensive gaming-security guides',target:'/labs.html',terms:'research labs guides malguard'},{name:'Docs',detail:'Product, tools, trust and contributor documentation',target:'/docs.html',terms:'docs documentation guide getting started'},{name:'Download',detail:'Official release and installer status',target:'#download',terms:'download installer install release windows'},{name:'Malware AI',detail:'Planned AI-assisted suspicious-file analysis',target:'#malware-ai',terms:'malware ai files threat'},{name:'GTA Guard',detail:'Security analysis for GTA 5 mods',target:'#gta-guard',terms:'gta guard mods files'},{name:'Game Scam Guard',detail:'Planned gaming-link and scam safety',target:'#game-scam-guard',terms:'game scam guard phishing links'}];
+  var items=[
+{name:'Scan Mods',detail:'Game-mod scanning hub with GTA Guard available now',target:'/scan-mods.html',terms:'scan mods gta minecraft roblox mod security'},
+{name:'AI Intelligence',detail:'MalGuard security AI modules and planned intelligence tools',target:'/ai-intelligence.html',terms:'ai intelligence malware ai security'},
+{name:'Scan URL',detail:'Local URL-text analysis plus SHA-256 fingerprinting',target:'/scan-url.html',terms:'scan url link phishing hash fingerprint'},
+{name:'Products',detail:'GTA Guard, Malware AI, and Game Scam Guard',target:'#products',terms:'products malware ai gta guard game scam'},
+{name:'How It Works',detail:'Compact MalGuard analysis workflow',target:'#how-it-works',terms:'how works scan identify inspect analyze decide'},
+{name:'File Fingerprint',detail:'Calculate SHA-256 locally without uploading the file',target:'/tools.html#file-fingerprint',terms:'sha256 hash fingerprint local file'},
+{name:'Link Inspector',detail:'Inspect URL text without opening the destination',target:'/tools.html#link-inspector',terms:'link url inspector phishing local'},
+{name:'Trust Center',detail:'Privacy, release integrity, signing and limitations',target:'/trust.html',terms:'security trust privacy signing integrity limitations'},
+{name:'Research',detail:'MalGuard Labs and defensive gaming-security guides',target:'/labs.html',terms:'research labs guides'},
+{name:'Docs',detail:'Product, tools, trust and contributor documentation',target:'/docs.html',terms:'docs documentation guide'},
+{name:'Support',detail:'Security reports, false positives, bugs and feedback',target:'/support.html',terms:'support bug false positive security report'},
+{name:'Download',detail:'Windows requirements, verification and installation',target:'/download.html',terms:'download installer install release windows x64'}
+];
   function closeSearch(){searchPanel.hidden=true;searchButton.setAttribute('aria-expanded','false');}
   function openSearch(){searchPanel.hidden=false;searchButton.setAttribute('aria-expanded','true');renderResults(searchInput.value);setTimeout(function(){searchInput.focus();},0);}
   function goTo(target){closeSearch();if(navLinks){navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false');}if(target.charAt(0)==='/'){location.href=target;return;}location.hash=target;if(typeof route==='function'){route();}var el=document.querySelector(target);if(el){setTimeout(function(){el.scrollIntoView({behavior:'smooth',block:'start'});},40);}}
