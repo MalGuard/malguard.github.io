@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /agent-runtime-test-v1/
+Disallow: /agent-runtime-test-v2/
+Disallow: /agent-runtime-test-v3/
+Disallow: /agent-runtime-test-v4/
+Disallow: /agent-runtime-test-v5/
+Disallow: /agent-runtime-test-v6/
+Disallow: /malware-ai-preview-v02/
+Disallow: /malware-ai-engine-v03/
+Disallow: /malware-ai-v04/
+Disallow: /ios-preview/
+Sitemap: https://malguard.github.io/sitemap.xml
