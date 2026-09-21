@@ -1,0 +1,43 @@
+name: Product bug
+description: Report reproducible MalGuard product behavior that is not a security vulnerability.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not upload real malware, secrets, credentials, personal data, or private certificates.
+        Security vulnerabilities should follow SECURITY.md instead of this public form.
+  - type: input
+    id: version
+    attributes:
+      label: MalGuard version
+      placeholder: e.g. 0.6.1-beta.1
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options: [Windows 10, Windows 11, iPhone browser preview, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Use harmless inputs only.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
