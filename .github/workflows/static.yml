@@ -33,7 +33,7 @@ jobs:
           mkdir -p _site/.well-known
 
           cp index.html 404.html _site/
-          cp tools.html trust.html privacy.html support.html about.html labs.html docs.html apps.html _site/
+          cp tools.html trust.html privacy.html support.html about.html labs.html docs.html _site/
           cp robots.txt sitemap.xml _site/
           cp favicon.ico favicon-96.png favicon-192.png _site/
           cp -R assets _site/assets
@@ -49,7 +49,6 @@ jobs:
           test -f _site/tools.html
           test -f _site/trust.html
           test -f _site/docs.html
-          test -f _site/apps.html
           test -f _site/research/repackaged-mod.html
 
       - name: Setup Pages
