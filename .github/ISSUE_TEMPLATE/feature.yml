@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest a defensive gaming-security improvement.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Security problem
+      description: Describe the user or gaming-security problem first.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed improvement
+    validations:
+      required: true
+  - type: textarea
+    id: limits
+    attributes:
+      label: Safety or privacy considerations
+      description: Note any new network access, data handling, execution, or trust assumptions this feature could introduce.
