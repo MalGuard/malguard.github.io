@@ -1,0 +1,67 @@
+name: Validate production site
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Validate required production files
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            index.html
+            tools.html
+            trust.html
+            privacy.html
+            support.html
+            about.html
+            labs.html
+            docs.html
+            404.html
+            robots.txt
+            sitemap.xml
+            .well-known/security.txt
+            assets/site-pages.css
+            research/repackaged-mod.html
+          )
+          for file in "${required[@]}"; do
+            test -s "$file" || { echo "Missing required file: $file"; exit 1; }
+          done
+
+      - name: Validate trust and product claims
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "Unsigned Preview" index.html
+          grep -q "No scan can guarantee" index.html
+          grep -q "Standard, Plus and Pro" index.html
+          grep -qi "local-first" trust.html
+          grep -q "security.txt" trust.html
+          if grep -q "MalGuard detects, blocks, and prevents cheats" index.html; then
+            echo "Overbroad legacy hero claim is still present."
+            exit 1
+          fi
+
+      - name: Validate production deploy boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "path: '_site'" .github/workflows/static.yml
+          if grep -q "path: '\.'" .github/workflows/static.yml; then
+            echo "Pages workflow must not upload the entire repository."
+            exit 1
+          fi
+          grep -q "test ! -e _site/agent-runtime-test-v1" .github/workflows/static.yml
+          grep -q "test ! -e _site/malware-ai-preview-v02" .github/workflows/static.yml
