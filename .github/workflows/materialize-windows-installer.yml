@@ -1,0 +1,57 @@
+name: Materialize verified Windows installer
+
+on:
+  push:
+    branches:
+      - publish/windows-installer-host
+    paths:
+      - '.github/workflows/materialize-windows-installer.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DOWNLOAD_URL: 'https://sdmntprnortheu.oaiusercontent.com/files/00000000-7e8c-81f4-a586-583963d8405b/raw?se=2026-09-21T08%3A33%3A51Z&sp=r&sv=2026-02-06&sr=b&scid=5ea707ff-15c2-56ed-b4a8-7505201ec0ae&skoid=40ce4b34-a373-4a62-b0bf-44befe221915&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-20T18%3A18%3A01Z&ske=2026-09-21T18%3A18%3A01Z&sks=b&skv=2026-02-06&sig=4vH1I86ipjxT67d%2Bn/plZHF%2B6bS6A7Ffket8ZUbwODg%3D'
+      INSTALLER_NAME: 'MalGuard-Setup-0.6.1-beta.1-windows-x64.exe'
+      EXPECTED_SHA256: '671d38e17a9a2dbd5f77aa95f7da4c104c1dac4d9e5ed477a3309e321291bf0b'
+    steps:
+      - name: Checkout publishing branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: true
+      - name: Verify and copy exact installer
+        shell: bash
+        run: |
+          set -euo pipefail
+          work="$(mktemp -d)"
+          curl --fail --location --retry 3 --retry-delay 2 "$DOWNLOAD_URL" -o "$work/artifact.zip"
+          unzip -q "$work/artifact.zip" -d "$work/artifact"
+          src="$(find "$work/artifact" -type f -name "$INSTALLER_NAME" -print -quit)"
+          test -n "$src"
+          actual="$(sha256sum "$src" | awk '{print $1}')"
+          test "$actual" = "$EXPECTED_SHA256"
+          sidecar="$src.sha256"
+          test -f "$sidecar"
+          sidehash="$(awk '{print $1}' "$sidecar" | tr 'A-F' 'a-f')"
+          test "$sidehash" = "$EXPECTED_SHA256"
+          mkdir -p downloads
+          cp "$src" "downloads/$INSTALLER_NAME"
+          printf '%s  %s\n' "$EXPECTED_SHA256" "$INSTALLER_NAME" > "downloads/$INSTALLER_NAME.sha256"
+          copied="$(sha256sum "downloads/$INSTALLER_NAME" | awk '{print $1}')"
+          test "$copied" = "$EXPECTED_SHA256"
+      - name: Commit verified installer to website branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "downloads/$INSTALLER_NAME" "downloads/$INSTALLER_NAME.sha256"
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Host verified GTA Guard Windows installer"
+          git push origin HEAD:publish/windows-installer-host
