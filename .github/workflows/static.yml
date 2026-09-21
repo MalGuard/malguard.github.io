@@ -32,13 +32,14 @@ jobs:
           rm -rf _site
           mkdir -p _site/.well-known
 
-          cp index.html _site/
+          cp index.html 404.html _site/
           cp tools.html trust.html privacy.html support.html about.html labs.html docs.html _site/
           cp robots.txt sitemap.xml _site/
           cp favicon.ico favicon-96.png favicon-192.png _site/
           cp -R assets _site/assets
           cp -R downloads _site/downloads
           cp -R ios-preview _site/ios-preview
+          cp -R research _site/research
           cp .well-known/security.txt _site/.well-known/security.txt
 
           # Guardrail: development prototypes must never ship in the Pages artifact.
@@ -47,6 +48,8 @@ jobs:
           test -f _site/.well-known/security.txt
           test -f _site/tools.html
           test -f _site/trust.html
+          test -f _site/docs.html
+          test -f _site/research/repackaged-mod.html
 
       - name: Setup Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
