@@ -2698,6 +2698,7 @@ function closeMenu({restoreFocus=false}={}){
   if(!navLinks.classList.contains('active'))return;
   setMenuButtonState(false);
   cancelAnimationFrame(menuProgrammaticAnimation);
+  if(menuSelectionFrame){cancelAnimationFrame(menuSelectionFrame);menuSelectionFrame=0}
   clearTimeout(menuScrollEndTimer);
   clearTimeout(menuCloseTimer);
   menuGestureMoved=false;
