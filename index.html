@@ -2084,6 +2084,154 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
 }
 </style>
 
+
+<style id="malguard-scroll-header-menu-20260922">
+/* Center each platform cluster within its own half while keeping mark left of text. */
+.hero-platform{
+  justify-content:center!important;
+}
+.hero-platform span{
+  align-items:flex-start!important;
+  text-align:left!important;
+}
+
+/* Hamburger opens a horizontal, scrollable header rail instead of the old vertical drawer. */
+.nav-inner{
+  overflow:visible!important;
+}
+.nav-inner>.feature-menu{
+  display:none!important;
+}
+.nav-inner>.feature-menu.active{
+  display:flex!important;
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  top:calc(100% + 8px)!important;
+  width:100%!important;
+  max-width:none!important;
+  min-height:58px!important;
+  max-height:none!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  gap:8px!important;
+  padding:8px 10px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  white-space:nowrap!important;
+  scrollbar-width:none!important;
+  border:1px solid rgba(223,229,235,.16)!important;
+  border-radius:15px!important;
+  background:linear-gradient(180deg,rgba(9,10,11,.94),rgba(4,5,6,.90))!important;
+  box-shadow:0 16px 42px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.035)!important;
+  backdrop-filter:blur(18px) saturate(110%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(110%)!important;
+  animation:mgMenuReveal .22s cubic-bezier(.2,.8,.2,1) both!important;
+}
+.nav-inner>.feature-menu.active::-webkit-scrollbar{
+  display:none!important;
+}
+.feature-menu .menu-close,
+.feature-menu .nav-group-label{
+  display:none!important;
+}
+.feature-menu a{
+  flex:0 0 auto!important;
+  min-height:38px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0 13px!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  border-bottom:1px solid rgba(255,255,255,.09)!important;
+  border-radius:10px!important;
+  background:rgba(255,255,255,.018)!important;
+  font:750 10px/1 var(--display)!important;
+  letter-spacing:.01em!important;
+  transition:transform .16s ease,background .16s ease,border-color .16s ease,color .16s ease!important;
+  animation:mgMenuItemIn .26s ease both!important;
+}
+.feature-menu a:nth-of-type(3n+1){
+  color:#ffffff!important;
+  background:rgba(255,255,255,.045)!important;
+}
+.feature-menu a:nth-of-type(3n+2){
+  color:#c6cdd5!important;
+  background:rgba(184,192,202,.025)!important;
+}
+.feature-menu a:nth-of-type(3n){
+  color:#9ea7b1!important;
+  background:rgba(118,127,137,.025)!important;
+}
+.feature-menu a:hover,
+.feature-menu a:focus-visible{
+  color:#fff!important;
+  border-color:rgba(255,255,255,.28)!important;
+  background:rgba(255,255,255,.07)!important;
+  transform:translateY(-1px)!important;
+}
+.feature-menu a:nth-of-type(1){animation-delay:.015s!important}
+.feature-menu a:nth-of-type(2){animation-delay:.03s!important}
+.feature-menu a:nth-of-type(3){animation-delay:.045s!important}
+.feature-menu a:nth-of-type(4){animation-delay:.06s!important}
+.feature-menu a:nth-of-type(5){animation-delay:.075s!important}
+.feature-menu a:nth-of-type(6){animation-delay:.09s!important}
+.feature-menu a:nth-of-type(7){animation-delay:.105s!important}
+.feature-menu a:nth-of-type(8){animation-delay:.12s!important}
+.feature-menu a:nth-of-type(9){animation-delay:.135s!important}
+
+.menu-btn[aria-expanded="true"]{
+  animation:mgMenuTap .20s ease-out!important;
+  color:#eef3f7!important;
+  border-color:rgba(255,255,255,.30)!important;
+  background:rgba(255,255,255,.055)!important;
+}
+
+@keyframes mgMenuReveal{
+  0%{opacity:0;transform:translateY(-5px) scale(.992)}
+  55%{opacity:1;transform:translateY(1px) scale(1.002)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes mgMenuItemIn{
+  0%{opacity:0;transform:translateX(5px)}
+  100%{opacity:1;transform:translateX(0)}
+}
+@keyframes mgMenuTap{
+  0%{transform:translateX(0)}
+  28%{transform:translateX(-1.3px)}
+  56%{transform:translateX(1.3px)}
+  78%{transform:translateX(-.6px)}
+  100%{transform:translateX(0)}
+}
+
+@media(max-width:760px){
+  .nav-inner>.feature-menu.active{
+    left:0!important;
+    right:0!important;
+    top:calc(100% + 7px)!important;
+    width:100%!important;
+    min-height:56px!important;
+    padding:8px!important;
+    gap:7px!important;
+  }
+  .feature-menu a{
+    min-height:36px!important;
+    padding:0 12px!important;
+    font-size:9px!important;
+  }
+  .hero-platform{
+    justify-content:center!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .nav-inner>.feature-menu.active,
+  .feature-menu a,
+  .menu-btn[aria-expanded="true"]{
+    animation:none!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <a class="site-skip-link" href="#homeContent">Skip to main content</a>
@@ -2318,7 +2466,7 @@ document.querySelectorAll('.plan-fold').forEach(card=>card.addEventListener('tog
   searchButton.addEventListener('click',openSearch);searchClose.addEventListener('click',closeSearch);searchBackdrop.addEventListener('click',closeSearch);searchInput.addEventListener('input',function(){renderResults(searchInput.value);});searchForm.addEventListener('submit',function(event){event.preventDefault();var first=searchResults.querySelector('button[data-target]');if(first){goTo(first.getAttribute('data-target'));}});var lightTrigger=document.querySelector('.hero-actions-logo'),heroEntry=document.querySelector('.hero-entry');
   function toggleHeroLights(){var locked=heroEntry.classList.toggle('lights-locked');lightTrigger.setAttribute('aria-pressed',String(locked));lightTrigger.setAttribute('aria-label',locked?'Resume gentle MalGuard lights':'Keep MalGuard lights fully on');}
   if(lightTrigger&&heroEntry){lightTrigger.addEventListener('click',toggleHeroLights);}
-  menuClose.addEventListener('click',function(){navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false');menuBtn.focus();});menuBtn.addEventListener('click',function(){setTimeout(function(){if(navLinks.classList.contains('active')){menuClose.focus();}},0);});document.addEventListener('keydown',function(event){if(event.key==='Escape'){closeSearch();if(navLinks.classList.contains('active')){navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false');menuBtn.focus();}}});renderResults('');
+  menuClose.addEventListener('click',function(){navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false');menuBtn.focus();});menuBtn.addEventListener('click',function(){if(navLinks.classList.contains('active')){try{if(navigator.vibrate)navigator.vibrate(8)}catch(e){}setTimeout(function(){navLinks.scrollLeft=0;},0);}});document.addEventListener('keydown',function(event){if(event.key==='Escape'){closeSearch();if(navLinks.classList.contains('active')){navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false');menuBtn.focus();}}});renderResults('');
 })();
 </script>
 <script id="compact-home-behavior">
