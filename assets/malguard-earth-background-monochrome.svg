@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="MalGuard Earth">
+<defs>
+  <filter id="earthMono" x="-10%" y="-10%" width="120%" height="120%">
+    <feColorMatrix type="saturate" values="0"/>
+    <feComponentTransfer>
+      <feFuncR type="gamma" amplitude="1.05" exponent=".9" offset="0"/>
+      <feFuncG type="gamma" amplitude="1.05" exponent=".9" offset="0"/>
+      <feFuncB type="gamma" amplitude="1.05" exponent=".9" offset="0"/>
+    </feComponentTransfer>
+  </filter>
+  <filter id="markMono" x="-35%" y="-35%" width="170%" height="170%">
+    <feColorMatrix type="saturate" values="0" result="gray"/>
+    <feComponentTransfer in="gray" result="tone">
+      <feFuncR type="gamma" amplitude="1.22" exponent=".78" offset="0"/>
+      <feFuncG type="gamma" amplitude="1.22" exponent=".78" offset="0"/>
+      <feFuncB type="gamma" amplitude="1.22" exponent=".78" offset="0"/>
+    </feComponentTransfer>
+    <feDropShadow in="tone" dx="0" dy="11" stdDeviation="12" flood-color="#000000" flood-opacity=".82"/>
+    <feDropShadow in="tone" dx="0" dy="0" stdDeviation="5" flood-color="#ffffff" flood-opacity=".16"/>
+  </filter>
+  <radialGradient id="markMask" cx="50%" cy="50%" r="50%">
+    <stop offset="0" stop-color="#030405" stop-opacity=".84"/>
+    <stop offset=".58" stop-color="#050607" stop-opacity=".58"/>
+    <stop offset="1" stop-color="#050607" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="leftShade" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#010101" stop-opacity=".82"/>
+    <stop offset=".38" stop-color="#010101" stop-opacity=".46"/>
+    <stop offset=".64" stop-color="#010101" stop-opacity=".08"/>
+    <stop offset="1" stop-color="#010101" stop-opacity="0"/>
+  </linearGradient>
+</defs>
+<image href="malguard-earth-background.png" x="0" y="0" width="1600" height="900" preserveAspectRatio="xMidYMid slice" filter="url(#earthMono)"/>
+<rect x="0" y="0" width="1600" height="900" fill="url(#leftShade)"/>
+<ellipse cx="1168" cy="414" rx="195" ry="185" fill="url(#markMask)"/>
+<image href="malguard-logo.svg" x="1008" y="254" width="320" height="320" preserveAspectRatio="xMidYMid meet" filter="url(#markMono)"/>
+</svg>
