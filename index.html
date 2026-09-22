@@ -2660,7 +2660,8 @@ function finalizeNativeMenuScroll(){
   let next=nearestMenuIndex();
   const min=Math.max(0,menuGestureStartIndex-2);
   const max=Math.min(menuItems.length-1,menuGestureStartIndex+2);
-  if(menuGestureMoved)next=Math.max(min,Math.min(max,next));
+  if(!menuGestureMoved)next=menuGestureStartIndex;
+  else next=Math.max(min,Math.min(max,next));
   setActiveMenuItem(next);
 
   const target=menuTargetLeft(next);
