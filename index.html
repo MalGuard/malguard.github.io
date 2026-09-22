@@ -2585,7 +2585,7 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
 <footer><div class="container footer-inner"><div class="footer-copy"><strong>© 2026 MalGuard. Scan Smart. Play Safe.</strong><span class="footer-disclaimer">Security analysis reduces risk. No scan can guarantee that a file, mod, link, or destination is harmless.</span></div><div class="footer-links"><a href="#products">Products</a><a href="/tools.html">Tools</a><a href="/about.html">About</a><a href="/docs.html">Docs</a><a href="/trust.html">Trust Center</a><a href="/privacy.html">Privacy</a><a href="/labs.html">Labs</a><a href="/support.html">Support</a><a href="/download.html">Download</a><a href="https://github.com/MalGuard" target="_blank" rel="noopener">GitHub</a></div></div></footer><div class="toast" id="toast"></div>
 <script>
 const navbar=document.getElementById('navbar'),menuBtn=document.getElementById('menuBtn'),navLinks=document.getElementById('navLinks'),homeContent=document.getElementById('homeContent'),productPages=document.querySelectorAll('.product-page');
-window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',scrollY>20));
+window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',scrollY>8));
 
 const menuItems=[...navLinks.querySelectorAll('a')];
 let activeMenuIndex=0;
@@ -2594,6 +2594,7 @@ let menuGestureStartX=0;
 let menuGestureMoved=false;
 let menuScrollEndTimer=0;
 let menuProgrammaticAnimation=0;
+let menuCloseTimer=0;
 
 function setMenuButtonState(opened){
   menuBtn.setAttribute('aria-expanded',String(opened));
@@ -2671,6 +2672,8 @@ function finalizeNativeMenuScroll(){
 }
 
 function openMenu(){
+  clearTimeout(menuCloseTimer);
+  navLinks.classList.remove('closing');
   navLinks.classList.add('active');
   setMenuButtonState(true);
   const routeIndex=menuItems.findIndex(item=>{
@@ -2687,11 +2690,16 @@ function openMenu(){
 }
 
 function closeMenu({restoreFocus=false}={}){
-  navLinks.classList.remove('active');
+  if(!navLinks.classList.contains('active'))return;
   setMenuButtonState(false);
   cancelAnimationFrame(menuProgrammaticAnimation);
   clearTimeout(menuScrollEndTimer);
+  clearTimeout(menuCloseTimer);
   menuGestureMoved=false;
+  navLinks.classList.add('closing');
+  menuCloseTimer=setTimeout(()=>{
+    navLinks.classList.remove('active','closing');
+  },260);
   if(restoreFocus)menuBtn.focus();
 }
 
