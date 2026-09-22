@@ -1492,3 +1492,14 @@ main > section:not(.hero-entry):not(.hero){
     height:42px!important;
   }
 }
+
+
+/* Contextual anchors stop below the floating header instead of hiding under it. */
+.mg-context-header + main [id]{
+  scroll-margin-top:118px!important;
+}
+@media(max-width:800px){
+  .mg-context-header + main [id]{
+    scroll-margin-top:112px!important;
+  }
+}
