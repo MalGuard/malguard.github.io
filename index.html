@@ -2544,6 +2544,7 @@ function setActiveMenuItem(index,{feedback=false,scrollIntoView=false}={}){
   const next=Math.max(0,Math.min(menuItems.length-1,index));
   if(next===activeMenuIndex){
     if(scrollIntoView)menuItems[next].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+    if(feedback)menuSelectionFeedback();
     return;
   }
   menuItems.forEach((item,i)=>{
