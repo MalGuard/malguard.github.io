@@ -1367,6 +1367,265 @@ input,select,textarea,button{max-width:100%}
   .hero-earth-malguard-logo{display:none!important}
 }
 </style>
+
+<style id="malguard-royal-monochrome-theme">
+:root{
+  --bg:#030303!important;
+  --panel:#09090a!important;
+  --panel2:#0e0f10!important;
+  --text:#f7f8fa!important;
+  --muted:#a5aab1!important;
+  --blue:#f5f7fa!important;
+  --blue2:#e8ecf1!important;
+  --cyan:#ffffff!important;
+  --green:#f3f5f7!important;
+  --magenta:#d5dae0!important;
+  --silver:#dfe4e9!important;
+  --danger:#d7dbe0!important;
+  --warning:#c8cdd3!important;
+  --line:rgba(255,255,255,.115)!important;
+}
+body{
+  background:
+    radial-gradient(circle at 73% 7%,rgba(255,255,255,.055),transparent 28%),
+    linear-gradient(180deg,#020202 0%,#060607 48%,#020202 100%)!important;
+  color:#f7f8fa!important;
+}
+body:before{
+  opacity:.25!important;
+  background:
+    linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px)!important;
+}
+.nav,.nav.scrolled{background:rgba(2,2,2,.86)!important}
+.nav-inner{
+  border-color:rgba(255,255,255,.18)!important;
+  background:linear-gradient(115deg,rgba(255,255,255,.035),rgba(255,255,255,.012))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 14px 42px rgba(0,0,0,.28)!important;
+}
+.brand-site-logo{
+  filter:drop-shadow(0 0 9px rgba(255,255,255,.16))!important;
+}
+.nav-links a{color:#d6d9dd!important}
+.nav-links a:hover{color:#fff!important;text-shadow:0 0 10px rgba(255,255,255,.2)!important}
+.nav-icon,.nav-download{
+  border-color:rgba(255,255,255,.2)!important;
+  background:rgba(255,255,255,.018)!important;
+  color:#f6f7f9!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05)!important;
+}
+.nav-icon:hover,.nav-download:hover{
+  border-color:rgba(255,255,255,.55)!important;
+  background:rgba(255,255,255,.05)!important;
+  box-shadow:0 0 22px rgba(255,255,255,.08)!important;
+}
+.download-label,.download-glyph{color:#f6f7f9!important}
+
+.hero-entry{
+  background:#020202!important;
+  padding:126px 0 56px!important;
+  overflow:hidden!important;
+}
+.hero-earth-backdrop{
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.98) 0%,rgba(0,0,0,.78) 43%,rgba(0,0,0,.43) 68%,rgba(0,0,0,.7) 100%),
+    url("assets/malguard-earth-background.png") center/cover no-repeat!important;
+  filter:grayscale(1) brightness(.5) contrast(1.18)!important;
+  opacity:.82!important;
+}
+.nasa-earth-photo{filter:grayscale(1)!important}
+.hero-entry .hero-grid{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr)!important;
+  min-height:570px!important;
+  align-items:center!important;
+  place-items:initial!important;
+  position:relative!important;
+  z-index:2!important;
+}
+.hero-entry .hero-copy{
+  display:flex!important;
+  max-width:690px!important;
+  align-items:flex-start!important;
+  flex-direction:column!important;
+  padding:30px 0 20px!important;
+  text-align:left!important;
+}
+.hero-entry .eyebrow{
+  color:#dfe4ea!important;
+  letter-spacing:.19em!important;
+  text-shadow:none!important;
+}
+.hero-entry h1{
+  max-width:700px!important;
+  margin-top:20px!important;
+  color:#fbfcfd!important;
+  text-align:left!important;
+  font-size:clamp(58px,6vw,88px)!important;
+  text-shadow:0 4px 28px rgba(0,0,0,.65)!important;
+}
+.hero-entry h1 span{
+  display:inline!important;
+  color:#eef2f6!important;
+  text-shadow:0 0 15px rgba(255,255,255,.09)!important;
+}
+.hero-entry .hero-description{
+  max-width:610px!important;
+  margin:22px 0 0!important;
+  color:#b9bec5!important;
+  text-align:left!important;
+  font-size:17px!important;
+}
+.hero-entry .hero-actions{
+  justify-content:flex-start!important;
+  margin-top:31px!important;
+}
+.hero-entry .btn{
+  border-color:rgba(255,255,255,.2)!important;
+  background:#09090a!important;
+  color:#f6f7f9!important;
+  box-shadow:none!important;
+}
+.hero-entry .btn-primary{
+  min-width:230px!important;
+  background:linear-gradient(180deg,#ffffff,#e9edf2)!important;
+  color:#090909!important;
+  border-color:#fff!important;
+  box-shadow:0 12px 30px rgba(255,255,255,.1)!important;
+}
+.hero-entry .btn-secondary{
+  background:rgba(8,8,9,.72)!important;
+  color:#f2f4f6!important;
+  border-color:rgba(255,255,255,.26)!important;
+}
+.hero-entry .btn:hover{
+  transform:translateY(-2px)!important;
+  border-color:rgba(255,255,255,.62)!important;
+}
+.hero-earth-malguard-logo{
+  display:block!important;
+  position:absolute!important;
+  left:73%!important;
+  top:46%!important;
+  width:min(470px,34vw)!important;
+  height:auto!important;
+  transform:translate(-50%,-50%)!important;
+  z-index:3!important;
+  padding:0!important;
+  background:none!important;
+  border-radius:0!important;
+  filter:
+    drop-shadow(0 14px 22px rgba(0,0,0,.9))
+    drop-shadow(0 0 18px rgba(255,255,255,.13))!important;
+  opacity:.98!important;
+}
+
+.hero-feature-rail{
+  border-top-color:rgba(255,255,255,.16)!important;
+  border-bottom-color:rgba(255,255,255,.16)!important;
+}
+.feature-hub{
+  border-right-color:rgba(255,255,255,.13)!important;
+  color:#f4f5f7!important;
+}
+.feature-hub:hover,.feature-hub:focus-visible{
+  background:rgba(255,255,255,.035)!important;
+  color:#fff!important;
+}
+.feature-hub img{
+  filter:grayscale(1) brightness(1.45) contrast(1.08)!important;
+}
+.feature-hub small{color:#91979e!important}
+
+.trust-bar,.home-compact-section{border-color:rgba(255,255,255,.09)!important}
+.trust-number,.section-label,.compact-system-grid a,.mg-text-link{color:#e7ebef!important}
+.compact-product-list,.compact-download-main,.compact-platform-side,.mg-preview-card,.compact-system-grid article{
+  border-color:rgba(255,255,255,.1)!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.022),rgba(255,255,255,.006))!important;
+}
+.compact-product{--pc:#eef1f4!important;border-bottom-color:rgba(255,255,255,.075)!important}
+.compact-product-gta,.compact-product-malware,.compact-product-scam{--pc:#eef1f4!important}
+.compact-product img{
+  filter:grayscale(1) brightness(1.35) contrast(1.08)!important;
+}
+.compact-product-top em,.mg-status,.mg-status.local,.mg-status.preview,.mg-status.warning{
+  color:#e3e7eb!important;
+  border-color:rgba(255,255,255,.17)!important;
+}
+.download-preview-pill,.preview-badge,.download-status{
+  color:#dfe3e7!important;
+  border-color:rgba(255,255,255,.16)!important;
+  background:rgba(255,255,255,.02)!important;
+}
+.game-card,.security-panel,.plan,.info-card,.labs-panel,.download-panel{
+  border-color:rgba(255,255,255,.1)!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.024),rgba(255,255,255,.006))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 18px 50px rgba(0,0,0,.24)!important;
+}
+.game-card *, .product-card *, .security-panel *, .plan *, .info-card *{
+  --accent:#f0f2f4!important;
+  --accent2:#d9dde2!important;
+}
+.product-icon,.product-brand-logo,.product-card img,.game-card img{
+  filter:grayscale(1) brightness(1.35) contrast(1.08)!important;
+}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline-color:rgba(255,255,255,.65)!important;
+}
+footer{border-top-color:rgba(255,255,255,.09)!important}
+
+@media(max-width:900px){
+  .hero-entry .hero-grid{
+    grid-template-columns:1fr!important;
+    min-height:760px!important;
+  }
+  .hero-earth-malguard-logo{
+    left:50%!important;
+    top:27%!important;
+    width:min(360px,72vw)!important;
+  }
+  .hero-entry .hero-copy{
+    max-width:650px!important;
+    padding:305px 28px 0!important;
+    align-items:center!important;
+    text-align:center!important;
+    margin:auto!important;
+  }
+  .hero-entry h1,.hero-entry .hero-description{text-align:center!important}
+  .hero-entry .hero-actions{justify-content:center!important}
+}
+@media(max-width:760px){
+  .nav-inner{border-color:rgba(255,255,255,.16)!important;background:rgba(5,5,6,.76)!important}
+  .feature-menu,.nav-links.active{
+    background:rgba(5,5,6,.98)!important;
+    border-color:rgba(255,255,255,.18)!important;
+  }
+  .hero-entry{padding:76px 0 34px!important}
+  .hero-entry .hero-grid{min-height:780px!important}
+  .hero-earth-backdrop{
+    background:
+      linear-gradient(180deg,rgba(0,0,0,.44),rgba(0,0,0,.68) 44%,#020202 74%),
+      url("assets/malguard-earth-background.png") center 14%/auto 780px no-repeat!important;
+  }
+  .hero-earth-malguard-logo{
+    top:29%!important;
+    width:min(320px,78vw)!important;
+  }
+  .hero-entry .hero-copy{
+    padding:345px 26px 0!important;
+  }
+  .hero-entry h1{
+    font-size:clamp(44px,12vw,64px)!important;
+  }
+  .hero-entry .hero-actions{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    width:min(100%,410px)!important;
+  }
+  .hero-entry .btn{width:100%!important;min-width:0!important}
+}
+</style>
+
 </head>
 <body>
 <a class="site-skip-link" href="#homeContent">Skip to main content</a>
@@ -1421,7 +1680,7 @@ input,select,textarea,button{max-width:100%}
 <section class="hero hero-entry" id="home">
   <div class="hero-earth-backdrop" aria-hidden="true">
   <div class="nasa-earth-photo"></div>
-  <img class="hero-earth-malguard-logo" src="assets/malguard-logo.svg" alt="">
+  <img class="hero-earth-malguard-logo" src="assets/malguard-site-logo.svg" alt="">
 </div>
   <div class="container hero-grid">
     <div class="hero-copy">
