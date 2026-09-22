@@ -1503,3 +1503,113 @@ main > section:not(.hero-entry):not(.hero){
     scroll-margin-top:112px!important;
   }
 }
+
+
+/* =========================================================
+   Header control cleanup · 2026-09-23
+   complete search glyph, icon-only download, neutral thin hamburger
+   ========================================================= */
+.nav-icon{
+  display:grid!important;
+  place-items:center!important;
+  font-size:0!important;
+  line-height:1!important;
+}
+.search-glyph{
+  width:19px!important;
+  height:19px!important;
+  display:block!important;
+  color:#eef2f6!important;
+  overflow:visible!important;
+  pointer-events:none!important;
+}
+
+/* Header download stays icon-only on all screen sizes. */
+.nav-download{
+  min-width:44px!important;
+  width:44px!important;
+  padding:0!important;
+  gap:0!important;
+}
+.nav-download .download-label{
+  display:none!important;
+}
+.nav-download .download-glyph{
+  width:20px!important;
+  height:20px!important;
+  display:block!important;
+}
+
+/* Hamburger remains visually neutral in both closed and open states. */
+.menu-btn,
+.menu-btn:hover,
+.menu-btn:active,
+.menu-btn:focus,
+.menu-btn:focus-visible,
+.menu-btn[aria-expanded="true"],
+.menu-btn[aria-expanded="true"]:hover,
+.menu-btn[aria-expanded="true"]:active,
+.menu-btn[aria-expanded="true"]:focus,
+.menu-btn[aria-expanded="true"]:focus-visible{
+  color:#eef2f6!important;
+  border-color:rgba(255,255,255,.10)!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+
+/* Keep keyboard accessibility without an iPhone-style blue tap square. */
+.menu-btn:focus-visible{
+  outline:1px solid rgba(255,255,255,.28)!important;
+  outline-offset:2px!important;
+}
+
+/* Thin, precise hamburger and X. */
+.menu-glyph{
+  width:18px!important;
+  height:13px!important;
+}
+.menu-glyph span{
+  width:18px!important;
+  height:1.25px!important;
+  margin-top:-.625px!important;
+  border-radius:999px!important;
+  background:currentColor!important;
+  box-shadow:none!important;
+  transition:
+    transform 220ms cubic-bezier(.22,1,.36,1),
+    opacity 160ms linear!important;
+}
+.menu-glyph span:nth-child(1){
+  top:50%!important;
+  transform:translateY(-5.5px)!important;
+}
+.menu-glyph span:nth-child(2){
+  top:50%!important;
+  transform:scaleX(1)!important;
+}
+.menu-glyph span:nth-child(3){
+  top:50%!important;
+  transform:translateY(5.5px)!important;
+}
+.menu-btn[aria-expanded="true"] .menu-glyph span:nth-child(1){
+  transform:translateY(0) rotate(45deg)!important;
+}
+.menu-btn[aria-expanded="true"] .menu-glyph span:nth-child(2){
+  opacity:0!important;
+  transform:scaleX(.35)!important;
+}
+.menu-btn[aria-expanded="true"] .menu-glyph span:nth-child(3){
+  transform:translateY(0) rotate(-45deg)!important;
+}
+
+/* Contextual headers use the same compact controls as home. */
+.mg-context-header .nav-icon,
+.mg-context-header .nav-download,
+.mg-context-header .menu-btn{
+  width:42px!important;
+  min-width:42px!important;
+  height:42px!important;
+  min-height:42px!important;
+  padding:0!important;
+}
