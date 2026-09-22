@@ -1613,3 +1613,205 @@ main > section:not(.hero-entry):not(.hero){
   min-height:42px!important;
   padding:0!important;
 }
+
+
+/* =========================================================
+   Header/menu cleanup + Windows download layout · 2026-09-23
+   ========================================================= */
+
+/* Download icon: centered, slightly larger, no label drift. */
+.nav-download{
+  display:grid!important;
+  place-items:center!important;
+  line-height:0!important;
+}
+.nav-download .download-glyph{
+  width:22px!important;
+  height:22px!important;
+  display:block!important;
+  margin:0!important;
+  transform:translateY(1px)!important;
+  overflow:visible!important;
+}
+.nav-download .download-label{
+  display:none!important;
+}
+
+/* Hamburger: no rectangle, no blue tap state, no color shift. */
+.menu-btn,
+.menu-btn:hover,
+.menu-btn:active,
+.menu-btn:focus,
+.menu-btn:focus-visible,
+.menu-btn[aria-expanded="true"],
+.menu-btn[aria-expanded="true"]:hover,
+.menu-btn[aria-expanded="true"]:active,
+.menu-btn[aria-expanded="true"]:focus,
+.menu-btn[aria-expanded="true"]:focus-visible{
+  border:0!important;
+  outline:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#eef0f2!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+
+/* Horizontal menu: simple ChatGPT-like neutral text, no blue pills. */
+.nav-inner>.feature-menu.active,
+.nav-inner>.feature-menu.closing{
+  border-color:rgba(255,255,255,.07)!important;
+  background:rgba(13,14,16,.94)!important;
+  box-shadow:0 18px 46px rgba(0,0,0,.32)!important;
+}
+.feature-menu a,
+.feature-menu a:nth-of-type(3n+1),
+.feature-menu a:nth-of-type(3n+2),
+.feature-menu a:nth-of-type(3n),
+.mg-context-header .feature-menu a{
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#8e8e93!important;
+  opacity:1!important;
+  transform:none!important;
+  text-shadow:none!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+  font-size:14px!important;
+  font-weight:500!important;
+  line-height:1.2!important;
+  letter-spacing:-.01em!important;
+  transition:none!important;
+}
+.feature-menu a:hover,
+.feature-menu a:focus-visible,
+.mg-context-header .feature-menu a:hover,
+.mg-context-header .feature-menu a:focus-visible{
+  border:0!important;
+  outline:0!important;
+  background:transparent!important;
+  color:#c8c9cc!important;
+  opacity:1!important;
+  transform:none!important;
+  box-shadow:none!important;
+}
+.feature-menu a.menu-current,
+.feature-menu a.menu-current:nth-of-type(3n+1),
+.feature-menu a.menu-current:nth-of-type(3n+2),
+.feature-menu a.menu-current:nth-of-type(3n),
+.feature-menu a.menu-current:hover,
+.feature-menu a.menu-current:focus-visible,
+.mg-context-header .feature-menu a.menu-current,
+.mg-context-header .feature-menu a.menu-current:hover,
+.mg-context-header .feature-menu a.menu-current:focus-visible{
+  border:0!important;
+  outline:0!important;
+  background:transparent!important;
+  color:#f4f4f5!important;
+  opacity:1!important;
+  transform:none!important;
+  box-shadow:none!important;
+  font-weight:600!important;
+}
+
+/* Download page cards: prevent global timeline .step rules from crushing text. */
+.download-page .hub-grid{
+  align-items:stretch!important;
+}
+.download-page .hub-card{
+  min-width:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  padding:22px!important;
+}
+.download-page .hub-card h3{
+  margin:0 0 8px!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+  font-size:18px!important;
+  font-weight:650!important;
+  line-height:1.25!important;
+  letter-spacing:-.01em!important;
+}
+.download-page .hub-card p{
+  width:100%!important;
+  margin:0!important;
+  color:#a7adb4!important;
+  font-size:14px!important;
+  line-height:1.58!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+}
+.download-page .hub-card code{
+  display:block!important;
+  width:100%!important;
+  margin-top:5px!important;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace!important;
+  font-size:11.5px!important;
+  line-height:1.5!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  word-break:break-all!important;
+}
+.download-page .hub-card .status{
+  margin-top:14px!important;
+  font-size:10.5px!important;
+  line-height:1.2!important;
+  letter-spacing:.06em!important;
+}
+
+.download-page .steps{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:12px!important;
+  margin-top:22px!important;
+}
+.download-page .steps .step{
+  display:block!important;
+  grid-template-columns:none!important;
+  min-width:0!important;
+  padding:16px 18px!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  border-radius:14px!important;
+  background:rgba(255,255,255,.018)!important;
+}
+.download-page .steps .step b{
+  display:block!important;
+  width:auto!important;
+  height:auto!important;
+  place-items:initial!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:none!important;
+  color:#f0f2f4!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+  font-size:14.5px!important;
+  font-weight:600!important;
+  line-height:1.35!important;
+}
+.download-page .steps .step p{
+  margin:7px 0 0!important;
+  color:#a7adb4!important;
+  font-size:14px!important;
+  line-height:1.55!important;
+  overflow-wrap:anywhere!important;
+}
+.download-page .notice{
+  font-size:14px!important;
+  line-height:1.6!important;
+  overflow-wrap:anywhere!important;
+}
+
+@media(max-width:800px){
+  .download-page .hub-card{
+    padding:20px!important;
+  }
+  .download-page .steps{
+    grid-template-columns:1fr!important;
+  }
+  .download-page .steps .step{
+    padding:15px 16px!important;
+  }
+}
