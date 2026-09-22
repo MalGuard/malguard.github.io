@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="description" content="MalGuard is a gaming security platform designed to help gamers inspect suspicious mods, dangerous files, scams and gaming-related threats before they become a problem.">
 <meta name="theme-color" content="#050607">
 <meta property="og:title" content="MalGuard | Scan Smart. Play Safe.">
@@ -1214,6 +1214,61 @@ footer{padding:21px 0!important}.footer-inner{align-items:start!important}
   .malware-ai-send{min-width:66px;padding:0 12px}
 }
 </style>
+
+<style id="malguard-responsive-hardening">
+/* Responsive hardening: keep desktop intact while preventing mobile overflow. */
+html{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{width:100%;max-width:100%;overflow-x:hidden}
+img,svg,video,canvas,iframe{max-width:100%}
+.container,.nav-inner,.hero-grid,.hero-copy,.hero-visual,.products-grid,.product-card,.steps,.step,.security-grid,.security-panel,.security-states,.state,.plans-grid,.plan,.labs-grid,.labs-panel,.download-panel,.platform-download-grid,.platform-download-card,.feedback-grid,.feedback-copy,.feedback-form,.product-page-grid,.info-card,.product-page-header,.malware-ai-shell,.malware-ai-embed-card,.malware-ai-embed-bar{min-width:0}
+h1,h2,h3,p,li,.section-description,.hero-description,.trust-label,.scan-card-value,.security-row,.state span,.plan p,.info-card p,.release-box span,.release-chip,.platform-download-card span,.platform-download-card small,.feedback-note,.product-page-header p,.malware-ai-embed-bar strong,.malware-ai-embed-bar span{overflow-wrap:anywhere;word-break:normal}
+pre,code,.mono{max-width:100%;overflow-wrap:anywhere;word-break:break-word;white-space:pre-wrap}
+input,select,textarea,button{max-width:100%}
+.security-row>*{min-width:0}
+@media(max-width:760px){
+  .nav{padding-top:max(12px,env(safe-area-inset-top));padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+  .nav-inner{gap:8px}
+  .hero{padding-top:118px}
+  .hero-grid{gap:24px}
+  .hero-description{font-size:15px;line-height:1.72}
+  .hero-actions{display:grid;grid-template-columns:1fr;width:min(100%,420px);margin-inline:auto}
+  .hero-actions .btn{width:100%}
+  .product-card{padding:22px;min-height:0}
+  .product-status{position:static;display:inline-flex;align-self:flex-start;margin:0 0 8px}
+  .product-card h3{margin-top:12px}
+  .security-row{gap:8px 14px;align-items:flex-start;flex-wrap:wrap}
+  .security-row span,.security-row strong{max-width:100%}
+  .release-chip,.labs-tag,.file-type{max-width:100%}
+  .feedback-form input,.feedback-form select,.feedback-form textarea{min-width:0}
+  .product-page{padding:115px 0 72px}
+  .product-page-header{margin-bottom:30px}
+  .product-page-header h1{font-size:clamp(36px,11vw,52px);line-height:1.02}
+  .malware-ai-embed-bar{align-items:flex-start;flex-wrap:wrap}
+  .malware-ai-live-dot{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+  .malware-ai-frame{height:calc(100dvh - 165px);min-height:520px}
+}
+@media(max-width:430px){
+  .container{width:calc(100% - 24px)}
+  .hero h1{font-size:clamp(38px,12vw,50px);line-height:1}
+  .hero-visual{min-height:420px}
+  .radar{width:min(330px,88vw)}
+  .scan-card{min-width:0;max-width:118px;padding:8px}
+  .scan-card.one{left:2%}
+  .scan-card.two{right:2%}
+  .radar-node{width:82px;padding:6px}
+  .labs-panel,.download-panel,.security-panel,.plan,.info-card{padding:20px}
+  .trust-item{padding:18px 10px}
+  .section{padding:68px 0}
+}
+@media(max-width:360px){
+  .hero h1{font-size:36px}
+  .hero-description{font-size:14px}
+  .radar{width:300px}
+  .radar-node{width:76px}
+  .scan-card{max-width:108px}
+}
+</style>
+
 </head>
 <body>
 <a class="site-skip-link" href="#homeContent">Skip to main content</a>
