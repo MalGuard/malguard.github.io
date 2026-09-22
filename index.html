@@ -2738,7 +2738,7 @@ navLinks.addEventListener('pointermove',e=>{
 
 navLinks.addEventListener('scroll',()=>{
   clearTimeout(menuScrollEndTimer);
-  menuScrollEndTimer=setTimeout(finalizeNativeMenuScroll,110);
+  menuScrollEndTimer=setTimeout(finalizeNativeMenuScroll,12);
 },{passive:true});
 
 if('onscrollend' in window){
