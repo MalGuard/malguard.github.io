@@ -1,0 +1,179 @@
+name: Publish current GTA Guard Windows x64
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/publish-current-gta-guard-windows.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/publish-current-gta-guard-windows.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: windows-2022
+    timeout-minutes: 35
+    env:
+      CORE_REPO: MalGuard/malguard-core
+      CORE_SHA: 3cc15b4deaf2f0980510e2ef2610e5350f4f65f4
+      RELEASE_TAG: gta-guard-v0.6.1-beta.1-3cc15b4
+      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 3cc15b4
+      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-3cc15b4-windows-x64.exe
+      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-3cc15b4-windows-x64.exe.sha256
+
+    steps:
+      - name: Checkout exact public MalGuard Core commit
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git init core
+          Set-Location core
+          git remote add origin "https://github.com/$env:CORE_REPO.git"
+          git fetch --depth=1 origin $env:CORE_SHA
+          git checkout --detach FETCH_HEAD
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $env:CORE_SHA) { throw "unexpected Core commit: $actual" }
+
+      - name: Setup exact Node.js for build tools
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.23.2'
+
+      - name: Stage pinned x64 Node runtime
+        shell: pwsh
+        working-directory: core
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $lock = Get-Content -LiteralPath 'tools/windows-node-runtime-lock.json' -Raw | ConvertFrom-Json
+          if ($lock.schemaVersion -ne '1.0.0' -or $lock.nodeVersion -ne '22.23.2') { throw 'unexpected Windows Node runtime lock' }
+          $entry = $lock.architectures.x64
+          if (-not $entry) { throw 'missing x64 Node runtime lock' }
+          $uri = [Uri]($lock.source + $entry.archive)
+          if ($uri.Scheme -ne 'https' -or $uri.Host -ne 'nodejs.org' -or $uri.Port -ne 443 -or $uri.UserInfo -or $uri.AbsolutePath -notlike '/dist/v22.23.2/*') { throw "untrusted Node runtime origin: $uri" }
+          $archive = Join-Path $env:RUNNER_TEMP $entry.archive
+          $response = Invoke-WebRequest -Uri $uri -OutFile $archive -MaximumRedirection 0 -PassThru
+          if ([int]$response.StatusCode -ne 200) { throw "Node runtime download returned HTTP $($response.StatusCode)" }
+          $actual = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne ([string]$entry.sha256).ToLowerInvariant()) { throw 'Node runtime SHA-256 mismatch' }
+          $extract = Join-Path $env:RUNNER_TEMP 'node-runtime-x64'
+          Remove-Item -LiteralPath $extract -Recurse -Force -ErrorAction SilentlyContinue
+          Expand-Archive -LiteralPath $archive -DestinationPath $extract -Force
+          $node = Get-ChildItem -LiteralPath $extract -Filter node.exe -File -Recurse | Select-Object -First 1
+          $license = Get-ChildItem -LiteralPath $extract -Filter LICENSE -File -Recurse | Select-Object -First 1
+          if (-not $node -or -not $license) { throw 'verified Node archive is incomplete' }
+          New-Item -ItemType Directory -Path 'desktop-app/runtime' -Force | Out-Null
+          Copy-Item -LiteralPath $node.FullName -Destination 'desktop-app/runtime/node.exe' -Force
+          Copy-Item -LiteralPath $license.FullName -Destination 'desktop-app/runtime/NODE-LICENSE.txt' -Force
+
+      - name: Build native x64 launcher
+        shell: pwsh
+        working-directory: core
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $build = Join-Path $env:RUNNER_TEMP 'malguard-windows-launcher-x64'
+          cmake -S native/windows-launcher -B $build -A x64
+          if ($LASTEXITCODE -ne 0) { throw 'launcher configure failed' }
+          cmake --build $build --config Release --parallel
+          if ($LASTEXITCODE -ne 0) { throw 'launcher build failed' }
+          $launcher = Get-ChildItem -LiteralPath $build -Filter 'MalGuard.exe' -File -Recurse | Select-Object -First 1
+          if (-not $launcher) { throw 'MalGuard.exe launcher was not produced' }
+          New-Item -ItemType Directory -Path 'desktop-app/bin' -Force | Out-Null
+          Copy-Item -LiteralPath $launcher.FullName -Destination 'desktop-app/bin/MalGuard.exe' -Force
+
+      - name: Build native x64 containment probe
+        shell: pwsh
+        working-directory: core
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $build = Join-Path $env:RUNNER_TEMP 'malguard-sandbox-containment-probe-x64'
+          cmake -S native/sandbox-containment-probe -B $build -A x64
+          if ($LASTEXITCODE -ne 0) { throw 'containment probe configure failed' }
+          cmake --build $build --config Release --parallel
+          if ($LASTEXITCODE -ne 0) { throw 'containment probe build failed' }
+          $probe = Get-ChildItem -LiteralPath $build -Filter 'MalGuardSandboxContainmentProbe.exe' -File -Recurse | Select-Object -First 1
+          if (-not $probe) { throw 'containment probe was not produced' }
+          New-Item -ItemType Directory -Path 'desktop-app/sandbox/bin' -Force | Out-Null
+          Copy-Item -LiteralPath $probe.FullName -Destination 'desktop-app/sandbox/bin/MalGuardSandboxContainmentProbe.exe' -Force
+
+      - name: Verify native x64 architecture
+        shell: pwsh
+        working-directory: core
+        run: |
+          $ErrorActionPreference = 'Stop'
+          function Get-PeMachine([string]$Path) {
+            $bytes = [IO.File]::ReadAllBytes((Resolve-Path -LiteralPath $Path))
+            if ($bytes.Length -lt 64 -or $bytes[0] -ne 0x4d -or $bytes[1] -ne 0x5a) { throw "not a PE file: $Path" }
+            $pe = [BitConverter]::ToInt32($bytes, 0x3c)
+            if ($pe -lt 0 -or $pe + 6 -gt $bytes.Length -or $bytes[$pe] -ne 0x50 -or $bytes[$pe+1] -ne 0x45) { throw "invalid PE header: $Path" }
+            return [BitConverter]::ToUInt16($bytes, $pe + 4)
+          }
+          foreach ($file in @('desktop-app/bin/MalGuard.exe','desktop-app/runtime/node.exe','desktop-app/sandbox/bin/MalGuardSandboxContainmentProbe.exe')) {
+            $actual = Get-PeMachine $file
+            if ($actual -ne 0x8664) { throw ("PE architecture mismatch for {0}: got 0x{1:X4}" -f $file,$actual) }
+          }
+
+      - name: Run release hardening regressions
+        shell: pwsh
+        working-directory: core
+        run: |
+          $ErrorActionPreference = 'Stop'
+          node tests/sandbox-backend.test.js
+          node tests/sandbox-first-run-certification.test.js
+          node tests/sandbox-telemetry.test.js
+          node tests/first-launch-counter.test.js
+          node tests/compatibility-profile.test.js
+          node tests/install-hardware-report-api.test.js
+          node tests/secure-update.test.js
+          node tests/release-trust.test.js
+          node tests/runtime-package-integrity.test.js
+          node tests/workflow-supply-chain.test.js
+          node tests/public-release-policy.test.js
+          node tests/windows-installer-source.test.js
+
+      - name: Build and verify sealed runtime package
+        shell: pwsh
+        working-directory: core
+        env:
+          MALGUARD_SOURCE_COMMIT: ${{ env.CORE_SHA }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          node tools/build-portable-package.js
+          $env:GITHUB_SHA = $env:CORE_SHA
+          node tools/verify-release-candidate.js
+
+      - name: Build Windows Setup executable
+        shell: pwsh
+        working-directory: core
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = (Get-Content -LiteralPath 'DESKTOP-VERSION' -Raw).Trim()
+          if ($version -ne '0.6.1-beta.1') { throw "unexpected desktop version: $version" }
+          $root = Join-Path (Get-Location) "dist/malguard-desktop-$version"
+          $setup = Join-Path (Get-Location) "dist/MalGuard-Setup-$version-windows-x64.exe"
+          & pwsh -NoLogo -NoProfile -NonInteractive -File .\tools\build-windows-installer.ps1 -PackageRoot $root -Architecture x64 -OutputPath $setup
+          if ($LASTEXITCODE -ne 0) { throw "Windows installer builder failed with exit code $LASTEXITCODE" }
+          if (-not (Test-Path -LiteralPath $setup -PathType Leaf)) { throw 'Windows installer was not produced' }
+          $publish = Join-Path (Get-Location) "dist/$env:PUBLISH_EXE"
+          Copy-Item -LiteralPath $setup -Destination $publish -Force
+          $hash = (Get-FileHash -LiteralPath $publish -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $env:PUBLISH_EXE" | Set-Content -LiteralPath (Join-Path (Get-Location) "dist/$env:PUBLISH_SUM") -Encoding ascii
+          Write-Host "Publish installer SHA-256: $hash"
+
+      - name: Publish immutable website Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        working-directory: core
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $exe = Join-Path (Get-Location) "dist/$env:PUBLISH_EXE"
+          $sum = Join-Path (Get-Location) "dist/$env:PUBLISH_SUM"
+          if (gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY *> $null) { throw "Release $env:RELEASE_TAG already exists; refusing to replace assets." }
+          $sha = ((Get-Content -LiteralPath $sum -Raw).Trim() -split '\s+')[0]
+          gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --prerelease --title $env:RELEASE_TITLE --notes "Unsigned Windows x64 preview built from MalGuard Core commit $env:CORE_SHA. SHA-256: $sha. Includes the anonymous coarse compatibility report documented in the MalGuard privacy policy." $exe $sum
+          if ($LASTEXITCODE -ne 0) { throw 'GitHub Release creation failed' }
