@@ -1,0 +1,313 @@
+/* MalGuard Professional Polish · 2026-09-22
+   Shared visual refinement for the homepage and supporting pages.
+   Keeps the existing MalGuard palette/content while improving motion,
+   hierarchy, touch targets and iPhone-class visual consistency. */
+
+html{
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+}
+body{letter-spacing:-.006em}
+button,a,input,select,textarea{
+  -webkit-tap-highlight-color:transparent;
+}
+button,a{
+  touch-action:manipulation;
+}
+
+/* Premium motion language: quick response, soft finish. */
+.btn,
+.nav-icon,
+.nav-download,
+.menu-btn,
+.feature-menu a,
+.card,
+.tool,
+.game-card,
+.fold-card,
+.feature-hub,
+.hero-platform{
+  transition-timing-function:cubic-bezier(.22,1,.36,1)!important;
+}
+
+/* Homepage glass/navigation refinement. */
+.nav-inner{
+  border-radius:18px!important;
+  border:1px solid rgba(220,228,236,.14)!important;
+  background:linear-gradient(180deg,rgba(15,17,20,.56),rgba(5,6,8,.42))!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 12px 36px rgba(0,0,0,.16)!important;
+  backdrop-filter:blur(20px) saturate(118%)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(118%)!important;
+}
+.nav.scrolled .nav-inner{
+  background:linear-gradient(180deg,rgba(12,14,17,.78),rgba(4,5,7,.68))!important;
+  border-color:rgba(226,233,240,.18)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    0 14px 40px rgba(0,0,0,.24)!important;
+}
+.nav-icon,.nav-download,.menu-btn{
+  min-width:42px!important;
+  min-height:42px!important;
+  border-radius:13px!important;
+  border:1px solid rgba(226,233,240,.16)!important;
+  background:rgba(255,255,255,.026)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+.nav-icon:active,.nav-download:active,.menu-btn:active{transform:scale(.965)!important}
+
+/* Real morphing hamburger. No character swap, so the motion stays continuous. */
+.menu-btn{
+  position:relative!important;
+  display:grid!important;
+  place-items:center!important;
+  color:#eef2f6!important;
+  font-size:0!important;
+  overflow:hidden!important;
+  transition:
+    color .28s cubic-bezier(.22,1,.36,1),
+    border-color .28s cubic-bezier(.22,1,.36,1),
+    background .28s cubic-bezier(.22,1,.36,1),
+    transform .18s cubic-bezier(.22,1,.36,1)!important;
+}
+.menu-glyph{
+  position:relative;
+  display:block;
+  width:18px;
+  height:14px;
+}
+.menu-glyph span{
+  position:absolute;
+  left:0;
+  width:18px;
+  height:1.7px;
+  border-radius:999px;
+  background:currentColor;
+  transform-origin:center;
+  transition:
+    top .36s cubic-bezier(.22,1,.36,1),
+    transform .36s cubic-bezier(.22,1,.36,1),
+    opacity .20s ease,
+    width .30s cubic-bezier(.22,1,.36,1);
+}
+.menu-glyph span:nth-child(1){top:0}
+.menu-glyph span:nth-child(2){top:6.1px}
+.menu-glyph span:nth-child(3){top:12.2px}
+.menu-btn[aria-expanded="true"]{
+  color:#f6f8fb!important;
+  border-color:rgba(255,255,255,.28)!important;
+  background:rgba(255,255,255,.065)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 0 18px rgba(255,255,255,.035)!important;
+}
+.menu-btn[aria-expanded="true"] .menu-glyph span:nth-child(1){
+  top:6.1px;
+  transform:rotate(45deg);
+}
+.menu-btn[aria-expanded="true"] .menu-glyph span:nth-child(2){
+  opacity:0;
+  width:8px;
+  transform:translateX(5px) scaleX(.35);
+}
+.menu-btn[aria-expanded="true"] .menu-glyph span:nth-child(3){
+  top:6.1px;
+  transform:rotate(-45deg);
+}
+
+/* Picker-style header rail. Fast enough to travel, still visually discrete. */
+.nav-inner>.feature-menu.active{
+  scroll-behavior:auto!important;
+  border-radius:16px!important;
+  border-color:rgba(225,232,239,.18)!important;
+  background:linear-gradient(180deg,rgba(13,15,18,.96),rgba(5,6,8,.93))!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 18px 50px rgba(0,0,0,.34)!important;
+}
+.feature-menu a{
+  border-radius:11px!important;
+  font-weight:700!important;
+  letter-spacing:-.005em!important;
+}
+.feature-menu a.menu-current{
+  background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.052))!important;
+  border-color:rgba(255,255,255,.26)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.065),
+    0 8px 24px rgba(0,0,0,.18)!important;
+}
+
+/* Cards and controls feel less "boxed in", more app-like. */
+.game-card,
+.fold-card,
+.security-panel,
+.plan,
+.info-card,
+.labs-panel,
+.download-panel,
+.card,
+.tool{
+  border-radius:22px!important;
+  border-color:rgba(210,221,231,.12)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 18px 48px rgba(0,0,0,.20)!important;
+}
+.btn{
+  border-radius:13px!important;
+  font-weight:700!important;
+  letter-spacing:.01em!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important;
+}
+.btn:active{transform:scale(.975)!important}
+
+/* Supporting pages share the same premium header/card language. */
+.topbar{
+  background:rgba(3,4,5,.76)!important;
+  border-bottom:1px solid rgba(255,255,255,.09)!important;
+  backdrop-filter:blur(20px) saturate(116%)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(116%)!important;
+  box-shadow:0 10px 34px rgba(0,0,0,.18)!important;
+}
+.topbar .nav{min-height:68px!important}
+.topbar .links a{
+  min-height:36px;
+  display:inline-flex;
+  align-items:center;
+  padding:0 9px;
+  border-radius:10px;
+  color:#cdd3da!important;
+  transition:color .18s ease,background .18s ease,transform .18s ease!important;
+}
+.topbar .links a:hover,
+.topbar .links a:focus-visible{
+  color:#fff!important;
+  background:rgba(255,255,255,.045)!important;
+  text-shadow:none!important;
+}
+.hero h1,.section-head h2{
+  text-wrap:balance;
+}
+.hero p,.section-head p,.card p,.tool p{
+  text-wrap:pretty;
+}
+.card,.tool{
+  background:linear-gradient(145deg,rgba(255,255,255,.030),rgba(255,255,255,.008))!important;
+}
+.field,input[type=file],select,textarea{
+  border-radius:13px!important;
+  min-height:46px;
+}
+
+/* Desktop hover is intentionally restrained. */
+@media(hover:hover) and (pointer:fine){
+  .game-card:hover,.card:hover,.tool:hover{
+    transform:translateY(-2px);
+    border-color:rgba(226,233,240,.18)!important;
+  }
+  .btn:hover,.nav-icon:hover,.nav-download:hover,.menu-btn:hover{
+    transform:translateY(-1px);
+  }
+}
+
+/* iPhone/phone readability: remove the tiny "designed for screenshots" text. */
+@media(max-width:800px){
+  body{font-size:16px;line-height:1.62}
+  .container{width:min(calc(100% - 28px),var(--max))!important}
+
+  .nav{padding-top:max(10px,env(safe-area-inset-top))!important}
+  .nav-inner{
+    min-height:58px!important;
+    padding:7px 9px!important;
+    border-radius:17px!important;
+  }
+  .brand-site-logo{height:34px!important}
+
+  .hero-entry .hero-description{
+    font-size:13px!important;
+    line-height:1.52!important;
+    color:#a1aab3!important;
+  }
+  .hero-entry .btn{
+    min-height:44px!important;
+    height:44px!important;
+    font-size:11.5px!important;
+  }
+  .hero-platform strong{font-size:10.5px!important}
+  .hero-platform small{font-size:9px!important;line-height:1.2!important}
+  .feature-hub strong{font-size:10.5px!important}
+  .feature-hub small{font-size:9px!important;line-height:1.25!important}
+
+  .section-description,
+  .fold-copy p,
+  .plan-summary-main p{
+    font-size:13.5px!important;
+    line-height:1.58!important;
+  }
+  .card-main p,
+  .detail-block p,
+  .rules-box li,
+  .info-card p,
+  .plan p{
+    font-size:12.5px!important;
+    line-height:1.55!important;
+  }
+
+  .feature-menu a{
+    min-height:42px!important;
+    font-size:10px!important;
+  }
+
+  .topbar .nav{
+    min-height:auto!important;
+    padding:11px 0 10px!important;
+    gap:9px!important;
+  }
+  .topbar .brand img{width:122px!important}
+  .topbar .links{
+    gap:6px!important;
+    padding:2px 0 6px!important;
+    scroll-padding-inline:4px;
+    mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent);
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent);
+  }
+  .topbar .links a{
+    min-height:38px!important;
+    padding:0 11px!important;
+    font-size:11.5px!important;
+    border:1px solid rgba(255,255,255,.075);
+    background:rgba(255,255,255,.018);
+    white-space:nowrap;
+  }
+
+  .hero{padding-top:78px!important}
+  .hero p{font-size:16px!important;line-height:1.65!important}
+  .card,.tool{padding:21px!important}
+  .card h3{font-size:20px!important}
+  .btn{min-height:46px!important;font-size:12px!important}
+}
+
+@media(max-width:420px){
+  .hero-entry h1{letter-spacing:-.04em!important}
+  .hero-entry .hero-description{font-size:12.5px!important}
+  .nav-icon,.nav-download,.menu-btn{
+    min-width:40px!important;
+    min-height:40px!important;
+  }
+  .menu-glyph{transform:scale(.96)}
+}
+
+/* Respect accessibility without turning the whole UI into a jump cut. */
+@media(prefers-reduced-motion:reduce){
+  .menu-glyph span,
+  .menu-btn,
+  .feature-menu a,
+  .btn,
+  .card,
+  .tool,
+  .game-card{transition:none!important}
+}

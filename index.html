@@ -2401,6 +2401,7 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
 }
 </style>
 
+<link rel="stylesheet" href="/assets/pro-polish.css">
 </head>
 <body>
 <a class="site-skip-link" href="#homeContent">Skip to main content</a>
@@ -2430,7 +2431,7 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
     <div class="nav-actions">
       <button class="nav-icon" id="searchButton" type="button" aria-label="Search MalGuard" aria-expanded="false" aria-controls="siteSearch">⌕</button>
       <a class="nav-download" href="/download.html" aria-label="Download MalGuard"><svg class="download-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="download-label">Download</span></a>
-      <button class="menu-btn" id="menuBtn" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="navLinks">☰</button>
+      <button class="menu-btn" id="menuBtn" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="navLinks"><span class="menu-glyph" aria-hidden="true"><span></span><span></span><span></span></span></button>
     </div>
   </div>
 </header>
@@ -2593,8 +2594,10 @@ let menuAnimating=false;
 let menuGestureStartX=0;
 let menuGestureStartY=0;
 let menuGestureTracking=false;
+let menuGestureStartTime=0;
 let menuWheelLocked=false;
 let menuSnapTimer=0;
+let menuAnimationToken=0;
 
 function primeMenuAudio(){
   try{
@@ -2617,21 +2620,20 @@ function menuSelectionFeedback(){
     const osc=menuAudioContext.createOscillator();
     const gain=menuAudioContext.createGain();
     osc.type='sine';
-    osc.frequency.setValueAtTime(155,now);
+    osc.frequency.setValueAtTime(820,now);
     gain.gain.setValueAtTime(0.0001,now);
-    gain.gain.exponentialRampToValueAtTime(0.018,now+0.003);
-    gain.gain.exponentialRampToValueAtTime(0.0001,now+0.022);
+    gain.gain.exponentialRampToValueAtTime(0.010,now+0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001,now+0.032);
     osc.connect(gain);
     gain.connect(menuAudioContext.destination);
     osc.start(now);
-    osc.stop(now+0.026);
+    osc.stop(now+0.036);
   }catch(e){}
 }
 
 function setMenuButtonState(opened){
   menuBtn.setAttribute('aria-expanded',String(opened));
   menuBtn.setAttribute('aria-label',opened?'Close navigation menu':'Open navigation menu');
-  menuBtn.textContent=opened?'×':'☰';
 }
 
 function setActiveMenuItem(index,{feedback=false}={}){
@@ -2654,27 +2656,55 @@ function menuTargetLeft(index){
   return Math.max(0,Math.min(raw,Math.max(0,navLinks.scrollWidth-navLinks.clientWidth)));
 }
 
-function snapMenuTo(index,{feedback=true,instant=false}={}){
+function snapMenuTo(index,{feedback=true,instant=false,duration=112}={}){
   if(!menuItems.length)return;
   const next=Math.max(0,Math.min(menuItems.length-1,index));
-  clearTimeout(menuSnapTimer);
+  const from=navLinks.scrollLeft;
+  const to=menuTargetLeft(next);
+  const token=++menuAnimationToken;
   menuAnimating=true;
-  navLinks.scrollTo({
-    left:menuTargetLeft(next),
-    behavior:instant?'auto':'smooth'
-  });
+
   const finish=()=>{
+    if(token!==menuAnimationToken)return;
+    navLinks.scrollLeft=to;
     setActiveMenuItem(next,{feedback});
     menuAnimating=false;
   };
-  if(instant)finish();
-  else menuSnapTimer=setTimeout(finish,190);
+
+  if(instant||Math.abs(to-from)<1){
+    finish();
+    return;
+  }
+
+  const started=performance.now();
+  const frame=now=>{
+    if(token!==menuAnimationToken)return;
+    const progress=Math.min(1,(now-started)/duration);
+    const eased=1-Math.pow(1-progress,3);
+    navLinks.scrollLeft=from+(to-from)*eased;
+    if(progress<1)requestAnimationFrame(frame);
+    else finish();
+  };
+  requestAnimationFrame(frame);
 }
 
-function stepMenu(direction){
+function stepMenu(direction,steps=1){
   if(menuAnimating||!navLinks.classList.contains('active'))return;
   const base=activeMenuIndex<0?0:activeMenuIndex;
-  snapMenuTo(base+(direction>0?1:-1),{feedback:true});
+  const amount=Math.max(1,Math.min(4,Math.round(steps)));
+  snapMenuTo(base+(direction>0?amount:-amount),{
+    feedback:true,
+    duration:amount>1?138:104
+  });
+}
+
+function gestureStepCount(distance,elapsed){
+  const d=Math.abs(distance);
+  const speed=d/Math.max(1,elapsed);
+  if(d>300||speed>2.0)return 4;
+  if(d>205||speed>1.35)return 3;
+  if(d>115||speed>.82)return 2;
+  return 1;
 }
 
 function openMenu(){
@@ -2693,6 +2723,7 @@ function closeMenu(){
   navLinks.classList.remove('active');
   setMenuButtonState(false);
   clearTimeout(menuSnapTimer);
+  menuAnimationToken++;
   menuAnimating=false;
   menuGestureTracking=false;
   menuItems.forEach(item=>{
@@ -2713,6 +2744,7 @@ navLinks.addEventListener('touchstart',e=>{
   primeMenuAudio();
   menuGestureStartX=e.touches[0].clientX;
   menuGestureStartY=e.touches[0].clientY;
+  menuGestureStartTime=performance.now();
   menuGestureTracking=true;
 },{passive:true});
 
@@ -2730,11 +2762,12 @@ navLinks.addEventListener('touchend',e=>{
   if(!t)return;
   const dx=t.clientX-menuGestureStartX;
   const dy=t.clientY-menuGestureStartY;
-  if(Math.abs(dx)<28||Math.abs(dx)<=Math.abs(dy)){
-    snapMenuTo(activeMenuIndex<0?0:activeMenuIndex,{feedback:false});
+  const elapsed=performance.now()-menuGestureStartTime;
+  if(Math.abs(dx)<24||Math.abs(dx)<=Math.abs(dy)){
+    snapMenuTo(activeMenuIndex<0?0:activeMenuIndex,{feedback:false,duration:90});
     return;
   }
-  stepMenu(dx<0?1:-1);
+  stepMenu(dx<0?1:-1,gestureStepCount(dx,elapsed));
 },{passive:true});
 
 navLinks.addEventListener('pointerdown',e=>{
@@ -2742,6 +2775,7 @@ navLinks.addEventListener('pointerdown',e=>{
   primeMenuAudio();
   menuGestureStartX=e.clientX;
   menuGestureStartY=e.clientY;
+  menuGestureStartTime=performance.now();
   menuGestureTracking=true;
 });
 
@@ -2750,18 +2784,19 @@ navLinks.addEventListener('pointerup',e=>{
   menuGestureTracking=false;
   const dx=e.clientX-menuGestureStartX;
   const dy=e.clientY-menuGestureStartY;
-  if(Math.abs(dx)>=26&&Math.abs(dx)>Math.abs(dy))stepMenu(dx<0?1:-1);
+  const elapsed=performance.now()-menuGestureStartTime;
+  if(Math.abs(dx)>=24&&Math.abs(dx)>Math.abs(dy))stepMenu(dx<0?1:-1,gestureStepCount(dx,elapsed));
 });
 
 navLinks.addEventListener('wheel',e=>{
   if(!navLinks.classList.contains('active'))return;
   const horizontal=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
-  if(Math.abs(horizontal)<8)return;
+  if(Math.abs(horizontal)<7)return;
   e.preventDefault();
-  if(menuWheelLocked)return;
+  if(menuWheelLocked||menuAnimating)return;
   menuWheelLocked=true;
-  stepMenu(horizontal>0?1:-1);
-  setTimeout(()=>{menuWheelLocked=false},260);
+  stepMenu(horizontal>0?1:-1,Math.abs(horizontal)>85?2:1);
+  setTimeout(()=>{menuWheelLocked=false},125);
 },{passive:false});
 
 menuItems.forEach((item,index)=>{
