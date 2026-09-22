@@ -2594,6 +2594,7 @@ let menuGestureStartX=0;
 let menuGestureMoved=false;
 let menuScrollEndTimer=0;
 let menuProgrammaticAnimation=0;
+let menuSelectionFrame=0;
 let menuCloseTimer=0;
 
 function setMenuButtonState(opened){
@@ -2655,18 +2656,19 @@ function animateMenuTo(index,{duration=260,select=true}={}){
   menuProgrammaticAnimation=requestAnimationFrame(frame);
 }
 
+function updateLiveMenuSelection(){
+  menuSelectionFrame=0;
+  if(!navLinks.classList.contains('active'))return;
+  setActiveMenuItem(nearestMenuIndex());
+}
+
 function finalizeNativeMenuScroll(){
   if(!navLinks.classList.contains('active'))return;
-  let next=nearestMenuIndex();
-  const min=Math.max(0,menuGestureStartIndex-2);
-  const max=Math.min(menuItems.length-1,menuGestureStartIndex+2);
-  if(!menuGestureMoved)next=menuGestureStartIndex;
-  else next=Math.max(min,Math.min(max,next));
+  const next=nearestMenuIndex();
   setActiveMenuItem(next);
-
   const target=menuTargetLeft(next);
-  if(Math.abs(navLinks.scrollLeft-target)>2){
-    animateMenuTo(next,{duration:260,select:true});
+  if(Math.abs(navLinks.scrollLeft-target)>.5){
+    navLinks.scrollLeft=target;
   }
   menuGestureMoved=false;
   menuGestureStartIndex=next;
@@ -2687,7 +2689,9 @@ function openMenu(){
   const next=routeIndex>=0?routeIndex:activeMenuIndex;
   setActiveMenuItem(next);
   menuGestureStartIndex=next;
-  requestAnimationFrame(()=>animateMenuTo(next,{duration:260,select:true}));
+  requestAnimationFrame(()=>{
+    navLinks.scrollLeft=menuTargetLeft(next);
+  });
 }
 
 function closeMenu({restoreFocus=false}={}){
@@ -2737,8 +2741,11 @@ navLinks.addEventListener('pointermove',e=>{
 },{passive:true});
 
 navLinks.addEventListener('scroll',()=>{
+  if(!menuSelectionFrame){
+    menuSelectionFrame=requestAnimationFrame(updateLiveMenuSelection);
+  }
   clearTimeout(menuScrollEndTimer);
-  menuScrollEndTimer=setTimeout(finalizeNativeMenuScroll,12);
+  menuScrollEndTimer=setTimeout(finalizeNativeMenuScroll,0);
 },{passive:true});
 
 if('onscrollend' in window){
@@ -2761,13 +2768,13 @@ document.addEventListener('keydown',e=>{
     e.preventDefault();
     const next=Math.min(menuItems.length-1,activeMenuIndex+1);
     setActiveMenuItem(next);
-    animateMenuTo(next,{duration:260,select:true});
+    navLinks.scrollLeft=menuTargetLeft(next);
     menuItems[next].focus();
   }else if(e.key==='ArrowLeft'){
     e.preventDefault();
     const next=Math.max(0,activeMenuIndex-1);
     setActiveMenuItem(next);
-    animateMenuTo(next,{duration:260,select:true});
+    navLinks.scrollLeft=menuTargetLeft(next);
     menuItems[next].focus();
   }
 });
