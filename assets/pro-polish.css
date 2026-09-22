@@ -858,3 +858,28 @@ main > section:not(.hero-entry):not(.hero){
     transform:none!important;
   }
 }
+
+
+/* Final audit alignment fixes. */
+.nav-inner{position:relative!important}
+
+@media(max-width:800px){
+  .hero-entry .btn{
+    min-height:46px!important;
+    height:46px!important;
+    font-size:14px!important;
+  }
+  .hero-platform strong,
+  .hero-platform small,
+  .feature-hub strong,
+  .feature-hub small{
+    font-size:14px!important;
+    line-height:1.25!important;
+  }
+  .hero-platform{
+    min-height:48px!important;
+  }
+  .feature-hub{
+    min-height:72px!important;
+  }
+}
