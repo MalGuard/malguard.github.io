@@ -37,3 +37,113 @@ input,select,textarea,button{max-width:100%}
   .card,.tool{padding:18px}
   .notice,.result{padding:14px}
 }
+
+
+/* MALGUARD ROYAL MONOCHROME THEME · 2026-09-22 */
+:root{
+  --bg:#030303;
+  --panel:#09090a;
+  --panel2:#0f1012;
+  --text:#f6f8fb;
+  --muted:#a5aab1;
+  --blue:#f6f8fb;
+  --blue2:#e7ebf0;
+  --cyan:#ffffff;
+  --green:#f3f5f7;
+  --danger:#d7dbe0;
+  --warning:#c8cdd3;
+  --line:rgba(255,255,255,.12);
+  --royal-white:#f6f8fb;
+  --electric-white:#e7ebf0;
+  --royal-silver:#b8c0ca;
+}
+html{background:#030303}
+body{
+  background:
+    radial-gradient(circle at 50% -14%,rgba(255,255,255,.07),transparent 31%),
+    linear-gradient(180deg,#020202 0%,#070708 45%,#020202 100%)!important;
+  color:var(--text)!important;
+}
+body:before{
+  background:
+    linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px)!important;
+}
+.topbar{
+  background:rgba(3,3,3,.9)!important;
+  border-bottom-color:rgba(255,255,255,.1)!important;
+  box-shadow:0 10px 40px rgba(0,0,0,.34)!important;
+}
+.brand img{
+  filter:drop-shadow(0 0 8px rgba(255,255,255,.14))!important;
+}
+.links a{color:#d6d9dd!important}
+.links a:hover,.links a:focus-visible{
+  color:#fff!important;
+  text-shadow:0 0 10px rgba(255,255,255,.22)!important;
+}
+.eyebrow,.kicker{
+  color:var(--electric-white)!important;
+  border-color:rgba(255,255,255,.18)!important;
+  background:rgba(255,255,255,.025)!important;
+}
+.hero h1,.section-head h2,.card h3,.step h3{color:#f8f9fb!important}
+.hero p,.section-head p,.card p,.step p,.fact dt{color:var(--muted)!important}
+.btn{
+  border-color:rgba(255,255,255,.18)!important;
+  background:#0b0b0c!important;
+  color:#f7f8fa!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+.btn.primary{
+  background:linear-gradient(180deg,#ffffff 0%,#edf1f5 100%)!important;
+  color:#090909!important;
+  border-color:#ffffff!important;
+  box-shadow:0 10px 30px rgba(255,255,255,.12),inset 0 -1px 0 rgba(0,0,0,.1)!important;
+}
+.btn.secondary:hover,.btn.secondary:focus-visible,.btn:hover,.btn:focus-visible{
+  border-color:rgba(255,255,255,.5)!important;
+  background:#111214!important;
+}
+.card,.tool,.step,.notice,.fact,.result{
+  border-color:rgba(255,255,255,.11)!important;
+}
+.card,.tool{
+  background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(255,255,255,.006))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.028),0 18px 45px rgba(0,0,0,.18)!important;
+}
+.badge,.badge.good,.badge.warn,.badge.info{
+  color:#edf0f4!important;
+  border-color:rgba(255,255,255,.18)!important;
+  background:rgba(255,255,255,.02)!important;
+}
+.notice{
+  background:rgba(255,255,255,.018)!important;
+  color:#d9dde2!important;
+}
+.field,input[type=file],select,textarea{
+  background:#070708!important;
+  color:#f7f8fa!important;
+  border-color:rgba(255,255,255,.12)!important;
+}
+.field:focus,input[type=file]:focus,select:focus,textarea:focus{
+  border-color:rgba(255,255,255,.42)!important;
+  box-shadow:0 0 0 3px rgba(255,255,255,.055)!important;
+}
+.step b{
+  border-color:rgba(255,255,255,.18)!important;
+  color:#f5f7fa!important;
+  background:rgba(255,255,255,.02)!important;
+}
+.signal,.signal.review,.signal.clear{
+  color:#e7eaee!important;
+  border-color:rgba(255,255,255,.13)!important;
+  background:rgba(255,255,255,.014)!important;
+}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline-color:rgba(255,255,255,.62)!important;
+}
+footer{border-top-color:rgba(255,255,255,.09)!important}
+img[src*="product-"],img[src*="feature-"]{
+  filter:grayscale(1) brightness(1.3) contrast(1.06)!important;
+}
