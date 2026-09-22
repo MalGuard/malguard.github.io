@@ -778,6 +778,18 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
   }
 }
 
+
+/* iPhone-only hero background preview: keep desktop unchanged. */
+@media(max-width:760px){
+  .nasa-earth-photo{
+    background:
+      linear-gradient(180deg,rgba(1,7,17,.08) 0%,rgba(1,7,17,.20) 36%,rgba(1,7,17,.56) 74%,#020815 100%),
+      url("https://d2jqrm6oza8nb6.cloudfront.net/datasets/d8131588-fc19-4def-ac72-4372ef3ef8fb.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMTU1N2U2NjRmMmM3NTZmMSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDE2MjE0OH0.E1oZqntNSBQPB8mvCXHjkOd__o8tY8bpheti41SLKO8") 50% 50%/cover no-repeat!important;
+    filter:brightness(.82) contrast(1.06) saturate(1.10)!important;
+    transform:none!important;
+  }
+}
+
 /* Installable product identities: the same app icons appear on the landing cards. */
 .hero-feature-rail .product-app-icon{display:block!important;width:52px!important;height:52px!important;object-fit:contain!important;border-radius:14px!important;filter:drop-shadow(0 0 7px rgba(31,209,255,.38))!important;transition:filter .25s ease,transform .25s ease!important}
 .hero-feature-rail button:hover .product-app-icon{transform:translateY(-2px)!important;filter:brightness(1.12) drop-shadow(0 0 13px rgba(31,209,255,.72))!important}
