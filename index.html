@@ -759,11 +759,23 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
   .hero-actions-logo .button-logo{width:108px!important;height:108px!important;flex-basis:108px!important}
 }
 
-/* Selected cyber-defense backdrop, stored locally with the site. */
+/* Responsive test backdrop: centered safe-zone composition for desktop and iPhone. */
 .hero-earth-backdrop{background:#020815!important}
-.nasa-earth-photo{background:linear-gradient(180deg,rgba(1,7,17,.20) 0%,rgba(1,7,17,.40) 40%,rgba(1,7,17,.72) 73%,#020815 100%),url("assets/malguard-hero-energy-core.jpg") center 18%/cover no-repeat!important;filter:brightness(.72) contrast(1.08) saturate(1.15)!important}
+.nasa-earth-photo{
+  background:
+    linear-gradient(180deg,rgba(1,7,17,.12) 0%,rgba(1,7,17,.30) 42%,rgba(1,7,17,.68) 78%,#020815 100%),
+    url("assets/malguard-hero-responsive-test.jpg") 50% 50%/cover no-repeat!important;
+  filter:brightness(.74) contrast(1.08) saturate(1.10)!important;
+  transform:none!important;
+}
 @media(max-width:760px){
-  .nasa-earth-photo{background:linear-gradient(180deg,rgba(1,7,17,.16) 0%,rgba(1,7,17,.36) 40%,rgba(1,7,17,.68) 73%,#020815 100%),url("assets/malguard-hero-energy-core.jpg") center top/cover no-repeat!important;filter:brightness(.76) contrast(1.08) saturate(1.18)!important}
+  .nasa-earth-photo{
+    background:
+      linear-gradient(180deg,rgba(1,7,17,.10) 0%,rgba(1,7,17,.28) 40%,rgba(1,7,17,.66) 78%,#020815 100%),
+      url("assets/malguard-hero-responsive-test.jpg") 50% 50%/cover no-repeat!important;
+    filter:brightness(.78) contrast(1.06) saturate(1.12)!important;
+    transform:none!important;
+  }
 }
 
 /* Installable product identities: the same app icons appear on the landing cards. */
