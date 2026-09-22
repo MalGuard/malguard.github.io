@@ -1032,3 +1032,23 @@ main > section:not(.hero-entry):not(.hero){
     top:calc(max(10px,env(safe-area-inset-top)) + 65px)!important;
   }
 }
+
+
+/* Maximum safe navigation response · 2026-09-22
+   Native momentum stays unrestricted. Visual selection updates at display-frame speed.
+   Final centering is immediate, so there is no artificial animation delay. */
+.nav-inner>.feature-menu.active,
+.nav-inner>.feature-menu.closing{
+  scroll-behavior:auto!important;
+  scroll-snap-type:none!important;
+}
+.feature-menu a,
+.feature-menu a:nth-of-type(3n+1),
+.feature-menu a:nth-of-type(3n+2),
+.feature-menu a:nth-of-type(3n),
+.feature-menu a.menu-current,
+.feature-menu a.menu-current:nth-of-type(3n+1),
+.feature-menu a.menu-current:nth-of-type(3n+2),
+.feature-menu a.menu-current:nth-of-type(3n){
+  transition:none!important;
+}
