@@ -1815,3 +1815,141 @@ main > section:not(.hero-entry):not(.hero){
     padding:15px 16px!important;
   }
 }
+
+
+/* =========================================================
+   MalGuard typography system · 2026-09-23
+   Baskerville Bold = H1/H2/Hero/page titles
+   Bodoni 72 Bold = H3/card/sub-headings
+   American Typewriter Bold = compact technical labels
+   System/SF = body, navigation, buttons, rules, docs
+   ========================================================= */
+:root{
+  --mg-font-title:"Baskerville","Baskerville Old Face","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --mg-font-subtitle:"Bodoni 72","Bodoni 72 Smallcaps","Bodoni MT",Didot,"Times New Roman",serif;
+  --mg-font-label:"American Typewriter","American Typewriter Condensed","Courier New",ui-monospace,monospace;
+  --mg-font-ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+
+/* Primary titles. */
+h1,
+h2,
+.hero-entry h1,
+.hero h1,
+.hub-hero h1,
+.section-title,
+.section-head h2,
+.malware-ai-page-header h1,
+.search-dialog h2,
+.mg-context-search .search-dialog h2{
+  font-family:var(--mg-font-title)!important;
+  font-weight:700!important;
+  font-style:normal!important;
+  letter-spacing:-.025em!important;
+}
+
+/* Card and secondary titles. */
+h3,
+.card h3,
+.hub-card h3,
+.info-card h3,
+.game-card h3,
+.fold-card h3,
+.tool h2,
+.tool h3,
+.step h3,
+.malware-ai-embed-bar strong{
+  font-family:var(--mg-font-subtitle)!important;
+  font-weight:700!important;
+  font-style:normal!important;
+  letter-spacing:-.015em!important;
+}
+
+/* Short technical labels only. */
+.eyebrow,
+.kicker,
+.badge,
+.status,
+.hub-card .status,
+.nav-group-label,
+.malware-ai-live-dot{
+  font-family:var(--mg-font-label)!important;
+  font-weight:700!important;
+  font-style:normal!important;
+  letter-spacing:.05em!important;
+}
+
+/* Long-form copy and interface text stay modern/readable. */
+body,
+p,
+li,
+dd,
+dt,
+label,
+input,
+textarea,
+select,
+button,
+.btn,
+.nav-links,
+.nav-links a,
+.feature-menu,
+.feature-menu a,
+.notice,
+.result,
+.meta,
+small,
+footer,
+.footer,
+.footer-links,
+.site-search-form,
+.site-search-results,
+.nav-actions,
+.nav-icon,
+.nav-download,
+.menu-btn,
+.download-label{
+  font-family:var(--mg-font-ui)!important;
+}
+
+/* Real hashes/code stay monospace. */
+code,
+pre,
+.mono,
+.result code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace!important;
+}
+
+/* Download page: readable rules/copy, decorative card titles only. */
+.download-page .hub-card p,
+.download-page .hub-card code,
+.download-page .steps .step p,
+.download-page .notice,
+.download-page .actions .btn,
+.download-page .steps .step b{
+  font-family:var(--mg-font-ui)!important;
+}
+.download-page .hub-card h3{
+  font-family:var(--mg-font-subtitle)!important;
+  font-weight:700!important;
+}
+
+@media(max-width:800px){
+  h1,
+  h2,
+  .hero-entry h1,
+  .hero h1,
+  .hub-hero h1,
+  .section-title,
+  .section-head h2{
+    letter-spacing:-.02em!important;
+  }
+  h3,
+  .card h3,
+  .hub-card h3,
+  .info-card h3,
+  .game-card h3,
+  .fold-card h3{
+    letter-spacing:-.01em!important;
+  }
+}
