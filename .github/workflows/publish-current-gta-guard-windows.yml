@@ -142,6 +142,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           node tools/build-portable-package.js
+          $env:GITHUB_SHA = $env:CORE_SHA
           node tools/verify-release-candidate.js
 
       - name: Build Windows Setup executable
