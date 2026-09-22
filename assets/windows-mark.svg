@@ -1,3 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="Windows">
-  <path fill="currentColor" d="M2 3.45 10.1 2.3v8.9H2V3.45Zm9.1-1.3L22 0.6v10.6H11.1V2.15ZM2 12.2h8.1v8.9L2 19.95V12.2Zm9.1 0H22v10.6l-10.9-1.55V12.2Z"/>
+  <defs>
+    <linearGradient id="windowsSilver" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".55" stop-color="#e8edf2"/>
+      <stop offset="1" stop-color="#aeb7c1"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#windowsSilver)" d="M2 3.45 10.1 2.3v8.9H2V3.45Zm9.1-1.3L22 0.6v10.6H11.1V2.15ZM2 12.2h8.1v8.9L2 19.95V12.2Zm9.1 0H22v10.6l-10.9-1.55V12.2Z"/>
 </svg>
