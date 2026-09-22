@@ -1815,3 +1815,134 @@ main > section:not(.hero-entry):not(.hero){
     padding:15px 16px!important;
   }
 }
+
+
+/* =========================================================
+   MalGuard typography system · 2026-09-23
+   Baskerville = primary titles
+   Bodoni 72 = card/subsection titles
+   American Typewriter = short labels/status
+   System/SF = body, navigation, controls
+   ========================================================= */
+:root{
+  --mg-title-font:Baskerville,"Baskerville Old Face","Hoefler Text",Georgia,serif;
+  --mg-card-title-font:"Bodoni 72","Bodoni MT",Didot,"Times New Roman",serif;
+  --mg-label-font:"American Typewriter","American Typewriter Condensed","Courier New",monospace;
+  --mg-ui-font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+
+/* Primary editorial hierarchy. */
+h1,
+h2,
+.hero-entry h1,
+.hero h1,
+.hub-hero h1,
+.section-title,
+.section-head h2,
+.page-title{
+  font-family:var(--mg-title-font)!important;
+  font-weight:700!important;
+  letter-spacing:-.022em!important;
+}
+
+/* Card and subsection headings use Bodoni 72. */
+h3,
+.card h2,
+.card h3,
+.tool h2,
+.tool h3,
+.hub-card h2,
+.hub-card h3,
+.info-card h2,
+.info-card h3,
+.game-card h2,
+.game-card h3,
+.fold-card h2,
+.fold-card h3,
+.plan h2,
+.plan h3,
+.step h3{
+  font-family:var(--mg-card-title-font)!important;
+  font-weight:700!important;
+  letter-spacing:-.012em!important;
+}
+
+/* Short labels/status only. */
+.eyebrow,
+.kicker,
+.badge,
+.status,
+.nav-group-label,
+.hero-platform small,
+.feature-hub small{
+  font-family:var(--mg-label-font)!important;
+  font-weight:700!important;
+  letter-spacing:.035em!important;
+}
+
+/* Keep all reading/UI text clean and fast. */
+body,
+p,
+li,
+dd,
+dt,
+.notice,
+.result,
+label,
+input,
+textarea,
+select,
+button,
+.btn,
+.nav-links,
+.nav-links a,
+.feature-menu a,
+.topbar .links,
+.topbar .links a,
+.nav-icon,
+.nav-download,
+.menu-btn,
+.site-search-form,
+.site-search-results,
+.search-hint,
+.footer,
+.footer a{
+  font-family:var(--mg-ui-font)!important;
+}
+
+/* Preserve code/hash readability. */
+code,
+pre,
+.mono{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace!important;
+}
+
+/* Prevent decorative fonts from becoming cramped on phones. */
+@media(max-width:800px){
+  h1,
+  h2,
+  .hero-entry h1,
+  .hero h1,
+  .hub-hero h1,
+  .section-title,
+  .section-head h2{
+    letter-spacing:-.018em!important;
+  }
+
+  h3,
+  .card h2,
+  .card h3,
+  .tool h2,
+  .tool h3,
+  .hub-card h2,
+  .hub-card h3{
+    letter-spacing:-.008em!important;
+  }
+
+  .eyebrow,
+  .kicker,
+  .badge,
+  .status{
+    letter-spacing:.025em!important;
+  }
+}
