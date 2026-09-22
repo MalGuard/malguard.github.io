@@ -2090,6 +2090,134 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
 }
 </style>
 
+
+<style id="malguard-horizontal-scroll-header-menu-20260922">
+/* Hamburger opens a horizontal scrolling rail inside the header system. */
+.nav-inner{overflow:visible!important}
+.nav-inner>.feature-menu{display:none!important}
+.nav-inner>.feature-menu.active{
+  display:flex!important;
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  top:calc(100% + 7px)!important;
+  width:100%!important;
+  max-width:none!important;
+  min-height:58px!important;
+  max-height:none!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  gap:8px!important;
+  padding:8px 10px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  white-space:nowrap!important;
+  scrollbar-width:none!important;
+  border:1px solid rgba(220,226,233,.16)!important;
+  border-radius:15px!important;
+  background:linear-gradient(180deg,rgba(9,10,11,.95),rgba(4,5,6,.91))!important;
+  box-shadow:0 16px 42px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.035)!important;
+  backdrop-filter:blur(18px) saturate(110%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(110%)!important;
+  animation:mgMenuReveal .22s cubic-bezier(.2,.8,.2,1) both!important;
+}
+.nav-inner>.feature-menu.active::-webkit-scrollbar{display:none!important}
+.feature-menu .menu-close,
+.feature-menu .nav-group-label{display:none!important}
+
+.feature-menu a{
+  flex:0 0 auto!important;
+  min-height:38px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0 13px!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  border-bottom:1px solid rgba(255,255,255,.09)!important;
+  border-radius:10px!important;
+  background:rgba(255,255,255,.018)!important;
+  font:750 10px/1 var(--display)!important;
+  letter-spacing:.01em!important;
+  transition:transform .16s ease,background .16s ease,border-color .16s ease,color .16s ease!important;
+  animation:mgMenuItemIn .24s ease both!important;
+}
+.feature-menu a:nth-of-type(3n+1){
+  color:#fff!important;
+  background:rgba(255,255,255,.045)!important;
+}
+.feature-menu a:nth-of-type(3n+2){
+  color:#c9d0d7!important;
+  background:rgba(184,192,202,.025)!important;
+}
+.feature-menu a:nth-of-type(3n){
+  color:#9ea7b1!important;
+  background:rgba(118,127,137,.025)!important;
+}
+.feature-menu a:hover,
+.feature-menu a:focus-visible{
+  color:#fff!important;
+  border-color:rgba(255,255,255,.28)!important;
+  background:rgba(255,255,255,.07)!important;
+  transform:translateY(-1px)!important;
+}
+
+.feature-menu a:nth-of-type(1){animation-delay:.015s!important}
+.feature-menu a:nth-of-type(2){animation-delay:.030s!important}
+.feature-menu a:nth-of-type(3){animation-delay:.045s!important}
+.feature-menu a:nth-of-type(4){animation-delay:.060s!important}
+.feature-menu a:nth-of-type(5){animation-delay:.075s!important}
+.feature-menu a:nth-of-type(6){animation-delay:.090s!important}
+.feature-menu a:nth-of-type(7){animation-delay:.105s!important}
+.feature-menu a:nth-of-type(8){animation-delay:.120s!important}
+.feature-menu a:nth-of-type(9){animation-delay:.135s!important}
+
+.menu-btn[aria-expanded="true"]{
+  color:#f1f4f7!important;
+  border-color:rgba(255,255,255,.30)!important;
+  background:rgba(255,255,255,.055)!important;
+  animation:mgMenuTap .20s ease-out!important;
+}
+
+@keyframes mgMenuReveal{
+  0%{opacity:0;transform:translateY(-5px) scale(.992)}
+  55%{opacity:1;transform:translateY(1px) scale(1.002)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes mgMenuItemIn{
+  0%{opacity:0;transform:translateX(5px)}
+  100%{opacity:1;transform:translateX(0)}
+}
+@keyframes mgMenuTap{
+  0%{transform:translateX(0)}
+  28%{transform:translateX(-1.2px)}
+  56%{transform:translateX(1.2px)}
+  78%{transform:translateX(-.55px)}
+  100%{transform:translateX(0)}
+}
+
+@media(max-width:760px){
+  .nav-inner>.feature-menu.active{
+    left:0!important;
+    right:0!important;
+    top:calc(100% + 6px)!important;
+    width:100%!important;
+    min-height:55px!important;
+    padding:8px!important;
+    gap:7px!important;
+  }
+  .feature-menu a{
+    min-height:36px!important;
+    padding:0 12px!important;
+    font-size:9px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .nav-inner>.feature-menu.active,
+  .feature-menu a,
+  .menu-btn[aria-expanded="true"]{animation:none!important}
+}
+</style>
+
 </head>
 <body>
 <a class="site-skip-link" href="#homeContent">Skip to main content</a>
@@ -2273,7 +2401,7 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
 <footer><div class="container footer-inner"><div class="footer-copy"><strong>© 2026 MalGuard. Scan Smart. Play Safe.</strong><span class="footer-disclaimer">Security analysis reduces risk. No scan can guarantee that a file, mod, link, or destination is harmless.</span></div><div class="footer-links"><a href="#products">Products</a><a href="/tools.html">Tools</a><a href="/about.html">About</a><a href="/docs.html">Docs</a><a href="/trust.html">Trust Center</a><a href="/privacy.html">Privacy</a><a href="/labs.html">Labs</a><a href="/support.html">Support</a><a href="/download.html">Download</a><a href="https://github.com/MalGuard" target="_blank" rel="noopener">GitHub</a></div></div></footer><div class="toast" id="toast"></div>
 <script>
 const navbar=document.getElementById('navbar'),menuBtn=document.getElementById('menuBtn'),navLinks=document.getElementById('navLinks'),homeContent=document.getElementById('homeContent'),productPages=document.querySelectorAll('.product-page');
-window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',scrollY>20));menuBtn.addEventListener('click',()=>{const a=navLinks.classList.toggle('active');menuBtn.setAttribute('aria-expanded',String(a))});document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>{navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false')}));
+window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',scrollY>20));menuBtn.addEventListener('click',()=>{const a=navLinks.classList.toggle('active');menuBtn.setAttribute('aria-expanded',String(a));if(a){try{if(navigator.vibrate)navigator.vibrate(8)}catch(e){}requestAnimationFrame(()=>{navLinks.scrollLeft=0})}});document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>{navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false')}));
 function openProduct(id){homeContent.classList.add('hidden');productPages.forEach(p=>p.classList.remove('active'));const p=document.getElementById('page-'+id);if(!p)return showHome();p.classList.add('active');scrollTo({top:0,behavior:'smooth'});history.pushState({id},'', '#'+id)}function showHome(){productPages.forEach(p=>p.classList.remove('active'));homeContent.classList.remove('hidden');history.pushState({},'','#home');scrollTo({top:0,behavior:'smooth'})}function route(){const id=location.hash.slice(1);if(['gta-guard','malware-ai','game-scam-guard'].includes(id)){homeContent.classList.add('hidden');productPages.forEach(p=>p.classList.remove('active'));document.getElementById('page-'+id).classList.add('active')}else{homeContent.classList.remove('hidden');productPages.forEach(p=>p.classList.remove('active'))}}addEventListener('hashchange',route);addEventListener('popstate',route);route();
 const scanLine=null,scanSweep=null,nodes=[]; // The Earth hero is intentionally static; product buttons remain interactive.
 const toast=document.getElementById('toast');let toastTimer;function showToast(m){toast.textContent=m;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),3000)}document.addEventListener('click',e=>{if(!navLinks.contains(e.target)&&!menuBtn.contains(e.target))navLinks.classList.remove('active')});
