@@ -1929,3 +1929,143 @@ h3,
 .info-card h3{
   letter-spacing:-.012em!important;
 }
+
+
+/* =========================================================
+   MalGuard typography roles · 2026-09-23
+   Baskerville = major titles
+   Bodoni 72 = card/sub titles
+   American Typewriter = short technical labels
+   System/SF = body, controls, navigation, rules
+   ========================================================= */
+:root{
+  --mg-font-title:"Baskerville","Baskerville Old Face",Georgia,"Times New Roman",serif;
+  --mg-font-subtitle:"Bodoni 72","Bodoni MT",Didot,"Times New Roman",serif;
+  --mg-font-label:"American Typewriter","Courier New",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --mg-font-ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+
+/* Long-form and interface copy stays maximally readable. */
+body,
+p,
+li,
+dd,
+dt,
+label,
+input,
+textarea,
+select,
+button,
+.btn,
+.nav-links,
+.feature-menu,
+.topbar .links,
+.notice,
+.result,
+.site-search-form,
+.site-search-results{
+  font-family:var(--mg-font-ui)!important;
+}
+
+/* Primary page hierarchy. */
+h1,
+h2,
+.hero-entry h1,
+.hero h1,
+.hub-hero h1,
+.section-title,
+.section-head h2,
+.tool h2,
+.malware-ai-page-header h1{
+  font-family:var(--mg-font-title)!important;
+  font-weight:700!important;
+  font-style:normal!important;
+  letter-spacing:-.025em!important;
+}
+
+/* Secondary/card hierarchy. */
+h3,
+.card h3,
+.hub-card h3,
+.info-card h3,
+.game-card h3,
+.fold-card h3,
+.tool h3,
+.step h3,
+.malware-ai-embed-bar strong{
+  font-family:var(--mg-font-subtitle)!important;
+  font-weight:700!important;
+  font-style:normal!important;
+  letter-spacing:-.015em!important;
+}
+
+/* Short technical labels only. */
+.eyebrow,
+.kicker,
+.badge,
+.status,
+.hub-card .status,
+.meta,
+.nav-group-label,
+.malware-ai-live-dot{
+  font-family:var(--mg-font-label)!important;
+  font-weight:700!important;
+  font-style:normal!important;
+  letter-spacing:.055em!important;
+}
+
+/* Keep header/navigation intentionally modern and ChatGPT-like. */
+.nav-links a,
+.feature-menu a,
+.nav-actions,
+.nav-icon,
+.nav-download,
+.menu-btn,
+.download-label{
+  font-family:var(--mg-font-ui)!important;
+}
+
+/* Download page readable copy/rules stay System/SF despite decorative headings. */
+.download-page .hub-card p,
+.download-page .hub-card code,
+.download-page .steps .step p,
+.download-page .notice,
+.download-page .actions .btn{
+  font-family:var(--mg-font-ui)!important;
+}
+.download-page .hub-card h3{
+  font-family:var(--mg-font-subtitle)!important;
+  font-weight:700!important;
+}
+.download-page .steps .step b{
+  font-family:var(--mg-font-ui)!important;
+  font-weight:600!important;
+}
+
+/* Mobile: preserve hierarchy but avoid fragile oversized serif rendering. */
+@media(max-width:800px){
+  h1,
+  h2,
+  .hero-entry h1,
+  .hero h1,
+  .hub-hero h1,
+  .section-title,
+  .section-head h2{
+    letter-spacing:-.02em!important;
+  }
+  h3,
+  .card h3,
+  .hub-card h3,
+  .info-card h3,
+  .game-card h3,
+  .fold-card h3{
+    letter-spacing:-.01em!important;
+  }
+  .eyebrow,
+  .kicker,
+  .badge,
+  .status,
+  .hub-card .status{
+    letter-spacing:.045em!important;
+  }
+}
