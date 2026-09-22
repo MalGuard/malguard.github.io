@@ -790,6 +790,13 @@ h1 span{color:#65d8ff;text-shadow:0 0 28px rgba(47,107,255,.18)}
   }
 }
 
+/* Keep the iPhone hero image visible above the hero's solid background. */
+@media(max-width:760px){
+  .hero-entry{isolation:isolate!important}
+  .hero-earth-backdrop{z-index:0!important}
+  .hero-entry .hero-grid{position:relative!important;z-index:1!important}
+}
+
 /* Installable product identities: the same app icons appear on the landing cards. */
 .hero-feature-rail .product-app-icon{display:block!important;width:52px!important;height:52px!important;object-fit:contain!important;border-radius:14px!important;filter:drop-shadow(0 0 7px rgba(31,209,255,.38))!important;transition:filter .25s ease,transform .25s ease!important}
 .hero-feature-rail button:hover .product-app-icon{transform:translateY(-2px)!important;filter:brightness(1.12) drop-shadow(0 0 13px rgba(31,209,255,.72))!important}
