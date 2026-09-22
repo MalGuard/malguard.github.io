@@ -1819,177 +1819,43 @@ main > section:not(.hero-entry):not(.hero){
 
 /* =========================================================
    MalGuard typography system · 2026-09-23
-   Baskerville = primary headings
-   Bodoni 72 = card/sub-headings
-   American Typewriter = compact technical labels
-   System/SF = body, navigation and controls
+   Baskerville Bold = H1/H2/Hero/page titles
+   Bodoni 72 Bold = H3/card/sub-headings
+   American Typewriter Bold = compact technical labels
+   System/SF = body, navigation, buttons, rules, docs
    ========================================================= */
 :root{
-  --mg-font-heading:"Baskerville","Baskerville Old Face","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-  --mg-font-subheading:"Bodoni 72","Bodoni 72 Smallcaps","Bodoni MT",Didot,"Times New Roman",serif;
+  --mg-font-title:"Baskerville","Baskerville Old Face","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --mg-font-subtitle:"Bodoni 72","Bodoni 72 Smallcaps","Bodoni MT",Didot,"Times New Roman",serif;
   --mg-font-label:"American Typewriter","American Typewriter Condensed","Courier New",ui-monospace,monospace;
   --mg-font-ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
 
-/* Main editorial identity: H1/H2 + hero/page titles. */
+/* Primary titles. */
 h1,
 h2,
+.hero-entry h1,
 .hero h1,
 .hub-hero h1,
-.hero-entry h1,
 .section-title,
 .section-head h2,
+.malware-ai-page-header h1,
 .search-dialog h2,
 .mg-context-search .search-dialog h2{
-  font-family:var(--mg-font-heading)!important;
-  font-weight:700!important;
-}
-
-/* Secondary hierarchy: card titles and smaller section headings. */
-h3,
-.card h3,
-.hub-card h3,
-.tool h2,
-.tool h3,
-.info-card h3,
-.game-card h3,
-.fold-card h3,
-.step h3{
-  font-family:var(--mg-font-subheading)!important;
-  font-weight:700!important;
-}
-
-/* Compact technical/UI labels only. */
-.eyebrow,
-.kicker,
-.badge,
-.status,
-.hub-card .status,
-.malware-ai-live-dot,
-.malware-ai-message-role{
-  font-family:var(--mg-font-label)!important;
-  font-weight:700!important;
-}
-
-/* Readability first: copy, navigation, controls, docs and rules. */
-body,
-p,
-li,
-dd,
-dt,
-label,
-input,
-textarea,
-select,
-button,
-.btn,
-.nav-links,
-.nav-links a,
-.feature-menu,
-.feature-menu a,
-.nav-download,
-.nav-icon,
-.menu-btn,
-.notice,
-.result,
-.meta,
-small,
-code:not(.mono),
-footer,
-.footer,
-.footer-links,
-.site-search-form,
-.site-search-results{
-  font-family:var(--mg-font-ui)!important;
-}
-
-/* Keep actual hashes/code in a true monospace stack. */
-code,
-pre,
-.mono,
-.result code{
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace!important;
-}
-
-/* Preserve clean rhythm with the new serif display faces. */
-h1,
-.hero h1,
-.hub-hero h1,
-.hero-entry h1{
-  letter-spacing:-.025em!important;
-}
-h2,
-.section-title,
-.section-head h2{
-  letter-spacing:-.018em!important;
-}
-h3,
-.card h3,
-.hub-card h3,
-.info-card h3{
-  letter-spacing:-.012em!important;
-}
-
-
-/* =========================================================
-   MalGuard typography roles · 2026-09-23
-   Baskerville = major titles
-   Bodoni 72 = card/sub titles
-   American Typewriter = short technical labels
-   System/SF = body, controls, navigation, rules
-   ========================================================= */
-:root{
-  --mg-font-title:"Baskerville","Baskerville Old Face",Georgia,"Times New Roman",serif;
-  --mg-font-subtitle:"Bodoni 72","Bodoni MT",Didot,"Times New Roman",serif;
-  --mg-font-label:"American Typewriter","Courier New",ui-monospace,SFMono-Regular,Menlo,monospace;
-  --mg-font-ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-}
-
-/* Long-form and interface copy stays maximally readable. */
-body,
-p,
-li,
-dd,
-dt,
-label,
-input,
-textarea,
-select,
-button,
-.btn,
-.nav-links,
-.feature-menu,
-.topbar .links,
-.notice,
-.result,
-.site-search-form,
-.site-search-results{
-  font-family:var(--mg-font-ui)!important;
-}
-
-/* Primary page hierarchy. */
-h1,
-h2,
-.hero-entry h1,
-.hero h1,
-.hub-hero h1,
-.section-title,
-.section-head h2,
-.tool h2,
-.malware-ai-page-header h1{
   font-family:var(--mg-font-title)!important;
   font-weight:700!important;
   font-style:normal!important;
   letter-spacing:-.025em!important;
 }
 
-/* Secondary/card hierarchy. */
+/* Card and secondary titles. */
 h3,
 .card h3,
 .hub-card h3,
 .info-card h3,
 .game-card h3,
 .fold-card h3,
+.tool h2,
 .tool h3,
 .step h3,
 .malware-ai-embed-bar strong{
@@ -2005,18 +1871,39 @@ h3,
 .badge,
 .status,
 .hub-card .status,
-.meta,
 .nav-group-label,
 .malware-ai-live-dot{
   font-family:var(--mg-font-label)!important;
   font-weight:700!important;
   font-style:normal!important;
-  letter-spacing:.055em!important;
+  letter-spacing:.05em!important;
 }
 
-/* Keep header/navigation intentionally modern and ChatGPT-like. */
+/* Long-form copy and interface text stay modern/readable. */
+body,
+p,
+li,
+dd,
+dt,
+label,
+input,
+textarea,
+select,
+button,
+.btn,
+.nav-links,
 .nav-links a,
+.feature-menu,
 .feature-menu a,
+.notice,
+.result,
+.meta,
+small,
+footer,
+.footer,
+.footer-links,
+.site-search-form,
+.site-search-results,
 .nav-actions,
 .nav-icon,
 .nav-download,
@@ -2025,24 +1912,28 @@ h3,
   font-family:var(--mg-font-ui)!important;
 }
 
-/* Download page readable copy/rules stay System/SF despite decorative headings. */
+/* Real hashes/code stay monospace. */
+code,
+pre,
+.mono,
+.result code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace!important;
+}
+
+/* Download page: readable rules/copy, decorative card titles only. */
 .download-page .hub-card p,
 .download-page .hub-card code,
 .download-page .steps .step p,
 .download-page .notice,
-.download-page .actions .btn{
+.download-page .actions .btn,
+.download-page .steps .step b{
   font-family:var(--mg-font-ui)!important;
 }
 .download-page .hub-card h3{
   font-family:var(--mg-font-subtitle)!important;
   font-weight:700!important;
 }
-.download-page .steps .step b{
-  font-family:var(--mg-font-ui)!important;
-  font-weight:600!important;
-}
 
-/* Mobile: preserve hierarchy but avoid fragile oversized serif rendering. */
 @media(max-width:800px){
   h1,
   h2,
@@ -2060,12 +1951,5 @@ h3,
   .game-card h3,
   .fold-card h3{
     letter-spacing:-.01em!important;
-  }
-  .eyebrow,
-  .kicker,
-  .badge,
-  .status,
-  .hub-card .status{
-    letter-spacing:.045em!important;
   }
 }
