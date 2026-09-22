@@ -12,7 +12,7 @@
 <link rel="canonical" href="https://malguard.github.io/">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://malware-ai-gray.vercel.app; object-src 'none'; base-uri 'self'; form-action 'self'">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"MalGuard","url":"https://malguard.github.io/","description":"Open-source defensive gaming security project focused on safer game-mod analysis, local scanning and fail-closed isolation."}</script>
 <title>MalGuard | Scan Smart. Play Safe.</title>
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png">
@@ -1080,6 +1080,139 @@ footer{padding:21px 0!important}.footer-inner{align-items:start!important}
   .malware-ai-frame{height:calc(100dvh - 156px);min-height:520px}
   .malware-ai-embed-bar{padding-left:12px;padding-right:12px}
 }
+
+.malware-ai-native{
+  display:flex;
+  flex-direction:column;
+  min-height:620px;
+  height:min(760px,calc(100dvh - 185px));
+  background:
+    radial-gradient(circle at 50% 0,rgba(67,191,255,.07),transparent 38%),
+    linear-gradient(180deg,rgba(6,15,22,.98),rgba(4,9,14,.98));
+  color:var(--text);
+  font-family:var(--body)
+}
+.malware-ai-controls{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 14px;
+  border-bottom:1px solid rgba(78,210,255,.14);
+  background:rgba(6,16,24,.82)
+}
+.malware-ai-controls label{
+  font:800 10px var(--display);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--blue2)
+}
+.malware-ai-controls select{
+  min-width:180px;
+  max-width:58vw;
+  border:1px solid rgba(67,191,255,.28);
+  border-radius:12px;
+  padding:9px 34px 9px 11px;
+  background:#09151d;
+  color:#eafaff;
+  font:700 11px var(--display);
+  outline:none
+}
+.malware-ai-controls select:focus{border-color:rgba(67,191,255,.7);box-shadow:0 0 0 3px rgba(67,191,255,.09)}
+.malware-ai-status{
+  margin-left:auto;
+  color:#7f9cab;
+  font:700 10px var(--display);
+  letter-spacing:.04em
+}
+.malware-ai-chat-log{
+  flex:1;
+  overflow:auto;
+  padding:22px 18px 26px;
+  scroll-behavior:smooth
+}
+.malware-ai-message{
+  width:min(82%,720px);
+  margin:0 0 18px;
+  padding:13px 15px;
+  border-radius:17px;
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(15,24,31,.9);
+  box-shadow:0 10px 28px rgba(0,0,0,.16)
+}
+.malware-ai-message.user{
+  margin-left:auto;
+  border-color:rgba(67,191,255,.24);
+  background:linear-gradient(145deg,rgba(20,71,93,.72),rgba(12,44,60,.8))
+}
+.malware-ai-message.assistant{margin-right:auto}
+.malware-ai-message-role{
+  display:block;
+  margin-bottom:5px;
+  color:var(--blue2);
+  font:800 9px var(--display);
+  letter-spacing:.08em;
+  text-transform:uppercase
+}
+.malware-ai-message.user .malware-ai-message-role{color:#b9f3ff}
+.malware-ai-message p{
+  margin:0;
+  color:#e8f0f4;
+  font:500 14px/1.7 var(--body);
+  white-space:pre-wrap;
+  overflow-wrap:anywhere
+}
+.malware-ai-message.pending p{color:#8fa6b2}
+.malware-ai-composer{
+  display:flex;
+  gap:9px;
+  align-items:flex-end;
+  padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+  border-top:1px solid rgba(78,210,255,.14);
+  background:rgba(5,13,19,.96)
+}
+.malware-ai-composer textarea{
+  flex:1;
+  min-height:48px;
+  max-height:150px;
+  resize:none;
+  border:1px solid rgba(67,191,255,.24);
+  border-radius:15px;
+  padding:13px 14px;
+  background:#09141b;
+  color:#f1fbff;
+  font:500 14px/1.45 var(--body);
+  outline:none
+}
+.malware-ai-composer textarea::placeholder{color:#627985}
+.malware-ai-composer textarea:focus{border-color:rgba(67,191,255,.66);box-shadow:0 0 0 3px rgba(67,191,255,.08)}
+.malware-ai-send{
+  min-width:76px;
+  height:48px;
+  border:1px solid rgba(67,191,255,.55);
+  border-radius:14px;
+  background:linear-gradient(180deg,#55caff,#2f99d6);
+  color:#031018;
+  font:900 11px var(--display);
+  letter-spacing:.05em
+}
+.malware-ai-send:disabled{opacity:.48;cursor:default}
+.malware-ai-meta{
+  padding:0 14px 10px;
+  background:rgba(5,13,19,.96);
+  color:#58717f;
+  font:600 9px var(--display);
+  letter-spacing:.04em
+}
+@media(max-width:720px){
+  .malware-ai-native{height:calc(100dvh - 156px);min-height:520px}
+  .malware-ai-controls{padding:10px 12px;gap:8px}
+  .malware-ai-controls select{min-width:0;flex:1;max-width:none}
+  .malware-ai-status{font-size:9px}
+  .malware-ai-chat-log{padding:18px 12px 22px}
+  .malware-ai-message{width:90%;padding:12px 13px}
+  .malware-ai-composer{padding-left:10px;padding-right:10px}
+  .malware-ai-send{min-width:66px;padding:0 12px}
+}
 </style>
 </head>
 <body>
@@ -1223,15 +1356,30 @@ footer{padding:21px 0!important}.footer-inner{align-items:start!important}
         </div>
         <span class="malware-ai-live-dot">LIVE</span>
       </div>
-      <iframe
-        id="malwareAiFrame"
-        class="malware-ai-frame"
-        src="https://malware-ai-gray.vercel.app/?embed=malguard"
-        title="MalGuard AI"
-        loading="eager"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allow="clipboard-write"
-      ></iframe>
+      <div class="malware-ai-native" id="malwareAiNative">
+        <div class="malware-ai-controls">
+          <label for="malwareAiModel">Model</label>
+          <select id="malwareAiModel" aria-label="Choose MalGuard AI model">
+            <option value="auto" selected>Auto</option>
+            <option value="fast">Fast · Llama 3.1 8B</option>
+            <option value="strong">Strong · Nemotron 120B</option>
+            <option value="gemini">Gemini · Flash</option>
+            <option value="fallback">GLM · 4.7 Flash</option>
+          </select>
+          <span class="malware-ai-status" id="malwareAiStatus">Ready</span>
+        </div>
+        <div class="malware-ai-chat-log" id="malwareAiChat" aria-live="polite">
+          <div class="malware-ai-message assistant">
+            <span class="malware-ai-message-role">MalGuard AI</span>
+            <p>Hi. Ask me anything. The conversation stays inside this MalGuard page.</p>
+          </div>
+        </div>
+        <form class="malware-ai-composer" id="malwareAiForm">
+          <textarea id="malwareAiPrompt" rows="1" maxlength="10000" autocomplete="off" placeholder="Message MalGuard AI…" aria-label="Message MalGuard AI"></textarea>
+          <button class="malware-ai-send" id="malwareAiSend" type="submit">Send</button>
+        </form>
+        <div class="malware-ai-meta" id="malwareAiMeta">MalGuard native chat · no iframe · no page redirect</div>
+      </div>
     </div>
   </div>
 </section>
@@ -1301,5 +1449,112 @@ document.querySelectorAll('.hash-copy').forEach(function(button){
     catch(e){if(typeof showToast==='function')showToast('Copy the SHA-256 shown above.')}
   });
 });
+</script>
+
+<script>
+(function(){
+  const API='https://malware-ai-gray.vercel.app/api/chat';
+  const form=document.getElementById('malwareAiForm');
+  const prompt=document.getElementById('malwareAiPrompt');
+  const send=document.getElementById('malwareAiSend');
+  const model=document.getElementById('malwareAiModel');
+  const chat=document.getElementById('malwareAiChat');
+  const status=document.getElementById('malwareAiStatus');
+  const meta=document.getElementById('malwareAiMeta');
+  if(!form||!prompt||!send||!model||!chat||!status||!meta)return;
+
+  const history=[];
+  let busy=false;
+
+  function localContext(){
+    const now=new Date();
+    const timeZone=Intl.DateTimeFormat().resolvedOptions().timeZone||'';
+    let persianDate='',gregorianDate='',localTime='';
+    try{persianDate=new Intl.DateTimeFormat('fa-IR-u-ca-persian',{dateStyle:'full',timeZone:timeZone||undefined}).format(now)}catch(e){}
+    try{gregorianDate=new Intl.DateTimeFormat('en-CA',{dateStyle:'full',timeZone:timeZone||undefined}).format(now)}catch(e){}
+    try{localTime=new Intl.DateTimeFormat('fa-IR',{timeStyle:'medium',timeZone:timeZone||undefined}).format(now)}catch(e){}
+    return{timeZone,nowISO:now.toISOString(),persianDate,gregorianDate,localTime};
+  }
+
+  function addMessage(role,text,pending){
+    const box=document.createElement('div');
+    box.className='malware-ai-message '+role+(pending?' pending':'');
+    const label=document.createElement('span');
+    label.className='malware-ai-message-role';
+    label.textContent=role==='user'?'You':'MalGuard AI';
+    const body=document.createElement('p');
+    body.textContent=text;
+    box.append(label,body);
+    chat.appendChild(box);
+    chat.scrollTop=chat.scrollHeight;
+    return{box,body};
+  }
+
+  function setBusy(value){
+    busy=value;
+    send.disabled=value;
+    prompt.disabled=value;
+    model.disabled=value;
+    status.textContent=value?'Thinking…':'Ready';
+  }
+
+  async function submit(){
+    const text=prompt.value.trim();
+    if(!text||busy)return;
+    prompt.value='';
+    addMessage('user',text,false);
+    history.push({role:'user',text});
+    const pending=addMessage('assistant','Thinking…',true);
+    setBusy(true);
+    const started=performance.now();
+
+    try{
+      const response=await fetch(API,{
+        method:'POST',
+        mode:'cors',
+        cache:'no-store',
+        headers:{'content-type':'application/json'},
+        body:JSON.stringify({
+          model:model.value,
+          messages:history.slice(-10),
+          clientContext:localContext()
+        })
+      });
+      let data={};
+      try{data=await response.json()}catch(e){}
+      if(!response.ok)throw new Error(data.error||('HTTP '+response.status));
+      const answer=(typeof data.text==='string'&&data.text.trim())
+        ?data.text
+        :(typeof data.response==='string'?data.response.trim():'');
+      if(!answer)throw new Error('No text response received');
+
+      pending.box.classList.remove('pending');
+      pending.body.textContent=answer;
+      history.push({role:'assistant',text:answer});
+
+      const actual=data.model||data.provider||'AI';
+      const elapsed=((performance.now()-started)/1000).toFixed(1);
+      status.textContent=actual+' · '+elapsed+'s';
+      const flags=[];
+      if(data.webSearchUsed)flags.push('Web');
+      if(data.fallbackUsed)flags.push('Fallback');
+      meta.textContent='Actual model: '+actual+(flags.length?' · '+flags.join(' · '):'')+' · build '+(data.build||'live');
+    }catch(error){
+      pending.box.classList.remove('pending');
+      pending.body.textContent='Error: '+(error&&error.message?error.message:'Request failed');
+      status.textContent='Error';
+      meta.textContent='MalGuard native chat · request failed';
+    }finally{
+      setBusy(false);
+      prompt.focus();
+      chat.scrollTop=chat.scrollHeight;
+    }
+  }
+
+  form.addEventListener('submit',function(event){event.preventDefault();submit()});
+  prompt.addEventListener('keydown',function(event){
+    if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit()}
+  });
+})();
 </script>
 </body></html>
