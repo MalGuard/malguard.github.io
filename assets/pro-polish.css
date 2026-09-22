@@ -883,3 +883,96 @@ main > section:not(.hero-entry):not(.hero){
     min-height:72px!important;
   }
 }
+
+
+/* Restore MalGuard floating capsule header · 2026-09-22
+   Keeps the newer navigation behavior, but restores the previous
+   detached translucent pill shell requested for the site header. */
+.nav{
+  position:fixed!important;
+  top:0!important;
+  left:0!important;
+  width:100%!important;
+  z-index:1000!important;
+  min-height:0!important;
+  padding:14px 0 0!important;
+  background:transparent!important;
+  border-bottom:0!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.nav.scrolled{
+  background:transparent!important;
+  border-bottom-color:transparent!important;
+  box-shadow:none!important;
+}
+.nav-inner{
+  width:min(calc(100% - 40px),var(--max))!important;
+  min-height:58px!important;
+  margin:0 auto!important;
+  padding:7px 10px!important;
+  border:1px solid rgba(220,228,236,.14)!important;
+  border-radius:18px!important;
+  background:linear-gradient(180deg,rgba(15,17,20,.56),rgba(5,6,8,.42))!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 12px 36px rgba(0,0,0,.16)!important;
+  backdrop-filter:blur(20px) saturate(118%)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(118%)!important;
+}
+.nav.scrolled .nav-inner{
+  background:linear-gradient(180deg,rgba(12,14,17,.78),rgba(4,5,7,.68))!important;
+  border-color:rgba(226,233,240,.18)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.055),
+    0 14px 40px rgba(0,0,0,.24)!important;
+}
+
+/* Compact labels need less horizontal room and more breathing space. */
+.nav-inner>.feature-menu.active,
+.nav-inner>.feature-menu.closing{
+  gap:8px!important;
+}
+.feature-menu a,
+.feature-menu a:nth-of-type(3n+1),
+.feature-menu a:nth-of-type(3n+2),
+.feature-menu a:nth-of-type(3n){
+  flex-basis:104px!important;
+  width:104px!important;
+  min-width:104px!important;
+  max-width:104px!important;
+  padding-inline:9px!important;
+}
+.nav-inner>.feature-menu.active::before,
+.nav-inner>.feature-menu.active::after,
+.nav-inner>.feature-menu.closing::before,
+.nav-inner>.feature-menu.closing::after{
+  flex-basis:calc(50% - 52px)!important;
+}
+.nav-inner>.feature-menu.active,
+.nav-inner>.feature-menu.closing{
+  scroll-padding-inline:calc(50% - 52px)!important;
+}
+
+@media(max-width:800px){
+  .nav{
+    min-height:0!important;
+    padding:
+      max(10px,env(safe-area-inset-top))
+      env(safe-area-inset-right)
+      0
+      env(safe-area-inset-left)!important;
+  }
+  .nav-inner{
+    width:min(calc(100% - 28px),var(--max))!important;
+    min-height:58px!important;
+    padding:7px 9px!important;
+    border-radius:17px!important;
+  }
+  .nav-inner>.feature-menu.active,
+  .nav-inner>.feature-menu.closing{
+    top:calc(max(10px,env(safe-area-inset-top)) + 58px + 7px)!important;
+    right:calc(14px + env(safe-area-inset-right))!important;
+  }
+}
