@@ -2317,6 +2317,90 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
 }
 </style>
 
+
+<style id="malguard-discrete-snap-header-menu-20260922">
+/* One gesture = one item. The centered item is the only active item. */
+.nav-inner>.feature-menu.active{
+  overflow-x:hidden!important;
+  overflow-y:hidden!important;
+  scroll-behavior:smooth!important;
+  scroll-snap-type:none!important;
+  touch-action:pan-y!important;
+  user-select:none!important;
+  -webkit-user-select:none!important;
+  cursor:grab!important;
+}
+.nav-inner>.feature-menu.active:active{cursor:grabbing!important}
+.nav-inner>.feature-menu.active::before,
+.nav-inner>.feature-menu.active::after{
+  content:""!important;
+  flex:0 0 calc(50% - 77px)!important;
+  pointer-events:none!important;
+}
+.feature-menu a{
+  flex:0 0 154px!important;
+  width:154px!important;
+  min-width:154px!important;
+  max-width:154px!important;
+  scroll-snap-align:none!important;
+  justify-content:center!important;
+}
+.feature-menu a.menu-current{
+  color:#ffffff!important;
+  opacity:1!important;
+  background:rgba(255,255,255,.075)!important;
+  border-color:rgba(255,255,255,.27)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 0 16px rgba(255,255,255,.045)!important;
+  transform:scale(1.025)!important;
+}
+
+/* Hamburger becomes a real red close control while the rail is open. */
+.menu-btn{
+  transition:
+    color .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    transform .16s ease!important;
+}
+.menu-btn[aria-expanded="true"]{
+  color:#ff4b55!important;
+  border-color:rgba(255,75,85,.58)!important;
+  background:rgba(72,8,13,.22)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,150,156,.08),
+    0 0 14px rgba(255,75,85,.07)!important;
+  font-size:27px!important;
+  line-height:1!important;
+}
+.menu-btn[aria-expanded="true"]:hover,
+.menu-btn[aria-expanded="true"]:focus-visible{
+  color:#ff626b!important;
+  border-color:rgba(255,98,107,.76)!important;
+  background:rgba(89,10,16,.28)!important;
+}
+
+@media(max-width:760px){
+  .nav-inner>.feature-menu.active::before,
+  .nav-inner>.feature-menu.active::after{
+    flex-basis:calc(50% - 72px)!important;
+  }
+  .feature-menu a{
+    flex-basis:144px!important;
+    width:144px!important;
+    min-width:144px!important;
+    max-width:144px!important;
+    min-height:38px!important;
+    font-size:9px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .nav-inner>.feature-menu.active{scroll-behavior:auto!important}
+  .feature-menu a.menu-current{transform:none!important}
+}
+</style>
+
 </head>
 <body>
 <a class="site-skip-link" href="#homeContent">Skip to main content</a>
@@ -2504,8 +2588,13 @@ window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',scrollY>
 
 const menuItems=[...navLinks.querySelectorAll('a')];
 let activeMenuIndex=-1;
-let menuScrollFrame=0;
 let menuAudioContext=null;
+let menuAnimating=false;
+let menuGestureStartX=0;
+let menuGestureStartY=0;
+let menuGestureTracking=false;
+let menuWheelLocked=false;
+let menuSnapTimer=0;
 
 function primeMenuAudio(){
   try{
@@ -2519,7 +2608,7 @@ function primeMenuAudio(){
 
 function menuSelectionFeedback(){
   try{
-    if(navigator.vibrate)navigator.vibrate(9);
+    if(navigator.vibrate)navigator.vibrate(10);
   }catch(e){}
   try{
     primeMenuAudio();
@@ -2528,106 +2617,188 @@ function menuSelectionFeedback(){
     const osc=menuAudioContext.createOscillator();
     const gain=menuAudioContext.createGain();
     osc.type='sine';
-    osc.frequency.setValueAtTime(135,now);
+    osc.frequency.setValueAtTime(155,now);
     gain.gain.setValueAtTime(0.0001,now);
-    gain.gain.exponentialRampToValueAtTime(0.022,now+0.004);
-    gain.gain.exponentialRampToValueAtTime(0.0001,now+0.026);
+    gain.gain.exponentialRampToValueAtTime(0.018,now+0.003);
+    gain.gain.exponentialRampToValueAtTime(0.0001,now+0.022);
     osc.connect(gain);
     gain.connect(menuAudioContext.destination);
     osc.start(now);
-    osc.stop(now+0.03);
+    osc.stop(now+0.026);
   }catch(e){}
 }
 
-function setActiveMenuItem(index,{feedback=false,scrollIntoView=false}={}){
+function setMenuButtonState(opened){
+  menuBtn.setAttribute('aria-expanded',String(opened));
+  menuBtn.setAttribute('aria-label',opened?'Close navigation menu':'Open navigation menu');
+  menuBtn.textContent=opened?'×':'☰';
+}
+
+function setActiveMenuItem(index,{feedback=false}={}){
   if(!menuItems.length)return;
   const next=Math.max(0,Math.min(menuItems.length-1,index));
-  if(next===activeMenuIndex){
-    if(scrollIntoView)menuItems[next].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
-    if(feedback)menuSelectionFeedback();
-    return;
-  }
+  const changed=next!==activeMenuIndex;
   menuItems.forEach((item,i)=>{
     item.classList.toggle('menu-current',i===next);
     item.setAttribute('aria-selected',i===next?'true':'false');
+    item.tabIndex=i===next?0:-1;
   });
   activeMenuIndex=next;
-  if(scrollIntoView)menuItems[next].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
-  if(feedback)menuSelectionFeedback();
+  if(feedback&&changed)menuSelectionFeedback();
 }
 
-function updateActiveMenuFromScroll(){
-  menuScrollFrame=0;
-  if(!navLinks.classList.contains('active')||!menuItems.length)return;
+function menuTargetLeft(index){
+  const item=menuItems[index];
+  if(!item)return 0;
+  const raw=item.offsetLeft-(navLinks.clientWidth-item.offsetWidth)/2;
+  return Math.max(0,Math.min(raw,Math.max(0,navLinks.scrollWidth-navLinks.clientWidth)));
+}
 
-  const maxScroll=Math.max(0,navLinks.scrollWidth-navLinks.clientWidth);
-  if(navLinks.scrollLeft<=2){
-    setActiveMenuItem(0,{feedback:activeMenuIndex!==0});
-    return;
-  }
-  if(maxScroll-navLinks.scrollLeft<=2){
-    setActiveMenuItem(menuItems.length-1,{feedback:activeMenuIndex!==menuItems.length-1});
-    return;
-  }
-
-  const rail=navLinks.getBoundingClientRect();
-  const railCenter=rail.left+(rail.width/2);
-  let bestIndex=0;
-  let bestScore=-Infinity;
-
-  menuItems.forEach((item,i)=>{
-    const r=item.getBoundingClientRect();
-    const visible=Math.max(0,Math.min(r.right,rail.right)-Math.max(r.left,rail.left));
-    const visibleRatio=visible/Math.max(1,r.width);
-    const center=r.left+(r.width/2);
-    const centerDistance=Math.abs(center-railCenter);
-    const score=(visibleRatio*1000)-centerDistance;
-    if(score>bestScore){
-      bestScore=score;
-      bestIndex=i;
-    }
+function snapMenuTo(index,{feedback=true,instant=false}={}){
+  if(!menuItems.length)return;
+  const next=Math.max(0,Math.min(menuItems.length-1,index));
+  clearTimeout(menuSnapTimer);
+  menuAnimating=true;
+  navLinks.scrollTo({
+    left:menuTargetLeft(next),
+    behavior:instant?'auto':'smooth'
   });
-
-  setActiveMenuItem(bestIndex,{feedback:bestIndex!==activeMenuIndex});
+  const finish=()=>{
+    setActiveMenuItem(next,{feedback});
+    menuAnimating=false;
+  };
+  if(instant)finish();
+  else menuSnapTimer=setTimeout(finish,190);
 }
 
-navLinks.addEventListener('scroll',()=>{
-  if(menuScrollFrame)return;
-  menuScrollFrame=requestAnimationFrame(updateActiveMenuFromScroll);
-},{passive:true});
+function stepMenu(direction){
+  if(menuAnimating||!navLinks.classList.contains('active'))return;
+  const base=activeMenuIndex<0?0:activeMenuIndex;
+  snapMenuTo(base+(direction>0?1:-1),{feedback:true});
+}
+
+function openMenu(){
+  primeMenuAudio();
+  navLinks.classList.add('active');
+  setMenuButtonState(true);
+  menuAnimating=false;
+  activeMenuIndex=-1;
+  requestAnimationFrame(()=>{
+    navLinks.scrollLeft=0;
+    requestAnimationFrame(()=>snapMenuTo(0,{feedback:false,instant:true}));
+  });
+}
+
+function closeMenu(){
+  navLinks.classList.remove('active');
+  setMenuButtonState(false);
+  clearTimeout(menuSnapTimer);
+  menuAnimating=false;
+  menuGestureTracking=false;
+  menuItems.forEach(item=>{
+    item.classList.remove('menu-current');
+    item.setAttribute('aria-selected','false');
+    item.tabIndex=-1;
+  });
+  activeMenuIndex=-1;
+}
 
 menuBtn.addEventListener('click',()=>{
-  primeMenuAudio();
-  const opened=navLinks.classList.toggle('active');
-  menuBtn.setAttribute('aria-expanded',String(opened));
-  if(opened){
-    activeMenuIndex=-1;
-    navLinks.scrollLeft=0;
-    requestAnimationFrame(()=>{
-      setActiveMenuItem(0,{feedback:false});
-    });
-  }else{
-    menuItems.forEach(item=>{
-      item.classList.remove('menu-current');
-      item.setAttribute('aria-selected','false');
-    });
-    activeMenuIndex=-1;
-  }
+  if(navLinks.classList.contains('active'))closeMenu();
+  else openMenu();
 });
+
+navLinks.addEventListener('touchstart',e=>{
+  if(!navLinks.classList.contains('active')||!e.touches.length)return;
+  primeMenuAudio();
+  menuGestureStartX=e.touches[0].clientX;
+  menuGestureStartY=e.touches[0].clientY;
+  menuGestureTracking=true;
+},{passive:true});
+
+navLinks.addEventListener('touchmove',e=>{
+  if(!menuGestureTracking||!e.touches.length)return;
+  const dx=e.touches[0].clientX-menuGestureStartX;
+  const dy=e.touches[0].clientY-menuGestureStartY;
+  if(Math.abs(dx)>Math.abs(dy)+4)e.preventDefault();
+},{passive:false});
+
+navLinks.addEventListener('touchend',e=>{
+  if(!menuGestureTracking)return;
+  menuGestureTracking=false;
+  const t=e.changedTouches&&e.changedTouches[0];
+  if(!t)return;
+  const dx=t.clientX-menuGestureStartX;
+  const dy=t.clientY-menuGestureStartY;
+  if(Math.abs(dx)<28||Math.abs(dx)<=Math.abs(dy)){
+    snapMenuTo(activeMenuIndex<0?0:activeMenuIndex,{feedback:false});
+    return;
+  }
+  stepMenu(dx<0?1:-1);
+},{passive:true});
+
+navLinks.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch')return;
+  primeMenuAudio();
+  menuGestureStartX=e.clientX;
+  menuGestureStartY=e.clientY;
+  menuGestureTracking=true;
+});
+
+navLinks.addEventListener('pointerup',e=>{
+  if(e.pointerType==='touch'||!menuGestureTracking)return;
+  menuGestureTracking=false;
+  const dx=e.clientX-menuGestureStartX;
+  const dy=e.clientY-menuGestureStartY;
+  if(Math.abs(dx)>=26&&Math.abs(dx)>Math.abs(dy))stepMenu(dx<0?1:-1);
+});
+
+navLinks.addEventListener('wheel',e=>{
+  if(!navLinks.classList.contains('active'))return;
+  const horizontal=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+  if(Math.abs(horizontal)<8)return;
+  e.preventDefault();
+  if(menuWheelLocked)return;
+  menuWheelLocked=true;
+  stepMenu(horizontal>0?1:-1);
+  setTimeout(()=>{menuWheelLocked=false},260);
+},{passive:false});
 
 menuItems.forEach((item,index)=>{
   item.setAttribute('role','option');
   item.setAttribute('aria-selected','false');
+  item.tabIndex=-1;
   item.addEventListener('pointerdown',()=>primeMenuAudio(),{passive:true});
-  item.addEventListener('click',()=>{
-    setActiveMenuItem(index,{feedback:true});
-    navLinks.classList.remove('active');
-    menuBtn.setAttribute('aria-expanded','false');
+  item.addEventListener('click',e=>{
+    if(index!==activeMenuIndex){
+      e.preventDefault();
+      snapMenuTo(index,{feedback:true});
+      return;
+    }
+    menuSelectionFeedback();
+    closeMenu();
   });
 });
+
+document.addEventListener('keydown',e=>{
+  if(!navLinks.classList.contains('active'))return;
+  if(e.key==='ArrowRight'){
+    e.preventDefault();
+    stepMenu(1);
+  }else if(e.key==='ArrowLeft'){
+    e.preventDefault();
+    stepMenu(-1);
+  }else if(e.key==='Escape'){
+    e.preventDefault();
+    closeMenu();
+  }else if(e.key==='Enter'&&activeMenuIndex>=0){
+    menuItems[activeMenuIndex].click();
+  }
+});
+
 function openProduct(id){homeContent.classList.add('hidden');productPages.forEach(p=>p.classList.remove('active'));const p=document.getElementById('page-'+id);if(!p)return showHome();p.classList.add('active');scrollTo({top:0,behavior:'smooth'});history.pushState({id},'', '#'+id)}function showHome(){productPages.forEach(p=>p.classList.remove('active'));homeContent.classList.remove('hidden');history.pushState({},'','#home');scrollTo({top:0,behavior:'smooth'})}function route(){const id=location.hash.slice(1);if(['gta-guard','malware-ai','game-scam-guard'].includes(id)){homeContent.classList.add('hidden');productPages.forEach(p=>p.classList.remove('active'));document.getElementById('page-'+id).classList.add('active')}else{homeContent.classList.remove('hidden');productPages.forEach(p=>p.classList.remove('active'))}}addEventListener('hashchange',route);addEventListener('popstate',route);route();
 const scanLine=null,scanSweep=null,nodes=[]; // The Earth hero is intentionally static; product buttons remain interactive.
-const toast=document.getElementById('toast');let toastTimer;function showToast(m){toast.textContent=m;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),3000)}document.addEventListener('click',e=>{if(!navLinks.contains(e.target)&&!menuBtn.contains(e.target))navLinks.classList.remove('active')});
+const toast=document.getElementById('toast');let toastTimer;function showToast(m){toast.textContent=m;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),3000)}document.addEventListener('click',e=>{if(navLinks.classList.contains('active')&&!navLinks.contains(e.target)&&!menuBtn.contains(e.target))closeMenu()});
 const form=document.getElementById('feedbackForm'),msg=document.getElementById('formMessage');if(form&&msg){form.addEventListener('submit',e=>{e.preventDefault();const field=document.getElementById('feedbackMessage');if(!field||!field.value.trim()){msg.textContent='Please enter your feedback.';msg.style.display='block';return}msg.textContent='Your feedback was prepared successfully, but the backend is not connected yet. Nothing was sent.';msg.style.display='block';form.reset()});}
 
 function openGameCard(id){
