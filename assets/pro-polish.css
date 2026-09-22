@@ -311,3 +311,550 @@ button,a{
   .tool,
   .game-card{transition:none!important}
 }
+
+
+/* =========================================================
+   MalGuard UI refinement from ModGuard audit · 2026-09-22
+   Uses the audited interaction principles without copying
+   ModGuard layout/content/branding.
+   ========================================================= */
+
+:root{
+  --mg-motion-fast:150ms;
+  --mg-motion-medium:260ms;
+  --mg-motion-slow:440ms;
+  --mg-ease:cubic-bezier(.22,1,.36,1);
+  --mg-color-ease:cubic-bezier(.4,0,.2,1);
+  --mg-accent:#43bfff;
+}
+
+html{
+  overflow-x:clip!important;
+  scroll-behavior:smooth;
+}
+body{
+  overflow-x:clip!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+  font-size:16px!important;
+  line-height:1.6!important;
+}
+h1,h2,h3,h4,
+.brand,
+.btn,
+.nav-links,
+.topbar .links{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+}
+h1,h2{letter-spacing:-.02em!important}
+
+/* Header: simple, full-width, sticky, restrained. */
+.nav{
+  position:sticky!important;
+  top:0!important;
+  left:auto!important;
+  width:100%!important;
+  z-index:100!important;
+  min-height:64px!important;
+  padding:0!important;
+  background:rgba(8,12,20,.78)!important;
+  border-bottom:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(18px) saturate(140%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(140%)!important;
+  transition:
+    box-shadow var(--mg-motion-fast) var(--mg-color-ease),
+    background var(--mg-motion-fast) var(--mg-color-ease)!important;
+}
+.nav.scrolled{
+  background:rgba(8,12,20,.82)!important;
+  border-bottom-color:rgba(255,255,255,.09)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.18)!important;
+}
+.nav-inner{
+  width:min(calc(100% - 48px),1080px)!important;
+  min-height:64px!important;
+  margin:0 auto!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
+/* Header controls stay touch-friendly without looking like toy buttons. */
+.nav-icon,
+.nav-download,
+.menu-btn{
+  min-width:44px!important;
+  min-height:44px!important;
+  height:44px!important;
+  border-radius:12px!important;
+  border:1px solid rgba(255,255,255,.06)!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  transition:
+    transform var(--mg-motion-fast) var(--mg-ease),
+    background var(--mg-motion-fast) var(--mg-color-ease),
+    border-color var(--mg-motion-fast) var(--mg-color-ease),
+    color var(--mg-motion-fast) var(--mg-color-ease)!important;
+}
+.nav-icon:hover,
+.nav-download:hover,
+.menu-btn:hover{
+  background:rgba(255,255,255,.035)!important;
+  border-color:rgba(255,255,255,.10)!important;
+}
+.nav-icon:active,
+.nav-download:active,
+.menu-btn:active{
+  transform:scale(.98) translateY(1px)!important;
+}
+
+/* 3-line hamburger morphs symmetrically into X. */
+.menu-btn{
+  color:rgba(255,255,255,.88)!important;
+}
+.menu-glyph{
+  position:relative!important;
+  display:block!important;
+  width:20px!important;
+  height:14px!important;
+}
+.menu-glyph span{
+  position:absolute!important;
+  left:0!important;
+  top:50%!important;
+  width:20px!important;
+  height:1.5px!important;
+  margin-top:-.75px!important;
+  border-radius:999px!important;
+  background:currentColor!important;
+  opacity:1;
+  transform-origin:center!important;
+  transition:
+    transform 260ms var(--mg-ease),
+    opacity 260ms var(--mg-ease),
+    color 260ms var(--mg-color-ease)!important;
+}
+.menu-glyph span:nth-child(1){
+  top:50%!important;
+  transform:translateY(-6px)!important;
+}
+.menu-glyph span:nth-child(2){
+  top:50%!important;
+  transform:scaleX(1)!important;
+}
+.menu-glyph span:nth-child(3){
+  top:50%!important;
+  transform:translateY(6px)!important;
+}
+.menu-btn[aria-expanded="true"]{
+  color:#fff!important;
+  background:rgba(255,255,255,.035)!important;
+  border-color:rgba(255,255,255,.09)!important;
+  box-shadow:none!important;
+}
+.menu-btn[aria-expanded="true"] .menu-glyph span:nth-child(1){
+  transform:translateY(0) rotate(45deg)!important;
+}
+.menu-btn[aria-expanded="true"] .menu-glyph span:nth-child(2){
+  opacity:0!important;
+  transform:scaleX(.55)!important;
+}
+.menu-btn[aria-expanded="true"] .menu-glyph span:nth-child(3){
+  transform:translateY(0) rotate(-45deg)!important;
+}
+
+/* Glass dropdown. It is intentionally compact, not full-screen. */
+.nav-inner>.feature-menu{
+  display:none!important;
+}
+.nav-inner>.feature-menu.active,
+.nav-inner>.feature-menu.closing{
+  display:flex!important;
+  position:absolute!important;
+  top:calc(100% + 8px)!important;
+  right:0!important;
+  left:auto!important;
+  width:min(360px,calc(100vw - 24px))!important;
+  min-height:auto!important;
+  padding:12px!important;
+  gap:8px!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  white-space:nowrap!important;
+  overscroll-behavior-x:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-x!important;
+  scroll-snap-type:x mandatory!important;
+  scroll-padding-inline:calc(50% - 56px)!important;
+  scrollbar-width:none!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  border-radius:20px!important;
+  background:rgba(12,17,27,.90)!important;
+  box-shadow:0 24px 70px rgba(0,0,0,.36)!important;
+  backdrop-filter:blur(22px) saturate(130%)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(130%)!important;
+  transform-origin:top right!important;
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+.nav-inner>.feature-menu.active{
+  animation:mgAuditMenuIn 260ms var(--mg-ease) both!important;
+}
+.nav-inner>.feature-menu.closing{
+  pointer-events:none!important;
+  animation:mgAuditMenuOut 260ms var(--mg-ease) both!important;
+}
+.nav-inner>.feature-menu.active::-webkit-scrollbar,
+.nav-inner>.feature-menu.closing::-webkit-scrollbar{
+  display:none!important;
+}
+@keyframes mgAuditMenuIn{
+  from{opacity:0;transform:translateY(-8px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes mgAuditMenuOut{
+  from{opacity:1;transform:translateY(0) scale(1)}
+  to{opacity:0;transform:translateY(-8px) scale(.98)}
+}
+
+/* Flex spacers allow first/last 112px items to center. */
+.nav-inner>.feature-menu.active::before,
+.nav-inner>.feature-menu.active::after,
+.nav-inner>.feature-menu.closing::before,
+.nav-inner>.feature-menu.closing::after{
+  content:""!important;
+  flex:0 0 calc(50% - 56px)!important;
+  pointer-events:none!important;
+}
+
+/* Hide legacy section labels/close button inside the compact rail. */
+.feature-menu .menu-close,
+.feature-menu .nav-group-label{
+  display:none!important;
+}
+
+/* Native rail: 112x44, snap-to-center, route selection after scroll settles. */
+.feature-menu a,
+.feature-menu a:nth-of-type(3n+1),
+.feature-menu a:nth-of-type(3n+2),
+.feature-menu a:nth-of-type(3n){
+  flex:0 0 112px!important;
+  width:112px!important;
+  min-width:112px!important;
+  max-width:112px!important;
+  height:44px!important;
+  min-height:44px!important;
+  padding:0 10px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  scroll-snap-align:center!important;
+  scroll-snap-stop:normal!important;
+  border:1px solid transparent!important;
+  border-radius:12px!important;
+  background:transparent!important;
+  color:#aab3c2!important;
+  opacity:.55!important;
+  transform:scale(.94)!important;
+  font-size:14px!important;
+  font-weight:600!important;
+  line-height:1.2!important;
+  letter-spacing:0!important;
+  text-align:center!important;
+  animation:none!important;
+  text-shadow:none!important;
+  box-shadow:none!important;
+  transition:
+    color var(--mg-motion-fast) var(--mg-color-ease),
+    opacity var(--mg-motion-fast) var(--mg-color-ease),
+    transform var(--mg-motion-fast) var(--mg-ease),
+    background var(--mg-motion-fast) var(--mg-color-ease),
+    border-color var(--mg-motion-fast) var(--mg-color-ease)!important;
+}
+.feature-menu a:hover,
+.feature-menu a:focus-visible{
+  color:#dfe4eb!important;
+  opacity:.82!important;
+  background:rgba(255,255,255,.025)!important;
+  border-color:rgba(255,255,255,.06)!important;
+  transform:scale(.96)!important;
+}
+.feature-menu a.menu-current,
+.feature-menu a.menu-current:nth-of-type(3n+1),
+.feature-menu a.menu-current:nth-of-type(3n+2),
+.feature-menu a.menu-current:nth-of-type(3n),
+.feature-menu a.menu-current:hover,
+.feature-menu a.menu-current:focus-visible{
+  color:#f5f7fa!important;
+  opacity:1!important;
+  transform:scale(1)!important;
+  background:rgba(67,191,255,.12)!important;
+  border-color:rgba(67,191,255,.20)!important;
+  box-shadow:none!important;
+}
+.feature-menu a:focus-visible{
+  outline:2px solid #55a3d6!important;
+  outline-offset:3px!important;
+}
+
+/* Buttons: restrained, consistent, fast. */
+.btn{
+  min-height:46px!important;
+  height:auto!important;
+  padding-inline:22px!important;
+  border-radius:14px!important;
+  font-size:14px!important;
+  font-weight:600!important;
+  transition:
+    transform 160ms var(--mg-ease),
+    background 160ms var(--mg-color-ease),
+    border-color 160ms var(--mg-color-ease),
+    color 160ms var(--mg-color-ease)!important;
+}
+.btn:active{
+  transform:scale(.98) translateY(1px)!important;
+}
+
+/* Cards: less glow, more structure. */
+.game-card,
+.fold-card,
+.security-panel,
+.plan,
+.info-card,
+.labs-panel,
+.download-panel,
+.card,
+.tool{
+  border-radius:18px!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  background:rgba(255,255,255,.035)!important;
+  box-shadow:0 12px 36px rgba(0,0,0,.18)!important;
+  transition:
+    transform 220ms var(--mg-ease),
+    border-color 220ms var(--mg-color-ease),
+    background 220ms var(--mg-color-ease)!important;
+}
+@media(hover:hover) and (pointer:fine){
+  .game-card:hover,
+  .fold-card:hover,
+  .card:hover,
+  .tool:hover{
+    transform:translateY(-2px)!important;
+    border-color:rgba(255,255,255,.13)!important;
+  }
+}
+
+/* Typography/readability. */
+.hero-entry h1,
+.hero h1{
+  font-size:clamp(60px,6vw,68px)!important;
+  line-height:1.04!important;
+}
+.section-title,
+.section-head h2,
+h2{
+  font-size:clamp(38px,4vw,44px)!important;
+}
+.card h3,
+.info-card h3,
+.game-card h3,
+.fold-card h3{
+  font-size:clamp(18px,2vw,20px)!important;
+}
+.hero-description,
+.hero p,
+.section-description,
+.section-head p,
+.card p,
+.info-card p,
+.tool p{
+  font-size:16px!important;
+  line-height:1.6!important;
+}
+small,
+.meta,
+.eyebrow,
+.kicker{
+  font-size:max(14px,1em)!important;
+}
+
+/* Section rhythm. */
+main > section:not(.hero-entry):not(.hero){
+  padding-block:96px!important;
+}
+.section{
+  padding-block:96px!important;
+}
+
+/* Supporting page topbar follows the same restrained language. */
+.topbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:100!important;
+  background:rgba(8,12,20,.78)!important;
+  border-bottom:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(18px) saturate(140%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(140%)!important;
+}
+.topbar .nav{
+  width:min(calc(100% - 48px),1080px)!important;
+  min-height:64px!important;
+  margin:0 auto!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.topbar .links a{
+  min-height:44px!important;
+  padding-inline:12px!important;
+  font-size:14px!important;
+  border:0!important;
+  background:transparent!important;
+}
+
+/* Mobile / iPhone. */
+@media(max-width:800px){
+  .nav{
+    min-height:calc(56px + env(safe-area-inset-top))!important;
+    padding-top:env(safe-area-inset-top)!important;
+    padding-left:env(safe-area-inset-left)!important;
+    padding-right:env(safe-area-inset-right)!important;
+  }
+  .nav-inner{
+    width:calc(100% - 32px)!important;
+    min-height:56px!important;
+  }
+  .brand-site-logo{
+    max-height:34px!important;
+  }
+  .nav-actions{gap:6px!important}
+
+  .nav-inner>.feature-menu.active,
+  .nav-inner>.feature-menu.closing{
+    position:fixed!important;
+    top:calc(56px + env(safe-area-inset-top) + 8px)!important;
+    right:calc(12px + env(safe-area-inset-right))!important;
+    left:auto!important;
+    width:min(360px,calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)))!important;
+  }
+
+  body{
+    padding-left:env(safe-area-inset-left);
+    padding-right:env(safe-area-inset-right);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+
+  .container{
+    width:calc(100% - 32px)!important;
+  }
+
+  .hero-entry h1,
+  .hero h1{
+    font-size:clamp(38px,10vw,48px)!important;
+    line-height:1.05!important;
+  }
+  .section-title,
+  .section-head h2,
+  h2{
+    font-size:clamp(30px,8vw,34px)!important;
+  }
+
+  .hero-description,
+  .hero p,
+  .section-description,
+  .section-head p,
+  .card p,
+  .info-card p,
+  .tool p{
+    font-size:16px!important;
+    line-height:1.6!important;
+  }
+
+  .card,
+  .tool,
+  .game-card,
+  .fold-card,
+  .security-panel,
+  .plan,
+  .info-card,
+  .labs-panel,
+  .download-panel{
+    padding:20px!important;
+  }
+
+  main > section:not(.hero-entry):not(.hero),
+  .section{
+    padding-block:80px!important;
+  }
+
+  .topbar{
+    padding-top:env(safe-area-inset-top)!important;
+    padding-left:env(safe-area-inset-left)!important;
+    padding-right:env(safe-area-inset-right)!important;
+  }
+  .topbar .nav{
+    width:calc(100% - 32px)!important;
+    min-height:56px!important;
+  }
+  .topbar .links{
+    overflow-x:auto!important;
+    overscroll-behavior-x:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  .topbar .links a{
+    min-height:44px!important;
+    font-size:14px!important;
+  }
+}
+
+@media(max-width:420px){
+  .nav-inner,
+  .topbar .nav{
+    width:calc(100% - 32px)!important;
+  }
+  .nav-icon,
+  .nav-download,
+  .menu-btn{
+    min-width:44px!important;
+    width:44px!important;
+    min-height:44px!important;
+    height:44px!important;
+  }
+}
+
+/* 100dvh where full viewport sections are used. */
+.hero-entry,
+.product-page{
+  min-height:100dvh;
+}
+
+/* Accessibility: reduced motion removes decorative movement. */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important}
+  *,
+  *::before,
+  *::after{
+    scroll-behavior:auto!important;
+    animation:none!important;
+    transition:none!important;
+  }
+  .feature-menu a,
+  .feature-menu a.menu-current,
+  .btn,
+  .card,
+  .tool,
+  .game-card,
+  .fold-card{
+    transform:none!important;
+  }
+}
