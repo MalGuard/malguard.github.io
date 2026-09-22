@@ -1794,17 +1794,24 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
     background:#020202!important;
   }
   .hero-entry .hero-grid{
-    min-height:690px!important;
+    min-height:825px!important;
     display:grid!important;
   }
   .hero-entry .hero-copy{
     max-width:none!important;
-    padding:144px 22px 0!important;
+    padding:clamp(246px,68vw,282px) 22px 0!important;
     margin:0 auto!important;
     align-items:center!important;
     text-align:center!important;
   }
   .hero-entry h1,.hero-entry .hero-description{text-align:center!important}
+}
+
+@media(max-width:430px){
+  .hero-entry .hero-copy{padding-top:clamp(250px,68vw,278px)!important}
+}
+@media(max-width:390px){
+  .hero-entry .hero-copy{padding-top:clamp(238px,67vw,262px)!important}
 }
 </style>
 
