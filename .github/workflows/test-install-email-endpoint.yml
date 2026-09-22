@@ -1,0 +1,23 @@
+name: Test MalGuard install email endpoint
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/test-install-email-endpoint.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test-email:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Send synthetic coarse install report
+        shell: bash
+        run: |
+          set -euo pipefail
+          body='{"schemaVersion":"1.0","event":"first_successful_launch","version":"0.6.1-beta.1","os":"Windows","build":"26100","arch":"x64","cpuCoresBucket":"9-12","ramBucket":"16-32 GB","language":"en-US"}'
+          response="$(curl --fail-with-body --silent --show-error             --request POST             --header 'content-type: application/json'             --data "$body"             https://malguard-core-sandbox.vercel.app/api/install-hardware-report)"
+          echo "$response"
+          grep -Fq '"ok":true' <<<"$response"
