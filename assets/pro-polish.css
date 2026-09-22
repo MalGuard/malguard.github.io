@@ -976,3 +976,59 @@ main > section:not(.hero-entry):not(.hero){
     right:calc(14px + env(safe-area-inset-right))!important;
   }
 }
+
+
+/* Final capsule + instant picker response · 2026-09-22 */
+.nav{
+  top:12px!important;
+  padding:0!important;
+}
+.nav-inner{
+  border-radius:999px!important;
+}
+.nav-inner>.feature-menu.active,
+.nav-inner>.feature-menu.closing{
+  border-radius:20px!important;
+}
+
+/* Unselected = gray, selected = bright. Blue ring stays, but lands essentially instantly. */
+.feature-menu a,
+.feature-menu a:nth-of-type(3n+1),
+.feature-menu a:nth-of-type(3n+2),
+.feature-menu a:nth-of-type(3n){
+  color:#8f98a5!important;
+  opacity:.62!important;
+  transition:
+    color 10ms linear,
+    opacity 10ms linear,
+    transform 10ms linear,
+    background 10ms linear,
+    border-color 10ms linear!important;
+}
+.feature-menu a.menu-current,
+.feature-menu a.menu-current:nth-of-type(3n+1),
+.feature-menu a.menu-current:nth-of-type(3n+2),
+.feature-menu a.menu-current:nth-of-type(3n),
+.feature-menu a.menu-current:hover,
+.feature-menu a.menu-current:focus-visible{
+  color:#fff!important;
+  opacity:1!important;
+  transform:scale(1)!important;
+  background:rgba(67,191,255,.12)!important;
+  border-color:rgba(67,191,255,.26)!important;
+}
+
+/* iPhone keeps a visible detached gap above the capsule. */
+@media(max-width:800px){
+  .nav{
+    top:max(10px,env(safe-area-inset-top))!important;
+    padding:0 env(safe-area-inset-right) 0 env(safe-area-inset-left)!important;
+  }
+  .nav-inner{
+    border-radius:999px!important;
+  }
+  .nav-inner>.feature-menu.active,
+  .nav-inner>.feature-menu.closing{
+    top:calc(max(10px,env(safe-area-inset-top)) + 65px)!important;
+  }
+}
