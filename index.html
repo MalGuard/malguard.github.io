@@ -2585,68 +2585,28 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
 <footer><div class="container footer-inner"><div class="footer-copy"><strong>© 2026 MalGuard. Scan Smart. Play Safe.</strong><span class="footer-disclaimer">Security analysis reduces risk. No scan can guarantee that a file, mod, link, or destination is harmless.</span></div><div class="footer-links"><a href="#products">Products</a><a href="/tools.html">Tools</a><a href="/about.html">About</a><a href="/docs.html">Docs</a><a href="/trust.html">Trust Center</a><a href="/privacy.html">Privacy</a><a href="/labs.html">Labs</a><a href="/support.html">Support</a><a href="/download.html">Download</a><a href="https://github.com/MalGuard" target="_blank" rel="noopener">GitHub</a></div></div></footer><div class="toast" id="toast"></div>
 <script>
 const navbar=document.getElementById('navbar'),menuBtn=document.getElementById('menuBtn'),navLinks=document.getElementById('navLinks'),homeContent=document.getElementById('homeContent'),productPages=document.querySelectorAll('.product-page');
-window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',scrollY>20));
+window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',scrollY>8));
 
 const menuItems=[...navLinks.querySelectorAll('a')];
-let activeMenuIndex=-1;
-let menuAudioContext=null;
-let menuAnimating=false;
+let activeMenuIndex=0;
+let menuGestureStartIndex=0;
 let menuGestureStartX=0;
-let menuGestureStartY=0;
-let menuGestureTracking=false;
-let menuGestureStartTime=0;
-let menuWheelLocked=false;
-let menuSnapTimer=0;
-let menuAnimationToken=0;
-
-function primeMenuAudio(){
-  try{
-    if(!menuAudioContext){
-      const AC=window.AudioContext||window.webkitAudioContext;
-      if(AC)menuAudioContext=new AC();
-    }
-    if(menuAudioContext&&menuAudioContext.state==='suspended')menuAudioContext.resume().catch(()=>{});
-  }catch(e){}
-}
-
-function menuSelectionFeedback(){
-  try{
-    if(navigator.vibrate)navigator.vibrate(10);
-  }catch(e){}
-  try{
-    primeMenuAudio();
-    if(!menuAudioContext||menuAudioContext.state!=='running')return;
-    const now=menuAudioContext.currentTime;
-    const osc=menuAudioContext.createOscillator();
-    const gain=menuAudioContext.createGain();
-    osc.type='sine';
-    osc.frequency.setValueAtTime(820,now);
-    gain.gain.setValueAtTime(0.0001,now);
-    gain.gain.exponentialRampToValueAtTime(0.010,now+0.004);
-    gain.gain.exponentialRampToValueAtTime(0.0001,now+0.032);
-    osc.connect(gain);
-    gain.connect(menuAudioContext.destination);
-    osc.start(now);
-    osc.stop(now+0.036);
-  }catch(e){}
-}
+let menuGestureMoved=false;
+let menuScrollEndTimer=0;
+let menuProgrammaticAnimation=0;
+let menuCloseTimer=0;
 
 function setMenuButtonState(opened){
   menuBtn.setAttribute('aria-expanded',String(opened));
   menuBtn.setAttribute('aria-label',opened?'Close navigation menu':'Open navigation menu');
+  navLinks.setAttribute('aria-hidden',String(!opened));
 }
 
-function setActiveMenuItem(index,{feedback=false}={}){
+function setActiveMenuItem(index){
   if(!menuItems.length)return;
   const next=Math.max(0,Math.min(menuItems.length-1,index));
-  const changed=next!==activeMenuIndex;
-  menuItems.forEach((item,i)=>{
-    item.classList.toggle('menu-current',i===next);
-    item.setAttribute('aria-selected',i===next?'true':'false');
-    item.tabIndex=i===next?0:-1;
-  });
+  menuItems.forEach((item,i)=>item.classList.toggle('menu-current',i===next));
   activeMenuIndex=next;
-  if(feedback&&changed)menuSelectionFeedback();
 }
 
 function menuTargetLeft(index){
@@ -2656,83 +2616,96 @@ function menuTargetLeft(index){
   return Math.max(0,Math.min(raw,Math.max(0,navLinks.scrollWidth-navLinks.clientWidth)));
 }
 
-function snapMenuTo(index,{feedback=true,instant=false,duration=112}={}){
+function nearestMenuIndex(){
+  if(!menuItems.length)return 0;
+  const center=navLinks.scrollLeft+(navLinks.clientWidth/2);
+  let nearest=0,best=Infinity;
+  menuItems.forEach((item,index)=>{
+    const itemCenter=item.offsetLeft+(item.offsetWidth/2);
+    const distance=Math.abs(itemCenter-center);
+    if(distance<best){best=distance;nearest=index}
+  });
+  return nearest;
+}
+
+function animateMenuTo(index,{duration=260,select=true}={}){
   if(!menuItems.length)return;
+  cancelAnimationFrame(menuProgrammaticAnimation);
   const next=Math.max(0,Math.min(menuItems.length-1,index));
   const from=navLinks.scrollLeft;
   const to=menuTargetLeft(next);
-  const token=++menuAnimationToken;
-  menuAnimating=true;
 
-  const finish=()=>{
-    if(token!==menuAnimationToken)return;
+  if(Math.abs(to-from)<1){
     navLinks.scrollLeft=to;
-    setActiveMenuItem(next,{feedback});
-    menuAnimating=false;
-  };
-
-  if(instant||Math.abs(to-from)<1){
-    finish();
+    if(select)setActiveMenuItem(next);
     return;
   }
 
   const started=performance.now();
   const frame=now=>{
-    if(token!==menuAnimationToken)return;
-    const progress=Math.min(1,(now-started)/duration);
-    const eased=1-Math.pow(1-progress,3);
-    navLinks.scrollLeft=from+(to-from)*eased;
-    if(progress<1)requestAnimationFrame(frame);
-    else finish();
+    const t=Math.min(1,(now-started)/duration);
+    const eased=1-Math.pow(1-t,4);
+    navLinks.scrollLeft=from+((to-from)*eased);
+    if(t<1)menuProgrammaticAnimation=requestAnimationFrame(frame);
+    else{
+      navLinks.scrollLeft=to;
+      if(select)setActiveMenuItem(next);
+    }
   };
-  requestAnimationFrame(frame);
+  menuProgrammaticAnimation=requestAnimationFrame(frame);
 }
 
-function stepMenu(direction,steps=1){
-  if(menuAnimating||!navLinks.classList.contains('active'))return;
-  const base=activeMenuIndex<0?0:activeMenuIndex;
-  const amount=Math.max(1,Math.min(4,Math.round(steps)));
-  snapMenuTo(base+(direction>0?amount:-amount),{
-    feedback:true,
-    duration:amount>1?138:104
-  });
-}
+function finalizeNativeMenuScroll(){
+  if(!navLinks.classList.contains('active'))return;
+  let next=nearestMenuIndex();
+  const min=Math.max(0,menuGestureStartIndex-2);
+  const max=Math.min(menuItems.length-1,menuGestureStartIndex+2);
+  if(!menuGestureMoved)next=menuGestureStartIndex;
+  else next=Math.max(min,Math.min(max,next));
+  setActiveMenuItem(next);
 
-function gestureStepCount(distance,elapsed){
-  const d=Math.abs(distance);
-  const speed=d/Math.max(1,elapsed);
-  if(d>300||speed>2.0)return 4;
-  if(d>205||speed>1.35)return 3;
-  if(d>115||speed>.82)return 2;
-  return 1;
+  const target=menuTargetLeft(next);
+  if(Math.abs(navLinks.scrollLeft-target)>2){
+    animateMenuTo(next,{duration:260,select:true});
+  }
+  menuGestureMoved=false;
+  menuGestureStartIndex=next;
 }
 
 function openMenu(){
-  primeMenuAudio();
+  clearTimeout(menuCloseTimer);
+  navLinks.classList.remove('closing');
   navLinks.classList.add('active');
   setMenuButtonState(true);
-  menuAnimating=false;
-  activeMenuIndex=-1;
-  requestAnimationFrame(()=>{
-    navLinks.scrollLeft=0;
-    requestAnimationFrame(()=>snapMenuTo(0,{feedback:false,instant:true}));
+  const routeIndex=menuItems.findIndex(item=>{
+    try{
+      const url=new URL(item.href,location.href);
+      return url.pathname===location.pathname &&
+        (!url.hash || url.hash===location.hash);
+    }catch(_){return false}
   });
+  const next=routeIndex>=0?routeIndex:activeMenuIndex;
+  setActiveMenuItem(next);
+  menuGestureStartIndex=next;
+  requestAnimationFrame(()=>animateMenuTo(next,{duration:260,select:true}));
 }
 
-function closeMenu(){
-  navLinks.classList.remove('active');
+function closeMenu({restoreFocus=false}={}){
+  if(!navLinks.classList.contains('active'))return;
   setMenuButtonState(false);
-  clearTimeout(menuSnapTimer);
-  menuAnimationToken++;
-  menuAnimating=false;
-  menuGestureTracking=false;
-  menuItems.forEach(item=>{
-    item.classList.remove('menu-current');
-    item.setAttribute('aria-selected','false');
-    item.tabIndex=-1;
-  });
-  activeMenuIndex=-1;
+  cancelAnimationFrame(menuProgrammaticAnimation);
+  clearTimeout(menuScrollEndTimer);
+  clearTimeout(menuCloseTimer);
+  menuGestureMoved=false;
+  navLinks.classList.add('closing');
+  menuCloseTimer=setTimeout(()=>{
+    navLinks.classList.remove('active','closing');
+  },260);
+  if(restoreFocus)menuBtn.focus();
 }
+
+setMenuButtonState(false);
+menuItems.forEach(item=>item.tabIndex=0);
 
 menuBtn.addEventListener('click',()=>{
   if(navLinks.classList.contains('active'))closeMenu();
@@ -2741,93 +2714,61 @@ menuBtn.addEventListener('click',()=>{
 
 navLinks.addEventListener('touchstart',e=>{
   if(!navLinks.classList.contains('active')||!e.touches.length)return;
-  primeMenuAudio();
+  menuGestureStartIndex=activeMenuIndex;
   menuGestureStartX=e.touches[0].clientX;
-  menuGestureStartY=e.touches[0].clientY;
-  menuGestureStartTime=performance.now();
-  menuGestureTracking=true;
+  menuGestureMoved=false;
 },{passive:true});
 
 navLinks.addEventListener('touchmove',e=>{
-  if(!menuGestureTracking||!e.touches.length)return;
-  const dx=e.touches[0].clientX-menuGestureStartX;
-  const dy=e.touches[0].clientY-menuGestureStartY;
-  if(Math.abs(dx)>Math.abs(dy)+4)e.preventDefault();
-},{passive:false});
-
-navLinks.addEventListener('touchend',e=>{
-  if(!menuGestureTracking)return;
-  menuGestureTracking=false;
-  const t=e.changedTouches&&e.changedTouches[0];
-  if(!t)return;
-  const dx=t.clientX-menuGestureStartX;
-  const dy=t.clientY-menuGestureStartY;
-  const elapsed=performance.now()-menuGestureStartTime;
-  if(Math.abs(dx)<24||Math.abs(dx)<=Math.abs(dy)){
-    snapMenuTo(activeMenuIndex<0?0:activeMenuIndex,{feedback:false,duration:90});
-    return;
-  }
-  stepMenu(dx<0?1:-1,gestureStepCount(dx,elapsed));
+  if(!e.touches.length)return;
+  if(Math.abs(e.touches[0].clientX-menuGestureStartX)>=24)menuGestureMoved=true;
 },{passive:true});
 
 navLinks.addEventListener('pointerdown',e=>{
   if(e.pointerType==='touch')return;
-  primeMenuAudio();
+  menuGestureStartIndex=activeMenuIndex;
   menuGestureStartX=e.clientX;
-  menuGestureStartY=e.clientY;
-  menuGestureStartTime=performance.now();
-  menuGestureTracking=true;
-});
+  menuGestureMoved=false;
+},{passive:true});
 
-navLinks.addEventListener('pointerup',e=>{
-  if(e.pointerType==='touch'||!menuGestureTracking)return;
-  menuGestureTracking=false;
-  const dx=e.clientX-menuGestureStartX;
-  const dy=e.clientY-menuGestureStartY;
-  const elapsed=performance.now()-menuGestureStartTime;
-  if(Math.abs(dx)>=24&&Math.abs(dx)>Math.abs(dy))stepMenu(dx<0?1:-1,gestureStepCount(dx,elapsed));
-});
+navLinks.addEventListener('pointermove',e=>{
+  if(e.pointerType==='touch')return;
+  if(Math.abs(e.clientX-menuGestureStartX)>=24)menuGestureMoved=true;
+},{passive:true});
 
-navLinks.addEventListener('wheel',e=>{
-  if(!navLinks.classList.contains('active'))return;
-  const horizontal=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
-  if(Math.abs(horizontal)<7)return;
-  e.preventDefault();
-  if(menuWheelLocked||menuAnimating)return;
-  menuWheelLocked=true;
-  stepMenu(horizontal>0?1:-1,Math.abs(horizontal)>85?2:1);
-  setTimeout(()=>{menuWheelLocked=false},125);
-},{passive:false});
+navLinks.addEventListener('scroll',()=>{
+  clearTimeout(menuScrollEndTimer);
+  menuScrollEndTimer=setTimeout(finalizeNativeMenuScroll,110);
+},{passive:true});
+
+if('onscrollend' in window){
+  navLinks.addEventListener('scrollend',finalizeNativeMenuScroll,{passive:true});
+}
 
 menuItems.forEach((item,index)=>{
-  item.setAttribute('role','option');
-  item.setAttribute('aria-selected','false');
-  item.tabIndex=-1;
-  item.addEventListener('pointerdown',()=>primeMenuAudio(),{passive:true});
-  item.addEventListener('click',e=>{
-    if(index!==activeMenuIndex){
-      e.preventDefault();
-      snapMenuTo(index,{feedback:true});
-      return;
-    }
-    menuSelectionFeedback();
+  item.addEventListener('click',()=>{
+    setActiveMenuItem(index);
     closeMenu();
   });
 });
 
 document.addEventListener('keydown',e=>{
   if(!navLinks.classList.contains('active'))return;
-  if(e.key==='ArrowRight'){
+  if(e.key==='Escape'){
     e.preventDefault();
-    stepMenu(1);
+    closeMenu({restoreFocus:true});
+  }else if(e.key==='ArrowRight'){
+    e.preventDefault();
+    const next=Math.min(menuItems.length-1,activeMenuIndex+1);
+    setActiveMenuItem(next);
+    animateMenuTo(next,{duration:260,select:true});
+    menuItems[next].focus();
   }else if(e.key==='ArrowLeft'){
     e.preventDefault();
-    stepMenu(-1);
-  }else if(e.key==='Escape'){
-    e.preventDefault();
-    closeMenu();
-  }else if(e.key==='Enter'&&activeMenuIndex>=0){
-    menuItems[activeMenuIndex].click();
+    const next=Math.max(0,activeMenuIndex-1);
+    setActiveMenuItem(next);
+    animateMenuTo(next,{duration:260,select:true});
+    menuItems[next].focus();
   }
 });
 
@@ -2876,12 +2817,12 @@ document.querySelectorAll('.plan-fold').forEach(card=>card.addEventListener('tog
 ];
   function closeSearch(){searchPanel.hidden=true;searchButton.setAttribute('aria-expanded','false');}
   function openSearch(){searchPanel.hidden=false;searchButton.setAttribute('aria-expanded','true');renderResults(searchInput.value);setTimeout(function(){searchInput.focus();},0);}
-  function goTo(target){closeSearch();if(navLinks){navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false');}if(target.charAt(0)==='/'){location.href=target;return;}location.hash=target;if(typeof route==='function'){route();}var el=document.querySelector(target);if(el){setTimeout(function(){el.scrollIntoView({behavior:'smooth',block:'start'});},40);}}
+  function goTo(target){closeSearch();if(typeof closeMenu==='function')closeMenu();if(target.charAt(0)==='/'){location.href=target;return;}location.hash=target;if(typeof route==='function'){route();}var el=document.querySelector(target);if(el){setTimeout(function(){el.scrollIntoView({behavior:'smooth',block:'start'});},40);}}
   function renderResults(query){var q=(query||'').trim().toLowerCase(),shown=items.filter(function(item){return !q||(item.name+' '+item.detail+' '+item.terms).toLowerCase().indexOf(q)!==-1;});searchResults.innerHTML=shown.length?shown.map(function(item){return '<button type="button" data-target="'+item.target+'"><span><strong>'+item.name+'</strong><small>'+item.detail+'</small></span><b aria-hidden="true">›</b></button>';}).join(''):'<p>No matching MalGuard section was found. Try GTA, download, or support.</p>';Array.prototype.forEach.call(searchResults.querySelectorAll('button[data-target]'),function(button){button.addEventListener('click',function(){goTo(button.getAttribute('data-target'));});});}
   searchButton.addEventListener('click',openSearch);searchClose.addEventListener('click',closeSearch);searchBackdrop.addEventListener('click',closeSearch);searchInput.addEventListener('input',function(){renderResults(searchInput.value);});searchForm.addEventListener('submit',function(event){event.preventDefault();var first=searchResults.querySelector('button[data-target]');if(first){goTo(first.getAttribute('data-target'));}});var lightTrigger=document.querySelector('.hero-actions-logo'),heroEntry=document.querySelector('.hero-entry');
   function toggleHeroLights(){var locked=heroEntry.classList.toggle('lights-locked');lightTrigger.setAttribute('aria-pressed',String(locked));lightTrigger.setAttribute('aria-label',locked?'Resume gentle MalGuard lights':'Keep MalGuard lights fully on');}
   if(lightTrigger&&heroEntry){lightTrigger.addEventListener('click',toggleHeroLights);}
-  menuClose.addEventListener('click',function(){navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false');menuBtn.focus();});menuBtn.addEventListener('click',function(){setTimeout(function(){if(navLinks.classList.contains('active')){menuClose.focus();}},0);});document.addEventListener('keydown',function(event){if(event.key==='Escape'){closeSearch();if(navLinks.classList.contains('active')){navLinks.classList.remove('active');menuBtn.setAttribute('aria-expanded','false');menuBtn.focus();}}});renderResults('');
+  document.addEventListener('keydown',function(event){if(event.key==='Escape')closeSearch();});renderResults('');
 })();
 </script>
 <script id="compact-home-behavior">
