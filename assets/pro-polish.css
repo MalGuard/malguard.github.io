@@ -334,7 +334,7 @@ html{
 }
 body{
   overflow-x:clip!important;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+  font-family:"Space Grotesk",sans-serif!important;
   font-size:16px!important;
   line-height:1.6!important;
 }
@@ -343,7 +343,7 @@ h1,h2,h3,h4,
 .btn,
 .nav-links,
 .topbar .links{
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+  font-family:"Sora",sans-serif!important;
 }
 h1,h2{letter-spacing:-.02em!important}
 
@@ -1355,7 +1355,7 @@ main > section:not(.hero-entry):not(.hero){
   border-radius:12px!important;
   background:rgba(255,255,255,.035)!important;
   color:#fff!important;
-  font:400 30px/1 Arial,sans-serif!important;
+  font:400 30px/1 "Sora",sans-serif!important;
 }
 .mg-context-search .site-search-form{
   display:flex!important;
@@ -1676,7 +1676,7 @@ main > section:not(.hero-entry):not(.hero){
   opacity:1!important;
   transform:none!important;
   text-shadow:none!important;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+  font-family:"Space Grotesk",sans-serif!important;
   font-size:14px!important;
   font-weight:500!important;
   line-height:1.2!important;
@@ -1727,7 +1727,7 @@ main > section:not(.hero-entry):not(.hero){
 }
 .download-page .hub-card h3{
   margin:0 0 8px!important;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+  font-family:"Space Grotesk",sans-serif!important;
   font-size:18px!important;
   font-weight:650!important;
   line-height:1.25!important;
@@ -1746,7 +1746,7 @@ main > section:not(.hero-entry):not(.hero){
   display:block!important;
   width:100%!important;
   margin-top:5px!important;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace!important;
+  font-family:"Oxanium",sans-serif!important;
   font-size:11.5px!important;
   line-height:1.5!important;
   white-space:normal!important;
@@ -1786,7 +1786,7 @@ main > section:not(.hero-entry):not(.hero){
   border-radius:0!important;
   background:none!important;
   color:#f0f2f4!important;
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif!important;
+  font-family:"Space Grotesk",sans-serif!important;
   font-size:14.5px!important;
   font-weight:600!important;
   line-height:1.35!important;
@@ -1819,16 +1819,16 @@ main > section:not(.hero-entry):not(.hero){
 
 /* =========================================================
    MalGuard typography system · 2026-09-23
-   Baskerville Bold = H1/H2/Hero/page titles
-   Bodoni 72 Bold = H3/card/sub-headings
-   American Typewriter Bold = compact technical labels
-   System/SF = body, navigation, buttons, rules, docs
+   Sora = H1/H2/Hero/page titles
+   Sora = H3/card/sub-headings
+   Oxanium = compact technical labels
+   Space Grotesk = body, navigation, buttons, rules, docs
    ========================================================= */
 :root{
-  --mg-font-title:"Baskerville","Baskerville Old Face","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-  --mg-font-subtitle:"Bodoni 72","Bodoni 72 Smallcaps","Bodoni MT",Didot,"Times New Roman",serif;
-  --mg-font-label:"American Typewriter","American Typewriter Condensed","Courier New",ui-monospace,monospace;
-  --mg-font-ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mg-font-title:"Sora",sans-serif;
+  --mg-font-subtitle:"Sora",sans-serif;
+  --mg-font-label:"Oxanium",sans-serif;
+  --mg-font-ui:"Space Grotesk",sans-serif;
 }
 
 /* Primary titles. */
@@ -1917,7 +1917,7 @@ code,
 pre,
 .mono,
 .result code{
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace!important;
+  font-family:"Oxanium",sans-serif!important;
 }
 
 /* Download page: readable rules/copy, decorative card titles only. */
