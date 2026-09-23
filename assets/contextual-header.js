@@ -167,7 +167,7 @@
     {name:'About',detail:'Project mission and structure',target:'/about.html',terms:'about project mission'},
     {name:'Support',detail:'Security reports, bugs and feedback',target:'/support.html',terms:'support bug feedback report'},
     {name:'Download',detail:'Windows preview and verification',target:'/download.html',terms:'download windows installer verify'},
-    {name:'iPhone Preview',detail:'GTA Guard browser preview for iPhone',target:'/ios-preview/',terms:'iphone ios preview'},
+    {name:'MalGuard App',detail:'Native MalGuard app for supported platforms',target:'/download.html#native-apps',terms:'malguard app android iphone ios windows mac'},
     {name:'Case Study',detail:'MalGuard Labs repackaged-mod case study',target:'/research/repackaged-mod.html',terms:'case study repackaged mod research'}
   ];
 
