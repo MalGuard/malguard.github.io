@@ -35,6 +35,7 @@ jobs:
             scan-url.html
             products.html
             gta-guard.html
+            app.html
             404.html
             robots.txt
             sitemap.xml
@@ -64,6 +65,11 @@ jobs:
           grep -q "LIVE PREVIEW" products.html
           grep -q "FINAL VERIFICATION PENDING" gta-guard.html
           grep -q "COMING SOON" gta-guard.html
+          grep -q "MalGuard App" app.html
+          grep -q "MalGuard-App-Preview-Android.apk" app.html
+          grep -q "MalGuard-App-Preview-Windows-x64.exe" app.html
+          grep -q "MalGuard-App-Preview-macOS" app.html
+          grep -q "COMING SOON" app.html
           grep -q "MalGuard-Setup-0.6.1-beta.1-build-3cc15b4-windows-x64.exe" gta-guard.html
           grep -q "data-malguard-back" research/repackaged-mod.html
           grep -q "data-malguard-back" ios-preview/index.html
