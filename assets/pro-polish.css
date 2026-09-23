@@ -334,7 +334,7 @@ html{
 }
 body{
   overflow-x:clip!important;
-  font-family:"Space Grotesk",sans-serif!important;
+  font-family:"American Typewriter"!important;
   font-size:16px!important;
   line-height:1.6!important;
 }
@@ -343,7 +343,7 @@ h1,h2,h3,h4,
 .btn,
 .nav-links,
 .topbar .links{
-  font-family:"Sora",sans-serif!important;
+  font-family:"Baskerville"!important;
 }
 h1,h2{letter-spacing:-.02em!important}
 
@@ -1355,7 +1355,7 @@ main > section:not(.hero-entry):not(.hero){
   border-radius:12px!important;
   background:rgba(255,255,255,.035)!important;
   color:#fff!important;
-  font:400 30px/1 "Sora",sans-serif!important;
+  font:400 30px/1 "Baskerville"!important;
 }
 .mg-context-search .site-search-form{
   display:flex!important;
@@ -1676,7 +1676,7 @@ main > section:not(.hero-entry):not(.hero){
   opacity:1!important;
   transform:none!important;
   text-shadow:none!important;
-  font-family:"Space Grotesk",sans-serif!important;
+  font-family:"American Typewriter"!important;
   font-size:14px!important;
   font-weight:500!important;
   line-height:1.2!important;
@@ -1727,7 +1727,7 @@ main > section:not(.hero-entry):not(.hero){
 }
 .download-page .hub-card h3{
   margin:0 0 8px!important;
-  font-family:"Space Grotesk",sans-serif!important;
+  font-family:"American Typewriter"!important;
   font-size:18px!important;
   font-weight:650!important;
   line-height:1.25!important;
@@ -1746,7 +1746,7 @@ main > section:not(.hero-entry):not(.hero){
   display:block!important;
   width:100%!important;
   margin-top:5px!important;
-  font-family:"Oxanium",sans-serif!important;
+  font-family:"American Typewriter"!important;
   font-size:11.5px!important;
   line-height:1.5!important;
   white-space:normal!important;
@@ -1786,7 +1786,7 @@ main > section:not(.hero-entry):not(.hero){
   border-radius:0!important;
   background:none!important;
   color:#f0f2f4!important;
-  font-family:"Space Grotesk",sans-serif!important;
+  font-family:"American Typewriter"!important;
   font-size:14.5px!important;
   font-weight:600!important;
   line-height:1.35!important;
@@ -1819,16 +1819,16 @@ main > section:not(.hero-entry):not(.hero){
 
 /* =========================================================
    MalGuard typography system · 2026-09-23
-   Sora = H1/H2/Hero/page titles
-   Sora = H3/card/sub-headings
-   Oxanium = compact technical labels
-   Space Grotesk = body, navigation, buttons, rules, docs
+   Baskerville = H1/H2/Hero/page titles
+   Baskerville = H3/card/sub-headings
+   American Typewriter = compact technical labels
+   American Typewriter = body, navigation, buttons, rules, docs
    ========================================================= */
 :root{
-  --mg-font-title:"Sora",sans-serif;
-  --mg-font-subtitle:"Sora",sans-serif;
-  --mg-font-label:"Oxanium",sans-serif;
-  --mg-font-ui:"Space Grotesk",sans-serif;
+  --mg-font-title:"Baskerville";
+  --mg-font-subtitle:"Baskerville";
+  --mg-font-label:"American Typewriter";
+  --mg-font-ui:"American Typewriter";
 }
 
 /* Primary titles. */
@@ -1912,12 +1912,12 @@ footer,
   font-family:var(--mg-font-ui)!important;
 }
 
-/* Real hashes/code stay monospace. */
+/* Real hashes/code stay. */
 code,
 pre,
 .mono,
 .result code{
-  font-family:"Oxanium",sans-serif!important;
+  font-family:"American Typewriter"!important;
 }
 
 /* Download page: readable rules/copy, decorative card titles only. */
@@ -2197,3 +2197,24 @@ pre,
     align-items:center!important;
   }
 }
+
+
+/* =========================================================
+   MalGuard classic three-font lock · 2026-09-23
+   Baskerville Bold = primary titles
+   Bodoni 72 Bold = secondary/card headings
+   American Typewriter Bold = body, UI, labels and technical text
+   ========================================================= */
+:root{
+  --display:"Baskerville";
+  --body:"American Typewriter";
+  --product:"American Typewriter";
+  --mg-font-title:"Baskerville";
+  --mg-font-subtitle:"Bodoni 72";
+  --mg-font-label:"American Typewriter";
+  --mg-font-ui:"American Typewriter";
+}
+html,body,body *{font-family:"American Typewriter"!important}
+h1,h2,.hero h1,.section-head h2{font-family:"Baskerville"!important}
+h3,h4,.card h3,.hub-card h3,.game-card h3{font-family:"Bodoni 72"!important}
+.brand,.btn,.nav-links,.topbar .links,.eyebrow,.kicker,.badge,code,pre,.mono,.result code{font-family:"American Typewriter"!important}
