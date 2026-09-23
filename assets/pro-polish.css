@@ -2196,20 +2196,4 @@ pre,
   .hero-platform-apple{
     align-items:center!important;
   }
-  .hero-platform-apple strong{
-    font-size:10.5px!important;
-    line-height:1.15!important;
-  }
-  .hero-platform-apple small{
-    font-size:8.5px!important;
-    line-height:1.18!important;
-    letter-spacing:0!important;
-  }
-}
-
-@media(max-width:390px){
-  .hero-platform-apple small{
-    font-size:8px!important;
-    line-height:1.16!important;
-  }
 }
