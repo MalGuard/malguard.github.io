@@ -130,16 +130,22 @@
   });
 
   const globalItems=[
+    {name:'Home',detail:'MalGuard overview',target:'/',terms:'home malguard'},
+    {name:'Products',detail:'Current MalGuard products and availability',target:'/products.html',terms:'products gta guard malware ai scam guard'},
+    {name:'GTA Guard',detail:'Windows x64 GTA Guard preview',target:'/gta-guard.html',terms:'gta guard windows mod security'},
     {name:'Scan Mods',detail:'Game-mod scanning hub',target:'/scan-mods.html',terms:'scan mods gta minecraft roblox'},
     {name:'AI Intelligence',detail:'MalGuard security AI',target:'/ai-intelligence.html',terms:'ai malware intelligence'},
     {name:'Scan URL',detail:'URL analysis and SHA-256 fingerprinting',target:'/scan-url.html',terms:'scan url link fingerprint hash'},
     {name:'Tools',detail:'Local-first security utilities',target:'/tools.html',terms:'tools fingerprint link inspector'},
     {name:'Trust',detail:'Security, privacy and release integrity',target:'/trust.html',terms:'security trust privacy integrity limits'},
+    {name:'Privacy',detail:'Local-first data and network policy',target:'/privacy.html',terms:'privacy local network transfer'},
     {name:'Labs',detail:'Gaming-security research',target:'/labs.html',terms:'labs research guides'},
     {name:'Docs',detail:'Product and security documentation',target:'/docs.html',terms:'docs documentation'},
     {name:'About',detail:'Project mission and structure',target:'/about.html',terms:'about project mission'},
     {name:'Support',detail:'Security reports, bugs and feedback',target:'/support.html',terms:'support bug feedback report'},
-    {name:'Download',detail:'Windows preview and verification',target:'/download.html',terms:'download windows installer verify'}
+    {name:'Download',detail:'Windows preview and verification',target:'/download.html',terms:'download windows installer verify'},
+    {name:'iPhone Preview',detail:'GTA Guard browser preview for iPhone',target:'/ios-preview/',terms:'iphone ios preview'},
+    {name:'Case Study',detail:'MalGuard Labs repackaged-mod case study',target:'/research/repackaged-mod.html',terms:'case study repackaged mod research'}
   ];
 
   const searchMarkup=`
