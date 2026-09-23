@@ -66,10 +66,20 @@ jobs:
           grep -q "FINAL VERIFICATION PENDING" gta-guard.html
           grep -q "COMING SOON" gta-guard.html
           grep -q "MalGuard App" app.html
+          grep -q "app-v0.2.0-offline-preview.1" app.html
           grep -q "MalGuard-App-Preview-Android.apk" app.html
-          grep -q "MalGuard-App-Preview-Windows-x64.exe" app.html
-          grep -q "MalGuard-App-Preview-macOS" app.html
+          grep -q "MalGuard-App-Preview-Windows-x64-Setup.exe" app.html
+          grep -q "MalGuard-App-Preview-macOS.zip" app.html
+          grep -q "Offline Preview 0.2.0" app.html
           grep -q "COMING SOON" app.html
+          grep -q "app-v0.2.0-offline-preview.1" download.html
+          grep -q "MalGuard-App-Preview-Android.apk" download.html
+          grep -q "MalGuard-App-Preview-Windows-x64-Setup.exe" download.html
+          grep -q "MalGuard-App-Preview-macOS.zip" download.html
+          if grep -q "malguard-app-v0.1.0-preview" app.html download.html; then
+            echo "Old online-shell app release links are still present."
+            exit 1
+          fi
           grep -q "MalGuard-Setup-0.6.1-beta.1-build-3cc15b4-windows-x64.exe" gta-guard.html
           grep -q "data-malguard-back" research/repackaged-mod.html
           grep -q "data-malguard-back" ios-preview/index.html
