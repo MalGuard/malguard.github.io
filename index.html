@@ -2401,7 +2401,7 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
 }
 </style>
 
-<link rel="stylesheet" href="/assets/pro-polish.css?v=20260923-5">
+<link rel="stylesheet" href="/assets/pro-polish.css?v=20260923-6">
 </head>
 <body>
 <a class="site-skip-link" href="#homeContent">Skip to main content</a>
@@ -2409,24 +2409,22 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
   <div class="container nav-inner">
     <a href="#home" class="brand" onclick="showHome()" aria-label="MalGuard home"><img class="brand-site-logo" src="assets/malguard-site-logo.svg" alt="MalGuard"></a>
     <nav class="nav-links feature-menu" id="navLinks" aria-label="Primary navigation">
-      <button class="menu-close" id="menuClose" type="button" aria-label="Close navigation menu">×</button>
-      <span class="nav-group-label">Quick tools</span>
+      <a href="/">Home</a>
+      <a href="/products.html">Products</a>
+      <a href="/gta-guard.html">GTA Guard</a>
       <a href="/scan-mods.html">Scan Mods</a>
-      <a href="/ai-intelligence.html">AI</a>
+      <a href="/ai-intelligence.html">AI Intelligence</a>
       <a href="/scan-url.html">Scan URL</a>
-      <a href="/tools.html#file-fingerprint">Fingerprint</a>
-      <a href="/tools.html#link-inspector">Link Check</a>
-      <span class="nav-group-label">Security & trust</span>
+      <a href="/tools.html">Tools</a>
       <a href="/trust.html">Trust</a>
       <a href="/privacy.html">Privacy</a>
-      <a href="/trust.html#release-integrity">Integrity</a>
-      <a href="/trust.html#limitations">Limits</a>
-      <span class="nav-group-label">Resources</span>
       <a href="/labs.html">Labs</a>
       <a href="/docs.html">Docs</a>
       <a href="/about.html">About</a>
       <a href="/support.html">Support</a>
       <a href="/download.html">Download</a>
+      <a href="/ios-preview/">iPhone Preview</a>
+      <a href="/research/repackaged-mod.html">Case Study</a>
     </nav>
     <div class="nav-actions">
       <button class="nav-icon" id="searchButton" type="button" aria-label="Search MalGuard" aria-expanded="false" aria-controls="siteSearch"><svg class="search-glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
@@ -2461,20 +2459,20 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
     <div class="hero-copy">
       <div class="eyebrow">SCAN SMART. PLAY SAFE.</div>
       <h1>A Safer Gaming <span>Community</span> Starts Here.</h1>
-      <p class="hero-description">MalGuard helps gamers inspect suspicious mods, files, links, scams, and gaming-related threats before use. GTA Guard is available as a Windows x64 preview and an iPhone browser preview; Malware AI and Game Scam Guard remain in development.</p>
+      <p class="hero-description">MalGuard helps gamers inspect suspicious mods, files, links and scams before use. GTA Guard is a Windows x64 preview, Malware AI has a live web preview, and Game Scam Guard remains in development.</p>
       <div class="hero-actions">
-        <a href="#products" class="btn btn-secondary"><span>Learn More</span><b aria-hidden="true">›</b></a>
+        <a href="/products.html" class="btn btn-secondary"><span>Explore Products</span><b aria-hidden="true">›</b></a>
         <a href="/download.html" class="btn btn-primary"><span>Get MalGuard</span><b aria-hidden="true">›</b></a>
       </div>
       <div class="hero-platform-strip" aria-label="MalGuard platforms">
-        <a class="hero-platform hero-platform-windows" href="/download.html" aria-label="MalGuard for Windows">
+        <a class="hero-platform hero-platform-windows" href="/gta-guard.html" aria-label="GTA Guard for Windows">
           <img src="assets/windows-mark.svg" alt="" aria-hidden="true">
           <span><strong>Windows</strong><small>Windows 10 / 11</small></span>
         </a>
         <span class="hero-platform-divider" aria-hidden="true"></span>
         <a class="hero-platform hero-platform-apple" href="/ios-preview/" aria-label="MalGuard Apple platforms, Mac and iPhone">
           <img src="assets/apple-mark.svg" alt="" aria-hidden="true">
-          <span><strong>Apple</strong><small>Mac / iPhone</small></span>
+          <span><strong>Apple</strong><small>iPhone preview · Mac coming soon</small></span>
         </a>
       </div>
     </div>
@@ -2499,29 +2497,28 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
 <section class="home-compact-section" id="products">
   <div class="container">
     <div class="compact-home-heading">
-      <div><span class="section-label">Products</span><h2>Three products. One security platform.</h2></div>
-      <p>Quick specifications stay on the homepage. Full technical details open only when you want them.</p>
+      <div><span class="section-label">Products</span><h2>Three focused products.</h2></div>
+      <p>See the essentials here, then open the dedicated page for details.</p>
     </div>
-    <div class="compact-product-list" aria-label="MalGuard products">
-      <button class="compact-product compact-product-gta" type="button" onclick="openProduct('gta-guard')">
+    <div class="compact-product-list compact-product-list-clean" aria-label="MalGuard products">
+      <a class="compact-product compact-product-gta" href="/gta-guard.html">
         <img src="assets/product-gta-guard.svg" alt="" aria-hidden="true">
-        <span class="compact-product-copy"><span class="compact-product-top"><strong>GTA Guard</strong><em>PREVIEW</em></span><small>GTA 5 mod security · Windows 10/11 · x64 · .ASI / .DLL / .ZIP</small><span class="compact-product-specs"><b>Standard</b><b>Plus</b><b>Pro</b><b>Sandbox routing</b></span></span>
+        <span class="compact-product-copy"><span class="compact-product-top"><strong>GTA Guard</strong><em>PREVIEW</em></span><small>Windows x64 game-mod security preview.</small></span>
         <span class="compact-product-arrow" aria-hidden="true">›</span>
-      </button>
-      <button class="compact-product compact-product-malware" type="button" onclick="openProduct('malware-ai')">
+      </a>
+      <a class="compact-product compact-product-malware" href="/ai-intelligence.html">
         <img src="assets/product-malware-ai.svg" alt="" aria-hidden="true">
-        <span class="compact-product-copy"><span class="compact-product-top"><strong>Malware AI</strong><em>LIVE PREVIEW</em></span><small>Live MalGuard AI preview · multi-model chat · automatic fallback · current-data routing</small><span class="compact-product-specs"><b>File inspection</b><b>Threat signals</b><b>AI-assisted</b></span></span>
+        <span class="compact-product-copy"><span class="compact-product-top"><strong>Malware AI</strong><em>LIVE PREVIEW</em></span><small>Live web preview for AI-assisted security analysis.</small></span>
         <span class="compact-product-arrow" aria-hidden="true">›</span>
-      </button>
-      <button class="compact-product compact-product-scam" type="button" onclick="openProduct('game-scam-guard')">
+      </a>
+      <div class="compact-product compact-product-scam compact-product-static" aria-label="Game Scam Guard, in development">
         <img src="assets/product-game-scam-guard.svg" alt="" aria-hidden="true">
-        <span class="compact-product-copy"><span class="compact-product-top"><strong>Game Scam Guard</strong><em>IN DEVELOPMENT</em></span><small>Planned gaming-link and scam analysis · deception signals · safer browsing guidance</small><span class="compact-product-specs"><b>Link analysis</b><b>Scam signals</b><b>Risk guidance</b></span></span>
-        <span class="compact-product-arrow" aria-hidden="true">›</span>
-      </button>
+        <span class="compact-product-copy"><span class="compact-product-top"><strong>Game Scam Guard</strong><em>IN DEVELOPMENT</em></span><small>Gaming scam and suspicious-link protection is being developed.</small></span>
+      </div>
     </div>
+    <div class="compact-home-more"><a class="btn btn-secondary" href="/products.html">View all products</a></div>
   </div>
 </section>
-
 <section class="home-compact-section home-system-strip" id="how-it-works">
   <div class="container compact-system-grid">
     <article><span class="section-label">How it works</span><h3>Identify → Inspect → Analyze → Decide</h3><p>MalGuard keeps uncertainty visible instead of turning missing evidence into “safe”.</p></article>
@@ -2582,7 +2579,7 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
   </div>
 </section>
 <section class="product-page" id="page-game-scam-guard"><div class="container"><div class="product-page-header"><img class="product-brand-logo" src="assets/malguard-logo.svg" alt="MalGuard"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status coming">COMING SOON</div><h1>Game Scam Guard</h1><p>A planned security product for suspicious gaming links, scams and unsafe gaming-related destinations.</p></div><div class="product-page-grid"><article class="info-card"><h3>Planned purpose</h3><p>Help players evaluate suspicious gaming-related links and scam indicators before interacting with them.</p></article><article class="info-card"><h3>Planned capabilities</h3><ul><li>Suspicious link analysis</li><li>Scam indicator detection</li><li>Risk classification</li><li>Safer browsing guidance</li></ul></article><article class="info-card"><h3>Current status</h3><p>This product is planned and is not being presented as an active security service.</p><div class="release-box"><strong>NO RELEASE YET</strong><span>Capabilities may change before an actual release.</span></div></article><article class="info-card"><h3>Download</h3><p>There is currently no official download.</p><button class="btn btn-secondary disabled-btn" disabled style="margin-top:20px">Coming Soon</button></article></div></div></section>
-<footer><div class="container footer-inner"><div class="footer-copy"><strong>© 2026 MalGuard. Scan Smart. Play Safe.</strong><span class="footer-disclaimer">Security analysis reduces risk. No scan can guarantee that a file, mod, link, or destination is harmless.</span></div><div class="footer-links"><a href="#products">Products</a><a href="/tools.html">Tools</a><a href="/about.html">About</a><a href="/docs.html">Docs</a><a href="/trust.html">Trust Center</a><a href="/privacy.html">Privacy</a><a href="/labs.html">Labs</a><a href="/support.html">Support</a><a href="/download.html">Download</a><a href="https://github.com/MalGuard" target="_blank" rel="noopener">GitHub</a></div></div></footer><div class="toast" id="toast"></div>
+<footer><div class="container footer-inner"><div class="footer-copy"><strong>© 2026 MalGuard. Scan Smart. Play Safe.</strong><span class="footer-disclaimer">Security analysis reduces risk. No scan can guarantee that a file, mod, link, or destination is harmless.</span></div><div class="footer-links"><a href="/products.html">Products</a><a href="/tools.html">Tools</a><a href="/about.html">About</a><a href="/docs.html">Docs</a><a href="/trust.html">Trust Center</a><a href="/privacy.html">Privacy</a><a href="/labs.html">Labs</a><a href="/support.html">Support</a><a href="/download.html">Download</a><a href="https://github.com/MalGuard" target="_blank" rel="noopener">GitHub</a></div></div></footer><div class="toast" id="toast"></div>
 <script>
 const navbar=document.getElementById('navbar'),menuBtn=document.getElementById('menuBtn'),navLinks=document.getElementById('navLinks'),homeContent=document.getElementById('homeContent'),productPages=document.querySelectorAll('.product-page');
 window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',scrollY>8));
@@ -2658,20 +2655,10 @@ function animateMenuTo(index,{duration=260,select=true}={}){
 
 function updateLiveMenuSelection(){
   menuSelectionFrame=0;
-  if(!navLinks.classList.contains('active'))return;
-  setActiveMenuItem(nearestMenuIndex());
 }
 
 function finalizeNativeMenuScroll(){
-  if(!navLinks.classList.contains('active'))return;
-  const next=nearestMenuIndex();
-  setActiveMenuItem(next);
-  const target=menuTargetLeft(next);
-  if(Math.abs(navLinks.scrollLeft-target)>.5){
-    navLinks.scrollLeft=target;
-  }
   menuGestureMoved=false;
-  menuGestureStartIndex=next;
 }
 
 function openMenu(){
@@ -2690,7 +2677,7 @@ function openMenu(){
   setActiveMenuItem(next);
   menuGestureStartIndex=next;
   requestAnimationFrame(()=>{
-    navLinks.scrollLeft=menuTargetLeft(next);
+    navLinks.scrollLeft=next===0?0:Math.max(0,menuItems[next].offsetLeft-12);
   });
 }
 
@@ -2813,7 +2800,8 @@ document.querySelectorAll('.plan-fold').forEach(card=>card.addEventListener('tog
 {name:'Scan Mods',detail:'Game-mod scanning hub with GTA Guard available now',target:'/scan-mods.html',terms:'scan mods gta minecraft roblox mod security'},
 {name:'AI Intelligence',detail:'MalGuard security AI modules and planned intelligence tools',target:'/ai-intelligence.html',terms:'ai intelligence malware ai security'},
 {name:'Scan URL',detail:'Local URL-text analysis plus SHA-256 fingerprinting',target:'/scan-url.html',terms:'scan url link phishing hash fingerprint'},
-{name:'Products',detail:'GTA Guard, Malware AI, and Game Scam Guard',target:'#products',terms:'products malware ai gta guard game scam'},
+{name:'Products',detail:'GTA Guard, Malware AI, and Game Scam Guard',target:'/products.html',terms:'products malware ai gta guard game scam'},
+{name:'GTA Guard',detail:'Windows x64 preview and platform status',target:'/gta-guard.html',terms:'gta guard windows preview mod security'},
 {name:'How It Works',detail:'Compact MalGuard analysis workflow',target:'#how-it-works',terms:'how works scan identify inspect analyze decide'},
 {name:'File Fingerprint',detail:'Calculate SHA-256 locally without uploading the file',target:'/tools.html#file-fingerprint',terms:'sha256 hash fingerprint local file'},
 {name:'Link Inspector',detail:'Inspect URL text without opening the destination',target:'/tools.html#link-inspector',terms:'link url inspector phishing local'},

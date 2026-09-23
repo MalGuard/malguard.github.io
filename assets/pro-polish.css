@@ -1953,3 +1953,119 @@ pre,
     letter-spacing:-.01em!important;
   }
 }
+
+
+/* =========================================================
+   Home global menu · free iPhone-style rail · 2026-09-23
+   ========================================================= */
+.nav:not(.mg-context-header) .nav-inner>.feature-menu.active,
+.nav:not(.mg-context-header) .nav-inner>.feature-menu.closing{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  gap:4px!important;
+  width:min(560px,calc(100vw - 24px))!important;
+  padding:10px 8px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  white-space:nowrap!important;
+  scroll-snap-type:none!important;
+  scroll-padding-inline:0!important;
+  scroll-behavior:auto!important;
+  overscroll-behavior-x:contain!important;
+  touch-action:pan-x!important;
+  -webkit-overflow-scrolling:touch!important;
+  scrollbar-width:none!important;
+  user-select:none!important;
+  -webkit-user-select:none!important;
+  mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent)!important;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 14px,#000 calc(100% - 14px),transparent)!important;
+}
+.nav:not(.mg-context-header) .nav-inner>.feature-menu.active::-webkit-scrollbar,
+.nav:not(.mg-context-header) .nav-inner>.feature-menu.closing::-webkit-scrollbar{
+  display:none!important;
+}
+.nav:not(.mg-context-header) .nav-inner>.feature-menu.active::before,
+.nav:not(.mg-context-header) .nav-inner>.feature-menu.active::after,
+.nav:not(.mg-context-header) .nav-inner>.feature-menu.closing::before,
+.nav:not(.mg-context-header) .nav-inner>.feature-menu.closing::after{
+  content:""!important;
+  flex:0 0 6px!important;
+}
+.nav:not(.mg-context-header) .feature-menu a,
+.nav:not(.mg-context-header) .feature-menu a:nth-of-type(3n+1),
+.nav:not(.mg-context-header) .feature-menu a:nth-of-type(3n+2),
+.nav:not(.mg-context-header) .feature-menu a:nth-of-type(3n){
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:max-content!important;
+  max-width:none!important;
+  min-height:38px!important;
+  height:38px!important;
+  padding:0 11px!important;
+  scroll-snap-align:none!important;
+  scroll-snap-stop:normal!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#8e8e93!important;
+  opacity:1!important;
+  transform:none!important;
+  font-family:var(--mg-font-ui)!important;
+  font-size:13px!important;
+  font-weight:500!important;
+  letter-spacing:-.01em!important;
+  box-shadow:none!important;
+}
+.nav:not(.mg-context-header) .feature-menu a:hover,
+.nav:not(.mg-context-header) .feature-menu a:focus-visible{
+  background:transparent!important;
+  color:#c8c9cc!important;
+  border:0!important;
+  transform:none!important;
+  outline:0!important;
+}
+.nav:not(.mg-context-header) .feature-menu a.menu-current,
+.nav:not(.mg-context-header) .feature-menu a.menu-current:hover,
+.nav:not(.mg-context-header) .feature-menu a.menu-current:focus-visible{
+  background:transparent!important;
+  border:0!important;
+  color:#f7f7f8!important;
+  font-weight:600!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+.compact-product-list-clean .compact-product{
+  min-height:86px!important;
+}
+.compact-product-list-clean .compact-product-copy small{
+  font-size:12px!important;
+  line-height:1.45!important;
+}
+.compact-product-static{
+  cursor:default!important;
+}
+.compact-product-static:hover{
+  transform:none!important;
+}
+.compact-home-more{
+  display:flex!important;
+  justify-content:flex-start!important;
+  margin-top:16px!important;
+}
+@media(max-width:760px){
+  .nav:not(.mg-context-header) .nav-inner>.feature-menu.active,
+  .nav:not(.mg-context-header) .nav-inner>.feature-menu.closing{
+    left:0!important;
+    right:0!important;
+    width:100%!important;
+    gap:2px!important;
+    padding:9px 6px!important;
+  }
+  .nav:not(.mg-context-header) .feature-menu a{
+    min-height:36px!important;
+    height:36px!important;
+    padding:0 10px!important;
+    font-size:12.5px!important;
+  }
+}

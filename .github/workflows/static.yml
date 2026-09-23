@@ -33,7 +33,7 @@ jobs:
           mkdir -p _site/.well-known
 
           cp index.html 404.html _site/
-          cp tools.html trust.html privacy.html support.html about.html labs.html docs.html download.html scan-mods.html ai-intelligence.html scan-url.html _site/
+          cp tools.html trust.html privacy.html support.html about.html labs.html docs.html download.html scan-mods.html ai-intelligence.html scan-url.html products.html gta-guard.html _site/
           cp robots.txt sitemap.xml _site/
           cp favicon.ico favicon-96.png favicon-192.png _site/
           cp -R assets _site/assets
@@ -53,6 +53,8 @@ jobs:
           test -f _site/scan-mods.html
           test -f _site/ai-intelligence.html
           test -f _site/scan-url.html
+          test -f _site/products.html
+          test -f _site/gta-guard.html
           test -f _site/research/repackaged-mod.html
 
       - name: Setup Pages
