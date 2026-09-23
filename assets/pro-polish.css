@@ -2069,3 +2069,102 @@ pre,
     font-size:12.5px!important;
   }
 }
+
+
+/* =========================================================
+   Shared Home + Back header controls · 2026-09-23
+   ========================================================= */
+.mg-history-actions{
+  display:flex!important;
+  align-items:center!important;
+  gap:5px!important;
+  flex:0 0 auto!important;
+}
+.mg-history-btn{
+  height:36px!important;
+  min-height:36px!important;
+  padding:0 10px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  border:0!important;
+  border-radius:999px!important;
+  background:transparent!important;
+  color:#b7bcc2!important;
+  box-shadow:none!important;
+  text-decoration:none!important;
+  font-family:var(--mg-font-ui)!important;
+  font-size:12px!important;
+  font-weight:500!important;
+  line-height:1!important;
+  letter-spacing:-.01em!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+.mg-history-btn:hover,
+.mg-history-btn:active,
+.mg-history-btn:focus-visible{
+  background:rgba(255,255,255,.035)!important;
+  color:#f4f5f6!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+.mg-history-icon{
+  display:block!important;
+  font-size:17px!important;
+  line-height:1!important;
+  transform:translateY(-.5px)!important;
+}
+.mg-home-icon{
+  width:16px!important;
+  height:16px!important;
+  display:block!important;
+  flex:0 0 auto!important;
+}
+@media(max-width:620px){
+  .mg-context-header .brand-site-logo{
+    max-width:108px!important;
+    height:30px!important;
+  }
+  .mg-context-header .nav-inner{
+    gap:7px!important;
+    padding-inline:8px!important;
+  }
+  .mg-context-header .nav-actions{
+    gap:3px!important;
+  }
+  .mg-history-actions{
+    gap:2px!important;
+  }
+  .mg-history-btn{
+    width:32px!important;
+    min-width:32px!important;
+    height:36px!important;
+    min-height:36px!important;
+    padding:0!important;
+    border-radius:10px!important;
+  }
+  .mg-history-label{
+    display:none!important;
+  }
+  .mg-history-icon{
+    font-size:18px!important;
+  }
+  .mg-home-icon{
+    width:17px!important;
+    height:17px!important;
+  }
+}
+@media(max-width:390px){
+  .mg-context-header .brand-site-logo{
+    max-width:94px!important;
+  }
+  .mg-context-header .nav-icon,
+  .mg-context-header .nav-download,
+  .mg-context-header .menu-btn{
+    width:38px!important;
+    min-width:38px!important;
+    height:38px!important;
+    min-height:38px!important;
+  }
+}
