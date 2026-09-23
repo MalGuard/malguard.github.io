@@ -2168,3 +2168,48 @@ pre,
     min-height:38px!important;
   }
 }
+
+
+/* =========================================================
+   Apple platform card overflow fix · 2026-09-23
+   ========================================================= */
+.hero-platform-apple{
+  min-width:0!important;
+  overflow:hidden!important;
+}
+.hero-platform-apple span{
+  flex:1 1 auto!important;
+  min-width:0!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+}
+.hero-platform-apple small{
+  display:block!important;
+  max-width:100%!important;
+  white-space:normal!important;
+  overflow-wrap:break-word!important;
+  word-break:normal!important;
+  text-overflow:clip!important;
+}
+
+@media(max-width:760px){
+  .hero-platform-apple{
+    align-items:center!important;
+  }
+  .hero-platform-apple strong{
+    font-size:10.5px!important;
+    line-height:1.15!important;
+  }
+  .hero-platform-apple small{
+    font-size:8.5px!important;
+    line-height:1.18!important;
+    letter-spacing:0!important;
+  }
+}
+
+@media(max-width:390px){
+  .hero-platform-apple small{
+    font-size:8px!important;
+    line-height:1.16!important;
+  }
+}
