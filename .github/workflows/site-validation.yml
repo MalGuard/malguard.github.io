@@ -69,10 +69,15 @@ jobs:
           grep -q "MalGuard-App-Preview-Android.apk" app.html
           grep -q "MalGuard-App-Preview-Windows-x64-Setup.exe" app.html
           grep -q "MalGuard-App-Preview-macOS.zip" app.html
-          grep -q "app-v0.2.0-offline-preview.1" app.html
+          grep -q "MalGuard-App-Preview-Linux-x64.AppImage" app.html
+          grep -q "MalGuard-App-Preview-Linux-x64.deb" app.html
+          grep -q "app-v0.2.0-offline-preview.2" app.html
+          grep -q "APPLE SIGNING REQUIRED" app.html
           grep -qi "offline" app.html
           grep -qi "offline" download.html
-          grep -q "COMING SOON" app.html
+          grep -q "MalGuard-App-Preview-Linux-x64.AppImage" download.html
+          grep -q "MalGuard-App-Preview-Linux-x64.deb" download.html
+          grep -q "APPLE SIGNING REQUIRED" download.html
           grep -q "MalGuard-Setup-0.6.1-beta.1-build-3cc15b4-windows-x64.exe" gta-guard.html
           grep -q "data-malguard-back" research/repackaged-mod.html
           grep -q "data-malguard-back" ios-preview/index.html
