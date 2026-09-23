@@ -6,6 +6,29 @@
   if(!navbar||!menuBtn||!navLinks||!searchButton)return;
 
   window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',scrollY>8),{passive:true});
+  const navActions=navbar.querySelector('.nav-actions');
+  if(navActions&&!navActions.querySelector('.mg-history-actions')){
+    navActions.insertAdjacentHTML('afterbegin',`
+      <div class="mg-history-actions" aria-label="Page navigation">
+        <button class="mg-history-btn mg-back-btn" type="button" aria-label="Back to previous MalGuard page">
+          <span class="mg-history-icon" aria-hidden="true">←</span>
+          <span class="mg-history-label">Back</span>
+        </button>
+        <a class="mg-history-btn mg-home-btn" href="/" aria-label="Go to MalGuard home">
+          <svg class="mg-home-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 10.5 12 4l7.5 6.5v8a1.5 1.5 0 0 1-1.5 1.5h-4.25v-5.25h-3.5V20H6a1.5 1.5 0 0 1-1.5-1.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          <span class="mg-history-label">Home</span>
+        </a>
+      </div>`);
+    const backButton=navActions.querySelector('.mg-back-btn');
+    backButton?.addEventListener('click',()=>{
+      try{
+        const ref=document.referrer?new URL(document.referrer):null;
+        if(ref&&ref.origin===location.origin){history.back();return}
+      }catch(_){}
+      location.href='/';
+    });
+  }
+
 
   const menuItems=[...navLinks.querySelectorAll('a')];
   let activeMenuIndex=0;
