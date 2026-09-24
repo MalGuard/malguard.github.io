@@ -19,11 +19,11 @@ jobs:
     timeout-minutes: 35
     env:
       CORE_REPO: MalGuard/malguard-core
-      CORE_SHA: 33bcb0c0825f17c31adcd8272228dbf575079842
-      RELEASE_TAG: gta-guard-v0.6.1-beta.1-33bcb0c
-      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 33bcb0c
-      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-33bcb0c-windows-x64.exe
-      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-33bcb0c-windows-x64.exe.sha256
+      CORE_SHA: 83509d221032f092be80ebdddf27696b9f18b959
+      RELEASE_TAG: gta-guard-v0.6.1-beta.1-83509d2
+      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 83509d2
+      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe
+      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe.sha256
 
     steps:
       - name: Checkout exact public MalGuard Core commit
@@ -144,6 +144,7 @@ jobs:
           node tests/public-release-policy.test.js
           node tests/windows-installer-source.test.js
           node tests/local-file-upload.test.js
+          node tests/scanner-feedback-ui.test.js
           node tests/packaging-foundation.test.js
 
       - name: Build and verify sealed runtime package
