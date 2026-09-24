@@ -119,6 +119,8 @@ jobs:
       - name: Run release hardening regressions
         shell: pwsh
         working-directory: core
+        env:
+          MALGUARD_SOURCE_COMMIT: ${{ env.CORE_SHA }}
         run: |
           $ErrorActionPreference = 'Stop'
           node tests/sandbox-backend.test.js
