@@ -64,6 +64,12 @@ jobs:
           grep -q 'href="/malware-ai.html">Open Malware AI' ai-intelligence.html
           grep -q "Open Windows Preview" malware-ai.html
           grep -q "Enter to send" malware-ai-windows.html
+          grep -q 'unicode-bidi:plaintext' malware-ai-windows.html
+          grep -q 'dir="auto"' malware-ai-windows.html
+          grep -q 'applyTextDirection' malware-ai-windows.html
+          grep -q 'unicode-bidi:plaintext' index.html
+          grep -q 'dir="auto"' index.html
+          grep -q 'applyTextDirection' index.html
           if grep -q 'href="https://malware-ai-gray.vercel.app">Open Malware AI' ai-intelligence.html; then
             echo "Malware AI must not navigate users away from malguard.github.io."
             exit 1
