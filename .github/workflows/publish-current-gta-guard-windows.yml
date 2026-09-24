@@ -19,11 +19,11 @@ jobs:
     timeout-minutes: 35
     env:
       CORE_REPO: MalGuard/malguard-core
-      CORE_SHA: 517878e1f07633b0274dbb059c0ac97ee2593ee8
-      RELEASE_TAG: gta-guard-v0.6.1-beta.1-517878e
-      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 517878e
-      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-517878e-windows-x64.exe
-      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-517878e-windows-x64.exe.sha256
+      CORE_SHA: e37bf3b28dd774680b72c70a7c4b79e8571063ad
+      RELEASE_TAG: gta-guard-v0.7.0-beta.1-e37bf3b
+      RELEASE_TITLE: GTA Guard 0.7.0-beta.1 · Windows x64 · Hybrid Isolation v1 · build e37bf3b
+      PUBLISH_EXE: MalGuard-Setup-0.7.0-beta.1-build-e37bf3b-windows-x64.exe
+      PUBLISH_SUM: MalGuard-Setup-0.7.0-beta.1-build-e37bf3b-windows-x64.exe.sha256
 
     steps:
       - name: Checkout exact public MalGuard Core commit
@@ -164,7 +164,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $version = (Get-Content -LiteralPath 'DESKTOP-VERSION' -Raw).Trim()
-          if ($version -ne '0.6.1-beta.1') { throw "unexpected desktop version: $version" }
+          if ($version -ne '0.7.0-beta.1') { throw "unexpected desktop version: $version" }
           $root = Join-Path (Get-Location) "dist/malguard-desktop-$version"
           $setup = Join-Path (Get-Location) "dist/MalGuard-Setup-$version-windows-x64.exe"
           & pwsh -NoLogo -NoProfile -NonInteractive -File .\tools\build-windows-installer.ps1 -PackageRoot $root -Architecture x64 -OutputPath $setup -DiagnosticOutputDirectory (Join-Path $env:RUNNER_TEMP 'malguard-publish-install')
@@ -222,7 +222,7 @@ jobs:
           $sum = Join-Path (Get-Location) "dist/$env:PUBLISH_SUM"
           if (gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY *> $null) { throw "Release $env:RELEASE_TAG already exists; refusing to replace assets." }
           $sha = ((Get-Content -LiteralPath $sum -Raw).Trim() -split '\s+')[0]
-          gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --prerelease --title $env:RELEASE_TITLE --notes "Unsigned Windows x64 preview built from MalGuard Core commit $env:CORE_SHA. SHA-256: $sha. This build extends Windows Sandbox startup/certification timeouts to 60 seconds for slower hosts without weakening isolation checks. Includes the anonymous coarse compatibility report documented in the MalGuard privacy policy." $exe $sum
+          gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --prerelease --title $env:RELEASE_TITLE --notes "Unsigned Windows x64 preview built from MalGuard Core commit $env:CORE_SHA. SHA-256: $sha. Hybrid Isolation v1 keeps Windows Sandbox as the only behavioral-execution path and adds an opt-in disposable Cloud Inspection fallback that is inspection-only, deny-all-network and destroyed after each job. Incomplete evidence is never promoted to SAFE." $exe $sum
           if ($LASTEXITCODE -ne 0) { throw 'GitHub Release creation failed' }
 
       - name: Publish website release metadata
@@ -269,3 +269,21 @@ jobs:
           Set-Content -LiteralPath $requestPath -Value $request -Encoding UTF8
           gh api --method PUT "repos/$env:GITHUB_REPOSITORY/contents/$path" --input $requestPath | Out-Null
           if ($LASTEXITCODE -ne 0) { throw 'failed to publish website release metadata' }
+
+      - name: Remove superseded GTA Guard 0.6 preview releases
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        working-directory: core
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $releases = gh release list --repo $env:GITHUB_REPOSITORY --limit 100 --json tagName | ConvertFrom-Json
+          foreach ($release in $releases) {
+            $tag = [string]$release.tagName
+            if ($tag -match '^gta-guard-v0\.6\.1-beta\.1-[a-f0-9]{7}$') {
+              Write-Host "Deleting superseded preview release $tag"
+              gh release delete $tag --repo $env:GITHUB_REPOSITORY --cleanup-tag --yes
+              if ($LASTEXITCODE -ne 0) { throw "failed to delete superseded release $tag" }
+            }
+          }

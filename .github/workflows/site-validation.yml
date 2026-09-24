@@ -86,10 +86,14 @@ jobs:
           grep -q "LIVE PREVIEW" products.html
           grep -q "FINAL VERIFICATION PENDING" gta-guard.html
           grep -q "COMING SOON" gta-guard.html
+          grep -q "HYBRID ISOLATION V1" gta-guard.html
+          grep -q "Disposable Cloud Inspection" gta-guard.html
+          grep -q "cannot promote incomplete evidence to SAFE" gta-guard.html
           grep -q "Check your installed build" gta-guard.html
           grep -q "New version available" gta-guard.html
           grep -q "malguardInstalledBuild" gta-guard.html
           grep -q "Download latest version" gta-guard.html
+          grep -q "Disposable Cloud Inspection" sandbox-help.html
           grep -q "SANDBOX_SELF_TEST_TIMEOUT" sandbox-help.html
           grep -q "NO_ISOLATION_BACKEND_ISOLATION_CERTIFIED" sandbox-help.html
           grep -q "VGpu" sandbox-help.html

@@ -51,8 +51,9 @@
 .critical-card ul{margin:8px 0 0;padding-left:18px}.verify-command{margin-top:12px;padding:12px;border-radius:10px;background:#050607;border:1px solid rgba(255,255,255,.08);font:600 11px ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
 .release-state{display:inline-flex;margin-top:10px;padding:6px 9px;border:1px solid rgba(255,255,255,.09);border-radius:999px;color:#aeb7bf;font-size:11px}
 .update-check{margin:0 0 14px;padding:18px;border:1px solid rgba(255,255,255,.10);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.008))}.update-check-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:10px}.update-check h3{margin:0;font-size:23px}.update-check p{margin:7px 0 0;color:var(--muted);font-size:13px;line-height:1.55}.update-check-latest{padding:7px 10px;border:1px solid rgba(255,255,255,.10);border-radius:999px;color:#dce4ea;font:600 11px "American Typewriter"}.update-check-form{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.update-check-form input{min-width:220px;flex:1;padding:11px 12px;border:1px solid rgba(255,255,255,.11);border-radius:10px;background:#070809;color:#edf2f5;font:600 12px ui-monospace,SFMono-Regular,Consolas,monospace;outline:none}.update-check-form input:focus{border-color:rgba(255,255,255,.28)}.update-result{display:none;margin-top:12px;padding:13px 14px;border-radius:12px;font-size:13px;line-height:1.55}.update-result.show{display:block}.update-result.ok{border:1px solid rgba(72,184,137,.55);background:rgba(33,110,79,.14);color:#bfe8d5}.update-result.update{border:1px solid rgba(230,185,93,.58);background:rgba(135,91,12,.16);color:#f3d9a0}.update-result.unknown{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.025);color:#cbd3d9}.update-result .release-actions{margin-top:10px}
+.hybrid{margin-top:38px}.hybrid h2{margin:0 0 12px;font-size:32px}.hybrid-intro{max-width:780px;color:var(--muted);font-size:14px;line-height:1.7}.hybrid-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}.hybrid-card{padding:19px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.012)}.hybrid-card .hybrid-step{display:inline-flex;width:28px;height:28px;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.12);border-radius:50%;font:700 11px "American Typewriter"}.hybrid-card h3{margin:12px 0 7px;font-size:20px}.hybrid-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}.hybrid-note{margin-top:14px;padding:14px 16px;border:1px solid rgba(255,255,255,.08);border-radius:13px;color:#c4ccd2;font-size:13px;line-height:1.6}
 @media(max-width:800px){
-  .platforms,.model-grid,.release-grid,.critical-grid{grid-template-columns:1fr}
+  .platforms,.model-grid,.release-grid,.critical-grid,.hybrid-grid{grid-template-columns:1fr}
   .platform-card{min-height:220px}
 }
 </style>
@@ -66,6 +67,7 @@
     <nav class="nav-links feature-menu" id="navLinks" aria-label="GTA Guard navigation">
       <a href="#overview">Overview</a>
       <a href="#platforms">Platforms</a>
+      <a href="#hybrid-isolation">Hybrid Isolation</a>
       <a href="#update">Update</a>
       <a href="#models">Models</a>
       <a href="/sandbox-help.html">Sandbox Help</a>
@@ -118,6 +120,19 @@
       <span class="status">COMING SOON</span>
       <div class="actions"><button class="btn secondary" type="button" disabled>Coming Soon</button></div>
     </article>
+  </div>
+</section>
+<section class="hybrid" id="hybrid-isolation">
+  <div class="container">
+    <span class="eyebrow">HYBRID ISOLATION V1</span>
+    <h2>Local execution first. Disposable cloud inspection only when you choose it.</h2>
+    <p class="hybrid-intro">GTA Guard keeps behavioral execution fail-closed. A Windows file is executed only after the local Windows Sandbox passes containment, isolation and harmless execution certification. If local behavioral isolation is unavailable, Plus and Pro can optionally continue with non-executing Cloud Inspection in a fresh ephemeral environment that is destroyed after the job.</p>
+    <div class="hybrid-grid">
+      <article class="hybrid-card"><span class="hybrid-step">01</span><h3>Verified local Sandbox</h3><p>Preferred path for behavioral analysis. Network, clipboard and mapped input remain restricted, and real execution proof is required before behavioral results can affect the verdict.</p></article>
+      <article class="hybrid-card"><span class="hybrid-step">02</span><h3>Disposable Cloud Inspection</h3><p>Optional fallback for bounded non-executing inspection. The cloud job uses deny-all networking, no host fallback and a disposable environment that is destroyed after completion.</p></article>
+      <article class="hybrid-card"><span class="hybrid-step">03</span><h3>Fail closed</h3><p>Cloud Inspection does not execute Windows samples and cannot promote incomplete evidence to SAFE. If behavioral execution was not proven, GTA Guard keeps that limitation visible.</p></article>
+    </div>
+    <div class="hybrid-note"><strong>Privacy boundary:</strong> Cloud Inspection is opt-in because it uploads a bounded copy of the selected file. Standard scanning remains local. Use the local Sandbox path when you do not want a file to leave the PC.</div>
   </div>
 </section>
 <section class="release-panel" id="update">
