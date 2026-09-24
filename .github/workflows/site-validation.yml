@@ -37,6 +37,7 @@ jobs:
             scan-url.html
             products.html
             gta-guard.html
+            sandbox-help.html
             app.html
             404.html
             robots.txt
@@ -80,6 +81,10 @@ jobs:
           grep -q "LIVE PREVIEW" products.html
           grep -q "FINAL VERIFICATION PENDING" gta-guard.html
           grep -q "COMING SOON" gta-guard.html
+          grep -q "SANDBOX_SELF_TEST_TIMEOUT" sandbox-help.html
+          grep -q "NO_ISOLATION_BACKEND_ISOLATION_CERTIFIED" sandbox-help.html
+          grep -q "VGpu" sandbox-help.html
+          grep -q "Re-check real Sandbox execution" sandbox-help.html
           grep -q "MalGuard App" app.html
           grep -q "MalGuard-App-Preview-Android.apk" app.html
           grep -q "MalGuard-App-Preview-Windows-x64-Setup.exe" app.html

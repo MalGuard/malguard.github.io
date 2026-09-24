@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Troubleshoot GTA Guard Secure Sandbox compatibility, Windows Sandbox setup, certification timeouts and common MalGuard isolation error codes.">
+<meta name="theme-color" content="#050607">
+<link rel="icon" href="/favicon.ico">
+<link rel="canonical" href="https://malguard.github.io/sandbox-help.html">
+<title>Secure Sandbox Troubleshooting | MalGuard</title>
+<link rel="stylesheet" href="/assets/site-pages.css?v=20260923-11">
+<style>
+.help-hero{padding:92px 0 38px}.help-hero h1{max-width:820px;margin:14px 0 0;font-size:clamp(42px,6.5vw,72px);line-height:1}.help-hero p{max-width:760px;color:var(--muted);line-height:1.7}
+.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.help-card{padding:20px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.012)}.help-card h2,.help-card h3{margin:0 0 10px}.help-card p,.help-card li{color:var(--muted);font-size:13.5px;line-height:1.65}.help-card ul,.help-card ol{padding-left:20px}
+.codebox{margin:10px 0;padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:10px;background:#050607;color:#cbd5dc;font:600 12px ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;white-space:pre-wrap}
+.error-list{display:grid;gap:10px;margin-top:16px}.error{padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.01)}.error code{display:block;color:#dce6ed;font-size:12px;word-break:break-all}.error p{margin:7px 0 0;color:var(--muted);font-size:13px;line-height:1.6}
+.good{border-left:4px solid #48b889}.warn{border-left:4px solid #e6b95d}.danger{border-left:4px solid #ef6868}.note{margin-top:18px;padding:16px;border:1px solid rgba(255,70,70,.55);border-radius:14px;background:rgba(120,12,18,.13)}.note strong{color:#ffb3b5}.note p{margin:6px 0 0;color:#c7cdd2;line-height:1.6}
+.steps{counter-reset:s;display:grid;gap:10px}.steps article{position:relative;padding:17px 17px 17px 52px;border:1px solid var(--line);border-radius:14px}.steps article:before{counter-increment:s;content:counter(s);position:absolute;left:16px;top:16px;width:24px;height:24px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.16);border-radius:50%;font-size:11px}
+@media(max-width:800px){.help-grid{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="/assets/pro-polish.css?v=20260923-11">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav mg-context-header" id="navbar"><div class="container nav-inner">
+<a href="/" class="brand" aria-label="MalGuard home"><img class="brand-site-logo" src="/assets/malguard-site-logo.svg" alt="MalGuard"></a>
+<nav class="nav-links feature-menu" id="navLinks" aria-label="Sandbox help navigation"><a href="#setup">Setup</a><a href="#diagnostics">Diagnostics</a><a href="#errors">Error codes</a><a href="/gta-guard.html">GTA Guard</a></nav>
+<div class="nav-actions"><a class="nav-download" href="/download.html" aria-label="Download MalGuard"><svg class="download-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v3h14v-3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="download-label">Download</span></a><button class="menu-btn" id="menuBtn" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="navLinks"><span class="menu-glyph" aria-hidden="true"><span></span><span></span><span></span></span></button></div>
+</div></header>
+<main id="main">
+<section class="help-hero"><div class="container"><span class="eyebrow">GTA GUARD · SECURE SANDBOX</span><h1>Fix Secure Sandbox compatibility errors.</h1><p>Plus and Pro behavioral analysis stays locked until MalGuard proves containment, Windows Sandbox isolation and a harmless real execution probe. Use this guide to fix the host instead of bypassing the safety gate.</p></div></section>
+
+<section id="setup"><div class="container"><div class="section-head"><span class="kicker">Windows setup</span><h2>Start with the host requirements.</h2></div><div class="steps">
+<article><h3>Confirm hardware virtualization</h3><p>Open Task Manager → Performance → CPU and confirm <strong>Virtualization: Enabled</strong>. If it is disabled, enable Intel Virtualization Technology / VT-x or AMD-V/SVM in UEFI/BIOS, then restart Windows.</p></article>
+<article><h3>Enable Windows Sandbox</h3><p>Press <strong>Win + R</strong>, type <strong>optionalfeatures</strong>, open Windows Features, enable <strong>Windows Sandbox</strong>, apply the change and restart if Windows asks.</p></article>
+<article><h3>Open Windows Sandbox once</h3><p>Launch Windows Sandbox from Start. It must reach the Windows desktop. A black window or cube that never reaches the desktop means the host still has a startup problem.</p></article>
+<article><h3>Run GTA Guard certification again</h3><p>Open GTA Guard → Security Health → Secure Sandbox compatibility → <strong>Re-check real Sandbox execution</strong>. Open Advanced diagnostics only if the check still fails.</p></article>
+</div></div></section>
+
+<section id="diagnostics"><div class="container"><div class="section-head"><span class="kicker">Diagnostics</span><h2>Check the Windows virtualization stack.</h2><p>Run these read-only checks in PowerShell. The feature check may require PowerShell opened as Administrator.</p></div>
+<div class="help-grid">
+<article class="help-card"><h3>Windows Sandbox feature</h3><div class="codebox">Get-WindowsOptionalFeature -Online -FeatureName Containers-DisposableClientVM</div><p>Expected: <strong>State : Enabled</strong>.</p></article>
+<article class="help-card"><h3>Required services</h3><div class="codebox">Get-Service vmcompute,hns | Select-Object Name,Status,StartType</div><p><strong>vmcompute</strong> and <strong>hns</strong> should normally be running when the virtualization stack is active.</p></article>
+<article class="help-card"><h3>Hypervisor boot setting</h3><div class="codebox">bcdedit /enum "{current}"</div><p>Look for <strong>hypervisorlaunchtype Auto</strong>. Do not change boot settings merely to silence a MalGuard error; use the diagnostic result to identify the cause first.</p></article>
+<article class="help-card"><h3>Black screen / blue cube test</h3><p>If normal Windows Sandbox hangs during graphics startup, create a text file named <strong>sandbox-test.wsb</strong> with this harmless configuration and open it:</p><div class="codebox">&lt;Configuration&gt;
+  &lt;VGpu&gt;Disable&lt;/VGpu&gt;
+&lt;/Configuration&gt;</div><p>If that opens, the host can start Windows Sandbox without vGPU. GTA Guard's isolation configuration also disables vGPU.</p></article>
+</div>
+<div class="note"><strong>Do not bypass the isolation gate.</strong><p>Do not disable network isolation, mapped-folder protections, containment checks or execution proof just to make Plus/Pro turn green. Standard scanning remains available while Sandbox certification is being fixed.</p></div>
+</div></section>
+
+<section id="errors"><div class="container"><div class="section-head"><span class="kicker">Error codes</span><h2>What the Advanced diagnostics codes mean.</h2></div><div class="error-list">
+<div class="error warn"><code>NO_ISOLATION_BACKEND_ISOLATION_CERTIFIED</code><p>This is a summary error. Read the <strong>failures</strong> array underneath it. On a Windows PC, the most useful entry is usually the code for <strong>windows-sandbox</strong>.</p></div>
+<div class="error warn"><code>SANDBOX_SELF_TEST_TIMEOUT</code><p>Windows Sandbox was found, but the isolated guest did not return its self-test result before the deadline. Update to the latest GTA Guard build, close any stuck Sandbox window, restart Windows if needed, verify that Sandbox opens manually, then run Re-check again. Newer builds allow up to 60 seconds for slow Windows Sandbox startup.</p></div>
+<div class="error danger"><code>WINDOWS_SANDBOX_UNAVAILABLE / SANDBOX_SELF_TEST_LAUNCH_FAILED</code><p>MalGuard could not find or launch Windows Sandbox. Confirm Virtualization is enabled, Windows Sandbox is enabled in Windows Features, restart the PC, and verify that Windows Sandbox itself opens before retrying MalGuard.</p></div>
+<div class="error danger"><code>CONTAINMENT_PROBE_NOT_INSTALLED</code><p>The trusted native containment component is missing from the installed package. Reinstall the latest official GTA Guard installer and verify its SHA-256. Do not download a replacement probe from a third-party site.</p></div>
+<div class="error danger"><code>CONTAINMENT_PROBE_FAILED</code><p>The native CPU, memory, process-count or kill-on-close enforcement test failed. Keep Plus/Pro disabled, restart the app or PC, and inspect the detailed containment fields. Do not bypass this check.</p></div>
+<div class="error warn"><code>SANDBOX_SELF_TEST_FAILED</code><p>The guest started but one of the required isolation properties was not proven, such as read-only input, writable bounded output or disabled default network route. Use the returned <strong>details</strong> object to identify which property failed.</p></div>
+<div class="error warn"><code>SANDBOX_EXECUTION_SELF_TEST_BLOCKED</code><p>This is usually a downstream result. MalGuard does not run its harmless execution proof until containment and isolation certification have both passed. Fix the earlier failure first.</p></div>
+<div class="error good"><code>MALGUARD_MICROVM_UNAVAILABLE / malguard_vm_engine_unavailable</code><p>These are fallback-backend status messages. If <strong>windows-sandbox</strong> is available and can certify successfully, the missing fallback engines do not need to be installed just to use Windows Sandbox.</p></div>
+</div></div></section>
+
+<section><div class="container"><div class="help-grid">
+<article class="help-card"><h3>What a successful check looks like</h3><p>Advanced diagnostics should report <strong>localProbeOk: true</strong>, <strong>nativeContainment.ok: true</strong>, isolation accepted, <strong>executionCertified: true</strong> and <strong>releaseReady: true</strong>.</p></article>
+<article class="help-card"><h3>Still failing?</h3><p>Copy the complete Advanced diagnostics JSON from GTA Guard. Keep the error code, failures array, blockers, nativeContainment, isolationSelfTest and executionProbe fields. Do not include unrelated personal files or real malware samples.</p></article>
+</div></div></section>
+</main>
+<footer><div class="container footer"><div><strong>MalGuard</strong><p>Security analysis reduces risk. No scan can guarantee that a file, mod, link, or destination is harmless.</p></div><div class="footer-links"><a href="/gta-guard.html">GTA Guard</a><a href="/docs.html">Docs</a><a href="/download.html">Download</a><a href="/support.html">Support</a></div></div></footer>
+<script src="/assets/contextual-header.js?v=20260923-4"></script>
+</body></html>
