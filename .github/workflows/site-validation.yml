@@ -107,7 +107,7 @@ jobs:
           grep -q "MalGuard-App-Preview-Linux-x64.AppImage" download.html
           grep -q "MalGuard-App-Preview-Linux-x64.deb" download.html
           grep -q "APPLE SIGNING REQUIRED" download.html
-          grep -q "MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe" gta-guard.html
+          grep -Eq "MalGuard-Setup-0\.6\.1-beta\.1-build-[a-f0-9]{7}-windows-x64\.exe" gta-guard.html
           grep -q "data-malguard-back" research/repackaged-mod.html
           grep -q "data-malguard-back" ios-preview/index.html
           grep -q "/assets/page-history.js" research/repackaged-mod.html
