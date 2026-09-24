@@ -19,11 +19,11 @@ jobs:
     timeout-minutes: 35
     env:
       CORE_REPO: MalGuard/malguard-core
-      CORE_SHA: 45733c185a886c3265c02e9fecbc794d443b715a
-      RELEASE_TAG: gta-guard-v0.6.1-beta.1-45733c1
-      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 45733c1
-      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-45733c1-windows-x64.exe
-      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-45733c1-windows-x64.exe.sha256
+      CORE_SHA: 517878e1f07633b0274dbb059c0ac97ee2593ee8
+      RELEASE_TAG: gta-guard-v0.6.1-beta.1-517878e
+      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 517878e
+      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-517878e-windows-x64.exe
+      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-517878e-windows-x64.exe.sha256
 
     steps:
       - name: Checkout exact public MalGuard Core commit
@@ -222,7 +222,7 @@ jobs:
           $sum = Join-Path (Get-Location) "dist/$env:PUBLISH_SUM"
           if (gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY *> $null) { throw "Release $env:RELEASE_TAG already exists; refusing to replace assets." }
           $sha = ((Get-Content -LiteralPath $sum -Raw).Trim() -split '\s+')[0]
-          gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --prerelease --title $env:RELEASE_TITLE --notes "Unsigned Windows x64 preview built from MalGuard Core commit $env:CORE_SHA. SHA-256: $sha. Includes the anonymous coarse compatibility report documented in the MalGuard privacy policy." $exe $sum
+          gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --prerelease --title $env:RELEASE_TITLE --notes "Unsigned Windows x64 preview built from MalGuard Core commit $env:CORE_SHA. SHA-256: $sha. This build extends Windows Sandbox startup/certification timeouts to 60 seconds for slower hosts without weakening isolation checks. Includes the anonymous coarse compatibility report documented in the MalGuard privacy policy." $exe $sum
           if ($LASTEXITCODE -ne 0) { throw 'GitHub Release creation failed' }
 
       - name: Publish website release metadata
@@ -257,7 +257,7 @@ jobs:
           } | ConvertTo-Json -Depth 5
           $encoded = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($metadata + "`n"))
           $path = 'release/gta-guard-windows.json'
-          $current = gh api "repos/$env:GITHUB_REPOSITORY/contents/$path?ref=main" --jq '.sha'
+          $current = gh api --method GET "repos/$env:GITHUB_REPOSITORY/contents/$path" -f ref=main --jq '.sha'
           if ($LASTEXITCODE -ne 0 -or -not $current) { throw 'could not read current release metadata blob' }
           $request = [ordered]@{
             message = "Publish GTA Guard Windows release metadata for build $build"
