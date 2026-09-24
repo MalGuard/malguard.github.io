@@ -50,6 +50,7 @@
 .critical-card h3{margin:7px 0 8px;font-size:20px}.critical-card p,.critical-card li{color:#c7cdd2;font-size:13px;line-height:1.58}
 .critical-card ul{margin:8px 0 0;padding-left:18px}.verify-command{margin-top:12px;padding:12px;border-radius:10px;background:#050607;border:1px solid rgba(255,255,255,.08);font:600 11px ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
 .release-state{display:inline-flex;margin-top:10px;padding:6px 9px;border:1px solid rgba(255,255,255,.09);border-radius:999px;color:#aeb7bf;font-size:11px}
+.update-check{margin:0 0 14px;padding:18px;border:1px solid rgba(255,255,255,.10);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.008))}.update-check-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:10px}.update-check h3{margin:0;font-size:23px}.update-check p{margin:7px 0 0;color:var(--muted);font-size:13px;line-height:1.55}.update-check-latest{padding:7px 10px;border:1px solid rgba(255,255,255,.10);border-radius:999px;color:#dce4ea;font:600 11px "American Typewriter"}.update-check-form{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.update-check-form input{min-width:220px;flex:1;padding:11px 12px;border:1px solid rgba(255,255,255,.11);border-radius:10px;background:#070809;color:#edf2f5;font:600 12px ui-monospace,SFMono-Regular,Consolas,monospace;outline:none}.update-check-form input:focus{border-color:rgba(255,255,255,.28)}.update-result{display:none;margin-top:12px;padding:13px 14px;border-radius:12px;font-size:13px;line-height:1.55}.update-result.show{display:block}.update-result.ok{border:1px solid rgba(72,184,137,.55);background:rgba(33,110,79,.14);color:#bfe8d5}.update-result.update{border:1px solid rgba(230,185,93,.58);background:rgba(135,91,12,.16);color:#f3d9a0}.update-result.unknown{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.025);color:#cbd3d9}.update-result .release-actions{margin-top:10px}
 @media(max-width:800px){
   .platforms,.model-grid,.release-grid,.critical-grid{grid-template-columns:1fr}
   .platform-card{min-height:220px}
@@ -85,7 +86,7 @@
     <p>GTA Guard is MalGuard's local-first game-mod security product. The Windows x64 preview has passed the current release checks, with one final verification still pending before the preview is treated as fully verified.</p>
     <div class="gta-statusline"><span>Windows 10 / 11</span><span>x64</span><span>Preview</span><span>Final verification pending</span></div>
     <div class="gta-actions">
-      <a class="btn primary" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-83509d2/MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe">Download Windows x64</a>
+      <a class="btn primary" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-517878e/MalGuard-Setup-0.6.1-beta.1-build-517878e-windows-x64.exe">Download Windows x64</a>
       <a class="btn secondary" href="/docs.html">Documentation</a>
       <a class="btn secondary" href="/sandbox-help.html">Fix Sandbox errors</a>
     </div>
@@ -99,8 +100,8 @@
       <p>The current GTA Guard preview for Windows 10 and Windows 11. One final verification remains.</p>
       <span class="status">PREVIEW · FINAL VERIFICATION PENDING</span>
       <div class="actions">
-        <a class="btn primary" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-83509d2/MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe">Download GTA Guard</a>
-        <a class="btn secondary" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-83509d2/MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe.sha256">SHA-256 file</a>
+        <a class="btn primary" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-517878e/MalGuard-Setup-0.6.1-beta.1-build-517878e-windows-x64.exe">Download GTA Guard</a>
+        <a class="btn secondary" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-517878e/MalGuard-Setup-0.6.1-beta.1-build-517878e-windows-x64.exe.sha256">SHA-256 file</a>
       </div>
     </article>
     <article class="platform-card">
@@ -122,20 +123,35 @@
 <section class="release-panel" id="update">
   <div class="container">
     <h2>Windows update & verification.</h2>
+    <article class="update-check" aria-labelledby="updateCheckTitle">
+      <div class="update-check-head">
+        <div>
+          <h3 id="updateCheckTitle">Check your installed build</h3>
+          <p>Open GTA Guard and copy the Build code shown at the top of the app. Enter it here and this page will compare it with the latest published Windows build.</p>
+        </div>
+        <span class="update-check-latest">Latest: <span id="latestBuildQuick">517878e</span></span>
+      </div>
+      <div class="update-check-form">
+        <input id="installedBuildInput" type="text" inputmode="text" autocomplete="off" spellcheck="false" maxlength="40" placeholder="Example: 517878e" aria-label="Installed GTA Guard build">
+        <button class="btn secondary" id="checkInstalledBuild" type="button">Check for update</button>
+      </div>
+      <div class="update-result unknown" id="updateResult" role="status" aria-live="polite"></div>
+      <p>Your entered Build is stored only in this browser so the page can compare it again on future visits. It is not uploaded.</p>
+    </article>
     <div class="release-grid">
       <article class="release-card">
         <h3>Latest Windows x64 release</h3>
         <dl class="release-meta">
           <dt>Version</dt><dd id="releaseVersion">0.6.1-beta.1</dd>
-          <dt>Build</dt><dd id="releaseBuild">83509d2</dd>
-          <dt>Released</dt><dd id="releaseDate">2026-09-23</dd>
+          <dt>Build</dt><dd id="releaseBuild">517878e</dd>
+          <dt>Released</dt><dd id="releaseDate">2026-09-24</dd>
           <dt>Platform</dt><dd>Windows 10 / 11 · x64</dd>
         </dl>
-        <div class="release-hash"><span>Installer SHA-256</span><code id="releaseSha">efba42466f5442e4cfe737fc7a6fc71a07c7389cff80e7d2ec9d9dda217c9fbf</code></div>
+        <div class="release-hash"><span>Installer SHA-256</span><code id="releaseSha">b896984bfaeacd161f11cf7e8a5dbb6e621e8afe2939703698a525655e3d36c7</code></div>
         <span class="release-state" id="releaseState">Published release metadata</span>
         <div class="release-actions">
-          <a class="btn primary release-download" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-83509d2/MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe">Download latest Windows x64</a>
-          <a class="btn secondary release-sha-file" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-83509d2/MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe.sha256">SHA-256 file</a>
+          <a class="btn primary release-download" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-517878e/MalGuard-Setup-0.6.1-beta.1-build-517878e-windows-x64.exe">Download latest Windows x64</a>
+          <a class="btn secondary release-sha-file" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-517878e/MalGuard-Setup-0.6.1-beta.1-build-517878e-windows-x64.exe.sha256">SHA-256 file</a>
         </div>
       </article>
       <article class="release-card">
@@ -160,7 +176,7 @@
         <strong>Important · after installation</strong>
         <h3>Verify the installed build.</h3>
         <p>Open GTA Guard and look at the Build badge at the top of the app. It must match the expected build shown here:</p>
-        <div class="verify-command">Expected build: <span id="expectedBuild">83509d2</span></div>
+        <div class="verify-command">Expected build: <span id="expectedBuild">517878e</span></div>
         <p>If the app shows a different build, you are running a different or older installation.</p>
       </article>
     </div>
@@ -191,20 +207,68 @@
 <script>
 (async()=>{
   const state=document.getElementById('releaseState');
+  const installedBuildInput=document.getElementById('installedBuildInput');
+  const checkInstalledBuild=document.getElementById('checkInstalledBuild');
+  const updateResult=document.getElementById('updateResult');
+  const latestBuildQuick=document.getElementById('latestBuildQuick');
+  let latestBuild='517878e';
+  let latestInstallerUrl='https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-517878e/MalGuard-Setup-0.6.1-beta.1-build-517878e-windows-x64.exe';
+  const normalizeBuild=value=>String(value||'').trim().toLowerCase().replace(/^build\s*/,'');
+  const renderUpdateResult=()=>{
+    if(!installedBuildInput||!updateResult)return;
+    const installed=normalizeBuild(installedBuildInput.value);
+    const latest=normalizeBuild(latestBuild);
+    updateResult.className='update-result show unknown';
+    updateResult.replaceChildren();
+    if(!installed){
+      updateResult.textContent='Enter the Build code shown in GTA Guard to check for updates.';
+      return;
+    }
+    if(!/^[a-f0-9]{7,40}$/.test(installed)){
+      updateResult.textContent='That does not look like a GTA Guard Build code. Copy the Build value shown at the top of the app.';
+      return;
+    }
+    try{localStorage.setItem('malguardInstalledBuild',installed);}catch(_){}
+    if(installed===latest){
+      updateResult.className='update-result show ok';
+      updateResult.textContent='✓ You’re up to date. Installed build '+installed+' matches the latest published build.';
+      return;
+    }
+    updateResult.className='update-result show update';
+    const strong=document.createElement('strong');
+    strong.textContent='New version available. ';
+    const message=document.createElement('span');
+    message.textContent='Your installed build is '+installed+', while the latest published build is '+latest+'.';
+    const actions=document.createElement('div');
+    actions.className='release-actions';
+    const link=document.createElement('a');
+    link.className='btn primary';
+    link.href=latestInstallerUrl;
+    link.textContent='Download latest version';
+    actions.appendChild(link);
+    updateResult.append(strong,message,actions);
+  };
+  if(installedBuildInput){
+    try{const saved=localStorage.getItem('malguardInstalledBuild');if(saved){installedBuildInput.value=saved;setTimeout(renderUpdateResult,0);}}catch(_){}
+  }
+  if(checkInstalledBuild)checkInstalledBuild.addEventListener('click',renderUpdateResult);
+  if(installedBuildInput)installedBuildInput.addEventListener('keydown',event=>{if(event.key==='Enter')renderUpdateResult();});
   try{
     const response=await fetch('/release/gta-guard-windows.json',{cache:'no-store'});
     if(!response.ok)throw new Error('metadata unavailable');
     const data=await response.json();
     const installer=data&&data.installer?data.installer:{};
     if(data.version)document.getElementById('releaseVersion').textContent=data.version;
-    if(data.build){document.getElementById('releaseBuild').textContent=data.build;document.getElementById('expectedBuild').textContent=data.build;}
+    if(data.build){latestBuild=data.build;document.getElementById('releaseBuild').textContent=data.build;document.getElementById('expectedBuild').textContent=data.build;if(latestBuildQuick)latestBuildQuick.textContent=data.build;}
     if(data.releasedAt){const d=new Date(data.releasedAt);document.getElementById('releaseDate').textContent=Number.isNaN(d.getTime())?data.releasedAt:d.toISOString().slice(0,10);}
     if(installer.sha256)document.getElementById('releaseSha').textContent=installer.sha256;
+    if(installer.url)latestInstallerUrl=installer.url;
     document.querySelectorAll('.release-download').forEach(a=>{if(installer.url)a.href=installer.url;});
     document.querySelectorAll('.release-sha-file').forEach(a=>{if(installer.sha256Url)a.href=installer.sha256Url;});
     document.querySelectorAll('a[href*="/releases/download/"][href$=".exe"]').forEach(a=>{if(installer.url)a.href=installer.url;});
     document.querySelectorAll('a[href*="/releases/download/"][href$=".sha256"]').forEach(a=>{if(installer.sha256Url)a.href=installer.sha256Url;});
     if(state)state.textContent='Published release metadata · build '+(data.build||'unknown');
+    if(installedBuildInput&&installedBuildInput.value.trim())renderUpdateResult();
   }catch(_){
     if(state)state.textContent='Release metadata could not be refreshed; use the published fallback shown here.';
   }
