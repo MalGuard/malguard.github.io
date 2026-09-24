@@ -1232,8 +1232,12 @@ footer{padding:21px 0!important}.footer-inner{align-items:start!important}
   color:#e8f0f4;
   font:500 14px/1.7 var(--body);
   white-space:pre-wrap;
-  overflow-wrap:anywhere
+  overflow-wrap:anywhere;
+  text-align:start;
+  unicode-bidi:plaintext
 }
+.malware-ai-message p[dir="rtl"]{text-align:right}
+.malware-ai-message p[dir="ltr"]{text-align:left}
 .malware-ai-message.pending p{color:#8fa6b2}
 .malware-ai-composer{
   display:flex;
@@ -1254,7 +1258,9 @@ footer{padding:21px 0!important}.footer-inner{align-items:start!important}
   background:#09141b;
   color:#f1fbff;
   font:500 14px/1.45 var(--body);
-  outline:none
+  outline:none;
+  text-align:start;
+  unicode-bidi:plaintext
 }
 .malware-ai-composer textarea::placeholder{color:#627985}
 .malware-ai-composer textarea:focus{border-color:rgba(67,191,255,.66);box-shadow:0 0 0 3px rgba(67,191,255,.08)}
@@ -2568,7 +2574,7 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
           </div>
         </div>
         <form class="malware-ai-composer" id="malwareAiForm">
-          <textarea id="malwareAiPrompt" rows="1" maxlength="10000" autocomplete="off" placeholder="Message MalGuard AI…" aria-label="Message MalGuard AI"></textarea>
+          <textarea id="malwareAiPrompt" dir="auto" rows="1" maxlength="10000" autocomplete="off" placeholder="Message MalGuard AI…" aria-label="Message MalGuard AI"></textarea>
           <button class="malware-ai-send" id="malwareAiSend" type="submit">Send</button>
         </form>
         <div class="malware-ai-meta" id="malwareAiMeta">MalGuard native chat · no iframe · no page redirect</div>
@@ -2854,6 +2860,12 @@ document.querySelectorAll('.hash-copy').forEach(function(button){
     return{timeZone,nowISO:now.toISOString(),persianDate,gregorianDate,localTime};
   }
 
+  function applyTextDirection(el,text){
+    const value=String(text||'');
+    el.setAttribute('dir','auto');
+    el.setAttribute('lang',/[\u0600-\u06FF]/u.test(value)?'fa':'en');
+  }
+
   function addMessage(role,text,pending){
     const box=document.createElement('div');
     box.className='malware-ai-message '+role+(pending?' pending':'');
@@ -2862,6 +2874,7 @@ document.querySelectorAll('.hash-copy').forEach(function(button){
     label.textContent=role==='user'?'You':'MalGuard AI';
     const body=document.createElement('p');
     body.textContent=text;
+    applyTextDirection(body,text);
     box.append(label,body);
     chat.appendChild(box);
     chat.scrollTop=chat.scrollHeight;
@@ -2908,6 +2921,7 @@ document.querySelectorAll('.hash-copy').forEach(function(button){
 
       pending.box.classList.remove('pending');
       pending.body.textContent=answer;
+      applyTextDirection(pending.body,answer);
       history.push({role:'assistant',text:answer});
 
       const actual=data.model||data.provider||'AI';
@@ -2920,6 +2934,7 @@ document.querySelectorAll('.hash-copy').forEach(function(button){
     }catch(error){
       pending.box.classList.remove('pending');
       pending.body.textContent='Error: '+(error&&error.message?error.message:'Request failed');
+      applyTextDirection(pending.body,pending.body.textContent);
       status.textContent='Error';
       meta.textContent='MalGuard native chat · request failed';
     }finally{
