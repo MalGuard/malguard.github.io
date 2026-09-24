@@ -37,7 +37,6 @@ jobs:
           cp robots.txt sitemap.xml _site/
           cp favicon.ico favicon-96.png favicon-192.png _site/
           cp -R assets _site/assets
-          cp -R downloads _site/downloads
           cp -R release _site/release
           cp -R ios-preview _site/ios-preview
           cp -R research _site/research
