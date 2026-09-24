@@ -19,11 +19,11 @@ jobs:
     timeout-minutes: 35
     env:
       CORE_REPO: MalGuard/malguard-core
-      CORE_SHA: 3cc15b4deaf2f0980510e2ef2610e5350f4f65f4
-      RELEASE_TAG: gta-guard-v0.6.1-beta.1-3cc15b4
-      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 3cc15b4
-      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-3cc15b4-windows-x64.exe
-      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-3cc15b4-windows-x64.exe.sha256
+      CORE_SHA: 897cdae260d8994dbcbc58c830110e98cd143e1e
+      RELEASE_TAG: gta-guard-v0.6.1-beta.1-897cdae
+      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 897cdae
+      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-897cdae-windows-x64.exe
+      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-897cdae-windows-x64.exe.sha256
 
     steps:
       - name: Checkout exact public MalGuard Core commit
@@ -119,6 +119,8 @@ jobs:
       - name: Run release hardening regressions
         shell: pwsh
         working-directory: core
+        env:
+          MALGUARD_SOURCE_COMMIT: ${{ env.CORE_SHA }}
         run: |
           $ErrorActionPreference = 'Stop'
           node tests/sandbox-backend.test.js
@@ -133,6 +135,7 @@ jobs:
           node tests/workflow-supply-chain.test.js
           node tests/public-release-policy.test.js
           node tests/windows-installer-source.test.js
+          node tests/packaging-foundation.test.js
 
       - name: Build and verify sealed runtime package
         shell: pwsh
