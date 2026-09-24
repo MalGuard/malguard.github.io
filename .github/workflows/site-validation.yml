@@ -32,6 +32,8 @@ jobs:
             download.html
             scan-mods.html
             ai-intelligence.html
+            malware-ai.html
+            malware-ai-windows.html
             scan-url.html
             products.html
             gta-guard.html
@@ -59,6 +61,13 @@ jobs:
           grep -q "security.txt" trust.html
           grep -q "Scan Mods" scan-mods.html
           grep -q "AI Intelligence" ai-intelligence.html
+          grep -q 'href="/malware-ai.html">Open Malware AI' ai-intelligence.html
+          grep -q "Open Windows Preview" malware-ai.html
+          grep -q "Enter to send" malware-ai-windows.html
+          if grep -q 'href="https://malware-ai-gray.vercel.app">Open Malware AI' ai-intelligence.html; then
+            echo "Malware AI must not navigate users away from malguard.github.io."
+            exit 1
+          fi
           grep -q "Scan URL" scan-url.html
           grep -q "Download" download.html
           grep -q "GTA Guard" products.html
