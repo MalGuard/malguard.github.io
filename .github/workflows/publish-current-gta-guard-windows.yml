@@ -235,7 +235,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $sum = Join-Path (Get-Location) "dist/$env:PUBLISH_SUM"
           $sha256 = ((Get-Content -LiteralPath $sum -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
-          if ($sha256 -notmatch '^[a-f0-9]{64}
+          if ($sha256 -notmatch '^[a-f0-9]{64}$') { throw 'invalid published installer SHA-256' }
           $version = (Get-Content -LiteralPath 'DESKTOP-VERSION' -Raw).Trim()
           $build = $env:CORE_SHA.Substring(0,7)
           $releasedAt = (Get-Date).ToUniversalTime().ToString('o')
