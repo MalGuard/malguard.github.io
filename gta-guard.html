@@ -219,8 +219,13 @@
     const installed=normalizeBuild(installedBuildInput.value);
     const latest=normalizeBuild(latestBuild);
     updateResult.className='update-result show unknown';
+    updateResult.replaceChildren();
     if(!installed){
       updateResult.textContent='Enter the Build code shown in GTA Guard to check for updates.';
+      return;
+    }
+    if(!/^[a-f0-9]{7,40}$/.test(installed)){
+      updateResult.textContent='That does not look like a GTA Guard Build code. Copy the Build value shown at the top of the app.';
       return;
     }
     try{localStorage.setItem('malguardInstalledBuild',installed);}catch(_){}
@@ -230,7 +235,18 @@
       return;
     }
     updateResult.className='update-result show update';
-    updateResult.innerHTML='<strong>New version available.</strong> Your installed build is <code>'+installed+'</code>, while the latest published build is <code>'+latest+'</code>.<div class="release-actions"><a class="btn primary" href="'+latestInstallerUrl+'">Download latest version</a></div>';
+    const strong=document.createElement('strong');
+    strong.textContent='New version available. ';
+    const message=document.createElement('span');
+    message.textContent='Your installed build is '+installed+', while the latest published build is '+latest+'.';
+    const actions=document.createElement('div');
+    actions.className='release-actions';
+    const link=document.createElement('a');
+    link.className='btn primary';
+    link.href=latestInstallerUrl;
+    link.textContent='Download latest version';
+    actions.appendChild(link);
+    updateResult.append(strong,message,actions);
   };
   if(installedBuildInput){
     try{const saved=localStorage.getItem('malguardInstalledBuild');if(saved){installedBuildInput.value=saved;setTimeout(renderUpdateResult,0);}}catch(_){}
