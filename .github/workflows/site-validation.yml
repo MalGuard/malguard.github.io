@@ -86,6 +86,10 @@ jobs:
           grep -q "LIVE PREVIEW" products.html
           grep -q "FINAL VERIFICATION PENDING" gta-guard.html
           grep -q "COMING SOON" gta-guard.html
+          grep -q "Check your installed build" gta-guard.html
+          grep -q "New version available" gta-guard.html
+          grep -q "malguardInstalledBuild" gta-guard.html
+          grep -q "Download latest version" gta-guard.html
           grep -q "SANDBOX_SELF_TEST_TIMEOUT" sandbox-help.html
           grep -q "NO_ISOLATION_BACKEND_ISOLATION_CERTIFIED" sandbox-help.html
           grep -q "VGpu" sandbox-help.html
