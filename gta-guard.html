@@ -35,8 +35,23 @@
 .verify{margin-top:16px;padding:16px;border:1px solid rgba(255,255,255,.07);border-radius:14px}
 .verify strong{display:block}
 .verify code{display:block;margin-top:7px;overflow-wrap:anywhere;word-break:break-all;font-size:12px;color:#aeb8c0}
+.release-panel{margin-top:38px}
+.release-panel h2{margin:0 0 16px;font-size:32px}
+.release-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+.release-card{padding:20px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.012)}
+.release-card h3{margin:0 0 14px;font-size:23px}.release-meta{display:grid;grid-template-columns:auto 1fr;gap:9px 14px;margin:0}
+.release-meta dt{color:#7f8a93;font-size:12px}.release-meta dd{margin:0;color:#e6eaed;font:600 12px "American Typewriter";overflow-wrap:anywhere}
+.release-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.release-hash{margin-top:14px;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(0,0,0,.16)}
+.release-hash span{display:block;color:#8e99a2;font-size:11px;text-transform:uppercase;letter-spacing:.08em}.release-hash code{display:block;margin-top:7px;word-break:break-all;font-size:11px;color:#c8d0d6}
+.critical-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.critical-card{padding:18px;border:1px solid rgba(255,70,70,.65);border-left:5px solid #ff4d4f;border-radius:14px;background:rgba(120,12,18,.16)}
+.critical-card strong{display:block;color:#ffb0b2;font-size:14px;text-transform:uppercase;letter-spacing:.04em}
+.critical-card h3{margin:7px 0 8px;font-size:20px}.critical-card p,.critical-card li{color:#c7cdd2;font-size:13px;line-height:1.58}
+.critical-card ul{margin:8px 0 0;padding-left:18px}.verify-command{margin-top:12px;padding:12px;border-radius:10px;background:#050607;border:1px solid rgba(255,255,255,.08);font:600 11px ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
+.release-state{display:inline-flex;margin-top:10px;padding:6px 9px;border:1px solid rgba(255,255,255,.09);border-radius:999px;color:#aeb7bf;font-size:11px}
 @media(max-width:800px){
-  .platforms,.model-grid{grid-template-columns:1fr}
+  .platforms,.model-grid,.release-grid,.critical-grid{grid-template-columns:1fr}
   .platform-card{min-height:220px}
 }
 </style>
@@ -50,6 +65,7 @@
     <nav class="nav-links feature-menu" id="navLinks" aria-label="GTA Guard navigation">
       <a href="#overview">Overview</a>
       <a href="#platforms">Platforms</a>
+      <a href="#update">Update</a>
       <a href="#models">Models</a>
       <a href="#limits">Limits</a>
     </nav>
@@ -101,6 +117,53 @@
     </article>
   </div>
 </section>
+<section class="release-panel" id="update">
+  <div class="container">
+    <h2>Windows update & verification.</h2>
+    <div class="release-grid">
+      <article class="release-card">
+        <h3>Latest Windows x64 release</h3>
+        <dl class="release-meta">
+          <dt>Version</dt><dd id="releaseVersion">0.6.1-beta.1</dd>
+          <dt>Build</dt><dd id="releaseBuild">83509d2</dd>
+          <dt>Released</dt><dd id="releaseDate">2026-09-23</dd>
+          <dt>Platform</dt><dd>Windows 10 / 11 · x64</dd>
+        </dl>
+        <div class="release-hash"><span>Installer SHA-256</span><code id="releaseSha">efba42466f5442e4cfe737fc7a6fc71a07c7389cff80e7d2ec9d9dda217c9fbf</code></div>
+        <span class="release-state" id="releaseState">Published release metadata</span>
+        <div class="release-actions">
+          <a class="btn primary release-download" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-83509d2/MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe">Download latest Windows x64</a>
+          <a class="btn secondary release-sha-file" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-83509d2/MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe.sha256">SHA-256 file</a>
+        </div>
+      </article>
+      <article class="release-card">
+        <h3>Verify the installer</h3>
+        <p>After downloading, calculate the file SHA-256 and compare it with the published value on this page. A mismatch means do not install that file.</p>
+        <div class="verify-command">Get-FileHash "C:\Path\To\MalGuard-Setup.exe" -Algorithm SHA256</div>
+        <p class="release-state">PowerShell · compare the full 64-character hash</p>
+      </article>
+    </div>
+
+    <div class="critical-grid" aria-label="Important installation checks">
+      <article class="critical-card">
+        <strong>Important · before installation</strong>
+        <h3>Verify the file before running Setup.</h3>
+        <ul>
+          <li>Download GTA Guard only from the official MalGuard release link on this page.</li>
+          <li>Confirm the published SHA-256 matches the downloaded installer exactly.</li>
+          <li>If the hash differs, stop. Do not install or run that copy.</li>
+        </ul>
+      </article>
+      <article class="critical-card">
+        <strong>Important · after installation</strong>
+        <h3>Verify the installed build.</h3>
+        <p>Open GTA Guard and look at the Build badge at the top of the app. It must match the expected build shown here:</p>
+        <div class="verify-command">Expected build: <span id="expectedBuild">83509d2</span></div>
+        <p>If the app shows a different build, you are running a different or older installation.</p>
+      </article>
+    </div>
+  </div>
+</section>
 <section class="models" id="models">
   <div class="container">
     <h2>Analysis models.</h2>
@@ -116,13 +179,35 @@
     <h2>What the preview does not promise.</h2>
     <p>A clean scan reduces risk but does not prove a mod is harmless. Platform capabilities can differ, and unavailable isolation backends fail closed rather than being presented as equivalent protection.</p>
     <div class="verify">
-      <strong>Published Windows SHA-256</strong>
-      <code>efba42466f5442e4cfe737fc7a6fc71a07c7389cff80e7d2ec9d9dda217c9fbf</code>
+      <strong>Release identity</strong>
+      <code>Compare the installer SHA-256 before installation and the in-app Build badge after installation.</code>
     </div>
   </div>
 </section>
 </main>
 <footer><div class="container footer"><div><strong>MalGuard</strong><p>Security analysis reduces risk. No scan can guarantee that a file, mod, link, or destination is harmless.</p></div><div class="footer-links"><a href="/products.html">Products</a><a href="/download.html">Download</a><a href="/trust.html">Trust</a><a href="/support.html">Support</a></div></div></footer>
+<script>
+(async()=>{
+  const state=document.getElementById('releaseState');
+  try{
+    const response=await fetch('/release/gta-guard-windows.json',{cache:'no-store'});
+    if(!response.ok)throw new Error('metadata unavailable');
+    const data=await response.json();
+    const installer=data&&data.installer?data.installer:{};
+    if(data.version)document.getElementById('releaseVersion').textContent=data.version;
+    if(data.build){document.getElementById('releaseBuild').textContent=data.build;document.getElementById('expectedBuild').textContent=data.build;}
+    if(data.releasedAt){const d=new Date(data.releasedAt);document.getElementById('releaseDate').textContent=Number.isNaN(d.getTime())?data.releasedAt:d.toISOString().slice(0,10);}
+    if(installer.sha256)document.getElementById('releaseSha').textContent=installer.sha256;
+    document.querySelectorAll('.release-download').forEach(a=>{if(installer.url)a.href=installer.url;});
+    document.querySelectorAll('.release-sha-file').forEach(a=>{if(installer.sha256Url)a.href=installer.sha256Url;});
+    document.querySelectorAll('a[href*="/releases/download/"][href$=".exe"]').forEach(a=>{if(installer.url)a.href=installer.url;});
+    document.querySelectorAll('a[href*="/releases/download/"][href$=".sha256"]').forEach(a=>{if(installer.sha256Url)a.href=installer.sha256Url;});
+    if(state)state.textContent='Published release metadata · build '+(data.build||'unknown');
+  }catch(_){
+    if(state)state.textContent='Release metadata could not be refreshed; use the published fallback shown here.';
+  }
+})();
+</script>
 <script src="/assets/contextual-header.js?v=20260923-4"></script>
 </body>
 </html>
