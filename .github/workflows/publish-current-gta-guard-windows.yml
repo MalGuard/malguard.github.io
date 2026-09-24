@@ -19,11 +19,11 @@ jobs:
     timeout-minutes: 35
     env:
       CORE_REPO: MalGuard/malguard-core
-      CORE_SHA: 6d9986760a7bb806668b0d99bc5d62ee6e76c858
-      RELEASE_TAG: gta-guard-v0.6.1-beta.1-6d99867
-      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 6d99867
-      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-6d99867-windows-x64.exe
-      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-6d99867-windows-x64.exe.sha256
+      CORE_SHA: 14a16721895915cd5b36aaad56fb01f5f86c2ac1
+      RELEASE_TAG: gta-guard-v0.6.1-beta.1-14a1672
+      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 14a1672
+      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-14a1672-windows-x64.exe
+      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-14a1672-windows-x64.exe.sha256
 
     steps:
       - name: Checkout exact public MalGuard Core commit
