@@ -3,13 +3,13 @@
   "product": "GTA Guard",
   "platform": "windows-x64",
   "version": "0.6.1-beta.1",
-  "build": "83509d2",
-  "sourceCommit": "83509d221032f092be80ebdddf27696b9f18b959",
-  "releasedAt": "2026-09-23T00:00:00Z",
+  "build": "45733c1",
+  "sourceCommit": "45733c185a886c3265c02e9fecbc794d443b715a",
+  "releasedAt": "2026-09-24T21:38:24Z",
   "installer": {
-    "name": "MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe",
-    "url": "https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-83509d2/MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe",
-    "sha256": "efba42466f5442e4cfe737fc7a6fc71a07c7389cff80e7d2ec9d9dda217c9fbf",
-    "sha256Url": "https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-83509d2/MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe.sha256"
+    "name": "MalGuard-Setup-0.6.1-beta.1-build-45733c1-windows-x64.exe",
+    "url": "https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-45733c1/MalGuard-Setup-0.6.1-beta.1-build-45733c1-windows-x64.exe",
+    "sha256": "9a9eda68ec966ff9d2cc24946098cf0f314a6e27ee793a0e38ab8c30fe922364",
+    "sha256Url": "https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.6.1-beta.1-45733c1/MalGuard-Setup-0.6.1-beta.1-build-45733c1-windows-x64.exe.sha256"
   }
 }
