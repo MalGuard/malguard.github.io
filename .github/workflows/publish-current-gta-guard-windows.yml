@@ -19,11 +19,11 @@ jobs:
     timeout-minutes: 35
     env:
       CORE_REPO: MalGuard/malguard-core
-      CORE_SHA: 83509d221032f092be80ebdddf27696b9f18b959
-      RELEASE_TAG: gta-guard-v0.6.1-beta.1-83509d2
-      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 83509d2
-      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe
-      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-83509d2-windows-x64.exe.sha256
+      CORE_SHA: 45733c185a886c3265c02e9fecbc794d443b715a
+      RELEASE_TAG: gta-guard-v0.6.1-beta.1-45733c1
+      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 45733c1
+      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-45733c1-windows-x64.exe
+      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-45733c1-windows-x64.exe.sha256
 
     steps:
       - name: Checkout exact public MalGuard Core commit
@@ -224,3 +224,48 @@ jobs:
           $sha = ((Get-Content -LiteralPath $sum -Raw).Trim() -split '\s+')[0]
           gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --prerelease --title $env:RELEASE_TITLE --notes "Unsigned Windows x64 preview built from MalGuard Core commit $env:CORE_SHA. SHA-256: $sha. Includes the anonymous coarse compatibility report documented in the MalGuard privacy policy." $exe $sum
           if ($LASTEXITCODE -ne 0) { throw 'GitHub Release creation failed' }
+
+      - name: Publish website release metadata
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        working-directory: core
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $sum = Join-Path (Get-Location) "dist/$env:PUBLISH_SUM"
+          $sha256 = ((Get-Content -LiteralPath $sum -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+          if ($sha256 -notmatch '^[a-f0-9]{64}$') { throw 'invalid published installer SHA-256' }
+          $version = (Get-Content -LiteralPath 'DESKTOP-VERSION' -Raw).Trim()
+          $build = $env:CORE_SHA.Substring(0,7)
+          $releasedAt = (Get-Date).ToUniversalTime().ToString('o')
+          $base = "https://github.com/$env:GITHUB_REPOSITORY/releases/download/$env:RELEASE_TAG"
+          $metadata = [ordered]@{
+            schemaVersion = '1.0.0'
+            product = 'GTA Guard'
+            platform = 'windows-x64'
+            version = $version
+            build = $build
+            sourceCommit = $env:CORE_SHA
+            releasedAt = $releasedAt
+            installer = [ordered]@{
+              name = $env:PUBLISH_EXE
+              url = "$base/$env:PUBLISH_EXE"
+              sha256 = $sha256
+              sha256Url = "$base/$env:PUBLISH_SUM"
+            }
+          } | ConvertTo-Json -Depth 5
+          $encoded = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($metadata + "`n"))
+          $path = 'release/gta-guard-windows.json'
+          $current = gh api "repos/$env:GITHUB_REPOSITORY/contents/$path?ref=main" --jq '.sha'
+          if ($LASTEXITCODE -ne 0 -or -not $current) { throw 'could not read current release metadata blob' }
+          $request = [ordered]@{
+            message = "Publish GTA Guard Windows release metadata for build $build"
+            content = $encoded
+            sha = $current.Trim()
+            branch = 'main'
+          } | ConvertTo-Json
+          $requestPath = Join-Path $env:RUNNER_TEMP 'gta-guard-release-metadata.json'
+          Set-Content -LiteralPath $requestPath -Value $request -Encoding UTF8
+          gh api --method PUT "repos/$env:GITHUB_REPOSITORY/contents/$path" --input $requestPath | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'failed to publish website release metadata' }
