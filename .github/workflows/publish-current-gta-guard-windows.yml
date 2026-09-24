@@ -281,19 +281,9 @@ jobs:
           $releases = gh release list --repo $env:GITHUB_REPOSITORY --limit 100 --json tagName | ConvertFrom-Json
           foreach ($release in $releases) {
             $tag = [string]$release.tagName
-            if ($tag -match '^gta-guard-v0\.6\.1-beta\.1-[a-f0-9]{7}
-              Write-Host "Deleting superseded preview release $tag"
-              gh release delete $tag --repo $env:GITHUB_REPOSITORY --cleanup-tag --yes
-              if ($LASTEXITCODE -ne 0) { throw "failed to delete superseded release $tag" }
-            }
-          }
- -or $tag -match '^gta-guard-v0\.7\.0-beta\.1-[a-f0-9]{7}
-              Write-Host "Deleting superseded preview release $tag"
-              gh release delete $tag --repo $env:GITHUB_REPOSITORY --cleanup-tag --yes
-              if ($LASTEXITCODE -ne 0) { throw "failed to delete superseded release $tag" }
-            }
-          }
-) {
+            $old06 = $tag -match '^gta-guard-v0\.6\.1-beta\.1-[a-f0-9]{7}$'
+            $oldBeta1 = $tag -match '^gta-guard-v0\.7\.0-beta\.1-[a-f0-9]{7}$'
+            if ($old06 -or $oldBeta1) {
               Write-Host "Deleting superseded preview release $tag"
               gh release delete $tag --repo $env:GITHUB_REPOSITORY --cleanup-tag --yes
               if ($LASTEXITCODE -ne 0) { throw "failed to delete superseded release $tag" }
