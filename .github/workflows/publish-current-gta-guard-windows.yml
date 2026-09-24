@@ -19,11 +19,11 @@ jobs:
     timeout-minutes: 35
     env:
       CORE_REPO: MalGuard/malguard-core
-      CORE_SHA: e37bf3b28dd774680b72c70a7c4b79e8571063ad
-      RELEASE_TAG: gta-guard-v0.7.0-beta.1-e37bf3b
-      RELEASE_TITLE: GTA Guard 0.7.0-beta.1 · Windows x64 · Hybrid Isolation v1 · build e37bf3b
-      PUBLISH_EXE: MalGuard-Setup-0.7.0-beta.1-build-e37bf3b-windows-x64.exe
-      PUBLISH_SUM: MalGuard-Setup-0.7.0-beta.1-build-e37bf3b-windows-x64.exe.sha256
+      CORE_SHA: 882c576e0adc7ed6554514d3b6c8e22284dde20f
+      RELEASE_TAG: gta-guard-v0.7.0-beta.2-882c576
+      RELEASE_TITLE: GTA Guard 0.7.0-beta.2 · Windows x64 · GTA plugin fallback fix · build 882c576
+      PUBLISH_EXE: MalGuard-Setup-0.7.0-beta.2-build-882c576-windows-x64.exe
+      PUBLISH_SUM: MalGuard-Setup-0.7.0-beta.2-build-882c576-windows-x64.exe.sha256
 
     steps:
       - name: Checkout exact public MalGuard Core commit
@@ -164,7 +164,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $version = (Get-Content -LiteralPath 'DESKTOP-VERSION' -Raw).Trim()
-          if ($version -ne '0.7.0-beta.1') { throw "unexpected desktop version: $version" }
+          if ($version -ne '0.7.0-beta.2') { throw "unexpected desktop version: $version" }
           $root = Join-Path (Get-Location) "dist/malguard-desktop-$version"
           $setup = Join-Path (Get-Location) "dist/MalGuard-Setup-$version-windows-x64.exe"
           & pwsh -NoLogo -NoProfile -NonInteractive -File .\tools\build-windows-installer.ps1 -PackageRoot $root -Architecture x64 -OutputPath $setup -DiagnosticOutputDirectory (Join-Path $env:RUNNER_TEMP 'malguard-publish-install')
@@ -222,7 +222,7 @@ jobs:
           $sum = Join-Path (Get-Location) "dist/$env:PUBLISH_SUM"
           if (gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY *> $null) { throw "Release $env:RELEASE_TAG already exists; refusing to replace assets." }
           $sha = ((Get-Content -LiteralPath $sum -Raw).Trim() -split '\s+')[0]
-          gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --prerelease --title $env:RELEASE_TITLE --notes "Unsigned Windows x64 preview built from MalGuard Core commit $env:CORE_SHA. SHA-256: $sha. Hybrid Isolation v1 keeps Windows Sandbox as the only behavioral-execution path and adds an opt-in disposable Cloud Inspection fallback that is inspection-only, deny-all-network and destroyed after each job. Incomplete evidence is never promoted to SAFE." $exe $sum
+          gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --prerelease --title $env:RELEASE_TITLE --notes "Unsigned Windows x64 preview built from MalGuard Core commit $env:CORE_SHA. SHA-256: $sha. GTA Guard 0.7 beta 2 fixes Pro routing for GTA ASI/DLL plugin files: plugins that are not standalone executables now use fail-closed non-executing fallback analysis instead of stopping at preflight. Optional Disposable Cloud Inspection remains opt-in, and incomplete evidence is never promoted to SAFE." $exe $sum
           if ($LASTEXITCODE -ne 0) { throw 'GitHub Release creation failed' }
 
       - name: Publish website release metadata
@@ -270,7 +270,7 @@ jobs:
           gh api --method PUT "repos/$env:GITHUB_REPOSITORY/contents/$path" --input $requestPath | Out-Null
           if ($LASTEXITCODE -ne 0) { throw 'failed to publish website release metadata' }
 
-      - name: Remove superseded GTA Guard 0.6 preview releases
+      - name: Remove superseded GTA Guard preview releases
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         shell: pwsh
         working-directory: core
@@ -281,7 +281,19 @@ jobs:
           $releases = gh release list --repo $env:GITHUB_REPOSITORY --limit 100 --json tagName | ConvertFrom-Json
           foreach ($release in $releases) {
             $tag = [string]$release.tagName
-            if ($tag -match '^gta-guard-v0\.6\.1-beta\.1-[a-f0-9]{7}$') {
+            if ($tag -match '^gta-guard-v0\.6\.1-beta\.1-[a-f0-9]{7}
+              Write-Host "Deleting superseded preview release $tag"
+              gh release delete $tag --repo $env:GITHUB_REPOSITORY --cleanup-tag --yes
+              if ($LASTEXITCODE -ne 0) { throw "failed to delete superseded release $tag" }
+            }
+          }
+ -or $tag -match '^gta-guard-v0\.7\.0-beta\.1-[a-f0-9]{7}
+              Write-Host "Deleting superseded preview release $tag"
+              gh release delete $tag --repo $env:GITHUB_REPOSITORY --cleanup-tag --yes
+              if ($LASTEXITCODE -ne 0) { throw "failed to delete superseded release $tag" }
+            }
+          }
+) {
               Write-Host "Deleting superseded preview release $tag"
               gh release delete $tag --repo $env:GITHUB_REPOSITORY --cleanup-tag --yes
               if ($LASTEXITCODE -ne 0) { throw "failed to delete superseded release $tag" }
