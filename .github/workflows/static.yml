@@ -38,6 +38,7 @@ jobs:
           cp favicon.ico favicon-96.png favicon-192.png _site/
           cp -R assets _site/assets
           cp -R downloads _site/downloads
+          cp -R release _site/release
           cp -R ios-preview _site/ios-preview
           cp -R research _site/research
           cp .well-known/security.txt _site/.well-known/security.txt
@@ -50,6 +51,7 @@ jobs:
           test -f _site/trust.html
           test -f _site/docs.html
           test -f _site/download.html
+          test -f _site/release/gta-guard-windows.json
           test -f _site/scan-mods.html
           test -f _site/ai-intelligence.html
           test -f _site/malware-ai.html
