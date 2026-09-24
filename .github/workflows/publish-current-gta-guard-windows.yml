@@ -19,11 +19,11 @@ jobs:
     timeout-minutes: 35
     env:
       CORE_REPO: MalGuard/malguard-core
-      CORE_SHA: 897cdae260d8994dbcbc58c830110e98cd143e1e
-      RELEASE_TAG: gta-guard-v0.6.1-beta.1-897cdae
-      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 897cdae
-      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-897cdae-windows-x64.exe
-      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-897cdae-windows-x64.exe.sha256
+      CORE_SHA: 6d9986760a7bb806668b0d99bc5d62ee6e76c858
+      RELEASE_TAG: gta-guard-v0.6.1-beta.1-6d99867
+      RELEASE_TITLE: GTA Guard 0.6.1-beta.1 · Windows x64 · build 6d99867
+      PUBLISH_EXE: MalGuard-Setup-0.6.1-beta.1-build-6d99867-windows-x64.exe
+      PUBLISH_SUM: MalGuard-Setup-0.6.1-beta.1-build-6d99867-windows-x64.exe.sha256
 
     steps:
       - name: Checkout exact public MalGuard Core commit
@@ -83,6 +83,14 @@ jobs:
           if (-not $launcher) { throw 'MalGuard.exe launcher was not produced' }
           New-Item -ItemType Directory -Path 'desktop-app/bin' -Force | Out-Null
           Copy-Item -LiteralPath $launcher.FullName -Destination 'desktop-app/bin/MalGuard.exe' -Force
+
+      - name: Run native launcher readiness and crash regressions
+        shell: pwsh
+        working-directory: core
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & pwsh -NoLogo -NoProfile -NonInteractive -File .\tests\windows-launcher-startup.ps1 -Launcher (Resolve-Path 'desktop-app/bin/MalGuard.exe').Path -Node (Resolve-Path 'desktop-app/runtime/node.exe').Path
+          if ($LASTEXITCODE -ne 0) { throw "Launcher startup regression failed: $LASTEXITCODE" }
 
       - name: Build native x64 containment probe
         shell: pwsh
