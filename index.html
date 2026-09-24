@@ -2907,7 +2907,7 @@ document.querySelectorAll('.hash-copy').forEach(function(button){
         headers:{'content-type':'application/json'},
         body:JSON.stringify({
           model:model.value,
-          messages:history.slice(-10),
+          messages:history.slice(-20),
           clientContext:localContext()
         })
       });
