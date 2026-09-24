@@ -42,6 +42,7 @@ jobs:
             404.html
             robots.txt
             sitemap.xml
+            release/gta-guard-windows.json
             .well-known/security.txt
             assets/site-pages.css
             assets/page-history.js
@@ -77,6 +78,10 @@ jobs:
           fi
           grep -q "Scan URL" scan-url.html
           grep -q "Download" download.html
+          grep -q '"product": "GTA Guard"' release/gta-guard-windows.json
+          grep -q '"platform": "windows-x64"' release/gta-guard-windows.json
+          grep -Eq '"build": "[a-f0-9]{7}"' release/gta-guard-windows.json
+          grep -Eq '"sha256": "[a-f0-9]{64}"' release/gta-guard-windows.json
           grep -q "GTA Guard" products.html
           grep -q "LIVE PREVIEW" products.html
           grep -q "FINAL VERIFICATION PENDING" gta-guard.html
