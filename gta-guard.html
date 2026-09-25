@@ -230,7 +230,7 @@
   let latestVersion='0.8.0-beta.1';
   let latestInstallerUrl='https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.8.0-beta.1-913cb0e/MalGuard-Setup-0.8.0-beta.1-build-913cb0e-windows-x64.exe';
   const normalizeBuild=value=>String(value||'').trim().toLowerCase().replace(/^build\s*/,'');
-  const renderUpdateResult=()=>{
+  const renderUpdateResult=async()=>{
     if(!installedBuildInput||!updateResult)return;
     const installed=normalizeBuild(installedBuildInput.value);
     const latest=normalizeBuild(latestBuild);
@@ -248,6 +248,27 @@
     if(installed===latest){
       updateResult.className='update-result show ok';
       updateResult.textContent='✓ You’re up to date. Installed build '+installed+' matches the latest published build.';
+      return;
+    }
+    updateResult.textContent='Checking build history…';
+    try{
+      const compare=await fetch('https://api.github.com/repos/MalGuard/malguard-core/compare/'+encodeURIComponent(installed)+'...'+encodeURIComponent(latest),{cache:'no-store'});
+      if(!compare.ok)throw new Error('compare unavailable');
+      const relation=await compare.json();
+      if(relation.status==='behind'){
+        updateResult.className='update-result show unknown';
+        updateResult.textContent='This installed build is newer than the currently published build. No downgrade is recommended.';
+        return;
+      }
+      if(relation.status==='diverged'){
+        updateResult.className='update-result show unknown';
+        updateResult.textContent='This build is from a different history. MalGuard cannot safely call either build newer from the Build code alone.';
+        return;
+      }
+      if(relation.status!=='ahead'&&relation.status!=='identical')throw new Error('unknown build relation');
+    }catch(_){
+      updateResult.className='update-result show unknown';
+      updateResult.textContent='The installed build differs from the published build, but its order could not be verified. MalGuard will not claim an update is newer without verified build history.';
       return;
     }
     updateResult.className='update-result show update';
@@ -282,7 +303,7 @@
   if(installedBuildInput){
     try{const saved=localStorage.getItem('malguardInstalledBuild');if(saved){installedBuildInput.value=saved;setTimeout(renderUpdateResult,0);}}catch(_){}
   }
-  if(checkInstalledBuild)checkInstalledBuild.addEventListener('click',renderUpdateResult);
+  if(checkInstalledBuild)checkInstalledBuild.addEventListener('click',()=>{renderUpdateResult();});
   if(installedBuildInput)installedBuildInput.addEventListener('keydown',event=>{if(event.key==='Enter')renderUpdateResult();});
   try{
     const response=await fetch('/release/gta-guard-windows.json',{cache:'no-store'});
