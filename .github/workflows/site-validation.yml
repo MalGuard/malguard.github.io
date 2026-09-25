@@ -85,10 +85,10 @@ jobs:
           grep -q "GTA Guard" products.html
           grep -q "LIVE PREVIEW" products.html
           grep -q "COMING SOON" gta-guard.html
-          grep -q "CURRENT PREVIEW · BETA 2 · HYBRID ISOLATION V1" gta-guard.html
-          grep -q "0.7.0-beta.2" trust.html
-          grep -q "882c576" trust.html
-          grep -q "c11e5a55cf161be2dc9074fbbd4e2385625437a42a68f283a60c2a17d75500e1" trust.html
+          grep -q "CURRENT PREVIEW · 0.8 BETA 1 · GTA SIMULATION ENGINE" gta-guard.html
+          grep -q "0.8.0-beta.1" trust.html
+          grep -q "913cb0e" trust.html
+          grep -q "2dd9952298cd99a6cd32380debad5058b49da9ec7c2185cfa03b871f3c376701" trust.html
           grep -q "HYBRID ISOLATION V1" gta-guard.html
           grep -q "Disposable Cloud Inspection" gta-guard.html
           grep -q "cannot promote incomplete evidence to SAFE" gta-guard.html
@@ -114,7 +114,7 @@ jobs:
           grep -q "MalGuard-App-Preview-Linux-x64.AppImage" download.html
           grep -q "MalGuard-App-Preview-Linux-x64.deb" download.html
           grep -q "APPLE SIGNING REQUIRED" download.html
-          grep -Eq "MalGuard-Setup-0\.7\.0-beta\.2-build-[a-f0-9]{7}-windows-x64\.exe" gta-guard.html
+          grep -Eq "MalGuard-Setup-0\.8\.0-beta\.1-build-[a-f0-9]{7}-windows-x64\.exe" gta-guard.html
           grep -q "data-malguard-back" research/repackaged-mod.html
           grep -q "data-malguard-back" ios-preview/index.html
           grep -q "/assets/page-history.js" research/repackaged-mod.html
