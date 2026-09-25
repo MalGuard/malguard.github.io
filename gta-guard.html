@@ -50,7 +50,7 @@
 .critical-card h3{margin:7px 0 8px;font-size:20px}.critical-card p,.critical-card li{color:#c7cdd2;font-size:13px;line-height:1.58}
 .critical-card ul{margin:8px 0 0;padding-left:18px}.verify-command{margin-top:12px;padding:12px;border-radius:10px;background:#050607;border:1px solid rgba(255,255,255,.08);font:600 11px ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
 .release-state{display:inline-flex;margin-top:10px;padding:6px 9px;border:1px solid rgba(255,255,255,.09);border-radius:999px;color:#aeb7bf;font-size:11px}
-.update-check{margin:0 0 14px;padding:18px;border:1px solid rgba(255,255,255,.10);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.008))}.update-check-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:10px}.update-check h3{margin:0;font-size:23px}.update-check p{margin:7px 0 0;color:var(--muted);font-size:13px;line-height:1.55}.update-check-latest{padding:7px 10px;border:1px solid rgba(255,255,255,.10);border-radius:999px;color:#dce4ea;font:600 11px "American Typewriter"}.update-check-form{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.update-check-form input{min-width:220px;flex:1;padding:11px 12px;border:1px solid rgba(255,255,255,.11);border-radius:10px;background:#070809;color:#edf2f5;font:600 12px ui-monospace,SFMono-Regular,Consolas,monospace;outline:none}.update-check-form input:focus{border-color:rgba(255,255,255,.28)}.update-result{display:none;margin-top:12px;padding:13px 14px;border-radius:12px;font-size:13px;line-height:1.55}.update-result.show{display:block}.update-result.ok{border:1px solid rgba(72,184,137,.55);background:rgba(33,110,79,.14);color:#bfe8d5}.update-result.update{border:1px solid rgba(230,185,93,.58);background:rgba(135,91,12,.16);color:#f3d9a0}.update-result.unknown{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.025);color:#cbd3d9}.update-result .release-actions{margin-top:10px}
+.update-check{margin:0 0 14px;padding:18px;border:1px solid rgba(255,255,255,.10);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.008))}.update-check-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:10px}.update-check h3{margin:0;font-size:23px}.update-check p{margin:7px 0 0;color:var(--muted);font-size:13px;line-height:1.55}.update-check-latest{padding:7px 10px;border:1px solid rgba(255,255,255,.10);border-radius:999px;color:#dce4ea;font:600 11px "American Typewriter"}.update-check-form{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.update-check-form input{min-width:220px;flex:1;padding:11px 12px;border:1px solid rgba(255,255,255,.11);border-radius:10px;background:#070809;color:#edf2f5;font:600 12px ui-monospace,SFMono-Regular,Consolas,monospace;outline:none}.update-check-form input:focus{border-color:rgba(255,255,255,.28)}.update-result{display:none;margin-top:12px;padding:13px 14px;border-radius:12px;font-size:13px;line-height:1.55}.update-result.show{display:block}.update-result.ok{border:1px solid rgba(72,184,137,.55);background:rgba(33,110,79,.14);color:#bfe8d5}.update-result.update{border:1px solid rgba(230,185,93,.58);background:rgba(135,91,12,.16);color:#f3d9a0}.update-result.unknown{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.025);color:#cbd3d9}.update-result .release-actions{margin-top:10px}.update-details{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.10)}.update-details strong{display:block;margin:0 0 6px}.update-details ul{margin:6px 0 0;padding-left:20px}.update-details li{margin:5px 0}
 .hybrid{margin-top:38px}.hybrid h2{margin:0 0 12px;font-size:32px}.hybrid-intro{max-width:780px;color:var(--muted);font-size:14px;line-height:1.7}.hybrid-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}.hybrid-card{padding:19px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.012)}.hybrid-card .hybrid-step{display:inline-flex;width:28px;height:28px;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.12);border-radius:50%;font:700 11px "American Typewriter"}.hybrid-card h3{margin:12px 0 7px;font-size:20px}.hybrid-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}.hybrid-note{margin-top:14px;padding:14px 16px;border:1px solid rgba(255,255,255,.08);border-radius:13px;color:#c4ccd2;font-size:13px;line-height:1.6}
 @media(max-width:800px){
   .platforms,.model-grid,.release-grid,.critical-grid,.hybrid-grid{grid-template-columns:1fr}
@@ -226,7 +226,8 @@
   const checkInstalledBuild=document.getElementById('checkInstalledBuild');
   const updateResult=document.getElementById('updateResult');
   const latestBuildQuick=document.getElementById('latestBuildQuick');
-  let latestBuild='882c576';
+  let latestBuild='913cb0e';
+  let latestVersion='0.8.0-beta.1';
   let latestInstallerUrl='https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.7.0-beta.2-882c576/MalGuard-Setup-0.7.0-beta.2-build-882c576-windows-x64.exe';
   const normalizeBuild=value=>String(value||'').trim().toLowerCase().replace(/^build\s*/,'');
   const renderUpdateResult=()=>{
@@ -253,7 +254,22 @@
     const strong=document.createElement('strong');
     strong.textContent='New version available. ';
     const message=document.createElement('span');
-    message.textContent='Your installed build is '+installed+', while the latest published build is '+latest+'.';
+    message.textContent='Your installed build is '+installed+', while the latest published build is '+latest+' ('+latestVersion+').';
+    const details=document.createElement('div');
+    details.className='update-details';
+    const why=document.createElement('strong');
+    why.textContent='Why this update is better';
+    const intro=document.createElement('div');
+    intro.textContent='This release improves GTA mod analysis by adding a GTA-specific simulation path instead of treating ASI/DLL plugins like ordinary standalone programs.';
+    const list=document.createElement('ul');
+    [
+      'GTA Simulation Engine builds a synthetic GTA runtime context for analysis.',
+      'Certified local Windows Sandbox can load ASI/DLL plugins through a separate isolated loader for real execution evidence.',
+      'Disposable GTA cloud simulation provides an isolated fallback without mounting your real GTA or user files.',
+      'MalGuard AI evidence analysis is bounded and opt-in; AI advice cannot silently rewrite the security verdict.',
+      'Fail-closed protection remains: without trustworthy execution evidence, MalGuard does not promote a file to SAFE.'
+    ].forEach(text=>{const li=document.createElement('li');li.textContent=text;list.appendChild(li);});
+    details.append(why,intro,list);
     const actions=document.createElement('div');
     actions.className='release-actions';
     const link=document.createElement('a');
@@ -261,7 +277,7 @@
     link.href=latestInstallerUrl;
     link.textContent='Download latest version';
     actions.appendChild(link);
-    updateResult.append(strong,message,actions);
+    updateResult.append(strong,message,details,actions);
   };
   if(installedBuildInput){
     try{const saved=localStorage.getItem('malguardInstalledBuild');if(saved){installedBuildInput.value=saved;setTimeout(renderUpdateResult,0);}}catch(_){}
@@ -273,7 +289,7 @@
     if(!response.ok)throw new Error('metadata unavailable');
     const data=await response.json();
     const installer=data&&data.installer?data.installer:{};
-    if(data.version)document.getElementById('releaseVersion').textContent=data.version;
+    if(data.version){latestVersion=data.version;document.getElementById('releaseVersion').textContent=data.version;}
     if(data.build){latestBuild=data.build;document.getElementById('releaseBuild').textContent=data.build;document.getElementById('expectedBuild').textContent=data.build;if(latestBuildQuick)latestBuildQuick.textContent=data.build;}
     if(data.releasedAt){const d=new Date(data.releasedAt);document.getElementById('releaseDate').textContent=Number.isNaN(d.getTime())?data.releasedAt:d.toISOString().slice(0,10);}
     if(installer.sha256)document.getElementById('releaseSha').textContent=installer.sha256;
