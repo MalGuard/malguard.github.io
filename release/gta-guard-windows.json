@@ -2,14 +2,14 @@
   "schemaVersion": "1.0.0",
   "product": "GTA Guard",
   "platform": "windows-x64",
-  "version": "0.7.0-beta.2",
-  "build": "882c576",
-  "sourceCommit": "882c576e0adc7ed6554514d3b6c8e22284dde20f",
-  "releasedAt": "2026-09-24T23:16:46.9482594Z",
+  "version": "0.8.0-beta.1",
+  "build": "913cb0e",
+  "sourceCommit": "913cb0e75e26fe5d1ed49468b28cecc0d8363b6e",
+  "releasedAt": "2026-09-25T09:29:50.0552779Z",
   "installer": {
-    "name": "MalGuard-Setup-0.7.0-beta.2-build-882c576-windows-x64.exe",
-    "url": "https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.7.0-beta.2-882c576/MalGuard-Setup-0.7.0-beta.2-build-882c576-windows-x64.exe",
-    "sha256": "c11e5a55cf161be2dc9074fbbd4e2385625437a42a68f283a60c2a17d75500e1",
-    "sha256Url": "https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.7.0-beta.2-882c576/MalGuard-Setup-0.7.0-beta.2-build-882c576-windows-x64.exe.sha256"
+    "name": "MalGuard-Setup-0.8.0-beta.1-build-913cb0e-windows-x64.exe",
+    "url": "https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.8.0-beta.1-913cb0e/MalGuard-Setup-0.8.0-beta.1-build-913cb0e-windows-x64.exe",
+    "sha256": "2dd9952298cd99a6cd32380debad5058b49da9ec7c2185cfa03b871f3c376701",
+    "sha256Url": "https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.8.0-beta.1-913cb0e/MalGuard-Setup-0.8.0-beta.1-build-913cb0e-windows-x64.exe.sha256"
   }
 }
