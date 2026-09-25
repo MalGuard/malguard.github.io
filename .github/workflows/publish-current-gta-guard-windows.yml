@@ -19,11 +19,11 @@ jobs:
     timeout-minutes: 35
     env:
       CORE_REPO: MalGuard/malguard-core
-      CORE_SHA: 960a9c1b0527c2067f845fad08e97a0c38f7e6cb
-      RELEASE_TAG: gta-guard-v0.8.0-beta.4-960a9c1
-      RELEASE_TITLE: GTA Guard 0.8.0-beta.4 · Windows x64 · GTA Simulation Engine · build 960a9c1
-      PUBLISH_EXE: MalGuard-Setup-0.8.0-beta.4-build-960a9c1-windows-x64.exe
-      PUBLISH_SUM: MalGuard-Setup-0.8.0-beta.4-build-960a9c1-windows-x64.exe.sha256
+      CORE_SHA: 639d548121b7ed6ba855187bfef50f9021c10100
+      RELEASE_TAG: gta-guard-v0.8.0-beta.5-639d548
+      RELEASE_TITLE: GTA Guard 0.8.0-beta.5 · Windows x64 · GTA Simulation Engine · build 639d548
+      PUBLISH_EXE: MalGuard-Setup-0.8.0-beta.5-build-639d548-windows-x64.exe
+      PUBLISH_SUM: MalGuard-Setup-0.8.0-beta.5-build-639d548-windows-x64.exe.sha256
 
     steps:
       - name: Checkout exact public MalGuard Core commit
@@ -164,7 +164,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $version = (Get-Content -LiteralPath 'DESKTOP-VERSION' -Raw).Trim()
-          if ($version -ne '0.8.0-beta.4') { throw "unexpected desktop version: $version" }
+          if ($version -ne '0.8.0-beta.5') { throw "unexpected desktop version: $version" }
           $root = Join-Path (Get-Location) "dist/malguard-desktop-$version"
           $setup = Join-Path (Get-Location) "dist/MalGuard-Setup-$version-windows-x64.exe"
           & pwsh -NoLogo -NoProfile -NonInteractive -File .\tools\build-windows-installer.ps1 -PackageRoot $root -Architecture x64 -OutputPath $setup -DiagnosticOutputDirectory (Join-Path $env:RUNNER_TEMP 'malguard-publish-install')
@@ -222,7 +222,7 @@ jobs:
           $sum = Join-Path (Get-Location) "dist/$env:PUBLISH_SUM"
           if (gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY *> $null) { throw "Release $env:RELEASE_TAG already exists; refusing to replace assets." }
           $sha = ((Get-Content -LiteralPath $sum -Raw).Trim() -split '\s+')[0]
-          gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --prerelease --title $env:RELEASE_TITLE --notes "Unsigned Windows x64 preview built from MalGuard Core commit $env:CORE_SHA. SHA-256: $sha. GTA Guard 0.8 beta 3 keeps the GTA Simulation Engine and adds GTA-specific cloud fallback routing when local behavioral isolation becomes unavailable, while preserving bounded AI evidence analysis and fail-closed verdict policy. Uncertified systems remain fail-closed; no synthetic or AI evidence can promote a file to SAFE." $exe $sum
+          gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --prerelease --title $env:RELEASE_TITLE --notes "Unsigned Windows x64 preview built from MalGuard Core commit $env:CORE_SHA. SHA-256: $sha. GTA Guard 0.8 beta 5 adds TSH-validated maximum defensive hardening: expanded Standard scanning for supported ASI/DLL/Lua/C#/ZIP inputs, bounded MalGuard AI evidence correlation, MalwareBazaar reputation, stricter SAFE coverage gates, privacy/prompt-injection hardening, and fail-closed fallback behavior. TSH passed 3,583 adversarial checks. Uncertified systems remain fail-closed; cloud simulation is non-executing and no synthetic or AI evidence can promote a file to SAFE." $exe $sum
           if ($LASTEXITCODE -ne 0) { throw 'GitHub Release creation failed' }
 
       - name: Publish website release metadata
