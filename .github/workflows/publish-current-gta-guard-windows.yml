@@ -19,11 +19,11 @@ jobs:
     timeout-minutes: 35
     env:
       CORE_REPO: MalGuard/malguard-core
-      CORE_SHA: 3fc72ee1ea0e9a721163fd9fd912bc9362eafbc9
-      RELEASE_TAG: gta-guard-v0.8.0-beta.3-3fc72ee
-      RELEASE_TITLE: GTA Guard 0.8.0-beta.3 · Windows x64 · GTA Simulation Engine · build 3fc72ee
-      PUBLISH_EXE: MalGuard-Setup-0.8.0-beta.3-build-3fc72ee-windows-x64.exe
-      PUBLISH_SUM: MalGuard-Setup-0.8.0-beta.3-build-3fc72ee-windows-x64.exe.sha256
+      CORE_SHA: 960a9c1b0527c2067f845fad08e97a0c38f7e6cb
+      RELEASE_TAG: gta-guard-v0.8.0-beta.4-960a9c1
+      RELEASE_TITLE: GTA Guard 0.8.0-beta.4 · Windows x64 · GTA Simulation Engine · build 960a9c1
+      PUBLISH_EXE: MalGuard-Setup-0.8.0-beta.4-build-960a9c1-windows-x64.exe
+      PUBLISH_SUM: MalGuard-Setup-0.8.0-beta.4-build-960a9c1-windows-x64.exe.sha256
 
     steps:
       - name: Checkout exact public MalGuard Core commit
@@ -164,7 +164,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $version = (Get-Content -LiteralPath 'DESKTOP-VERSION' -Raw).Trim()
-          if ($version -ne '0.8.0-beta.3') { throw "unexpected desktop version: $version" }
+          if ($version -ne '0.8.0-beta.4') { throw "unexpected desktop version: $version" }
           $root = Join-Path (Get-Location) "dist/malguard-desktop-$version"
           $setup = Join-Path (Get-Location) "dist/MalGuard-Setup-$version-windows-x64.exe"
           & pwsh -NoLogo -NoProfile -NonInteractive -File .\tools\build-windows-installer.ps1 -PackageRoot $root -Architecture x64 -OutputPath $setup -DiagnosticOutputDirectory (Join-Path $env:RUNNER_TEMP 'malguard-publish-install')
