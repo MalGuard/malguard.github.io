@@ -19,11 +19,11 @@ jobs:
     timeout-minutes: 35
     env:
       CORE_REPO: MalGuard/malguard-core
-      CORE_SHA: 052414995b8073e3b96afa9d67345fccc70e97d3
-      RELEASE_TAG: gta-guard-v0.8.0-beta.6-0524149
-      RELEASE_TITLE: GTA Guard 0.8.0-beta.6 · Windows x64 · MalGuard Fusion Engine 1.0 · build 0524149
-      PUBLISH_EXE: MalGuard-Setup-0.8.0-beta.6-build-0524149-windows-x64.exe
-      PUBLISH_SUM: MalGuard-Setup-0.8.0-beta.6-build-0524149-windows-x64.exe.sha256
+      CORE_SHA: bc60530f9bf6614b986c6ec7c4ea8609e32eb4cf
+      RELEASE_TAG: gta-guard-v0.8.0-beta.7-bc60530
+      RELEASE_TITLE: GTA Guard 0.8.0-beta.7 · Windows x64 · MalGuard Fusion Engine 2.0 · build bc60530
+      PUBLISH_EXE: MalGuard-Setup-0.8.0-beta.7-build-bc60530-windows-x64.exe
+      PUBLISH_SUM: MalGuard-Setup-0.8.0-beta.7-build-bc60530-windows-x64.exe.sha256
 
     steps:
       - name: Checkout exact public MalGuard Core commit
@@ -68,6 +68,45 @@ jobs:
           New-Item -ItemType Directory -Path 'desktop-app/runtime' -Force | Out-Null
           Copy-Item -LiteralPath $node.FullName -Destination 'desktop-app/runtime/node.exe' -Force
           Copy-Item -LiteralPath $license.FullName -Destination 'desktop-app/runtime/NODE-LICENSE.txt' -Force
+
+      - name: Stage hash-pinned independent analysis engines
+        shell: pwsh
+        working-directory: core
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $engines = @(
+            @{
+              Name='yara-x'
+              Uri='https://github.com/VirusTotal/yara-x/releases/download/v1.20.0/yara-x-v1.20.0-x86_64-pc-windows-msvc.zip'
+              Sha256='b1e2840bac593aea353d2b2b341f5a862c9d61c0c406d9abbbad9e1fa35163a1'
+              Exe='yr.exe'
+            },
+            @{
+              Name='capa'
+              Uri='https://github.com/mandiant/capa/releases/download/v9.4.0/capa-v9.4.0-windows.zip'
+              Sha256='670ab1a58b81f59cb57533bf4021ac1e7033fbe9b5d5cc180f796976081e3bb5'
+              Exe='capa.exe'
+            }
+          )
+          foreach ($engine in $engines) {
+            $uri=[Uri]$engine.Uri
+            if ($uri.Scheme -ne 'https' -or $uri.Host -ne 'github.com') { throw "untrusted engine origin: $uri" }
+            $archive=Join-Path $env:RUNNER_TEMP ($engine.Name+'.zip')
+            Invoke-WebRequest -Uri $uri -OutFile $archive
+            $actual=(Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actual -ne $engine.Sha256) { throw "$($engine.Name) SHA-256 mismatch" }
+            $extract=Join-Path $env:RUNNER_TEMP ('publish-engine-'+$engine.Name)
+            Remove-Item -LiteralPath $extract -Recurse -Force -ErrorAction SilentlyContinue
+            Expand-Archive -LiteralPath $archive -DestinationPath $extract -Force
+            $engineExe=Get-ChildItem -LiteralPath $extract -Filter $engine.Exe -File -Recurse | Select-Object -First 1
+            if (-not $engineExe) { throw "$($engine.Name) executable missing from verified archive" }
+            $target=Join-Path (Get-Location) ('desktop-app/engines/'+$engine.Name)
+            New-Item -ItemType Directory -Path $target -Force | Out-Null
+            Copy-Item -LiteralPath $engineExe.FullName -Destination (Join-Path $target $engine.Exe) -Force
+            & (Join-Path $target $engine.Exe) --version
+            if ($LASTEXITCODE -ne 0) { throw "$($engine.Name) self-identification failed" }
+            Write-Host "Pinned $($engine.Name) staged: $actual"
+          }
 
       - name: Build native x64 launcher
         shell: pwsh
@@ -124,6 +163,14 @@ jobs:
             if ($actual -ne 0x8664) { throw ("PE architecture mismatch for {0}: got 0x{1:X4}" -f $file,$actual) }
           }
 
+      - name: Prove independent engines execute before publishing
+        shell: pwsh
+        working-directory: core
+        run: |
+          $ErrorActionPreference = 'Stop'
+          node -e "const {runExternalEngines}=require('./desktop-app/multiengine/external-engine-runner.js'); (async()=>{const r=await runExternalEngines('desktop-app/bin/MalGuard.exe'); console.log(JSON.stringify(r,null,2)); for(const n of ['yara_x','capa']){const e=r.engines.find(x=>x.name===n); if(!e||e.status==='unavailable'||e.status==='error') throw new Error(n+' did not execute');}})().catch(e=>{console.error(e);process.exit(1)})"
+          if ($LASTEXITCODE -ne 0) { throw 'independent engine publish smoke test failed' }
+
       - name: Run release hardening regressions
         shell: pwsh
         working-directory: core
@@ -164,7 +211,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $version = (Get-Content -LiteralPath 'DESKTOP-VERSION' -Raw).Trim()
-          if ($version -ne '0.8.0-beta.6') { throw "unexpected desktop version: $version" }
+          if ($version -ne '0.8.0-beta.7') { throw "unexpected desktop version: $version" }
           $root = Join-Path (Get-Location) "dist/malguard-desktop-$version"
           $setup = Join-Path (Get-Location) "dist/MalGuard-Setup-$version-windows-x64.exe"
           & pwsh -NoLogo -NoProfile -NonInteractive -File .\tools\build-windows-installer.ps1 -PackageRoot $root -Architecture x64 -OutputPath $setup -DiagnosticOutputDirectory (Join-Path $env:RUNNER_TEMP 'malguard-publish-install')
@@ -222,7 +269,7 @@ jobs:
           $sum = Join-Path (Get-Location) "dist/$env:PUBLISH_SUM"
           if (gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY *> $null) { throw "Release $env:RELEASE_TAG already exists; refusing to replace assets." }
           $sha = ((Get-Content -LiteralPath $sum -Raw).Trim() -split '\s+')[0]
-          gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --prerelease --title $env:RELEASE_TITLE --notes "Unsigned Windows x64 preview built from MalGuard Core commit $env:CORE_SHA. SHA-256: $sha. GTA Guard 0.8 beta 6 introduces MalGuard Fusion Engine 1.0: multi-layer local evidence fusion, type-aware ASI/DLL/Lua/C#/ZIP analysis, bounded AI evidence correlation, MalwareBazaar reputation, stronger SAFE coverage gates, and automatic deep-static fallback when behavioral isolation is unavailable. The full 3-stage TSH maps all canonical test programs exactly once across Core Detection, Isolation/Runtime, and Product/Release gates. AI and non-executing cloud simulation remain advisory and cannot manufacture SAFE." $exe $sum
+          gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --prerelease --title $env:RELEASE_TITLE --notes "Unsigned Windows x64 preview built from MalGuard Core commit $env:CORE_SHA. SHA-256: $sha. GTA Guard 0.8 Beta 7 introduces MalGuard Fusion Engine 2.0 with real independent analysis layers. The Windows x64 package includes hash-pinned YARA-X v1.20.0 and capa v9.4.0, uses Microsoft Defender when available, and combines those signals with MalGuard static PE/script/archive analysis, MalwareBazaar reputation, bounded MalGuard AI evidence, GTA simulation, and verified behavioral isolation when available. TSH 10-Stage maps all 85 canonical test programs exactly once across release identity, packaging, parser/fuzzing, local APIs, multi-engine fusion, AI/privacy, cloud simulation, isolation routing, runtime defense, and product readiness. AI remains advisory and cannot manufacture SAFE. FLOSS and ClamAV adapters are optional and are not bundled in this installer." $exe $sum
           if ($LASTEXITCODE -ne 0) { throw 'GitHub Release creation failed' }
 
       - name: Publish website release metadata
