@@ -2441,8 +2441,245 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
 </style>
 
 <link rel="stylesheet" href="/assets/pro-polish.css?v=20260923-11">
+
+<style id="site-entry-gate-style">
+body.site-entry-locked{overflow:hidden!important}
+.site-entry-gate{
+  position:fixed;inset:0;z-index:5000;
+  display:grid;place-items:center;
+  padding:22px;
+  background:#030405;
+  color:#f5f7f8;
+}
+.site-entry-gate[hidden]{display:none!important}
+.site-entry-shell{
+  width:min(540px,100%);
+  max-height:calc(100dvh - 36px);
+  overflow:auto;
+  padding:28px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:26px;
+  background:linear-gradient(180deg,rgba(17,20,23,.985),rgba(7,9,11,.995));
+  box-shadow:0 34px 110px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.035);
+}
+.site-entry-security{
+  position:relative;
+  height:160px;
+  margin:-2px 0 18px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.055);
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 50% 44%,rgba(255,255,255,.045),transparent 35%),
+    linear-gradient(180deg,rgba(255,255,255,.018),rgba(255,255,255,.006));
+}
+.site-entry-grid{
+  position:absolute;inset:0;opacity:.18;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:38px 38px;
+  mask-image:radial-gradient(circle at 50% 50%,#000 0 40%,transparent 78%);
+  -webkit-mask-image:radial-gradient(circle at 50% 50%,#000 0 40%,transparent 78%);
+}
+.site-entry-halo{
+  position:absolute;left:50%;top:50%;
+  width:230px;height:230px;
+  transform:translate(-50%,-50%) scale(.78);
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.09);
+  opacity:0
+}
+.site-entry-halo:after{content:"";position:absolute;inset:24px;border-radius:50%;border:1px solid rgba(255,255,255,.05)}
+.site-entry-nodes{position:absolute;inset:0;pointer-events:none}
+.site-entry-node{
+  position:absolute;width:6px;height:6px;border-radius:50%;
+  background:#f4f7f8;box-shadow:0 0 14px rgba(255,255,255,.46);opacity:0
+}
+.site-entry-node:nth-child(1){left:19%;top:49%}
+.site-entry-node:nth-child(2){left:34%;top:21%}
+.site-entry-node:nth-child(3){right:33%;top:23%}
+.site-entry-node:nth-child(4){right:19%;top:53%}
+.site-entry-node:nth-child(5){left:50%;bottom:15%}
+.site-entry-logo-wrap{
+  position:absolute;left:50%;top:50%;
+  width:min(400px,80%);height:126px;
+  transform:translate(-50%,-50%)
+}
+.site-entry-logo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none}
+.site-entry-logo-base{opacity:.12;filter:blur(2px) saturate(.65);transform:scale(.96)}
+.site-entry-logo-live{opacity:0;clip-path:inset(100% 0 0 0);filter:drop-shadow(0 0 13px rgba(255,255,255,.11))}
+.site-entry-frame{position:absolute;inset:8px 2px;opacity:0}
+.site-entry-corner{position:absolute;width:25px;height:25px;opacity:0}
+.site-entry-corner.c1{left:0;top:0;border-left:1.5px solid rgba(255,255,255,.40);border-top:1.5px solid rgba(255,255,255,.40);border-top-left-radius:8px}
+.site-entry-corner.c2{right:0;top:0;border-right:1.5px solid rgba(255,255,255,.40);border-top:1.5px solid rgba(255,255,255,.40);border-top-right-radius:8px}
+.site-entry-corner.c3{left:0;bottom:0;border-left:1.5px solid rgba(255,255,255,.40);border-bottom:1.5px solid rgba(255,255,255,.40);border-bottom-left-radius:8px}
+.site-entry-corner.c4{right:0;bottom:0;border-right:1.5px solid rgba(255,255,255,.40);border-bottom:1.5px solid rgba(255,255,255,.40);border-bottom-right-radius:8px}
+.site-entry-scan{
+  position:absolute;left:3%;right:3%;top:-10%;height:2px;border-radius:999px;
+  background:linear-gradient(90deg,transparent,rgba(244,248,250,.96),transparent);
+  box-shadow:0 0 10px rgba(244,248,250,.78),0 0 24px rgba(244,248,250,.18);opacity:0
+}
+.site-entry-scan-tail{
+  position:absolute;left:4%;right:4%;top:-10%;height:31px;
+  background:linear-gradient(180deg,rgba(255,255,255,.07),transparent);opacity:0
+}
+.site-entry-pulse{
+  position:absolute;left:50%;top:50%;width:92px;height:92px;
+  transform:translate(-50%,-50%) scale(.3);
+  border-radius:50%;border:1px solid rgba(255,255,255,.16);opacity:0
+}
+.site-entry-gate.security-play .site-entry-halo{animation:siteHalo .68s cubic-bezier(.22,.8,.22,1) .02s forwards}
+.site-entry-gate.security-play .site-entry-node{animation:siteNode .62s ease forwards}
+.site-entry-gate.security-play .site-entry-node:nth-child(1){animation-delay:.08s}
+.site-entry-gate.security-play .site-entry-node:nth-child(2){animation-delay:.15s}
+.site-entry-gate.security-play .site-entry-node:nth-child(3){animation-delay:.22s}
+.site-entry-gate.security-play .site-entry-node:nth-child(4){animation-delay:.29s}
+.site-entry-gate.security-play .site-entry-node:nth-child(5){animation-delay:.36s}
+.site-entry-gate.security-play .site-entry-frame{animation:siteFrame .45s ease .18s forwards}
+.site-entry-gate.security-play .site-entry-corner{animation:siteCorner .58s ease .24s forwards}
+.site-entry-gate.security-play .site-entry-scan{animation:siteScan 1.02s cubic-bezier(.42,0,.24,1) .16s forwards}
+.site-entry-gate.security-play .site-entry-scan-tail{animation:siteScanTail 1.02s cubic-bezier(.42,0,.24,1) .16s forwards}
+.site-entry-gate.security-play .site-entry-logo-live{animation:siteLogo 1.02s cubic-bezier(.42,0,.24,1) .16s forwards}
+.site-entry-gate.security-play .site-entry-logo-base{animation:siteBase .88s ease .26s forwards}
+.site-entry-gate.security-play .site-entry-pulse{animation:sitePulse .9s ease-out .58s forwards}
+@keyframes siteHalo{from{opacity:0;transform:translate(-50%,-50%) scale(.78)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes siteNode{0%{opacity:0;transform:scale(.2)}38%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.65)}}
+@keyframes siteFrame{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+@keyframes siteCorner{from{opacity:0;transform:scale(.7)}to{opacity:.9;transform:scale(1)}}
+@keyframes siteScan{0%{top:-10%;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:108%;opacity:0}}
+@keyframes siteScanTail{0%{top:-10%;opacity:0}12%{opacity:1}100%{top:100%;opacity:0}}
+@keyframes siteLogo{0%{opacity:0;clip-path:inset(100% 0 0 0)}10%{opacity:1}100%{opacity:1;clip-path:inset(0 0 0 0)}}
+@keyframes siteBase{to{opacity:0;filter:blur(0);transform:scale(1)}}
+@keyframes sitePulse{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}20%{opacity:.62}100%{opacity:0;transform:translate(-50%,-50%) scale(2.2)}}
+.site-entry-step[hidden]{display:none!important}
+.site-entry-step h1{
+  margin:0 0 8px!important;
+  max-width:none!important;
+  font-family:var(--display,"Baskerville")!important;
+  font-size:30px!important;
+  line-height:1.08!important;
+  letter-spacing:-.025em!important;
+}
+.site-entry-step p{
+  margin:0 0 18px;
+  color:#9da8ae;
+  font-family:var(--body,"American Typewriter")!important;
+  font-size:12px;line-height:1.65
+}
+.site-entry-choice{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.site-entry-choice button{
+  min-height:112px;padding:16px;
+  border:1px solid rgba(255,255,255,.11);border-radius:17px;
+  background:rgba(255,255,255,.035);color:#f5f7f8;text-align:left;
+  transition:.18s ease
+}
+.site-entry-choice button:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.24);background:rgba(255,255,255,.055)}
+.site-entry-choice strong{
+  display:block;margin-bottom:7px;
+  font-family:"Bodoni 72",var(--display,"Baskerville")!important;
+  font-size:18px;line-height:1.15
+}
+.site-entry-choice span{
+  display:block;color:#94a0a6;
+  font-family:var(--body,"American Typewriter")!important;
+  font-size:11px;line-height:1.5
+}
+.site-entry-form{display:grid;gap:10px}
+.site-entry-form input{
+  width:100%;min-height:48px;padding:0 14px;
+  border:1px solid rgba(255,255,255,.14);border-radius:13px;
+  background:#07090b;color:#f7f9fa;outline:none;
+  font-family:var(--body,"American Typewriter")!important;font-size:14px;font-weight:600
+}
+.site-entry-form input:focus{border-color:rgba(255,255,255,.34);box-shadow:0 0 0 3px rgba(255,255,255,.045)}
+.site-entry-button{
+  min-height:46px;border:1px solid rgba(255,255,255,.18);border-radius:13px;
+  background:#edf3f5;color:#07090b;
+  font-family:var(--body,"American Typewriter")!important;font-size:13px;font-weight:800
+}
+.site-entry-back{background:transparent;color:#aab5ba}
+.site-entry-error{min-height:18px;color:#ff9f9f;font-family:var(--body,"American Typewriter")!important;font-size:11px;line-height:1.5}
+.site-entry-note{color:#707a80!important;font-size:10px!important;line-height:1.5!important;margin:2px 0 0!important}
+.site-entry-success{
+  margin:0 0 12px;padding:11px 12px;
+  border:1px solid rgba(78,208,145,.35);border-radius:12px;
+  background:rgba(78,208,145,.08);color:#bdf0d6;
+  font-family:var(--body,"American Typewriter")!important;font-size:12px;font-weight:700
+}
+.site-entry-consent{display:flex;gap:8px;align-items:flex-start;color:#aeb7bc;font-family:var(--body,"American Typewriter")!important;font-size:11px;line-height:1.5}
+.site-entry-consent input{width:auto;min-height:auto;margin-top:2px}
+@media(max-width:560px){
+  .site-entry-shell{padding:20px;border-radius:22px}
+  .site-entry-security{height:138px;margin-bottom:15px}
+  .site-entry-logo-wrap{width:min(330px,84%);height:106px}
+  .site-entry-halo{width:195px;height:195px}
+  .site-entry-choice{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  .site-entry-halo,.site-entry-node,.site-entry-frame,.site-entry-corner,.site-entry-scan,.site-entry-scan-tail,.site-entry-logo-live,.site-entry-logo-base,.site-entry-pulse{animation:none!important}
+  .site-entry-logo-base{opacity:0}
+  .site-entry-logo-live,.site-entry-frame,.site-entry-corner{opacity:1;clip-path:none}
+}
+</style>
+
 </head>
-<body>
+<body class="site-entry-locked">
+<section class="site-entry-gate security-play" id="siteEntryGate" aria-labelledby="siteEntryTitle">
+  <div class="site-entry-shell">
+    <div class="site-entry-security" aria-hidden="true">
+      <div class="site-entry-grid"></div>
+      <div class="site-entry-halo"></div>
+      <div class="site-entry-nodes">
+        <span class="site-entry-node"></span><span class="site-entry-node"></span><span class="site-entry-node"></span><span class="site-entry-node"></span><span class="site-entry-node"></span>
+      </div>
+      <div class="site-entry-logo-wrap">
+        <div class="site-entry-frame">
+          <span class="site-entry-corner c1"></span><span class="site-entry-corner c2"></span><span class="site-entry-corner c3"></span><span class="site-entry-corner c4"></span>
+        </div>
+        <img class="site-entry-logo site-entry-logo-base" src="/assets/malguard-site-logo.svg" alt="">
+        <img class="site-entry-logo site-entry-logo-live" src="/assets/malguard-site-logo.svg" alt="">
+        <div class="site-entry-scan-tail"></div>
+        <div class="site-entry-scan"></div>
+        <div class="site-entry-pulse"></div>
+      </div>
+    </div>
+
+    <div class="site-entry-step" id="siteEntryChoice">
+      <h1 id="siteEntryTitle">Choose how to continue</h1>
+      <p>Enter MalGuard as a public visitor, or use protected administrator access.</p>
+      <div class="site-entry-choice">
+        <button id="sitePublicEntry" type="button"><strong>Public</strong><span>Open the standard MalGuard site.</span></button>
+        <button id="siteAdminEntry" type="button"><strong>Admin</strong><span>Verify protected administrator access before entering.</span></button>
+      </div>
+    </div>
+
+    <div class="site-entry-step" id="siteAdminPasswordStep" hidden>
+      <h1>Admin access</h1>
+      <p>Enter the administrator password to continue.</p>
+      <form class="site-entry-form" id="siteAdminPasswordForm">
+        <input id="siteAdminPassword" type="password" maxlength="128" autocomplete="current-password" spellcheck="false" placeholder="Admin password" required>
+        <button class="site-entry-button" id="siteAdminPasswordSubmit" type="submit">Continue</button>
+        <button class="site-entry-button site-entry-back" id="siteAdminPasswordBack" type="button">Back</button>
+      </form>
+      <div class="site-entry-error" id="siteAdminPasswordError" role="status" aria-live="polite"></div>
+    </div>
+
+    <div class="site-entry-step" id="siteAdminIdentityStep" hidden>
+      <div class="site-entry-success">✓ Password correct. Complete the administrator access log.</div>
+      <form class="site-entry-form" id="siteAdminIdentityForm">
+        <input id="siteAdminName" type="text" maxlength="80" autocomplete="name" spellcheck="false" placeholder="Your name" required>
+        <input id="siteAdminPhone" type="tel" maxlength="24" autocomplete="tel" inputmode="tel" placeholder="+98 912 345 6789" required>
+        <p class="site-entry-note">For administrator security, the entered name and phone number plus device information, public IP, approximate city/region/country and login time may be included in the access-alert email. Approximate location is IP-based, not exact GPS.</p>
+        <label class="site-entry-consent"><input id="siteAdminConsent" type="checkbox">I understand and agree to this administrator access log.</label>
+        <button class="site-entry-button" id="siteAdminEnter" type="submit">Enter MalGuard as Admin</button>
+        <button class="site-entry-button site-entry-back" id="siteAdminIdentityBack" type="button">Back</button>
+      </form>
+      <div class="site-entry-error" id="siteAdminIdentityError" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
 <a class="site-skip-link" href="#homeContent">Skip to main content</a>
 <header class="nav" id="navbar">
   <div class="container nav-inner">
@@ -2985,4 +3222,145 @@ document.querySelectorAll('.hash-copy').forEach(function(button){
   });
 })();
 </script>
+
+<script id="site-entry-gate-script">
+(function(){
+  const AUTH_API='https://malware-ai-gray.vercel.app/api/auth';
+  const gate=document.getElementById('siteEntryGate');
+  const choice=document.getElementById('siteEntryChoice');
+  const publicEntry=document.getElementById('sitePublicEntry');
+  const adminEntry=document.getElementById('siteAdminEntry');
+  const passwordStep=document.getElementById('siteAdminPasswordStep');
+  const passwordForm=document.getElementById('siteAdminPasswordForm');
+  const passwordInput=document.getElementById('siteAdminPassword');
+  const passwordSubmit=document.getElementById('siteAdminPasswordSubmit');
+  const passwordBack=document.getElementById('siteAdminPasswordBack');
+  const passwordError=document.getElementById('siteAdminPasswordError');
+  const identityStep=document.getElementById('siteAdminIdentityStep');
+  const identityForm=document.getElementById('siteAdminIdentityForm');
+  const nameInput=document.getElementById('siteAdminName');
+  const phoneInput=document.getElementById('siteAdminPhone');
+  const consent=document.getElementById('siteAdminConsent');
+  const identityBack=document.getElementById('siteAdminIdentityBack');
+  const identityError=document.getElementById('siteAdminIdentityError');
+  let adminPassword='';
+
+  function replaySecurity(){
+    gate.classList.remove('security-play');
+    void gate.offsetWidth;
+    requestAnimationFrame(()=>gate.classList.add('security-play'));
+  }
+  function show(step){
+    choice.hidden=step!=='choice';
+    passwordStep.hidden=step!=='password';
+    identityStep.hidden=step!=='identity';
+    passwordError.textContent='';
+    identityError.textContent='';
+    replaySecurity();
+  }
+  function enterSite(role,sessionToken='',expiresAt=''){
+    try{
+      sessionStorage.setItem('malguard-site-role',role);
+      if(role==='admin'&&sessionToken){
+        sessionStorage.setItem('malguard-admin-session',sessionToken);
+        sessionStorage.setItem('malguard-admin-session-exp',String(expiresAt||''));
+      }else{
+        sessionStorage.removeItem('malguard-admin-session');
+        sessionStorage.removeItem('malguard-admin-session-exp');
+      }
+    }catch(e){}
+    gate.hidden=true;
+    document.body.classList.remove('site-entry-locked');
+  }
+  async function clientDeviceInfo(){
+    const info={
+      platform:navigator.platform||'',
+      maxTouchPoints:navigator.maxTouchPoints||0,
+      language:navigator.language||'',
+      timeZone:(Intl.DateTimeFormat().resolvedOptions().timeZone||''),
+      screen:(window.screen?String(window.screen.width)+'x'+String(window.screen.height):'')
+    };
+    try{
+      if(navigator.userAgentData&&navigator.userAgentData.getHighEntropyValues){
+        const high=await navigator.userAgentData.getHighEntropyValues(['platform','platformVersion','model','architecture','bitness']);
+        Object.assign(info,high);
+      }
+    }catch(e){}
+    return info;
+  }
+
+  publicEntry.addEventListener('click',()=>enterSite('public'));
+  adminEntry.addEventListener('click',()=>{show('password');setTimeout(()=>passwordInput.focus(),0)});
+  passwordBack.addEventListener('click',()=>{adminPassword='';passwordInput.value='';show('choice')});
+  identityBack.addEventListener('click',()=>{nameInput.value='';phoneInput.value='';consent.checked=false;show('password');setTimeout(()=>passwordInput.focus(),0)});
+
+  passwordForm.addEventListener('submit',async function(event){
+    event.preventDefault();
+    const password=passwordInput.value;
+    if(!password)return;
+    passwordSubmit.disabled=true;
+    passwordError.textContent='Checking access…';
+    try{
+      const response=await fetch(AUTH_API,{
+        method:'POST',mode:'cors',cache:'no-store',
+        headers:{'content-type':'application/json'},
+        body:JSON.stringify({password})
+      });
+      let data={};try{data=await response.json()}catch(e){}
+      if(!response.ok){
+        if(response.status===429)throw new Error('Too many failed attempts. Try again later.');
+        throw new Error(data.error||'Access denied');
+      }
+      adminPassword=password;
+      passwordInput.value='';
+      show('identity');
+      setTimeout(()=>nameInput.focus(),0);
+    }catch(error){
+      passwordInput.select();
+      passwordError.textContent=error&&error.message?error.message:'Access denied';
+    }finally{passwordSubmit.disabled=false}
+  });
+
+  identityForm.addEventListener('submit',async function(event){
+    event.preventDefault();
+    const name=nameInput.value.replace(/\s+/g,' ').trim();
+    const phoneRaw=phoneInput.value.trim();
+    const phoneDigits=phoneRaw.replace(/\D/g,'');
+    if(name.length<2){identityError.textContent='Enter your name before continuing.';nameInput.focus();return}
+    if(phoneDigits.length<8||phoneDigits.length>15||/^([0-9])\1{7,}$/.test(phoneDigits)){identityError.textContent='Enter a valid phone number with 8 to 15 digits.';phoneInput.focus();return}
+    if(!consent.checked){identityError.textContent='You must acknowledge the administrator access log before continuing.';return}
+    const enterButton=document.getElementById('siteAdminEnter');
+    enterButton.disabled=true;
+    identityError.textContent='Recording secure access…';
+    try{
+      const client=await clientDeviceInfo();
+      const response=await fetch(AUTH_API,{
+        method:'POST',mode:'cors',cache:'no-store',
+        headers:{'content-type':'application/json'},
+        body:JSON.stringify({password:adminPassword,phase:'enter',name,phone:phoneRaw,client,consent:true})
+      });
+      let data={};try{data=await response.json()}catch(e){}
+      if(!response.ok)throw new Error(data.error||'Access could not be completed');
+      if(data.emailConfigured===false)throw new Error('Administrator login email is not configured.');
+      if(data.emailSent!==true)throw new Error('Administrator login email could not be sent.');
+      adminPassword='';
+      enterSite('admin',data.sessionToken||'',data.sessionExpiresAt||'');
+    }catch(error){
+      identityError.textContent=error&&error.message?error.message:'Access could not be completed';
+    }finally{enterButton.disabled=false}
+  });
+
+  let existingRole='';
+  try{existingRole=sessionStorage.getItem('malguard-site-role')||''}catch(e){}
+  if(existingRole==='public'||existingRole==='admin'){
+    gate.hidden=true;
+    document.body.classList.remove('site-entry-locked');
+  }else{
+    gate.hidden=false;
+    document.body.classList.add('site-entry-locked');
+    show('choice');
+  }
+})();
+</script>
+
 </body></html>
