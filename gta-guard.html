@@ -104,7 +104,9 @@
       <div class="actions">
         <a class="btn primary" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.8.0-beta.7-bc60530/MalGuard-Setup-0.8.0-beta.7-build-bc60530-windows-x64.exe">Download GTA Guard</a>
         <a class="btn secondary" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.8.0-beta.7-bc60530/MalGuard-Setup-0.8.0-beta.7-build-bc60530-windows-x64.exe.sha256">SHA-256 file</a>
+        <a class="btn secondary telemetry-preview-download" href="https://github.com/MalGuard/malguard-core/releases/download/telemetry-preview-72ec93ef/MalGuard-Telemetry-Preview-0.8.0-beta.7-build-72ec93ef223ec62e3a8df5df9d3c0a536bae41f4-windows-x64.exe">Telemetry Preview (Test)</a>
       </div>
+      <p>Test build only: opt-in installation diagnostics and Privacy &amp; Diagnostics controls. Unsigned preview; it does not replace the current Beta 7 release.</p>
     </article>
     <article class="platform-card">
       <div class="platform-symbol" aria-hidden="true">&gt;_</div>
@@ -317,7 +319,7 @@
     if(installer.url)latestInstallerUrl=installer.url;
     document.querySelectorAll('.release-download').forEach(a=>{if(installer.url)a.href=installer.url;});
     document.querySelectorAll('.release-sha-file').forEach(a=>{if(installer.sha256Url)a.href=installer.sha256Url;});
-    document.querySelectorAll('a[href*="/releases/download/"][href$=".exe"]').forEach(a=>{if(installer.url)a.href=installer.url;});
+    document.querySelectorAll('a[href*="/releases/download/"][href$=".exe"]:not(.telemetry-preview-download)').forEach(a=>{if(installer.url)a.href=installer.url;});
     document.querySelectorAll('a[href*="/releases/download/"][href$=".sha256"]').forEach(a=>{if(installer.sha256Url)a.href=installer.sha256Url;});
     if(state)state.textContent='Published release metadata · build '+(data.build||'unknown');
     if(installedBuildInput&&installedBuildInput.value.trim())renderUpdateResult();
