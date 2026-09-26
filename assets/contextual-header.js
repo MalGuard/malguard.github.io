@@ -165,6 +165,7 @@
     {name:'Labs',detail:'Gaming-security research',target:'/labs.html',terms:'labs research guides'},
     {name:'Docs',detail:'Product and security documentation',target:'/docs.html',terms:'docs documentation'},
     {name:'About',detail:'Project mission and structure',target:'/about.html',terms:'about project mission'},
+    {name:'Founder',detail:'Official profile for Mohammadreza Azardarkhash',target:'/founder.html',terms:'founder creator mohammadreza azardarkhash'},
     {name:'Support',detail:'Security reports, bugs and feedback',target:'/support.html',terms:'support bug feedback report'},
     {name:'Download',detail:'Windows preview and verification',target:'/download.html',terms:'download windows installer verify'},
     {name:'MalGuard App',detail:'Native MalGuard app for supported platforms',target:'/app.html',terms:'malguard app android iphone ios windows mac'},

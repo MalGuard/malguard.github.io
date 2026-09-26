@@ -14,7 +14,40 @@
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://cdn.creativeclaw.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://malware-ai-gray.vercel.app; object-src 'none'; base-uri 'self'; form-action 'self'">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"MalGuard","url":"https://malguard.github.io/","description":"Open-source defensive gaming security project focused on safer game-mod analysis, local scanning and fail-closed isolation."}</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://malguard.github.io/#organization",
+      "name": "MalGuard",
+      "url": "https://malguard.github.io/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://malguard.github.io/assets/malguard-site-logo.svg"
+      },
+      "description": "Open-source defensive gaming security project focused on safer game-mod analysis, local scanning and fail-closed isolation.",
+      "founder": {
+        "@id": "https://malguard.github.io/founder.html#person"
+      },
+      "sameAs": [
+        "https://github.com/MalGuard"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://malguard.github.io/#website",
+      "name": "MalGuard",
+      "url": "https://malguard.github.io/",
+      "description": "Open-source defensive gaming security project focused on safer game-mod analysis, local scanning and fail-closed isolation.",
+      "publisher": {
+        "@id": "https://malguard.github.io/#organization"
+      }
+    }
+  ]
+}
+</script>
 <title>MalGuard | Scan Smart. Play Safe.</title>
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png">
 <link rel="shortcut icon" href="/favicon.ico">
@@ -2583,7 +2616,7 @@ footer{border-top-color:rgba(255,255,255,.09)!important}
   </div>
 </section>
 <section class="product-page" id="page-game-scam-guard"><div class="container"><div class="product-page-header"><img class="product-brand-logo" src="assets/malguard-logo.svg" alt="MalGuard"><button class="back-button" onclick="showHome()">← Back to MalGuard</button><div class="product-hero-status coming">COMING SOON</div><h1>Game Scam Guard</h1><p>A planned security product for suspicious gaming links, scams and unsafe gaming-related destinations.</p></div><div class="product-page-grid"><article class="info-card"><h3>Planned purpose</h3><p>Help players evaluate suspicious gaming-related links and scam indicators before interacting with them.</p></article><article class="info-card"><h3>Planned capabilities</h3><ul><li>Suspicious link analysis</li><li>Scam indicator detection</li><li>Risk classification</li><li>Safer browsing guidance</li></ul></article><article class="info-card"><h3>Current status</h3><p>This product is planned and is not being presented as an active security service.</p><div class="release-box"><strong>NO RELEASE YET</strong><span>Capabilities may change before an actual release.</span></div></article><article class="info-card"><h3>Download</h3><p>There is currently no official download.</p><button class="btn btn-secondary disabled-btn" disabled style="margin-top:20px">Coming Soon</button></article></div></div></section>
-<footer><div class="container footer-inner"><div class="footer-copy"><strong>© 2026 MalGuard. Scan Smart. Play Safe.</strong><span class="footer-disclaimer">Security analysis reduces risk. No scan can guarantee that a file, mod, link, or destination is harmless.</span></div><div class="footer-links"><a href="/products.html">Products</a><a href="/tools.html">Tools</a><a href="/about.html">About</a><a href="/docs.html">Docs</a><a href="/trust.html">Trust Center</a><a href="/privacy.html">Privacy</a><a href="/labs.html">Labs</a><a href="/support.html">Support</a><a href="/download.html">Download</a><a href="https://github.com/MalGuard" target="_blank" rel="noopener">GitHub</a></div></div></footer><div class="toast" id="toast"></div>
+<footer><div class="container footer-inner"><div class="footer-copy"><strong>© 2026 MalGuard. Scan Smart. Play Safe.</strong><span class="footer-disclaimer">Security analysis reduces risk. No scan can guarantee that a file, mod, link, or destination is harmless.</span></div><div class="footer-links"><a href="/products.html">Products</a><a href="/tools.html">Tools</a><a href="/about.html">About</a><a href="/founder.html">Founder</a><a href="/docs.html">Docs</a><a href="/trust.html">Trust Center</a><a href="/privacy.html">Privacy</a><a href="/labs.html">Labs</a><a href="/support.html">Support</a><a href="/download.html">Download</a><a href="https://github.com/MalGuard" target="_blank" rel="noopener">GitHub</a></div></div></footer><div class="toast" id="toast"></div>
 <script>
 const navbar=document.getElementById('navbar'),menuBtn=document.getElementById('menuBtn'),navLinks=document.getElementById('navLinks'),homeContent=document.getElementById('homeContent'),productPages=document.querySelectorAll('.product-page');
 window.addEventListener('scroll',()=>navbar.classList.toggle('scrolled',scrollY>8));
