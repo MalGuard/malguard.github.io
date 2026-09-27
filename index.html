@@ -2592,6 +2592,23 @@ body.site-entry-locked{overflow:hidden!important}
   background:#07090b;color:#f7f9fa;outline:none;
   font-family:var(--body,"American Typewriter")!important;font-size:14px;font-weight:600
 }
+.site-password-wrap{position:relative}
+.site-password-wrap input{padding-right:52px!important}
+.site-password-toggle{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  width:38px;height:38px;min-width:38px;min-height:38px;
+  display:grid;place-items:center;padding:0;
+  border:0!important;border-radius:10px!important;
+  background:transparent!important;color:#aeb7bc!important;
+  cursor:pointer;box-shadow:none!important
+}
+.site-password-toggle:hover,.site-password-toggle:focus-visible{
+  color:#fff!important;background:rgba(255,255,255,.05)!important;outline:0
+}
+.site-password-toggle svg{width:19px;height:19px;display:block}
+.site-password-toggle .eye-off{display:none}
+.site-password-toggle[aria-pressed="true"] .eye-on{display:none}
+.site-password-toggle[aria-pressed="true"] .eye-off{display:block}
 .site-entry-form input:focus{border-color:rgba(255,255,255,.34);box-shadow:0 0 0 3px rgba(255,255,255,.045)}
 .site-entry-button{
   min-height:46px;border:1px solid rgba(255,255,255,.18);border-radius:13px;
@@ -2788,7 +2805,13 @@ body.site-entry-locked{overflow:hidden!important}
       <h1>Admin access</h1>
       <p>Enter the administrator password to continue.</p>
       <form class="site-entry-form" id="siteAdminPasswordForm">
-        <input id="siteAdminPassword" type="password" maxlength="128" autocomplete="current-password" spellcheck="false" placeholder="Admin password" required>
+        <div class="site-password-wrap">
+          <input id="siteAdminPassword" type="password" maxlength="128" autocomplete="current-password" spellcheck="false" placeholder="Admin password" required>
+          <button class="site-password-toggle" id="siteAdminPasswordToggle" type="button" aria-label="Show password" aria-pressed="false">
+            <svg class="eye-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.7" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+            <svg class="eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3 21 21M9.6 6.35A9.8 9.8 0 0 1 12 6c6 0 9.5 6 9.5 6a15 15 0 0 1-2.25 2.95M6.1 8.15A15.9 15.9 0 0 0 2.5 12s3.5 6 9.5 6a9.7 9.7 0 0 0 3.1-.5M10.1 10.1a2.7 2.7 0 0 0 3.8 3.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+        </div>
         <button class="site-entry-button" id="siteAdminPasswordSubmit" type="submit">Continue</button>
         <button class="site-entry-button site-entry-back" id="siteAdminPasswordBack" type="button">Back</button>
       </form>
@@ -3363,6 +3386,7 @@ document.querySelectorAll('.hash-copy').forEach(function(button){
   const passwordStep=document.getElementById('siteAdminPasswordStep');
   const passwordForm=document.getElementById('siteAdminPasswordForm');
   const passwordInput=document.getElementById('siteAdminPassword');
+  const passwordToggle=document.getElementById('siteAdminPasswordToggle');
   const passwordSubmit=document.getElementById('siteAdminPasswordSubmit');
   const passwordBack=document.getElementById('siteAdminPasswordBack');
   const passwordError=document.getElementById('siteAdminPasswordError');
@@ -3418,6 +3442,14 @@ document.querySelectorAll('.hash-copy').forEach(function(button){
     }catch(e){}
     return info;
   }
+
+  passwordToggle?.addEventListener('click',()=>{
+    const showing=passwordInput.type==='text';
+    passwordInput.type=showing?'password':'text';
+    passwordToggle.setAttribute('aria-pressed',String(!showing));
+    passwordToggle.setAttribute('aria-label',showing?'Show password':'Hide password');
+    passwordInput.focus();
+  });
 
   publicEntry.addEventListener('click',()=>enterSite('public'));
   adminEntry.addEventListener('click',()=>{show('password');setTimeout(()=>passwordInput.focus(),0)});
