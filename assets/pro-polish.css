@@ -2218,3 +2218,163 @@ html,body,body *{font-family:"American Typewriter"!important}
 h1,h2,.hero h1,.section-head h2{font-family:"Baskerville"!important}
 h3,h4,.card h3,.hub-card h3,.game-card h3{font-family:"Bodoni 72"!important}
 .brand,.btn,.nav-links,.topbar .links,.eyebrow,.kicker,.badge,code,pre,.mono,.result code{font-family:"American Typewriter"!important}
+
+
+/* =========================================================
+   Desktop refinement pass · 2026-09-27
+   Keeps phone/tablet layouts unchanged.
+   ========================================================= */
+@media(min-width:1024px){
+  :root{--max:1240px!important}
+
+  .container{
+    width:min(calc(100% - 72px),1240px)!important;
+  }
+
+  .mg-context-header{
+    top:14px!important;
+  }
+  .mg-context-header .nav-inner{
+    width:min(calc(100% - 72px),1240px)!important;
+    min-height:64px!important;
+    padding:9px 14px!important;
+    gap:16px!important;
+    border-radius:24px!important;
+  }
+  .mg-context-header .brand-site-logo{
+    height:38px!important;
+    max-width:172px!important;
+  }
+  .mg-context-header .nav-actions{
+    gap:8px!important;
+  }
+  .mg-context-header .nav-icon,
+  .mg-context-header .nav-download,
+  .mg-context-header .menu-btn{
+    width:44px!important;
+    min-width:44px!important;
+    height:44px!important;
+    min-height:44px!important;
+  }
+
+  /* Give desktop page headers room to breathe beneath the fixed shell. */
+  .hero:not(.hero-entry),
+  .hub-hero,
+  .product-hero,
+  .app-hero{
+    padding-top:126px!important;
+    padding-bottom:58px!important;
+  }
+
+  .hero:not(.hero-entry) h1,
+  .hub-hero h1,
+  .product-hero h1,
+  .app-hero h1{
+    max-width:900px!important;
+  }
+
+  .hero:not(.hero-entry) p,
+  .hub-hero p,
+  .product-hero p,
+  .app-hero p{
+    max-width:800px!important;
+    font-size:17px!important;
+    line-height:1.68!important;
+  }
+
+  section{
+    scroll-margin-top:96px;
+  }
+
+  .section-head{
+    max-width:860px!important;
+    margin-bottom:32px!important;
+  }
+
+  .grid,
+  .grid.two,
+  .hub-grid,
+  .platform-grid,
+  .compare-grid{
+    gap:20px!important;
+  }
+
+  .card,
+  .tool,
+  .hub-card,
+  .platform-card,
+  .compare-card{
+    border-radius:20px!important;
+  }
+
+  .card,
+  .tool{
+    padding:28px!important;
+  }
+
+  .hub-card{
+    padding:27px!important;
+  }
+
+  .platform-card{
+    padding:26px!important;
+    min-height:286px!important;
+  }
+
+  .product-stack{
+    gap:18px!important;
+  }
+  .product-entry{
+    grid-template-columns:64px minmax(0,1fr) auto!important;
+    gap:22px!important;
+    padding:28px 30px!important;
+    border-radius:20px!important;
+  }
+  .product-entry img{
+    width:58px!important;
+    height:58px!important;
+  }
+  .product-entry h2{
+    font-size:30px!important;
+  }
+  .compare{
+    margin-top:50px!important;
+    padding:30px!important;
+    border-radius:22px!important;
+  }
+  .compare-card{
+    padding:20px!important;
+  }
+
+  .native-apps{
+    padding:30px!important;
+    border-radius:22px!important;
+  }
+  .native-app-grid{
+    gap:14px!important;
+  }
+  .native-app-card{
+    padding:20px!important;
+    border-radius:17px!important;
+  }
+
+  .actions{
+    gap:12px!important;
+  }
+  .btn{
+    min-height:48px!important;
+    padding-inline:20px!important;
+  }
+
+  .facts{
+    gap:12px!important;
+  }
+  .fact{
+    grid-template-columns:210px minmax(0,1fr)!important;
+    gap:18px!important;
+  }
+
+  .footer{
+    padding-top:40px!important;
+  }
+}
