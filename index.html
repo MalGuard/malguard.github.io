@@ -2610,96 +2610,132 @@ body.site-entry-locked{overflow:hidden!important}
 .site-entry-consent{display:flex;gap:8px;align-items:flex-start;color:#aeb7bc;font-family:var(--body,"American Typewriter")!important;font-size:11px;line-height:1.5}
 .site-entry-consent input{width:auto;min-height:auto;margin-top:2px}
 
-@media(min-width:900px){
+@media(min-width:801px){
   .site-entry-gate{
-    padding:40px;
+    display:block;
+    overflow-y:auto;
+    padding:32px;
+    overscroll-behavior:contain;
   }
   .site-entry-shell{
-    width:min(980px,calc(100vw - 80px));
-    min-height:520px;
-    max-height:min(720px,calc(100dvh - 80px));
+    width:min(1120px,calc(100vw - 64px));
+    min-height:min(620px,calc(100dvh - 64px));
+    max-height:none;
+    margin:0 auto;
     display:grid;
-    grid-template-columns:minmax(380px,.92fr) minmax(430px,1.08fr);
-    overflow:hidden;
+    grid-template-columns:minmax(360px,.9fr) minmax(420px,1.1fr);
+    grid-template-areas:"copy visual";
+    align-items:center;
+    overflow:visible;
     padding:0;
-    border-radius:28px;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    box-shadow:none;
   }
   .site-entry-security{
-    height:auto;
-    min-height:520px;
+    grid-area:visual;
+    height:min(620px,calc(100dvh - 64px));
+    min-height:500px;
     margin:0;
-    border:0;
-    border-right:1px solid rgba(255,255,255,.07);
-    border-radius:0;
+    border:1px solid rgba(255,255,255,.075);
+    border-radius:30px;
     background:
-      radial-gradient(circle at 50% 42%,rgba(255,255,255,.055),transparent 30%),
-      linear-gradient(180deg,rgba(255,255,255,.016),rgba(255,255,255,.003));
+      radial-gradient(circle at 50% 42%,rgba(255,255,255,.06),transparent 31%),
+      linear-gradient(180deg,rgba(255,255,255,.018),rgba(255,255,255,.004));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.035),
+      0 40px 120px rgba(0,0,0,.34);
   }
   .site-entry-logo-wrap{
-    width:min(390px,82%);
-    height:132px;
+    width:min(440px,80%);
+    height:146px;
   }
   .site-entry-halo{
-    width:300px;
-    height:300px;
+    width:330px;
+    height:330px;
   }
   .site-entry-step{
+    grid-area:copy;
     align-self:center;
-    padding:54px 52px;
+    padding:48px 54px 48px 8px;
   }
   .site-entry-step h1{
-    font-size:40px!important;
-    line-height:1.02!important;
-    margin-bottom:12px!important;
+    max-width:520px!important;
+    margin-bottom:14px!important;
+    font-size:clamp(40px,4.6vw,58px)!important;
+    line-height:.98!important;
+    letter-spacing:-.04em!important;
   }
   .site-entry-step p{
-    max-width:440px;
-    margin-bottom:24px;
-    font-size:13.5px;
-    line-height:1.68;
+    max-width:500px;
+    margin-bottom:28px;
+    font-size:14px;
+    line-height:1.7;
   }
   .site-entry-choice{
+    max-width:520px;
     grid-template-columns:1fr 1fr;
-    gap:14px;
+    gap:12px;
   }
   .site-entry-choice button{
-    min-height:138px;
-    padding:20px;
+    min-height:132px;
+    padding:19px;
     border-radius:18px;
   }
   .site-entry-choice strong{
     font-size:21px;
-    margin-bottom:9px;
+    margin-bottom:8px;
   }
   .site-entry-choice span{
-    font-size:12px;
+    font-size:11.5px;
     line-height:1.55;
   }
   .site-entry-form{
+    max-width:520px;
     gap:12px;
   }
   .site-entry-form input{
     min-height:54px;
     padding-inline:16px;
     border-radius:14px;
-    font-size:14px;
   }
   .site-entry-button{
     min-height:50px;
     border-radius:14px;
-    font-size:13px;
   }
   .site-entry-success{
-    margin-bottom:16px;
-    padding:13px 14px;
-  }
-  .site-entry-note{
-    font-size:10.5px!important;
-    line-height:1.58!important;
+    max-width:520px;
   }
   .site-entry-error{
+    max-width:520px;
     margin-top:8px;
-    font-size:11.5px;
+  }
+}
+
+@media(min-width:801px) and (max-width:1050px){
+  .site-entry-gate{
+    padding:20px;
+  }
+  .site-entry-shell{
+    width:min(940px,calc(100vw - 40px));
+    grid-template-columns:minmax(330px,.95fr) minmax(380px,1.05fr);
+  }
+  .site-entry-security{
+    height:calc(100dvh - 40px);
+    min-height:500px;
+  }
+  .site-entry-step{
+    padding:34px 34px 34px 4px;
+  }
+  .site-entry-step h1{
+    font-size:clamp(36px,4.5vw,46px)!important;
+  }
+  .site-entry-choice{
+    grid-template-columns:1fr;
+  }
+  .site-entry-choice button{
+    min-height:92px;
   }
 }
 
