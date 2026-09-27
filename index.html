@@ -2609,6 +2609,100 @@ body.site-entry-locked{overflow:hidden!important}
 }
 .site-entry-consent{display:flex;gap:8px;align-items:flex-start;color:#aeb7bc;font-family:var(--body,"American Typewriter")!important;font-size:11px;line-height:1.5}
 .site-entry-consent input{width:auto;min-height:auto;margin-top:2px}
+
+@media(min-width:900px){
+  .site-entry-gate{
+    padding:40px;
+  }
+  .site-entry-shell{
+    width:min(980px,calc(100vw - 80px));
+    min-height:520px;
+    max-height:min(720px,calc(100dvh - 80px));
+    display:grid;
+    grid-template-columns:minmax(380px,.92fr) minmax(430px,1.08fr);
+    overflow:hidden;
+    padding:0;
+    border-radius:28px;
+  }
+  .site-entry-security{
+    height:auto;
+    min-height:520px;
+    margin:0;
+    border:0;
+    border-right:1px solid rgba(255,255,255,.07);
+    border-radius:0;
+    background:
+      radial-gradient(circle at 50% 42%,rgba(255,255,255,.055),transparent 30%),
+      linear-gradient(180deg,rgba(255,255,255,.016),rgba(255,255,255,.003));
+  }
+  .site-entry-logo-wrap{
+    width:min(390px,82%);
+    height:132px;
+  }
+  .site-entry-halo{
+    width:300px;
+    height:300px;
+  }
+  .site-entry-step{
+    align-self:center;
+    padding:54px 52px;
+  }
+  .site-entry-step h1{
+    font-size:40px!important;
+    line-height:1.02!important;
+    margin-bottom:12px!important;
+  }
+  .site-entry-step p{
+    max-width:440px;
+    margin-bottom:24px;
+    font-size:13.5px;
+    line-height:1.68;
+  }
+  .site-entry-choice{
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  .site-entry-choice button{
+    min-height:138px;
+    padding:20px;
+    border-radius:18px;
+  }
+  .site-entry-choice strong{
+    font-size:21px;
+    margin-bottom:9px;
+  }
+  .site-entry-choice span{
+    font-size:12px;
+    line-height:1.55;
+  }
+  .site-entry-form{
+    gap:12px;
+  }
+  .site-entry-form input{
+    min-height:54px;
+    padding-inline:16px;
+    border-radius:14px;
+    font-size:14px;
+  }
+  .site-entry-button{
+    min-height:50px;
+    border-radius:14px;
+    font-size:13px;
+  }
+  .site-entry-success{
+    margin-bottom:16px;
+    padding:13px 14px;
+  }
+  .site-entry-note{
+    font-size:10.5px!important;
+    line-height:1.58!important;
+  }
+  .site-entry-error{
+    margin-top:8px;
+    font-size:11.5px;
+  }
+}
+
 @media(max-width:560px){
   .site-entry-shell{padding:20px;border-radius:22px}
   .site-entry-security{height:138px;margin-bottom:15px}
