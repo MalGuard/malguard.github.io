@@ -15,6 +15,8 @@ permissions:
 
 jobs:
   build-and-publish:
+    # Public GTA Guard distribution is paused. Remove this guard only through an intentional reviewed change.
+    if: ${{ false }}
     runs-on: windows-2022
     timeout-minutes: 35
     env:
