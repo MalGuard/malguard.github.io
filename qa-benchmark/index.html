@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SentinelForge — Secure Runtime Platform</title>
+  <meta name="description" content="SentinelForge protects applications with policy-driven runtime security, release verification, and AI-assisted triage." />
+  <style>
+    :root{--bg:#070b12;--panel:#0f1624;--panel2:#121c2c;--text:#edf4ff;--muted:#93a4b8;--line:#243247;--accent:#68d8ff;--good:#68f0b0;--warn:#f4c95d}
+    *{box-sizing:border-box}html,body{margin:0;background:radial-gradient(circle at 20% -10%,#13253f 0,transparent 34%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}.shell{max-width:1180px;margin:auto;padding:0 24px}
+    header{position:sticky;top:0;z-index:20;background:rgba(7,11,18,.88);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.06)}
+    .topbar{height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font-weight:800;letter-spacing:.2px}.brand span{color:var(--accent)}
+    .desktop-nav{display:flex;gap:24px;color:#c5d0df;font-size:14px}.desktop-nav a:hover{color:white}
+    .menu-btn{display:none;border:1px solid var(--line);background:var(--panel);color:white;border-radius:10px;padding:9px 12px}
+    .mobile-drawer{display:none}.nav-scroll{display:flex;gap:18px;align-items:center}
+    .hero{padding:92px 0 60px;display:grid;grid-template-columns:1.2fr .8fr;gap:44px;align-items:center}.eyebrow{display:inline-flex;gap:8px;align-items:center;border:1px solid #29435c;background:#0d1b2b;border-radius:999px;padding:7px 10px;color:#bcecff;font-size:12px}.dot{width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 16px var(--good)}
+    h1{font-size:clamp(44px,7vw,82px);line-height:.96;margin:18px 0 22px;letter-spacing:-3px}.lead{font-size:18px;line-height:1.7;color:#aab8ca;max-width:720px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}.btn{border:1px solid var(--line);background:#111a28;color:white;border-radius:12px;padding:13px 18px;font-weight:700;cursor:pointer}.btn.primary{background:linear-gradient(135deg,#42c8ff,#7fe5ff);color:#04111b;border-color:transparent}.btn:hover{transform:translateY(-1px)}
+    .status-card,.card{background:linear-gradient(180deg,rgba(18,28,44,.96),rgba(11,17,28,.96));border:1px solid var(--line);border-radius:18px;padding:22px}.status-card{box-shadow:0 22px 70px rgba(0,0,0,.3)}.row{display:flex;justify-content:space-between;gap:18px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06)}.row:last-child{border-bottom:0}.label{color:var(--muted)}.value{font-weight:700;text-align:right}.paused{color:var(--warn)}
+    section{padding:42px 0;scroll-margin-top:92px}.section-head{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:18px}.section-head h2{font-size:30px;margin:0}.section-head p{color:var(--muted);max-width:620px;margin:0;line-height:1.6}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card h3{margin:4px 0 10px}.card p{color:var(--muted);line-height:1.6;margin:0}.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:5px 8px;font-size:11px;color:#b9c7d8;margin-bottom:10px}
+    .release-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.notice{border:1px solid #5b4b1d;background:#1d190d;color:#f4d77a;padding:13px 14px;border-radius:12px;margin-bottom:14px}
+    .link-list{display:grid;gap:10px}.link-item{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:12px;padding:14px;background:#0c1320}.link-item small{color:var(--muted)}
+    footer{margin-top:40px;border-top:1px solid var(--line);padding:34px 0 48px;color:var(--muted);font-size:13px}.footer-row{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}.footer-links{display:flex;gap:16px;flex-wrap:wrap}
+    @media(max-width:800px){
+      .desktop-nav{display:none}.menu-btn{display:block}.hero{grid-template-columns:1fr;padding-top:58px}.grid,.release-grid{grid-template-columns:1fr}
+      .mobile-drawer.open{display:block;border-top:1px solid var(--line);overflow-x:auto;white-space:nowrap;padding:12px 18px;background:#090e17}
+      .mobile-drawer .nav-scroll{width:1180px}
+      .mobile-drawer a{display:inline-flex;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#0e1724}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="shell topbar">
+    <a class="brand" href="#home">Sentinel<span>Forge</span></a>
+    <nav class="desktop-nav" aria-label="Primary navigation">
+      <a href="#product">Product</a><a href="#trust">Trust</a><a href="#docs">Docs</a><a href="#downloads">Downloads</a><a href="#ai">AI Preview</a><a href="#support">Support</a>
+    </nav>
+    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mobileDrawer">Menu</button>
+  </div>
+  <div class="mobile-drawer" id="mobileDrawer">
+    <nav class="nav-scroll" aria-label="Mobile navigation">
+      <a href="#home">Home</a><a href="#product">Product</a><a href="#trust">Trust Center</a><a href="#docs">Documentation</a><a href="#downloads">Downloads</a><a href="#ai">AI Preview</a><a href="#support">Support</a><a href="#privacy">Privacy</a><a href="#integrations">Integrations</a><a href="#status">System Status</a>
+    </nav>
+  </div>
+</header>
+
+<main id="home">
+  <div class="shell hero">
+    <div>
+      <span class="eyebrow"><span class="dot"></span> Platform operational</span>
+      <h1>Security that verifies itself.</h1>
+      <p class="lead">SentinelForge combines policy enforcement, release integrity, and AI-assisted triage in one runtime security platform for modern applications.</p>
+      <div class="actions">
+        <a class="btn primary" href="#product">Explore Platform</a>
+        <button class="btn" id="consoleBtn">Open Console</button>
+      </div>
+    </div>
+    <aside class="status-card" aria-label="Release status">
+      <div class="row"><span class="label">Current release</span><span class="value">2.4.1</span></div>
+      <div class="row"><span class="label">Distribution</span><span class="value paused">Public downloads paused</span></div>
+      <div class="row"><span class="label">Policy engine</span><span class="value">Online</span></div>
+      <div class="row"><span class="label">Verification API</span><span class="value">Healthy</span></div>
+    </aside>
+  </div>
+
+  <section id="product"><div class="shell">
+    <div class="section-head"><div><h2>Product</h2></div><p>Layered controls for release integrity, runtime policy, and evidence-backed incident review.</p></div>
+    <div class="grid">
+      <article class="card"><span class="tag">Runtime</span><h3>Policy Guard</h3><p>Block untrusted behavior before it reaches protected workloads.</p></article>
+      <article class="card"><span class="tag">Integrity</span><h3>Release Verify</h3><p>Validate release metadata, build identity, and integrity records.</p></article>
+      <article class="card"><span class="tag">Analysis</span><h3>Signal AI</h3><p>Summarize security evidence without replacing human review.</p></article>
+    </div>
+  </div></section>
+
+  <section id="trust"><div class="shell">
+    <div class="section-head"><div><h2>Trust Center</h2></div><p>Public security, privacy, and disclosure information.</p></div>
+    <div class="link-list">
+      <a class="link-item" href="#privacy"><span>Privacy overview</span><small>Read policy</small></a>
+      <a class="link-item" href="missing-policy.html"><span>Security disclosure policy</span><small>security.txt</small></a>
+      <a class="link-item" href="#status"><span>Service status</span><small>Operational</small></a>
+    </div>
+  </div></section>
+
+  <section id="downloads"><div class="shell">
+    <div class="section-head"><div><h2>Downloads & verification</h2></div><p>Public release distribution is temporarily paused while verification infrastructure is being upgraded.</p></div>
+    <div class="release-grid">
+      <article class="card">
+        <div class="notice">Public downloads are paused.</div>
+        <h3>Release verification</h3>
+        <div class="row"><span class="label">Release</span><span class="value">2.4.1</span></div>
+        <div class="row"><span class="label">Release date</span><span class="value" id="releaseDate">2026-08-11</span></div>
+        <div class="row"><span class="label">SHA-256</span><span class="value" id="releaseHash">7f2b91a0…d18c</span></div>
+      </article>
+      <article class="card">
+        <span class="tag">Preview channel</span>
+        <h3>Telemetry Preview</h3>
+        <p>This harmless browser preview demonstrates release telemetry and does not contain software binaries.</p>
+        <div class="actions"><a class="btn primary" href="preview.html">Download Preview</a></div>
+      </article>
+    </div>
+  </div></section>
+
+  <section id="docs"><div class="shell">
+    <div class="section-head"><div><h2>Documentation</h2></div><p>Reference material for setup, release validation, and policy design.</p></div>
+    <div class="grid">
+      <article class="card"><h3>Quick start</h3><p>Connect a test workload and verify your first signed release.</p></article>
+      <article class="card"><h3>Release help</h3><p>Installer troubleshooting for SentinelForge 2.3.8 and supported environments.</p></article>
+      <article class="card"><h3>API guide</h3><p>Read-only verification endpoints and structured evidence responses.</p></article>
+    </div>
+  </div></section>
+
+  <section id="ai"><div class="shell">
+    <div class="section-head"><div><h2>AI Preview</h2></div><p>Security evidence summaries designed for review, not autonomous enforcement.</p></div>
+    <div class="card"><h3>Signal AI sandbox</h3><p>Preview mode is available with synthetic events only. No credentials or uploads are required.</p><div class="actions"><a class="btn" href="#support">View limitations</a></div></div>
+  </div></section>
+
+  <section id="support"><div class="shell">
+    <div class="section-head"><div><h2>Support</h2></div><p>Use public documentation or contact the security team through approved channels.</p></div>
+    <div class="link-list">
+      <a class="link-item" href="#docs"><span>Documentation</span><small>Open</small></a>
+      <a class="link-item" href="https://example.com/" target="_blank" rel="noopener"><span>Official source repository</span><small>External</small></a>
+      <a class="link-item" href="#trust"><span>Security reporting</span><small>Trust Center</small></a>
+    </div>
+  </div></section>
+
+  <section id="privacy"><div class="shell"><div class="card"><h3>Privacy</h3><p>Benchmark pages do not request accounts, credentials, uploads, or personal data.</p></div></div></section>
+  <section id="integrations"><div class="shell"><div class="card"><h3>Integrations</h3><p>Webhook, CI, and evidence export integrations are documented for test environments.</p></div></div></section>
+  <section id="status"><div class="shell"><div class="card"><h3>System Status</h3><p>Web experience: Operational. Verification API: Healthy. Public binary distribution: Paused.</p></div></div></section>
+
+  <section id="legacyProduct" hidden>
+    <h2>Legacy Desktop Agent</h2>
+    <a href="legacy.html">Download SentinelForge Desktop 1.7.4</a>
+  </section>
+</main>
+
+<footer><div class="shell footer-row"><span>© 2026 SentinelForge Labs</span><div class="footer-links"><a href="#privacy">Privacy</a><a href="#trust">Trust</a><a href="#docs">Docs</a><a href="#support">Support</a></div></div></footer>
+
+<script>
+  const menuBtn=document.getElementById('menuBtn');
+  const drawer=document.getElementById('mobileDrawer');
+  menuBtn.addEventListener('click',()=>{const open=drawer.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open));});
+  setTimeout(()=>{
+    document.getElementById('releaseDate').textContent='2026-09-28';
+    document.getElementById('releaseHash').textContent='c4d81e77…9a42';
+  },550);
+</script>
+</body>
+</html>
