@@ -43,6 +43,7 @@ jobs:
             robots.txt
             sitemap.xml
             release/gta-guard-windows.json
+            data/product-status.json
             .well-known/security.txt
             assets/site-pages.css
             assets/page-history.js
@@ -80,6 +81,15 @@ jobs:
           grep -q "Download" download.html
           grep -q '"product": "GTA Guard"' release/gta-guard-windows.json
           grep -q '"platform": "windows-x64"' release/gta-guard-windows.json
+          grep -q '"downloadEnabled": false' release/gta-guard-windows.json
+          grep -q '"windowsX64": "paused"' data/product-status.json
+          grep -q 'rel="canonical" href="https://malguard.github.io/malware-ai.html"' malware-ai.html
+          grep -q '"@type": "WebApplication"' malware-ai.html
+          grep -q '"@type": "SoftwareApplication"' gta-guard.html
+          if grep -Eq 'https://github\.com/MalGuard/malguard\.github\.io/releases/download/gta-guard-[^"]+\.exe' gta-guard.html trust.html download.html scan-mods.html; then
+            echo "Public GTA Guard installer URL must remain disabled."
+            exit 1
+          fi
           grep -Eq '"build": "[a-f0-9]{7}"' release/gta-guard-windows.json
           grep -Eq '"sha256": "[a-f0-9]{64}"' release/gta-guard-windows.json
           grep -q "GTA Guard" products.html
@@ -90,7 +100,7 @@ jobs:
           grep -q "trustReleaseSource" trust.html
           grep -q "trustReleaseSha" trust.html
           grep -q "Fusion Engine 2.0" trust.html
-          grep -q "0.8 Beta 7" gta-guard.html
+          grep -q "0.8.0-beta.7" gta-guard.html
           grep -q "HYBRID ISOLATION V1" gta-guard.html
           grep -q "Disposable Cloud Inspection" gta-guard.html
           grep -q "cannot promote incomplete evidence to SAFE" gta-guard.html
@@ -116,7 +126,6 @@ jobs:
           grep -q "MalGuard-App-Preview-Linux-x64.AppImage" download.html
           grep -q "MalGuard-App-Preview-Linux-x64.deb" download.html
           grep -q "APPLE SIGNING REQUIRED" download.html
-          grep -Eq "MalGuard-Setup-0\.8\.0-beta\.7-build-[a-f0-9]{7}-windows-x64\.exe" gta-guard.html
           grep -q "data-malguard-back" research/repackaged-mod.html
           grep -q "data-malguard-back" ios-preview/index.html
           grep -q "/assets/page-history.js" research/repackaged-mod.html
