@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="GTA Guard by MalGuard: Windows x64 preview, supported analysis models, platform status and release verification.">
 <meta name="theme-color" content="#050607">
+<meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="icon" href="/favicon.ico">
 <link rel="canonical" href="https://malguard.github.io/gta-guard.html">
 <title>GTA Guard | MalGuard</title>
@@ -58,6 +59,19 @@
 }
 </style>
 <link rel="stylesheet" href="/assets/pro-polish.css?v=20260927-2">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "GTA Guard",
+  "applicationCategory": "SecurityApplication",
+  "operatingSystem": "Windows 10, Windows 11",
+  "softwareVersion": "0.8.0-beta.7",
+  "description": "MalGuard GTA Guard is a local-first security preview for inspecting supported GTA 5 mods and files before use.",
+  "url": "https://malguard.github.io/gta-guard.html",
+  "publisher": {"@type":"Organization","name":"MalGuard","url":"https://malguard.github.io/"}
+}
+</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -85,10 +99,10 @@
   <div class="container">
     <span class="eyebrow">GTA GUARD · PREVIEW</span>
     <h1>Inspect GTA 5 mods before you trust them.</h1>
-    <p>GTA Guard is MalGuard's local-first game-mod security product. The current Windows x64 preview is GTA Guard 0.8 beta 4 with GTA Simulation Engine. It passed the release pipeline and keeps behavioral execution fail-closed when verified local isolation is unavailable.</p>
-    <div class="gta-statusline"><span>Windows 10 / 11</span><span>x64</span><span>0.8 Beta 3</span><span>Hybrid Isolation v1</span></div>
+    <p>GTA Guard is MalGuard's local-first game-mod security product. The current Windows x64 preview is GTA Guard 0.8.0-beta.7 with MalGuard Fusion Engine 2.0. Public installer distribution is currently paused. Behavioral execution remains fail-closed when verified local isolation is unavailable.</p>
+    <div class="gta-statusline"><span>Windows 10 / 11</span><span>x64</span><span>0.8.0-beta.7</span><span>Download paused</span><span>Hybrid Isolation v1</span></div>
     <div class="gta-actions">
-      <a class="btn primary" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.8.0-beta.7-bc60530/MalGuard-Setup-0.8.0-beta.7-build-bc60530-windows-x64.exe">Download Windows x64</a>
+      <a class="btn primary" href="#distribution-paused">GTA Guard download paused</a>
       <a class="btn secondary" href="/docs.html">Documentation</a>
       <a class="btn secondary" href="/sandbox-help.html">Fix Sandbox errors</a>
     </div>
@@ -102,8 +116,8 @@
       <p>The current GTA Guard 0.8 Beta 7 Fusion 2 preview for Windows 10 and Windows 11 with MalGuard Fusion Engine 2.0 and Hybrid Isolation v1.</p>
       <span class="status">CURRENT PREVIEW · 0.8 BETA 7 · FUSION ENGINE 2.0</span>
       <div class="actions">
-        <a class="btn primary" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.8.0-beta.7-bc60530/MalGuard-Setup-0.8.0-beta.7-build-bc60530-windows-x64.exe">Download GTA Guard</a>
-        <a class="btn secondary" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.8.0-beta.7-bc60530/MalGuard-Setup-0.8.0-beta.7-build-bc60530-windows-x64.exe.sha256">SHA-256 file</a>
+        <a class="btn primary" href="#distribution-paused">GTA Guard download paused</a>
+        <a class="btn secondary" href="#distribution-paused.sha256">Release integrity</a>
         <a class="btn secondary telemetry-preview-download" href="https://github.com/MalGuard/malguard-core/releases/download/telemetry-preview-72ec93ef/MalGuard-Telemetry-Preview-0.8.0-beta.7-build-72ec93ef223ec62e3a8df5df9d3c0a536bae41f4-windows-x64.exe">Telemetry Preview (Test)</a>
       </div>
       <p>Test build only: opt-in installation diagnostics and Privacy &amp; Diagnostics controls. Unsigned preview; it does not replace the current Beta 7 release.</p>
@@ -167,8 +181,8 @@
         <div class="release-hash"><span>Installer SHA-256</span><code id="releaseSha">2dd9952298cd99a6cd32380debad5058b49da9ec7c2185cfa03b871f3c376701</code></div>
         <span class="release-state" id="releaseState">Published release metadata</span>
         <div class="release-actions">
-          <a class="btn primary release-download" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.8.0-beta.7-bc60530/MalGuard-Setup-0.8.0-beta.7-build-bc60530-windows-x64.exe">Download latest Windows x64</a>
-          <a class="btn secondary release-sha-file" href="https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.8.0-beta.7-bc60530/MalGuard-Setup-0.8.0-beta.7-build-bc60530-windows-x64.exe.sha256">SHA-256 file</a>
+          <a class="btn primary release-download" href="#distribution-paused">GTA Guard download paused</a>
+          <a class="btn secondary release-sha-file" href="#distribution-paused.sha256">SHA-256 file</a>
         </div>
       </article>
       <article class="release-card">
@@ -230,7 +244,7 @@
   const latestBuildQuick=document.getElementById('latestBuildQuick');
   let latestBuild='bc60530';
   let latestVersion='0.8.0-beta.7';
-  let latestInstallerUrl='https://github.com/MalGuard/malguard.github.io/releases/download/gta-guard-v0.8.0-beta.7-bc60530/MalGuard-Setup-0.8.0-beta.7-build-bc60530-windows-x64.exe';
+  let latestInstallerUrl='#distribution-paused';
   const normalizeBuild=value=>String(value||'').trim().toLowerCase().replace(/^build\s*/,'');
   const renderUpdateResult=async()=>{
     if(!installedBuildInput||!updateResult)return;
@@ -316,10 +330,10 @@
     if(data.build){latestBuild=data.build;document.getElementById('releaseBuild').textContent=data.build;document.getElementById('expectedBuild').textContent=data.build;if(latestBuildQuick)latestBuildQuick.textContent=data.build;}
     if(data.releasedAt){const d=new Date(data.releasedAt);document.getElementById('releaseDate').textContent=Number.isNaN(d.getTime())?data.releasedAt:d.toISOString().slice(0,10);}
     if(installer.sha256)document.getElementById('releaseSha').textContent=installer.sha256;
-    if(installer.url)latestInstallerUrl=installer.url;
-    document.querySelectorAll('.release-download').forEach(a=>{if(installer.url)a.href=installer.url;});
+    if(data.distribution&&data.distribution.downloadEnabled===true&&installer.url)latestInstallerUrl=installer.url;
+    document.querySelectorAll('.release-download').forEach(a=>{if(data.distribution&&data.distribution.downloadEnabled===true&&installer.url)a.href=installer.url;});
     document.querySelectorAll('.release-sha-file').forEach(a=>{if(installer.sha256Url)a.href=installer.sha256Url;});
-    document.querySelectorAll('a[href*="/releases/download/"][href$=".exe"]:not(.telemetry-preview-download)').forEach(a=>{if(installer.url)a.href=installer.url;});
+    document.querySelectorAll('a[href*="/releases/download/"][href$=".exe"]:not(.telemetry-preview-download)').forEach(a=>{if(data.distribution&&data.distribution.downloadEnabled===true&&installer.url)a.href=installer.url;});
     document.querySelectorAll('a[href*="/releases/download/"][href$=".sha256"]').forEach(a=>{if(installer.sha256Url)a.href=installer.sha256Url;});
     if(state)state.textContent='Published release metadata · build '+(data.build||'unknown');
     if(installedBuildInput&&installedBuildInput.value.trim())renderUpdateResult();
