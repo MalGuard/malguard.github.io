@@ -5,17 +5,19 @@ import { createHash } from 'node:crypto';
 const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
 const routes = ['/', '/products.html', '/tools.html', '/scan-url.html', '/gta-guard.html', '/ai-intelligence.html', '/malware-ai.html', '/malware-ai-windows.html', '/scan-mods.html', '/download.html', '/app.html', '/trust.html', '/privacy.html', '/about.html', '/founder.html', '/docs.html', '/labs.html', '/support.html', '/sandbox-help.html', '/ios-preview/', '/research/repackaged-mod.html'];
 await mkdir('test-results', { recursive: true });
-const report = { passed: [], failed: [] };
-async function check(name, work) { try { await work(); report.passed.push(name); console.log('PASS', name); } catch (e) { report.failed.push({ name, error: e.message }); console.error('FAIL', name, e.message); } }
-async function settle(page) { await page.evaluate(() => document.fonts.ready); }
-async function publicEntry(page) { const button = page.locator('#sitePublicEntry'); if (await button.isVisible()) await button.click(); }
+const report = { passed: [], failed: [], consoleErrors: [] };
+let activePage;
+async function check(name, work) { try { await work(); report.passed.push(name); console.log('PASS', name); } catch (e) { report.failed.push({ name, error: e.message }); console.error('FAIL', name, e.message); if(activePage && !activePage.isClosed()) await activePage.screenshot({path:'test-results/failed-'+name.replace(/[^a-zA-Z0-9]/g,'-')+'.png',fullPage:true}).catch(()=>{}); } }
+async function settle(page) { await page.evaluate(() => document.fonts.ready); await page.waitForFunction(()=>document.documentElement.dataset.experienceReady==='true',null,{timeout:5000}); }
+async function publicEntry(page) { await settle(page); const button = page.locator('#sitePublicEntry'); if (await button.isVisible()) await button.click(); }
 for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], ['webkit',webkit,[390,820]]]) {
   const browser = await engine.launch();
   for (const width of sizes) {
     const context = await browser.newContext({ viewport:{ width, height: width<600?844:1000 }, reducedMotion:'reduce' });
     // All functional checks use benign inputs. External backends are blocked, not called.
     await context.route('**/*', route => new URL(route.request().url()).origin === new URL(base).origin ? route.continue() : route.abort());
-    const page = await context.newPage();
+    const page = await context.newPage(); activePage=page;
+    page.on('console',msg=>{if(msg.type()==='error')report.consoleErrors.push({browser:name,width,url:page.url(),message:msg.text()});});
     const errors=[]; page.on('pageerror',e=>errors.push(e.message));
     for (const path of routes) await check(`${name} ${width}px ${path} layout`, async () => {
       const startErrors=errors.length; const response=await page.goto(base+path); assert.equal(response.status(),200); await publicEntry(page); await settle(page);
@@ -24,7 +26,8 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
         const outside=[...document.querySelectorAll('main a,main button,main input,main select,main textarea,header button,header a')].filter(e=>{
           const r=e.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(e).visibility!=='hidden'&&(r.left< -1||r.right>vw+1);
         }).map(e=>({id:e.id,text:(e.textContent||e.getAttribute('aria-label')||'').trim().slice(0,70),left:e.getBoundingClientRect().left,right:e.getBoundingClientRect().right}));
-        return {scroll:document.documentElement.scrollWidth,client:vw,outside,h1:!!document.querySelector('h1')};
+        const spill=[...document.querySelectorAll('main *')].filter(e=>e.getBoundingClientRect().right>vw+1 && getComputedStyle(e).visibility!=='hidden').slice(0,12).map(e=>({tag:e.tagName,id:e.id,cls:e.className,right:e.getBoundingClientRect().right}));
+        return {scroll:document.documentElement.scrollWidth,client:vw,outside,spill,h1:!!document.querySelector('h1')};
       });
       assert.ok(state.h1,'h1 required'); assert.ok(state.scroll<=state.client+1,JSON.stringify(state));assert.deepEqual(state.outside,[],JSON.stringify(state.outside));assert.deepEqual(errors.slice(startErrors),[],'Runtime exception');
       if (['/','/products.html','/tools.html','/gta-guard.html','/malware-ai-windows.html'].includes(path)) await page.screenshot({path:`test-results/${name}-${width}-${path==='/'?'home':path.slice(1).replace('.html','')}.png`,fullPage:true});

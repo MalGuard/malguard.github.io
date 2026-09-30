@@ -47,6 +47,7 @@
     if (open) menu.querySelector('a')?.focus(); else if (focus) menuButton.focus();
   }
   setMenu(false);
+  navbar.dataset.navigationReady = "true";
   menuButton.addEventListener('click', () => setMenu(menu.hidden));
   menu.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); });
   document.addEventListener('click', e => { if (!menu.hidden && !menu.contains(e.target) && !menuButton.contains(e.target)) setMenu(false); });
