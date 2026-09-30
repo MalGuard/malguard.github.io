@@ -2,10 +2,14 @@ import assert from 'node:assert/strict';
 import { chromium, webkit } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
+const base = process.env.TEST_BASE_URL || 'https://127.0.0.1:8443';
+// The CI fixture uses an ephemeral, self-signed certificate. This exception is
+// restricted to this loopback origin; production CSP and TLS remain unchanged.
+assert.equal(base, 'https://127.0.0.1:8443', 'This isolated suite only targets the local HTTPS fixture');
+const fixtureTLS = { ignoreHTTPSErrors: true };
 const routes = ['/', '/products.html', '/tools.html', '/scan-url.html', '/gta-guard.html', '/ai-intelligence.html', '/malware-ai.html', '/malware-ai-windows.html', '/scan-mods.html', '/download.html', '/app.html', '/trust.html', '/privacy.html', '/about.html', '/founder.html', '/docs.html', '/labs.html', '/support.html', '/sandbox-help.html', '/ios-preview/', '/research/repackaged-mod.html'];
 await mkdir('test-results', { recursive: true });
-const report = { passed: [], failed: [], consoleErrors: [] };
+const report = { passed: [], failed: [], consoleErrors: [], requestFailures: [] };
 let activePage;
 async function check(name, work) { try { await work(); report.passed.push(name); console.log('PASS', name); } catch (e) { report.failed.push({ name, error: e.message }); console.error('FAIL', name, e.message); if(activePage && !activePage.isClosed()) await activePage.screenshot({path:'test-results/failed-'+name.replace(/[^a-zA-Z0-9]/g,'-')+'.png',fullPage:true}).catch(()=>{}); } }
 async function settle(page) { await page.evaluate(() => document.fonts.ready); await page.waitForFunction(()=>document.documentElement.dataset.experienceReady==='true',null,{timeout:5000}); }
@@ -13,11 +17,12 @@ async function publicEntry(page) { await settle(page); const button = page.locat
 for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], ['webkit',webkit,[390,820]]]) {
   const browser = await engine.launch();
   for (const width of sizes) {
-    const context = await browser.newContext({ viewport:{ width, height: width<600?844:1000 }, reducedMotion:'reduce' });
+    const context = await browser.newContext({ ...fixtureTLS, viewport:{ width, height: width<600?844:1000 }, reducedMotion:'reduce' });
     // All functional checks use benign inputs. External backends are blocked, not called.
     await context.route('**/*', route => new URL(route.request().url()).origin === new URL(base).origin ? route.continue() : route.abort());
     const page = await context.newPage(); activePage=page;
     page.on('console',msg=>{if(msg.type()==='error')report.consoleErrors.push({browser:name,width,url:page.url(),message:msg.text()});});
+    page.on('requestfailed',req=>report.requestFailures.push({browser:name,width,url:req.url(),error:req.failure()?.errorText}));
     const errors=[]; page.on('pageerror',e=>errors.push(e.message));
     for (const path of routes) await check(`${name} ${width}px ${path} layout`, async () => {
       const startErrors=errors.length; const response=await page.goto(base+path); assert.equal(response.status(),200); await publicEntry(page); await settle(page);
@@ -76,7 +81,7 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     await context.close();
   }
   await check(`${name} entry gate and failed authentication`,async()=>{
-    const context=await browser.newContext({reducedMotion:'reduce'});let authCalls=0;
+    const context=await browser.newContext({...fixtureTLS,reducedMotion:'reduce'});let authCalls=0;
     await context.route('**/*',async route=>{
       if(new URL(route.request().url()).origin===new URL(base).origin)return route.continue();
       if(route.request().url().endsWith('/api/auth')){authCalls++;return route.fulfill({status:401,headers:{'access-control-allow-origin':'*'},contentType:'application/json',body:'{"error":"Access denied"}'});}return route.abort();
@@ -87,8 +92,8 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     await page.locator('#siteAdminPasswordBack').click();await publicEntry(page);assert.equal(await page.locator('main').evaluate(e=>e.inert),false);await context.close();
   });
   await check(`${name} motion preference and JavaScript-free content`,async()=>{
-    const context=await browser.newContext();const page=await context.newPage();await page.goto(base+'/');await publicEntry(page);await page.locator('#motionToggle').click();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await page.reload();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await context.close();
-    const nojs=await browser.newContext({javaScriptEnabled:false});const p=await nojs.newPage();await p.goto(base+'/');assert.ok(await p.getByRole('heading',{name:'Play freely. Trust carefully.'}).isVisible());assert.ok(await p.getByRole('link',{name:'Explore MalGuard'}).isVisible());assert.equal(await p.locator('#siteEntryGate').isVisible(),false);await nojs.close();
+    const context=await browser.newContext(fixtureTLS);const page=await context.newPage();await page.goto(base+'/');await publicEntry(page);await page.locator('#motionToggle').click();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await page.reload();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await context.close();
+    const nojs=await browser.newContext({...fixtureTLS,javaScriptEnabled:false});const p=await nojs.newPage();await p.goto(base+'/');assert.ok(await p.getByRole('heading',{name:'Play freely. Trust carefully.'}).isVisible());assert.ok(await p.getByRole('link',{name:'Explore MalGuard'}).isVisible());assert.equal(await p.locator('#siteEntryGate').isVisible(),false);await nojs.close();
   });
   await browser.close();
 }

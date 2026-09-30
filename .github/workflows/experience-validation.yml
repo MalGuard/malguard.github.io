@@ -22,7 +22,10 @@ jobs:
           npx playwright install --with-deps chromium webkit
       - name: Check responsive pages and benign interactions
         run: |
-          python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/malguard-site-test.log 2>&1 &
+          # Match production HTTPS: WebKit correctly upgrades HTTP subresources
+          # when an existing page declares upgrade-insecure-requests.
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
+          python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
           npm run test:experience
       - name: Save screenshots and verification report
         if: always()
