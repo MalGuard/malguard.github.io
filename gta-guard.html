@@ -72,8 +72,9 @@
   "publisher": {"@type":"Organization","name":"MalGuard","url":"https://malguard.github.io/"}
 }
 </script>
+<link rel="stylesheet" href="/assets/experience.css?v=20260930-1">
 </head>
-<body>
+<body class="mg-experience">
 <a class="skip" href="#main">Skip to content</a>
 <header class="nav mg-context-header" id="navbar">
   <div class="container nav-inner">
@@ -102,7 +103,7 @@
     <p>GTA Guard is MalGuard's local-first game-mod security product. The current Windows x64 preview is GTA Guard 0.8.0-beta.7 with MalGuard Fusion Engine 2.0. Public installer distribution is currently paused. Behavioral execution remains fail-closed when verified local isolation is unavailable.</p>
     <div class="gta-statusline"><span>Windows 10 / 11</span><span>x64</span><span>0.8.0-beta.7</span><span>Download paused</span><span>Hybrid Isolation v1</span></div>
     <div class="gta-actions">
-      <a class="btn primary" href="#distribution-paused">GTA Guard download paused</a>
+      <a class="btn primary" href="#platforms">GTA Guard download paused</a>
       <a class="btn secondary" href="/docs.html">Documentation</a>
       <a class="btn secondary" href="/sandbox-help.html">Fix Sandbox errors</a>
     </div>
@@ -116,8 +117,8 @@
       <p>The current GTA Guard 0.8 Beta 7 Fusion 2 preview for Windows 10 and Windows 11 with MalGuard Fusion Engine 2.0 and Hybrid Isolation v1.</p>
       <span class="status">CURRENT PREVIEW · 0.8 BETA 7 · FUSION ENGINE 2.0</span>
       <div class="actions">
-        <a class="btn primary" href="#distribution-paused">GTA Guard download paused</a>
-        <a class="btn secondary" href="#distribution-paused.sha256">Release integrity</a>
+        <a class="btn primary" href="#platforms">GTA Guard download paused</a>
+        <a class="btn secondary" href="/trust.html#release-integrity">Release integrity</a>
         <a class="btn secondary telemetry-preview-download" href="https://github.com/MalGuard/malguard-core/releases/download/telemetry-preview-72ec93ef/MalGuard-Telemetry-Preview-0.8.0-beta.7-build-72ec93ef223ec62e3a8df5df9d3c0a536bae41f4-windows-x64.exe">Telemetry Preview (Test)</a>
       </div>
       <p>Test build only: opt-in installation diagnostics and Privacy &amp; Diagnostics controls. Unsigned preview; it does not replace the current Beta 7 release.</p>
@@ -181,8 +182,8 @@
         <div class="release-hash"><span>Installer SHA-256</span><code id="releaseSha">2dd9952298cd99a6cd32380debad5058b49da9ec7c2185cfa03b871f3c376701</code></div>
         <span class="release-state" id="releaseState">Published release metadata</span>
         <div class="release-actions">
-          <a class="btn primary release-download" href="#distribution-paused">GTA Guard download paused</a>
-          <a class="btn secondary release-sha-file" href="#distribution-paused.sha256">SHA-256 file</a>
+          <a class="btn primary release-download" href="#platforms">GTA Guard download paused</a>
+          <a class="btn secondary release-sha-file" href="/trust.html#release-integrity">Published SHA-256</a>
         </div>
       </article>
       <article class="release-card">
@@ -244,7 +245,7 @@
   const latestBuildQuick=document.getElementById('latestBuildQuick');
   let latestBuild='bc60530';
   let latestVersion='0.8.0-beta.7';
-  let latestInstallerUrl='#distribution-paused';
+  let latestInstallerUrl='#platforms';
   const normalizeBuild=value=>String(value||'').trim().toLowerCase().replace(/^build\s*/,'');
   const renderUpdateResult=async()=>{
     if(!installedBuildInput||!updateResult)return;
@@ -342,6 +343,6 @@
   }
 })();
 </script>
-<script src="/assets/contextual-header.js?v=20260923-4"></script>
-</body>
+<script src="/assets/contextual-header.js?v=20260930-1"></script>
+<script src="/assets/experience.js?v=20260930-1" defer></script></body>
 </html>

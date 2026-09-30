@@ -70,9 +70,9 @@ jobs:
           grep -q 'unicode-bidi:plaintext' malware-ai-windows.html
           grep -q 'dir="auto"' malware-ai-windows.html
           grep -q 'applyTextDirection' malware-ai-windows.html
-          grep -q 'unicode-bidi:plaintext' index.html
-          grep -q 'dir="auto"' index.html
-          grep -q 'applyTextDirection' index.html
+          grep -q 'unicode-bidi:plaintext' assets/experience.css
+          grep -q '/ai-intelligence.html' index.html
+          grep -q "'#malware-ai':'/malware-ai.html'" assets/experience.js
           if grep -q 'href="https://malware-ai-gray.vercel.app">Open Malware AI' ai-intelligence.html; then
             echo "Malware AI must not navigate users away from malguard.github.io."
             exit 1
@@ -86,7 +86,7 @@ jobs:
           grep -q 'rel="canonical" href="https://malguard.github.io/malware-ai.html"' malware-ai.html
           grep -q '"@type": "WebApplication"' malware-ai.html
           grep -q '"@type": "SoftwareApplication"' gta-guard.html
-          if grep -Eq 'https://github\.com/MalGuard/malguard\.github\.io/releases/download/gta-guard-[^"]+\.exe' gta-guard.html trust.html download.html scan-mods.html; then
+          if grep -Eq 'https://github\.com/MalGuard/malguard\.github\.io/releases/download/gta-guard-[^"]+\.exe' index.html gta-guard.html trust.html download.html scan-mods.html; then
             echo "Public GTA Guard installer URL must remain disabled."
             exit 1
           fi
