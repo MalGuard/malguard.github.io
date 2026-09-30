@@ -1,0 +1,34 @@
+name: Validate MalGuard experience
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  responsive-and-functional:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Validate source and install pinned test tooling
+        run: |
+          python3 tests/validate-site.py
+          npm ci --ignore-scripts --no-audit --no-fund
+          node --check assets/contextual-header.js
+          node --check assets/experience.js
+          node --check assets/site-entry.js
+          npx playwright install --with-deps chromium webkit
+      - name: Check responsive pages and benign interactions
+        run: |
+          python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/malguard-site-test.log 2>&1 &
+          npm run test:experience
+      - name: Save screenshots and verification report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: malguard-experience-verification
+          path: test-results/
+          if-no-files-found: warn
+          retention-days: 14
