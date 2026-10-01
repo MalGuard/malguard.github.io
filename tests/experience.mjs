@@ -26,6 +26,8 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     const errors=[]; page.on('pageerror',e=>errors.push(e.message));
     for (const path of routes) await check(`${name} ${width}px ${path} layout`, async () => {
       const startErrors=errors.length; const response=await page.goto(base+path); assert.equal(response.status(),200); await publicEntry(page); await settle(page);
+      assert.equal(await page.evaluate(()=>document.fonts.check('16px "Manrope"')),true,'Shared body font loaded');
+      assert.equal(await page.evaluate(()=>document.fonts.check('16px "Space Grotesk"')),true,'Shared heading font loaded');
       const state=await page.evaluate(()=>{
         const vw=document.documentElement.clientWidth;
         const outside=[...document.querySelectorAll('main a,main button,main input,main select,main textarea,header button,header a')].filter(e=>{

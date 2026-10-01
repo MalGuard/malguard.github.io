@@ -142,7 +142,8 @@
  const paused=()=>reduced.matches||root.classList.contains('motion-paused');
  const line=document.createElement('div');line.className='scroll-reading-line';line.setAttribute('aria-hidden','true');document.body.append(line);
  let scrollRAF=0;
- function scroll(){scrollRAF=0;const max=root.scrollHeight-root.clientHeight;line.style.transform='scaleX('+(max?Math.min(1,scrollY/max):0)+')';if(scene&&!paused()){const p=Math.min(1,scrollY/Math.max(1,innerHeight));scene.style.setProperty('--core-x',(6+p*9)+'deg');}}
+ const sculptures=[...document.querySelectorAll('.orbit-product')];sculptures.forEach((card,i)=>card.style.setProperty('--reveal-order',String(i)));
+ function scroll(){scrollRAF=0;if(!paused()){sculptures.forEach(card=>{const r=card.getBoundingClientRect();if(r.bottom<0||r.top>innerHeight)return;const p=Math.min(1,Math.max(0,(innerHeight-r.top)/(innerHeight*.7)));card.style.setProperty('--art-drift',((1-p)*16)+'px');card.style.setProperty('--art-angle',((1-p)*6)+'deg');});}const max=root.scrollHeight-root.clientHeight;line.style.transform='scaleX('+(max?Math.min(1,scrollY/max):0)+')';if(scene&&!paused()){const p=Math.min(1,scrollY/Math.max(1,innerHeight));scene.style.setProperty('--core-x',(6+p*9)+'deg');}}
  function scheduleScroll(){if(!scrollRAF)scrollRAF=requestAnimationFrame(scroll);}
  addEventListener('scroll',scheduleScroll,{passive:true});addEventListener('resize',scheduleScroll);
  if('ResizeObserver'in window)new ResizeObserver(scheduleScroll).observe(document.body);
