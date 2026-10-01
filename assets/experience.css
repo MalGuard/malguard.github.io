@@ -165,3 +165,12 @@ body.mg-experience{background:#070c13!important}
 .motion-paused .studio-workspace,.motion-paused .studio-device,.motion-paused .studio-device *{animation:none!important;transition:none!important}
 
 .mg-experience .studio-code :is(code,span){font-family:ui-monospace,SFMono-Regular,Consolas,monospace!important}
+
+/* Use a flat control above the decorative 3D model for reliable hit testing. */
+.studio-lid{pointer-events:none}
+.studio-open-control{position:absolute;inset:0;z-index:10;width:100%;height:100%;padding:0;border:0;border-radius:20px;background:transparent;color:#b6efdf}
+.studio-open-caption{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:8px 15px;border:1px solid #a5f6dd40;border-radius:30px;background:#102331;backdrop-filter:blur(10px);font-size:11px;transition:background .2s,border-color .2s}
+.studio-open-control:hover .studio-open-caption{background:#1a3a45;border-color:#a5f6dd99}
+.studio-stage:has(.studio-open-control:hover) .studio-device:not(.is-open) .studio-lid{transform:rotateX(48deg)}
+@media(prefers-reduced-motion:reduce){.studio-stage:has(.studio-open-control:hover) .studio-device:not(.is-open) .studio-lid{transform:rotateX(56deg)}}
+.motion-paused .studio-stage:has(.studio-open-control:hover) .studio-device:not(.is-open) .studio-lid{transform:rotateX(56deg)}

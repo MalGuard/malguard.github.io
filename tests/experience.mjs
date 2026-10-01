@@ -98,26 +98,14 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
       await page.locator('#studioTabTools').click();
       await page.locator('#studioPanelTools a').click(); await page.waitForURL('**/tools.html');
       await page.goto(base+'/'); await publicEntry(page);
-      await page.evaluate(() => {
-        window.__studioTrace=[];
-        const originalFocus=HTMLElement.prototype.focus;
-        HTMLElement.prototype.focus=function(...args){window.__studioTrace.push({action:'focus',id:this.id,stack:new Error().stack});return originalFocus.apply(this,args);};
-        document.addEventListener('focusin',e=>window.__studioTrace.push({action:'focusin',id:e.target.id}));
-        document.getElementById('studioOpen').addEventListener('click',()=>window.__studioTrace.push({action:'open-click',expanded:document.getElementById('studioOpen').getAttribute('aria-expanded')}));
-      });
       await page.locator('#studioOpen').click();
-      console.log('STUDIO BEFORE SCREENSHOT',name,width,await page.evaluate(()=>({active:document.activeElement.id,expanded:document.getElementById('studioOpen').getAttribute('aria-expanded'),hidden:document.getElementById('studioWorkspace').hidden})));
+      assert.equal(await page.locator('#studioOpen').getAttribute('aria-expanded'),'true');
+      assert.ok(await page.locator('#studioWorkspace').isVisible());
       const noOverflow = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
       assert.ok(noOverflow, 'Open workspace must fit the viewport');
       await page.screenshot({path:`test-results/${name}-${width}-studio-open.png`,fullPage:true});
-      console.log('STUDIO AFTER SCREENSHOT',name,width,await page.evaluate(()=>({active:document.activeElement.id,expanded:document.getElementById('studioOpen').getAttribute('aria-expanded'),hidden:document.getElementById('studioWorkspace').hidden,trace:window.__studioTrace})));
       await page.keyboard.press('Escape');
-      console.log('STUDIO AFTER ESCAPE',name,width,await page.evaluate(()=>window.__studioTrace));
       assert.equal(await page.locator('#studioWorkspace').isVisible(),false);
-      console.log('STUDIO FOCUS DIAGNOSTIC', name, width, await page.evaluate(() => {
-        const opener=document.getElementById('studioOpen');
-        return {active:document.activeElement.id,expanded:opener.getAttribute('aria-expanded'),workspaceHidden:document.getElementById('studioWorkspace').hidden,openerHidden:opener.hidden,openerTab:opener.tabIndex,deviceClass:document.getElementById('studioDevice').className,ancestors:[opener,opener.parentElement,opener.parentElement.parentElement,document.querySelector('main')].map(el=>({id:el.id,inert:el.inert,display:getComputedStyle(el).display,visibility:getComputedStyle(el).visibility,opacity:getComputedStyle(el).opacity})),gateHidden:document.getElementById('siteEntryGate').hidden};
-      }));
       await page.waitForFunction(()=>document.activeElement.id==='studioOpen',null,{timeout:5000});
       await page.locator('#studioOpen').click(); await page.locator('#studioClose').click();
       assert.equal(await page.locator('#studioOpen').getAttribute('aria-expanded'),'false');

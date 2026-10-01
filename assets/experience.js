@@ -77,8 +77,7 @@
       device.classList.add('is-open');
       workspace.hidden = false;
       open.setAttribute('aria-expanded', 'true');
-      open.tabIndex = -1;
-      open.setAttribute('aria-hidden', 'true');
+      open.hidden = true;
       if (hint) hint.textContent = 'Choose a product below to explore';
       const selected = tabs.find(tab => tab.getAttribute('aria-selected') === 'true') || tabs[0];
       selected?.focus({ preventScroll: true });
@@ -88,8 +87,7 @@
       workspace.hidden = true;
       device.classList.remove('is-open');
       open.setAttribute('aria-expanded', 'false');
-      open.tabIndex = 0;
-      open.removeAttribute('aria-hidden');
+      open.hidden = false;
       if (hint) hint.textContent = 'Click or press Enter to open';
       device.scrollIntoView({ behavior: paused() ? 'instant' : 'smooth', block: 'center' });
       // Restore focus after layout and browser scrolling settle.
