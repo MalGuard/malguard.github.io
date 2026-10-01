@@ -104,7 +104,7 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
       await page.screenshot({path:`test-results/${name}-${width}-studio-open.png`,fullPage:true});
       await page.keyboard.press('Escape');
       assert.equal(await page.locator('#studioWorkspace').isVisible(),false);
-      assert.equal(await page.evaluate(()=>document.activeElement.id),'studioOpen');
+      await page.waitForFunction(()=>document.activeElement.id==='studioOpen');
       await page.locator('#studioOpen').click(); await page.locator('#studioClose').click();
       assert.equal(await page.locator('#studioOpen').getAttribute('aria-expanded'),'false');
       await page.evaluate(() => {

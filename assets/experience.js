@@ -91,8 +91,9 @@
       open.tabIndex = 0;
       open.removeAttribute('aria-hidden');
       if (hint) hint.textContent = 'Click or press Enter to open';
-      open.focus({ preventScroll: true });
       device.scrollIntoView({ behavior: paused() ? 'instant' : 'smooth', block: 'center' });
+      // Restore focus after layout and browser scrolling settle.
+      requestAnimationFrame(() => { if (workspace.hidden) open.focus({ preventScroll: true }); });
     }
     close.addEventListener('click', closeWorkspace);
     workspace.addEventListener('keydown', event => {
