@@ -98,7 +98,7 @@
     const link=document.getElementById('inspectorLink'),source=card.querySelector('.orbit-card-link');link.href=source.getAttribute('href');link.textContent=source.textContent;
     const object=document.getElementById('inspectorObject');object.replaceChildren(card.querySelector('.product-art').cloneNode(true));
     dialog.showModal();lift(card);
-    if(!paused())dialog.querySelector('.inspector-details').animate([{opacity:0,transform:'translateY(15px)'},{opacity:1,transform:'none'}],{duration:580,delay:160,fill:'both',easing:'cubic-bezier(.16,1,.3,1)'});
+    if(!paused())dialog.querySelector('.inspector-details').animate([{opacity:0,transform:'translateY(15px)'},{opacity:1,transform:'none'}],{duration:580,delay:160,fill:'backwards',easing:'cubic-bezier(.16,1,.3,1)'});
    });
   });
 
