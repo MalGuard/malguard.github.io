@@ -98,11 +98,21 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
       await page.locator('#studioTabTools').click();
       await page.locator('#studioPanelTools a').click(); await page.waitForURL('**/tools.html');
       await page.goto(base+'/'); await publicEntry(page);
+      await page.evaluate(() => {
+        window.__studioTrace=[];
+        const originalFocus=HTMLElement.prototype.focus;
+        HTMLElement.prototype.focus=function(...args){window.__studioTrace.push({action:'focus',id:this.id,stack:new Error().stack});return originalFocus.apply(this,args);};
+        document.addEventListener('focusin',e=>window.__studioTrace.push({action:'focusin',id:e.target.id}));
+        document.getElementById('studioOpen').addEventListener('click',()=>window.__studioTrace.push({action:'open-click',expanded:document.getElementById('studioOpen').getAttribute('aria-expanded')}));
+      });
       await page.locator('#studioOpen').click();
+      console.log('STUDIO BEFORE SCREENSHOT',name,width,await page.evaluate(()=>({active:document.activeElement.id,expanded:document.getElementById('studioOpen').getAttribute('aria-expanded'),hidden:document.getElementById('studioWorkspace').hidden})));
       const noOverflow = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
       assert.ok(noOverflow, 'Open workspace must fit the viewport');
       await page.screenshot({path:`test-results/${name}-${width}-studio-open.png`,fullPage:true});
+      console.log('STUDIO AFTER SCREENSHOT',name,width,await page.evaluate(()=>({active:document.activeElement.id,expanded:document.getElementById('studioOpen').getAttribute('aria-expanded'),hidden:document.getElementById('studioWorkspace').hidden,trace:window.__studioTrace})));
       await page.keyboard.press('Escape');
+      console.log('STUDIO AFTER ESCAPE',name,width,await page.evaluate(()=>window.__studioTrace));
       assert.equal(await page.locator('#studioWorkspace').isVisible(),false);
       console.log('STUDIO FOCUS DIAGNOSTIC', name, width, await page.evaluate(() => {
         const opener=document.getElementById('studioOpen');
