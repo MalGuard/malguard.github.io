@@ -2,7 +2,7 @@ import { chromium } from 'playwright';
 import { mkdir, writeFile } from 'node:fs/promises';
 await mkdir('reference-results',{recursive:true});
 const browser=await chromium.launch();
-const context=await browser.newContext({viewport:{width:1280,height:850},reducedMotion:'reduce'});
+const context=await browser.newContext({viewport:{width:1280,height:850},reducedMotion:'no-preference'});
 const page=await context.newPage();
 const ownPaths=['/','/products.html','/gta-guard.html','/tools.html','/scan-url.html','/ai-intelligence.html','/malware-ai.html','/malware-ai-windows.html','/scan-mods.html','/download.html','/app.html','/trust.html','/privacy.html','/about.html','/founder.html','/docs.html','/labs.html','/support.html','/sandbox-help.html','/ios-preview/','/research/repackaged-mod.html'];
 const own=[];
@@ -36,11 +36,14 @@ const refs=[
 ];
 for(const [name,url,category]of refs){
  try{
-  await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForTimeout(1600);
+  await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});await page.waitForTimeout(name==='lusion'?12000:3500);
   const info=await page.evaluate(()=>({title:document.title,headings:[...document.querySelectorAll('h1,h2')].slice(0,9).map(e=>e.textContent.trim().slice(0,160)),fonts:[...new Set([...document.querySelectorAll('h1,h2,p,button')].slice(0,40).map(e=>getComputedStyle(e).fontFamily))],background:getComputedStyle(document.body).backgroundColor,canvases:document.querySelectorAll('canvas').length,videos:document.querySelectorAll('video').length,animations:document.getAnimations().length,buttons:[...document.querySelectorAll('button')].slice(0,10).map(e=>e.textContent.trim().slice(0,60))}));
   console.log('REFERENCE_DATA '+JSON.stringify({name,url,category,...info}));
   await page.screenshot({path:'reference-results/'+name+'.jpg',type:'jpeg',quality:42});
   console.log('REFERENCE_IMAGE '+name+' '+(await page.screenshot({type:'jpeg',quality:35})).toString('base64'));
+ await page.mouse.wheel(0,700);await page.waitForTimeout(1800);
+  console.log('REFERENCE_SCROLL '+name+' '+(await page.screenshot({type:'jpeg',quality:35})).toString('base64'));
+  console.log('REFERENCE_MOTION '+JSON.stringify({name,...await page.evaluate(()=>({scrollY,animations:document.getAnimations().map(a=>({state:a.playState,duration:a.effect?.getTiming().duration})).slice(0,20)}))}));
  }catch(e){console.log('REFERENCE_DATA '+JSON.stringify({name,url,category,error:e.message}));}
 }
 await browser.close();
