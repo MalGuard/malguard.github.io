@@ -217,3 +217,6 @@
 .orbit-product:hover .product-art img{transform:translateY(-8px) rotate(-5deg) scale(1.03)}
 @media(min-width:1001px){.orbit-home h1 em{white-space:nowrap}}
 @media(min-width:801px) and (max-width:1000px){.orbit-hero-grid{grid-template-columns:1fr;min-height:0;padding:65px 0 30px}.orbit-hero-copy{max-width:650px}.orbit-home h1{font-size:78px}.orbit-scene{width:600px;justify-self:center;height:540px;margin-top:20px}}
+
+.mg-experience:not(.mg-home) :is(.hero,.product-hero,.hub-hero) h1{text-wrap:balance!important}
+.mg-experience:not(.mg-home) :is(.hero,.product-hero,.hub-hero) p{text-wrap:pretty}
