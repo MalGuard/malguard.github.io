@@ -40,7 +40,7 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     await check(`${name} ${width}px substantive homepage copy is preserved`,async()=>{
       await page.goto(base+'/');await publicEntry(page);
       const expected=JSON.parse(await (await import('node:fs/promises')).readFile('tests/homepage-copy.json','utf8'));
-      const text=(await page.locator('body').textContent()).replace(/\\s+/g,' ').trim();
+      const text=(await page.locator('body').textContent()).replace(/\s+/g,' ').trim();
       for(const paragraph of expected)assert.ok(text.includes(paragraph),'Missing original copy: '+paragraph);
     });
     await check(`${name} ${width}px menu and search`, async()=>{
