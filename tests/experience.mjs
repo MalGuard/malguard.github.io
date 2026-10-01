@@ -104,7 +104,11 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
       await page.screenshot({path:`test-results/${name}-${width}-studio-open.png`,fullPage:true});
       await page.keyboard.press('Escape');
       assert.equal(await page.locator('#studioWorkspace').isVisible(),false);
-      await page.waitForFunction(()=>document.activeElement.id==='studioOpen');
+      console.log('STUDIO FOCUS DIAGNOSTIC', name, width, await page.evaluate(() => {
+        const opener=document.getElementById('studioOpen');
+        return {active:document.activeElement.id,expanded:opener.getAttribute('aria-expanded'),workspaceHidden:document.getElementById('studioWorkspace').hidden,openerHidden:opener.hidden,openerTab:opener.tabIndex,deviceClass:document.getElementById('studioDevice').className,ancestors:[opener,opener.parentElement,opener.parentElement.parentElement,document.querySelector('main')].map(el=>({id:el.id,inert:el.inert,display:getComputedStyle(el).display,visibility:getComputedStyle(el).visibility,opacity:getComputedStyle(el).opacity})),gateHidden:document.getElementById('siteEntryGate').hidden};
+      }));
+      await page.waitForFunction(()=>document.activeElement.id==='studioOpen',null,{timeout:5000});
       await page.locator('#studioOpen').click(); await page.locator('#studioClose').click();
       assert.equal(await page.locator('#studioOpen').getAttribute('aria-expanded'),'false');
       await page.evaluate(() => {
