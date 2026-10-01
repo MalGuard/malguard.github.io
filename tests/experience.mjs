@@ -78,6 +78,51 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
       await page.locator('#installedBuildInput').fill('not-a-build');await page.locator('#checkInstalledBuild').click();assert.match(await page.locator('#updateResult').innerText(),/does not look like/);
       await page.locator('#installedBuildInput').fill('bc60530');await page.locator('#checkInstalledBuild').click();assert.match(await page.locator('#updateResult').innerText(),/matches the latest published build/);
     });
+
+    await check(`${name} ${width}px computer showcase and developer example`, async () => {
+      await page.goto(base+'/'); await publicEntry(page);
+      const opener = page.locator('#studioOpen');
+      await opener.focus(); await page.keyboard.press('Enter');
+      assert.equal(await opener.getAttribute('aria-expanded'),'true');
+      assert.ok(await page.locator('#studioWorkspace').isVisible());
+      assert.equal(await page.evaluate(()=>document.activeElement.id),'studioTabGuard');
+      await page.keyboard.press('ArrowRight');
+      assert.equal(await page.locator('#studioTabAI').getAttribute('aria-selected'),'true');
+      assert.ok(await page.locator('#studioPanelAI').isVisible());
+      assert.equal(await page.locator('#studioPanelGuard').isVisible(),false);
+      await page.keyboard.press('End');
+      assert.equal(await page.locator('#studioTabTools').getAttribute('aria-selected'),'true');
+      assert.ok(await page.locator('#studioPanelTools a').isVisible());
+      await page.keyboard.press('Home');
+      assert.equal(await page.locator('#studioTabGuard').getAttribute('aria-selected'),'true');
+      await page.locator('#studioTabTools').click();
+      await page.locator('#studioPanelTools a').click(); await page.waitForURL('**/tools.html');
+      await page.goto(base+'/'); await publicEntry(page);
+      await page.locator('#studioOpen').click();
+      assert.equal(await page.locator('#studioOpen').getAttribute('aria-expanded'),'true');
+      assert.ok(await page.locator('#studioWorkspace').isVisible());
+      const noOverflow = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
+      assert.ok(noOverflow, 'Open workspace must fit the viewport');
+      await page.screenshot({path:`test-results/${name}-${width}-studio-open.png`,fullPage:true});
+      await page.keyboard.press('Escape');
+      assert.equal(await page.locator('#studioWorkspace').isVisible(),false);
+      await page.waitForFunction(()=>document.activeElement.id==='studioOpen',null,{timeout:5000});
+      await page.locator('#studioOpen').click(); await page.locator('#studioClose').click();
+      assert.equal(await page.locator('#studioOpen').getAttribute('aria-expanded'),'false');
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, 'clipboard', {configurable:true,value:{writeText:async text=>{window.__copiedStudio=text;}}});
+      });
+      await page.locator('#studioCopyCode').click();
+      await page.waitForFunction(()=>document.querySelector('#studioCopyStatus').textContent==='Example copied');
+      assert.equal(await page.evaluate(()=>window.__copiedStudio),await page.locator('#studioCode').textContent());
+      await page.evaluate(() => Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('denied');}}}));
+      await page.locator('#studioCopyCode').click();
+      await page.waitForFunction(()=>document.querySelector('#studioCopyStatus').textContent.includes('highlighted example'));
+      assert.ok((await page.evaluate(()=>window.getSelection().toString())).includes('local-first'));
+      const running = await page.evaluate(()=>document.getAnimations().filter(animation=>animation.playState==='running').length);
+      assert.equal(running,0,'Studio motion respects reduced-motion');
+    });
+
     await context.close();
   }
   await check(`${name} entry gate and failed authentication`,async()=>{
