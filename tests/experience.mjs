@@ -58,6 +58,31 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
       assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');
       const running=await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length);assert.equal(running,0);
     });
+    await check(`${name} ${width}px interactive computer and transparent local demo`,async()=>{
+      await page.goto(base+'/');await publicEntry(page);
+      let outbound=0;const record=req=>{if(!req.url().startsWith(base))outbound++};page.on('request',record);
+      await page.locator('#openCore').click();
+      assert.ok(await page.locator('#coreDialog').evaluate(e=>e.open));
+      const box=await page.locator('#coreDialog').boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);
+      assert.match(await page.locator('#lab-analysis').innerText(),/not a live device-protection status or a safety verdict/);
+      await page.locator('#lab-analysis [data-run-fingerprint]').click();
+      await page.waitForFunction(()=>document.querySelector('#lab-analysis [data-fingerprint-output]').dataset.state==='success');
+      const expected=createHash('sha256').update('MalGuard demo — local only.').digest('hex');
+      assert.ok((await page.locator('#lab-analysis [data-fingerprint-output]').innerText()).includes(expected));
+      await page.locator('#lab-tab-source').click();assert.ok(await page.locator('#lab-source').isVisible());assert.equal(await page.locator('#lab-analysis').isVisible(),false);
+      await page.locator('#lab-tab-source').press('ArrowRight');assert.ok(await page.locator('#lab-layers').isVisible());
+      await page.locator('#lab-tab-layers').press('Home');assert.ok(await page.locator('#lab-analysis').isVisible());
+      await page.screenshot({path:`test-results/${name}-${width}-workspace.png`,fullPage:true});
+      await page.locator('[data-close-core]').click();assert.equal(await page.locator('#coreDialog').evaluate(e=>e.open),false);
+      assert.equal(await page.evaluate(()=>document.activeElement.id),'openCore');
+      assert.notEqual(await page.locator('body').evaluate(e=>e.style.overflow),'hidden');
+      for(const card of await page.locator('.glass-disclosure').all()) { await card.locator('summary').click();assert.ok(await card.evaluate(e=>e.open));await card.locator('summary').click();assert.equal(await card.evaluate(e=>e.open),false); }
+      await page.locator('.code-window [data-run-fingerprint]').click();
+      await page.waitForFunction(()=>document.querySelector('.code-window [data-fingerprint-output]').dataset.state==='success');
+      assert.ok((await page.locator('.code-window [data-fingerprint-output]').innerText()).includes(expected));
+      assert.equal(outbound,0,'The workspace must never upload or request demo data');page.off('request',record);
+      assert.deepEqual(errors,[],'No JavaScript errors across the tested pages');
+    });
     await check(`${name} ${width}px URL inputs and local SHA-256`,async()=>{
       for(const path of ['/tools.html','/scan-url.html']){
         await page.goto(base+path);const button=page.locator(path==='/tools.html'?'#inspectButton':'#scanUrl');
@@ -94,6 +119,16 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
   await check(`${name} motion preference and JavaScript-free content`,async()=>{
     const context=await browser.newContext(fixtureTLS);const page=await context.newPage();await page.goto(base+'/');await publicEntry(page);await page.locator('#motionToggle').click();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await page.reload();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await context.close();
     const nojs=await browser.newContext({...fixtureTLS,javaScriptEnabled:false});const p=await nojs.newPage();await p.goto(base+'/');assert.ok(await p.getByRole('heading',{name:'Play freely. Trust carefully.'}).isVisible());assert.ok(await p.getByRole('link',{name:'Explore MalGuard'}).isVisible());assert.equal(await p.locator('#siteEntryGate').isVisible(),false);await nojs.close();
+  });
+  await check(`${name} local demo fails honestly and remains retryable`,async()=>{
+    const context=await browser.newContext(fixtureTLS);
+    await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
+    await context.addInitScript(()=>{Object.defineProperty(window.crypto.subtle,'digest',{value:()=>Promise.reject(new Error('Synthetic unavailable crypto fixture'))});});
+    const page=await context.newPage();await page.goto(base+'/');await publicEntry(page);
+    const button=page.locator('.code-window [data-run-fingerprint]');await button.click();
+    await page.waitForFunction(()=>document.querySelector('.code-window [data-fingerprint-output]').dataset.state==='error');
+    assert.match(await page.locator('.code-window [data-fingerprint-output]').innerText(),/No result or safety verdict was generated/);
+    assert.ok(await button.isEnabled());await context.close();
   });
   await browser.close();
 }
