@@ -30,6 +30,7 @@ jobs:
           openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
           python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
           npm run test:experience
+          node tests/visual-review.mjs
       - name: Save screenshots and verification report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

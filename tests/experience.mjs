@@ -37,6 +37,12 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
       assert.ok(state.h1,'h1 required'); assert.ok(state.scroll<=state.client+1,JSON.stringify(state));assert.deepEqual(state.outside,[],JSON.stringify(state.outside));assert.deepEqual(errors.slice(startErrors),[],'Runtime exception');
       if (['/','/products.html','/tools.html','/gta-guard.html','/malware-ai-windows.html'].includes(path)) await page.screenshot({path:`test-results/${name}-${width}-${path==='/'?'home':path.slice(1).replace('.html','')}.png`,fullPage:true});
     });
+    await check(`${name} ${width}px substantive homepage copy is preserved`,async()=>{
+      await page.goto(base+'/');await publicEntry(page);
+      const expected=JSON.parse(await (await import('node:fs/promises')).readFile('tests/homepage-copy.json','utf8'));
+      const text=(await page.locator('body').textContent()).replace(/\\s+/g,' ').trim();
+      for(const paragraph of expected)assert.ok(text.includes(paragraph),'Missing original copy: '+paragraph);
+    });
     await check(`${name} ${width}px menu and search`, async()=>{
       await page.goto(base+'/');await publicEntry(page);
       await page.getByRole('button',{name:'Open navigation menu',exact:true}).click();
@@ -79,50 +85,35 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
       await page.locator('#installedBuildInput').fill('bc60530');await page.locator('#checkInstalledBuild').click();assert.match(await page.locator('#updateResult').innerText(),/matches the latest published build/);
     });
 
-    await check(`${name} ${width}px computer showcase and developer example`, async () => {
-      await page.goto(base+'/'); await publicEntry(page);
-      const opener = page.locator('#studioOpen');
-      await opener.focus(); await page.keyboard.press('Enter');
-      assert.equal(await opener.getAttribute('aria-expanded'),'true');
-      assert.ok(await page.locator('#studioWorkspace').isVisible());
-      assert.equal(await page.evaluate(()=>document.activeElement.id),'studioTabGuard');
-      await page.keyboard.press('ArrowRight');
-      assert.equal(await page.locator('#studioTabAI').getAttribute('aria-selected'),'true');
-      assert.ok(await page.locator('#studioPanelAI').isVisible());
-      assert.equal(await page.locator('#studioPanelGuard').isVisible(),false);
-      await page.keyboard.press('End');
-      assert.equal(await page.locator('#studioTabTools').getAttribute('aria-selected'),'true');
-      assert.ok(await page.locator('#studioPanelTools a').isVisible());
-      await page.keyboard.press('Home');
-      assert.equal(await page.locator('#studioTabGuard').getAttribute('aria-selected'),'true');
-      await page.locator('#studioTabTools').click();
-      await page.locator('#studioPanelTools a').click(); await page.waitForURL('**/tools.html');
-      await page.goto(base+'/'); await publicEntry(page);
-      await page.locator('#studioOpen').click();
-      assert.equal(await page.locator('#studioOpen').getAttribute('aria-expanded'),'true');
-      assert.ok(await page.locator('#studioWorkspace').isVisible());
-      const noOverflow = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
-      assert.ok(noOverflow, 'Open workspace must fit the viewport');
-      await page.screenshot({path:`test-results/${name}-${width}-studio-open.png`,fullPage:true});
-      await page.keyboard.press('Escape');
-      assert.equal(await page.locator('#studioWorkspace').isVisible(),false);
-      await page.waitForFunction(()=>document.activeElement.id==='studioOpen',null,{timeout:5000});
-      await page.locator('#studioOpen').click(); await page.locator('#studioClose').click();
-      assert.equal(await page.locator('#studioOpen').getAttribute('aria-expanded'),'false');
-      await page.evaluate(() => {
-        Object.defineProperty(navigator, 'clipboard', {configurable:true,value:{writeText:async text=>{window.__copiedStudio=text;}}});
-      });
+
+    await check(`${name} ${width}px spatial product inspection and developer example`,async()=>{
+      await page.goto(base+'/');await publicEntry(page);
+      assert.equal(await page.locator('#studioDevice').count(),0,'Unwanted computer is removed');
+      for(let i=0;i<3;i++){
+        const button=page.locator('#inspectProduct'+i);
+        await button.focus();await page.keyboard.press('Enter');
+        assert.ok(await page.locator('#productInspector').evaluate(e=>e.open));
+        assert.equal(await page.locator('#inspectorTitle').innerText(),['GTA Guard','Malware AI','Game Scam Guard'][i]);
+        assert.ok(await page.locator('#inspectorLink').isVisible());
+        const box=await page.locator('#productInspector').boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);
+        await page.screenshot({path:`test-results/${name}-${width}-product-${i}.png`});
+        await page.keyboard.press('Escape');
+        assert.equal(await page.locator('#productInspector').evaluate(e=>e.open),false);
+        assert.equal(await page.evaluate(()=>document.activeElement.id),'inspectProduct'+i);
+      }
+      await page.locator('#inspectProduct0').click();await page.locator('#closeInspector').click();
+      await page.locator('#inspectProduct1').click();await page.locator('#inspectorLink').click();await page.waitForURL('**/ai-intelligence.html');
+      await page.goto(base+'/');await publicEntry(page);
+      await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.__copiedStudio=text;}}}));
       await page.locator('#studioCopyCode').click();
       await page.waitForFunction(()=>document.querySelector('#studioCopyStatus').textContent==='Example copied');
       assert.equal(await page.evaluate(()=>window.__copiedStudio),await page.locator('#studioCode').textContent());
-      await page.evaluate(() => Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('denied');}}}));
+      await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw Error('denied');}}}));
       await page.locator('#studioCopyCode').click();
       await page.waitForFunction(()=>document.querySelector('#studioCopyStatus').textContent.includes('highlighted example'));
       assert.ok((await page.evaluate(()=>window.getSelection().toString())).includes('local-first'));
-      const running = await page.evaluate(()=>document.getAnimations().filter(animation=>animation.playState==='running').length);
-      assert.equal(running,0,'Studio motion respects reduced-motion');
+      assert.equal(await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length),0);
     });
-
     await context.close();
   }
   await check(`${name} entry gate and failed authentication`,async()=>{
@@ -139,6 +130,24 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
   await check(`${name} motion preference and JavaScript-free content`,async()=>{
     const context=await browser.newContext(fixtureTLS);const page=await context.newPage();await page.goto(base+'/');await publicEntry(page);await page.locator('#motionToggle').click();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await page.reload();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await context.close();
     const nojs=await browser.newContext({...fixtureTLS,javaScriptEnabled:false});const p=await nojs.newPage();await p.goto(base+'/');assert.ok(await p.getByRole('heading',{name:'Play freely. Trust carefully.'}).isVisible());assert.ok(await p.getByRole('link',{name:'Explore MalGuard'}).isVisible());assert.equal(await p.locator('#siteEntryGate').isVisible(),false);await nojs.close();
+  });
+
+  await check(`${name} normal-motion spatial transitions and suspended offscreen field`,async()=>{
+    const context=await browser.newContext({...fixtureTLS,viewport:{width:1280,height:850},reducedMotion:'no-preference'});
+    await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
+    const page=await context.newPage();activePage=page;await page.goto(base+'/');await publicEntry(page);
+    await page.waitForTimeout(200);
+    assert.equal(await page.evaluate(()=>document.fonts.check('16px "Manrope"')),true);
+    assert.equal(await page.evaluate(()=>document.fonts.check('16px "Space Grotesk"')),true);
+    const frameCount=()=>page.evaluate(()=>Number(document.documentElement.dataset.fieldFrames));
+    const a=await frameCount();await page.waitForTimeout(200);assert.ok(await frameCount()>a);
+    await page.locator('#inspectProduct0').click();assert.ok(await page.locator('#productInspector').evaluate(e=>e.open));
+    await page.waitForTimeout(800);assert.equal(await page.locator('.product-flight').count(),0);
+    await page.locator('#closeInspector').click();assert.equal(await page.evaluate(()=>document.activeElement.id),'inspectProduct0');
+    await page.locator('#trust').scrollIntoViewIfNeeded();await page.waitForTimeout(150);const b=await frameCount();await page.waitForTimeout(180);assert.equal(await frameCount(),b);
+    await page.evaluate(()=>scrollTo(0,0));await page.waitForTimeout(250);
+    await page.locator('#motionToggle').click();const c=await frameCount();await page.waitForTimeout(180);assert.equal(await frameCount(),c);
+    await context.close();
   });
   await browser.close();
 }

@@ -54,7 +54,7 @@
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png">
 <link rel="shortcut icon" href="/favicon.ico">
 <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
-<link rel="stylesheet" href="/assets/experience.css?v=20261001-studio-1">
+<link rel="stylesheet" href="/assets/experience.css?v=20261001-evidence-1">
 </head>
 <body class="mg-experience mg-home site-entry-locked">
 <section class="site-entry-gate security-play" id="siteEntryGate" role="dialog" aria-modal="true" aria-labelledby="siteEntryTitle">
@@ -159,11 +159,9 @@
       </div>
       <div class="orbit-scene" id="securityScene">
         <div class="orbit-scene-label"><span>THE MALGUARD CORE</span><span>01 / EXPLORE</span></div>
-        <div class="orbit-halo" aria-hidden="true"></div>
-        <div class="orbit-system" aria-hidden="true"><div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div><div class="orbit-ring ring-three"></div><div class="orbit-ring ring-four"></div><div class="orbit-satellite sat-one"></div><div class="orbit-satellite sat-two"></div></div>
+        <canvas class="evidence-field" id="evidenceField" aria-hidden="true"></canvas><div class="lens-shell" aria-hidden="true"></div>
         <button class="orbit-core" id="openCore" type="button" aria-haspopup="dialog" aria-controls="coreDialog" aria-label="Explore the MalGuard security layers"><span class="core-glass"><img src="/assets/malguard-core-mark.svg" width="160" height="180" alt=""><span class="core-scan" aria-hidden="true"></span></span></button>
-        <span class="orbit-float float-one" aria-hidden="true"><i></i> Local inspection<span>YOUR FILES. YOUR DEVICE.</span></span>
-        <span class="orbit-float float-two" aria-hidden="true"><span class="float-icon">⌘</span> Evidence before trust</span>
+        <div class="field-caption" aria-hidden="true"><span>LOCAL INSPECTION</span><span>EVIDENCE BEFORE TRUST</span></div>
         <div class="orbit-scene-footer"><span>Tap the shield to explore <span aria-hidden="true">↗</span></span><button id="motionToggle" class="motion-toggle" type="button" aria-pressed="false">Pause motion</button></div>
       </div>
     </div>
@@ -176,61 +174,28 @@
       <div class="orbit-products">
         <article class="orbit-product product-mod" data-reveal data-tilt>
           <div class="orbit-product-top"><span>01 / MOD SECURITY</span><span class="orbit-status paused">DOWNLOAD PAUSED</span></div>
-          <div class="product-art mod-art" aria-hidden="true"><div class="file-layer back"></div><div class="file-layer front"><span>.ASI</span><span>.DLL · .ZIP</span></div><div class="file-check">⌕</div></div>
+          <div class="product-art" aria-hidden="true"><img src="/assets/evidence-guard.svg" alt="" width="300" height="280"></div>
           <h3>GTA Guard</h3><p>Look inside your next GTA mod. Explore Standard, Plus and Pro analysis paths for supported files.</p>
-          <div class="orbit-product-meta">Windows x64 · Unsigned Preview</div><a class="orbit-card-link" href="/gta-guard.html">Explore GTA Guard <span aria-hidden="true">↗</span></a>
+          <div class="orbit-product-meta">Windows x64 · Unsigned Preview</div><button class="product-inspect" id="inspectProduct0" type="button" data-product-inspect="0" aria-haspopup="dialog" aria-controls="productInspector">Inspect details <span aria-hidden="true">↗</span></button><a class="orbit-card-link" href="/gta-guard.html">Explore GTA Guard <span aria-hidden="true">↗</span></a>
         </article>
         <article class="orbit-product product-ai" data-reveal data-tilt>
           <div class="orbit-product-top"><span>02 / INTELLIGENCE</span><span class="orbit-status">WEB PREVIEW</span></div>
-          <div class="product-art ai-art" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="product-art" aria-hidden="true"><img src="/assets/evidence-ai.svg" alt="" width="300" height="280"></div>
           <h3>Malware AI</h3><p>A dedicated space for AI-assisted security analysis. Explore the preview and its access options.</p>
-          <div class="orbit-product-meta">AI assistance · Preview access</div><a class="orbit-card-link" href="/ai-intelligence.html">Explore Intelligence <span aria-hidden="true">↗</span></a>
+          <div class="orbit-product-meta">AI assistance · Preview access</div><button class="product-inspect" id="inspectProduct1" type="button" data-product-inspect="1" aria-haspopup="dialog" aria-controls="productInspector">Inspect details <span aria-hidden="true">↗</span></button><a class="orbit-card-link" href="/ai-intelligence.html">Explore Intelligence <span aria-hidden="true">↗</span></a>
         </article>
         <article class="orbit-product product-link" data-reveal data-tilt>
           <div class="orbit-product-top"><span>03 / SAFER LINKS</span><span class="orbit-status planned">IN DEVELOPMENT</span></div>
-          <div class="product-art link-art" aria-hidden="true"><div></div><div></div><span>?</span></div>
+          <div class="product-art" aria-hidden="true"><img src="/assets/evidence-link.svg" alt="" width="300" height="280"></div>
           <h3>Game Scam Guard</h3><p>A focused approach to gaming scams and suspicious destinations. Currently in development.</p>
-          <div class="orbit-product-meta">Planned product · No public release</div><a class="orbit-card-link" href="/products.html#game-scam-guard">See product plans <span aria-hidden="true">↗</span></a>
+          <div class="orbit-product-meta">Planned product · No public release</div><button class="product-inspect" id="inspectProduct2" type="button" data-product-inspect="2" aria-haspopup="dialog" aria-controls="productInspector">Inspect details <span aria-hidden="true">↗</span></button><a class="orbit-card-link" href="/products.html#game-scam-guard">See product plans <span aria-hidden="true">↗</span></a>
         </article>
       </div>
+<div class="evidence-notes" data-reveal><div><h3>Look inside the mod.</h3><p>Explore GTA Guard’s Standard, Plus and Pro analysis paths. The Windows x64 preview is unsigned, and public installer distribution is paused.</p><a href="/gta-guard.html">Explore GTA Guard ↗</a></div><div><h3>A different kind of insight.</h3><p>Explore Malware AI’s available web preview and platform interfaces. AI assistance supports your investigation; it does not guarantee safety.</p><a href="/ai-intelligence.html">Explore Intelligence ↗</a></div><div><h3>Start on your device.</h3><p>Calculate a file fingerprint or inspect URL text locally in your browser. A hash proves identity, and URL-text signals do not prove a destination is safe.</p><a href="/tools.html">Open local tools ↗</a></div></div>
       <p class="orbit-availability">GTA Guard public installer distribution is paused. <a href="/gta-guard.html#platforms">Check current availability <span aria-hidden="true">↗</span></a></p>
     </div>
   </section>
 
-  <section class="orbit-section studio-section" id="interactive-studio" aria-labelledby="studioTitle">
-    <div class="container">
-      <div class="studio-heading" data-reveal><span class="orbit-eyebrow">THE INTERACTIVE STUDIO / 02</span><h2 id="studioTitle">Open a new<br><em>perspective.</em></h2><p>A closer look at the MalGuard ecosystem. Open the computer, then choose what you want to explore.</p></div>
-      <div class="studio-stage" data-reveal>
-        <div class="studio-orbit" aria-hidden="true"></div>
-        <div class="studio-device" id="studioDevice">
-          <div class="studio-lid" aria-hidden="true"><span class="studio-lid-face"><img src="/assets/malguard-core-mark.svg" alt="" width="82" height="94"><span>MALGUARD</span></span><span class="studio-lid-label">MALGUARD STUDIO</span></div>
-          <div class="studio-display" aria-hidden="true"><div class="studio-display-inner"><span class="studio-display-dot"></span><img src="/assets/malguard-core-mark.svg" alt="" width="65" height="74"><strong>Scan smart.<br>Play safe.</strong><span>YOUR NEXT PERSPECTIVE</span></div></div>
-          <div class="studio-base" aria-hidden="true"><div class="studio-keys"></div><div class="studio-trackpad"></div></div>
-        </div>
-        <button class="studio-open-control" id="studioOpen" type="button" aria-expanded="false" aria-controls="studioWorkspace" aria-describedby="studioHint"><span class="studio-open-caption">Open the computer <span aria-hidden="true">↗</span></span></button>
-        <span class="studio-stage-note" id="studioHint">Click or press Enter to open</span>
-      </div>
-      <div class="studio-workspace" id="studioWorkspace" hidden>
-        <div class="studio-window-bar"><span><i aria-hidden="true"></i> MALGUARD / EXPLORER</span><button id="studioClose" type="button" aria-label="Close computer showcase">Close <span aria-hidden="true">×</span></button></div>
-        <div class="studio-tabs" role="tablist" aria-label="Explore MalGuard products">
-          <button id="studioTabGuard" role="tab" aria-selected="true" aria-controls="studioPanelGuard" tabindex="0" type="button">01 / GTA Guard</button>
-          <button id="studioTabAI" role="tab" aria-selected="false" aria-controls="studioPanelAI" tabindex="-1" type="button">02 / Malware AI</button>
-          <button id="studioTabTools" role="tab" aria-selected="false" aria-controls="studioPanelTools" tabindex="-1" type="button">03 / Local tools</button>
-        </div>
-        <div class="studio-panel" id="studioPanelGuard" role="tabpanel" aria-labelledby="studioTabGuard" tabindex="0">
-          <div class="studio-panel-art" aria-hidden="true"><img src="/assets/product-gta-guard.svg" alt="" width="110" height="110"><span>.ASI / .DLL / .ZIP</span></div><div><span class="orbit-status paused">WINDOWS PREVIEW · DOWNLOAD PAUSED</span><h3>Look inside the mod.</h3><p>Explore GTA Guard’s Standard, Plus and Pro analysis paths. The Windows x64 preview is unsigned, and public installer distribution is paused.</p><a class="orbit-button primary" href="/gta-guard.html">Explore GTA Guard ↗</a></div>
-        </div>
-        <div class="studio-panel" id="studioPanelAI" role="tabpanel" aria-labelledby="studioTabAI" tabindex="0" hidden>
-          <div class="studio-panel-art" aria-hidden="true"><img src="/assets/product-malware-ai.svg" alt="" width="110" height="110"><span>AI / SECURITY / EVIDENCE</span></div><div><span class="orbit-status">LIVE WEB PREVIEW</span><h3>A different kind of insight.</h3><p>Explore Malware AI’s available web preview and platform interfaces. AI assistance supports your investigation; it does not guarantee safety.</p><a class="orbit-button primary" href="/ai-intelligence.html">Explore Intelligence ↗</a></div>
-        </div>
-        <div class="studio-panel" id="studioPanelTools" role="tabpanel" aria-labelledby="studioTabTools" tabindex="0" hidden>
-          <div class="studio-panel-art studio-hash-art" aria-hidden="true"><strong>#</strong><span>SHA-256 / URL TEXT</span></div><div><span class="orbit-status">LOCAL · NO UPLOAD</span><h3>Start on your device.</h3><p>Calculate a file fingerprint or inspect URL text locally in your browser. A hash proves identity, and URL-text signals do not prove a destination is safe.</p><a class="orbit-button primary" href="/tools.html">Open local tools ↗</a></div>
-        </div>
-        <div class="studio-workspace-note">Product showcase · No file is scanned or executed here.</div>
-      </div>
-      <noscript><p class="studio-nojs">The animated computer needs JavaScript. <a href="/products.html">Explore the products →</a></p></noscript>
-    </div>
-  </section>
   <section class="orbit-section studio-code-section" id="developer" aria-labelledby="developerTitle">
     <div class="container studio-code-grid">
       <div data-reveal><span class="orbit-eyebrow">BUILT IN THE OPEN / 03</span><h2 id="developerTitle">Behind the glass.<br><em>Inside the thinking.</em></h2><p class="orbit-section-copy">Good security starts with clear boundaries. Explore the source and the principles behind MalGuard’s local-first approach.</p><a class="orbit-text-link" href="https://github.com/MalGuard/malguard-core" target="_blank" rel="noopener">Browse the core source <span aria-hidden="true">↗</span></a></div>
@@ -283,8 +248,9 @@
 <footer class="orbit-footer"><div class="container"><div class="orbit-footer-top"><div><img src="/assets/malguard-site-logo.svg" alt="MalGuard" width="158" height="46"><p>Scan smart. Play safe.</p></div><div><span>EXPLORE</span><a href="/products.html">Products</a><a href="/tools.html">Local tools</a><a href="/download.html">Downloads</a><a href="/app.html">MalGuard App</a></div><div><span>UNDERSTAND</span><a href="/docs.html">Documentation</a><a href="/trust.html">Trust Center</a><a href="/privacy.html">Privacy</a><a href="/labs.html">Labs</a></div><div><span>CONNECT</span><a href="/about.html">About MalGuard</a><a href="/founder.html">Our founder</a><a href="/support.html">Support</a><a href="/trust.html#vulnerability-disclosure">Report a vulnerability</a></div></div><div class="orbit-footer-word" aria-hidden="true">MalGuard<span>✳</span></div><div class="orbit-footer-bottom"><span>© 2026 MalGuard</span><span>Independent. Open. Evidence-led.</span><a href="#home">Back to top ↑</a></div></div></footer>
 <dialog class="orbit-dialog" id="coreDialog" aria-labelledby="coreDialogTitle"><div class="orbit-dialog-top"><span class="orbit-eyebrow">INSIDE MALGUARD</span><button type="button" class="orbit-icon-button" data-close-core aria-label="Close security layers">×</button></div><img src="/assets/malguard-core-mark.svg" alt="" width="70" height="80"><h2 id="coreDialogTitle">Evidence at the core.</h2><p>The shield represents MalGuard’s approach. This is an interactive explanation, not a live scan or device-protection status.</p><div class="orbit-dialog-layers"><div><span>01</span><strong>Start local</strong><p>Browser fingerprinting reads the file on your device.</p></div><div><span>02</span><strong>Keep limits visible</strong><p>Product availability, isolation and uncertainty stay explicit.</p></div><div><span>03</span><strong>Make trust inspectable</strong><p>Review source code, release integrity and policies.</p></div></div><a class="orbit-button primary" href="/trust.html">Read the security approach ↗</a></dialog>
 
-<script src="/assets/contextual-header.js?v=20261001-studio-1" defer></script>
-<script src="/assets/experience.js?v=20261001-studio-1" defer></script>
-<script src="/assets/site-entry.js?v=20261001-studio-1" defer></script>
+<dialog class="inspector-dialog" id="productInspector" aria-labelledby="inspectorTitle"><div class="inspector-bar"><span class="orbit-eyebrow">THE MALGUARD ECOSYSTEM</span><button class="orbit-icon-button" id="closeInspector" type="button" aria-label="Close product details">×</button></div><div class="inspector-grid"><div class="inspector-stage"><div class="inspector-object" id="inspectorObject" aria-hidden="true"></div></div><div class="inspector-details"><span class="orbit-status" id="inspectorStatus"></span><h2 id="inspectorTitle"></h2><p id="inspectorDescription"></p><div class="inspector-meta" id="inspectorMeta"></div><h3 id="inspectorHeading"></h3><p id="inspectorEvidence"></p><a class="orbit-button primary" id="inspectorLink"></a></div></div><div class="inspector-footnote">Product showcase · No file is scanned or executed here.</div></dialog>
+<script src="/assets/contextual-header.js?v=20261001-evidence-1" defer></script>
+<script src="/assets/experience.js?v=20261001-evidence-1" defer></script>
+<script src="/assets/site-entry.js?v=20261001-evidence-1" defer></script>
 <noscript><style>.site-entry-gate{display:none!important}.site-entry-locked{overflow:auto!important}</style><p class="container">JavaScript is needed for interactive tools and administrator sign-in. Public product pages remain available.</p></noscript>
 </body></html>
