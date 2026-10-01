@@ -163,3 +163,5 @@ body.mg-experience{background:#070c13!important}
 @media(prefers-reduced-motion:reduce){.studio-orbit:after{animation:none!important}.studio-device,.studio-device *,.studio-workspace{animation:none!important;transition:none!important}.mg-experience .orbit-product:hover .product-art{transform:none!important}}
 .motion-paused .studio-orbit:after,.page-hidden .studio-orbit:after{animation-play-state:paused!important}
 .motion-paused .studio-workspace,.motion-paused .studio-device,.motion-paused .studio-device *{animation:none!important;transition:none!important}
+
+.mg-experience .studio-code :is(code,span){font-family:ui-monospace,SFMono-Regular,Consolas,monospace!important}
