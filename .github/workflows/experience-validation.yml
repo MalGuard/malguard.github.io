@@ -10,6 +10,10 @@ jobs:
   responsive-and-functional:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Match package-lock.json; browsers and OS libraries are already installed.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Validate source and install pinned test tooling
@@ -19,7 +23,6 @@ jobs:
           node --check assets/contextual-header.js
           node --check assets/experience.js
           node --check assets/site-entry.js
-          npx playwright install --with-deps chromium webkit
       - name: Check responsive pages and benign interactions
         run: |
           # Match production HTTPS: WebKit correctly upgrades HTTP subresources
