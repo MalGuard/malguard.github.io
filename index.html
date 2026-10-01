@@ -54,7 +54,7 @@
 <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png">
 <link rel="shortcut icon" href="/favicon.ico">
 <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
-<link rel="stylesheet" href="/assets/experience.css?v=20260930-1">
+<link rel="stylesheet" href="/assets/experience.css?v=20261001-1">
 </head>
 <body class="mg-experience mg-home site-entry-locked">
 <section class="site-entry-gate security-play" id="siteEntryGate" role="dialog" aria-modal="true" aria-labelledby="siteEntryTitle">
@@ -120,7 +120,7 @@
 <a class="site-skip-link" href="#homeContent">Skip to main content</a>
 <header class="nav" id="navbar">
   <div class="container nav-inner">
-    <a href="/" class="brand" onclick="showHome()" aria-label="MalGuard home"><img class="brand-site-logo" src="assets/malguard-site-logo.svg" alt="MalGuard"></a>
+    <a href="/" class="brand" aria-label="MalGuard home"><img class="brand-site-logo" src="assets/malguard-site-logo.svg" alt="MalGuard"></a>
     <nav class="nav-links feature-menu" id="navLinks" aria-label="Primary navigation">
       <a href="/">Home</a>
       <a href="/products.html">Products</a>
@@ -148,7 +148,7 @@
 </header>
 <main id="homeContent" class="orbit-home" tabindex="-1">
   <section class="orbit-hero" id="home" aria-labelledby="heroTitle">
-    <div class="orbit-grid-bg" aria-hidden="true"></div>
+    <div class="orbit-grid-bg" aria-hidden="true"></div><div class="aurora aurora-cyan" aria-hidden="true"></div><div class="aurora aurora-violet" aria-hidden="true"></div>
     <div class="container orbit-hero-grid">
       <div class="orbit-hero-copy">
         <span class="orbit-eyebrow"><i aria-hidden="true"></i> INDEPENDENT GAMING SECURITY</span>
@@ -157,14 +157,26 @@
         <div class="orbit-actions"><a class="orbit-button primary" href="/products.html">Explore MalGuard <span aria-hidden="true">↗</span></a><a class="orbit-button secondary" href="/tools.html">Try local tools <span aria-hidden="true">→</span></a></div>
         <div class="orbit-hero-note"><span class="orbit-tiny-shield" aria-hidden="true">◇</span> Local-first tools. Clear limits. Open-source thinking.</div>
       </div>
-      <div class="orbit-scene" id="securityScene">
-        <div class="orbit-scene-label"><span>THE MALGUARD CORE</span><span>01 / EXPLORE</span></div>
-        <div class="orbit-halo" aria-hidden="true"></div>
-        <div class="orbit-system" aria-hidden="true"><div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div><div class="orbit-ring ring-three"></div><div class="orbit-ring ring-four"></div><div class="orbit-satellite sat-one"></div><div class="orbit-satellite sat-two"></div></div>
-        <button class="orbit-core" id="openCore" type="button" aria-haspopup="dialog" aria-controls="coreDialog" aria-label="Explore the MalGuard security layers"><span class="core-glass"><img src="/assets/malguard-core-mark.svg" width="160" height="180" alt=""><span class="core-scan" aria-hidden="true"></span></span></button>
-        <span class="orbit-float float-one" aria-hidden="true"><i></i> Local inspection<span>YOUR FILES. YOUR DEVICE.</span></span>
-        <span class="orbit-float float-two" aria-hidden="true"><span class="float-icon">⌘</span> Evidence before trust</span>
-        <div class="orbit-scene-footer"><span>Tap the shield to explore <span aria-hidden="true">↗</span></span><button id="motionToggle" class="motion-toggle" type="button" aria-pressed="false">Pause motion</button></div>
+      <div class="workstation-scene" id="securityScene">
+        <div class="workstation-caption"><span>THE MALGUARD WORKSPACE</span><span>DESIGNED TO BE EXPLORED</span></div>
+        <div class="workstation-orbit orbit-a" aria-hidden="true"></div><div class="workstation-orbit orbit-b" aria-hidden="true"></div>
+        <div class="workstation-floor" aria-hidden="true"></div>
+        <button class="workstation" id="openCore" type="button" aria-haspopup="dialog" aria-controls="coreDialog" aria-label="Open the interactive MalGuard computer">
+          <span class="computer-lid">
+            <span class="computer-camera" aria-hidden="true"></span>
+            <span class="computer-screen" aria-hidden="true">
+              <span class="screen-top"><img src="/assets/malguard-site-logo.svg" width="110" height="32" alt=""><span>INTERACTIVE PREVIEW</span></span>
+              <span class="screen-content"><span class="screen-sidebar"><i>◈</i><i>⌕</i><i>⌘</i><i>⌁</i></span><span class="screen-main"><span class="screen-eyebrow">EVIDENCE BEFORE TRUST</span><span class="screen-title">A closer look.<br>A clearer decision.</span><span class="screen-chips"><span>Identify</span><span>Inspect</span><span>Understand</span></span><span class="screen-file"><span class="screen-file-icon">#</span><span>malguard-demo.txt<small>LOCAL · BENIGN TEXT SAMPLE</small></span><span>↗</span></span></span><span class="screen-emblem"><span></span><img src="/assets/malguard-core-mark.svg" alt="" width="125" height="145"></span></span>
+              <span class="screen-bottom"><span>YOUR DEVICE. YOUR DATA.</span><span>OPEN WORKSPACE ↗</span></span>
+            </span>
+          </span>
+          <span class="computer-base" aria-hidden="true"><span class="computer-keys"></span><span class="computer-trackpad"></span></span>
+          <span class="computer-edge" aria-hidden="true"></span>
+          <span class="computer-open-label">Tap to open <span aria-hidden="true">↗</span></span>
+        </button>
+        <div class="workstation-tag tag-local" aria-hidden="true"><span class="tag-symbol">⌘</span><div>Local by design<small>FILES STAY WITH YOU</small></div></div>
+        <div class="workstation-tag tag-evidence" aria-hidden="true"><span class="tag-symbol">{ }</span><div>Built in the open<small>EXPLORE THE EVIDENCE</small></div></div>
+        <div class="workstation-controls"><span>A working demo. A transparent approach.</span><button id="motionToggle" class="motion-toggle" type="button" aria-pressed="false">Pause motion</button></div>
       </div>
     </div>
     <div class="container orbit-hero-bottom"><a href="#products">DISCOVER THE ECOSYSTEM <span aria-hidden="true">↓</span></a><span>SCAN SMART. PLAY SAFE.</span></div>
@@ -179,18 +191,21 @@
           <div class="product-art mod-art" aria-hidden="true"><div class="file-layer back"></div><div class="file-layer front"><span>.ASI</span><span>.DLL · .ZIP</span></div><div class="file-check">⌕</div></div>
           <h3>GTA Guard</h3><p>Look inside your next GTA mod. Explore Standard, Plus and Pro analysis paths for supported files.</p>
           <div class="orbit-product-meta">Windows x64 · Unsigned Preview</div><a class="orbit-card-link" href="/gta-guard.html">Explore GTA Guard <span aria-hidden="true">↗</span></a>
+          <details class="glass-disclosure"><summary>Inside GTA Guard<span aria-hidden="true">+</span></summary><p>Inspect supported file formats, compare analysis modes, and review the isolation requirements before using a preview.</p></details>
         </article>
         <article class="orbit-product product-ai" data-reveal data-tilt>
           <div class="orbit-product-top"><span>02 / INTELLIGENCE</span><span class="orbit-status">WEB PREVIEW</span></div>
           <div class="product-art ai-art" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
           <h3>Malware AI</h3><p>A dedicated space for AI-assisted security analysis. Explore the preview and its access options.</p>
           <div class="orbit-product-meta">AI assistance · Preview access</div><a class="orbit-card-link" href="/ai-intelligence.html">Explore Intelligence <span aria-hidden="true">↗</span></a>
+          <details class="glass-disclosure"><summary>Inside Malware AI<span aria-hidden="true">+</span></summary><p>AI-assisted explanations belong alongside verifiable evidence. Preview access and model availability remain separate from scan results.</p></details>
         </article>
         <article class="orbit-product product-link" data-reveal data-tilt>
           <div class="orbit-product-top"><span>03 / SAFER LINKS</span><span class="orbit-status planned">IN DEVELOPMENT</span></div>
           <div class="product-art link-art" aria-hidden="true"><div></div><div></div><span>?</span></div>
           <h3>Game Scam Guard</h3><p>A focused approach to gaming scams and suspicious destinations. Currently in development.</p>
           <div class="orbit-product-meta">Planned product · No public release</div><a class="orbit-card-link" href="/products.html#game-scam-guard">See product plans <span aria-hidden="true">↗</span></a>
+          <details class="glass-disclosure"><summary>Inside Game Scam Guard<span aria-hidden="true">+</span></summary><p>A planned tool for suspicious gaming destinations. Use the available local link inspector while development continues.</p></details>
         </article>
       </div>
       <p class="orbit-availability">GTA Guard public installer distribution is paused. <a href="/gta-guard.html#platforms">Check current availability <span aria-hidden="true">↗</span></a></p>
@@ -208,9 +223,28 @@
       </div>
     </div>
   </section>
+  <section class="orbit-section code-section" id="open-source">
+    <div class="container code-layout">
+      <div class="code-copy" data-reveal><span class="orbit-eyebrow">BUILT IN THE OPEN / 03</span><h2>No black box.<br><em>Look inside.</em></h2><p class="orbit-section-copy">The details matter. Explore a real piece of local analysis: a SHA-256 fingerprint, calculated right here in your browser.</p><p class="code-note">A fingerprint identifies bytes. It does not tell you whether a file is safe.</p><a class="orbit-text-link" href="https://github.com/MalGuard/malguard-core" target="_blank" rel="noopener">Explore the source <span aria-hidden="true">↗</span></a></div>
+      <div class="code-window" data-reveal>
+        <div class="code-window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>local-fingerprint.js</span><span>JAVASCRIPT</span></div>
+        <pre class="code-listing" tabindex="0" aria-label="JavaScript SHA-256 example"><code><span class="code-comment">// Your browser. No upload.</span>
+<span class="code-purple">const</span> sample = <span class="code-string">'MalGuard demo — local only.'</span>;
+<span class="code-purple">const</span> bytes = <span class="code-purple">new</span> TextEncoder().encode(sample);
+<span class="code-purple">const</span> digest = <span class="code-purple">await</span> crypto.subtle.digest(
+  <span class="code-string">'SHA-256'</span>, bytes
+);
+<span class="code-purple">const</span> fingerprint = [...<span class="code-purple">new</span> Uint8Array(digest)]
+  .map(byte =&gt; byte.toString(<span class="code-number">16</span>).padStart(<span class="code-number">2</span>, <span class="code-string">'0'</span>))
+  .join(<span class="code-string">''</span>);</code></pre>
+        <div class="code-runner"><button class="orbit-button primary" type="button" data-run-fingerprint>Run this example <span aria-hidden="true">▷</span></button><span>BENIGN TEXT ONLY · NO NETWORK</span></div>
+        <div class="code-output" role="status" aria-live="polite" data-fingerprint-output>Ready. Run the example to calculate its real fingerprint.</div>
+      </div>
+    </div>
+  </section>
   <section class="orbit-section" id="local-tools">
     <div class="container">
-      <div class="orbit-section-head" data-reveal><div><span class="orbit-eyebrow">START HERE / 03</span><h2>Small tools.<br><em>Useful answers.</em></h2></div><p>Two practical ways to inspect before you trust. These checks run locally in your browser.</p></div>
+      <div class="orbit-section-head" data-reveal><div><span class="orbit-eyebrow">START HERE / 04</span><h2>Small tools.<br><em>Useful answers.</em></h2></div><p>Two practical ways to inspect before you trust. These checks run locally in your browser.</p></div>
       <div class="orbit-tools-grid">
         <a class="orbit-tool-card" href="/tools.html#file-fingerprint" data-reveal><span class="orbit-tool-icon" aria-hidden="true">#</span><div><span class="orbit-eyebrow">FILE FINGERPRINT</span><h3>Know the identity.</h3><p>Calculate a file’s SHA-256. Your file stays on your device.</p></div><span class="orbit-tool-arrow" aria-hidden="true">↗</span><div class="hash-decoration" aria-hidden="true">SHA-256 <span>e3b0 · c442 · 98fc · 1c14</span></div></a>
         <a class="orbit-tool-card" href="/scan-url.html" data-reveal><span class="orbit-tool-icon" aria-hidden="true">↗</span><div><span class="orbit-eyebrow">LINK INSPECTOR</span><h3>Look before you click.</h3><p>Inspect URL text for warning signs without opening the destination.</p></div><span class="orbit-tool-arrow" aria-hidden="true">↗</span><div class="hash-decoration" aria-hidden="true">HTTPS:// <span>inspect · understand · decide</span></div></a>
@@ -218,14 +252,30 @@
     </div>
   </section>
   <section class="orbit-section orbit-trust" id="trust">
-    <div class="container orbit-trust-inner" data-reveal><span class="orbit-eyebrow">TRUST, IN THE OPEN / 04</span><h2>Security should be<br><em>something you can inspect.</em></h2><p>Understand the privacy choices, inspect the source, and see the limits. No scan can guarantee that a file, mod, link, or destination is harmless.</p><div class="orbit-actions"><a class="orbit-button primary" href="/trust.html">Visit the Trust Center <span aria-hidden="true">↗</span></a><a class="orbit-button secondary" href="https://github.com/MalGuard/malguard-core" rel="noopener" target="_blank">Explore the source <span aria-hidden="true">↗</span></a></div></div>
+    <div class="container orbit-trust-inner" data-reveal><span class="orbit-eyebrow">TRUST, IN THE OPEN / 05</span><h2>Security should be<br><em>something you can inspect.</em></h2><p>Understand the privacy choices, inspect the source, and see the limits. No scan can guarantee that a file, mod, link, or destination is harmless.</p><div class="orbit-actions"><a class="orbit-button primary" href="/trust.html">Visit the Trust Center <span aria-hidden="true">↗</span></a><a class="orbit-button secondary" href="https://github.com/MalGuard/malguard-core" rel="noopener" target="_blank">Explore the source <span aria-hidden="true">↗</span></a></div></div>
   </section>
 </main>
 <footer class="orbit-footer"><div class="container"><div class="orbit-footer-top"><div><img src="/assets/malguard-site-logo.svg" alt="MalGuard" width="158" height="46"><p>Scan smart. Play safe.</p></div><div><span>EXPLORE</span><a href="/products.html">Products</a><a href="/tools.html">Local tools</a><a href="/download.html">Downloads</a><a href="/app.html">MalGuard App</a></div><div><span>UNDERSTAND</span><a href="/docs.html">Documentation</a><a href="/trust.html">Trust Center</a><a href="/privacy.html">Privacy</a><a href="/labs.html">Labs</a></div><div><span>CONNECT</span><a href="/about.html">About MalGuard</a><a href="/founder.html">Our founder</a><a href="/support.html">Support</a><a href="/trust.html#vulnerability-disclosure">Report a vulnerability</a></div></div><div class="orbit-footer-word" aria-hidden="true">MalGuard<span>✳</span></div><div class="orbit-footer-bottom"><span>© 2026 MalGuard</span><span>Independent. Open. Evidence-led.</span><a href="#home">Back to top ↑</a></div></div></footer>
-<dialog class="orbit-dialog" id="coreDialog" aria-labelledby="coreDialogTitle"><div class="orbit-dialog-top"><span class="orbit-eyebrow">INSIDE MALGUARD</span><button type="button" class="orbit-icon-button" data-close-core aria-label="Close security layers">×</button></div><img src="/assets/malguard-core-mark.svg" alt="" width="70" height="80"><h2 id="coreDialogTitle">Evidence at the core.</h2><p>The shield represents MalGuard’s approach. This is an interactive explanation, not a live scan or device-protection status.</p><div class="orbit-dialog-layers"><div><span>01</span><strong>Start local</strong><p>Browser fingerprinting reads the file on your device.</p></div><div><span>02</span><strong>Keep limits visible</strong><p>Product availability, isolation and uncertainty stay explicit.</p></div><div><span>03</span><strong>Make trust inspectable</strong><p>Review source code, release integrity and policies.</p></div></div><a class="orbit-button primary" href="/trust.html">Read the security approach ↗</a></dialog>
+<dialog class="orbit-dialog workspace-dialog" id="coreDialog" aria-labelledby="coreDialogTitle">
+  <div class="workspace-top"><div><img src="/assets/malguard-core-mark.svg" width="24" height="28" alt=""><span>MALGUARD <span class="workspace-label">/ INTERACTIVE LAB</span></span></div><button type="button" class="orbit-icon-button" data-close-core aria-label="Close MalGuard workspace" autofocus>×</button></div>
+  <div class="workspace-heading"><div><span class="orbit-eyebrow">EXPLORE WHAT HAPPENS BEFORE TRUST</span><h2 id="coreDialogTitle">Your security workspace.</h2></div><span class="workspace-demo-badge">BENIGN DEMONSTRATION</span></div>
+  <div class="workspace-tabs" role="tablist" aria-label="Workspace views"><button id="lab-tab-analysis" type="button" role="tab" aria-selected="true" aria-controls="lab-analysis" tabindex="0">01 <span>Analysis</span></button><button id="lab-tab-source" type="button" role="tab" aria-selected="false" aria-controls="lab-source" tabindex="-1">02 <span>Source</span></button><button id="lab-tab-layers" type="button" role="tab" aria-selected="false" aria-controls="lab-layers" tabindex="-1">03 <span>Layers</span></button></div>
+  <div class="workspace-panel" id="lab-analysis" role="tabpanel" aria-labelledby="lab-tab-analysis" tabindex="0">
+    <div class="lab-analysis-grid"><div class="lab-file"><div class="lab-file-art" aria-hidden="true">.txt<span>#</span></div><h3>Meet your first sample.</h3><p>A fixed, harmless text sample. Calculate its real SHA-256 identity locally.</p><code>MalGuard demo — local only.</code><button class="orbit-button primary" type="button" data-run-fingerprint>Calculate fingerprint <span aria-hidden="true">▷</span></button></div><div class="lab-evidence"><span class="orbit-eyebrow">WHAT THIS DEMO DOES</span><ol><li><span>01</span><div><strong>Identify the input</strong><p>Encode the displayed text as UTF-8 bytes.</p></div></li><li><span>02</span><div><strong>Calculate its fingerprint</strong><p>Use the browser’s SHA-256 implementation.</p></div></li><li><span>03</span><div><strong>Keep the limits visible</strong><p>No malware detection or isolation is performed in this demo.</p></div></li></ol><div class="code-output" role="status" aria-live="polite" data-fingerprint-output>Ready. No file is uploaded or executed.</div></div></div>
+    <p class="lab-footnote">This workspace explains MalGuard’s approach. It is not a live device-protection status or a safety verdict.</p>
+  </div>
+  <div class="workspace-panel" id="lab-source" role="tabpanel" aria-labelledby="lab-tab-source" tabindex="0" hidden><div class="lab-source-head"><span class="orbit-eyebrow">THE CODE BEHIND THIS DEMO</span><a href="https://github.com/MalGuard/malguard.github.io/blob/main/assets/experience.js" target="_blank" rel="noopener">View source ↗</a></div><pre class="code-listing" tabindex="0"><code><span class="code-comment">// Fixed benign input; nothing leaves this browser.</span>
+<span class="code-purple">const</span> bytes = <span class="code-purple">new</span> TextEncoder()
+  .encode(<span class="code-string">'MalGuard demo — local only.'</span>);
+<span class="code-purple">const</span> digest = <span class="code-purple">await</span> crypto.subtle.digest(<span class="code-string">'SHA-256'</span>, bytes);
+<span class="code-purple">const</span> fingerprint = [...<span class="code-purple">new</span> Uint8Array(digest)]
+  .map(byte =&gt; byte.toString(<span class="code-number">16</span>).padStart(<span class="code-number">2</span>, <span class="code-string">'0'</span>))
+  .join(<span class="code-string">''</span>);</code></pre><p class="lab-footnote">A reproducible identity, not a malware verdict. Identical bytes produce the same fingerprint.</p></div>
+  <div class="workspace-panel" id="lab-layers" role="tabpanel" aria-labelledby="lab-tab-layers" tabindex="0" hidden><div class="lab-layers-grid"><a href="/tools.html"><span>01 / LOCAL TOOLS</span><strong>Start with identity.</strong><p>Fingerprint a file or inspect a link’s text on your device.</p><b aria-hidden="true">↗</b></a><a href="/gta-guard.html"><span>02 / GTA GUARD</span><strong>Understand the evidence.</strong><p>Review analysis modes and current product availability.</p><b aria-hidden="true">↗</b></a><a href="/trust.html"><span>03 / TRANSPARENCY</span><strong>Inspect our approach.</strong><p>Read the security limits, privacy choices and release details.</p><b aria-hidden="true">↗</b></a></div></div>
+</dialog>
 
 <script src="/assets/contextual-header.js?v=20260930-1" defer></script>
-<script src="/assets/experience.js?v=20260930-1" defer></script>
+<script src="/assets/experience.js?v=20261001-1" defer></script>
 <script src="/assets/site-entry.js?v=20260930-1" defer></script>
 <noscript><style>.site-entry-gate{display:none!important}.site-entry-locked{overflow:auto!important}</style><p class="container">JavaScript is needed for interactive tools and administrator sign-in. Public product pages remain available.</p></noscript>
 </body></html>
