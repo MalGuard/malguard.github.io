@@ -143,7 +143,7 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     const a=await frameCount();await page.waitForTimeout(200);assert.ok(await frameCount()>a);
     await page.locator('#inspectProduct0').click();assert.ok(await page.locator('#productInspector').evaluate(e=>e.open));
     await page.waitForTimeout(800);assert.equal(await page.locator('.product-flight').count(),0);
-    await page.locator('#closeInspector').click();assert.equal(await page.evaluate(()=>document.activeElement.id),'inspectProduct0');
+    await page.locator('#closeInspector').click();await page.waitForFunction(()=>!document.querySelector('#productInspector').open);assert.equal(await page.evaluate(()=>document.activeElement.id),'inspectProduct0');
     await page.locator('#trust').scrollIntoViewIfNeeded();await page.waitForTimeout(150);const b=await frameCount();await page.waitForTimeout(180);assert.equal(await frameCount(),b);
     await page.evaluate(()=>scrollTo(0,0));await page.waitForTimeout(250);
     await page.locator('#motionToggle').click();const c=await frameCount();await page.waitForTimeout(180);assert.equal(await frameCount(),c);

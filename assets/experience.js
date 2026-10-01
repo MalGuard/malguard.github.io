@@ -60,7 +60,7 @@
  const paused=()=>reduced.matches||root.classList.contains('motion-paused');
  const cards=[...document.querySelectorAll('.orbit-product')];
  const dialog=document.getElementById('productInspector');
- let origin=null,flight=null,flightAnimation=null;
+ let origin=null,flight=null,flightAnimation=null,closing=false,closeTimer=0;
  const paragraphs=[...document.querySelectorAll('.evidence-notes>div')];
  const stopFlight=()=>{flightAnimation?.cancel();flight?.remove();flight=null;flightAnimation=null;};
  const field=(id,text)=>{const el=document.getElementById(id);if(el)el.textContent=text;};
@@ -101,10 +101,21 @@
     if(!paused())dialog.querySelector('.inspector-details').animate([{opacity:0,transform:'translateY(15px)'},{opacity:1,transform:'none'}],{duration:580,delay:160,fill:'both',easing:'cubic-bezier(.16,1,.3,1)'});
    });
   });
-  document.getElementById('closeInspector').addEventListener('click',()=>dialog.close());
-  dialog.addEventListener('click',e=>{if(e.target!==dialog)return;const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();});
-  dialog.addEventListener('close',()=>{stopFlight();origin?.focus({preventScroll:true});});
-  window.addEventListener('malguard-motion',()=>{if(paused()){stopFlight();dialog.getAnimations({subtree:true}).forEach(a=>{if(a.effect?.getTiming().iterations!==Infinity)a.finish();});}});
+
+  function requestClose(){
+   if(closing)return;
+   if(paused()){dialog.close();return;}
+   closing=true;
+   lift(origin?.closest('.orbit-product'),true);
+   dialog.querySelector('.inspector-grid').animate([{opacity:1},{opacity:0}],{duration:280,fill:'both'});
+   closeTimer=setTimeout(()=>dialog.close(),390);
+  }
+  document.getElementById('closeInspector').addEventListener('click',requestClose);
+  dialog.addEventListener('cancel',e=>{e.preventDefault();requestClose();});
+
+  dialog.addEventListener('click',e=>{if(e.target!==dialog)return;const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)requestClose();});
+  dialog.addEventListener('close',()=>{clearTimeout(closeTimer);closing=false;stopFlight();dialog.querySelector('.inspector-grid').getAnimations().forEach(a=>a.cancel());origin?.focus({preventScroll:true});});
+  window.addEventListener('malguard-motion',()=>{if(paused()){if(closing){clearTimeout(closeTimer);dialog.close();}stopFlight();dialog.getAnimations({subtree:true}).forEach(a=>{if(a.effect?.getTiming().iterations!==Infinity)a.finish();});}});
  }
  cards.forEach(card=>{
   let raf=0;
