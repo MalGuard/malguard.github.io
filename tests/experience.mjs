@@ -61,6 +61,9 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     await check(`${name} ${width}px interactive computer and transparent local demo`,async()=>{
       await page.goto(base+'/');await publicEntry(page);
       let outbound=0;const record=req=>{if(!req.url().startsWith(base))outbound++};page.on('request',record);
+      const previewFile=await page.locator('.screen-file').boundingBox();
+      const previewFooter=await page.locator('.screen-bottom').boundingBox();
+      assert.ok(previewFile.y+previewFile.height<=previewFooter.y+1,'Laptop preview content must not overlap its footer');
       await page.locator('#openCore').click();
       assert.ok(await page.locator('#coreDialog').evaluate(e=>e.open));
       const box=await page.locator('#coreDialog').boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);

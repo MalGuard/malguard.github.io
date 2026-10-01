@@ -145,3 +145,8 @@ body.mg-experience{background:radial-gradient(ellipse at 95% 3%,#39356812,transp
 .page-hidden *, .page-hidden *:before, .page-hidden *:after{animation-play-state:paused!important}
 .motion-paused .workstation-tag,.motion-paused .code-window{transform:none}
 @media(prefers-reduced-motion:reduce){.aurora{animation:none;will-change:auto}.workstation-tag,.code-window{transform:none}.workstation:hover .computer-lid,.workstation:focus-visible .computer-lid{transform:rotateX(-9deg) rotateY(-5deg)}}
+/* Keep output line boundaries and decorative motion consistent with user preferences. */
+.code-output{white-space:pre-wrap}
+.motion-paused dialog::backdrop{animation:none!important;transition:none!important}
+@media(prefers-reduced-motion:reduce){dialog::backdrop{animation:none!important;transition:none!important}}
+@media(max-width:560px){.screen-chips{display:none}}
