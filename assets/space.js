@@ -239,7 +239,7 @@
       points.push({f,p,s,pts});
     }
     if(pulse){
-      const elapsed=now-pulse.start, radius=elapsed*.48, prev=Math.max(0,radius-34);
+      const elapsed=Math.max(0,now-pulse.start), radius=elapsed*.48, prev=Math.max(0,radius-34);
       let best=null,bestD=1e9;
       for(const o of points){
         const d=Math.hypot(o.p.x-pulse.x,o.p.y-pulse.y);
@@ -264,7 +264,7 @@
     root.dataset.spaceScanned=String(files.reduce((n,f)=>n+(f.scanned?1:0),0));
   }
   function drawPulse(now){
-    if(!pulse)return;const radius=(now-pulse.start)*.48,alpha=clamp(1-radius/330,0,1);
+    if(!pulse)return;const radius=Math.max(0,(now-pulse.start)*.48),alpha=clamp(1-radius/330,0,1);
     ctx.strokeStyle='rgba(208,255,141,'+(alpha*.85)+')';ctx.lineWidth=2;ctx.beginPath();ctx.arc(pulse.x,pulse.y,radius,0,Math.PI*2);ctx.stroke();
   }
 
