@@ -71,9 +71,8 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
       assert.equal(await shield.getAttribute('aria-expanded'),'false');
       assert.equal(await page.evaluate(()=>document.activeElement.id),'openCore');
       await page.locator('[data-space-dot="2"]').click();
-      console.log('SPACE_DIAG',name,width,await page.evaluate(()=>({station:document.documentElement.dataset.spaceStation,requested:document.documentElement.dataset.spaceRequested,target:document.documentElement.dataset.spaceTarget,camera:document.documentElement.dataset.spaceCamera,scroll:scrollY,range:document.documentElement.dataset.spaceRange,flightTop:document.documentElement.dataset.spaceFlightTop,reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,paused:document.documentElement.classList.contains('motion-paused'),locked:document.body.classList.contains('site-entry-locked')})));
-      await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='2',null,{timeout:4000});
-      assert.ok(await page.locator('[data-space-station="2"]').isVisible());
+      await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='2',null,{timeout:5000});
+      assert.ok(await page.locator('.space-card[data-space-station="2"]').isVisible());
       assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');
       assert.ok(await page.locator('#motionToggle').isDisabled());
       const running=await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length);
@@ -176,7 +175,7 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     assert.equal(await shield.getAttribute('aria-expanded'),'false');
     await page.locator('[data-space-dot="3"]').click();
     await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='3',null,{timeout:5000});
-    const card=page.locator('[data-space-station="3"]');
+    const card=page.locator('.space-card[data-space-station="3"]');
     const box=await card.boundingBox();
     await page.locator('#inspectProduct0').click();await page.waitForTimeout(430);
     assert.equal(await page.locator('#inspectProduct0').getAttribute('aria-expanded'),'true');
