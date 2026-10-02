@@ -128,10 +128,10 @@ for (const [name, engine] of [['chromium', chromium], ['webkit', webkit]]) {
     await session.send('Emulation.setCPUThrottlingRate', { rate:4 });
     await page.locator('[data-space-dot="6"]').click();
     await page.waitForFunction(() => document.documentElement.dataset.spaceStation === '6', null, { timeout:8000 });
-    await page.waitForTimeout(650);
+    await page.waitForTimeout(2200);
     const perf = await page.evaluate(() => window.__malguardSpace.metrics());
     console.log('PERF_4X ' + JSON.stringify(perf));
-    assert.ok(Number.isFinite(perf.frameAverage) && perf.frameAverage < 30, '4x CPU average frame time must stay under 30 ms');
+    assert.ok(Number.isFinite(perf.frameAverage) && perf.frameAverage < 24, '4x CPU average frame time must recover below 24 ms');
     assert.ok(['full','adaptive'].includes(perf.quality));
     report.push({ browser:'chromium', width:1440, base, result:'4x-cpu-passed', performance:perf });
     await session.send('Emulation.setCPUThrottlingRate', { rate:1 });
