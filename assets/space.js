@@ -227,10 +227,10 @@
       let best=null,bestD=1e9;
       for(const o of points){
         const d=Math.hypot(o.p.x-pulse.x,o.p.y-pulse.y);
-        if(!o.f.scanned && d<=radius && d>=prev && d<280){o.f.scanned=true;const delta=Math.abs(d-radius);if(delta<bestD){best=o;bestD=delta;}}
+        if(!o.f.scanned && d<=radius && d>=prev && d<360){o.f.scanned=true;const delta=Math.abs(d-radius);if(delta<bestD){best=o;bestD=delta;}}
       }
       if(best){highlighted={f:best.f,x:best.p.x,y:best.p.y,until:now+1800};}
-      if(radius>330)pulse=null;
+      if(radius>410)pulse=null;
     }
     for(const o of points)(o.f.scanned?sc:un).push(o);
     const drawGroup=(arr,color,width)=>{
