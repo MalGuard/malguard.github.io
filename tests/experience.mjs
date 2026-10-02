@@ -71,7 +71,8 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
       assert.equal(await shield.getAttribute('aria-expanded'),'false');
       assert.equal(await page.evaluate(()=>document.activeElement.id),'openCore');
       await page.locator('[data-space-dot="2"]').click();
-      await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='2');
+      console.log('SPACE_DIAG',name,width,await page.evaluate(()=>({station:document.documentElement.dataset.spaceStation,requested:document.documentElement.dataset.spaceRequested,target:document.documentElement.dataset.spaceTarget,camera:document.documentElement.dataset.spaceCamera,scroll:scrollY,range:document.documentElement.dataset.spaceRange,flightTop:document.documentElement.dataset.spaceFlightTop,reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,paused:document.documentElement.classList.contains('motion-paused'),locked:document.body.classList.contains('site-entry-locked')})));
+      await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='2',null,{timeout:4000});
       assert.ok(await page.locator('[data-space-station="2"]').isVisible());
       assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');
       assert.ok(await page.locator('#motionToggle').isDisabled());
