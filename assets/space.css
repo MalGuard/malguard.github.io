@@ -53,7 +53,7 @@
 .space-status.paused{color:#ffc86b;border-color:#ffc86b44}
 .space-status.planned{color:#bdc9d7}
 .space-js .space-flight{height:700vh;min-height:4200px}
-.space-js .space-stage{position:sticky;top:0;height:100vh;height:100svh;min-height:560px;padding:0;overflow:hidden;background:var(--space-bg);isolation:isolate}
+.space-js .space-stage{position:sticky;top:80px;height:calc(100vh - 80px);height:calc(100svh - 80px);min-height:480px;padding:0;overflow:hidden;background:var(--space-bg);isolation:isolate}
 .space-js .space-canvas{display:block;position:absolute;inset:0;width:100%;height:100%;z-index:0;touch-action:pan-y}
 .space-js .space-cards{position:absolute;inset:0;z-index:3;pointer-events:none}
 .space-js .space-card{position:absolute;top:50%;left:clamp(22px,5vw,84px);width:min(470px,calc(100% - 88px));margin:0;opacity:0;visibility:hidden;transform:translateY(-46%);transition:opacity .24s ease,transform .34s cubic-bezier(.2,.8,.2,1),visibility 0s .34s;pointer-events:none}
