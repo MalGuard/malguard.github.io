@@ -18,7 +18,7 @@ async function enter(page) {
 async function station(page, i) {
   await page.locator(`[data-space-dot="${i}"]`).click();
   await page.waitForFunction(n => document.documentElement.dataset.spaceStation === String(n), i, { timeout:5000 });
-  const card = page.locator(`[data-space-station="${i}"]`);
+  const card = page.locator(`.space-card[data-space-station="${i}"]`);
   assert.ok(await card.isVisible(), 'Station '+i+' card must be visible');
   return card;
 }
