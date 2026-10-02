@@ -84,7 +84,7 @@
 
   let W=innerWidth,H=innerHeight,DPR=1,F=900,flightTop=0,range=1;
   let lowQuality=false, ema=16, slowFrames=0, frames=0;
-  let cameraT=0, targetT=0, active=-1, raf=0, last=0, prevBasis=null, prevPos=null;
+  let cameraT=0, targetT=0, active=-1, raf=0, last=0, prevBasis=null, prevPos=null, commanded=null;
   let shieldOpen=false, pulse=null, highlighted=null, pointerDown=null;
   const paused = () => reduced.matches || root.classList.contains('motion-paused') || document.hidden || document.body.classList.contains('site-entry-locked');
 
@@ -106,9 +106,15 @@
     const i=Math.floor(t), f=smooth(t-i), a=stationCamera(i), b=stationCamera(Math.min(N,i+1));
     return { p:mix3(a.p,b.p,f), l:mix3(a.l,b.l,f) };
   }
+  function syncScrollGeometry() {
+    const rect=flight.getBoundingClientRect();
+    flightTop=rect.top+scrollY;
+    range=Math.max(1,flight.offsetHeight-innerHeight);
+    root.dataset.spaceRange=String(Math.round(range));
+    root.dataset.spaceFlightTop=String(Math.round(flightTop));
+  }
   function scrollTarget() {
-    const y=scrollY;
-    return clamp((y-flightTop)/range,0,1)*N;
+    return clamp((scrollY-flightTop)/range,0,1)*N;
   }
   function setStation(i) {
     i=clamp(i,0,N);
@@ -125,8 +131,21 @@
     root.dataset.spaceStation=String(i);
   }
   function go(i) {
-    const y=flightTop+(clamp(i,0,N)/N)*range;
-    scrollTo({ top:y, behavior:reduced.matches || root.classList.contains('motion-paused') ? 'auto' : 'smooth' });
+    i=clamp(i,0,N);
+    syncScrollGeometry();
+    const y=flightTop+(i/N)*range;
+    root.dataset.spaceRequested=String(i);
+    if (reduced.matches || root.classList.contains('motion-paused')) {
+      commanded=null;
+      window.scrollTo(0,y);
+      targetT=cameraT=i;
+      setStation(i);
+      wake();
+      return;
+    }
+    commanded={station:i,y,started:performance.now()};
+    window.scrollTo({top:y,left:0,behavior:'smooth'});
+    targetT=i;
     wake();
   }
   dots.forEach((dot,i)=>dot.addEventListener('click',()=>go(i)));
@@ -163,9 +182,7 @@
   shieldButton?.addEventListener('click',()=>setShield(!shieldOpen));
 
   function measure(wakeAfter=true) {
-    const rect=flight.getBoundingClientRect();
-    flightTop=rect.top+scrollY;
-    range=Math.max(1,flight.offsetHeight-innerHeight);
+    syncScrollGeometry();
     W=Math.max(1,innerWidth);H=Math.max(1,innerHeight);
     DPR=Math.min(lowQuality?1:1.75,devicePixelRatio||1);
     canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);
@@ -257,7 +274,19 @@
     ema+=(dt-ema)*.06;
     if(!lowQuality){slowFrames=ema>24?slowFrames+1:Math.max(0,slowFrames-2);if(slowFrames>75){lowQuality=true;root.dataset.spaceQuality='adaptive';measure(false);}}
     root.dataset.spaceFrameAverage=ema.toFixed(2);
-    targetT=scrollTarget();
+    const scrollT=scrollTarget();
+    if(commanded){
+      targetT=commanded.station;
+      const arrived=Math.abs(scrollY-commanded.y)<2;
+      const expired=now-commanded.started>1600;
+      if(arrived||expired){
+        if(!arrived)window.scrollTo(0,commanded.y);
+        commanded=null;
+        targetT=scrollTarget();
+      }
+    }else targetT=scrollT;
+    root.dataset.spaceScroll=String(Math.round(scrollY));
+    root.dataset.spaceTarget=targetT.toFixed(3);
     if(paused())cameraT=targetT;else cameraT+=(targetT-cameraT)*.08;
     const c=currentCamera(cameraT),b=basis(c.p,c.l);
     const speed=prevPos?Math.hypot(c.p[0]-prevPos[0],c.p[1]-prevPos[1],c.p[2]-prevPos[2]):0;
@@ -285,10 +314,12 @@
   },{passive:true});
   canvas.addEventListener('pointercancel',()=>pointerDown=null,{passive:true});
   addEventListener('scroll',wake,{passive:true});
+  addEventListener('wheel',()=>{commanded=null;wake();},{passive:true});
+  addEventListener('touchstart',()=>{commanded=null;wake();},{passive:true});
   addEventListener('resize',()=>requestAnimationFrame(measure),{passive:true});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;}else wake();});
   addEventListener('malguard-motion',()=>{cameraT=scrollTarget();wake();});
-  new MutationObserver(wake).observe(document.body,{attributes:true,attributeFilter:['class']});
+  new MutationObserver(()=>measure()).observe(document.body,{attributes:true,attributeFilter:['class']});
   shieldImage?.addEventListener('load',wake,{once:true});
   reduced.addEventListener('change',()=>{cameraT=scrollTarget();wake();});
 
