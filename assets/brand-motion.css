@@ -312,7 +312,7 @@
 .mg-home .art-ai .product-sculpture i{animation-duration:22s!important}
 .mg-home .art-link .product-sculpture i{animation-duration:20s!important}
 .mg-home [data-reveal].revealed{
-  animation:cinematic-reveal .95s cubic-bezier(.18,.86,.22,1) both!important;
+  animation:cinematic-reveal .68s cubic-bezier(.18,.86,.22,1) both!important;
 }
 @keyframes cinematic-reveal{
   from{opacity:0;transform:translateY(30px) scale(.992);filter:blur(7px)}
