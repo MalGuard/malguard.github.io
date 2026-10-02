@@ -80,6 +80,9 @@ for (const [name, engine] of [['chromium', chromium], ['webkit', webkit]]) {
 
     for (let i = 0; i < 3; i++) {
       const card = await station(page, i + 3);
+      // Station activation has a short card entrance transition. Measure only
+      // after it settles so the flip assertion isolates the flip itself.
+      await page.waitForTimeout(380);
       const trigger = page.locator('#inspectProduct' + i);
       const before = await card.boundingBox();
       await trigger.click(); await page.waitForTimeout(430);
