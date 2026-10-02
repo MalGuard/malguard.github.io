@@ -37,7 +37,7 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
         return {scroll:document.documentElement.scrollWidth,client:vw,outside,spill,h1:!!document.querySelector('h1')};
       });
       assert.ok(state.h1,'h1 required'); assert.ok(state.scroll<=state.client+1,JSON.stringify(state));assert.deepEqual(state.outside,[],JSON.stringify(state.outside));assert.deepEqual(errors.slice(startErrors),[],'Runtime exception');
-      if (['/','/products.html','/tools.html','/gta-guard.html','/malware-ai-windows.html'].includes(path)) await page.screenshot({path:`test-results/${name}-${width}-${path==='/'?'home':path.slice(1).replace('.html','')}.png`,fullPage:true});
+      if (['/','/products.html','/tools.html','/gta-guard.html','/malware-ai-windows.html'].includes(path)) await page.screenshot({path:`test-results/${name}-${width}-${path==='/'?'home':path.slice(1).replace('.html','')}.png`,fullPage:path!=='/'});
     });
     await check(`${name} ${width}px substantive homepage copy is preserved`,async()=>{
       await page.goto(base+'/');await publicEntry(page);
@@ -59,12 +59,24 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
       await page.locator('#siteSearchInput').fill('fingerprint');
       await page.locator('#siteSearchResults button').click();await page.waitForURL('**/tools.html');
     });
-    await check(`${name} ${width}px inline shield and accordion`,async()=>{
-      await page.goto(base+'/');await publicEntry(page);await page.locator('#openCore').click();assert.equal(await page.locator('#openCore').getAttribute('aria-expanded'),'true');assert.equal(await page.locator('#coreDetails').getAttribute('aria-hidden'),'false');
-      await page.keyboard.press('Escape');assert.equal(await page.locator('#openCore').getAttribute('aria-expanded'),'false');assert.equal(await page.evaluate(()=>document.activeElement.id),'openCore');
-      const step=page.locator('.orbit-step').nth(1);await step.locator('summary').click();assert.ok(await step.evaluate(e=>e.open));
+    await check(`${name} ${width}px space flight shield and reduced motion`,async()=>{
+      await page.goto(base+'/');await publicEntry(page);
+      await page.waitForFunction(()=>document.documentElement.dataset.spaceReady==='true');
+      assert.equal(await page.locator('[data-space-dot]').count(),7);
+      const shield=page.locator('#openCore');
+      await shield.click();
+      assert.equal(await shield.getAttribute('aria-expanded'),'true');
+      assert.equal(await page.locator('#coreDetails').getAttribute('aria-hidden'),'false');
+      await page.keyboard.press('Escape');
+      assert.equal(await shield.getAttribute('aria-expanded'),'false');
+      assert.equal(await page.evaluate(()=>document.activeElement.id),'openCore');
+      await page.locator('[data-space-dot="2"]').click();
+      await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='2');
+      assert.ok(await page.locator('[data-space-station="2"]').isVisible());
       assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');
-      const running=await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length);assert.equal(running,0);
+      assert.ok(await page.locator('#motionToggle').isDisabled());
+      const running=await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length);
+      assert.equal(running,0);
     });
     await check(`${name} ${width}px URL inputs and local SHA-256`,async()=>{
       for(const path of ['/tools.html','/scan-url.html']){
@@ -90,20 +102,29 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
 
     await check(`${name} ${width}px spatial product inspection and developer example`,async()=>{
       await page.goto(base+'/');await publicEntry(page);
+      await page.waitForFunction(()=>document.documentElement.dataset.spaceReady==='true');
       assert.equal(await page.locator('#studioDevice').count(),0,'Unwanted computer is removed');
       for(let i=0;i<3;i++){
+        const station=i+3;
+        await page.locator(`[data-space-dot="${station}"]`).click();
+        await page.waitForFunction(n=>document.documentElement.dataset.spaceStation===String(n),station);
         const button=page.locator('#inspectProduct'+i);
         await button.focus();await page.keyboard.press('Enter');
-        assert.equal(await page.locator('#inspectProduct'+i).getAttribute('aria-expanded'),'true');
+        assert.equal(await button.getAttribute('aria-expanded'),'true');
         assert.equal(await page.locator('#productBack'+i+' h3').innerText(),['GTA Guard','Malware AI','Game Scam Guard'][i]);
         assert.ok(await page.locator('#productBack'+i+' .orbit-card-link').isVisible());
-        const box=await page.locator('#productBack'+i).boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);
+        const box=await page.locator('#productBack'+i).boundingBox();
+        assert.ok(box.x>=0&&box.x+box.width<=width+1);
         await page.screenshot({path:`test-results/${name}-${width}-product-${i}.png`});
         await page.keyboard.press('Escape');
-        assert.equal(await page.locator('#inspectProduct'+i).getAttribute('aria-expanded'),'false');
+        assert.equal(await button.getAttribute('aria-expanded'),'false');
         assert.equal(await page.evaluate(()=>document.activeElement.id),'inspectProduct'+i);
       }
+      await page.locator('[data-space-dot="3"]').click();
+      await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='3');
       await page.locator('#inspectProduct0').click();await page.locator('#productBack0 .product-return').click();
+      await page.locator('[data-space-dot="4"]').click();
+      await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='4');
       await page.locator('#inspectProduct1').click();await page.locator('#productBack1 .orbit-card-link').click();await page.waitForURL('**/ai-intelligence.html');
       await page.goto(base+'/');await publicEntry(page);
       await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.__copiedStudio=text;}}}));
@@ -116,6 +137,9 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
       assert.ok((await page.evaluate(()=>window.getSelection().toString())).includes('local-first'));
       assert.equal(await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length),0);
     });
+    await context.close();
+  }
+  await check(`${name} entry gate and failed authentication`,async()=>{
     await context.close();
   }
   await check(`${name} entry gate and failed authentication`,async()=>{
@@ -134,37 +158,48 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     const nojs=await browser.newContext({...fixtureTLS,javaScriptEnabled:false});const p=await nojs.newPage();await p.goto(base+'/');assert.ok(await p.getByRole('heading',{name:'Play freely. Trust carefully.'}).isVisible());assert.ok(await p.getByRole('link',{name:'Explore MalGuard'}).isVisible());assert.equal(await p.locator('#siteEntryGate').isVisible(),false);await nojs.close();
   });
 
-  await check(`${name} normal-motion transitions, reversals and pause`,async()=>{
+  await check(`${name} normal-motion flight, reversals and pause`,async()=>{
     const context=await browser.newContext({...fixtureTLS,viewport:{width:1280,height:850},reducedMotion:'no-preference'});
     await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
     const page=await context.newPage();activePage=page;await page.goto(base+'/');await publicEntry(page);
-    const frameCount=()=>page.evaluate(()=>Number(document.documentElement.dataset.networkFrames));
-    const a=await frameCount();await page.waitForTimeout(200);assert.ok(await frameCount()>a);
+    await page.waitForFunction(()=>document.documentElement.dataset.spaceReady==='true');
+    const frameCount=()=>page.evaluate(()=>Number(document.documentElement.dataset.spaceFrames||0));
+    const before=await frameCount();
+    await page.locator('[data-space-dot="2"]').click();
+    await page.waitForTimeout(220);
+    assert.ok(await frameCount()>before,'Camera flight must render while moving');
+    await page.locator('[data-space-dot="0"]').click();
+    await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='0');
     const shield=page.locator('#openCore');
-    const initial=await page.locator('.shield-left').evaluate(e=>getComputedStyle(e).transform);
-    await shield.click();await page.waitForTimeout(1200);
-    assert.notEqual(await page.locator('.shield-left').evaluate(e=>getComputedStyle(e).transform),initial);
-    await page.keyboard.press('Escape');assert.equal(await shield.getAttribute('aria-expanded'),'false');
-    const card=page.locator('.orbit-product').first();await card.scrollIntoViewIfNeeded();await page.waitForTimeout(900);
-    const before=await card.boundingBox();
-    await page.locator('#inspectProduct0').click();await page.waitForTimeout(1050);
+    await shield.click();
+    assert.equal(await shield.getAttribute('aria-expanded'),'true');
+    assert.equal(await page.evaluate(()=>document.documentElement.dataset.spaceShield),'open');
+    await page.keyboard.press('Escape');
+    assert.equal(await shield.getAttribute('aria-expanded'),'false');
+    await page.locator('[data-space-dot="3"]').click();
+    await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='3');
+    const card=page.locator('[data-space-station="3"]');
+    const box=await card.boundingBox();
+    await page.locator('#inspectProduct0').click();await page.waitForTimeout(430);
     assert.equal(await page.locator('#inspectProduct0').getAttribute('aria-expanded'),'true');
-    const after=await card.boundingBox();assert.ok(Math.abs(before.height-after.height)<1,'Turning a card must not move the layout');
-    assert.equal(await page.locator('.product-front').first().evaluate(e=>e.inert),true);
-    await page.keyboard.press('Escape');await page.waitForTimeout(1050);
+    const after=await card.boundingBox();
+    assert.ok(Math.abs(box.height-after.height)<1,'Turning a card must not move the layout');
+    assert.equal(await page.locator('.space-product-card .product-front').first().evaluate(e=>e.inert),true);
+    await page.keyboard.press('Escape');await page.waitForTimeout(430);
     assert.equal(await page.evaluate(()=>document.activeElement.id),'inspectProduct0');
     for(let cycle=0;cycle<3;cycle++){
-      await page.locator('#inspectProduct0').click();await page.waitForTimeout(100);await page.keyboard.press('Escape');
-      await page.waitForTimeout(1000);
+      await page.locator('#inspectProduct0').click();await page.waitForTimeout(60);await page.keyboard.press('Escape');await page.waitForTimeout(430);
       assert.equal(await page.locator('#inspectProduct0').getAttribute('aria-expanded'),'false');
       assert.equal(await page.evaluate(()=>document.activeElement.id),'inspectProduct0');
     }
-    await page.locator('#motionToggle').click();await page.waitForTimeout(80);
-    const c=await frameCount();await page.waitForTimeout(200);assert.equal(await frameCount(),c);
+    await page.locator('#motionToggle').click();await page.waitForTimeout(120);
+    const stopped=await frameCount();await page.waitForTimeout(260);assert.equal(await frameCount(),stopped);
     assert.equal(await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length),0);
+    await page.locator('[data-space-dot="0"]').click();await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='0');
     await page.locator('#openCore').click();assert.equal(await shield.getAttribute('aria-expanded'),'true','Paused motion keeps controls usable');
     await context.close();
   });
+  await browser.close();
   await browser.close();
 }
 await writeFile('test-results/report.json',JSON.stringify(report,null,2));
