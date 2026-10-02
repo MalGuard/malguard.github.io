@@ -12,7 +12,7 @@ for(const width of [390,1440]){
   await page.goto(base);await page.evaluate(()=>document.fonts.ready);
   await page.locator('#sitePublicEntry').click();
   await page.waitForFunction(()=>document.documentElement.dataset.spaceReady==='true');
-  async function shot(name){await page.screenshot({path:'test-results/visual-'+width+'-'+name+'.jpg',type:'jpeg',quality:72});console.log('SCREENSHOT '+width+'-'+name);}
+  async function shot(name){const r=await page.locator('.space-card.is-active').boundingBox();if(!r||r.y<70||r.y+r.height>innerHeight-6)throw new Error('Active card leaves viewport at '+width+' '+name+': '+JSON.stringify(r));await page.screenshot({path:'test-results/visual-'+width+'-'+name+'.jpg',type:'jpeg',quality:72});console.log('SCREENSHOT '+width+'-'+name);}
   async function go(i){await page.locator(`[data-space-dot="${i}"]`).click();await page.waitForFunction(n=>document.documentElement.dataset.spaceStation===String(n),i,{timeout:5000});}
   await shot('first-view');
   await page.locator('#openCore').click();await page.waitForTimeout(180);await shot('shield-open');
