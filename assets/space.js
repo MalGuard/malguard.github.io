@@ -261,6 +261,7 @@
       if(match){highlighted.x=match.p.x;highlighted.y=match.p.y;scanLabel.textContent=highlighted.f.name+'  '+highlighted.f.hash;scanLabel.style.left=highlighted.x+'px';scanLabel.style.top=highlighted.y+'px';scanLabel.classList.add('is-visible');}
       else scanLabel.classList.remove('is-visible');
     }else{highlighted=null;scanLabel.classList.remove('is-visible');}
+    root.dataset.spaceScanned=String(files.reduce((n,f)=>n+(f.scanned?1:0),0));
   }
   function drawPulse(now){
     if(!pulse)return;const radius=(now-pulse.start)*.48,alpha=clamp(1-radius/330,0,1);
