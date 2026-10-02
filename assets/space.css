@@ -24,12 +24,12 @@
 .space-rule{height:1px;background:var(--space-line);margin:22px 0}
 .space-meta{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px;color:#b9c5d3;font-size:12px}
 .space-meta span{border:1px solid var(--space-line);border-radius:999px;padding:5px 9px}
-.space-core-details{display:grid;gap:10px;margin-top:18px}
+.space-core-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px}
 .space-core-details[hidden]{display:none}
-.space-core-note{padding:12px 14px;border:1px solid var(--space-line);border-radius:14px;background:#ffffff05}
+.space-core-note{padding:10px 11px;border:1px solid var(--space-line);border-radius:14px;background:#ffffff05}
 .space-core-note span{color:#b5c0ce;font-size:10px;letter-spacing:.08em}
 .space-core-note h3{margin:4px 0 2px;font-size:15px}
-.space-core-note p{margin:0;font-size:12px}
+.space-core-note p{margin:0;font-size:11px;line-height:1.45}
 .space-preserved-copy{display:none!important}
 .space-anchor{position:absolute;left:0;width:1px;height:1px;pointer-events:none}
 .space-anchor.method{top:28.5%}.space-anchor.products{top:50%}
@@ -80,8 +80,14 @@
   .space-card,.space-card:nth-child(even){max-width:none;margin:0}
   .space-js .space-card,.space-js .space-card.is-right{left:12px;right:12px;top:auto;bottom:calc(60px + env(safe-area-inset-bottom,0px));width:auto;transform:translateY(12px);padding:20px;border-radius:18px}
   .space-js .space-card.is-active,.space-js .space-product-card.is-active{transform:none}
-  .space-card h1{font-size:clamp(40px,11vw,58px)}
+  .space-card h1{font-size:clamp(36px,10.2vw,52px)}
   .space-card h2{font-size:clamp(29px,8vw,42px)}
+  .space-card[data-space-station="0"] .space-small{display:none}
+  .space-card[data-space-station="0"] .space-actions{margin-top:12px}
+  .space-core-details{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:10px}
+  .space-core-note{padding:8px 6px}
+  .space-core-note span,.space-core-note p{display:none}
+  .space-core-note h3{font-size:11px;line-height:1.2;margin:0}
   .space-card p{font-size:13px;line-height:1.55;margin-top:9px}
   .space-card p.space-mobile-hide{display:none}
   .space-actions{margin-top:14px}
