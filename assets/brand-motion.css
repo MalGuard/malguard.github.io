@@ -145,3 +145,209 @@
 @media(max-width:600px){.mg-home .orbit-scene{height:590px}.mg-home .orbit-core{width:190px;height:246px;top:47%}.core-note:nth-child(1){top:38px}}
 @media(max-width:360px){.mg-home .orbit-core{width:165px;height:214px}}
 .mg-home :is(.orbit-button,.orbit-card-link,.product-inspect,.orbit-text-link,.stack-toggle)>span[aria-hidden]{font-family:Arial,'DejaVu Sans',sans-serif!important;font-variant-emoji:text}
+
+
+/* CINEMATIC PARTICLE BACKDROP V2
+   The particle field is a continuous environmental layer, inspired by the
+   supplied reference's portal / stream / horizon / black-hole transitions.
+   Product UI remains legible and interactive above it. */
+.mg-home{
+  --mg-bg:#02040b;
+  --cinematic-blue:#6aaeff;
+  --cinematic-cyan:#86e8ff;
+  --cinematic-violet:#9c7dff;
+  --cinematic-pink:#ff8bd8;
+  background:
+    radial-gradient(circle at 50% -12%,rgba(92,132,255,.12),transparent 38%),
+    #02040b!important;
+}
+.mg-home #networkField.network-field{
+  z-index:0;
+  opacity:.96;
+  filter:saturate(1.08) contrast(1.05);
+}
+.mg-home .orbit-home,
+.mg-home .orbit-footer{position:relative;z-index:1}
+.mg-home .orbit-home{
+  background:
+    linear-gradient(180deg,rgba(2,4,11,.05),rgba(2,4,11,.18) 26%,rgba(2,4,11,.06) 72%,rgba(2,4,11,.5));
+}
+.mg-home #navbar.nav{
+  background:linear-gradient(180deg,rgba(3,6,13,.9),rgba(3,6,13,.7))!important;
+  border-bottom-color:rgba(165,195,255,.13)!important;
+  box-shadow:0 12px 40px rgba(0,0,0,.14)!important;
+}
+.mg-home .orbit-grid-bg{
+  opacity:.16!important;
+  -webkit-mask-image:radial-gradient(ellipse 70% 75% at 54% 45%,#000 15%,transparent 72%);
+  mask-image:radial-gradient(ellipse 70% 75% at 54% 45%,#000 15%,transparent 72%);
+}
+.mg-home .orbit-hero{
+  min-height:calc(100svh - 80px);
+  background:
+    radial-gradient(ellipse at 69% 46%,rgba(85,153,255,.08),transparent 34%),
+    linear-gradient(90deg,rgba(2,4,11,.76) 0%,rgba(2,4,11,.28) 40%,rgba(2,4,11,.06) 72%,rgba(2,4,11,.44) 100%)!important;
+}
+.mg-home .orbit-hero-grid{
+  min-height:calc(100svh - 135px);
+  align-items:center;
+  padding-block:64px 34px;
+}
+.mg-home .orbit-hero-copy{
+  position:relative;
+  z-index:3;
+  text-shadow:0 12px 48px rgba(0,0,0,.44);
+}
+.mg-home .orbit-home h1{
+  font-size:clamp(62px,7.4vw,104px);
+  line-height:.94;
+  letter-spacing:-.065em;
+  max-width:8.6ch;
+}
+.mg-home .orbit-home h1 em{
+  background:linear-gradient(98deg,#fff 6%,#a8d7ff 43%,#ae9bff 74%,#ffd0ef 108%);
+  background-clip:text;
+  -webkit-background-clip:text;
+  color:transparent;
+  filter:drop-shadow(0 0 20px rgba(112,170,255,.08));
+}
+.mg-home .orbit-intro{
+  max-width:480px;
+  color:#b8c4d8!important;
+  font-size:16px;
+}
+.mg-home .orbit-eyebrow{
+  color:#a9cbff!important;
+  letter-spacing:.17em;
+}
+.mg-home .orbit-eyebrow i{
+  background:#77b7ff!important;
+  box-shadow:0 0 18px rgba(99,178,255,.7);
+}
+.mg-home .orbit-button.primary{
+  background:linear-gradient(112deg,#eff6ff,#c5dcff 48%,#e9dcff)!important;
+  border-color:rgba(235,244,255,.95)!important;
+  color:#0a1120!important;
+  box-shadow:0 16px 46px rgba(80,137,255,.14),inset 0 1px 0 #fff;
+}
+.mg-home .orbit-button.secondary{
+  border-color:rgba(180,207,255,.24)!important;
+  background:rgba(7,12,27,.32)!important;
+  backdrop-filter:blur(14px);
+}
+.mg-home .orbit-scene{
+  background:radial-gradient(circle at 50% 48%,rgba(86,151,255,.035),transparent 46%);
+}
+.mg-home .shield-aura{
+  background:radial-gradient(ellipse,rgba(114,174,255,.09),transparent 66%)!important;
+}
+.mg-home .shield-aura i{
+  border-color:rgba(137,187,255,.21)!important;
+  animation-duration:13s!important;
+}
+.mg-home .shield-heart{
+  background:radial-gradient(circle,rgba(129,190,255,.15),rgba(116,108,255,.04) 40%,transparent 70%)!important;
+  box-shadow:0 0 90px rgba(107,164,255,.08)!important;
+}
+.mg-home .shield-heart img{
+  filter:brightness(1.55) drop-shadow(0 0 19px rgba(147,205,255,.5))!important;
+}
+.mg-home .orbit-principles{
+  border-block:1px solid rgba(151,184,241,.12)!important;
+  background:rgba(3,7,18,.53)!important;
+  backdrop-filter:blur(13px)!important;
+}
+.mg-home [data-cinematic-scene]{
+  position:relative;
+  isolation:isolate;
+}
+.mg-home [data-cinematic-scene]::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(2,4,11,.22),rgba(2,4,11,.04) 22%,rgba(2,4,11,.04) 78%,rgba(2,4,11,.25));
+}
+.mg-home .orbit-method,
+.mg-home .studio-code-section,
+.mg-home .orbit-trust{
+  background:transparent!important;
+  border-color:rgba(160,192,246,.12)!important;
+}
+.mg-home .orbit-method-grid,
+.mg-home .studio-code-grid,
+.mg-home #products>.container,
+.mg-home #local-tools>.container,
+.mg-home .orbit-trust-inner{
+  position:relative;
+  z-index:2;
+}
+.mg-home .orbit-method-panel,
+.mg-home .product-face,
+.mg-home .studio-code-window,
+.mg-home .orbit-tool-card{
+  background:linear-gradient(145deg,rgba(16,24,44,.79),rgba(5,9,21,.88) 72%)!important;
+  border-color:rgba(163,195,255,.18)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 26px 80px rgba(0,0,0,.17)!important;
+  backdrop-filter:blur(15px);
+}
+.mg-home .orbit-step[open]{
+  background:linear-gradient(90deg,rgba(110,173,255,.09),transparent)!important;
+  border-left-color:#91c8ff!important;
+}
+.mg-home .stack-plane{
+  background:linear-gradient(135deg,rgba(49,67,101,.9),rgba(11,18,36,.94) 75%)!important;
+  border-color:rgba(158,196,255,.27)!important;
+}
+.mg-home .stack-plane.is-active{
+  border-color:rgba(187,217,255,.72)!important;
+  background:linear-gradient(135deg,rgba(68,92,139,.94),rgba(18,29,57,.95) 75%)!important;
+  box-shadow:0 0 38px rgba(96,151,255,.08)!important;
+}
+.mg-home .product-sculpture{
+  animation-duration:13s!important;
+}
+.mg-home .art-guard .product-sculpture i{animation-duration:26s!important}
+.mg-home .art-ai .product-sculpture i{animation-duration:22s!important}
+.mg-home .art-link .product-sculpture i{animation-duration:20s!important}
+.mg-home [data-reveal].revealed{
+  animation:cinematic-reveal .95s cubic-bezier(.18,.86,.22,1) both!important;
+}
+@keyframes cinematic-reveal{
+  from{opacity:0;transform:translateY(30px) scale(.992);filter:blur(7px)}
+  to{opacity:1;transform:none;filter:none}
+}
+.mg-home .studio-code-window{
+  box-shadow:0 35px 110px rgba(0,0,0,.28),0 0 70px rgba(88,145,255,.035)!important;
+}
+.mg-home .orbit-trust{
+  background:
+    radial-gradient(ellipse at 50% 40%,rgba(99,139,255,.06),transparent 47%)!important;
+}
+.mg-home .orbit-footer{
+  background:linear-gradient(180deg,rgba(3,6,14,.88),#02040b)!important;
+  border-top:1px solid rgba(152,184,239,.12);
+}
+.mg-home .scroll-reading-line{
+  background:linear-gradient(90deg,#72b5ff,#9188ff,#ff9bd6)!important;
+  box-shadow:0 0 13px rgba(116,173,255,.42);
+}
+@media(max-width:900px){
+  .mg-home .orbit-hero{
+    background:linear-gradient(180deg,rgba(2,4,11,.28),rgba(2,4,11,.12) 50%,rgba(2,4,11,.48))!important;
+  }
+  .mg-home .orbit-home h1{font-size:clamp(60px,11vw,90px);max-width:9ch}
+}
+@media(max-width:600px){
+  .mg-home #networkField.network-field{opacity:.86}
+  .mg-home .orbit-hero-grid{padding-top:48px}
+  .mg-home .orbit-home h1{font-size:clamp(46px,13.2vw,70px);line-height:.96}
+  .mg-home .orbit-intro{font-size:14px}
+  .mg-home [data-cinematic-scene]::before{
+    background:linear-gradient(180deg,rgba(2,4,11,.18),rgba(2,4,11,.08) 45%,rgba(2,4,11,.42));
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .mg-home #networkField.network-field{opacity:.58}
+}
