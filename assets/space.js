@@ -318,5 +318,6 @@
 
   setStation(0);setShield(false);measure();
   root.dataset.spaceQuality='full';root.dataset.collectionReady='true';root.dataset.spaceReady='true';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>root.classList.add('space-motion-ready')));
   window.__malguardSpace={go,metrics:()=>({station:active,frameAverage:ema,quality:root.dataset.spaceQuality,camera:cameraT})};
 })();
