@@ -4,7 +4,7 @@
   if (!document.body.classList.contains('mg-home')) return;
   const root = document.documentElement;
   root.classList.add('space-js');
-  const flight = document.getElementById('spaceFlight');
+  const flight = document.querySelector('.space-flight');
   const stage = document.getElementById('spaceStage');
   const canvas = document.getElementById('spaceCanvas');
   const shieldImage = document.getElementById('spaceShieldSprite');
@@ -190,7 +190,7 @@
     F=Math.min(W*1.05,H*1.2);
     targetT=scrollTarget();
     if(reduced.matches || root.classList.contains('motion-paused'))cameraT=targetT;
-    wake();
+    if(wakeAfter)wake();
   }
 
   function drawStars(b, moving) {
