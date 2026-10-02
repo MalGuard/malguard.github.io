@@ -140,9 +140,6 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     await context.close();
   }
   await check(`${name} entry gate and failed authentication`,async()=>{
-    await context.close();
-  }
-  await check(`${name} entry gate and failed authentication`,async()=>{
     const context=await browser.newContext({...fixtureTLS,reducedMotion:'reduce'});let authCalls=0;
     await context.route('**/*',async route=>{
       if(new URL(route.request().url()).origin===new URL(base).origin)return route.continue();
@@ -199,7 +196,6 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     await page.locator('#openCore').click();assert.equal(await shield.getAttribute('aria-expanded'),'true','Paused motion keeps controls usable');
     await context.close();
   });
-  await browser.close();
   await browser.close();
 }
 await writeFile('test-results/report.json',JSON.stringify(report,null,2));
