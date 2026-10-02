@@ -4,7 +4,10 @@
   "version": "1.0.0",
   "scripts": {
     "test:static": "python3 tests/validate-site.py",
-    "test:experience": "node tests/experience.mjs"
+    "test:experience": "node tests/experience.mjs",
+    "test:motion": "node tests/motion-smoke.mjs"
   },
-  "devDependencies": { "playwright": "1.62.1" }
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
 }
