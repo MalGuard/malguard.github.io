@@ -108,7 +108,7 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
       for(let i=0;i<3;i++){
         const station=i+3;
         await page.locator(`[data-space-dot="${station}"]`).click();
-        await page.waitForFunction(n=>document.documentElement.dataset.spaceStation===String(n),station);
+        await page.waitForFunction(n=>document.documentElement.dataset.spaceStation===String(n),station,{timeout:5000});
         const button=page.locator('#inspectProduct'+i);
         await button.focus();await page.keyboard.press('Enter');
         assert.equal(await button.getAttribute('aria-expanded'),'true');
@@ -122,10 +122,10 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
         assert.equal(await page.evaluate(()=>document.activeElement.id),'inspectProduct'+i);
       }
       await page.locator('[data-space-dot="3"]').click();
-      await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='3');
+      await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='3',null,{timeout:5000});
       await page.locator('#inspectProduct0').click();await page.locator('#productBack0 .product-return').click();
       await page.locator('[data-space-dot="4"]').click();
-      await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='4');
+      await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='4',null,{timeout:5000});
       await page.locator('#inspectProduct1').click();await page.locator('#productBack1 .orbit-card-link').click();await page.waitForURL('**/ai-intelligence.html');
       await page.goto(base+'/');await publicEntry(page);
       await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.__copiedStudio=text;}}}));
@@ -167,7 +167,7 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     await page.waitForTimeout(220);
     assert.ok(await frameCount()>before,'Camera flight must render while moving');
     await page.locator('[data-space-dot="0"]').click();
-    await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='0');
+    await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='0',null,{timeout:5000});
     const shield=page.locator('#openCore');
     await shield.click();
     assert.equal(await shield.getAttribute('aria-expanded'),'true');
@@ -175,7 +175,7 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     await page.keyboard.press('Escape');
     assert.equal(await shield.getAttribute('aria-expanded'),'false');
     await page.locator('[data-space-dot="3"]').click();
-    await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='3');
+    await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='3',null,{timeout:5000});
     const card=page.locator('[data-space-station="3"]');
     const box=await card.boundingBox();
     await page.locator('#inspectProduct0').click();await page.waitForTimeout(430);
@@ -193,7 +193,7 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     await page.locator('#motionToggle').click();await page.waitForTimeout(120);
     const stopped=await frameCount();await page.waitForTimeout(260);assert.equal(await frameCount(),stopped);
     assert.equal(await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length),0);
-    await page.locator('[data-space-dot="0"]').click();await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='0');
+    await page.locator('[data-space-dot="0"]').click();await page.waitForFunction(()=>document.documentElement.dataset.spaceStation==='0',null,{timeout:5000});
     await page.locator('#openCore').click();assert.equal(await shield.getAttribute('aria-expanded'),'true','Paused motion keeps controls usable');
     await context.close();
   });
