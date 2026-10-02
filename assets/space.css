@@ -1,4 +1,4 @@
-/* MalGuard cinematic flight: one scene, one card, no HUD clutter. */
+/* MalGuard cinematic flight: one scene, one card, no HUD clutter. */\n.site-sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}\n.space-shield-control[hidden]{display:none!important}
 .mg-home{--mg-accent:#d0ff8d;--space-bg:#05080d;--space-panel:#0c121b;--space-panel-2:#101824;--space-text:#f1f5fb;--space-muted:#9aa8ba;--space-line:#ffffff1c;background:var(--space-bg)!important;overflow-x:clip}
 .mg-home .orbit-home{background:var(--space-bg);overflow:clip}
 .space-flight{position:relative;background:var(--space-bg)}
