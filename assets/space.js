@@ -162,7 +162,7 @@
   }
   shieldButton?.addEventListener('click',()=>setShield(!shieldOpen));
 
-  function measure() {
+  function measure(wakeAfter=true) {
     const rect=flight.getBoundingClientRect();
     flightTop=rect.top+scrollY;
     range=Math.max(1,flight.offsetHeight-innerHeight);
@@ -255,7 +255,7 @@
     raf=0;
     const rawDt=last?now-last:16.7;last=now;const dt=Math.min(50,rawDt);
     ema+=(dt-ema)*.06;
-    if(!lowQuality){slowFrames=ema>24?slowFrames+1:Math.max(0,slowFrames-2);if(slowFrames>75){lowQuality=true;root.dataset.spaceQuality='adaptive';measure();}}
+    if(!lowQuality){slowFrames=ema>24?slowFrames+1:Math.max(0,slowFrames-2);if(slowFrames>75){lowQuality=true;root.dataset.spaceQuality='adaptive';measure(false);}}
     root.dataset.spaceFrameAverage=ema.toFixed(2);
     targetT=scrollTarget();
     if(paused())cameraT=targetT;else cameraT+=(targetT-cameraT)*.08;
