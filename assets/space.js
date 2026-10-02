@@ -84,7 +84,7 @@
 
   let W=innerWidth,H=innerHeight,DPR=1,F=900,flightTop=0,range=1;
   let lowQuality=false, ema=16, slowFrames=0, frames=0;
-  let cameraT=0, targetT=0, active=-1, raf=0, last=0, prevBasis=null, prevPos=null, commanded=null;
+  let cameraT=0, targetT=0, active=-1, raf=0, last=0, prevBasis=null, prevPos=null;
   let shieldOpen=false, pulse=null, highlighted=null, pointerDown=null;
   const paused = () => reduced.matches || root.classList.contains('motion-paused') || document.hidden || document.body.classList.contains('site-entry-locked');
 
@@ -135,17 +135,16 @@
     syncScrollGeometry();
     const y=flightTop+(i/N)*range;
     root.dataset.spaceRequested=String(i);
-    if (reduced.matches || root.classList.contains('motion-paused')) {
-      commanded=null;
-      window.scrollTo(0,y);
-      targetT=cameraT=i;
-      setStation(i);
-      wake();
-      return;
-    }
-    commanded={station:i,y,started:performance.now()};
-    window.scrollTo({top:y,left:0,behavior:'smooth'});
+    // Move the document position immediately. Camera damping, not browser
+    // smooth-scroll, provides the cinematic transition and stays deterministic
+    // across Chromium, Safari/WebKit and reduced-motion mode.
+    const scroller=document.scrollingElement||document.documentElement;
+    scroller.scrollTop=y;
     targetT=i;
+    if(reduced.matches || root.classList.contains('motion-paused')) {
+      cameraT=i;
+      setStation(i);
+    }
     wake();
   }
   dots.forEach((dot,i)=>dot.addEventListener('click',()=>go(i)));
@@ -274,17 +273,7 @@
     ema+=(dt-ema)*.06;
     if(!lowQuality){slowFrames=ema>24?slowFrames+1:Math.max(0,slowFrames-2);if(slowFrames>75){lowQuality=true;root.dataset.spaceQuality='adaptive';measure(false);}}
     root.dataset.spaceFrameAverage=ema.toFixed(2);
-    const scrollT=scrollTarget();
-    if(commanded){
-      targetT=commanded.station;
-      const arrived=Math.abs(scrollY-commanded.y)<2;
-      const expired=now-commanded.started>1600;
-      if(arrived||expired){
-        if(!arrived)window.scrollTo(0,commanded.y);
-        commanded=null;
-        targetT=scrollTarget();
-      }
-    }else targetT=scrollT;
+    targetT=scrollTarget();
     root.dataset.spaceScroll=String(Math.round(scrollY));
     root.dataset.spaceTarget=targetT.toFixed(3);
     if(paused())cameraT=targetT;else cameraT+=(targetT-cameraT)*.08;
@@ -314,8 +303,8 @@
   },{passive:true});
   canvas.addEventListener('pointercancel',()=>pointerDown=null,{passive:true});
   addEventListener('scroll',wake,{passive:true});
-  addEventListener('wheel',()=>{commanded=null;wake();},{passive:true});
-  addEventListener('touchstart',()=>{commanded=null;wake();},{passive:true});
+  addEventListener('wheel',wake,{passive:true});
+  addEventListener('touchstart',wake,{passive:true});
   addEventListener('resize',()=>requestAnimationFrame(measure),{passive:true});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;}else wake();});
   addEventListener('malguard-motion',()=>{cameraT=scrollTarget();wake();});
