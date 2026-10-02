@@ -194,7 +194,7 @@
   }
 
   function drawStars(b, moving) {
-    const count=lowQuality?130:stars.length;
+    const count=lowQuality?72:stars.length;
     if(moving && prevBasis)ctx.beginPath();
     else ctx.fillStyle='rgba(215,230,255,.68)';
     for(let i=0;i<count;i++){
@@ -230,7 +230,7 @@
     ctx.beginPath();ctx.ellipse(p.x,p.y,rx,ry,-.34,0,Math.PI);ctx.stroke();
   }
   function drawFiles(b,now) {
-    const un=[],sc=[],points=[]; const step=lowQuality?2:1; const ang=cameraT*.035,ca=Math.cos(ang),sa=Math.sin(ang);
+    const un=[],sc=[],points=[]; const step=lowQuality?3:1; const ang=cameraT*.035,ca=Math.cos(ang),sa=Math.sin(ang);
     for(let i=0;i<files.length;i+=step){
       const f=files[i],x=f.x*ca+f.z*sa,z=-f.x*sa+f.z*ca,p=project(x,f.y,z,b);if(!p)continue;
       const s=clamp(f.s*p.s,5,34),a=f.rot+cameraT*.015,c=Math.cos(a),sn=Math.sin(a);
@@ -280,8 +280,11 @@
     if(paused())cameraT=targetT;else cameraT+=(targetT-cameraT)*.08;
     const c=currentCamera(cameraT),b=basis(c.p,c.l);
     const speed=prevPos?Math.hypot(c.p[0]-prevPos[0],c.p[1]-prevPos[1],c.p[2]-prevPos[2]):0;
-    ctx.drawImage(bgSprite,0,0,W,H);
-    drawStars(b,speed>3.2);
+    if(lowQuality){
+      ctx.fillStyle='#05080d';
+      ctx.fillRect(0,0,W,H);
+    }else ctx.drawImage(bgSprite,0,0,W,H);
+    drawStars(b,!lowQuality && speed>3.2);
     const drawables=[{d:project(0,0,0,b)?.d||0,type:'core'}];
     planets.forEach((p,i)=>{const q=project(p.p[0],p.p[1],p.p[2],b);if(q)drawables.push({d:q.d,type:'planet',i});});
     drawables.sort((a,z)=>z.d-a.d).forEach(o=>o.type==='core'?drawCore(b):drawPlanet(planets[o.i],b));
