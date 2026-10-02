@@ -13,7 +13,7 @@ for(const width of [390,1440]){
   await page.locator('#sitePublicEntry').click();
   await page.waitForFunction(()=>document.documentElement.dataset.spaceReady==='true');
   async function shot(name){await page.screenshot({path:'test-results/visual-'+width+'-'+name+'.jpg',type:'jpeg',quality:72});console.log('SCREENSHOT '+width+'-'+name);}
-  async function go(i){await page.locator(`[data-space-dot="${i}"]`).click();await page.waitForFunction(n=>document.documentElement.dataset.spaceStation===String(n),i);}
+  async function go(i){await page.locator(`[data-space-dot="${i}"]`).click();await page.waitForFunction(n=>document.documentElement.dataset.spaceStation===String(n),i,{timeout:5000});}
   await shot('first-view');
   await page.locator('#openCore').click();await page.waitForTimeout(180);await shot('shield-open');
   await go(4);await page.waitForTimeout(260);await shot('story-mid');
