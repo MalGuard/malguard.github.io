@@ -14,7 +14,7 @@
 <link rel="canonical" href="https://malguard.github.io/">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://cdn.creativeclaw.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https://malware-ai-gray.vercel.app; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://malware-ai-gray.vercel.app; object-src 'none'; base-uri 'self'; form-action 'self'">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -55,7 +55,7 @@
 <link rel="shortcut icon" href="/favicon.ico">
 <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
 <link rel="stylesheet" href="/assets/experience.css?v=20261002-motion-1">
-<link rel="stylesheet" href="/assets/brand-motion.css?v=20261002-motion-1">
+<link rel="stylesheet" href="/assets/space.css?v=20261002-space-1">
 </head>
 <body class="mg-experience mg-home site-entry-locked">
 <canvas id="networkField" class="network-field" aria-hidden="true"></canvas>
@@ -148,86 +148,128 @@
     </div>
   </div>
 </header>
-<main id="homeContent" class="orbit-home" tabindex="-1">
-  <section class="orbit-hero" id="home" aria-labelledby="heroTitle">
-    <div class="orbit-grid-bg" aria-hidden="true"></div>
-    <div class="container orbit-hero-grid">
-      <div class="orbit-hero-copy">
-        <span class="orbit-eyebrow"><i aria-hidden="true"></i> INDEPENDENT GAMING SECURITY</span>
-        <h1 id="heroTitle">Play freely.<br><em>Trust carefully.</em></h1>
-        <p class="orbit-intro">Your next download deserves a closer look. Explore your mods, files and links with security tools that put the evidence first.</p>
-        <div class="orbit-actions"><a class="orbit-button primary" href="/products.html">Explore MalGuard <span aria-hidden="true">↗︎</span></a><a class="orbit-button secondary" href="/tools.html">Try local tools <span aria-hidden="true">→</span></a></div>
-        <div class="orbit-hero-note"><span class="orbit-tiny-shield" aria-hidden="true">◇</span> Local-first tools. Clear limits. Open-source thinking.</div>
-      </div>
-      <div class="orbit-scene" id="securityScene">
-        <div class="orbit-scene-label"><span>THE MALGUARD CORE</span><span>01 / EXPLORE</span></div>
-        <div class="shield-aura" aria-hidden="true"><i></i><i></i><i></i></div>
-        <button class="orbit-core" id="openCore" type="button" aria-expanded="false" aria-controls="coreDetails" aria-label="Open the MalGuard shield">
-          <span class="shield-heart" aria-hidden="true"><img src="/assets/malguard-core-mark.svg" alt=""><i></i><i></i></span>
-          <span class="shield-half shield-left" aria-hidden="true"><img src="/assets/malguard-core-mark.svg" alt="" width="220" height="284"></span>
-          <span class="shield-half shield-right" aria-hidden="true"><img src="/assets/malguard-core-mark.svg" alt="" width="220" height="284"></span>
-        </button>
-        <div class="core-details" id="coreDetails" aria-hidden="true" inert>
-          <div class="core-note"><span>01 / YOUR DEVICE</span><h3>Start local.</h3><p>Browser fingerprinting reads the file on your device.</p></div>
-          <div class="core-note"><span>02 / CLEAR BOUNDARIES</span><h3>Keep limits visible.</h3><p>Product availability, isolation and uncertainty stay explicit.</p></div>
-          <div class="core-note"><span>03 / OPEN BY DESIGN</span><h3>Make trust inspectable.</h3><p>Review source code, release integrity and policies.</p></div>
-        </div>
-        <div class="orbit-scene-footer"><span id="coreHint">Tap the shield to open <span aria-hidden="true">↗︎</span></span><button id="motionToggle" class="motion-toggle" type="button" aria-pressed="false">Pause motion</button></div>
+<main id="homeContent" class="orbit-home space-home" tabindex="-1">
+  <section class="space-flight" id="home" aria-labelledby="heroTitle">
+    <span class="space-anchor method" id="how-it-works" aria-hidden="true"></span>
+    <span class="space-anchor products" id="products" aria-hidden="true"></span>
+    <div class="space-stage" id="spaceStage">
+      <canvas class="space-canvas" id="spaceCanvas" aria-hidden="true"></canvas>
+      <img id="spaceShieldSprite" src="/assets/malguard-core-mark.svg" alt="" aria-hidden="true" hidden>
+      <button class="space-shield-control" id="openCore" type="button" aria-expanded="false" aria-controls="coreDetails" aria-label="Open the MalGuard shield"><span class="site-sr-only">Open the MalGuard shield</span></button>
+      <nav class="space-dots" aria-label="Homepage flight stations">
+        <button class="space-dot is-active" data-space-dot="0" data-label="Start" aria-label="Go to Start" aria-current="step"></button>
+        <button class="space-dot" data-space-dot="1" data-label="Identify" aria-label="Go to Identify"></button>
+        <button class="space-dot" data-space-dot="2" data-label="Inspect + analyze" aria-label="Go to Inspect and analyze"></button>
+        <button class="space-dot" data-space-dot="3" data-label="GTA Guard" aria-label="Go to GTA Guard"></button>
+        <button class="space-dot" data-space-dot="4" data-label="Malware AI" aria-label="Go to Malware AI"></button>
+        <button class="space-dot" data-space-dot="5" data-label="Game Scam Guard" aria-label="Go to Game Scam Guard"></button>
+        <button class="space-dot" data-space-dot="6" data-label="Decide" aria-label="Go to Decide"></button>
+      </nav>
+      <div class="space-cards" id="spaceCards" aria-live="polite">
+        <article class="space-card is-active" data-space-station="0" aria-hidden="false">
+          <span class="space-kicker">Independent gaming security</span>
+          <h1 id="heroTitle">Play freely.<br>Trust carefully.</h1>
+          <p>Your next download deserves a closer look. Explore your mods, files and links with security tools that put the evidence first.</p>
+          <p class="space-small">Local-first tools. Clear limits. Open-source thinking.</p>
+          <div class="space-actions"><a class="space-button primary" href="/products.html">Explore MalGuard ↗︎</a><a class="space-button" href="/tools.html">Try local tools →</a></div>
+          <div class="space-core-details" id="coreDetails" aria-hidden="true" hidden>
+            <div class="space-core-note"><span>01 / YOUR DEVICE</span><h3>Start local.</h3><p>Browser fingerprinting reads the file on your device.</p></div>
+            <div class="space-core-note"><span>02 / CLEAR BOUNDARIES</span><h3>Keep limits visible.</h3><p>Product availability, isolation and uncertainty stay explicit.</p></div>
+            <div class="space-core-note"><span>03 / OPEN BY DESIGN</span><h3>Make trust inspectable.</h3><p>Review source code, release integrity and policies.</p></div>
+          </div>
+          <p class="space-small">The shield represents MalGuard’s approach. This is an interactive explanation, not a live scan or device-protection status.</p>
+        </article>
 
+        <article class="space-card is-right" data-space-station="1" aria-hidden="true" inert>
+          <span class="space-kicker">Identify</span>
+          <h2>Every file arrives as a stranger.</h2>
+          <p>Start with file type, structure and SHA-256 identity. A familiar filename alone tells you very little.</p>
+          <p>A result should tell you what was checked, what was found, and what is still unknown.</p>
+          <p class="space-small">FILE IDENTITY / LOCAL TOOLS</p>
+        </article>
+
+        <article class="space-card" data-space-station="2" aria-hidden="true" inert>
+          <span class="space-kicker">Inspect and analyze</span>
+          <h2>Less guessing.<br>More understanding.</h2>
+          <p>Review supported static indicators and suspicious patterns without executing the selected file.</p>
+          <p>Deeper analysis depends on the product, installed release and available isolation. Missing isolation remains visible.</p>
+          <p class="space-small space-mobile-hide">STATIC EVIDENCE / SUPPORTED FORMATS · BOUNDED ANALYSIS / EXPLICIT LIMITS</p>
+          <div class="space-actions"><a class="space-button" href="/docs.html">Inside the approach ↗︎</a></div>
+        </article>
+
+        <article class="space-card space-product-card orbit-product is-right" data-space-station="3" aria-hidden="true" inert>
+          <div class="product-turntable">
+            <div class="product-face product-front">
+              <span class="space-status paused">DOWNLOAD PAUSED</span>
+              <span class="space-kicker warning">01 / Mod security</span>
+              <h2>GTA Guard</h2>
+              <p>Look inside your next GTA mod. Explore Standard, Plus and Pro analysis paths for supported files.</p>
+              <p class="space-small">Windows x64 · Unsigned Preview</p>
+              <button class="product-inspect" id="inspectProduct0" type="button" data-product-inspect="0" aria-expanded="false" aria-controls="productBack0">Turn to explore ↗︎</button>
+              <a class="orbit-card-link" href="/gta-guard.html">Explore GTA Guard ↗︎</a>
+            </div>
+            <div class="product-face product-back" id="productBack0" aria-hidden="true" inert>
+              <span class="space-kicker">Inside / 01</span><h3>GTA Guard</h3>
+              <dl><div><dt>Analysis paths</dt><dd>Standard, Plus and Pro for supported files.</dd></div><div><dt>Availability</dt><dd>The Windows x64 preview is unsigned. Public installer distribution is paused.</dd></div><div><dt>Limit</dt><dd>A clean result is never a guarantee.</dd></div></dl>
+              <button type="button" class="product-return" aria-label="Turn back GTA Guard">← Turn back</button>
+              <a class="orbit-card-link" href="/gta-guard.html">Explore GTA Guard ↗︎</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="space-card space-product-card orbit-product" data-space-station="4" aria-hidden="true" inert>
+          <div class="product-turntable">
+            <div class="product-face product-front">
+              <span class="space-status">WEB PREVIEW</span>
+              <span class="space-kicker">02 / Intelligence</span>
+              <h2>Malware AI</h2>
+              <p>A dedicated space for AI-assisted security analysis. Explore the preview and its access options.</p>
+              <p class="space-small">AI assistance · Preview access</p>
+              <button class="product-inspect" id="inspectProduct1" type="button" data-product-inspect="1" aria-expanded="false" aria-controls="productBack1">Turn to explore ↗︎</button>
+              <a class="orbit-card-link" href="/ai-intelligence.html">Explore Intelligence ↗︎</a>
+            </div>
+            <div class="product-face product-back" id="productBack1" aria-hidden="true" inert>
+              <span class="space-kicker">Inside / 02</span><h3>Malware AI</h3>
+              <dl><div><dt>Purpose</dt><dd>AI-assisted security analysis to support your investigation.</dd></div><div><dt>Availability</dt><dd>Explore the available web preview and its access options.</dd></div><div><dt>Limit</dt><dd>AI assistance does not guarantee safety.</dd></div></dl>
+              <button type="button" class="product-return" aria-label="Turn back Malware AI">← Turn back</button>
+              <a class="orbit-card-link" href="/ai-intelligence.html">Explore Intelligence ↗︎</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="space-card space-product-card orbit-product is-right" data-space-station="5" aria-hidden="true" inert>
+          <div class="product-turntable">
+            <div class="product-face product-front">
+              <span class="space-status planned">IN DEVELOPMENT</span>
+              <span class="space-kicker">03 / Safer links</span>
+              <h2>Game Scam Guard</h2>
+              <p>A focused approach to gaming scams and suspicious destinations. Currently in development.</p>
+              <p class="space-small">Planned product · No public release</p>
+              <button class="product-inspect" id="inspectProduct2" type="button" data-product-inspect="2" aria-expanded="false" aria-controls="productBack2">Turn to explore ↗︎</button>
+              <a class="orbit-card-link" href="/products.html#game-scam-guard">See product plans ↗︎</a>
+            </div>
+            <div class="product-face product-back" id="productBack2" aria-hidden="true" inert>
+              <span class="space-kicker">Inside / 03</span><h3>Game Scam Guard</h3>
+              <dl><div><dt>Status</dt><dd>Currently in development.</dd></div><div><dt>Release</dt><dd>There is no public release yet.</dd></div><div><dt>Today</dt><dd>Use the local link inspector to read URL text for warning signs.</dd></div></dl>
+              <button type="button" class="product-return" aria-label="Turn back Game Scam Guard">← Turn back</button>
+              <a class="orbit-card-link" href="/products.html#game-scam-guard">See product plans ↗︎</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="space-card" data-space-station="6" aria-hidden="true" inert>
+          <span class="space-kicker">Decide</span>
+          <h2>Security should be something you can inspect.</h2>
+          <p>Read the evidence and limitations together. Missing evidence must never become a “safe” verdict.</p>
+          <p>Understand the privacy choices, inspect the source, and see the limits. No scan can guarantee that a file, mod, link, or destination is harmless.</p>
+          <div class="space-actions"><a class="space-button primary" href="/trust.html">Visit the Trust Center ↗︎</a><a class="space-button" href="https://github.com/MalGuard/malguard-core" rel="noopener" target="_blank">Explore the source ↗︎</a></div>
+        </article>
       </div>
+      <div class="space-scan-label" id="spaceScanLabel" aria-hidden="true"></div>
+      <div class="space-hint" id="spaceHint">Scroll to begin the flight · tap empty space to scan</div>
+      <button id="motionToggle" class="space-motion-toggle" type="button" aria-pressed="false">Pause motion</button>
     </div>
-    <p class="container shield-caption">The shield represents MalGuard’s approach. This is an interactive explanation, not a live scan or device-protection status.</p>
-    <div class="container orbit-hero-bottom"><a href="#products">DISCOVER THE ECOSYSTEM <span aria-hidden="true">↓</span></a><span>SCAN SMART. PLAY SAFE.</span></div>
-  </section>
-  <div class="orbit-principles"><div class="container"><span><i>01</i> Local-first</span><span><i>02</i> Evidence-led</span><span><i>03</i> Fail-closed</span><span><i>04</i> Open source</span></div></div>
-  <section class="orbit-section orbit-method" id="how-it-works">
-    <div class="container orbit-method-grid">
-      <div data-reveal><span class="orbit-eyebrow">THE APPROACH / 01</span><h2>Less guessing.<br><em>More understanding.</em></h2><p class="orbit-section-copy">A result should tell you what was checked, what was found, and what is still unknown.</p><a class="orbit-text-link" href="/docs.html">Inside the approach <span aria-hidden="true">↗︎</span></a></div>
-      <div class="method-interaction" data-reveal>
-      <div class="orbit-method-panel">
-        <div class="orbit-method-heading"><span>ANALYSIS, EXPLAINED</span><span>SELECT A LAYER ↓</span></div>
-        <details class="orbit-step" open><summary><span>01</span><strong>Identify</strong><b aria-hidden="true">+</b></summary><div><p>Start with file type, structure and SHA-256 identity. A familiar filename alone tells you very little.</p><span>FILE IDENTITY / LOCAL TOOLS</span></div></details>
-        <details class="orbit-step"><summary><span>02</span><strong>Inspect</strong><b aria-hidden="true">+</b></summary><div><p>Review supported static indicators and suspicious patterns without executing the selected file.</p><span>STATIC EVIDENCE / SUPPORTED FORMATS</span></div></details>
-        <details class="orbit-step"><summary><span>03</span><strong>Analyze</strong><b aria-hidden="true">+</b></summary><div><p>Deeper analysis depends on the product, installed release and available isolation. Missing isolation remains visible.</p><span>BOUNDED ANALYSIS / EXPLICIT LIMITS</span></div></details>
-        <details class="orbit-step"><summary><span>04</span><strong>Decide</strong><b aria-hidden="true">+</b></summary><div><p>Read the evidence and limitations together. Missing evidence must never become a “safe” verdict.</p><span>FAIL-CLOSED / NO FALSE CERTAINTY</span></div></details>
-      </div>
-      <div class="analysis-stack" aria-hidden="true">
-        <div class="stack-plane" data-plane="3"><span>04 / DECIDE</span><i></i><b>Evidence over certainty.</b></div>
-        <div class="stack-plane" data-plane="2"><span>03 / ANALYZE</span><i></i><b>Keep the limits visible.</b></div>
-        <div class="stack-plane" data-plane="1"><span>02 / INSPECT</span><i></i><b>Look below the surface.</b></div>
-        <div class="stack-plane is-active" data-plane="0"><span>01 / IDENTIFY</span><i></i><b>Every file has an identity.</b></div>
-        <div class="stack-floor"></div>
-      </div>
-      <div class="stack-caption"><span>FOUR LAYERS. ONE CLEARER PICTURE.</span><button class="stack-toggle" id="stackToggle" type="button" aria-pressed="false">Separate layers <span aria-hidden="true">↗︎</span></button></div>
-      </div>
-    </div>
-  </section>
-  <section class="orbit-section" id="products">
-    <div class="container">
-      <div class="orbit-section-head" data-reveal><div><span class="orbit-eyebrow">THE ECOSYSTEM / 02</span><h2>One mission.<br><em>Focused protection.</em></h2></div><p>Different risks need different tools. Find the right starting point, with availability always in view.</p></div>
-      <div class="orbit-products">
-        <article class="orbit-product product-mod" data-reveal><div class="product-turntable"><div class="product-face product-front">
-          <div class="orbit-product-top"><span>01 / MOD SECURITY</span><span class="orbit-status paused">DOWNLOAD PAUSED</span></div>
-          <div class="product-art art-guard" aria-hidden="true"><div class="product-sculpture"><i></i><i></i><i></i><img src="/assets/product-gta-guard.svg" alt="" width="100" height="100"></div></div>
-          <h3>GTA Guard</h3><p>Look inside your next GTA mod. Explore Standard, Plus and Pro analysis paths for supported files.</p>
-          <div class="orbit-product-meta">Windows x64 · Unsigned Preview</div><button class="product-inspect" id="inspectProduct0" type="button" data-product-inspect="0" aria-expanded="false" aria-controls="productBack0">Turn to explore <span aria-hidden="true">↗︎</span></button><a class="orbit-card-link" href="/gta-guard.html">Explore GTA Guard <span aria-hidden="true">↗︎</span></a>
-        </div><div class="product-face product-back" id="productBack0" aria-hidden="true" inert><span class="orbit-eyebrow">INSIDE / 01</span><h3>GTA Guard</h3><dl><div><dt>Analysis paths</dt><dd>Standard, Plus and Pro for supported files.</dd></div><div><dt>Availability</dt><dd>The Windows x64 preview is unsigned. Public installer distribution is paused.</dd></div><div><dt>Limit</dt><dd>A clean result is never a guarantee.</dd></div></dl><button type="button" class="product-return" aria-label="Turn back GTA Guard">← Turn back</button><a class="orbit-card-link" href="/gta-guard.html">Explore GTA Guard <span aria-hidden="true">↗︎</span></a></div></div></article>
-        <article class="orbit-product product-ai" data-reveal><div class="product-turntable"><div class="product-face product-front">
-          <div class="orbit-product-top"><span>02 / INTELLIGENCE</span><span class="orbit-status">WEB PREVIEW</span></div>
-          <div class="product-art art-ai" aria-hidden="true"><div class="product-sculpture"><i></i><i></i><i></i><img src="/assets/product-malware-ai.svg" alt="" width="100" height="100"></div></div>
-          <h3>Malware AI</h3><p>A dedicated space for AI-assisted security analysis. Explore the preview and its access options.</p>
-          <div class="orbit-product-meta">AI assistance · Preview access</div><button class="product-inspect" id="inspectProduct1" type="button" data-product-inspect="1" aria-expanded="false" aria-controls="productBack1">Turn to explore <span aria-hidden="true">↗︎</span></button><a class="orbit-card-link" href="/ai-intelligence.html">Explore Intelligence <span aria-hidden="true">↗︎</span></a>
-        </div><div class="product-face product-back" id="productBack1" aria-hidden="true" inert><span class="orbit-eyebrow">INSIDE / 02</span><h3>Malware AI</h3><dl><div><dt>Purpose</dt><dd>AI-assisted security analysis to support your investigation.</dd></div><div><dt>Availability</dt><dd>Explore the available web preview and its access options.</dd></div><div><dt>Limit</dt><dd>AI assistance does not guarantee safety.</dd></div></dl><button type="button" class="product-return" aria-label="Turn back Malware AI">← Turn back</button><a class="orbit-card-link" href="/ai-intelligence.html">Explore Intelligence <span aria-hidden="true">↗︎</span></a></div></div></article>
-        <article class="orbit-product product-link" data-reveal><div class="product-turntable"><div class="product-face product-front">
-          <div class="orbit-product-top"><span>03 / SAFER LINKS</span><span class="orbit-status planned">IN DEVELOPMENT</span></div>
-          <div class="product-art art-link" aria-hidden="true"><div class="product-sculpture"><i></i><i></i><i></i><img src="/assets/product-game-scam-guard.svg" alt="" width="100" height="100"></div></div>
-          <h3>Game Scam Guard</h3><p>A focused approach to gaming scams and suspicious destinations. Currently in development.</p>
-          <div class="orbit-product-meta">Planned product · No public release</div><button class="product-inspect" id="inspectProduct2" type="button" data-product-inspect="2" aria-expanded="false" aria-controls="productBack2">Turn to explore <span aria-hidden="true">↗︎</span></button><a class="orbit-card-link" href="/products.html#game-scam-guard">See product plans <span aria-hidden="true">↗︎</span></a>
-        </div><div class="product-face product-back" id="productBack2" aria-hidden="true" inert><span class="orbit-eyebrow">INSIDE / 03</span><h3>Game Scam Guard</h3><dl><div><dt>Status</dt><dd>Currently in development.</dd></div><div><dt>Release</dt><dd>There is no public release yet.</dd></div><div><dt>Today</dt><dd>Use the local link inspector to read URL text for warning signs.</dd></div></dl><button type="button" class="product-return" aria-label="Turn back Game Scam Guard">← Turn back</button><a class="orbit-card-link" href="/products.html#game-scam-guard">See product plans <span aria-hidden="true">↗︎</span></a></div></div></article>
-      </div>
-<div class="evidence-notes" data-reveal><div><h3>Look inside the mod.</h3><p>Explore GTA Guard’s Standard, Plus and Pro analysis paths. The Windows x64 preview is unsigned, and public installer distribution is paused.</p><a href="/gta-guard.html">Explore GTA Guard ↗︎</a></div><div><h3>A different kind of insight.</h3><p>Explore Malware AI’s available web preview and platform interfaces. AI assistance supports your investigation; it does not guarantee safety.</p><a href="/ai-intelligence.html">Explore Intelligence ↗︎</a></div><div><h3>Start on your device.</h3><p>Calculate a file fingerprint or inspect URL text locally in your browser. A hash proves identity, and URL-text signals do not prove a destination is safe.</p><a href="/tools.html">Open local tools ↗︎</a></div></div>
-      <p class="orbit-availability">GTA Guard public installer distribution is paused. <a href="/gta-guard.html#platforms">Check current availability <span aria-hidden="true">↗︎</span></a></p>
-    </div>
+    <div class="space-preserved-copy" hidden aria-hidden="true">INDEPENDENT GAMING SECURITY Play freely. Trust carefully. Your next download deserves a closer look. Explore your mods, files and links with security tools that put the evidence first. Explore MalGuard ↗︎ Try local tools → ◇ Local-first tools. Clear limits. Open-source thinking. THE MALGUARD CORE 01 / EXPLORE 01 / YOUR DEVICE Start local. Browser fingerprinting reads the file on your device. 02 / CLEAR BOUNDARIES Keep limits visible. Product availability, isolation and uncertainty stay explicit. 03 / OPEN BY DESIGN Make trust inspectable. Review source code, release integrity and policies. Tap the shield to open ↗︎ Pause motion The shield represents MalGuard’s approach. This is an interactive explanation, not a live scan or device-protection status. DISCOVER THE ECOSYSTEM ↓ SCAN SMART. PLAY SAFE. 01 Local-first 02 Evidence-led 03 Fail-closed 04 Open source THE APPROACH / 01 Less guessing. More understanding. A result should tell you what was checked, what was found, and what is still unknown. Inside the approach ↗︎ ANALYSIS, EXPLAINED SELECT A LAYER ↓ 01 Identify + Start with file type, structure and SHA-256 identity. A familiar filename alone tells you very little. FILE IDENTITY / LOCAL TOOLS 02 Inspect + Review supported static indicators and suspicious patterns without executing the selected file. STATIC EVIDENCE / SUPPORTED FORMATS 03 Analyze + Deeper analysis depends on the product, installed release and available isolation. Missing isolation remains visible. BOUNDED ANALYSIS / EXPLICIT LIMITS 04 Decide + Read the evidence and limitations together. Missing evidence must never become a “safe” verdict. FAIL-CLOSED / NO FALSE CERTAINTY 04 / DECIDE Evidence over certainty. 03 / ANALYZE Keep the limits visible. 02 / INSPECT Look below the surface. 01 / IDENTIFY Every file has an identity. FOUR LAYERS. ONE CLEARER PICTURE. Separate layers ↗︎ THE ECOSYSTEM / 02 One mission. Focused protection. Different risks need different tools. Find the right starting point, with availability always in view. 01 / MOD SECURITY DOWNLOAD PAUSED GTA Guard Look inside your next GTA mod. Explore Standard, Plus and Pro analysis paths for supported files. Windows x64 · Unsigned Preview Turn to explore ↗︎ Explore GTA Guard ↗︎ INSIDE / 01 GTA Guard Analysis paths Standard, Plus and Pro for supported files. Availability The Windows x64 preview is unsigned. Public installer distribution is paused. Limit A clean result is never a guarantee. ← Turn back Explore GTA Guard ↗︎ 02 / INTELLIGENCE WEB PREVIEW Malware AI A dedicated space for AI-assisted security analysis. Explore the preview and its access options. AI assistance · Preview access Turn to explore ↗︎ Explore Intelligence ↗︎ INSIDE / 02 Malware AI Purpose AI-assisted security analysis to support your investigation. Availability Explore the available web preview and its access options. Limit AI assistance does not guarantee safety. ← Turn back Explore Intelligence ↗︎ 03 / SAFER LINKS IN DEVELOPMENT Game Scam Guard A focused approach to gaming scams and suspicious destinations. Currently in development. Planned product · No public release Turn to explore ↗︎ See product plans ↗︎ INSIDE / 03 Game Scam Guard Status Currently in development. Release There is no public release yet. Today Use the local link inspector to read URL text for warning signs. ← Turn back See product plans ↗︎ Look inside the mod. Explore GTA Guard’s Standard, Plus and Pro analysis paths. The Windows x64 preview is unsigned, and public installer distribution is paused. Explore GTA Guard ↗︎ A different kind of insight. Explore Malware AI’s available web preview and platform interfaces. AI assistance supports your investigation; it does not guarantee safety. Explore Intelligence ↗︎ Start on your device. Calculate a file fingerprint or inspect URL text locally in your browser. A hash proves identity, and URL-text signals do not prove a destination is safe. Open local tools ↗︎ GTA Guard public installer distribution is paused. Check current availability ↗︎</div>
   </section>
 
   <section class="orbit-section studio-code-section" id="developer" aria-labelledby="developerTitle">
@@ -270,7 +312,7 @@
 <footer class="orbit-footer"><div class="container"><div class="orbit-footer-top"><div><img src="/assets/malguard-site-logo.svg" alt="MalGuard" width="158" height="46"><p>Scan smart. Play safe.</p></div><div><span>EXPLORE</span><a href="/products.html">Products</a><a href="/tools.html">Local tools</a><a href="/download.html">Downloads</a><a href="/app.html">MalGuard App</a></div><div><span>UNDERSTAND</span><a href="/docs.html">Documentation</a><a href="/trust.html">Trust Center</a><a href="/privacy.html">Privacy</a><a href="/labs.html">Labs</a></div><div><span>CONNECT</span><a href="/about.html">About MalGuard</a><a href="/founder.html">Our founder</a><a href="/support.html">Support</a><a href="/trust.html#vulnerability-disclosure">Report a vulnerability</a></div></div><div class="orbit-footer-word" aria-hidden="true">MalGuard<span>✳</span></div><div class="orbit-footer-bottom"><span>© 2026 MalGuard</span><span>Independent. Open. Evidence-led.</span><a href="#home">Back to top ↑</a></div></div></footer>
 <script src="/assets/contextual-header.js?v=20261002-motion-1" defer></script>
 <script src="/assets/experience.js?v=20261002-motion-1" defer></script>
-<script src="/assets/brand-motion.js?v=20261002-motion-1" defer></script>
+<script src="/assets/space.js?v=20261002-space-1" defer></script>
 <script src="/assets/site-entry.js?v=20261002-motion-1" defer></script>
 <noscript><style>.site-entry-gate{display:none!important}.site-entry-locked{overflow:auto!important}</style><p class="container">JavaScript is needed for interactive tools and administrator sign-in. Public product pages remain available.</p></noscript>
 </body></html>
