@@ -351,3 +351,22 @@
 @media(prefers-reduced-motion:reduce){
   .mg-home #networkField.network-field{opacity:.58}
 }
+
+/* Reduced-motion must win over every cinematic override above. */
+@media(prefers-reduced-motion:reduce){
+  .mg-home [data-reveal].revealed,
+  .mg-home .product-sculpture,
+  .mg-home .product-sculpture i,
+  .mg-home .shield-aura i,
+  .mg-home .shield-heart i,
+  .mg-home .stack-plane.is-active:after,
+  .mg-home .orbit-button.primary::before{
+    animation:none!important;
+    transition:none!important;
+  }
+  .mg-home [data-reveal].revealed{
+    opacity:1!important;
+    transform:none!important;
+    filter:none!important;
+  }
+}
