@@ -23,6 +23,7 @@ jobs:
           node --check assets/contextual-header.js
           node --check assets/experience.js
           node --check assets/brand-motion.js
+          node --check assets/space.js
           node --check assets/site-entry.js
       - name: Check responsive pages and benign interactions
         run: |
