@@ -22,6 +22,7 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           node --check assets/contextual-header.js
           node --check assets/experience.js
+          node --check assets/brand-motion.js
           node --check assets/site-entry.js
       - name: Check responsive pages and benign interactions
         run: |
@@ -30,6 +31,7 @@ jobs:
           openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
           python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
           npm run test:experience
+          npm run test:motion
           node tests/visual-review.mjs
       - name: Save screenshots and verification report
         if: always()

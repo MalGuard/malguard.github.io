@@ -6,7 +6,7 @@ from hashlib import sha256
 import os, time
 root = Path(__file__).resolve().parents[1]
 base = "https://malguard.github.io/"
-paths = ["index.html", "products.html", "tools.html", "gta-guard.html", "assets/experience.css", "assets/experience.js", "assets/evidence-guard.svg", "assets/evidence-ai.svg", "assets/evidence-link.svg", "assets/fonts/manrope.ttf", "assets/fonts/space-grotesk.ttf"]
+paths = ["index.html", "products.html", "tools.html", "gta-guard.html", "assets/experience.css", "assets/experience.js", "assets/brand-motion.css", "assets/brand-motion.js", "assets/malguard-core-mark.svg", "assets/product-gta-guard.svg", "assets/product-malware-ai.svg", "assets/product-game-scam-guard.svg", "assets/evidence-guard.svg", "assets/evidence-ai.svg", "assets/evidence-link.svg", "assets/fonts/manrope.ttf", "assets/fonts/space-grotesk.ttf"]
 revision = os.environ["GITHUB_SHA"]
 for path in paths:
     expected = sha256((root / path).read_bytes()).hexdigest()
