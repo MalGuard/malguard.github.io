@@ -73,8 +73,9 @@ form.addEventListener('submit', async event => {
       const expected = Math.min(release.partBytes, release.size - received);
       if (response.headers.get('x-part-index') !== String(part) ||
           response.headers.get('x-file-size') !== String(release.size) ||
-          response.headers.get('x-file-sha256') !== release.sha256 ||
-          Number(response.headers.get('content-length')) !== expected) throw new Error('integrity');
+          response.headers.get('x-file-sha256') !== release.sha256) throw new Error('integrity');
+      // Content-Length describes transport bytes and may be absent or compressed.
+      // Validate the bounded decoded stream below and the complete SHA-256 instead.
       const bytes = new Uint8Array(expected);
       const reader = response.body.getReader();
       let position = 0;
