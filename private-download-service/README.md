@@ -29,3 +29,7 @@ To revoke access, replace the code hash in Vercel and redeploy. To rotate the
 encryption key, reseal the original verified installer, update release metadata
 and sealed parts, then update the sensitive key and deploy the matching source.
 Keep production secrets out of fork and untrusted pull-request deployments.
+
+Production secrets are intentionally unavailable in preview and development.
+After configuring or rotating them, rebuild the production branch: promoting
+an older preview without rebuilding does not apply new environment values.
