@@ -11,7 +11,7 @@
   "partCount": 7,
   "authenticodeSigned": false,
   "serviceUrl": "https://malguard-private-download.vercel.app/api/download",
-  "status": "awaiting-secure-service-configuration",
+  "status": "private-download-ready",
   "verification": {
     "linuxPassed": 917,
     "linuxSkipped": 1,
