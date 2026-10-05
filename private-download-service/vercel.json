@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm install --ignore-scripts",
+  "functions": {
+    "api/download.js": {
+      "includeFiles": "sealed/**",
+      "maxDuration": 30
+    }
+  },
+  "headers": [{
+    "source": "/(.*)",
+    "headers": [
+      { "key": "Cache-Control", "value": "no-store" },
+      { "key": "X-Content-Type-Options", "value": "nosniff" },
+      { "key": "Referrer-Policy", "value": "no-referrer" }
+    ]
+  }]
+}
