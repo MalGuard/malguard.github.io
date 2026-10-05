@@ -1,0 +1,14 @@
+.private-build{margin:0 0 38px;padding:28px;border:1px solid rgba(105,224,246,.3);border-radius:20px;background:linear-gradient(140deg,rgba(43,173,195,.09),rgba(255,255,255,.012));color:#e8edf1;font-family:Tahoma,Arial,sans-serif;line-height:1.8}
+.private-build h2{margin:8px 0 16px;font-family:inherit;font-size:clamp(25px,4vw,36px);letter-spacing:0;line-height:1.4}
+.private-build p{font-size:16px;margin:10px 0;color:#b4c0ca}
+.private-build .build-label{display:inline-block;border:1px solid rgba(105,224,246,.3);border-radius:999px;padding:3px 12px;font-size:14px;color:#a6ebf5}
+.private-build dl{display:grid;grid-template-columns:160px minmax(0,1fr);gap:8px 16px;padding:17px 0;margin:0}
+.private-build dt{font-size:14px;color:#a1adb8}.private-build dd{margin:0;font-size:16px;overflow-wrap:anywhere}
+.private-build code{font:14px/1.8 ui-monospace,Consolas,monospace;word-break:break-all;direction:ltr;unicode-bidi:isolate}
+.private-build form{margin-top:20px;max-width:680px}.private-build label{display:block;font-size:16px;margin-bottom:8px}
+.private-build .code-row{display:flex;gap:10px;flex-wrap:wrap}.private-build input{flex:1;min-width:220px;border:1px solid #536575;border-radius:10px;padding:13px;background:#080e14;color:#e8edf1;font:16px/1.4 ui-monospace,Consolas,monospace;direction:ltr}
+.private-build input:focus-visible,.private-build button:focus-visible{outline:2px solid #92e3f3;outline-offset:3px}
+.private-build button{border:1px solid #86dfed;border-radius:10px;padding:12px 20px;background:#b0edf7;color:#061117;font:700 16px/1.4 Tahoma,Arial,sans-serif;cursor:pointer}
+.private-build button:disabled{opacity:.55;cursor:wait}.private-build progress{display:block;width:100%;margin-top:16px;height:12px;accent-color:#99e5f2}.private-build [hidden]{display:none}
+.private-build .download-status{min-height:30px;color:#d5e8f0}.private-build .download-status[data-error=true]{color:#ffb9b9}.private-build .build-limit{font-size:14px;color:#a1adb8}.private-build a{color:#a6ebf5}
+@media(max-width:560px){.private-build{padding:19px}.private-build dl{grid-template-columns:1fr;gap:3px}.private-build dd{margin-bottom:8px}.private-build button,.private-build input{width:100%;min-width:0}}

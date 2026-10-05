@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0.0",
+  "product": "MalGuard clean-room static scanner",
+  "version": "1.0.0",
+  "build": "MG-1.0.0-WIN64-247f6200cc4e",
+  "platform": "windows-x64",
+  "filename": "MalGuard-Setup-x64.exe",
+  "size": 22002925,
+  "sha256": "247f6200cc4e87ba0e6383cdc3ba37814f1aaf934254260bc0888fe98c146054",
+  "partBytes": 3145728,
+  "partCount": 7,
+  "authenticodeSigned": false,
+  "serviceUrl": "https://malguard-private-download.vercel.app/api/download",
+  "status": "awaiting-secure-service-configuration",
+  "verification": {
+    "linuxPassed": 917,
+    "linuxSkipped": 1,
+    "exeWineChecks": 31,
+    "installerWineChecks": 5,
+    "nativeWindowsVerified": false,
+    "corpusMetricsAvailable": false
+  }
+}
