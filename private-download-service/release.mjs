@@ -1,40 +1,40 @@
 export const metadata = Object.freeze({
-  "build": "MG-1.0.0-WIN64-247f6200cc4e",
-  "version": "1.0.0",
+  "build": "MG-1.1.0-GUI-WIN64-41b60427edcc",
+  "version": "1.1.0",
   "filename": "MalGuard-Setup-x64.exe",
-  "size": 22002925,
-  "sha256": "247f6200cc4e87ba0e6383cdc3ba37814f1aaf934254260bc0888fe98c146054",
-  "sealedSha256": "2df0b238f03157b4b62b2934ce98cc71385c1a67a2f50433f44ae4c9c3c64380",
+  "size": 24057933,
+  "sha256": "41b60427edcc83f68fed767c4696b6d338938a433c9b5a171a43d1c5254a54f4",
+  "sealedSha256": "f60741d4fda3806d1456e3580e2567f7ff8f9b38370b13f6ab9c118b4abf5245",
   "parts": [
     {
       "name": "000.sealed",
       "size": 4194304,
-      "sha256": "c584b38da3fab2f0faefc24869988367e1ed336912f8c356529c9de23cf08a40"
+      "sha256": "448286d026a566c16deab4bea54d538f282f881dc4ff670d81801643148458bb"
     },
     {
       "name": "001.sealed",
       "size": 4194304,
-      "sha256": "02c7fdad4a3be942c8a4f6498dd4ff7fe31d25263fd35d208eef6759198d2390"
+      "sha256": "85408eefb5ed4fac859d5770c6c3805db9bb6bf51e16db3b41053c0e55bc9e6c"
     },
     {
       "name": "002.sealed",
       "size": 4194304,
-      "sha256": "658beb8b6c62de9a0e2a7b95bbaf7b2d2e472598ae3cdd1429992b70fde3a484"
+      "sha256": "78fe069f76df329d9116bc8cba1d0c3f81710e4f59cb0bc155acb6af814dad2b"
     },
     {
       "name": "003.sealed",
       "size": 4194304,
-      "sha256": "0b131b6e4906155db9a7b26c3c56b793b8a1c3f4b56f06d0724c4c7e8a1fdd83"
+      "sha256": "483a2ca42a494e3b15ef105c6756ba723ca17974a11c2f10d56409237f382ff6"
     },
     {
       "name": "004.sealed",
       "size": 4194304,
-      "sha256": "38db38041c85114571ccd3b74f600dcab573044700d524d657227ab0cfc9c837"
+      "sha256": "7ba2cbcb3c5f26cd40643946c668b4793e6ea81920230414e0562e1b57a1eeae"
     },
     {
       "name": "005.sealed",
-      "size": 1031439,
-      "sha256": "b2be408faa0cf80ff240f470f7f0c903b190389bbbfb23a9a71668a9c1826729"
+      "size": 3086447,
+      "sha256": "fd396ed9faad2ef174ee73c4edad847b560cb2c0fcb3d7ef63ec3cc202c19b14"
     }
   ]
 });
