@@ -17,7 +17,7 @@ async function loadRelease() {
     if (!response.ok) throw new Error('metadata');
     const data = await response.json();
     if (data.schemaVersion !== '1.0.0' || data.platform !== 'windows-x64' ||
-        !Number.isSafeInteger(data.size) || data.size < 1 || data.size > 32 * 1024 * 1024 ||
+        !Number.isSafeInteger(data.size) || data.size < 1 || data.size > 40 * 1024 * 1024 ||
         !/^[a-f0-9]{64}$/.test(data.sha256) || data.filename !== 'MalGuard-Setup-x64.exe' ||
         data.partBytes !== 3 * 1024 * 1024 || data.partCount !== Math.ceil(data.size / data.partBytes)) {
       throw new Error('metadata');
