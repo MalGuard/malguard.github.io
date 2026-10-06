@@ -42,7 +42,7 @@ async function readBody(req) {
 }
 
 export function createDownloadHandler({ metadata, readSealed, getSecrets, origin }) {
-  if (!Number.isSafeInteger(metadata.size) || metadata.size < 1 || metadata.size > 32 * 1024 * 1024 ||
+  if (!Number.isSafeInteger(metadata.size) || metadata.size < 1 || metadata.size > 40 * 1024 * 1024 ||
       !/^[a-f0-9]{64}$/.test(metadata.sha256) || !/^[a-f0-9]{64}$/.test(metadata.sealedSha256) ||
       !/^[A-Za-z0-9._-]{1,100}$/.test(metadata.filename) ||
       !/^[A-Za-z0-9._-]{1,100}$/.test(metadata.build)) throw new Error('invalid release metadata');

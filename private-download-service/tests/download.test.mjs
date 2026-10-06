@@ -12,7 +12,7 @@ const normalized = normalizeCode(code);
 async function fixture(t, change = {}) {
   const key = Buffer.alloc(32, 13);
   const nonce = Buffer.alloc(12, 19);
-  const plaintext = Buffer.alloc(PART_BYTES + 71, 7); // inert synthetic bytes
+  const plaintext = Buffer.alloc(change.size ?? PART_BYTES + 71, 7); // inert synthetic bytes
   const build = 'synthetic-test';
   const cipher = createCipheriv('aes-256-gcm', key, nonce);
   cipher.setAAD(Buffer.from('MGDL1:' + build));
@@ -65,6 +65,33 @@ test('authorized parts reconstruct exactly the inert fixture with no public GET 
   assert.deepEqual(Buffer.concat(parts), f.plaintext);
   assert.equal(f.reads(), 1);
   assert.equal((await request(f.url, undefined, {}, 'GET')).status, 405);
+});
+
+test('authorized delivery above the previous 32 MiB limit retains complete integrity', async t => {
+  const f = await fixture(t, { size: 33 * 1024 * 1024 + 17 });
+  const expectedHash = hash(f.plaintext);
+  const parts = [];
+  for (let part = 0; part < Math.ceil(f.plaintext.length / PART_BYTES); part++) {
+    const res = await request(f.url, { code, part });
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('x-file-sha256'), expectedHash);
+    const bytes = Buffer.from(await res.arrayBuffer());
+    assert.equal(bytes.length, Math.min(PART_BYTES, f.plaintext.length - part * PART_BYTES));
+    parts.push(bytes);
+  }
+  const complete = Buffer.concat(parts);
+  assert.equal(complete.length, f.plaintext.length);
+  assert.equal(hash(complete), expectedHash);
+  assert.equal(f.reads(), 1);
+});
+
+test('release above the 40 MiB deterministic limit is rejected before reading data', () => {
+  const digest = hash(Buffer.alloc(0));
+  assert.throws(() => createDownloadHandler({
+    metadata: { build: 'synthetic-limit', size: 40 * 1024 * 1024 + 1, sha256: digest,
+      sealedSha256: digest, filename: 'synthetic.bin' },
+    origin, getSecrets: () => ({}), readSealed: () => { throw new Error('must not read'); }
+  }), /invalid release metadata/);
 });
 
 for (const [name, body, expected] of [
