@@ -7,7 +7,9 @@ assert.ok(['https://127.0.0.1:8443','https://malguard.github.io'].includes(base)
 const local = base.includes('127.0.0.1');
 const report = [];
 await mkdir('test-results', { recursive: true });
-for (const [name, engine] of [['chromium', chromium], ['webkit', webkit]]) {
+const selectedBrowser=process.env.TEST_BROWSER;
+if(selectedBrowser)assert.ok(['chromium','webkit'].includes(selectedBrowser));
+for (const [name, engine] of [['chromium', chromium], ['webkit', webkit]].filter(([name])=>!selectedBrowser||name===selectedBrowser)) {
   const browser = await engine.launch();
   for (const width of [390, 1440]) {
     const context = await browser.newContext({ viewport: { width, height: width === 390 ? 844 : 1000 }, reducedMotion: 'no-preference', ignoreHTTPSErrors: local, hasTouch: width === 390 });
@@ -45,9 +47,13 @@ for (const [name, engine] of [['chromium', chromium], ['webkit', webkit]]) {
     for (let i=0; i<3; i++) {
       const card=page.locator('.orbit-product').nth(i);
       await card.scrollIntoViewIfNeeded();await page.waitForTimeout(900);
+      // Settle the click target first: Playwright may scroll a tall card's
+      // bottom button into view before clicking. That is not a layout shift.
+      await page.locator('#inspectProduct'+i).scrollIntoViewIfNeeded();
+      await page.waitForTimeout(900);
       const box=await card.boundingBox();
       await page.locator('#inspectProduct'+i).click();await page.waitForTimeout(1050);
-      const after=await card.boundingBox();assert.ok(Math.abs(box.height-after.height)<1 && Math.abs(box.y-after.y)<2,'Card turn keeps its position and size');
+      const after=await card.boundingBox();assert.ok(Math.abs(box.height-after.height)<1 && Math.abs(box.y-after.y)<2,'Card turn keeps its position and size: '+JSON.stringify({browser:name,width,card:i,before:box,after}));
       assert.ok(await page.locator('#productBack'+i+' .orbit-card-link').isVisible());
       const active=await page.evaluate(()=>document.activeElement.className);assert.equal(active,'product-return');
       await page.locator('#productBack'+i+' .product-return').click();await page.waitForTimeout(1050);
