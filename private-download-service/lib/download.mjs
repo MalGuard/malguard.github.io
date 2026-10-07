@@ -41,7 +41,8 @@ async function readBody(req) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
-export function createDownloadHandler({ metadata, readSealed, getSecrets, origin }) {
+export function createDownloadHandler({ metadata, readSealed, getSecrets, origin, publicAccess = false }) {
+  if (typeof publicAccess !== 'boolean') throw new Error('invalid download policy');
   if (!Number.isSafeInteger(metadata.size) || metadata.size < 1 || metadata.size > 40 * 1024 * 1024 ||
       !/^[a-f0-9]{64}$/.test(metadata.sha256) || !/^[a-f0-9]{64}$/.test(metadata.sealedSha256) ||
       !/^[A-Za-z0-9._-]{1,100}$/.test(metadata.filename) ||
@@ -67,7 +68,7 @@ export function createDownloadHandler({ metadata, readSealed, getSecrets, origin
       return reply(res, 415, 'JSON_REQUIRED');
     }
     const secrets = getSecrets();
-    if (!/^[a-f0-9]{64}$/.test(secrets.key || '') || !/^[a-f0-9]{64}$/.test(secrets.codeHash || '')) {
+    if (!/^[a-f0-9]{64}$/.test(secrets.key || '') || (!publicAccess && !/^[a-f0-9]{64}$/.test(secrets.codeHash || ''))) {
       return reply(res, 503, 'DOWNLOAD_UNAVAILABLE');
     }
     // The hosting proxy supplies this header. This bounded limiter is local to
@@ -79,13 +80,13 @@ export function createDownloadHandler({ metadata, readSealed, getSecrets, origin
     let body;
     try { body = await readBody(req); } catch { return reply(res, 400, 'INVALID_REQUEST'); }
     if (!body || typeof body !== 'object' || Array.isArray(body) ||
-        Object.keys(body).sort().join(',') !== 'code,part' || !Number.isInteger(body.part) ||
+        Object.keys(body).sort().join(',') !== (publicAccess ? 'part' : 'code,part') || !Number.isInteger(body.part) ||
         body.part < 0 || body.part >= Math.ceil(metadata.size / PART_BYTES)) {
       return reply(res, 400, 'INVALID_REQUEST');
     }
     const code = normalizeCode(body.code);
     const actual = createHash('sha256').update(code || 'invalid').digest();
-    if (!code || !timingSafeEqual(actual, Buffer.from(secrets.codeHash, 'hex'))) {
+    if (!publicAccess && (!code || !timingSafeEqual(actual, Buffer.from(secrets.codeHash, 'hex')))) {
       const entry = failures.get(ip) || { count: 0, until: now + 60_000 };
       entry.count += 1;
       if (failures.size >= 2048 && !failures.has(ip)) failures.delete(failures.keys().next().value);

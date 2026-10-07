@@ -1,55 +1,55 @@
 export const metadata = Object.freeze({
-  "build": "MG-1.1.0-IEXPRESS-WIN64-ea558cf66606",
-  "version": "1.1.0",
+  "build": "MG-1.2.0-WIN64-a31b3579f5d3",
+  "version": "1.2.0",
   "filename": "MalGuard-Setup-x64.exe",
-  "size": 34189312,
-  "sha256": "ea558cf66606ac2568afa0a22794046f4b188b3b3a932b2c2292d04eb9a40970",
-  "sealedSha256": "39759ddac2381c505f964cc6dc29729adc67985ffb65126647373370fdf3a06c",
+  "size": 34201600,
+  "sha256": "db2d552990593c5a8b392750a8693764e42a6e29a76bd027d28410ae86127f71",
+  "sealedSha256": "7a0b0d108bbce393bde963c4c9a839080b2b71c2fc24d838db754416ba639de1",
   "parts": [
     {
       "name": "000.sealed",
       "size": 4194304,
-      "sha256": "0067a1039601df78b97e5a7cd39fd8afaddb2f7e2c043757a9c2b6f0990195e5"
+      "sha256": "8b1511c7954456c2efa8df848281e84d9cfdc8ef93701dbe0974a70bd8b23701"
     },
     {
       "name": "001.sealed",
       "size": 4194304,
-      "sha256": "e675004ec1a82453e99822e15a6017071ace253ff6d48ff76a1857da32574554"
+      "sha256": "a2c653a416aad056b2444e515af31c90d320797204d44bed38501108948463e1"
     },
     {
       "name": "002.sealed",
       "size": 4194304,
-      "sha256": "7971c4f45a630e918b1b20d02c33027c9961dde767970a0de0e9565ab49efb2a"
+      "sha256": "c777525dc64e219f86b1afdcc31904bba347b7b20577c1b4309ffc64ded0c4a4"
     },
     {
       "name": "003.sealed",
       "size": 4194304,
-      "sha256": "a9256f8280ce3e3bc45a54f197b55c7df00f907a51f73a0cc5775e8fe4d5f412"
+      "sha256": "ac241d4c995fc40a8efc59db87ea8b55b7ae3ab94ae3d0a2584e2e88f99c4578"
     },
     {
       "name": "004.sealed",
       "size": 4194304,
-      "sha256": "b93089858ac4bab0934bcacf4eb8695796e47420f3ce669c6ba365de0d6a1046"
+      "sha256": "0ae150b90b2667216dc6e34b3d28e4cd87c10f414c2d246d339c0625527bec23"
     },
     {
       "name": "005.sealed",
       "size": 4194304,
-      "sha256": "78db2ec97f1469b46689c2562c903d677ced219efcd77e27391d1df19894224e"
+      "sha256": "4339ea88d63f3dcc2e042d713238d1ee92e7cd65f72c21360af6199afc484879"
     },
     {
       "name": "006.sealed",
       "size": 4194304,
-      "sha256": "adb11785077d193443ac7ceccf62dc52a167bd7cdeda472d8fb1ea6f4884c876"
+      "sha256": "a9cdcf294dad4daf95ad3f57de48e76c2a36983fba3b0c10a74255425e68a11c"
     },
     {
       "name": "007.sealed",
       "size": 4194304,
-      "sha256": "7660387262dd451c76c7fd2781f1a9a1f1ba3e33923eeba7493dc66bc853dea3"
+      "sha256": "4ca6ce80fb946c3cb491c9c35843a1d5e71e3b143c854990732341c3d17cd4d7"
     },
     {
       "name": "008.sealed",
-      "size": 634914,
-      "sha256": "ea8599c0e4fc956ab39ff8bde37498ade208710fab60229d5c71f4481381b947"
+      "size": 647202,
+      "sha256": "98dc81eb5c5ae76bab7350c5e2927dee0b9667d5421c465a765f4a84a930ba8d"
     }
   ]
 });

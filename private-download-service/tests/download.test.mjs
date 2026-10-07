@@ -26,6 +26,7 @@ async function fixture(t, change = {}) {
   const handler = createDownloadHandler({
     metadata,
     origin,
+    publicAccess: change.publicAccess ?? false,
     getSecrets: () => ({ key: change.noKey ? undefined : key.toString('hex'), codeHash: hash(normalized) }),
     readSealed: async () => { reads += 1; return sealed; }
   });
@@ -150,4 +151,32 @@ test('valid preflight carries no file bytes', async t => {
   assert.equal(res.status, 204);
   assert.equal((await res.arrayBuffer()).byteLength, 0);
   assert.equal(f.reads(), 0);
+});
+
+test('public policy delivers intact bytes without a code', async t => {
+  const f = await fixture(t, { publicAccess: true });
+  const parts = [];
+  for (let part = 0; part < 2; part++) {
+    const res = await request(f.url, { part });
+    assert.equal(res.status, 200);
+    parts.push(Buffer.from(await res.arrayBuffer()));
+  }
+  assert.deepEqual(Buffer.concat(parts), f.plaintext);
+});
+
+test('client cannot switch policy or supply a download code in public mode', async t => {
+  const f = await fixture(t, { publicAccess: true });
+  for (const body of [{ part: 0, code }, { part: 0, publicAccess: true }, { part: 0, path: '../secret' }]) {
+    assert.equal((await request(f.url, body)).status, 400);
+  }
+  assert.equal(f.reads(), 0);
+});
+
+test('public policy retains key and ciphertext integrity gates', async t => {
+  for (const change of [{ noKey: true }, { badTag: true }, { badHash: true }, { corrupt: true }]) {
+    const f = await fixture(t, { ...change, publicAccess: true });
+    const res = await request(f.url, { part: 0 });
+    assert.equal(res.status, 503);
+    assert.equal(res.headers.get('x-file-sha256'), null);
+  }
 });

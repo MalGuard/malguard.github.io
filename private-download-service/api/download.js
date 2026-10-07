@@ -6,7 +6,8 @@ import { metadata } from '../release.mjs';
 export default createDownloadHandler({
   metadata,
   origin: 'https://malguard.github.io',
-  getSecrets: () => ({ key: process.env.MALGUARD_DOWNLOAD_KEY, codeHash: process.env.MALGUARD_DOWNLOAD_CODE_HASH }),
+  publicAccess: true,
+  getSecrets: () => ({ key: process.env.MALGUARD_DOWNLOAD_KEY }),
   readSealed: async () => {
     const parts = [];
     let total = 0;
