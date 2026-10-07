@@ -6,7 +6,7 @@ const {createHash}=require('node:crypto');
  const server=spawn('python3',['-m','http.server','8769','--bind','127.0.0.1'],{cwd:process.cwd(),stdio:'ignore'});
  let browser;
  try{
-  browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+  browser=await chromium.launch({executablePath:process.env.TEST_CHROMIUM_EXECUTABLE,headless:true,args:['--no-sandbox']});
   const page=await browser.newPage();
   await page.route('**/release/malguard-public-release.json',r=>r.fulfill({status:404,body:'No release in this synthetic failure scenario'}));
   await page.goto('http://127.0.0.1:8769/download.html');

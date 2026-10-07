@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {chromium}from 'playwright';
 import {readFile,writeFile}from 'node:fs/promises';
 const paths=['/','/products.html','/tools.html','/scan-url.html','/gta-guard.html','/ai-intelligence.html','/malware-ai.html','/malware-ai-windows.html','/scan-mods.html','/download.html','/app.html','/trust.html','/privacy.html','/about.html','/founder.html','/docs.html','/labs.html','/support.html','/sandbox-help.html','/ios-preview/','/research/repackaged-mod.html','/404.html'];
-const browser=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});
+const browser=await chromium.launch({executablePath:process.env.TEST_CHROMIUM_EXECUTABLE,args:['--no-sandbox']});
 const results=[];
 try{
  for(const width of [320,1280]){

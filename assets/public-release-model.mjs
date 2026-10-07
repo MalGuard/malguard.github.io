@@ -6,6 +6,7 @@ const build = /^MG-\d{1,3}\.\d{1,3}\.\d{1,3}-(?:IEXPRESS-|GUI-)?WIN64-[a-f0-9]{1
 const hash = /^[a-f0-9]{64}$/;
 export function validateRelease(data) {
   if (!data || typeof data !== 'object' || Array.isArray(data) ||
+      !['schemaVersion','platform','status','serviceUrl','filename','version','engineVersion','build','sourceCommit','sha256'].every(key => typeof data[key] === 'string') ||
       data.schemaVersion !== '1.0.0' || data.platform !== 'windows-x64' ||
       data.status !== 'public-download-ready' || data.serviceUrl !== SERVICE_URL ||
       data.filename !== 'MalGuard-Setup-x64.exe' || !version.test(data.version || '') ||

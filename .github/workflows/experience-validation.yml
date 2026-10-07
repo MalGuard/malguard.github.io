@@ -24,6 +24,10 @@ jobs:
           node --check assets/experience.js
           node --check assets/brand-motion.js
           node --check assets/site-entry.js
+          node --check assets/i18n.mjs
+          node --check assets/public-release.mjs
+          node tests/public-release/model.test.mjs
+          node --test private-download-service/tests/download.test.mjs
       - name: Check responsive pages and benign interactions
         run: |
           # Match production HTTPS: WebKit correctly upgrades HTTP subresources
@@ -31,6 +35,8 @@ jobs:
           openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
           python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
           npm run test:experience
+          node tests/public-release/browser.cjs
+          node tests/public-release/locale-pages.mjs
           npm run test:motion
           node tests/visual-review.mjs
       - name: Save screenshots and verification report
