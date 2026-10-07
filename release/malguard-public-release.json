@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0.0",
+  "product": "MalGuard clean-room static scanner",
+  "platform": "windows-x64",
+  "version": "1.2.0",
+  "engineVersion": "1.1.0",
+  "build": "MG-1.2.0-WIN64-a31b3579f5d3",
+  "sourceCommit": "a31b3579f5d39101646626378bee24231546cb40",
+  "filename": "MalGuard-Setup-x64.exe",
+  "size": 34201600,
+  "sha256": "db2d552990593c5a8b392750a8693764e42a6e29a76bd027d28410ae86127f71",
+  "installerFormat": "IExpress-PowerShell",
+  "authenticodeSigned": false,
+  "partBytes": 3145728,
+  "partCount": 11,
+  "serviceUrl": "https://malguard-private-download.vercel.app/api/download",
+  "status": "public-download-ready",
+  "changes": {
+    "en": [
+      "Full-file bounded XOR recovery instead of prefix-only decoding.",
+      "NUL-separated base64/hex and layered encoded string tables recovered under shared budgets.",
+      "English default and Persian switching in the scanner and release pages.",
+      "Public download without a password; build-ID update checks and installation guidance."
+    ],
+    "fa": [
+      "بازیابی محدود XOR در کل فایل به جای بررسی ابتدای فایل.",
+      "بازیابی جدول‌های رشتهٔ base64/hex و چندلایه با جداکنندهٔ NUL و بودجهٔ مشترک.",
+      "انگلیسی پیش‌فرض و انتخاب فارسی در اسکنر و صفحات انتشار.",
+      "دانلود عمومی بدون رمز، بررسی کد بیلد و راهنمای نصب."
+    ]
+  },
+  "onlineUpdates": {
+    "configured": true,
+    "windowsClientVerified": true,
+    "verifiedRecords": 1342,
+    "verifiedEpoch": 37608574476001
+  },
+  "verification": {
+    "linux": {
+      "passed": 956,
+      "skipped": 1
+    },
+    "windows": {
+      "passed": 955,
+      "skipped": 2
+    },
+    "nativeInstallChecks": 15,
+    "installedSyntheticFixtures": 6,
+    "nativeWindowsVerified": true,
+    "windows10_11LaptopVerified": false,
+    "corpusMetricsAvailable": false,
+    "aiAdapterConfigured": false,
+    "publicServiceChecks": 7
+  }
+}

@@ -1,19 +1,20 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-28",
+  "updatedAt": "2026-10-07",
   "canonicalSite": "https://malguard.github.io/",
   "products": {
     "gtaGuard": {
       "name": "GTA Guard",
       "status": "public-preview",
-      "currentVersion": "0.8.0-beta.7",
-      "engine": "MalGuard Fusion Engine 2.0",
+      "currentVersion": "1.2.0",
+      "engine": "MalGuard clean-room static engine 1.1.0",
       "distribution": {
-        "windowsX64": "paused",
-        "downloadEnabled": false
+        "windowsX64": "public-download-ready",
+        "downloadEnabled": true,
+        "detailsUrl": "/download.html#scanner"
       },
       "platforms": {
-        "windowsX64": "preview-distribution-paused",
+        "windowsX64": "public-preview",
         "iPhoneBrowserPreview": "available"
       }
     },

@@ -28,8 +28,28 @@ for page in PAGES:
         if u.fragment and target.suffix=='.html':
             if u.fragment not in Document(target.read_text()).ids:errors.append(f'{page.name}: missing anchor {ref}')
     if re.search(r'https://github\.com/MalGuard/malguard\.github\.io/releases/download/gta-guard-[^"\s]+\.exe',text):errors.append(f'{page.name}: paused GTA installer URL exposed')
-assert json.loads((ROOT/'data/product-status.json').read_text())['products']['gtaGuard']['distribution']['windowsX64']=='paused'
-assert json.loads((ROOT/'release/gta-guard-windows.json').read_text())['distribution']['downloadEnabled'] is False
+release=json.loads((ROOT/'release/malguard-public-release.json').read_text())
+status=json.loads((ROOT/'data/product-status.json').read_text())['products']['gtaGuard']
+legacy=json.loads((ROOT/'release/gta-guard-windows.json').read_text())
+assert release['status']=='public-download-ready'
+assert release['build']==f"MG-{release['version']}-WIN64-{release['sourceCommit'][:12]}"
+assert re.fullmatch('[a-f0-9]{64}',release['sha256'])
+assert 0<release['size']<=40*1024*1024
+assert release['serviceUrl']=='https://malguard-private-download.vercel.app/api/download'
+assert release['verification']['nativeInstallChecks']==15
+assert release['verification']['publicServiceChecks']==7
+assert release['verification']['nativeWindowsVerified'] is True
+assert release['verification']['corpusMetricsAvailable'] is False
+assert status['currentVersion']==release['version']
+assert status['distribution']['windowsX64']=='public-download-ready'
+assert legacy['installer']['sha256']==release['sha256']
+assert legacy['distribution']['downloadEnabled'] is True
+assert 'privateDownloadCode' not in (ROOT/'download.html').read_text()
+assert 'publicAccess: true' in (ROOT/'private-download-service/api/download.js').read_text()
+assert 'Administrator password' in (ROOT/'index.html').read_text()
+for page in PAGES:
+    text=page.read_text()
+    assert '/assets/i18n.mjs' in text,f'{page}: missing locale controls'
 for e in errors: print(e)
 if errors:raise SystemExit(f'{len(errors)} link/asset/distribution errors')
-print(f'PASS: {len(PAGES)} HTML documents, local links, anchors, assets, duplicate IDs and paused installer boundary')
+print(f'PASS: {len(PAGES)} HTML documents, links/assets/anchors, multilingual controls, verified public release and preserved admin authentication')

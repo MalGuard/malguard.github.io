@@ -14,7 +14,10 @@ let activePage;
 async function check(name, work) { try { await work(); report.passed.push(name); console.log('PASS', name); } catch (e) { report.failed.push({ name, error: e.message }); console.error('FAIL', name, e.message); if(activePage && !activePage.isClosed()) await activePage.screenshot({path:'test-results/failed-'+name.replace(/[^a-zA-Z0-9]/g,'-')+'.png',fullPage:true}).catch(()=>{}); } }
 async function settle(page) { await page.evaluate(() => document.fonts.ready); await page.waitForFunction(()=>document.documentElement.dataset.experienceReady==='true',null,{timeout:5000}); }
 async function publicEntry(page) { await settle(page); const button = page.locator('#sitePublicEntry'); if (await button.isVisible()) await button.click(); }
-for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], ['webkit',webkit,[390,820]]]) {
+const browserMatrix = [['chromium',chromium,[320,390,820,1440]], ['webkit',webkit,[390,820]]];
+const selectedBrowser = process.env.TEST_BROWSER;
+if(selectedBrowser)assert.ok(['chromium','webkit'].includes(selectedBrowser),'Unknown requested browser');
+for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrowser||name===selectedBrowser)) {
   const browser = await engine.launch();
   for (const width of sizes) {
     const context = await browser.newContext({ ...fixtureTLS, viewport:{ width, height: width<600?844:1000 }, reducedMotion:'reduce' });
@@ -82,9 +85,12 @@ for (const [name, engine, sizes] of [['chromium',chromium,[320,390,820,1440]], [
     await check(`${name} ${width}px legacy links and product boundary`,async()=>{
       await page.goto(base+'/#gta-guard');await page.waitForURL('**/gta-guard.html');
       assert.equal(await page.locator('a[href*="releases/download/gta-guard-"]').count(),0);
-      await page.locator('#checkInstalledBuild').click();assert.match(await page.locator('#updateResult').innerText(),/Enter the Build/);
-      await page.locator('#installedBuildInput').fill('not-a-build');await page.locator('#checkInstalledBuild').click();assert.match(await page.locator('#updateResult').innerText(),/does not look like/);
-      await page.locator('#installedBuildInput').fill('bc60530');await page.locator('#checkInstalledBuild').click();assert.match(await page.locator('#updateResult').innerText(),/matches the latest published build/);
+      assert.ok((await page.locator('#models').innerText()).includes('static evidence pipeline'));
+      await page.getByRole('link',{name:'Check your installed build',exact:true}).click();
+      await page.waitForURL('**/download.html#updates');
+      assert.equal(await page.locator('#buildInput').count(),1);
+      assert.equal(await page.locator('input[type=password]').count(),0);
+      assert.ok((await page.locator('#troubleshooting').textContent()).includes('Do not disable protection'));
     });
 
 

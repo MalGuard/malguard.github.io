@@ -9,7 +9,7 @@
   const pages = [
     ['Home', 'MalGuard overview', '/', 'home malguard'],
     ['Products', 'Products and current availability', '/products.html', 'gta guard malware ai scam guard'],
-    ['GTA Guard', 'Windows x64 preview · download paused', '/gta-guard.html', 'mods windows files'],
+    ['GTA Guard', 'Clean-room Windows x64 static scanner', '/gta-guard.html', 'mods windows files'],
     ['Scan Mods', 'Supported and planned game-mod tools', '/scan-mods.html', 'gta minecraft roblox'],
     ['AI Intelligence', 'Malware AI preview and access options', '/ai-intelligence.html', 'chat intelligence malware'],
     ['Scan URL', 'Local URL-text inspection', '/scan-url.html', 'url link address'],
@@ -22,7 +22,7 @@
     ['Founder', 'Mohammadreza Azardarkhash', '/founder.html', 'founder creator'],
     ['Support', 'Bug reports, false positives and feedback', '/support.html', 'support bug help'],
     ['Downloads', 'Platform availability and verification', '/download.html', 'download install'],
-    ['MalGuard App', 'Offline interface for supported platforms', '/app.html', 'app mac android ios linux'],
+    ['MalGuard App', 'Windows scanner, installation and build checks', '/app.html', 'app mac android ios linux'],
     ['Sandbox Help', 'Isolation requirements and troubleshooting', '/sandbox-help.html', 'sandbox windows errors'],
     ['Case Study', 'How a legitimate mod can be repackaged', '/research/repackaged-mod.html', 'research repackaged']
   ];

@@ -1,0 +1,17 @@
+[
+  {
+    "build": "MG-1.1.0-IEXPRESS-WIN64-ea558cf66606",
+    "version": "1.1.0",
+    "supersededBy": "MG-1.2.0-WIN64-a31b3579f5d3"
+  },
+  {
+    "build": "MG-1.1.0-GUI-WIN64-41b60427edcc",
+    "version": "1.1.0",
+    "supersededBy": "MG-1.2.0-WIN64-a31b3579f5d3"
+  },
+  {
+    "build": "MG-1.2.0-WIN64-a31b3579f5d3",
+    "version": "1.2.0",
+    "sourceCommit": "a31b3579f5d39101646626378bee24231546cb40"
+  }
+]
