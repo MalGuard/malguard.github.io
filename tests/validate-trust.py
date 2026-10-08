@@ -20,22 +20,24 @@ for path,text in [
  ('malware-ai-windows.html','dir="auto"'),('malware-ai-windows.html','applyTextDirection'),
  ('assets/experience.css','unicode-bidi:plaintext'),('assets/experience.js',"'#malware-ai':'/malware-ai.html'"),
  ('index.html','/ai-intelligence.html'),('scan-url.html','Scan URL'),('products.html','LIVE PREVIEW'),
- ('download.html','Download previous public 1.2.0 EXE'),('download.html','More info'),('download.html','Run anyway'),
+ ('download.html','Verify password and download EXE'),('download.html','More info'),('download.html','Run anyway'),
  ('download.html','Do not disable protection'),('gta-guard.html','No scanned code is executed'),
  ('gta-guard.html','Check your installed build'),('sandbox-help.html','does not upload scanned files'),
  ('app.html','/download.html#scanner'),('app.html','actual MalGuard / GTA Guard Windows scanner'),
- ('index.html','Administrator password'),('assets/public-release.mjs','JSON.stringify({part})'),
+ ('index.html','Administrator password'),('assets/public-release.mjs','JSON.stringify({code,part})'),
  ('assets/public-release.mjs',"crypto.subtle.digest('SHA-256'"),('assets/public-release-model.mjs','MAX_FILE_BYTES'),
  ('assets/public-release-model.mjs','reader.cancel()'),('assets/i18n.mjs',"document.documentElement.dir=locale==='fa'?'rtl':'ltr'"),
  ('research/repackaged-mod.html','data-malguard-back'),('ios-preview/index.html','data-malguard-back'),
  ('research/repackaged-mod.html','/assets/page-history.js'),('ios-preview/index.html','/assets/page-history.js')]:contains(path,text)
 for path,text in [('index.html','MalGuard detects, blocks, and prevents cheats'),('ai-intelligence.html','href="https://malware-ai-gray.vercel.app">Open Malware AI'),('app.html','MalGuard-App-Preview-'),('download.html','MalGuard-App-Preview-'),('download.html','privateDownloadCode')]:absent(path,text)
-release=json.loads((ROOT/'release/malguard-public-release.json').read_text())
-assert release['verification']['nativeInstallChecks']==15
-assert release['verification']['installedSyntheticFixtures']==6
-assert release['verification']['windows']['passed']>=955
-assert release['verification']['linux']['passed']>=956
-assert release['verification']['publicServiceChecks']==7
+release=json.loads((ROOT/'release/malguard-current-release.json').read_text())
+assert release['verification']['nativeInstallChecks']==16
+assert release['verification']['setupDeadlineChecks']==5
+assert release['verification']['installedSyntheticFixtures']>=6
+assert release['verification']['windows']['passed']>=1005
+assert release['verification']['linux']['passed']>=1006
+assert release['verification']['passwordServiceUnitChecks']==19
+assert release['passwordRequired'] is True and release['deviceLicenseRequired'] is False and release['installerPasswordRequired'] is False
 assert release['verification']['aiAdapterConfigured'] is False
 assert release['verification']['corpusMetricsAvailable'] is False
 assert release['authenticodeSigned'] is False

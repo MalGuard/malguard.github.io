@@ -1,35 +1,40 @@
-# Private Windows preview download
+# Password before the Windows installer download
 
-This service authorizes every 3 MiB download part on the server. GitHub Pages
-hosts the existing site; a separate Vercel project builds only this directory.
-There is no public plaintext installer and no browser-side password comparison.
+The current `api/installer` endpoint checks the owner's random download code on
+**every request**, before returning installer bytes. The website sends the code
+in a POST body over HTTPS. It never saves it in a URL or browser storage. The
+ordinary Windows EXE has no archive password, installation password or device
+license. Anyone with the downloaded EXE can copy and install it, as requested.
 
-`sealed/` contains authenticated AES-256-GCM ciphertext. Its random key and the
-SHA-256 of a separate 160-bit random access code are sensitive Vercel environment
-variables named `MALGUARD_DOWNLOAD_KEY` and `MALGUARD_DOWNLOAD_CODE_HASH`. Never
-commit either value, the access code, or an unencrypted installer. Missing
-configuration, changed ciphertext, failed authentication or a hash mismatch
-blocks delivery. The code is submitted in a POST body and is never stored in
-browser storage or a URL. Responses are not cacheable. The site verifies the
-complete installer hash before offering the browser download.
+Only AES-256-GCM ciphertext is committed in `sealed-installer/`. The release
+build and random public salt derive a key from the uniformly random 160-bit
+code using HKDF-SHA256. A successful GCM authentication verifies the code on the
+server; a changed ciphertext or final installer SHA-256 mismatch blocks delivery.
+The code and derived key are absent from Git, Pages, release JSON and logs. This
+scheme is intended for generated high-entropy codes, never short chosen passwords.
+The existing Vercel Git connection deploys this directory without adding a new
+production secret. `installer-release.mjs` contains public metadata only.
 
-Three-MiB parts stay below Vercel's documented 4.5 MB response limit. Each part
-requires fresh authorization. A per-instance bounded failure limiter complements
-the high-entropy code; it is not a distributed rate limiter. CORS is restricted
-to `https://malguard.github.io`, and no cookies are needed. CORS alone is not
-authentication; the code is always checked independently.
+Each response is at most 3 MiB, below Vercel's 4.5 MB response limit. CORS is
+restricted to `https://malguard.github.io`; CORS alone is not authentication.
+Responses are private and not cacheable. Cached plaintext still requires the
+matching key for each part. Concurrent work, request size and failed-code state
+are bounded. The per-instance limiter is not a distributed rate limiter. The
+browser verifies the complete size and SHA-256 before offering the EXE to save.
 
-Run the harmless tests with `npm test`. Production deployment must also verify
-wrong-code denial, missing-code denial, absence of a public plaintext path and
-an exact SHA-256 match for a complete authorized download. A successful build
-alone does not establish those checks. The original scanner EXE is never changed
-or executed by this service.
+Run `npm test` for harmless cryptographic and HTTP regressions. The browser tests
+exercise the actual handler using inert fixtures, including wrong codes before
+and after an authorized download, cancellation and corrupt transfers. Live
+verification uses an ephemeral RSA recipient in CI: only its public key, the
+wrapped code and a bounded verification receipt enter Git. The recipient's
+private key and owner's code are never published. The live download is hashed,
+not executed or uploaded as a CI artifact.
 
-To revoke access, replace the code hash in Vercel and redeploy. To rotate the
-encryption key, reseal the original verified installer, update release metadata
-and sealed parts, then update the sensitive key and deploy the matching source.
-Keep production secrets out of fork and untrusted pull-request deployments.
+To rotate access, generate a fresh random code and salt, reseal the verified EXE,
+update `installer-release.mjs` and `sealed-installer/`, and redeploy. Ciphertext
+already downloaded from an older revision remains decryptable by its old code.
+Changing website HTML does not revoke copies of a downloaded EXE.
 
-Production secrets are intentionally unavailable in preview and development.
-After configuring or rotating them, rebuild the production branch: promoting
-an older preview without rebuilding does not apply new environment values.
+The older `api/download` endpoint serves only historical public 1.2.0 ciphertext
+from `sealed/` using its existing environment key. It cannot decrypt or deliver
+the current 1.3.1 installer. Its historical metadata remains separate.

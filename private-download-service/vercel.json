@@ -3,6 +3,10 @@
   "framework": null,
   "installCommand": "npm install --ignore-scripts",
   "functions": {
+    "api/installer.js": {
+      "includeFiles": "sealed-installer/**",
+      "maxDuration": 30
+    },
     "api/download.js": {
       "includeFiles": "sealed/**",
       "maxDuration": 30

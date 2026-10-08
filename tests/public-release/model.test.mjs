@@ -11,3 +11,8 @@ test('decoded part bounds work without Content-Length',async()=>assert.deepEqual
 test('truncated and oversized parts are rejected',async()=>{await assert.rejects(readBounded(new Response(new Uint8Array([1])),2));await assert.rejects(readBounded(new Response(new Uint8Array([1,2,3])),2));});
 test('overflow cancels hostile stream',async()=>{let canceled=false;const stream=new ReadableStream({start(c){c.enqueue(new Uint8Array(10));},cancel(){canceled=true;}});await assert.rejects(readBounded(new Response(stream),2));assert.equal(canceled,true);});
 test('JSON stream size and UTF-8 are bounded',async()=>{assert.deepEqual(await readJsonBounded(new Response('{"ok":true}'),20),{ok:true});await assert.rejects(readJsonBounded(new Response('x'.repeat(30)),20));await assert.rejects(readJsonBounded(new Response(new Uint8Array([255])),20));});
+test('password release permits only the reviewed server and unrestricted installation',()=>{
+ const gated={...fixture(),status:'password-download-ready',serviceUrl:'https://malguard-private-download.vercel.app/api/installer',passwordRequired:true,deviceLicenseRequired:false,installerPasswordRequired:false};
+ assert.equal(validateRelease(gated).status,'password-download-ready');
+ for(const change of [{serviceUrl:SERVICE_URL},{passwordRequired:false},{deviceLicenseRequired:true},{installerPasswordRequired:true},{serviceUrl:gated.serviceUrl+'?code=public'}])assert.throws(()=>validateRelease({...gated,...change}));
+});

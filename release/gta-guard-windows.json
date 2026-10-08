@@ -2,18 +2,20 @@
   "schemaVersion": "1.0.0",
   "product": "GTA Guard / MalGuard",
   "platform": "windows-x64",
-  "version": "1.2.0",
-  "engineVersion": "1.1.0",
-  "build": "MG-1.2.0-WIN64-a31b3579f5d3",
-  "sourceCommit": "a31b3579f5d39101646626378bee24231546cb40",
+  "version": "1.3.1",
+  "engineVersion": "1.2.1",
+  "build": "MG-1.3.1-WIN64-22511e787034",
+  "sourceCommit": "22511e7870347733b982262eb9efe7f1430a0f4e",
   "installer": {
     "name": "MalGuard-Setup-x64.exe",
     "url": "/download.html#scanner",
-    "sha256": "db2d552990593c5a8b392750a8693764e42a6e29a76bd027d28410ae86127f71",
+    "sha256": "c0c2bf7b4121ae091d75bb13feedd0c80fa45dd6a53d4ea8021b8705ebff945d",
     "sha256Url": null
   },
   "distribution": {
-    "status": "public-download-ready",
-    "downloadEnabled": true
+    "status": "password-download-ready",
+    "downloadEnabled": true,
+    "passwordRequired": true,
+    "deviceLicenseRequired": false
   }
 }

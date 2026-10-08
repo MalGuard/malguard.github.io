@@ -7,3 +7,6 @@
 .private-release-install code{display:inline-block;max-width:100%}@media(max-width:400px){html[dir=rtl] .private-release-panel .release-specs{grid-template-columns:1fr}}
 
 #scanner,#public-release{scroll-margin-top:100px}
+
+.release-anchor{position:absolute;scroll-margin-top:100px}#scanner{position:relative}.release-input-row #downloadPassword{letter-spacing:.04em}#downloadForm .btn{white-space:normal;text-align:center}#downloadBytes{font-size:12px;font-variant-numeric:tabular-nums}#cancelDownload[hidden]{display:none}
+@media(max-width:400px){html[dir=rtl] .release-specs{grid-template-columns:1fr;gap:5px}html[dir=rtl] .release-specs dd{margin-bottom:12px}}

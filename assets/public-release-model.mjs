@@ -1,4 +1,5 @@
 export const SERVICE_URL = 'https://malguard-private-download.vercel.app/api/download';
+export const PASSWORD_SERVICE_URL = 'https://malguard-private-download.vercel.app/api/installer';
 export const MAX_FILE_BYTES = 40 * 1024 * 1024;
 export const PART_BYTES = 3 * 1024 * 1024;
 const version = /^\d{1,3}\.\d{1,3}\.\d{1,3}$/;
@@ -8,7 +9,9 @@ export function validateRelease(data) {
   if (!data || typeof data !== 'object' || Array.isArray(data) ||
       !['schemaVersion','platform','status','serviceUrl','filename','version','engineVersion','build','sourceCommit','sha256'].every(key => typeof data[key] === 'string') ||
       data.schemaVersion !== '1.0.0' || data.platform !== 'windows-x64' ||
-      data.status !== 'public-download-ready' || data.serviceUrl !== SERVICE_URL ||
+      !((data.status === 'public-download-ready' && data.serviceUrl === SERVICE_URL) ||
+        (data.status === 'password-download-ready' && data.serviceUrl === PASSWORD_SERVICE_URL &&
+         data.passwordRequired === true && data.deviceLicenseRequired === false && data.installerPasswordRequired === false)) ||
       data.filename !== 'MalGuard-Setup-x64.exe' || !version.test(data.version || '') ||
       !version.test(data.engineVersion || '') || !build.test(data.build || '') ||
       !/^[a-f0-9]{40}$/.test(data.sourceCommit || '') ||

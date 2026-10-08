@@ -29,25 +29,30 @@ for page in PAGES:
         if u.fragment and target.suffix=='.html':
             if u.fragment not in Document(target.read_text()).ids:errors.append(f'{page.name}: missing anchor {ref}')
     if re.search(r'https://github\.com/MalGuard/malguard\.github\.io/releases/download/gta-guard-[^"\s]+\.exe',text):errors.append(f'{page.name}: paused GTA installer URL exposed')
-release=json.loads((ROOT/'release/malguard-public-release.json').read_text())
+historical=json.loads((ROOT/'release/malguard-public-release.json').read_text())
+release=json.loads((ROOT/'release/malguard-current-release.json').read_text())
 status=json.loads((ROOT/'data/product-status.json').read_text())['products']['gtaGuard']
 legacy=json.loads((ROOT/'release/gta-guard-windows.json').read_text())
-assert release['status']=='public-download-ready'
+assert historical['status']=='public-download-ready'
+assert release['status']=='password-download-ready'
+assert release['passwordRequired'] is True and release['deviceLicenseRequired'] is False and release['installerPasswordRequired'] is False
 assert release['build']==f"MG-{release['version']}-WIN64-{release['sourceCommit'][:12]}"
 assert re.fullmatch('[a-f0-9]{64}',release['sha256'])
 assert 0<release['size']<=40*1024*1024
-assert release['serviceUrl']=='https://malguard-private-download.vercel.app/api/download'
-assert release['verification']['nativeInstallChecks']==15
-assert release['verification']['publicServiceChecks']==7
+assert release['serviceUrl']=='https://malguard-private-download.vercel.app/api/installer'
+assert release['verification']['nativeInstallChecks']==16
+assert release['verification']['setupDeadlineChecks']==5
+assert release['verification']['passwordServiceUnitChecks']==19
 assert release['verification']['nativeWindowsVerified'] is True
 assert release['verification']['corpusMetricsAvailable'] is False
 assert status['currentVersion']==release['version']
-assert status['distribution']['windowsX64']=='public-download-ready'
+assert status['distribution']['windowsX64']=='password-download-ready'
 assert legacy['installer']['sha256']==release['sha256']
 assert legacy['distribution']['downloadEnabled'] is True
-assert 'privateDownloadCode' not in (ROOT/'download.html').read_text()
+assert 'type="password"' in (ROOT/'download.html').read_text()
 assert 'publicAccess: true' in (ROOT/'private-download-service/api/download.js').read_text()
 assert 'Administrator password' in (ROOT/'index.html').read_text()
+assert 'createPasswordDownloadHandler' in (ROOT/'private-download-service/api/installer.js').read_text()
 private=json.loads((ROOT/'release/malguard-private-release.json').read_text())
 assert private['status']=='private-package-ready'
 assert private['build']==f"MG-{private['version']}-WIN64-{private['sourceCommit'][:12]}"
@@ -61,11 +66,30 @@ assert package.read_bytes()[:6]==b'7z\xbc\xaf\x27\x1c'
 assert sorted(p.name for p in package.parent.iterdir())==[private['filename']], 'Only ciphertext may be published'
 assert not {'password','fingerprint','license','privateKey'} & set(private)
 download=(ROOT/'download.html').read_text()
-assert private['build'] in download and private['sha256'] in download
-assert f'href="{private["url"]}" download="{private["filename"]}"' in download
+assert private['url'] not in download
+assert 'device activation is required' in download
+assert 'sealed-installer' not in download
+assert not list((ROOT/'release').rglob('*.exe'))
+server=(ROOT/'private-download-service/installer-release.mjs').read_text()
+assert release['sha256'] in server and release['build'] in server
+metadata=json.loads(server.removeprefix('export const metadata = Object.freeze(').strip().removesuffix(');'))
+assert metadata['size']==release['size'] and metadata['sha256']==release['sha256']
+assert re.fullmatch('[a-f0-9]{64}',metadata['passwordSalt'])
+sealed=[]
+for part in metadata['parts']:
+    assert re.fullmatch('[0-9]{3}\\.sealed',part['name']) and 0<part['size']<=4*1024*1024
+    piece=(ROOT/'private-download-service/sealed-installer'/part['name']).read_bytes()
+    assert len(piece)==part['size']
+    sealed.append(piece)
+ciphertext=b''.join(sealed)
+assert ciphertext[:6]==b'MGDL1\x00' and len(ciphertext)==release['size']+34
+assert sha256(ciphertext).hexdigest()==metadata['sealedSha256']
+assert not list((ROOT/'private-download-service').rglob('*.exe'))
+assert set(metadata)=={'filename','size','sha256','build','sealedSha256','passwordSalt','parts'}
+assert not {'password','fingerprint','license','privateKey','code'} & set(release)
 for page in PAGES:
     text=page.read_text()
     assert '/assets/i18n.mjs' in text,f'{page}: missing locale controls'
 for e in errors: print(e)
 if errors:raise SystemExit(f'{len(errors)} link/asset/distribution errors')
-print(f'PASS: {len(PAGES)} HTML documents, links/assets/anchors, multilingual controls, public/private releases, encrypted package hash and preserved admin authentication')
+print(f'PASS: {len(PAGES)} HTML documents, links/assets/anchors, multilingual controls, website password release, historical encrypted package hash and preserved admin authentication')
