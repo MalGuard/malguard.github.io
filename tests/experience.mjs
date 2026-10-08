@@ -89,7 +89,10 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
       await page.getByRole('link',{name:'Check your installed build',exact:true}).click();
       await page.waitForURL('**/download.html#updates');
       assert.equal(await page.locator('#buildInput').count(),1);
-      assert.equal(await page.locator('input[type=password]').count(),0);
+      assert.equal(await page.locator('input[type=password]').count(),1);
+      assert.equal(await page.locator('#downloadPassword').getAttribute('required'),'');
+      assert.equal(await page.locator('#downloadForm').count(),1);
+      assert.equal(await page.locator('a[href$=".7z"]').count(),0);
       assert.ok((await page.locator('#troubleshooting').textContent()).includes('Do not disable protection'));
     });
 
