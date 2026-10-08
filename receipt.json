@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "runId": "37785594893",
+  "sourceCommit": "2e5cdfff641335e21319ab6de0157e2bb6cfef51",
+  "build": "MG-1.3.1-WIN64-22511e787034",
+  "sha256": "c0c2bf7b4121ae091d75bb13feedd0c80fa45dd6a53d4ea8021b8705ebff945d",
+  "size": 34254848,
+  "status": "verified",
+  "checks": [
+    {
+      "name": "live-password-handler",
+      "ok": true,
+      "detail": "OPTIONS contains no installer"
+    },
+    {
+      "name": "no-public-installer-/release/MalGuard-Setup-x64.exe",
+      "ok": true,
+      "detail": "HTTP 404"
+    },
+    {
+      "name": "no-public-installer-/release/private/MalGuard-Setup-x64.exe",
+      "ok": true,
+      "detail": "HTTP 404"
+    },
+    {
+      "name": "no-public-installer-/MalGuard-Setup-x64.exe",
+      "ok": true,
+      "detail": "HTTP 404"
+    },
+    {
+      "name": "public-get",
+      "ok": true,
+      "detail": "HTTP 405; no installer bytes"
+    },
+    {
+      "name": "missing-password",
+      "ok": true,
+      "detail": "HTTP 400; no installer bytes"
+    },
+    {
+      "name": "empty-password",
+      "ok": true,
+      "detail": "HTTP 403; no installer bytes"
+    },
+    {
+      "name": "wrong-password",
+      "ok": true,
+      "detail": "HTTP 403; no installer bytes"
+    },
+    {
+      "name": "authorized-part-0",
+      "ok": true,
+      "detail": "reviewed part headers"
+    },
+    {
+      "name": "part-size-0",
+      "ok": true,
+      "detail": "3145728 bytes"
+    },
+    {
+      "name": "authorized-part-1",
+      "ok": true,
+      "detail": "reviewed part headers"
+    },
+    {
+      "name": "part-size-1",
+      "ok": true,
+      "detail": "3145728 bytes"
+    },
+    {
+      "name": "authorized-part-2",
+      "ok": true,
+      "detail": "reviewed part headers"
+    },
+    {
+      "name": "part-size-2",
+      "ok": true,
+      "detail": "3145728 bytes"
+    },
+    {
+      "name": "authorized-part-3",
+      "ok": true,
+      "detail": "reviewed part headers"
+    },
+    {
+      "name": "part-size-3",
+      "ok": true,
+      "detail": "3145728 bytes"
+    },
+    {
+      "name": "authorized-part-4",
+      "ok": true,
+      "detail": "reviewed part headers"
+    },
+    {
+      "name": "part-size-4",
+      "ok": true,
+      "detail": "3145728 bytes"
+    },
+    {
+      "name": "authorized-part-5",
+      "ok": true,
+      "detail": "reviewed part headers"
+    },
+    {
+      "name": "part-size-5",
+      "ok": true,
+      "detail": "3145728 bytes"
+    },
+    {
+      "name": "authorized-part-6",
+      "ok": true,
+      "detail": "reviewed part headers"
+    },
+    {
+      "name": "part-size-6",
+      "ok": true,
+      "detail": "3145728 bytes"
+    },
+    {
+      "name": "authorized-part-7",
+      "ok": true,
+      "detail": "reviewed part headers"
+    },
+    {
+      "name": "part-size-7",
+      "ok": true,
+      "detail": "3145728 bytes"
+    },
+    {
+      "name": "authorized-part-8",
+      "ok": true,
+      "detail": "reviewed part headers"
+    },
+    {
+      "name": "part-size-8",
+      "ok": true,
+      "detail": "3145728 bytes"
+    },
+    {
+      "name": "authorized-part-9",
+      "ok": true,
+      "detail": "reviewed part headers"
+    },
+    {
+      "name": "part-size-9",
+      "ok": true,
+      "detail": "3145728 bytes"
+    },
+    {
+      "name": "authorized-part-10",
+      "ok": true,
+      "detail": "reviewed part headers"
+    },
+    {
+      "name": "part-size-10",
+      "ok": true,
+      "detail": "2797568 bytes"
+    },
+    {
+      "name": "complete-installer-sha256",
+      "ok": true,
+      "detail": "34254848 bytes; exact SHA-256"
+    },
+    {
+      "name": "cached-installer-still-protected",
+      "ok": true,
+      "detail": "wrong password rejected after successful full download"
+    }
+  ],
+  "failure": null
+}
