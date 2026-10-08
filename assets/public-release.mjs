@@ -1,4 +1,4 @@
-import {validateRelease, checkBuild, readBounded, readJsonBounded} from './public-release-model.mjs';
+import {validateRelease, checkBuild, readBounded, readJsonBounded} from './public-release-model.mjs?v=20261008-site-password';
 import {language} from './i18n.mjs?v=20261008-site-password';
 const element = id => document.getElementById(id);
 const words = {
