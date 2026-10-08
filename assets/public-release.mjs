@@ -2,8 +2,8 @@ import {validateRelease, checkBuild, readBounded, readJsonBounded} from './publi
 import {language} from './i18n.mjs';
 const element = id => document.getElementById(id);
 const words = {
-  en: {loading:'Checking release metadata',ready:'Public download is available. No password is required.',unavailable:'Release details cannot be verified. Download is disabled; try again later.',receiving:'Receiving verified installer',verifying:'Checking SHA-256',saved:'Integrity verified. The installer is ready to save.',failed:'Download stopped. Integrity or network checks failed; do not run a partial file.',current:'No new release: this is the latest known build.',older:'A newer release is available. Review the changes below and install the verified download.',unknown:'Build not recognized. Its update status cannot be confirmed.',invalid:'Enter the complete build code shown inside MalGuard.'},
-  fa: {loading:'در حال بررسی مشخصات انتشار',ready:'دانلود عمومی در دسترس است؛ رمز لازم نیست.',unavailable:'مشخصات انتشار قابل تأیید نیست. دانلود غیرفعال است؛ بعداً دوباره امتحان کنید.',receiving:'در حال دریافت فایل نصب',verifying:'در حال بررسی SHA-256',saved:'یکپارچگی تأیید شد. فایل نصب آمادهٔ ذخیره است.',failed:'دانلود متوقف شد. بررسی شبکه یا یکپارچگی ناموفق بود؛ فایل ناقص را اجرا نکنید.',current:'نسخهٔ جدیدی نداریم؛ این آخرین بیلد شناخته‌شده است.',older:'نسخهٔ جدید موجود است. تغییرات زیر را بخوانید و فایل تأییدشده را نصب کنید.',unknown:'بیلد شناخته نشد؛ وضعیت به‌روزرسانی آن قابل تأیید نیست.',invalid:'کد کامل بیلد را از داخل MalGuard وارد کنید.'}
+  en: {loading:'Checking release metadata',ready:'Public download is available. No password is required.',unavailable:'Release details cannot be verified. Public download is disabled; try again later.',receiving:'Receiving verified installer',verifying:'Checking SHA-256',saved:'Integrity verified. The installer is ready to save.',failed:'Download stopped. Integrity or network checks failed; do not run a partial file.',current:'This is the latest known build of the public edition. The private edition above requires its own password and device license.',privateCurrent:'This is the current private build. Installation requires the privately provided password and matching device license.',older:'A newer release of the public edition is available. Review the changes below and install the verified download.',unknown:'Build not recognized. Its update status cannot be confirmed.',invalid:'Enter the complete build code shown inside MalGuard.'},
+  fa: {loading:'در حال بررسی مشخصات انتشار',ready:'دانلود عمومی در دسترس است؛ رمز لازم نیست.',unavailable:'مشخصات انتشار قابل تأیید نیست. دانلود عمومی غیرفعال است؛ بعداً دوباره امتحان کنید.',receiving:'در حال دریافت فایل نصب',verifying:'در حال بررسی SHA-256',saved:'یکپارچگی تأیید شد. فایل نصب آمادهٔ ذخیره است.',failed:'دانلود متوقف شد. بررسی شبکه یا یکپارچگی ناموفق بود؛ فایل ناقص را اجرا نکنید.',current:'این آخرین بیلد شناخته‌شدهٔ نسخهٔ عمومی است. نسخهٔ خصوصی بالا به رمز و مجوز دستگاه مخصوص خود نیاز دارد.',privateCurrent:'این بیلد فعلی نسخهٔ خصوصی است. نصب به رمز تحویل‌شدهٔ خصوصی و مجوز مطابق با دستگاه نیاز دارد.',older:'نسخهٔ عمومی جدید موجود است. تغییرات زیر را بخوانید و فایل تأییدشده را نصب کنید.',unknown:'بیلد شناخته نشد؛ وضعیت به‌روزرسانی آن قابل تأیید نیست.',invalid:'کد کامل بیلد را از داخل MalGuard وارد کنید.'}
 };
 let release = null, history = [], state = 'loading', buildState = null, busy = false;
 function render() {
@@ -18,7 +18,8 @@ function render() {
 window.addEventListener('malguard-language', render);
 element('buildCheckForm').addEventListener('submit', event => {
   event.preventDefault();
-  buildState = release ? checkBuild(element('buildInput').value, release, history) : null;
+  const input = element('buildInput').value.trim();
+  buildState = input.toUpperCase() === element('privateBuild').textContent.trim().toUpperCase() ? 'privateCurrent' : release ? checkBuild(input, release, history) : null;
   render();
 });
 element('downloadButton').addEventListener('click', async () => {

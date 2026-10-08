@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0.0",
+  "status": "private-package-ready",
+  "version": "1.3.0",
+  "engineVersion": "1.2.0",
+  "build": "MG-1.3.0-WIN64-5c8f84dec75c",
+  "sourceCommit": "5c8f84dec75c0332c23a91ad62e274e1d680da1b",
+  "platform": "windows-x64",
+  "filename": "MalGuard-1.3.0-Private-Win64.7z",
+  "url": "/release/private/MalGuard-1.3.0-Private-Win64.7z",
+  "size": 34086461,
+  "sha256": "33b46504960bffd0d4dcac490522bd51d44efcb2fe69147b9b5635f221e3890b",
+  "passwordRequired": true,
+  "deviceLicenseRequired": true,
+  "authenticodeSigned": false,
+  "ownerWindowsTested": false,
+  "verification": {
+    "windowsPassed": 1004,
+    "windowsSkipped": 2,
+    "nativeInstallChecks": 15,
+    "deviceLicenseChecks": 7,
+    "productionLicenseChecks": 6,
+    "activationChecks": 5,
+    "archiveRoundTripVerified": true
+  }
+}

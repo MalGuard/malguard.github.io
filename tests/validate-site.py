@@ -3,6 +3,7 @@ from pathlib import Path
 from html.parser import HTMLParser
 from urllib.parse import urlsplit, unquote
 import re, json
+from hashlib import sha256
 ROOT=Path(__file__).resolve().parents[1]
 PAGES=[ROOT/'index.html', *[p for p in ROOT.glob('*.html') if p.name!='index.html'],ROOT/'ios-preview/index.html',ROOT/'research/repackaged-mod.html']
 class Document(HTMLParser):
@@ -47,9 +48,24 @@ assert legacy['distribution']['downloadEnabled'] is True
 assert 'privateDownloadCode' not in (ROOT/'download.html').read_text()
 assert 'publicAccess: true' in (ROOT/'private-download-service/api/download.js').read_text()
 assert 'Administrator password' in (ROOT/'index.html').read_text()
+private=json.loads((ROOT/'release/malguard-private-release.json').read_text())
+assert private['status']=='private-package-ready'
+assert private['build']==f"MG-{private['version']}-WIN64-{private['sourceCommit'][:12]}"
+assert private['passwordRequired'] is True and private['deviceLicenseRequired'] is True
+assert private['authenticodeSigned'] is False and private['ownerWindowsTested'] is False
+assert private['url']==f"/release/private/{private['filename']}"
+package=ROOT/private['url'].lstrip('/')
+assert package.stat().st_size==private['size']
+assert sha256(package.read_bytes()).hexdigest()==private['sha256']
+assert package.read_bytes()[:6]==b'7z\xbc\xaf\x27\x1c'
+assert sorted(p.name for p in package.parent.iterdir())==[private['filename']], 'Only ciphertext may be published'
+assert not {'password','fingerprint','license','privateKey'} & set(private)
+download=(ROOT/'download.html').read_text()
+assert private['build'] in download and private['sha256'] in download
+assert f'href="{private["url"]}" download="{private["filename"]}"' in download
 for page in PAGES:
     text=page.read_text()
     assert '/assets/i18n.mjs' in text,f'{page}: missing locale controls'
 for e in errors: print(e)
 if errors:raise SystemExit(f'{len(errors)} link/asset/distribution errors')
-print(f'PASS: {len(PAGES)} HTML documents, links/assets/anchors, multilingual controls, verified public release and preserved admin authentication')
+print(f'PASS: {len(PAGES)} HTML documents, links/assets/anchors, multilingual controls, public/private releases, encrypted package hash and preserved admin authentication')
