@@ -1,4 +1,4 @@
-import {translations} from './i18n-catalog.mjs';
+import {translations} from './i18n-catalog.mjs?v=20261008-private-clarity';
 
 let locale='en';
 try {if(localStorage.getItem('malguard-language')==='fa')locale='fa';} catch {}

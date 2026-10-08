@@ -76,4 +76,10 @@ export const translations = {
 "Previous public release":"انتشار عمومی قبلی",
 "Changes in public release 1.2.0":"تغییرات انتشار عمومی ۱.۲.۰",
 "bytes":"بایت",
+"Public 1.2":"عمومی ۱.۲",
+"Downloading saves an encrypted 7z file; the website does not ask for a password. Opening or extracting the package in 7-Zip or WinRAR requires the privately provided password.":"دانلود، فایل رمزگذاری‌شدهٔ 7z را ذخیره می‌کند؛ سایت رمز نمی‌خواهد. بازکردن یا استخراج بسته با 7-Zip یا WinRAR به رمز تحویل‌شدهٔ خصوصی نیاز دارد.",
+"Previous public release 1.2.0":"نسخهٔ عمومی قبلی ۱.۲.۰",
+"For the password-protected 1.3.0 package, use the private download above. This older public installer does not include the private device license.":"برای بستهٔ رمزدار ۱.۳.۰، از دکمهٔ دانلود خصوصی بالا استفاده کنید. این نصب‌کنندهٔ عمومی قدیمی مجوز دستگاهِ نسخهٔ خصوصی را ندارد.",
+"Download previous public 1.2.0 EXE":"دانلود EXE نسخهٔ عمومی قبلی ۱.۲.۰",
+"Install public version 1.2.0 in four steps":"نصب نسخهٔ عمومی ۱.۲.۰ در چهار مرحله",
 };

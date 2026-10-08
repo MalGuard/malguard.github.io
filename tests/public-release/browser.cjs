@@ -11,7 +11,7 @@ const privateRelease=JSON.parse(readFileSync('release/malguard-private-release.j
   browser=await chromium.launch({executablePath:process.env.TEST_CHROMIUM_EXECUTABLE,headless:true,args:['--no-sandbox']});
   const page=await browser.newPage();
   await page.route('**/release/malguard-public-release.json',r=>r.fulfill({status:404,body:'No release in this synthetic failure scenario'}));
-  await page.goto('http://127.0.0.1:8769/download.html');
+  await page.goto('http://127.0.0.1:8769/download.html#scanner');
   await page.waitForFunction(()=>document.getElementById('downloadStatus').textContent.includes('cannot be verified'));
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
   assert.equal(await page.locator('#downloadButton').isDisabled(),true);
@@ -19,6 +19,7 @@ const privateRelease=JSON.parse(readFileSync('release/malguard-private-release.j
   assert.equal(await page.locator('#privatePackageDownload').getAttribute('href'),privateRelease.url);
   assert.equal(await page.locator('#privateBuild').innerText(),privateRelease.build);
   assert.equal(await page.locator('#privatePackageHash').innerText(),privateRelease.sha256);
+  assert.equal(await page.locator('#private-release #scanner').count(),1);
   await page.locator('#buildInput').fill(privateRelease.build.toLowerCase());
   await page.locator('#buildCheckForm button').click();
   assert.ok((await page.locator('#buildCheckStatus').innerText()).includes('current private build'));
@@ -64,6 +65,12 @@ const privateRelease=JSON.parse(readFileSync('release/malguard-private-release.j
     await r.fulfill({body:bytes,headers:{'access-control-allow-origin':'http://127.0.0.1:8769','access-control-expose-headers':'x-part-index,x-file-size,x-file-sha256','Content-Type':'application/octet-stream','x-part-index':'0','x-file-size':String(bytes.length),'x-file-sha256':latest.sha256}});
   });
   await page.reload();await page.waitForFunction(()=>!document.getElementById('downloadButton').disabled);
+  assert.ok((await page.locator('#downloadStatus').innerText()).includes('Previous public release 1.2.0'));
+  assert.ok((await page.locator('#downloadStatus').innerText()).includes('password-protected 1.3.0'));
+  await page.locator('.mg-language select').selectOption('fa');
+  assert.ok((await page.locator('#downloadStatus').innerText()).includes('نسخهٔ عمومی قبلی ۱.۲.۰'));
+  assert.ok((await page.locator('#downloadStatus').innerText()).includes('بستهٔ رمزدار ۱.۳.۰'));
+  await page.locator('.mg-language select').selectOption('en');
   for(const [input,message]of [[latest.build,'latest known build'],[old,'newer release'],['MG-1.1.0-GUI-WIN64-cccccccccccc','not recognized'],['beta6','complete build code']]){
     await page.locator('#buildInput').fill(input);await page.locator('#buildCheckForm button').click();
     assert.ok((await page.locator('#buildCheckStatus').innerText()).includes(message));

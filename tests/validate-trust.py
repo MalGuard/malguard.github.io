@@ -20,7 +20,7 @@ for path,text in [
  ('malware-ai-windows.html','dir="auto"'),('malware-ai-windows.html','applyTextDirection'),
  ('assets/experience.css','unicode-bidi:plaintext'),('assets/experience.js',"'#malware-ai':'/malware-ai.html'"),
  ('index.html','/ai-intelligence.html'),('scan-url.html','Scan URL'),('products.html','LIVE PREVIEW'),
- ('download.html','Download Windows EXE'),('download.html','More info'),('download.html','Run anyway'),
+ ('download.html','Download previous public 1.2.0 EXE'),('download.html','More info'),('download.html','Run anyway'),
  ('download.html','Do not disable protection'),('gta-guard.html','No scanned code is executed'),
  ('gta-guard.html','Check your installed build'),('sandbox-help.html','does not upload scanned files'),
  ('app.html','/download.html#scanner'),('app.html','actual MalGuard / GTA Guard Windows scanner'),

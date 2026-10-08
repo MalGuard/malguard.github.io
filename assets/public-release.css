@@ -5,3 +5,5 @@
 @media(max-width:600px){.mg-home .nav-inner{flex-wrap:wrap}.mg-home .nav-actions{flex-wrap:wrap;justify-content:flex-end;max-width:100%}.mg-home .brand{max-width:120px}.mg-language{flex-shrink:0}}
 
 .private-release-install code{display:inline-block;max-width:100%}@media(max-width:400px){html[dir=rtl] .private-release-panel .release-specs{grid-template-columns:1fr}}
+
+#scanner,#public-release{scroll-margin-top:100px}
