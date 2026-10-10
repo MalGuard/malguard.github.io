@@ -1,17 +1,19 @@
 # Password before the Windows installer download
 
-The current `api/installer` endpoint checks the owner's random download code on
+The current `api/installer` endpoint checks the owner's download password on
 **every request**, before returning installer bytes. The website sends the code
 in a POST body over HTTPS. It never saves it in a URL or browser storage. The
 ordinary Windows EXE has no archive password, installation password or device
 license. Anyone with the downloaded EXE can copy and install it, as requested.
 
 Only AES-256-GCM ciphertext is committed in `sealed-installer/`. The release
-build and random public salt derive a key from the uniformly random 160-bit
-code using HKDF-SHA256. A successful GCM authentication verifies the code on the
+build and random public salt derive a key using scrypt (N=65536, r=8, p=1), with
+the build included in the salt context. Chosen passwords preserve case, spaces
+and punctuation exactly. Historical releases without `passwordKdf` retain
+HKDF-SHA256 for their uniformly random 160-bit codes. A successful GCM authentication verifies the password on the
 server; a changed ciphertext or final installer SHA-256 mismatch blocks delivery.
 The code and derived key are absent from Git, Pages, release JSON and logs. This
-scheme is intended for generated high-entropy codes, never short chosen passwords.
+Current chosen passwords use a memory-hard derivation rather than the historical fast code derivation.
 The existing Vercel Git connection deploys this directory without adding a new
 production secret. `installer-release.mjs` contains public metadata only.
 
@@ -30,10 +32,17 @@ wrapped code and a bounded verification receipt enter Git. The recipient's
 private key and owner's code are never published. The live download is hashed,
 not executed or uploaded as a CI artifact.
 
-To rotate access, generate a fresh random code and salt, reseal the verified EXE,
+To rotate access, use the owner's new password and a fresh random salt, reseal the verified EXE,
 update `installer-release.mjs` and `sealed-installer/`, and redeploy. Ciphertext
 already downloaded from an older revision remains decryptable by its old code.
 Changing website HTML does not revoke copies of a downloaded EXE.
+
+`X-Release-Seal-SHA256` is a public deployment identity available on the empty
+OPTIONS response. Live verification waits for the reviewed seal before sending
+passwords. `tools/wrap-verification-password.mjs` accepts the proof checkout,
+reviewed run ID, source commit, and private current/previous password file paths.
+It binds the encrypted payload to the run, installer and seal. Verification also
+rejects the previous password before and after downloading the verified EXE.
 
 The older `api/download` endpoint serves only historical public 1.2.0 ciphertext
 from `sealed/` using its existing environment key. It cannot decrypt or deliver
