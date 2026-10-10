@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "runId": "38021075377",
+  "sourceCommit": "05991be3e18b42a84aed17994ef404f0bcfe54d7",
+  "build": "MG-1.3.1-WIN64-22511e787034",
+  "sha256": "c0c2bf7b4121ae091d75bb13feedd0c80fa45dd6a53d4ea8021b8705ebff945d",
+  "sealedSha256": "521b7a7c8769e5b0f0bbc610b12ead684b6640d92cc52c68786940d757cca5e8",
+  "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAn+db6DwumOk9aIuje6/J\nnih1v7XDk+gY3fizKXmuLzzJ2gsZSixIqT/8xBhF5mpgkV4VK5D8tkLcM+p/P0C2\ngmugsuEHIEuS7nTVGHm2rjOotkBqE0QjJ53fZdEmhVcuEmE+1j3s2G6sD2qqKqyR\nu5DLJWj9STemwAaPlzjsW23kJTkP5joQz0exbQN8Ao1qseY23qWMJPj1agRtYJ+C\nwqbeQlCrqDJacdUQCS9w2HrYaGOQixSJ93yjhaTpUGgznh/JEZthUBjVZZ3G5OuG\nTdNnWYAD6ULnQzLbPClmRWKI5bN1j175RpJxk4QC43EqMD5nCbNEw/UKTJe/kpuF\nZgsMgjBVeVbB+m20j8rfLMBo+SCLzVsFKP6W2h4hr0MBXTRrAFOvqucEoUeIDNwz\nMjiCa7JNEYdcc5mSveluEvE0lx46KgdUimCpkbKEIb69LHYTdNbMA1CiDkXUR8AQ\nN8KyOYLiANZpga1BVaOZ6uX17kNbvlle7x1H8y7cb4tJAgMBAAE=\n-----END PUBLIC KEY-----\n"
+}
