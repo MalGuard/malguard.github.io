@@ -9,6 +9,10 @@
   const pages = [
     ['Home', 'MalGuard overview', '/', 'home malguard'],
     ['Products', 'Products and current availability', '/products.html', 'gta guard malware ai scam guard'],
+    ['Game Scam Guard', 'In development — no public release', '/game-scam-guard.html', 'game gaming scam'],
+    ['Malware AI', 'Platform-specific web preview', '/malware-ai.html', 'ai preview platforms'],
+    ['Windows AI Preview', 'Malware AI web workspace', '/malware-ai-windows.html', 'ai windows chat'],
+    ['iPhone Preview', 'Bounded local mobile inspection', '/ios-preview/', 'iphone ios'],
     ['GTA Guard', 'Clean-room Windows x64 static scanner', '/gta-guard.html', 'mods windows files'],
     ['Scan Mods', 'Supported and planned game-mod tools', '/scan-mods.html', 'gta minecraft roblox'],
     ['AI Intelligence', 'Malware AI preview and access options', '/ai-intelligence.html', 'chat intelligence malware'],
@@ -39,6 +43,7 @@
   menu.replaceChildren(); menu.setAttribute('aria-label', 'All MalGuard pages');
   const label = text => { const e = document.createElement('span'); e.className = 'mg-menu-label'; e.textContent = text; menu.append(e); };
   label('EXPLORE MALGUARD'); pages.forEach(p => menu.append(link(p[0], p[2])));
+  if(document.body.classList.contains('mg-fusion')){const admin=document.createElement('button');admin.id='openAdminAccess';admin.type='button';admin.textContent='Administrator access';menu.append(admin);}else{menu.append(link('Administrator access','/#admin-access'));}
   if (sections.length) { label('ON THIS PAGE'); sections.forEach(p => menu.append(link(...p))); }
   function setMenu(open, focus = false) {
     menu.classList.toggle('active', open); menu.hidden = !open;

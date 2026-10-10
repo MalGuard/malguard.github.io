@@ -1,0 +1,167 @@
+{
+  "baselineCommit": "52826c9d7a6fa533b322358639cb4a8e91df41e9",
+  "approvedFusionCommit": "303949729a0775e552549b913831e3d28e6a34b0",
+  "routes": [
+    {
+      "path": "404.html",
+      "baselineSHA256": "4b09eb2b380380bb4e916f31457c6f827761badb9305f137ba66338808f9a825",
+      "preparedSHA256": "ab2b6c93b37201607146a0fc4c1460a0d5148c83e036d4e6fd52aad65671510f",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "about.html",
+      "baselineSHA256": "9d106a1c12499071667f72a2b97552bf6da283cd1714ef8e71f990f77020b3d3",
+      "preparedSHA256": "6da709640f14d8d4a21a710558b86990efe99109ec26b4c143d43a6c8ee722cb",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "ai-intelligence.html",
+      "baselineSHA256": "b6535079d297cee07f23b6658bd46391a2d85d73d3170772f13ca452ff7e6bd9",
+      "preparedSHA256": "31753bdface96c99fa6a9ed8fc287306c85fd731f4d62f831394aee4b5e0ba12",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "app.html",
+      "baselineSHA256": "06e0be9fc22f8758244bd59d7bf9ffa448e26113e4db75a04dfee2a4e487620a",
+      "preparedSHA256": "9030c0875d00495f57697db96e7444adc5af292c63f1d060ad9864296e615120",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "docs.html",
+      "baselineSHA256": "e004c79fefcb25a095994ed736db40e402a441fe77b8c4c9feaa081c4009992e",
+      "preparedSHA256": "fad14c4d92c29dd99841e99484ac8d2dc452ee0c246dfe6a6853fd035e7f1afe",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "download.html",
+      "baselineSHA256": "a6e36d6d077e425bf13dc4213ccc98d52943a12f5f4e817dede91f91b580f0d8",
+      "preparedSHA256": "9892f0f477128935a0884c6367a03056670fb6961aaaeceaa45205f581e219af",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "founder.html",
+      "baselineSHA256": "ff6cee44575e4803210d67e6ca2d886b6507fc2e4a4ec2cbb82b32bed073ab1f",
+      "preparedSHA256": "f0b9276c07ecc0d497afc47f9fd516ba3699282d637748383cd4fb3ee23d6de7",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "game-scam-guard.html",
+      "baselineSHA256": "c1befd0a2570d190a776c95a1c87b0e1c861cb611821742b83f0276b05830b91",
+      "preparedSHA256": "90985cb24fcb6776d807cfb293e0736fca2707394ed18751d485f9194f0a8a42",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "gta-guard.html",
+      "baselineSHA256": "53c66d1ea8a81b968349a2f47037b25628edc69772fd5e176ca27955b26e8829",
+      "preparedSHA256": "eee31069c5bd2a4e69e5cace6aed790203a5a7861dbb4700da669a7cc1f79f40",
+      "surface": "approved Fusion"
+    },
+    {
+      "path": "index.html",
+      "baselineSHA256": "934a8d0145ace7ff47e1ce2160a903ed9fe3e05a28fedbcccd5e8a532f1acfc7",
+      "preparedSHA256": "90f1f45b2fb0b76bbb772b46be6745e8a2e6f29bbe47dce3ccf4a52716c4de99",
+      "surface": "approved Fusion"
+    },
+    {
+      "path": "labs.html",
+      "baselineSHA256": "a20fc365efd95b28ac8163a02b0b5e11ceb6a7b2b7df91c46f5bc641d8485d8d",
+      "preparedSHA256": "58652f9fced0cd7223268b0b53213fc557b1a6f9394b1878a67dc96c5b51d9ba",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "malware-ai-windows.html",
+      "baselineSHA256": "6b1140d356f02224ac4d44279fbbe55cd0d4b788a3e9ddc2a434d599117d0edd",
+      "preparedSHA256": "9e42d7eb941b484d4420b723fee10bcbffc01e42db30bfa196a1b65cdba2d603",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "malware-ai.html",
+      "baselineSHA256": "6969660c1f0a0cc5ef021eb542165ade574b89f6a30928db4ae5b1fc36db92da",
+      "preparedSHA256": "168f1c58fdd429c578c3289422d9e3eae152aaa84a037625d39267a1f4ba8ff5",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "privacy.html",
+      "baselineSHA256": "d1ae2e3492fa527ae8ee7aa0499db3668ec30f0d368941aeaa3ac2920bafdb99",
+      "preparedSHA256": "a3681494ecc18a355e79d24e3553dd986198a8692a1f9aaab5d2bc14225f6962",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "products.html",
+      "baselineSHA256": "a2c479eb8788f5ae850464815a46a003c058089e8099a0ccf00fb4eead1fa05f",
+      "preparedSHA256": "0e4b604bc9614d62f521aa8a6ef6ec61951d9c1ea5f2d022bab441c521edd69c",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "sandbox-help.html",
+      "baselineSHA256": "9395e4b16eb80d6ef44174e21ece23b673d72bbc2cda6eddef1a83d827a78de6",
+      "preparedSHA256": "2f4944b394cfc9dc2393754c6699d1b6503a46bfcf4aa18e8d76f55ca881825d",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "scan-mods.html",
+      "baselineSHA256": "ceb6de06bcc35f4da110983ba4dc7034306191ad3db4bf203a98d82b92dc1d84",
+      "preparedSHA256": "f56a3d435949e21d20f19c06a913bcbf8d3133187a0b6081648fec7aa72d25ec",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "scan-url.html",
+      "baselineSHA256": "e5e1989d7d357b3200682d53af06e0ec9a7b81ff298403b48c12b292bac0ff41",
+      "preparedSHA256": "a1950001fd9d69d7ee51f36e8cb590441d73e61b79958332d57c04ad16b883ce",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "support.html",
+      "baselineSHA256": "5b7eaa4e6b67256633080b7ce7e1f8b2432e8f21e6d49a4df383d8b25a450753",
+      "preparedSHA256": "51bcdddc7244a87abc3b81d60c912ff77ecb89b31cc80f43adb1b246a1477f66",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "tools.html",
+      "baselineSHA256": "1bb791ac213e0a2cfc8f127aaf9c270ae433348b9f1549e47a6cb596088ce318",
+      "preparedSHA256": "e962b4ddcc352784dea1c42c67b4c2a9c9c390163112b77a30b8e83118798fbb",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "trust.html",
+      "baselineSHA256": "fa87f231a1f188b6c8a68ed05e961d30379f3f0218334d7c04d34aba74470a3a",
+      "preparedSHA256": "4a9e256cd0feef8d303b3a6b392ae56bb8fbf19f5f77126c5ee67462c720f9f2",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "ios-preview/index.html",
+      "baselineSHA256": "a29be316085a72bbbd7d6f000d75f188a24adfd7a8ee5c0149f595c1b9dbbef7",
+      "preparedSHA256": "5e3e952ec061b74ac78666d70c892986318966fd6f54e4f450387caf6e6ea577",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "research/repackaged-mod.html",
+      "baselineSHA256": "83f5e2144d87161913d61bf956572085c58e5e81ace7366c2c1f0f81a500cd9c",
+      "preparedSHA256": "09eaf055de6ebb310aa106ef13da068ad728c35620134bd79d42c941837dabea",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "research/security-motion.html",
+      "baselineSHA256": "7a1da5c19f22dccb5dd14e465e9bd239d33547ab38c8e630e31cdc04445b4f3f",
+      "preparedSHA256": "cfdff6e277074d83b408f0c555c87e25b47ef672c267bba1e782d4c089a2552a",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "release/sandbox-help-historical.html",
+      "baselineSHA256": "b6a1b8fa3be68457c9efa4311fd09dafbbacb38f560a1446b634098b598098c4",
+      "preparedSHA256": "e0f208c26d427badf7e20b0dc1b655db4a0e321ce385c98a7be3da93a09561a0",
+      "surface": "preserved content and functional controls"
+    }
+  ],
+  "publicRouteCount": 25,
+  "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
+  "functionalRuntimePreserved": [
+    "assets/public-release.mjs",
+    "assets/public-release-model.mjs",
+    "assets/i18n.mjs",
+    "assets/malware-ai-update.js",
+    "assets/page-history.js",
+    "ios-preview/app.js"
+  ],
+  "assetPolicy": "Authentic marks, exact approved particle/GTA engine and time lines; no inactive laptop or Apple model copied."
+}

@@ -20,6 +20,12 @@
   const identityBack=document.getElementById('siteAdminIdentityBack');
   const identityError=document.getElementById('siteAdminIdentityError');
   let adminPassword='';
+  const optional=gate.dataset.optional==='true';
+  const opener=document.getElementById('openAdminAccess');
+  const menuControl=document.getElementById('menuBtn');
+  function dismiss(){gate.hidden=true;document.body.classList.remove('site-entry-locked');adminPassword='';passwordInput.value='';syncGate();menuControl?.focus({preventScroll:true});}
+  opener?.addEventListener('click',()=>{if(menuControl?.getAttribute('aria-expanded')==='true')menuControl.click();window.MalGuardOpening?.finish('administrator-access');gate.hidden=false;document.body.classList.add('site-entry-locked');show('choice');syncGate();publicEntry.focus({preventScroll:true});});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&optional&&!gate.hidden){e.preventDefault();dismiss();}});
 
   function syncGate(){
     [...document.body.children].filter(el=>el!==gate && !['SCRIPT','STYLE','NOSCRIPT'].includes(el.tagName)).forEach(el=>{el.inert=!gate.hidden});
@@ -59,7 +65,7 @@
     gate.hidden=true;
     document.body.classList.remove('site-entry-locked');
     syncGate();
-    document.getElementById('homeContent')?.focus({preventScroll:true});
+    (document.getElementById('homeContent')||document.querySelector('main'))?.focus({preventScroll:true});
   }
   async function clientDeviceInfo(){
     const info={
@@ -149,7 +155,8 @@
 
   let existingRole='';
   try{existingRole=sessionStorage.getItem('malguard-site-role')||''}catch(e){}
-  if(existingRole==='public'||existingRole==='admin'){
+  if(optional&&!existingRole){try{sessionStorage.setItem('malguard-site-role','public')}catch(e){}}
+  if(optional||existingRole==='public'||existingRole==='admin'){
     gate.hidden=true;
     document.body.classList.remove('site-entry-locked');
     syncGate();
@@ -161,4 +168,7 @@
     publicEntry.focus({preventScroll:true});
   }
   syncGate();
+  function openFromHash(){if(optional&&location.hash==='#admin-access'){opener?.click();}}
+  window.addEventListener('hashchange',openFromHash);
+  openFromHash();
 })();

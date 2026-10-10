@@ -2,7 +2,13 @@
 import http.server
 import ssl
 
-server = http.server.ThreadingHTTPServer(("127.0.0.1", 8443), http.server.SimpleHTTPRequestHandler)
+class FixtureHandler(http.server.SimpleHTTPRequestHandler):
+    # Browser suites already record URLs/statuses. Hundreds of font/canvas
+    # requests must not fill an unread runner pipe and block response threads.
+    def log_message(self, format, *args):
+        pass
+
+server = http.server.ThreadingHTTPServer(("127.0.0.1", 8443), FixtureHandler)
 context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 context.load_cert_chain("/tmp/malguard-test.crt", "/tmp/malguard-test.key")
 server.socket = context.wrap_socket(server.socket, server_side=True)

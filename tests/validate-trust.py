@@ -10,7 +10,7 @@ def absent(path,text):
  assert text not in (ROOT/path).read_text(),f'{path}: unexpected {text}'
  checks.append(f'{path}: absence {text}')
 for path,text in [
- ('index.html','No scan can guarantee'),('index.html','bounded static analysis'),
+ ('index.html','No scan can guarantee'),('gta-guard.html','Static analysis / No scanned code execution'),
  ('trust.html','security.txt'),('trust.html','Unsigned preview'),
  ('scan-mods.html','Scan Mods'),('ai-intelligence.html','AI Intelligence'),
  ('ai-intelligence.html','href="/malware-ai.html">Open Malware AI'),

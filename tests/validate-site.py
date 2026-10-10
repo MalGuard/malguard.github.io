@@ -5,7 +5,7 @@ from urllib.parse import urlsplit, unquote
 import re, json
 from hashlib import sha256
 ROOT=Path(__file__).resolve().parents[1]
-PAGES=[ROOT/'index.html', *[p for p in ROOT.glob('*.html') if p.name!='index.html'],ROOT/'ios-preview/index.html',ROOT/'research/repackaged-mod.html']
+PAGES=[ROOT/'index.html', *[p for p in ROOT.glob('*.html') if p.name!='index.html'],ROOT/'ios-preview/index.html',ROOT/'research/repackaged-mod.html',ROOT/'research/security-motion.html',ROOT/'release/sandbox-help-historical.html']
 class Document(HTMLParser):
     def __init__(self,text):
         super().__init__(); self.ids=[];self.refs=[];self.controls=[];self.feed(text)

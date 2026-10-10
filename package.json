@@ -5,7 +5,8 @@
   "scripts": {
     "test:static": "python3 tests/validate-site.py",
     "test:experience": "node tests/experience.mjs",
-    "test:motion": "node tests/motion-smoke.mjs"
+    "test:motion": "node tests/motion-smoke.mjs",
+    "build": "python3 tools/build-public-site.py"
   },
   "devDependencies": {
     "playwright": "1.62.1"

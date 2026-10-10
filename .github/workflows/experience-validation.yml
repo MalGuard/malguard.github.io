@@ -20,6 +20,9 @@ jobs:
         run: |
           python3 tests/validate-site.py
           npm ci --ignore-scripts --no-audit --no-fund
+          npm run build
+          node --check assets/malguard-unified.js
+          node --check assets/fusion/home-sections.js
           node --check assets/contextual-header.js
           node --check assets/experience.js
           node --check assets/brand-motion.js
