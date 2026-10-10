@@ -9,7 +9,8 @@ permissions:
 jobs:
   responsive-and-functional:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Full cinematic and failure matrices now run sequentially in two engines.
+    timeout-minutes: 35
     # Match package-lock.json; browsers and OS libraries are already installed.
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
