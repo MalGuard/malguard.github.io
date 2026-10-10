@@ -42,12 +42,17 @@ const profiles=[['desktop',1440,900],['ipad',820,1180],['mobile',390,844],['smal
    if(label==='context-loss'){
     await page.waitForFunction(()=>MalGuardOpening.snapshot().failure==='WebGL context lost');assert.equal(await page.evaluate(()=>MalGuardOpening.snapshot().renderer),'css');await page.evaluate(()=>window.__restoreContextLossClock?.());
    }
-   for(const at of label==='desktop'?[1000,2850,4050,5300]:label==='mobile'?[2800]:[3200]){
-    await page.waitForFunction(at=>MalGuardOpening.snapshot().elapsed>=at,at,{timeout:9000});
-    const s=await page.evaluate(()=>({opening:MalGuardOpening.snapshot(),copyHidden:getComputedStyle(document.querySelector('.scene[data-scene="0"] .t')).visibility==='hidden',safeCopy:getComputedStyle(document.querySelector('.scene .t')).backgroundColor,overflow:document.documentElement.scrollWidth-innerWidth,overlay:getComputedStyle(document.getElementById('home-opening')).backgroundColor,fieldOpacity:getComputedStyle(document.getElementById('c')).opacity}));
+   for(const at of label==='desktop'?[1000,2850,4050,4350,4880,5550]:label==='mobile'?[2800,4050,4350,4880,5550]:[3200]){
+    const expectedPhase=at<3820?'portal':at<4260?'flare':at<5520?'settle':'formed';
+    await page.waitForFunction(({at,expectedPhase})=>MalGuardOpening.snapshot().elapsed>=at&&document.getElementById('c').dataset.openingPhase===expectedPhase,{at,expectedPhase},{timeout:9000});
+    const s=await page.evaluate(()=>({opening:MalGuardOpening.snapshot(),particlePhase:document.getElementById('c').dataset.openingPhase,particleCount:Number(document.getElementById('c').dataset.drawn),copyHidden:getComputedStyle(document.querySelector('.scene[data-scene="0"] .t')).visibility==='hidden',safeCopy:getComputedStyle(document.querySelector('.scene .t')).backgroundColor,overflow:document.documentElement.scrollWidth-innerWidth,overlay:getComputedStyle(document.getElementById('home-opening')).backgroundColor,fieldOpacity:getComputedStyle(document.getElementById('c')).opacity}));
     assert.equal(s.copyHidden,!s.opening.complete);assert.equal(s.safeCopy,'rgba(0, 0, 0, 0)');assert.equal(s.overlay,'rgba(0, 0, 0, 0)');assert.equal(s.fieldOpacity,'1');assert(s.overflow<=1);checkpoints.push(s);
     if(label==='desktop'||label==='mobile')await page.screenshot({path:`${base}/home-opening-${wk?'webkit':'chromium'}-${label}-${at}.png`});
     if(s.opening.complete)break;
+   }
+   if(['desktop','mobile'].includes(label)){
+    assert.deepEqual(checkpoints.slice(-4).map(x=>x.particlePhase),['flare','settle','settle','formed']);
+    assert(checkpoints.slice(-4).every(x=>x.particleCount>0),'Particles stay visible while bursting and settling into the opening form');
    }
    await page.waitForFunction(()=>MalGuardOpening.snapshot().complete,null,{timeout:15000});
   }
