@@ -136,7 +136,9 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     const context=await browser.newContext({...fixtureTLS,viewport:{width:1280,height:850},reducedMotion:'no-preference'});
     await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
     const page=await context.newPage();activePage=page;await page.goto(base+'/');await settle(page);
-    if(await page.locator('#home-opening-skip').isVisible())await page.locator('#home-opening-skip').click();await page.waitForFunction(()=>document.getElementById('c').dataset.introComplete==='true');
+    // The intro can finish between a visibility check and a button click.
+    // Escape is also the real keyboard skip and remains safe after completion.
+    await page.keyboard.press('Escape');await page.waitForFunction(()=>document.getElementById('c').dataset.introComplete==='true');
     await page.locator('#finale').scrollIntoViewIfNeeded();await page.waitForFunction(()=>Number(document.getElementById('c').dataset.scene)>12.98&&document.getElementById('c').dataset.logoReady==='true');
     assert.equal(await page.locator('#c').getAttribute('data-black-masks'),'0');assert.ok(await page.locator('#c').evaluate(e=>Number(e.dataset.underText)/Math.max(1,Number(e.dataset.drawn))<.05),'Final particle mass respects the reading area');
     await page.locator('#motionToggle').click();
