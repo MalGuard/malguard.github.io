@@ -31,4 +31,6 @@ The browser suites target isolated local HTTPS and block external analysis/auth/
 
 The original GitHub Pages workflow retains its explicit public-file whitelist. It adds only the informational Game Scam Guard page. The post-deployment verifier compares every public HTML route, all Fusion assets and the preserved release runtime/metadata against the deployed commit. No server service is redeployed.
 
-Baseline for a reversible rollback: `52826c9d7a6fa533b322358639cb4a8e91df41e9`. Use an ordinary revert of the integration commit, followed by the same Pages workflow; do not force-push or remove historical release data.
+Baseline for a reversible rollback: `05991be3e18b42a84aed17994ef404f0bcfe54d7`. Use an ordinary revert of the integration commit, followed by the same Pages workflow; do not force-push or remove historical release data.
+
+The integration preserves the concurrent password rotation from `05991be3e18b42a84aed17994ef404f0bcfe54d7` exactly, including scrypt derivation, encrypted installer parts and current password fixtures. The initial page inventory remains based on `52826c9d7a6fa533b322358639cb4a8e91df41e9`; no download password is included in this release.

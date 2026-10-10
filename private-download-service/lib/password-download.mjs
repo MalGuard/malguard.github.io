@@ -1,15 +1,29 @@
-import {createHash, createDecipheriv, hkdfSync, timingSafeEqual} from 'node:crypto';
+import {createHash, createDecipheriv, hkdfSync, scrypt, timingSafeEqual} from 'node:crypto';
+import {promisify} from 'node:util';
 import {normalizeCode, PART_BYTES} from './download.mjs';
 
 const MAGIC = Buffer.from('MGDL1\0', 'ascii');
 const digest = data => createHash('sha256').update(data).digest('hex');
+const deriveScrypt = promisify(scrypt);
 
-export function passwordDownloadKey(code, salt, build) {
-  const normalized = normalizeCode(code);
+export function downloadPassword(code, kdf) {
+  if (kdf === undefined) return normalizeCode(code);
+  if (kdf !== 'scrypt-v1' || typeof code !== 'string' || code.length < 1 || code.length > 80 ||
+      Buffer.byteLength(code, 'utf8') > 160 || /[\u0000-\u001f\u007f]/u.test(code)) return null;
+  return code; // Chosen passwords are exact: preserve case, spaces and punctuation.
+}
+
+export async function passwordDownloadKey(code, salt, build, kdf) {
+  const normalized = downloadPassword(code, kdf);
   if (!normalized || !/^[a-f0-9]{64}$/.test(salt || '') || !/^[A-Za-z0-9._-]{1,100}$/.test(build || '')) {
     throw new Error('invalid password derivation input');
   }
-  // Codes are generated from 160 random bits, not human-chosen passwords.
+  if (kdf === 'scrypt-v1') {
+    const context = Buffer.concat([Buffer.from(salt, 'hex'), Buffer.from('MalGuard site download scrypt v1:' + build)]);
+    return deriveScrypt(Buffer.from(normalized, 'utf8'), context, 32,
+      {N: 65536, r: 8, p: 1, maxmem: 128 * 1024 * 1024});
+  }
+  // Retain compatibility with historical uniformly random 160-bit codes.
   return Buffer.from(hkdfSync('sha256', Buffer.from(normalized), Buffer.from(salt, 'hex'),
     Buffer.from('MalGuard site download v1:' + build), 32));
 }
@@ -42,6 +56,7 @@ export function createPasswordDownloadHandler({metadata, readSealed, origin}) {
   if (!Number.isSafeInteger(metadata.size) || metadata.size < 1 || metadata.size > 40 * 1024 * 1024 ||
       !/^[a-f0-9]{64}$/.test(metadata.sha256 || '') || !/^[a-f0-9]{64}$/.test(metadata.sealedSha256 || '') ||
       !/^[a-f0-9]{64}$/.test(metadata.passwordSalt || '') ||
+      (metadata.passwordKdf !== undefined && metadata.passwordKdf !== 'scrypt-v1') ||
       !/^[A-Za-z0-9._-]{1,100}$/.test(metadata.filename || '') ||
       !/^[A-Za-z0-9._-]{1,100}$/.test(metadata.build || '')) throw new Error('invalid release metadata');
   let sealedCache = null, sealedPromise = null, cache = null, cacheKey = null, active = 0;
@@ -55,7 +70,8 @@ export function createPasswordDownloadHandler({metadata, readSealed, origin}) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.setHeader('Access-Control-Expose-Headers', 'X-Part-Index, X-File-Size, X-File-SHA256');
+    res.setHeader('Access-Control-Expose-Headers', 'X-Part-Index, X-File-Size, X-File-SHA256, X-Release-Seal-SHA256');
+    res.setHeader('X-Release-Seal-SHA256', metadata.sealedSha256);
     if (req.method === 'OPTIONS') {res.statusCode = 204; res.end(); return;}
     if (req.method !== 'POST') return reply(res, 405, 'POST_REQUIRED');
     if ((req.headers['content-type'] || '').split(';')[0].trim() !== 'application/json') return reply(res, 415, 'JSON_REQUIRED');
@@ -75,12 +91,12 @@ export function createPasswordDownloadHandler({metadata, readSealed, origin}) {
     if (!request || typeof request !== 'object' || Array.isArray(request) ||
         Object.keys(request).sort().join(',') !== 'code,part' || !Number.isInteger(request.part) ||
         request.part < 0 || request.part >= Math.ceil(metadata.size / PART_BYTES)) return reply(res, 400, 'INVALID_REQUEST');
-    if (!normalizeCode(request.code)) return deny();
+    if (!downloadPassword(request.code, metadata.passwordKdf)) return deny();
     if (active >= 2) return reply(res, 503, 'TRY_LATER');
     active++;
     let plaintext = null;
     try {
-      const key = passwordDownloadKey(request.code, metadata.passwordSalt, metadata.build);
+      const key = await passwordDownloadKey(request.code, metadata.passwordSalt, metadata.build, metadata.passwordKdf);
       if (!cache || !cacheKey || !timingSafeEqual(key, cacheKey)) {
         if (!sealedCache) {
           if (!sealedPromise) sealedPromise = Promise.resolve().then(readSealed).then(sealed => {

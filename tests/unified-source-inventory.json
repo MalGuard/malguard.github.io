@@ -163,5 +163,6 @@
     "assets/page-history.js",
     "ios-preview/app.js"
   ],
-  "assetPolicy": "Authentic marks, exact approved particle/GTA engine and time lines; no inactive laptop or Apple model copied."
+  "assetPolicy": "Authentic marks, exact approved particle/GTA engine and time lines; no inactive laptop or Apple model copied.",
+  "integrationBaseCommit": "05991be3e18b42a84aed17994ef404f0bcfe54d7"
 }

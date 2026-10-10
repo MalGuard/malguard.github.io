@@ -15,11 +15,12 @@ async function fixture(t, options = {}) {
   const salt = 'a'.repeat(64);
   const plaintext = Buffer.alloc(options.size || PART_BYTES + 111, 9);
   const nonce = Buffer.alloc(12, 3);
-  const cipher = createCipheriv('aes-256-gcm', passwordDownloadKey(code, salt, build), nonce);
+  const cipher = createCipheriv('aes-256-gcm', await passwordDownloadKey(options.code || code, salt, build, options.kdf), nonce);
   cipher.setAAD(Buffer.from('MGDL1:' + build));
   const sealed = Buffer.concat([Buffer.from('MGDL1\0'), nonce, cipher.update(plaintext), cipher.final(), cipher.getAuthTag()]);
   const metadata = {build, passwordSalt: salt, filename: 'synthetic.bin', size: plaintext.length,
     sha256: hash(plaintext), sealedSha256: hash(sealed)};
+  if (options.kdf) metadata.passwordKdf = options.kdf;
   if (options.corrupt) sealed[30] ^= 1;
   if (options.badHash) metadata.sha256 = 'f'.repeat(64);
   let reads = 0;
@@ -31,7 +32,7 @@ async function fixture(t, options = {}) {
   const server = createServer((req, res) => handler(req, res).catch(() => res.destroy()));
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   t.after(() => new Promise(resolve => {server.close(resolve); server.closeAllConnections();}));
-  return {url: 'http://127.0.0.1:' + server.address().port, plaintext, reads: () => reads};
+  return {url: 'http://127.0.0.1:' + server.address().port, plaintext, sealedSha256: metadata.sealedSha256, reads: () => reads};
 }
 
 const request = (url, body = {code, part: 0}, method = 'POST', requestOrigin = origin) => fetch(url, {
@@ -94,6 +95,7 @@ test('GET, wrong origin and OPTIONS never deliver installer bytes', async t => {
   assert.equal((await request(f.url, undefined, 'POST', 'https://example.invalid')).status, 403);
   const preflight = await request(f.url, undefined, 'OPTIONS');
   assert.equal(preflight.status, 204);assert.equal((await preflight.arrayBuffer()).byteLength, 0);
+  assert.equal(preflight.headers.get('x-release-seal-sha256'), f.sealedSha256);
   assert.equal(f.reads(), 0);
 });
 
@@ -109,10 +111,35 @@ test('well-formed wrong passwords hit a bounded instance limiter', async t => {
   assert.equal(f.reads(), 1);
 });
 
-test('key derivation separates builds, salts and normalized codes', () => {
+test('key derivation separates builds, salts and normalized codes', async () => {
   const salt = 'a'.repeat(64);
-  assert.deepEqual(passwordDownloadKey(code, salt, 'build-a'), passwordDownloadKey(code.toLowerCase(), salt, 'build-a'));
-  assert.notDeepEqual(passwordDownloadKey(code, salt, 'build-a'), passwordDownloadKey(code, salt, 'build-b'));
-  assert.notDeepEqual(passwordDownloadKey(code, salt, 'build-a'), passwordDownloadKey(code, 'b'.repeat(64), 'build-a'));
-  assert.throws(() => passwordDownloadKey('', salt, 'build-a'));
+  assert.deepEqual(await passwordDownloadKey(code, salt, 'build-a'), await passwordDownloadKey(code.toLowerCase(), salt, 'build-a'));
+  assert.notDeepEqual(await passwordDownloadKey(code, salt, 'build-a'), await passwordDownloadKey(code, salt, 'build-b'));
+  assert.notDeepEqual(await passwordDownloadKey(code, salt, 'build-a'), await passwordDownloadKey(code, 'b'.repeat(64), 'build-a'));
+  await assert.rejects(passwordDownloadKey('', salt, 'build-a'));
+});
+
+test('chosen password preserves case and punctuation; previous code fails before and after download', async t => {
+  const chosen = 'Fixture&Access2013';
+  const f = await fixture(t, {code: chosen, kdf: 'scrypt-v1', size: 111});
+  for (const deniedCode of [code, chosen.toLowerCase(), chosen.replace('&', ''), chosen + ' ']) {
+    const response = await request(f.url, {code: deniedCode, part: 0});
+    assert.equal(response.status, 403);assert.deepEqual(await response.json(), {error: 'ACCESS_DENIED'});
+  }
+  const accepted = await request(f.url, {code: chosen, part: 0});
+  assert.equal(accepted.status, 200);
+  assert.deepEqual(Buffer.from(await accepted.arrayBuffer()), f.plaintext);
+  const previous = await request(f.url, {code, part: 0});
+  assert.equal(previous.status, 403);assert.deepEqual(await previous.json(), {error: 'ACCESS_DENIED'});
+});
+
+test('chosen password derivation binds salt and build and rejects invalid inputs', async () => {
+  const chosen = 'Fixture&Access2013', salt = 'a'.repeat(64), kdf = 'scrypt-v1';
+  const key = await passwordDownloadKey(chosen, salt, 'build-a', kdf);
+  assert.notDeepEqual(key, await passwordDownloadKey(chosen, salt, 'build-b', kdf));
+  assert.notDeepEqual(key, await passwordDownloadKey(chosen, 'b'.repeat(64), 'build-a', kdf));
+  for (const invalid of ['', 'x'.repeat(81), 'line\nbreak', null, 123]) {
+    await assert.rejects(passwordDownloadKey(invalid, salt, 'build-a', kdf));
+  }
+  await assert.rejects(passwordDownloadKey(chosen, salt, 'build-a', 'unknown'));
 });

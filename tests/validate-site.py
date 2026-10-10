@@ -85,7 +85,8 @@ ciphertext=b''.join(sealed)
 assert ciphertext[:6]==b'MGDL1\x00' and len(ciphertext)==release['size']+34
 assert sha256(ciphertext).hexdigest()==metadata['sealedSha256']
 assert not list((ROOT/'private-download-service').rglob('*.exe'))
-assert set(metadata)=={'filename','size','sha256','build','sealedSha256','passwordSalt','parts'}
+assert set(metadata)=={'filename','size','sha256','build','sealedSha256','passwordSalt','passwordKdf','parts'}
+assert metadata['passwordKdf']=='scrypt-v1'
 assert not {'password','fingerprint','license','privateKey','code'} & set(release)
 for page in PAGES:
     text=page.read_text()
