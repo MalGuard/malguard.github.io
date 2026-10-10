@@ -6,8 +6,10 @@ from hashlib import sha256
 import os, time
 root = Path(__file__).resolve().parents[1]
 base = "https://malguard.github.io/"
-paths = ["index.html", "products.html", "tools.html", "gta-guard.html", "assets/experience.css", "assets/experience.js", "assets/brand-motion.css", "assets/brand-motion.js", "assets/malguard-core-mark.svg", "assets/product-gta-guard.svg", "assets/product-malware-ai.svg", "assets/product-game-scam-guard.svg", "assets/evidence-guard.svg", "assets/evidence-ai.svg", "assets/evidence-link.svg", "assets/fonts/manrope.ttf", "assets/fonts/space-grotesk.ttf"]
-paths += ["download.html", "assets/public-release.css", "assets/public-release.mjs", "assets/i18n.mjs", "assets/i18n-catalog.mjs", "assets/public-release-model.mjs", "release/malguard-current-release.json", "release/malguard-release-history.json"]
+import json
+paths=[r['path'] for r in json.loads((root/'tests/unified-source-inventory.json').read_text())['routes']]
+paths += ['assets/malguard-unified.css','assets/malguard-unified.js','assets/contextual-header.js','assets/site-entry.js','assets/i18n.mjs','assets/public-release.mjs','assets/public-release-model.mjs','release/malguard-current-release.json','release/malguard-release-history.json']
+paths += [str(p.relative_to(root)) for p in (root/'assets/fusion').rglob('*') if p.is_file()]
 revision = os.environ["GITHUB_SHA"]
 for path in paths:
     expected = sha256((root / path).read_bytes()).hexdigest()

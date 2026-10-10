@@ -20,6 +20,9 @@ jobs:
         run: |
           python3 tests/validate-site.py
           npm ci --ignore-scripts --no-audit --no-fund
+          npm run build
+          node --check assets/malguard-unified.js
+          node --check assets/fusion/home-sections.js
           node --check assets/contextual-header.js
           node --check assets/experience.js
           node --check assets/brand-motion.js
@@ -37,13 +40,51 @@ jobs:
           npm run test:experience
           node tests/public-release/browser.cjs
           node tests/public-release/locale-pages.mjs
-          npm run test:motion
-          node tests/visual-review.mjs
       - name: Save screenshots and verification report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: malguard-experience-verification
+          path: test-results/
+          if-no-files-found: warn
+          retention-days: 14
+  cinematic:
+    needs: responsive-and-functional
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install pinned verification tools
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify complete cinematic and failure matrix
+        env:
+          TEST_BROWSER: ${{ matrix.browser }}
+        run: |
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
+          python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
+          # WebKit 26.5's Linux WPE headless compositor crashes on the
+          # full-motion card scene. Use its GTK display compositor under
+          # Xvfb; keep the same engine, effects and complete test matrix.
+          if [ "$TEST_BROWSER" = "webkit" ]; then
+            xvfb-run --auto-servernum npm run test:motion
+          else
+            npm run test:motion
+          fi
+      - name: Capture desktop and mobile visual review
+        if: matrix.browser == 'chromium'
+        run: node tests/visual-review.mjs
+      - name: Save cinematic evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: malguard-cinematic-${{ matrix.browser }}
           path: test-results/
           if-no-files-found: warn
           retention-days: 14

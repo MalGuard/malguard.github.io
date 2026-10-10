@@ -1,0 +1,171 @@
+{
+  "approvedCommit": "303949729a0775e552549b913831e3d28e6a34b0",
+  "allowedAdaptation": "Absolute production asset paths; authentic logo binding to shared navigation; guard removed legacy menu; native flip controls and focus semantics. Shape data, durations, easing, particles, shaders and camera paths unchanged. Freeze hover tilt while targeting native flip controls or product links.",
+  "files": [
+    {
+      "path": "assets/fusion/assets/Inter-OFL.txt",
+      "sha256": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57",
+      "approvedSHA256": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57"
+    },
+    {
+      "path": "assets/fusion/assets/JetBrainsMono-OFL.txt",
+      "sha256": "b2fe5e8987594e9ffd1d2ca52a2f5d73eb8335243893c5d6254b5ad69269591d",
+      "approvedSHA256": "b2fe5e8987594e9ffd1d2ca52a2f5d73eb8335243893c5d6254b5ad69269591d"
+    },
+    {
+      "path": "assets/fusion/assets/Sora-OFL.txt",
+      "sha256": "ba0b9729c9428ba79a0459ab8ec575791b51509dbec213e383d0316d37fec299",
+      "approvedSHA256": "ba0b9729c9428ba79a0459ab8ec575791b51509dbec213e383d0316d37fec299"
+    },
+    {
+      "path": "assets/fusion/assets/font-0.ttf",
+      "sha256": "1b08e7fc267a5c7e1d614100f604b83e7e8a0be241f0f288faa2b3ac93a683ba",
+      "approvedSHA256": "1b08e7fc267a5c7e1d614100f604b83e7e8a0be241f0f288faa2b3ac93a683ba"
+    },
+    {
+      "path": "assets/fusion/assets/font-1.ttf",
+      "sha256": "8c883f63b2c4157d997319f2c8bc6995ed4357ef371940d31ca159004a4aae63",
+      "approvedSHA256": "8c883f63b2c4157d997319f2c8bc6995ed4357ef371940d31ca159004a4aae63"
+    },
+    {
+      "path": "assets/fusion/assets/font-2.ttf",
+      "sha256": "e7a1aaf7eda9f2fad4131725fa556265ec75ca7b2d756260173a040363e8d4f7",
+      "approvedSHA256": "e7a1aaf7eda9f2fad4131725fa556265ec75ca7b2d756260173a040363e8d4f7"
+    },
+    {
+      "path": "assets/fusion/assets/font-3.ttf",
+      "sha256": "44ce4a84f20d60f24539bd0cef11f79c29e38609e0f8adf18551c9794a5d9dc3",
+      "approvedSHA256": "44ce4a84f20d60f24539bd0cef11f79c29e38609e0f8adf18551c9794a5d9dc3"
+    },
+    {
+      "path": "assets/fusion/assets/font-4.ttf",
+      "sha256": "3386a05f6ece969e4537de6be894170d20558e82f7d56c8c5d332972ef172160",
+      "approvedSHA256": "3386a05f6ece969e4537de6be894170d20558e82f7d56c8c5d332972ef172160"
+    },
+    {
+      "path": "assets/fusion/assets/font-5.ttf",
+      "sha256": "4e865030820f424ff0f3445269809a87ef0424994cc482b39108f5ba24a901a4",
+      "approvedSHA256": "4e865030820f424ff0f3445269809a87ef0424994cc482b39108f5ba24a901a4"
+    },
+    {
+      "path": "assets/fusion/assets/font-6.ttf",
+      "sha256": "1b547e90e4c49aa12e9a35ca8acc91732e188aa9fdbe08d2299ea4d4cae72145",
+      "approvedSHA256": "1b547e90e4c49aa12e9a35ca8acc91732e188aa9fdbe08d2299ea4d4cae72145"
+    },
+    {
+      "path": "assets/fusion/assets/font-7.ttf",
+      "sha256": "86199efe0823277aa825a8ad673010df2efa7b3a5e8e14cda200d984491256ea",
+      "approvedSHA256": "86199efe0823277aa825a8ad673010df2efa7b3a5e8e14cda200d984491256ea"
+    },
+    {
+      "path": "assets/fusion/assets/font-8.ttf",
+      "sha256": "4e79171a1720d04b72eb68bd7604f85888c31c05bb6b432147d4524e9439af30",
+      "approvedSHA256": "4e79171a1720d04b72eb68bd7604f85888c31c05bb6b432147d4524e9439af30"
+    },
+    {
+      "path": "assets/fusion/assets/font-9.ttf",
+      "sha256": "273c4607b34e1a0ba805a67e196c147b455ce8667a331ea9225551e46617a2bf",
+      "approvedSHA256": "273c4607b34e1a0ba805a67e196c147b455ce8667a331ea9225551e46617a2bf"
+    },
+    {
+      "path": "assets/fusion/assets/gta-v-official.svg",
+      "sha256": "41782d1115f3720c5cdfb2747bce83484b49d77cc780c96cd3dd5f5758affb9f",
+      "approvedSHA256": "41782d1115f3720c5cdfb2747bce83484b49d77cc780c96cd3dd5f5758affb9f"
+    },
+    {
+      "path": "assets/fusion/assets/malguard-logo.svg",
+      "sha256": "56e7e360cd4f428fdf99d6d68f7f11e51597e14e89491ea400a2573057d725c7",
+      "approvedSHA256": "56e7e360cd4f428fdf99d6d68f7f11e51597e14e89491ea400a2573057d725c7"
+    },
+    {
+      "path": "assets/fusion/common.js",
+      "sha256": "c3ebf89f3215c6443e56b72eb554ed90e773413e7b07b4e2a45ac0a5a1d83d8e",
+      "approvedSHA256": "96de8cbbe4ce7e0f9383d8787c284ebd7b7aa0bfc50e45068c949634b759cd33"
+    },
+    {
+      "path": "assets/fusion/device-story.css",
+      "sha256": "053901858e754e7736f675c026e5974b5c6cf1e794485f0934a4a1f71d72e3e0",
+      "approvedSHA256": "053901858e754e7736f675c026e5974b5c6cf1e794485f0934a4a1f71d72e3e0"
+    },
+    {
+      "path": "assets/fusion/energy.js",
+      "sha256": "cad8417913e18e87895aa3052e65c4a69870a0a58ad7551d2e9d6a9ea34f101f",
+      "approvedSHA256": "1b5236b367d0d9fc08018671c40a3b4e1611d7dd6dc4660312f0ca06ce12175a"
+    },
+    {
+      "path": "assets/fusion/fonts.css",
+      "sha256": "22c5a60edf418774b6f30c7a8579e5c26c0baa710b21ad0216559d9ebc91824f",
+      "approvedSHA256": "fc3a0d7ed174657f44863851f951cab9226cda2f4613ce20d42fd22a75f37beb"
+    },
+    {
+      "path": "assets/fusion/gta-guard-scene-source.js",
+      "sha256": "c5872c53e8d424ae2cdaa683e721378d38f3e68f0186d3650a07773f7ba6f6aa",
+      "approvedSHA256": "c3eda9676a06be1382a306e7685719ddcfb6970d5828c95a490f64c0c33b7697"
+    },
+    {
+      "path": "assets/fusion/gta-guard-scene.js",
+      "sha256": "4b0568bb4be9678f151a1277507a0cb7cff43d7875b8845be7ccee49c3af8ac9",
+      "approvedSHA256": "46e69ef3130d553b0968a15cedf2ec68147c6afc665466d39b3d3433fd6fa3c9"
+    },
+    {
+      "path": "assets/fusion/gta-guard-source.js",
+      "sha256": "d563b6d1d54e0cd71372e0c66b226814e1c1278fa0487a3769cf5a9ea11cc6c7",
+      "approvedSHA256": "8a1c8d24e7c1d9e62e2d676814be506fe5d71f5c93ac84e043e6ca74a33b2a74"
+    },
+    {
+      "path": "assets/fusion/gta-guard.css",
+      "sha256": "e3a2e256c6c1aadd496aad6698b8e6e6db35a7598efff0ea880f203d8c496247",
+      "approvedSHA256": "e3a2e256c6c1aadd496aad6698b8e6e6db35a7598efff0ea880f203d8c496247"
+    },
+    {
+      "path": "assets/fusion/gta-guard.js",
+      "sha256": "60aefbad2fdcfb6d58b559eaf273470fec5617d452a58c242dc5d9b9ce170389",
+      "approvedSHA256": "fc0bbc6b5d830ae168c13bcf0c6b671e253dc6eb698f0a7256f4b3f146c2ce85"
+    },
+    {
+      "path": "assets/fusion/home-opening-scene-source.js",
+      "sha256": "ef0e4ad16ff8ed926572ffbc2723cf911f5b76198fd31533f7933cce0eb93b7a",
+      "approvedSHA256": "ef0e4ad16ff8ed926572ffbc2723cf911f5b76198fd31533f7933cce0eb93b7a"
+    },
+    {
+      "path": "assets/fusion/home-opening-scene.js",
+      "sha256": "c34ce2412c53404ef0cc5e9938008033ba33060231ff36e98618e7aa7f1c67d4",
+      "approvedSHA256": "c34ce2412c53404ef0cc5e9938008033ba33060231ff36e98618e7aa7f1c67d4"
+    },
+    {
+      "path": "assets/fusion/home-opening.css",
+      "sha256": "39d5934e7a7cb0d4f82bfe4c30ec583b625d7b130465ea364244a82e28d43d5c",
+      "approvedSHA256": "39d5934e7a7cb0d4f82bfe4c30ec583b625d7b130465ea364244a82e28d43d5c"
+    },
+    {
+      "path": "assets/fusion/home-opening.js",
+      "sha256": "3dbe597eda0cef4469b4c67bc7f71806b377962dce95b2de25283c9138a6fdce",
+      "approvedSHA256": "c0be8d2ac5f10605eb0ff6122a012ac49ef6d8f2893a909f3a5665a3b166c0e7"
+    },
+    {
+      "path": "assets/fusion/home-sections.css",
+      "sha256": "903785394f543fa388766eea806f3f018c364ac747f3e3616804ce51ac94f8b9",
+      "approvedSHA256": "903785394f543fa388766eea806f3f018c364ac747f3e3616804ce51ac94f8b9"
+    },
+    {
+      "path": "assets/fusion/home-sections.js",
+      "sha256": "f721e847c49bb7de13f683658c30413da490aabe247adb776946731c691be0fa",
+      "approvedSHA256": "6eb0507de414c8f705588dd23603752e29a0fd8f13ade4008bd46b6044f83d6b"
+    },
+    {
+      "path": "assets/fusion/lab.js",
+      "sha256": "38cebd417811d3140558d9f6fd86f912d5dfbb163af140d569cc80d05040609c",
+      "approvedSHA256": "38cebd417811d3140558d9f6fd86f912d5dfbb163af140d569cc80d05040609c"
+    },
+    {
+      "path": "assets/fusion/reference.css",
+      "sha256": "75c0dfe0456e2d9d9b8c83476053646ac828211f63e12056f4fe93110e6e9170",
+      "approvedSHA256": "75c0dfe0456e2d9d9b8c83476053646ac828211f63e12056f4fe93110e6e9170"
+    },
+    {
+      "path": "assets/fusion/styles.css",
+      "sha256": "f75dc00b67cab7385a6c38044b3186307165ac818267d8b309e85ae780e4d0c6",
+      "approvedSHA256": "f75dc00b67cab7385a6c38044b3186307165ac818267d8b309e85ae780e4d0c6"
+    }
+  ]
+}
