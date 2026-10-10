@@ -69,7 +69,14 @@ jobs:
         run: |
           openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
           python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
-          npm run test:motion
+          # WebKit 26.5's Linux WPE headless compositor crashes on the
+          # full-motion card scene. Use its GTK display compositor under
+          # Xvfb; keep the same engine, effects and complete test matrix.
+          if [ "$TEST_BROWSER" = "webkit" ]; then
+            xvfb-run --auto-servernum npm run test:motion
+          else
+            npm run test:motion
+          fi
       - name: Capture desktop and mobile visual review
         if: matrix.browser == 'chromium'
         run: node tests/visual-review.mjs
