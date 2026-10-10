@@ -119,8 +119,10 @@
     const start=performance.now();
     P=staticMotion?target:referenceTiming.follow(P,target,elapsed);
     if(Math.abs(target-P)<.001)P=target;
+    let openingTime=null;
     if(!introComplete){
       const opening=window.MalGuardOpening?.state();
+      if(opening)openingTime=opening.elapsed;
       if(staticMotion||target>.15)introElapsed=introDuration;
       else if(opening)introElapsed=opening.particleProgress*introDuration;
       else introElapsed+=elapsed*particleSpeed;
@@ -157,8 +159,26 @@
     let drawn=0,underText=0;
     // During the opening's opaque geometry shot, particles have no exposure.
     // Save their draw cost until the continuous field joins the handoff.
-    const openingSuppressed=window.MalGuardOpening?.state().elapsed<4000;
-    const openingExposure=window.MalGuardOpening?smooth(4250,5900,window.MalGuardOpening.state().elapsed):1;
+    if(openingTime===null&&window.MalGuardOpening)openingTime=window.MalGuardOpening.state().elapsed;
+    const openingSuppressed=openingTime!==null&&openingTime<4010;
+    const openingExposure=openingTime===null?1:smooth(3990,4540,openingTime);
+    const openingPhase=openingTime===null?'idle':openingTime<3820?'portal':openingTime<4260?'flare':openingTime<5520?'settle':'formed';
+    canvas.dataset.openingPhase=openingPhase;
+    if(openingTime!==null&&openingTime>=3820&&openingTime<4900){
+      const fallback=document.querySelector('.opening-fallback')?.getBoundingClientRect();
+      const bx=fallback?fallback.left+fallback.width*.5:W*.66,by=fallback?fallback.top+fallback.height*.5:H*.45;
+      const p=Math.max(0,Math.min(1,(openingTime-3820)/1080)),strength=Math.sin(p*PI);
+      const radius=Math.min(W,H)*(.025+.245*smooth(3820,4390,openingTime));
+      const glow=ctx.createRadialGradient(bx,by,0,bx,by,radius);
+      glow.addColorStop(0,`rgba(238,250,255,${.78*strength})`);
+      glow.addColorStop(.06,`rgba(170,221,255,${.55*strength})`);
+      glow.addColorStop(.25,`rgba(69,145,255,${.22*strength})`);
+      glow.addColorStop(1,'rgba(40,105,255,0)');
+      ctx.globalCompositeOperation='lighter';ctx.fillStyle=glow;ctx.fillRect(bx-radius,by-radius,radius*2,radius*2);ctx.globalCompositeOperation='source-over';
+    }
+    const fallbackRect=openingTime!==null?document.querySelector('.opening-fallback')?.getBoundingClientRect():null;
+    const burstX=fallbackRect?fallbackRect.left+fallbackRect.width*.5:cx,burstY=fallbackRect?fallbackRect.top+fallbackRect.height*.5:cy;
+    const burstRadius=Math.min(W,H)*.19;
     for(let i=0;i<(openingSuppressed?0:active);i++){
       const j=i*3;
       const v=referenceTiming.mix(t,delay[i]);
@@ -180,7 +200,15 @@
       const X2=X*ca+Z*sa,Z2=-X*sa+Z*ca,Y2=Y*ct-Z2*st,Z3=Y*st+Z2*ct;
       const f=4.8/(Z3+4.8);
       const spread=i%17===0?1+arc*1.5:1;
-      const px=cx+X2*scale*f*spread,py=cy+Y2*scale*f*spread+(staticMotion?0:Math.sin(time*.00065)*2*logoWeight);
+      let px=cx+X2*scale*f*spread,py=cy+Y2*scale*f*spread+(staticMotion?0:Math.sin(time*.00065)*2*logoWeight);
+      if(openingTime!==null&&openingTime>=4010&&openingTime<5650){
+        const stagger=Math.max(0,openingTime-4220-delay[i]*330),gather=ease(Math.min(1,stagger/1090));
+        const angle=phases[i]+delay[i]*TAU-gather*.7,radius=burstRadius*(1-gather)*smooth(3970,4390,openingTime);
+        const swirl=(1-gather)*Math.sin(gather*PI+phases[i])*Math.min(W,H)*.038;
+        const sparkX=burstX+Math.cos(angle)*radius-Math.sin(angle)*swirl;
+        const sparkY=burstY+Math.sin(angle)*radius+Math.cos(angle)*swirl;
+        px=sparkX+(px-burstX)*gather;py=sparkY+(py-burstY)*gather;
+      }
       if(px<0||px>W||py<0||py>H)continue;
       const hue=(HA[i]+(HB[i]-HA[i])*v+360)%360;
       const sz=Math.max(.7,Math.min(2.6,f*1.6));

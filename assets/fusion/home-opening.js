@@ -14,7 +14,7 @@
   let mode='css',failure='',lastMetrics=null,scriptPromise=null,frameCount=0,caption=-1,frameDelta=16,slowFrames=0,qualityFallback='',performanceLimited=false;
   const cleanups=[];
   function listen(el,type,fn,opt){el.addEventListener(type,fn,opt);cleanups.push(()=>el.removeEventListener(type,fn,opt));}
-  function state(){return{elapsed,duration,complete,frameDelta,particleProgress:complete?1:clamp((elapsed-3200)/3200),open:smooth(800,3400,elapsed),logo:smooth(1700,3300,elapsed),scan:clamp((elapsed-2100)/1800),beam:smooth(2000,2300,elapsed)*(1-smooth(3600,3950,elapsed)),handoff:smooth(4300,6250,elapsed),compact:innerWidth<=900};}
+  function state(){const burst=smooth(3820,4280,elapsed)*(1-smooth(4430,4890,elapsed));return{elapsed,duration,complete,frameDelta,particleProgress:complete?1:clamp((elapsed-3200)/3200),open:smooth(800,3400,elapsed),logo:smooth(1700,3300,elapsed),scan:clamp((elapsed-2100)/1800),beam:smooth(2000,2300,elapsed)*(1-smooth(3600,3950,elapsed)),burst,burstScale:.12+.96*smooth(3700,4300,elapsed),handoff:smooth(4300,6250,elapsed),compact:innerWidth<=900};}
   function releaseRenderer(){if(renderer){lastMetrics=renderer.metrics();renderer.dispose();renderer=null;}root.classList.remove('webgl');}
   function syncControls(){controls.hidden=scrollY>innerHeight*.65||reduced.matches;skip.hidden=complete;replay.hidden=!complete;controls.querySelector('.opening-counter').hidden=complete;}
   function finish(reason='complete',focus=false){
@@ -31,6 +31,7 @@
     root.style.setProperty('--opening-alpha',alpha.toFixed(4));
     root.style.setProperty('--opening-open',s.open.toFixed(4));root.style.setProperty('--opening-logo',s.logo.toFixed(4));
     root.style.setProperty('--opening-scan',s.scan.toFixed(4));root.style.setProperty('--opening-beam',s.beam.toFixed(4));
+    root.style.setProperty('--opening-burst',s.burst.toFixed(4));root.style.setProperty('--opening-burst-scale',s.burstScale.toFixed(4));
     root.style.setProperty('--opening-caption',(smooth(1400,2400,elapsed)*(1-smooth(4400,5200,elapsed))).toFixed(4));
     const beat=elapsed<1700?0:elapsed<3500?1:2;
     if(beat!==caption){caption=beat;root.querySelector('.opening-ident span+span').textContent=['Establish the boundary','Bring the evidence into view','Scan smart. Play safe.'][beat];}
