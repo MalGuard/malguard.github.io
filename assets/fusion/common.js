@@ -72,7 +72,7 @@
       if(e.key==='Enter'||e.key===' '){e.preventDefault();flip();}
       if(e.key==='Escape'&&card.classList.contains('flip'))flip();
     });
-    card.addEventListener('pointermove',e=>{
+    card.addEventListener('pointermove',e=>{if(e.target.closest('.mg-card-control,a'))return;
       if(!fine.matches||reduced.matches||document.body.classList.contains('motion-paused')||card.classList.contains('flip'))return;
       const r=card.getBoundingClientRect();
       tilt.style.transform=`rotateY(${((e.clientX-r.left)/r.width-.5)*9}deg) rotateX(${((e.clientY-r.top)/r.height-.5)*-9}deg)`;

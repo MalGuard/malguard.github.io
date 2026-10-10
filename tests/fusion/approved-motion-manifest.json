@@ -1,6 +1,6 @@
 {
   "approvedCommit": "303949729a0775e552549b913831e3d28e6a34b0",
-  "allowedAdaptation": "Absolute production asset paths; authentic logo binding to shared navigation; guard removed legacy menu; native flip controls and focus semantics. Shape data, durations, easing, particles, shaders and camera paths unchanged.",
+  "allowedAdaptation": "Absolute production asset paths; authentic logo binding to shared navigation; guard removed legacy menu; native flip controls and focus semantics. Shape data, durations, easing, particles, shaders and camera paths unchanged. Freeze hover tilt while targeting native flip controls or product links.",
   "files": [
     {
       "path": "assets/fusion/assets/Inter-OFL.txt",
@@ -79,7 +79,7 @@
     },
     {
       "path": "assets/fusion/common.js",
-      "sha256": "f1bce1a33dfda4343936e5754be68db726f5fa732f3792d9acbe56ff78aa045f",
+      "sha256": "c3ebf89f3215c6443e56b72eb554ed90e773413e7b07b4e2a45ac0a5a1d83d8e",
       "approvedSHA256": "96de8cbbe4ce7e0f9383d8787c284ebd7b7aa0bfc50e45068c949634b759cd33"
     },
     {
