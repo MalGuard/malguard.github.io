@@ -160,25 +160,40 @@
     // During the opening's opaque geometry shot, particles have no exposure.
     // Save their draw cost until the continuous field joins the handoff.
     if(openingTime===null&&window.MalGuardOpening){openingState=window.MalGuardOpening.state();openingTime=openingState.elapsed;}
-    const openingSuppressed=openingTime!==null&&openingTime<4010;
-    const openingExposure=openingTime===null?1:smooth(3990,4540,openingTime);
-    const openingPhase=openingTime===null?'idle':openingTime<3820?'portal':openingTime<4260?'flare':openingTime<5520?'settle':'formed';
+    const releaseAt=openingState?.releaseAt??4700,gatherAt=openingState?.gatherAt??5900,formedAt=openingState?.formedAt??8250;
+    const openingSuppressed=openingTime!==null&&openingTime<releaseAt;
+    const openingExposure=openingTime===null||openingState?.complete?1:smooth(releaseAt,releaseAt+100,openingTime);
+    const openingPhase=openingTime===null?'idle':openingTime<releaseAt?'portal':openingTime<releaseAt+650?'flare':openingTime<formedAt?'settle':'formed';
     canvas.dataset.openingPhase=openingPhase;
-    if(openingTime!==null&&openingTime>=3820&&openingTime<4900){
-      const fallback=document.querySelector('.opening-fallback')?.getBoundingClientRect();
-      const bx=fallback?fallback.left+fallback.width*.5:W*.66,by=fallback?fallback.top+fallback.height*.5:H*.45;
-      const p=Math.max(0,Math.min(1,(openingTime-3820)/1080)),strength=Math.sin(p*PI);
-      const radius=Math.min(W,H)*(.025+.245*smooth(3820,4390,openingTime));
-      const glow=ctx.createRadialGradient(bx,by,0,bx,by,radius);
-      glow.addColorStop(0,`rgba(238,250,255,${.78*strength})`);
-      glow.addColorStop(.06,`rgba(170,221,255,${.55*strength})`);
-      glow.addColorStop(.25,`rgba(69,145,255,${.22*strength})`);
-      glow.addColorStop(1,'rgba(40,105,255,0)');
-      ctx.globalCompositeOperation='lighter';ctx.fillStyle=glow;ctx.fillRect(bx-radius,by-radius,radius*2,radius*2);ctx.globalCompositeOperation='source-over';
+    // The physical aperture and emitted field share the exact viewport origin.
+    const burstX=W*(openingState?.portalX??cx/W),burstY=H*(openingState?.portalY??cy/H);
+    const burstRadius=Math.min(W,H)*.68;
+    if(openingTime!==null&&!openingState?.complete&&openingTime>3000&&openingTime<releaseAt+800){
+      const charge=openingState?.charge??0,turn=openingState?.quantumTurn??0;
+      const fade=1-smooth(releaseAt-40,releaseAt+160,openingTime);
+      ctx.save();ctx.translate(burstX,burstY);ctx.globalCompositeOperation='lighter';
+      // Restrained precessing orbital trails: acceleration is visible before
+      // the release; no separate layer or black backdrop covers the page.
+      for(let n=0;n<5;n++){
+        const radius=Math.min(W,H)*(.12+charge*.07+n*.008);
+        ctx.save();ctx.rotate(turn*.24+n*PI/5);ctx.globalAlpha=charge*fade*(.1+n*.016);
+        ctx.strokeStyle='#9cdcf7';ctx.lineWidth=.65;ctx.beginPath();ctx.ellipse(0,0,radius,radius*(.27+n*.055),0,0,TAU);ctx.stroke();ctx.restore();
+      }
+      ctx.restore();
+      if(openingTime>=releaseAt-90){
+        const p=Math.max(0,(openingTime-releaseAt)/800),strength=openingState.burst;
+        const radius=Math.min(W,H)*(.045+.65*(1-Math.exp(-p*5)));
+        const glow=ctx.createRadialGradient(burstX,burstY,0,burstX,burstY,radius);
+        glow.addColorStop(0,`rgba(238,250,255,${.9*strength})`);
+        glow.addColorStop(.05,`rgba(170,221,255,${.7*strength})`);
+        glow.addColorStop(.25,`rgba(69,145,255,${.2*strength})`);
+        glow.addColorStop(1,'rgba(40,105,255,0)');
+        ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1;ctx.fillStyle=glow;
+        ctx.fillRect(burstX-radius,burstY-radius,radius*2,radius*2);
+        ctx.strokeStyle=`rgba(168,223,255,${.55*(1-smooth(releaseAt+180,releaseAt+800,openingTime))})`;
+        ctx.lineWidth=1.1;ctx.beginPath();ctx.arc(burstX,burstY,radius*.92,0,TAU);ctx.stroke();ctx.restore();
+      }
     }
-    const fallbackRect=openingTime!==null?document.querySelector('.opening-fallback')?.getBoundingClientRect():null;
-    const burstX=fallbackRect?fallbackRect.left+fallbackRect.width*.5:cx,burstY=fallbackRect?fallbackRect.top+fallbackRect.height*.5:cy;
-    const burstRadius=Math.min(W,H)*.19;
     for(let i=0;i<(openingSuppressed?0:active);i++){
       const j=i*3;
       const v=referenceTiming.mix(t,delay[i]);
@@ -188,7 +203,7 @@
       // Particles arrive with individual delays, settle into our unchanged
       // fingerprint, then the hero copy is released once every point has arrived.
       const arrival=staticMotion?1:ease(Math.max(0,Math.min(1,(introElapsed-delay[i]*1200)/2400)));
-      const entry=(1-arrival)*(1-smooth(0,.65,P));
+      const entry=openingState?0:(1-arrival)*(1-smooth(0,.65,P));
       const entryAngle=entry*(1.5+delay[i]);
       const ex=X*Math.cos(entryAngle)-Y*Math.sin(entryAngle);
       Y=X*Math.sin(entryAngle)+Y*Math.cos(entryAngle);X=ex;
@@ -201,13 +216,24 @@
       const f=4.8/(Z3+4.8);
       const spread=i%17===0?1+arc*1.5:1;
       let px=cx+X2*scale*f*spread,py=cy+Y2*scale*f*spread+(staticMotion?0:Math.sin(time*.00065)*2*logoWeight);
-      if(openingTime!==null&&openingTime>=4010&&openingTime<5650){
-        const stagger=Math.max(0,openingTime-4220-delay[i]*330),gather=ease(Math.min(1,stagger/1090));
-        const turn=openingState?.quantumTurn||0,angle=phases[i]+delay[i]*TAU-gather*.7+turn*.22*(1-gather),radius=burstRadius*(1-gather)*smooth(3970,4390,openingTime);
-        const swirl=(1-gather)*Math.sin(gather*PI+phases[i]+turn*.12)*Math.min(W,H)*.052;
-        const sparkX=burstX+Math.cos(angle)*radius-Math.sin(angle)*swirl;
-        const sparkY=burstY+Math.sin(angle)*radius+Math.cos(angle)*swirl;
-        px=sparkX+(px-burstX)*gather;py=sparkY+(py-burstY)*gather;
+      if(openingTime!==null&&!openingState?.complete&&openingTime>=releaseAt&&openingTime<formedAt){
+        const flight=1-Math.exp(-(openingTime-releaseAt)/430);
+        const gather=ease(Math.max(0,Math.min(1,(openingTime-gatherAt-delay[i]*430)/(formedAt-gatherAt-215))));
+        const angle=phases[i]+(openingState.quantumTurn||0)*.22+(1-gather)*flight*.7;
+        // Deterministic depth and velocity retain every particle's identity.
+        const depth=Math.sqrt(Math.max(.015,1-flow[j+2]*flow[j+2]));
+        const radius=burstRadius*(.18+.82*(delay[i]*2))*depth*flight;
+        const sparkX=burstX+Math.cos(angle)*radius;
+        const sparkY=burstY+Math.sin(angle)*radius*.82;
+        const destX=px,destY=py;
+        px=sparkX+(destX-sparkX)*gather;py=sparkY+(destY-sparkY)*gather;
+        // Short directional streaks give the launch momentum, then settle into
+        // the very same fingerprint points (no replacement particle system).
+        const trail=(1-gather)*(1-smooth(releaseAt+200,releaseAt+1000,openingTime))*flight;
+        if(trail>.03){
+          ctx.globalAlpha=openingExposure*trail*.38;ctx.strokeStyle='#a7d8f5';ctx.lineWidth=.65;
+          ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px-Math.cos(angle)*trail*14,py-Math.sin(angle)*trail*11);ctx.stroke();
+        }
       }
       if(px<0||px>W||py<0||py>H)continue;
       const hue=(HA[i]+(HB[i]-HA[i])*v+360)%360;

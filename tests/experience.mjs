@@ -122,10 +122,38 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
       if(new URL(route.request().url()).origin===new URL(base).origin)return route.continue();
       if(route.request().url().endsWith('/api/auth')){authCalls++;return route.fulfill({status:401,headers:{'access-control-allow-origin':'*'},contentType:'application/json',body:'{"error":"Access denied"}'});}return route.abort();
     });
-    const page=await context.newPage();await page.goto(base+'/#admin-access');await settle(page);assert.ok(await page.locator('#siteEntryGate').isVisible());assert.ok(await page.locator('main').evaluate(e=>e.inert));
-    await page.locator('#siteAdminEntry').click();await page.locator('#siteAdminPassword').fill('benign-invalid-test-password');await page.locator('#siteAdminPasswordToggle').click();assert.equal(await page.locator('#siteAdminPassword').getAttribute('type'),'text');await page.locator('#siteAdminPasswordToggle').click();assert.equal(await page.locator('#siteAdminPassword').getAttribute('type'),'password');
+    const page=await context.newPage();await page.goto(base+'/');await settle(page);assert.equal(await page.locator('#siteEntryGate').isVisible(),false);assert.equal(await page.locator('a[href*="admin-access"]').count(),0);assert.equal(await page.locator('#adminSessionBadge').isVisible(),false);
+    await page.locator('#menuBtn').click();assert.equal(await page.getByText('Administrator access',{exact:true}).count(),0);
+    await page.goto(base+'/#mg-console-8d42b69fda13705cc47a');await settle(page);assert.ok(await page.locator('#siteEntryGate').isVisible());assert.ok(await page.locator('main').evaluate(e=>e.inert));
+    await page.locator('#siteAdminPassword').fill('benign-invalid-test-password');await page.locator('#siteAdminPasswordToggle').click();assert.equal(await page.locator('#siteAdminPassword').getAttribute('type'),'text');await page.locator('#siteAdminPasswordToggle').click();assert.equal(await page.locator('#siteAdminPassword').getAttribute('type'),'password');
     await page.locator('#siteAdminPasswordSubmit').click();await page.waitForFunction(()=>document.querySelector('#siteAdminPasswordError').textContent==='Access denied');assert.equal(authCalls,1);assert.equal(await page.locator('#siteAdminIdentityStep').isVisible(),false);
     await page.locator('#siteAdminPasswordBack').click();await publicEntry(page);assert.equal(await page.locator('main').evaluate(e=>e.inert),false);await context.close();
+  });
+  await check(`${name} private administrator session indicator and advanced AI access`,async()=>{
+    const context=await browser.newContext({...fixtureTLS,reducedMotion:'reduce'});
+    await context.route('**/*',async route=>{
+      const url=new URL(route.request().url());
+      if(url.origin===new URL(base).origin)return route.continue();
+      if(url.pathname==='/api/auth'){
+        const cors={'access-control-allow-origin':'*','access-control-allow-methods':'POST, OPTIONS','access-control-allow-headers':'content-type'};
+        if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers:cors});
+        const request=JSON.parse(route.request().postData()||'{}');
+        const body=request.phase==='enter'?{emailConfigured:true,emailSent:true,sessionToken:'test-admin-session',sessionExpiresAt:Date.now()+3600000}:{ok:true};
+        return route.fulfill({status:200,headers:cors,contentType:'application/json',body:JSON.stringify(body)});
+      }
+      return route.abort();
+    });
+    const page=await context.newPage();await page.goto(base+'/#mg-console-8d42b69fda13705cc47a');await settle(page);
+    await page.locator('#siteAdminPassword').fill('benign-success-test-password');await page.locator('#siteAdminPasswordSubmit').click();
+    await page.locator('#siteAdminName').fill('MalGuard Owner');await page.locator('#siteAdminPhone').fill('+1 202 555 0148');await page.locator('#siteAdminConsent').check();await page.locator('#siteAdminEnter').click();
+    await page.waitForFunction(()=>document.getElementById('siteEntryGate').hidden);
+    assert.equal(await page.locator('#adminSessionBadge').isVisible(),true);
+    assert.match(await page.locator('#adminSessionBadge').innerText(),/ADMIN SESSION ACTIVE/);
+    await page.goto(base+'/malware-ai-windows.html');await page.waitForSelector('#accessGate:not([hidden])');
+    await page.locator('#accessPassword').fill('benign-success-test-password');await page.locator('#accessSubmit').click();
+    await page.waitForFunction(()=>document.getElementById('accessGate').hidden);
+    assert.equal(await page.locator('#aiApp').evaluate(e=>e.classList.contains('access-locked')),false);
+    await context.close();
   });
   await check(`${name} motion preference and JavaScript-free content`,async()=>{
     const context=await browser.newContext(fixtureTLS);const page=await context.newPage();await page.goto(base+'/');await publicEntry(page);await page.locator('#motionToggle').click();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await page.reload();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await context.close();

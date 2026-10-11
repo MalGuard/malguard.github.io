@@ -7,14 +7,33 @@
   const skip=document.getElementById('home-opening-skip'),replay=document.getElementById('home-opening-replay');
   const copy=document.querySelector('.scene[data-scene="0"] .t');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const duration=6400,clamp=(n,a=0,b=1)=>Math.min(b,Math.max(a,n));
+  const duration=8600,clamp=(n,a=0,b=1)=>Math.min(b,Math.max(a,n));
   const smooth=(a,b,n)=>{const v=clamp((n-a)/(b-a));return v*v*v*(v*(v*6-15)+10);};
   const weak=()=>innerWidth<=600||innerHeight<500||(navigator.deviceMemory||8)<=2||(navigator.hardwareConcurrency||8)<4||navigator.connection?.saveData;
   let elapsed=0,complete=false,raf=0,last=0,renderer=null,loading=false,disposed=false,generation=0;
   let mode='css',failure='',lastMetrics=null,scriptPromise=null,frameCount=0,caption=-1,frameDelta=16,slowFrames=0,qualityFallback='',performanceLimited=false;
   const cleanups=[];
   function listen(el,type,fn,opt){el.addEventListener(type,fn,opt);cleanups.push(()=>el.removeEventListener(type,fn,opt));}
-  function state(){const burst=smooth(3820,4280,elapsed)*(1-smooth(4430,4890,elapsed)),compact=innerWidth<=900,arrival=smooth(180,3050,elapsed),quantumTurn=Math.PI*2*(.12+1.72*Math.pow(smooth(250,3850,elapsed),1.8)),quantumEnergy=smooth(280,1550,elapsed)*(.24+.76*Math.pow(.5+.5*Math.sin(quantumTurn),5))*(1-smooth(4200,5000,elapsed));return{elapsed,duration,complete,frameDelta,particleProgress:complete?1:clamp((elapsed-3200)/3200),open:smooth(800,3400,elapsed),logo:smooth(1700,3300,elapsed),scan:clamp((elapsed-2100)/1800),beam:smooth(2000,2300,elapsed)*(1-smooth(3600,3950,elapsed)),burst,burstScale:.12+.96*smooth(3700,4300,elapsed),handoff:smooth(4300,6250,elapsed),compact,portalX:(compact?.88:.9)+((compact?.5:.67)-(compact?.88:.9))*arrival,portalY:(compact?.13:.17)+((compact?.34:.48)-(compact?.13:.17))*arrival,quantumTurn,quantumEnergy,fragments:smooth(3970,4660,elapsed)};}
+  // The arrival remains unchanged. A distinct charge, release and recovery
+  // use one clock shared by the model and the persistent homepage particles.
+  const releaseAt=4700,gatherAt=5900,formedAt=8250;
+  function state(){
+    const compact=innerWidth<=900,arrival=smooth(180,3050,elapsed);
+    const charge=smooth(2900,releaseAt,elapsed);
+    const quantumTurn=Math.PI*2*(.12+.72*smooth(250,3050,elapsed)+3.1*Math.pow(charge,2.15));
+    const quantumEnergy=(.2*smooth(280,1550,elapsed)+.8*charge)*(1-smooth(releaseAt,releaseAt+250,elapsed));
+    const burst=smooth(releaseAt-90,releaseAt+90,elapsed)*(1-smooth(releaseAt+190,releaseAt+650,elapsed));
+    return{elapsed,duration,complete,frameDelta,releaseAt,gatherAt,formedAt,
+      particleProgress:complete?1:smooth(gatherAt,duration,elapsed),
+      open:smooth(800,3400,elapsed),logo:smooth(1700,3300,elapsed),scan:clamp((elapsed-2100)/1800),
+      beam:smooth(2000,2300,elapsed)*(1-smooth(3600,3950,elapsed)),burst,
+      burstScale:.12+1.7*smooth(releaseAt-90,releaseAt+620,elapsed),
+      handoff:smooth(releaseAt+100,releaseAt+750,elapsed),compact,
+      portalX:(compact?.88:.9)+((compact?.5:.67)-(compact?.88:.9))*arrival,
+      portalY:(compact?.13:.17)+((compact?.34:.48)-(compact?.13:.17))*arrival,
+      quantumTurn,quantumEnergy,charge,
+      fragments:smooth(releaseAt-30,releaseAt+290,elapsed)};
+  }
   function releaseRenderer(){if(renderer){lastMetrics=renderer.metrics();renderer.dispose();renderer=null;}root.classList.remove('webgl');}
   function syncControls(){controls.hidden=scrollY>innerHeight*.65||reduced.matches;skip.hidden=complete;replay.hidden=!complete;controls.querySelector('.opening-counter').hidden=complete;}
   function finish(reason='complete',focus=false){
@@ -34,7 +53,7 @@
     root.style.setProperty('--opening-burst',s.burst.toFixed(4));root.style.setProperty('--opening-burst-scale',s.burstScale.toFixed(4));
     root.style.setProperty('--opening-x',`${(s.portalX*100).toFixed(3)}%`);root.style.setProperty('--opening-y',`${(s.portalY*100).toFixed(3)}%`);
     root.style.setProperty('--opening-spin',`${(s.quantumTurn*180/Math.PI).toFixed(2)}deg`);root.style.setProperty('--opening-energy',s.quantumEnergy.toFixed(4));root.style.setProperty('--opening-fragments',s.fragments.toFixed(4));
-    root.style.setProperty('--opening-caption',(smooth(1400,2400,elapsed)*(1-smooth(4400,5200,elapsed))).toFixed(4));
+    root.style.setProperty('--opening-caption',(smooth(1400,2400,elapsed)*(1-smooth(releaseAt-100,releaseAt+200,elapsed))).toFixed(4));
     const beat=elapsed<1700?0:elapsed<3500?1:2;
     if(beat!==caption){caption=beat;root.querySelector('.opening-ident span+span').textContent=['Establish the boundary','Bring the evidence into view','Scan smart. Play safe.'][beat];}
     controls.querySelector('.opening-counter').textContent=`0${Math.min(3,beat+1)} / 03`;
@@ -59,7 +78,7 @@
       const timeout=setTimeout(()=>{script.remove();reject(Error('Opening unavailable'));},3500);
       script.onerror=()=>{clearTimeout(timeout);script.remove();reject(Error('Opening unavailable'));};
       if(embedded){try{script.textContent=atob(embedded.textContent.trim());document.head.append(script);clearTimeout(timeout);resolve();}catch(e){clearTimeout(timeout);reject(e);}}
-      else{script.src='/assets/fusion/home-opening-scene.js?v=20261011-quantum4k';script.onload=()=>{clearTimeout(timeout);resolve();};document.head.append(script);}
+      else{script.src='/assets/fusion/home-opening-scene.js?v=20261011-quantum-release';script.onload=()=>{clearTimeout(timeout);resolve();};document.head.append(script);}
     }).catch(e=>{scriptPromise=null;throw e;});return scriptPromise;
   }
   async function enhance(){
@@ -68,7 +87,7 @@
     try{
       await loadFactory();if(token!==generation||complete||disposed||weak())return;
       const made=await window.createMalGuardHomeScene(host,{lite:innerWidth<=1100||matchMedia('(pointer:coarse)').matches,onContextLost:()=>{failure='WebGL context lost';performanceLimited=true;mode='css';root.classList.add('fallback-immediate');releaseRenderer();paint();}});
-      if(token!==generation||complete||disposed||elapsed>5200){made.dispose();return;}
+      if(token!==generation||complete||disposed||elapsed>releaseAt+300){made.dispose();return;}
       renderer=made;renderer.draw(state());mode='webgl';root.classList.add('webgl');
     }catch(e){failure='Three-dimensional opening unavailable';performanceLimited=true;mode='css';}
     finally{if(token===generation)loading=false;}
