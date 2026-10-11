@@ -28,7 +28,7 @@ const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobi
   // starts are still covered by the negative profiles and their real fallback.
   if(['desktop','4k','ipad'].includes(label)){
    await page.goto(siteURL+'tools.html');await page.addScriptTag({url:siteURL+'assets/fusion/home-opening-scene.js'});
-   gpuPreflight=await page.evaluate(async()=>{const h=document.createElement('div');Object.assign(h.style,{position:'fixed',width:'900px',height:'700px'});document.body.append(h);const model=await createMalGuardHomeScene(h,{lite:false});model.draw({elapsed:2800,logo:1,open:1,beam:1,scan:.5,handoff:0,compact:false});const result=model.metrics();model.dispose();h.remove();return result;});assert(gpuPreflight.authenticLogo&&gpuPreflight.triangles>0,'Real WebGL geometry and genuine logo must render');
+   gpuPreflight=await page.evaluate(async()=>{const h=document.createElement('div');Object.assign(h.style,{position:'fixed',width:'900px',height:'700px'});document.body.append(h);const model=await createMalGuardHomeScene(h,{lite:false});model.draw({elapsed:2800,logo:1,open:1,beam:1,scan:.5,handoff:0,compact:false});const result=model.metrics();model.dispose();h.remove();return result;});assert(gpuPreflight.authenticLogo&&gpuPreflight.triangles>0,'Real WebGL geometry and genuine logo must render');assert.deepEqual(gpuPreflight.camera.slice(0,2),[0,0],'The entrance camera faces the upright mark');assert.deepEqual(gpuPreflight.orientation,[0,0,0]);assert.deepEqual(gpuPreflight.logoRotation,[0,0,0]);
   }
   await page.goto(siteURL,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.MalGuardOpening);
   let checkpoints=[],skipReason,metrics;
@@ -43,16 +43,16 @@ const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobi
    if(label==='context-loss'){
     await page.waitForFunction(()=>MalGuardOpening.snapshot().failure==='WebGL context lost');assert.equal(await page.evaluate(()=>MalGuardOpening.snapshot().renderer),'css');await page.evaluate(()=>window.__restoreContextLossClock?.());
    }
-   for(const at of label==='desktop'?[1000,2850,4400,4880,5500,6900,8350]:label==='mobile'?[2800,4400,4880,5500,6900,8350]:[3200]){
+   for(const at of label==='desktop'?[650,1600,2400,3100,3650,4120,4900,6030]:label==='mobile'?[650,1600,2400,3100,3650,4120,4900,6030]:[3200]){
     await page.waitForFunction(at=>MalGuardOpening.snapshot().elapsed>=at||MalGuardOpening.snapshot().complete,at,{polling:50,timeout:9000});
     const s=await page.evaluate(()=>({opening:MalGuardOpening.snapshot(),introStage:document.body.dataset.intro,particlePhase:document.getElementById('c').dataset.openingPhase,particleCount:Number(document.getElementById('c').dataset.drawn),copyHidden:getComputedStyle(document.querySelector('.scene[data-scene="0"] .t')).visibility==='hidden',safeCopy:getComputedStyle(document.querySelector('.scene .t')).backgroundColor,overflow:document.documentElement.scrollWidth-innerWidth,overlay:getComputedStyle(document.getElementById('home-opening')).backgroundColor,fieldOpacity:getComputedStyle(document.getElementById('c')).opacity}));
     assert(['portal','flare','settle','formed'].includes(s.particlePhase),'Opening reports a valid particle transition phase');
-    assert.equal(s.copyHidden,!s.opening.complete);assert.equal(s.introStage,s.opening.complete?'ready':'assembling','Controls and text wait for the complete handoff');assert.equal(s.safeCopy,'rgba(0, 0, 0, 0)');assert.equal(s.overlay,'rgba(0, 0, 0, 0)');assert.equal(s.fieldOpacity,'1');assert(s.overflow<=1);checkpoints.push(s);
+    if(s.opening.elapsed<=s.opening.spinAt)assert.equal(s.opening.quantumTurn,0,'Mark arrives upright before spinning');assert.equal(s.opening.duration,6200);assert.equal(s.copyHidden,!s.opening.complete);assert.equal(s.introStage,s.opening.complete?'ready':'assembling','Controls and text wait for the complete handoff');assert.equal(s.safeCopy,'rgba(0, 0, 0, 0)');assert.equal(s.overlay,'rgba(0, 0, 0, 0)');assert.equal(s.fieldOpacity,'1');assert(s.overflow<=1);checkpoints.push(s);
     if(label==='desktop'||label==='mobile')await page.screenshot({path:`${base}/home-opening-${wk?'webkit':'chromium'}-${label}-${at}.png`});
     if(s.opening.complete)break;
    }
    if(['desktop','mobile'].includes(label)){
-    assert.equal(checkpoints.at(-1).particlePhase,'formed');
+    const spinSamples=checkpoints.filter(x=>x.opening.elapsed>x.opening.spinAt&&x.opening.elapsed<x.opening.releaseAt);if(spinSamples.length>=3){const rates=spinSamples.slice(1).map((x,i)=>(x.opening.quantumTurn-spinSamples[i].opening.quantumTurn)/(x.opening.elapsed-spinSamples[i].opening.elapsed));assert(rates.every((rate,i)=>i===0||rate>rates[i-1]),'Each successive spin interval accelerates');}assert.equal(checkpoints.at(-1).particlePhase,'formed');
     assert(checkpoints.at(-1).particleCount>0,'The persistent particle field remains visible in its formed state');
     assert(checkpoints.every(x=>x.opening.complete||x.particleCount>0||x.opening.elapsed<x.opening.releaseAt),'The field becomes visible after the portal and stays visible through its handoff');
    }

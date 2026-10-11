@@ -160,7 +160,7 @@
     // During the opening's opaque geometry shot, particles have no exposure.
     // Save their draw cost until the continuous field joins the handoff.
     if(openingTime===null&&window.MalGuardOpening){openingState=window.MalGuardOpening.state();openingTime=openingState.elapsed;}
-    const releaseAt=openingState?.releaseAt??4700,gatherAt=openingState?.gatherAt??5900,formedAt=openingState?.formedAt??8250;
+    const releaseAt=openingState?.releaseAt??3900,gatherAt=openingState?.gatherAt??4650,formedAt=openingState?.formedAt??5950;
     const openingSuppressed=openingTime!==null&&openingTime<releaseAt;
     const openingExposure=openingTime===null||openingState?.complete?1:smooth(releaseAt,releaseAt+100,openingTime);
     const openingPhase=openingTime===null?'idle':openingTime<releaseAt?'portal':openingTime<releaseAt+650?'flare':openingTime<formedAt?'settle':'formed';
@@ -168,7 +168,7 @@
     // The physical aperture and emitted field share the exact viewport origin.
     const burstX=W*(openingState?.portalX??cx/W),burstY=H*(openingState?.portalY??cy/H);
     const burstRadius=Math.min(W,H)*.68;
-    if(openingTime!==null&&!openingState?.complete&&openingTime>3000&&openingTime<releaseAt+800){
+    if(openingTime!==null&&!openingState?.complete&&openingTime>(openingState?.spinAt??1900)&&openingTime<releaseAt+800){
       const charge=openingState?.charge??0,turn=openingState?.quantumTurn??0;
       const fade=1-smooth(releaseAt-40,releaseAt+160,openingTime);
       ctx.save();ctx.translate(burstX,burstY);ctx.globalCompositeOperation='lighter';

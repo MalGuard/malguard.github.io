@@ -68,14 +68,14 @@ window.createMalGuardHomeScene=async function(host,options={}){
     if(disposed)return;const before=performance.now(),t=s.elapsed/1000;
     if(W!==host.clientWidth||H!==host.clientHeight)resize();
     const open=s.open,wide=W>900,composition=s.portalX??(wide?.67:.5),cy=s.portalY??(wide?.48:.35),burst=s.fragments||0,turn=s.quantumTurn||0,energy=s.quantumEnergy||0;
-    // Macro machining detail → layered boundary → front-facing brand reveal.
+    // The mark arrives upright, with a small axial push instead of a tilted camera.
     // The object completes its motion before the original headline is released.
-    camera.position.set(lerp(4.7,.18,open),lerp(1.1,.22,open),lerp(4.45,wide?12.6:15.7,open));
+    camera.position.set(0,0,lerp(wide?14.2:17.2,wide?12.6:15.7,open));
     camera.lookAt(0,0,0);camera.setViewOffset(W,H,-(composition-.5)*W,-(cy-.5)*H,W,H);
-    world.rotation.set(lerp(.04,-.02,open)+Math.sin(turn*.43)*(.045+energy*.1),lerp(-.25,.04,open)+Math.cos(turn*.31)*(.09+energy*.12),lerp(-.18,0,open)+turn*.22);
+    world.rotation.set(0,0,turn*.54);
     for(let i=0;i<4;i++){const delayed=Math.min(1,Math.max(0,(open-i*.085)/.74));frames3d[i].position.z=-i*(.10+delayed*.48)-burst*(.28+i*.11);frames3d[i].position.x=(i-1.5)*burst*.075;frames3d[i].rotation.z=(1-delayed)*.045*(i-1.5)+turn*.16+burst*(i-1.5)*.035;}
     blades.forEach((g,i)=>{const a=i*Math.PI/3,spread=burst*(.42+(i%3)*.08);g.position.set(Math.sin(a)*(open*.43+spread),Math.cos(a)*(open*.43+spread),open*.16+burst*.24);g.rotation.z=a+(1-open)*.11+turn*.27;});
-    emblem.position.z=lerp(-.45,.32,open)+burst*.2;emblem.rotation.y=(1-open)*-.48+Math.sin(turn*.2)*.1;emblem.rotation.z=turn*.54;emblem.scale.setScalar((1+energy*.1)*(1-burst*.75));
+    emblem.position.z=lerp(-.45,.32,open)+burst*.2;emblem.rotation.set(0,0,0);emblem.scale.setScalar((1+energy*.1)*(1-burst*.75));
     emblemMaterials.forEach(m=>{m.opacity=s.logo*(1-burst);m.emissiveIntensity=.035+energy*.34;});pane.material.opacity=.13*(.35+.65*open)*(1-burst*.85);
     scan.position.y=1.82-s.scan*3.64;scanSkirt.position.y=scan.position.y+.14;scanMaterial.opacity=s.beam*.65;scanSkirt.material.opacity=s.beam*.045;
     rails.rotation.z=lerp(-.14,0,open);links.material.opacity=.42+.18*open;
@@ -84,7 +84,7 @@ window.createMalGuardHomeScene=async function(host,options={}){
     if(renderMs>24||s.frameDelta>55)bad++;else bad=Math.max(0,bad-1);
     if(bad>=5&&pixelRatio>1){pixelRatio=Math.max(1,pixelRatio-.2);bad=0;resize();}
   }
-  function metrics(){return{frames,frameMs:renderMs,pixelRatio,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,authenticLogo:svg.paths.length===2,model:'MalGuard evidence aperture',camera:[camera.position.x,camera.position.y,camera.position.z]};}
+  function metrics(){return{frames,frameMs:renderMs,pixelRatio,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,authenticLogo:svg.paths.length===2,model:'MalGuard evidence aperture',camera:[camera.position.x,camera.position.y,camera.position.z],orientation:[world.rotation.x,world.rotation.y,world.rotation.z],logoRotation:[emblem.rotation.x,emblem.rotation.y,emblem.rotation.z]};}
   resize();await renderer.compileAsync(scene,camera);if(disposed)throw Error('Opening disposed');host.append(renderer.domElement);return{draw,resize,dispose,metrics,loseContext:()=>renderer.getContext().getExtension('WEBGL_lose_context')?.loseContext()};
   }catch(e){dispose();throw e;}
 };

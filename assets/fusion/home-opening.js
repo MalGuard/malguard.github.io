@@ -7,26 +7,28 @@
   const skip=document.getElementById('home-opening-skip'),replay=document.getElementById('home-opening-replay');
   const copy=document.querySelector('.scene[data-scene="0"] .t');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  const duration=8600,clamp=(n,a=0,b=1)=>Math.min(b,Math.max(a,n));
+  const duration=6200,clamp=(n,a=0,b=1)=>Math.min(b,Math.max(a,n));
   const smooth=(a,b,n)=>{const v=clamp((n-a)/(b-a));return v*v*v*(v*(v*6-15)+10);};
   const weak=()=>innerWidth<=600||innerHeight<500||(navigator.deviceMemory||8)<=2||(navigator.hardwareConcurrency||8)<4||navigator.connection?.saveData;
   let elapsed=0,complete=false,raf=0,last=0,renderer=null,loading=false,disposed=false,generation=0;
   let mode='css',failure='',lastMetrics=null,scriptPromise=null,frameCount=0,caption=-1,frameDelta=16,slowFrames=0,qualityFallback='',performanceLimited=false;
   const cleanups=[];
   function listen(el,type,fn,opt){el.addEventListener(type,fn,opt);cleanups.push(()=>el.removeEventListener(type,fn,opt));}
-  // The arrival remains unchanged. A distinct charge, release and recovery
-  // use one clock shared by the model and the persistent homepage particles.
-  const releaseAt=4700,gatherAt=5900,formedAt=8250;
+  // Upright arrival, then angular acceleration from rest. One shared clock
+  // keeps the model, fallback, particles and copy in the same short sequence.
+  const spinAt=1900,releaseAt=3900,gatherAt=4650,formedAt=5950;
   function state(){
-    const compact=innerWidth<=900,arrival=smooth(180,3050,elapsed);
-    const charge=smooth(2900,releaseAt,elapsed);
-    const quantumTurn=Math.PI*2*(.12+.72*smooth(250,3050,elapsed)+3.1*Math.pow(charge,2.15));
+    const compact=innerWidth<=900,arrival=smooth(160,1900,elapsed);
+    const spin=clamp((elapsed-spinAt)/(releaseAt-spinAt)),charge=spin*spin;
+    // Integrated positive acceleration: angle and velocity both start at zero,
+    // and speed keeps increasing until release, without a second speed jump.
+    const quantumTurn=Math.PI*2*3.05*spin*spin*spin;
     const quantumEnergy=(.2*smooth(280,1550,elapsed)+.8*charge)*(1-smooth(releaseAt,releaseAt+250,elapsed));
     const burst=smooth(releaseAt-90,releaseAt+90,elapsed)*(1-smooth(releaseAt+190,releaseAt+650,elapsed));
-    return{elapsed,duration,complete,frameDelta,releaseAt,gatherAt,formedAt,
+    return{elapsed,duration,complete,frameDelta,spinAt,releaseAt,gatherAt,formedAt,
       particleProgress:complete?1:smooth(gatherAt,duration,elapsed),
-      open:smooth(800,3400,elapsed),logo:smooth(1700,3300,elapsed),scan:clamp((elapsed-2100)/1800),
-      beam:smooth(2000,2300,elapsed)*(1-smooth(3600,3950,elapsed)),burst,
+      open:smooth(300,1900,elapsed),logo:smooth(160,850,elapsed),scan:clamp((elapsed-1250)/1250),
+      beam:smooth(1250,1500,elapsed)*(1-smooth(2850,3150,elapsed)),burst,
       burstScale:.12+1.7*smooth(releaseAt-90,releaseAt+620,elapsed),
       handoff:smooth(releaseAt+100,releaseAt+750,elapsed),compact,
       portalX:(compact?.88:.9)+((compact?.5:.67)-(compact?.88:.9))*arrival,
@@ -53,8 +55,8 @@
     root.style.setProperty('--opening-burst',s.burst.toFixed(4));root.style.setProperty('--opening-burst-scale',s.burstScale.toFixed(4));
     root.style.setProperty('--opening-x',`${(s.portalX*100).toFixed(3)}%`);root.style.setProperty('--opening-y',`${(s.portalY*100).toFixed(3)}%`);
     root.style.setProperty('--opening-spin',`${(s.quantumTurn*180/Math.PI).toFixed(2)}deg`);root.style.setProperty('--opening-energy',s.quantumEnergy.toFixed(4));root.style.setProperty('--opening-fragments',s.fragments.toFixed(4));
-    root.style.setProperty('--opening-caption',(smooth(1400,2400,elapsed)*(1-smooth(releaseAt-100,releaseAt+200,elapsed))).toFixed(4));
-    const beat=elapsed<1700?0:elapsed<3500?1:2;
+    root.style.setProperty('--opening-caption',(smooth(700,1400,elapsed)*(1-smooth(releaseAt-100,releaseAt+200,elapsed))).toFixed(4));
+    const beat=elapsed<1300?0:elapsed<2900?1:2;
     if(beat!==caption){caption=beat;root.querySelector('.opening-ident span+span').textContent=['Establish the boundary','Bring the evidence into view','Scan smart. Play safe.'][beat];}
     controls.querySelector('.opening-counter').textContent=`0${Math.min(3,beat+1)} / 03`;
     if(renderer)try{renderer.draw(s);}catch(e){failure='Rendering unavailable';mode='css';releaseRenderer();}
@@ -78,7 +80,7 @@
       const timeout=setTimeout(()=>{script.remove();reject(Error('Opening unavailable'));},3500);
       script.onerror=()=>{clearTimeout(timeout);script.remove();reject(Error('Opening unavailable'));};
       if(embedded){try{script.textContent=atob(embedded.textContent.trim());document.head.append(script);clearTimeout(timeout);resolve();}catch(e){clearTimeout(timeout);reject(e);}}
-      else{script.src='/assets/fusion/home-opening-scene.js?v=20261011-quantum-release';script.onload=()=>{clearTimeout(timeout);resolve();};document.head.append(script);}
+      else{script.src='/assets/fusion/home-opening-scene.js?v=20261011-upright-acceleration';script.onload=()=>{clearTimeout(timeout);resolve();};document.head.append(script);}
     }).catch(e=>{scriptPromise=null;throw e;});return scriptPromise;
   }
   async function enhance(){
