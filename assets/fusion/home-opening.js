@@ -14,7 +14,7 @@
   let mode='css',failure='',lastMetrics=null,scriptPromise=null,frameCount=0,caption=-1,frameDelta=16,slowFrames=0,qualityFallback='',performanceLimited=false;
   const cleanups=[];
   function listen(el,type,fn,opt){el.addEventListener(type,fn,opt);cleanups.push(()=>el.removeEventListener(type,fn,opt));}
-  // Upright arrival, then angular acceleration from rest. One shared clock
+  // A close, upright entrance from below, then angular acceleration from rest. One shared clock
   // keeps the model, fallback, particles and copy in the same short sequence.
   const spinAt=1900,releaseAt=3900,gatherAt=4650,formedAt=5950;
   function state(){
@@ -32,7 +32,7 @@
       burstScale:.12+1.7*smooth(releaseAt-90,releaseAt+620,elapsed),
       handoff:smooth(releaseAt+100,releaseAt+750,elapsed),compact,
       portalX:(compact?.88:.9)+((compact?.5:.67)-(compact?.88:.9))*arrival,
-      portalY:(compact?.13:.17)+((compact?.34:.48)-(compact?.13:.17))*arrival,
+      portalY:(compact?.88:.86)+((compact?.34:.48)-(compact?.88:.86))*arrival,
       quantumTurn,quantumEnergy,charge,
       fragments:smooth(releaseAt-30,releaseAt+290,elapsed)};
   }
@@ -80,7 +80,7 @@
       const timeout=setTimeout(()=>{script.remove();reject(Error('Opening unavailable'));},3500);
       script.onerror=()=>{clearTimeout(timeout);script.remove();reject(Error('Opening unavailable'));};
       if(embedded){try{script.textContent=atob(embedded.textContent.trim());document.head.append(script);clearTimeout(timeout);resolve();}catch(e){clearTimeout(timeout);reject(e);}}
-      else{script.src='/assets/fusion/home-opening-scene.js?v=20261011-upright-acceleration';script.onload=()=>{clearTimeout(timeout);resolve();};document.head.append(script);}
+      else{script.src='/assets/fusion/home-opening-scene.js?v=20261011-depth-entry';script.onload=()=>{clearTimeout(timeout);resolve();};document.head.append(script);}
     }).catch(e=>{scriptPromise=null;throw e;});return scriptPromise;
   }
   async function enhance(){
