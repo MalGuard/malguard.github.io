@@ -43,7 +43,6 @@
   menu.replaceChildren(); menu.setAttribute('aria-label', 'All MalGuard pages');
   const label = text => { const e = document.createElement('span'); e.className = 'mg-menu-label'; e.textContent = text; menu.append(e); };
   label('EXPLORE MALGUARD'); pages.forEach(p => menu.append(link(p[0], p[2])));
-  if(document.body.classList.contains('mg-fusion')){const admin=document.createElement('button');admin.id='openAdminAccess';admin.type='button';admin.textContent='Administrator access';menu.append(admin);}else{menu.append(link('Administrator access','/#admin-access'));}
   if (sections.length) { label('ON THIS PAGE'); sections.forEach(p => menu.append(link(...p))); }
   function setMenu(open, focus = false) {
     menu.classList.toggle('active', open); menu.hidden = !open;

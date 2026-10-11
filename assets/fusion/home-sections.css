@@ -67,3 +67,7 @@ body.motion-paused #products .card-rim rect,body.motion-paused #products .produc
 @media(prefers-reduced-motion:reduce){.logo-reacting .product-glyph,#workflow-code code:after{animation:none!important}}
 body.motion-paused #workflow-code code:after{animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){.card-rim .rim-beam{stroke-dasharray:none!important;opacity:.12!important}.card-rim .rim-halo{opacity:0!important}}
+
+.admin-session-badge{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;padding:5px 10px;border:1px solid #94c8ad55;border-radius:999px;background:#0b1915aa;color:#d4f3df;font:9px 'JetBrains Mono',monospace;letter-spacing:.06em}
+.admin-session-badge[hidden]{display:none}
+.admin-session-badge .btn{font:11px 'JetBrains Mono',monospace;padding:9px 13px;min-height:38px;border-color:#94c8ad55;background:#10231d;color:#e2fff0}

@@ -21,10 +21,9 @@
   const identityError=document.getElementById('siteAdminIdentityError');
   let adminPassword='';
   const optional=gate.dataset.optional==='true';
-  const opener=document.getElementById('openAdminAccess');
+  const adminSessionBadge=document.getElementById('adminSessionBadge');
   const menuControl=document.getElementById('menuBtn');
   function dismiss(){gate.hidden=true;document.body.classList.remove('site-entry-locked');adminPassword='';passwordInput.value='';syncGate();menuControl?.focus({preventScroll:true});}
-  opener?.addEventListener('click',()=>{if(menuControl?.getAttribute('aria-expanded')==='true')menuControl.click();window.MalGuardOpening?.finish('administrator-access');gate.hidden=false;document.body.classList.add('site-entry-locked');show('choice');syncGate();publicEntry.focus({preventScroll:true});});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&optional&&!gate.hidden){e.preventDefault();dismiss();}});
 
   function syncGate(){
@@ -65,7 +64,19 @@
     gate.hidden=true;
     document.body.classList.remove('site-entry-locked');
     syncGate();
+    syncAdminSessionBadge();
     (document.getElementById('homeContent')||document.querySelector('main'))?.focus({preventScroll:true});
+  }
+  function syncAdminSessionBadge(){
+    if(!adminSessionBadge)return;
+    let active=false,expiresAt=0;
+    try{
+      active=sessionStorage.getItem('malguard-site-role')==='admin'&&!!sessionStorage.getItem('malguard-admin-session');
+      expiresAt=Number(sessionStorage.getItem('malguard-admin-session-exp')||0);
+      active=active&&expiresAt>Date.now();
+    }catch(e){}
+    adminSessionBadge.hidden=!active;
+    if(active)setTimeout(()=>{if(Date.now()>=expiresAt)adminSessionBadge.hidden=true;},Math.max(0,expiresAt-Date.now()));
   }
   async function clientDeviceInfo(){
     const info={
@@ -168,7 +179,18 @@
     publicEntry.focus({preventScroll:true});
   }
   syncGate();
-  function openFromHash(){if(optional&&location.hash==='#admin-access'){opener?.click();}}
+  syncAdminSessionBadge();
+  window.addEventListener('pageshow',syncAdminSessionBadge);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncAdminSessionBadge()});
+  function openFromHash(){
+    if(!optional||location.hash!=='#mg-console-8d42b69fda13705cc47a')return;
+    window.MalGuardOpening?.finish('private-administrator-access');
+    gate.hidden=false;
+    document.body.classList.add('site-entry-locked');
+    show('password');
+    syncGate();
+    setTimeout(()=>passwordInput.focus(),0);
+  }
   window.addEventListener('hashchange',openFromHash);
   openFromHash();
 })();
