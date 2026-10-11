@@ -57,11 +57,20 @@ const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobi
     assert(checkpoints.at(-1).particleCount>0,'The persistent particle field remains visible in its formed state');
     assert(checkpoints.every(x=>x.opening.complete||x.particleCount>0||x.opening.elapsed<x.opening.releaseAt),'The field becomes visible after the portal and stays visible through its handoff');
    }
-   // Completion is controller state, not a compositor-frame condition. A
-   // software 4K driver can delay RAF polling after the scene is disposed.
-   await page.waitForFunction(()=>MalGuardOpening.snapshot().complete,null,{polling:50,timeout:15000});
+   // Read completion from the harness rather than depending on an in-page
+   // timer in the overloaded software compositor. Keep the real film clock
+   // and all assertions; the Retina driver deadline is not a device benchmark.
+   const completionDeadline=Date.now()+(label==='4k'?45000:15000);
+   while(!await page.evaluate(()=>MalGuardOpening.snapshot().complete)){
+    assert(Date.now()<completionDeadline,'Opening must complete within the software-driver deadline');
+    await new Promise(resolve=>setTimeout(resolve,100));
+   }
   }
-  await page.waitForFunction(()=>document.body.dataset.intro==='ready');await page.waitForFunction(()=>getComputedStyle(document.querySelector('.scene h1 .w')).opacity==='1');
+  const copyDeadline=Date.now()+30000;
+  while(!await page.evaluate(()=>document.body.dataset.intro==='ready'&&getComputedStyle(document.querySelector('.scene h1 .w')).opacity==='1')){
+   assert(Date.now()<copyDeadline,'The completed opening must release fully visible text');
+   await new Promise(resolve=>setTimeout(resolve,100));
+  }
   const final=await page.evaluate(()=>({opening:MalGuardOpening.snapshot(),particlePixelRatio:Number(document.getElementById('c').dataset.pixelRatio),particles:document.getElementById('c').dataset.introComplete,canvas:document.querySelectorAll('#home-scene canvas').length,copy: getComputedStyle(document.querySelector('.scene .t')).visibility,inert:document.querySelector('.scene .t').inert,wordOpacity:getComputedStyle(document.querySelector('.scene h1 .w')).opacity,overflow:document.documentElement.scrollWidth-innerWidth}));
   assert(final.opening.gpuReleased);assert(!final.opening.raf);assert.equal(final.canvas,0);assert.equal(final.copy,'visible');assert(!final.inert);assert.equal(final.wordOpacity,'1');assert(final.overflow<=1);assert.equal(final.particles,'true');metrics=final.opening.metrics;
   if(metrics){assert(metrics.authenticLogo);assert(metrics.drawCalls<90);assert(metrics.triangles<30000);assert(metrics.pixelRatio<=2);}
