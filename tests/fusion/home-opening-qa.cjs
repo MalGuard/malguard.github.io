@@ -56,7 +56,9 @@ const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobi
     assert(checkpoints.at(-1).particleCount>0,'The persistent particle field remains visible in its formed state');
     assert(checkpoints.every(x=>x.opening.complete||x.particleCount>0||x.opening.elapsed<x.opening.releaseAt),'The field becomes visible after the portal and stays visible through its handoff');
    }
-   await page.waitForFunction(()=>MalGuardOpening.snapshot().complete,null,{timeout:15000});
+   // Completion is controller state, not a compositor-frame condition. A
+   // software 4K driver can delay RAF polling after the scene is disposed.
+   await page.waitForFunction(()=>MalGuardOpening.snapshot().complete,null,{polling:50,timeout:15000});
   }
   await page.waitForFunction(()=>document.body.dataset.intro==='ready');await page.waitForFunction(()=>getComputedStyle(document.querySelector('.scene h1 .w')).opacity==='1');
   const final=await page.evaluate(()=>({opening:MalGuardOpening.snapshot(),particlePixelRatio:Number(document.getElementById('c').dataset.pixelRatio),particles:document.getElementById('c').dataset.introComplete,canvas:document.querySelectorAll('#home-scene canvas').length,copy: getComputedStyle(document.querySelector('.scene .t')).visibility,inert:document.querySelector('.scene .t').inert,wordOpacity:getComputedStyle(document.querySelector('.scene h1 .w')).opacity,overflow:document.documentElement.scrollWidth-innerWidth}));
