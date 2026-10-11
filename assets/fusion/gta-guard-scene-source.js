@@ -11,7 +11,7 @@ window.createMalGuardGTAScene = async function(host, options = {}) {
   const world=new THREE.Group(); scene.add(world);
   const resources=new Set(), own=r=>(resources.add(r),r);
   let disposed=false,frames=0,lastRenderMs=0,badFrames=0;
-  let pixelRatio=Math.min(devicePixelRatio||1,options.lite?1.25:1.8);
+  let pixelRatio=Math.min(devicePixelRatio||1,options.lite?1.25:2);
   const environment=new RoomEnvironment();
   const generator=new THREE.PMREMGenerator(renderer);
   const environmentTarget=own(generator.fromScene(environment,.04));

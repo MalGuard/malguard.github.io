@@ -69,8 +69,8 @@
   // Readability comes from continuous light falloff, never DOM-shaped black masks.
   function smooth(a,b,x){const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);}
   function resize(){
-    W=canvas.clientWidth;H=canvas.clientHeight;D=Math.min(devicePixelRatio||1,weak?1.25:1.75);
-    canvas.width=Math.round(W*D);canvas.height=Math.round(H*D);ctx.setTransform(D,0,0,D,0,0);
+    W=canvas.clientWidth;H=canvas.clientHeight;D=Math.min(devicePixelRatio||1,weak?1.25:2);
+    canvas.width=Math.round(W*D);canvas.height=Math.round(H*D);canvas.dataset.pixelRatio=String(D);ctx.setTransform(D,0,0,D,0,0);
     updateAnchors();
     scroll();
   }
@@ -119,10 +119,10 @@
     const start=performance.now();
     P=staticMotion?target:referenceTiming.follow(P,target,elapsed);
     if(Math.abs(target-P)<.001)P=target;
-    let openingTime=null;
+    let openingTime=null,openingState=null;
     if(!introComplete){
       const opening=window.MalGuardOpening?.state();
-      if(opening)openingTime=opening.elapsed;
+      if(opening){openingTime=opening.elapsed;openingState=opening;}
       if(staticMotion||target>.15)introElapsed=introDuration;
       else if(opening)introElapsed=opening.particleProgress*introDuration;
       else introElapsed+=elapsed*particleSpeed;
@@ -159,7 +159,7 @@
     let drawn=0,underText=0;
     // During the opening's opaque geometry shot, particles have no exposure.
     // Save their draw cost until the continuous field joins the handoff.
-    if(openingTime===null&&window.MalGuardOpening)openingTime=window.MalGuardOpening.state().elapsed;
+    if(openingTime===null&&window.MalGuardOpening){openingState=window.MalGuardOpening.state();openingTime=openingState.elapsed;}
     const openingSuppressed=openingTime!==null&&openingTime<4010;
     const openingExposure=openingTime===null?1:smooth(3990,4540,openingTime);
     const openingPhase=openingTime===null?'idle':openingTime<3820?'portal':openingTime<4260?'flare':openingTime<5520?'settle':'formed';
@@ -203,8 +203,8 @@
       let px=cx+X2*scale*f*spread,py=cy+Y2*scale*f*spread+(staticMotion?0:Math.sin(time*.00065)*2*logoWeight);
       if(openingTime!==null&&openingTime>=4010&&openingTime<5650){
         const stagger=Math.max(0,openingTime-4220-delay[i]*330),gather=ease(Math.min(1,stagger/1090));
-        const angle=phases[i]+delay[i]*TAU-gather*.7,radius=burstRadius*(1-gather)*smooth(3970,4390,openingTime);
-        const swirl=(1-gather)*Math.sin(gather*PI+phases[i])*Math.min(W,H)*.038;
+        const turn=openingState?.quantumTurn||0,angle=phases[i]+delay[i]*TAU-gather*.7+turn*.22*(1-gather),radius=burstRadius*(1-gather)*smooth(3970,4390,openingTime);
+        const swirl=(1-gather)*Math.sin(gather*PI+phases[i]+turn*.12)*Math.min(W,H)*.052;
         const sparkX=burstX+Math.cos(angle)*radius-Math.sin(angle)*swirl;
         const sparkY=burstY+Math.sin(angle)*radius+Math.cos(angle)*swirl;
         px=sparkX+(px-burstX)*gather;py=sparkY+(py-burstY)*gather;
