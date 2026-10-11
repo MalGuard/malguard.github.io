@@ -105,6 +105,7 @@ function checkComposition(c, profile, label) {
     check(c.state.scene.authenticLogo, `${label}: authentic MalGuard logo missing from 3D surface`);
     check(c.state.scene.triangles <= 50000, `${label}: triangle budget exceeded`);
     check(c.state.scene.drawCalls < 100, `${label}: draw-call budget exceeded`);
+    check(c.state.scene.pixelRatio <= 2 && c.state.scene.pixelRatio > 0, `${label}: invalid retina render scale`);
   }
 }
 async function panelRect(page) {

@@ -1,15 +1,15 @@
 const {playwright,chromiumLaunch,siteURL}=require('./qa-runtime.cjs'),assert=require('assert'),fs=require('fs'),path=require('path');
 const wk=process.argv[2]==='webkit',base=path.resolve(__dirname,'../../test-results/fusion');let browser,lastPage,gpuPreflight;fs.mkdirSync(base,{recursive:true});
-const profiles=[['desktop',1440,900],['ipad',820,1180],['mobile',390,844],['small-mobile',320,568],['zoom-short',360,225],['no-webgl',1280,900],['reduced',1280,900],['failed-scene',1280,900],['failed-controller',1280,900],['scroll-skip',1280,900],['touch-skip',390,844],['pause',390,844],['context-loss',1280,900]];
+const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobile',390,844],['small-mobile',320,568],['zoom-short',360,225],['no-webgl',1280,900],['reduced',1280,900],['failed-scene',1280,900],['failed-controller',1280,900],['scroll-skip',1280,900],['touch-skip',390,844],['pause',390,844],['context-loss',1280,900]];
 (async()=>{
  browser=await(wk?playwright.webkit:playwright.chromium).launch(wk?{headless:!process.env.DISPLAY}:chromiumLaunch);const reports=[],hashes={};for(const file of ['index.html','energy.js','home-opening.css','home-opening.js','home-opening-scene.js'])hashes[file]=require('crypto').createHash('sha256').update(fs.readFileSync(path.resolve(__dirname,'../../',file==='index.html'?file:'assets/fusion/'+file))).digest('hex');
  const reportFile=`${base}/home-opening-${wk?'webkit':'chromium'}.json`;
  if(process.env.MALGUARD_OPENING_RESUME==='1'&&fs.existsSync(reportFile)){const previous=JSON.parse(fs.readFileSync(reportFile));if(JSON.stringify(previous.sourceSHA256)===JSON.stringify(hashes))reports.push(...previous.profiles);}
  function persist(status='IN_PROGRESS'){fs.writeFileSync(reportFile,JSON.stringify({status,fullMatrix:status==='PASS'&&reports.length===profiles.length,engine:wk?'webkit':'chromium',sourceSHA256:hashes,profiles:reports},null,2)+'\n');}
- for(const [label,width,height]of profiles){
+ for(const [label,width,height,dpr]of profiles){
   if(process.env.MALGUARD_OPENING_PROFILES&&!process.env.MALGUARD_OPENING_PROFILES.split(',').includes(label))continue;
   if(reports.some(r=>r.label===label))continue;
-  const page=await browser.newPage({ignoreHTTPSErrors:true,viewport:{width,height},hasTouch:width<1000,isMobile:width<1000,reducedMotion:label==='reduced'?'reduce':'no-preference'}),errors=[],writes=[],sceneRequests=[];
+  const page=await browser.newPage({ignoreHTTPSErrors:true,viewport:{width,height},deviceScaleFactor:dpr||1,hasTouch:width<1000,isMobile:width<1000,reducedMotion:label==='reduced'?'reduce':'no-preference'}),errors=[],writes=[],sceneRequests=[];
   lastPage=page;await page.addInitScript(disable=>{Object.defineProperty(navigator,'deviceMemory',{configurable:true,get:()=>8});Object.defineProperty(navigator,'hardwareConcurrency',{get:()=>8});if(disable){const old=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(kind,...args){return /webgl/.test(kind)?null:old.call(this,kind,...args)};}},label==='no-webgl');
   if(['scroll-skip','touch-skip','pause'].includes(label))await page.addInitScript(()=>Object.defineProperty(navigator,'deviceMemory',{configurable:true,get:()=>2}));
   if(label==='context-loss')await page.addInitScript(()=>{const native=requestAnimationFrame.bind(window);let virtual=0,last=0;window.__restoreContextLossClock=()=>{window.requestAnimationFrame=native;};window.requestAnimationFrame=cb=>native(ts=>{virtual=last?virtual+Math.min(60,ts-last):ts;last=ts;cb(virtual);});let factory;Object.defineProperty(window,'createMalGuardHomeScene',{configurable:true,get:()=>factory,set:fn=>{factory=async(...args)=>{const made=await fn(...args);queueMicrotask(()=>made.loseContext());return made;};}});});
@@ -38,7 +38,7 @@ const profiles=[['desktop',1440,900],['ipad',820,1180],['mobile',390,844],['smal
    if(label==='scroll-skip')await page.mouse.wheel(0,350);else if(label==='touch-skip')await page.locator('#home-opening-skip').tap();else await page.locator('.motion-control').tap();
    await page.waitForFunction(()=>MalGuardOpening.snapshot().complete);skipReason=(await page.evaluate(()=>MalGuardOpening.snapshot())).finished;assert.equal(skipReason,label==='scroll-skip'?'scroll':label==='touch-skip'?'skip':'pause');
   }else{
-   if(['desktop','ipad'].includes(label)){await page.waitForFunction(()=>MalGuardOpening.snapshot().metrics?.authenticLogo||MalGuardOpening.snapshot().complete,null,{timeout:15000});const s=await page.evaluate(()=>MalGuardOpening.snapshot());assert(s.metrics?.authenticLogo||(s.complete&&gpuPreflight?.authenticLogo),'Actual WebGL geometry must render, and a late software-driver start must preserve the film fallback');}
+   if(['desktop','4k','ipad'].includes(label)){await page.waitForFunction(()=>MalGuardOpening.snapshot().metrics?.authenticLogo||MalGuardOpening.snapshot().complete,null,{timeout:15000});const s=await page.evaluate(()=>MalGuardOpening.snapshot());assert(s.metrics?.authenticLogo||(s.complete&&gpuPreflight?.authenticLogo),'Actual WebGL geometry must render, and a late software-driver start must preserve the film fallback');}
    if(label==='context-loss'){
     await page.waitForFunction(()=>MalGuardOpening.snapshot().failure==='WebGL context lost');assert.equal(await page.evaluate(()=>MalGuardOpening.snapshot().renderer),'css');await page.evaluate(()=>window.__restoreContextLossClock?.());
    }
@@ -58,9 +58,10 @@ const profiles=[['desktop',1440,900],['ipad',820,1180],['mobile',390,844],['smal
    await page.waitForFunction(()=>MalGuardOpening.snapshot().complete,null,{timeout:15000});
   }
   await page.waitForFunction(()=>document.body.dataset.intro==='ready');await page.waitForFunction(()=>getComputedStyle(document.querySelector('.scene h1 .w')).opacity==='1');
-  const final=await page.evaluate(()=>({opening:MalGuardOpening.snapshot(),particles:document.getElementById('c').dataset.introComplete,canvas:document.querySelectorAll('#home-scene canvas').length,copy: getComputedStyle(document.querySelector('.scene .t')).visibility,inert:document.querySelector('.scene .t').inert,wordOpacity:getComputedStyle(document.querySelector('.scene h1 .w')).opacity,overflow:document.documentElement.scrollWidth-innerWidth}));
+  const final=await page.evaluate(()=>({opening:MalGuardOpening.snapshot(),particlePixelRatio:Number(document.getElementById('c').dataset.pixelRatio),particles:document.getElementById('c').dataset.introComplete,canvas:document.querySelectorAll('#home-scene canvas').length,copy: getComputedStyle(document.querySelector('.scene .t')).visibility,inert:document.querySelector('.scene .t').inert,wordOpacity:getComputedStyle(document.querySelector('.scene h1 .w')).opacity,overflow:document.documentElement.scrollWidth-innerWidth}));
   assert(final.opening.gpuReleased);assert(!final.opening.raf);assert.equal(final.canvas,0);assert.equal(final.copy,'visible');assert(!final.inert);assert.equal(final.wordOpacity,'1');assert(final.overflow<=1);assert.equal(final.particles,'true');metrics=final.opening.metrics;
-  if(metrics){assert(metrics.authenticLogo);assert(metrics.drawCalls<90);assert(metrics.triangles<30000);assert(metrics.pixelRatio<=1.6);}
+  if(metrics){assert(metrics.authenticLogo);assert(metrics.drawCalls<90);assert(metrics.triangles<30000);assert(metrics.pixelRatio<=2);}
+  if(label==='4k')assert.equal(final.particlePixelRatio,2,'4K particle surface should use the full Retina pixel density');
   if(['mobile','small-mobile','zoom-short','reduced'].includes(label))assert.equal(sceneRequests.length,0,'heavy renderer requested on fallback');
   if(label==='desktop'){
    await page.screenshot({path:`${base}/home-opening-${wk?'webkit':'chromium'}-desktop-ready.png`});
