@@ -62,16 +62,17 @@
     if(renderer)try{renderer.draw(s);}catch(e){failure='Rendering unavailable';mode='css';releaseRenderer();}
     frameCount++;root.dataset.phase=['boundary','evidence','reveal'][beat];root.dataset.renderer=mode;
   }
-  function frame(ts){
+  function frame(){
     raf=0;if(disposed||complete||document.hidden)return;
     // Use elapsed wall time, rather than slowing the film on a busy GPU.
     // Visibility changes reset this clock, so a hidden tab never skips ahead.
-    frameDelta=last?Math.max(0,ts-last):16;last=ts;elapsed=Math.min(duration,elapsed+frameDelta);
+    const now=performance.now();
+    frameDelta=last?Math.max(0,now-last):16;last=now;elapsed=Math.min(duration,elapsed+frameDelta);
     if(renderer){slowFrames=frameDelta>120?slowFrames+1:Math.max(0,slowFrames-1);if(slowFrames>=2){performanceLimited=true;qualityFallback='frame-budget';mode='css';root.classList.add('fallback-immediate');releaseRenderer();}}
     if(reduced.matches||document.body.classList.contains('motion-paused')){finish('motion-preference');return;}
     paint();if(elapsed>=duration)finish();else raf=requestAnimationFrame(frame);
   }
-  function wake(){if(!disposed&&!complete&&!document.hidden&&!raf){last=0;raf=requestAnimationFrame(frame);}}
+  function wake(){if(!disposed&&!complete&&!document.hidden&&!raf){last=performance.now();raf=requestAnimationFrame(frame);}}
   function loadFactory(){
     if(window.createMalGuardHomeScene)return Promise.resolve();
     if(scriptPromise)return scriptPromise;
@@ -80,7 +81,7 @@
       const timeout=setTimeout(()=>{script.remove();reject(Error('Opening unavailable'));},3500);
       script.onerror=()=>{clearTimeout(timeout);script.remove();reject(Error('Opening unavailable'));};
       if(embedded){try{script.textContent=atob(embedded.textContent.trim());document.head.append(script);clearTimeout(timeout);resolve();}catch(e){clearTimeout(timeout);reject(e);}}
-      else{script.src='/assets/fusion/home-opening-scene.js?v=20261011-original-entry';script.onload=()=>{clearTimeout(timeout);resolve();};document.head.append(script);}
+      else{script.src='/assets/fusion/home-opening-scene.js?v=20261011-original-entry-clock';script.onload=()=>{clearTimeout(timeout);resolve();};document.head.append(script);}
     }).catch(e=>{scriptPromise=null;throw e;});return scriptPromise;
   }
   async function enhance(){
