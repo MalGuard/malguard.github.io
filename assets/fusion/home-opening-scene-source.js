@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import {SVGLoader} from 'three/addons/loaders/SVGLoader.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import originalLogo from './assets/malguard-logo.svg';
+import {fractureLogo,fragmentPose} from './home-opening-fracture-source.mjs';
 
 window.createMalGuardHomeScene=async function(host,options={}){
   const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'low-power'});
@@ -22,6 +23,7 @@ window.createMalGuardHomeScene=async function(host,options={}){
   const key=new THREE.DirectionalLight(0xe3f1ff,2.7);key.position.set(-5,6,4);scene.add(key);
   const edge=new THREE.DirectionalLight(0x528cbe,2.2);edge.position.set(6,1,-3);scene.add(edge);
   const fill=new THREE.DirectionalLight(0xaccdde,.48);fill.position.set(-3,-3,5);scene.add(fill);
+  const core=new THREE.PointLight(0xc4efff,0,14,2);core.position.set(0,0,.7);world.add(core);
   const graphite=own(new THREE.MeshStandardMaterial({color:'#233442',metalness:.87,roughness:.38,envMapIntensity:.55}));
   const silver=own(new THREE.MeshStandardMaterial({color:'#6b8495',metalness:.92,roughness:.3,envMapIntensity:.6}));
   const blueLine=own(new THREE.MeshBasicMaterial({color:'#8db9d4',transparent:true,opacity:.47}));
@@ -53,6 +55,12 @@ window.createMalGuardHomeScene=async function(host,options={}){
       geo.translate(-180,-178,0);geo.scale(.011,-.011,.011);geo.computeVertexNormals();mesh(geo,material,emblem);
     }
   }
+  const fracture=fractureLogo(originalLogo),debris=new THREE.Group();world.add(debris);
+  const shardMaterials=new Map(),shards=fracture.pieces.map(piece=>{
+    if(!shardMaterials.has(piece.color))shardMaterials.set(piece.color,own(new THREE.MeshStandardMaterial({color:piece.color,emissive:piece.color,emissiveIntensity:.08,metalness:.53,roughness:.28,side:THREE.DoubleSide,envMapIntensity:.5})));
+    const positions=[];for(const face of piece.faces)for(let i=1;i<face.length-1;i++)for(const v of [face[0],face[i],face[i+1]])positions.push(...v);
+    const geo=own(new THREE.BufferGeometry());geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.computeVertexNormals();return mesh(geo,shardMaterials.get(piece.color),debris);
+  });
   const pane=mesh(own(new THREE.PlaneGeometry(2.88,3.77)),own(new THREE.MeshPhysicalMaterial({color:'#44617b',metalness:.05,roughness:.25,clearcoat:1,transparent:true,opacity:.11,depthWrite:false,side:THREE.DoubleSide})),world,0,0,-.06);
   const scanMaterial=own(new THREE.MeshBasicMaterial({color:'#b9e6fa',transparent:true,opacity:0,depthWrite:false}));
   const scan=mesh(own(new THREE.BoxGeometry(3.55,.012,.25)),scanMaterial,world,0,1.8,.32);
@@ -76,16 +84,19 @@ window.createMalGuardHomeScene=async function(host,options={}){
     world.rotation.set(lerp(.04,-.02,open),lerp(-.25,.04,open),turn*.54);
     for(let i=0;i<4;i++){const delayed=Math.min(1,Math.max(0,(open-i*.085)/.74));frames3d[i].position.z=-i*(.10+delayed*.48)-burst*(.28+i*.11);frames3d[i].position.x=(i-1.5)*burst*.075;frames3d[i].rotation.z=(1-delayed)*.045*(i-1.5)+turn*.16+burst*(i-1.5)*.035;}
     blades.forEach((g,i)=>{const a=i*Math.PI/3,spread=burst*(.42+(i%3)*.08);g.position.set(Math.sin(a)*(open*.43+spread),Math.cos(a)*(open*.43+spread),open*.16+burst*.24);g.rotation.z=a+(1-open)*.11+turn*.27;});
-    emblem.position.z=lerp(-.45,.32,open)+burst*.2;emblem.rotation.set(0,(1-open)*-.48,0);emblem.scale.setScalar((1+energy*.1)*(1-burst*.75));
-    emblemMaterials.forEach(m=>{m.opacity=s.logo*(1-burst);m.emissiveIntensity=.035+energy*.34;});pane.material.opacity=.13*(.35+.65*open)*(1-burst*.85);
+    emblem.position.z=lerp(-.45,.32,open);emblem.rotation.set(0,0,0);emblem.scale.setScalar(1+energy*.1);emblem.visible=burst===0;debris.visible=burst>0;
+    debris.position.z=emblem.position.z;debris.scale.copy(emblem.scale);
+    shards.forEach((shard,i)=>{const p=fragmentPose(fracture.pieces[i],i,s.explosionAge||0);shard.position.set(...p.position);shard.rotation.set(...p.rotation,'ZYX');});
+    emblemMaterials.forEach(m=>{m.opacity=s.logo;m.emissiveIntensity=.035+energy*.34;});shardMaterials.forEach(m=>{m.emissiveIntensity=.08+(s.coreEnergy||0)*.9;});pane.material.opacity=.13*(.35+.65*open)*(1-burst*.85);
     scan.position.y=1.82-s.scan*3.64;scanSkirt.position.y=scan.position.y+.14;scanMaterial.opacity=s.beam*.65;scanSkirt.material.opacity=s.beam*.045;
     rails.rotation.z=lerp(-.14,0,open);links.material.opacity=.42+.18*open;
     key.intensity=2.1+.6*s.logo+energy*2.4;edge.intensity=1.7+.5*open+energy*1.2;
+    core.intensity=(s.coreEnergy||0)*24;
     renderer.render(scene,camera);renderMs=performance.now()-before;frames++;
     if(renderMs>24||s.frameDelta>55)bad++;else bad=Math.max(0,bad-1);
     if(bad>=5&&pixelRatio>1){pixelRatio=Math.max(1,pixelRatio-.2);bad=0;resize();}
   }
-  function metrics(){return{frames,frameMs:renderMs,pixelRatio,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,authenticLogo:svg.paths.length===2,model:'MalGuard evidence aperture',camera:[camera.position.x,camera.position.y,camera.position.z],orientation:[world.rotation.x,world.rotation.y,world.rotation.z],logoRotation:[emblem.rotation.x,emblem.rotation.y,emblem.rotation.z]};}
+  function metrics(){return{frames,frameMs:renderMs,pixelRatio,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,authenticLogo:svg.paths.length===2,fragmentCount:shards.length,fragmentArea:fracture.fragmentArea,sourceArea:fracture.sourceArea,fragmentsVisible:debris.visible,coreIntensity:core.intensity,fragmentPosition:shards[0].position.toArray(),model:'MalGuard evidence aperture',camera:[camera.position.x,camera.position.y,camera.position.z],orientation:[world.rotation.x,world.rotation.y,world.rotation.z],logoRotation:[emblem.rotation.x,emblem.rotation.y,emblem.rotation.z]};}
   resize();await renderer.compileAsync(scene,camera);if(disposed)throw Error('Opening disposed');host.append(renderer.domElement);return{draw,resize,dispose,metrics,loseContext:()=>renderer.getContext().getExtension('WEBGL_lose_context')?.loseContext()};
   }catch(e){dispose();throw e;}
 };

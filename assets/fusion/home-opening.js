@@ -10,7 +10,7 @@
   const duration=7700,clamp=(n,a=0,b=1)=>Math.min(b,Math.max(a,n));
   const smooth=(a,b,n)=>{const v=clamp((n-a)/(b-a));return v*v*v*(v*(v*6-15)+10);};
   const weak=()=>innerWidth<=600||innerHeight<500||(navigator.deviceMemory||8)<=2||(navigator.hardwareConcurrency||8)<4||navigator.connection?.saveData;
-  let elapsed=0,complete=false,raf=0,last=0,renderer=null,loading=false,disposed=false,generation=0;
+  let elapsed=0,complete=false,raf=0,last=0,renderer=null,projection=null,loading=false,disposed=false,generation=0;
   let mode='css',failure='',lastMetrics=null,scriptPromise=null,frameCount=0,caption=-1,frameDelta=16,slowFrames=0,qualityFallback='',performanceLimited=false;
   const cleanups=[];
   function listen(el,type,fn,opt){el.addEventListener(type,fn,opt);cleanups.push(()=>el.removeEventListener(type,fn,opt));}
@@ -19,10 +19,10 @@
   const spinAt=3400,releaseAt=5400,gatherAt=6150,formedAt=7450;
   function state(){
     const compact=innerWidth<=900,arrival=smooth(160,1900,elapsed);
-    const spin=clamp((elapsed-spinAt)/(releaseAt-spinAt)),charge=spin*spin;
+    const spin=Math.max(0,(elapsed-spinAt)/(releaseAt-spinAt)),charge=clamp(spin)*clamp(spin);
     // Integrated positive acceleration: angle and velocity both start at zero,
     // and speed keeps increasing until release, without a second speed jump.
-    const quantumTurn=Math.PI*2*3.05*spin*spin*spin;
+    const quantumTurn=Math.PI*2*3.05*(Math.pow(clamp(spin),3)+3*Math.max(0,spin-1));
     const quantumEnergy=(.2*smooth(280,1550,elapsed)+.8*charge)*(1-smooth(releaseAt,releaseAt+250,elapsed));
     const burst=smooth(releaseAt-90,releaseAt+90,elapsed)*(1-smooth(releaseAt+190,releaseAt+650,elapsed));
     return{elapsed,duration,complete,frameDelta,spinAt,releaseAt,gatherAt,formedAt,
@@ -34,13 +34,16 @@
       portalX:(compact?.88:.9)+((compact?.5:.67)-(compact?.88:.9))*arrival,
       portalY:(compact?.88:.86)+((compact?.34:.48)-(compact?.88:.86))*arrival,
       quantumTurn,quantumEnergy,charge,
+      explosionAge:Math.max(0,(elapsed-(releaseAt-30))/1000),
+      coreEnergy:smooth(releaseAt-700,releaseAt+20,elapsed)*(1-smooth(releaseAt+100,releaseAt+650,elapsed)),
       fragments:smooth(releaseAt-30,releaseAt+290,elapsed)};
   }
   function releaseRenderer(){if(renderer){lastMetrics=renderer.metrics();renderer.dispose();renderer=null;}root.classList.remove('webgl');}
+  function releaseProjection(){projection?.dispose();projection=null;root.classList.remove('projected');}
   function syncControls(){controls.hidden=scrollY>innerHeight*.65||reduced.matches;skip.hidden=complete;replay.hidden=!complete;controls.querySelector('.opening-counter').hidden=complete;}
   function finish(reason='complete',focus=false){
     if(disposed)return;elapsed=duration;complete=true;generation++;loading=false;
-    cancelAnimationFrame(raf);raf=0;last=0;root.hidden=true;releaseRenderer();
+    cancelAnimationFrame(raf);raf=0;last=0;root.hidden=true;releaseRenderer();releaseProjection();
     document.body.classList.remove('home-opening-active');
     document.body.dataset.intro='ready';copy.inert=false;copy.closest('.scene').classList.add('in');
     root.dataset.finished=reason;syncControls();
@@ -55,11 +58,13 @@
     root.style.setProperty('--opening-burst',s.burst.toFixed(4));root.style.setProperty('--opening-burst-scale',s.burstScale.toFixed(4));
     root.style.setProperty('--opening-x',`${(s.portalX*100).toFixed(3)}%`);root.style.setProperty('--opening-y',`${(s.portalY*100).toFixed(3)}%`);
     root.style.setProperty('--opening-spin',`${(s.quantumTurn*180/Math.PI).toFixed(2)}deg`);root.style.setProperty('--opening-energy',s.quantumEnergy.toFixed(4));root.style.setProperty('--opening-fragments',s.fragments.toFixed(4));
+    root.style.setProperty('--opening-core',s.coreEnergy.toFixed(4));
     root.style.setProperty('--opening-caption',(smooth(1400,2400,elapsed)*(1-smooth(releaseAt-100,releaseAt+200,elapsed))).toFixed(4));
     const beat=elapsed<1700?0:elapsed<3500?1:2;
     if(beat!==caption){caption=beat;root.querySelector('.opening-ident span+span').textContent=['Establish the boundary','Bring the evidence into view','Scan smart. Play safe.'][beat];}
     controls.querySelector('.opening-counter').textContent=`0${Math.min(3,beat+1)} / 03`;
     if(renderer)try{renderer.draw(s);}catch(e){failure='Rendering unavailable';mode='css';releaseRenderer();}
+    if(!renderer&&projection)try{projection.draw(s);}catch(e){releaseProjection();}
     frameCount++;root.dataset.phase=['boundary','evidence','reveal'][beat];root.dataset.renderer=mode;
   }
   function frame(){
@@ -68,7 +73,9 @@
     // Visibility changes reset this clock, so a hidden tab never skips ahead.
     const now=performance.now();
     frameDelta=last?Math.max(0,now-last):16;last=now;elapsed=Math.min(duration,elapsed+frameDelta);
-    if(renderer){slowFrames=frameDelta>120?slowFrames+1:Math.max(0,slowFrames-1);if(slowFrames>=2){performanceLimited=true;qualityFallback='frame-budget';mode='css';root.classList.add('fallback-immediate');releaseRenderer();}}
+    // Shader compilation and unrelated main-thread stalls are not GPU draw
+    // cost. Keep the volume unless the renderer itself is persistently slow.
+    if(renderer){const gpu=renderer.metrics();slowFrames=gpu.frames>4&&gpu.frameMs>60&&frameDelta>120?slowFrames+1:Math.max(0,slowFrames-1);if(slowFrames>=6){performanceLimited=true;qualityFallback='frame-budget';mode='css';root.classList.add('fallback-immediate');releaseRenderer();}}
     if(reduced.matches||document.body.classList.contains('motion-paused')){finish('motion-preference');return;}
     paint();if(elapsed>=duration)finish();else raf=requestAnimationFrame(frame);
   }
@@ -81,7 +88,7 @@
       const timeout=setTimeout(()=>{script.remove();reject(Error('Opening unavailable'));},3500);
       script.onerror=()=>{clearTimeout(timeout);script.remove();reject(Error('Opening unavailable'));};
       if(embedded){try{script.textContent=atob(embedded.textContent.trim());document.head.append(script);clearTimeout(timeout);resolve();}catch(e){clearTimeout(timeout);reject(e);}}
-      else{script.src='/assets/fusion/home-opening-scene.js?v=20261011-original-entry-clock';script.onload=()=>{clearTimeout(timeout);resolve();};document.head.append(script);}
+      else{script.src='/assets/fusion/home-opening-scene.js?v=20261012-mg-fracture';script.onload=()=>{clearTimeout(timeout);resolve();};document.head.append(script);}
     }).catch(e=>{scriptPromise=null;throw e;});return scriptPromise;
   }
   async function enhance(){
@@ -99,22 +106,26 @@
     if(disposed)return;generation++;elapsed=0;complete=false;last=0;caption=-1;mode='css';failure='';qualityFallback=performanceLimited?'frame-budget':'';slowFrames=0;root.classList.remove('fallback-immediate');root.hidden=false;
     document.body.dataset.intro='assembling';document.body.classList.add('home-opening-active');
     copy.inert=true;copy.closest('.scene').classList.remove('in');
-    root.removeAttribute('data-finished');syncControls();paint();
+    root.removeAttribute('data-finished');syncControls();
+    if(!projection&&!reduced.matches&&!document.body.classList.contains('motion-paused')&&scrollY<=64&&innerHeight>=500){
+      try{projection=window.createMalGuardHomeProjection?.(root,{lite:weak()||innerWidth<=1100});root.classList.toggle('projected',Boolean(projection));}catch(e){releaseProjection();}
+    }
+    paint();
     if(reduced.matches||document.body.classList.contains('motion-paused')||scrollY>64||innerHeight<500){finish('direct-entry');return;}
     enhance();wake();
   }
   listen(skip,'click',()=>finish('skip',true));
   listen(replay,'click',()=>{scrollTo({top:0,behavior:'instant'});window.MalGuardParticles?.restartIntro();start();skip.focus({preventScroll:true});});
   listen(window,'scroll',()=>{if(!complete&&scrollY>64)finish('scroll');syncControls();},{passive:true});
-  listen(window,'resize',()=>{if(renderer){if(weak()){mode='css';releaseRenderer();}else renderer.resize();}if(!complete)paint();syncControls();},{passive:true});
+  listen(window,'resize',()=>{if(renderer){if(weak()){mode='css';releaseRenderer();}else renderer.resize();}projection?.resize();if(!complete)paint();syncControls();},{passive:true});
   listen(document,'keydown',e=>{if(e.key==='Escape'&&!complete){e.preventDefault();finish('escape',true);}});
   listen(document.querySelector('.skip-link'),'click',()=>finish('skip-link'));
   listen(document,'visibilitychange',()=>{cancelAnimationFrame(raf);raf=0;last=0;if(!document.hidden)wake();});
   listen(window,'mg:motion',e=>{if(e.detail.paused&&!complete)finish('pause');});
   listen(reduced,'change',()=>{if(reduced.matches)finish('reduced-motion');syncControls();});
-  function dispose(){if(disposed)return;disposed=true;generation++;cancelAnimationFrame(raf);raf=0;releaseRenderer();cleanups.splice(0).forEach(fn=>fn());}
+  function dispose(){if(disposed)return;disposed=true;generation++;cancelAnimationFrame(raf);raf=0;releaseRenderer();releaseProjection();cleanups.splice(0).forEach(fn=>fn());}
   listen(window,'pagehide',e=>{if(!e.persisted)dispose();else{cancelAnimationFrame(raf);raf=0;last=0;}});
   listen(window,'pageshow',()=>wake());
-  window.MalGuardOpening={state,snapshot:()=>({...state(),renderer:mode,loading,failure,qualityFallback,frames:frameCount,raf:Boolean(raf),gpuReleased:!renderer,metrics:renderer?.metrics()||lastMetrics,finished:root.dataset.finished||null}),finish};
+  window.MalGuardOpening={state,snapshot:()=>({...state(),renderer:mode,projection:Boolean(projection),projectionMetrics:projection?.metrics()||null,loading,failure,qualityFallback,frames:frameCount,raf:Boolean(raf),gpuReleased:!renderer,metrics:renderer?.metrics()||lastMetrics,finished:root.dataset.finished||null}),finish};
   start();
 })();
