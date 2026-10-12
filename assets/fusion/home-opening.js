@@ -27,7 +27,7 @@
     const burst=smooth(releaseAt-90,releaseAt+90,elapsed)*(1-smooth(releaseAt+190,releaseAt+650,elapsed));
     return{elapsed,duration,complete,frameDelta,spinAt,releaseAt,gatherAt,formedAt,
       particleProgress:complete?1:smooth(gatherAt,duration,elapsed),
-      open:smooth(800,3400,elapsed),logo:smooth(1700,3300,elapsed),scan:clamp((elapsed-2100)/1800),
+      open:smooth(800,3400,elapsed),logo:smooth(160,850,elapsed),scan:clamp((elapsed-2100)/1800),
       beam:smooth(2000,2300,elapsed)*(1-smooth(3600,3950,elapsed)),burst,
       burstScale:.12+1.7*smooth(releaseAt-90,releaseAt+620,elapsed),
       handoff:smooth(releaseAt+100,releaseAt+750,elapsed),compact,
