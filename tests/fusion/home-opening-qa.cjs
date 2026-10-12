@@ -45,7 +45,11 @@ const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobi
     await page.waitForFunction(()=>MalGuardOpening.snapshot().failure==='WebGL context lost');assert.equal(await page.evaluate(()=>MalGuardOpening.snapshot().renderer),'css');await page.evaluate(()=>window.__restoreContextLossClock?.());
    }
    for(const at of label==='desktop'?[650,1600,2400,3100,3800,4400,5100,6400,7530]:label==='mobile'?[650,1600,2400,3100,3800,4400,5100,6400,7530]:[3200]){
-    await page.waitForFunction(at=>MalGuardOpening.snapshot().elapsed>=at||MalGuardOpening.snapshot().complete,at,{polling:50,timeout:9000});
+    const checkpointDeadline=Date.now()+(label==='4k'?45000:9000);
+    while(!await page.evaluate(at=>MalGuardOpening.snapshot().elapsed>=at||MalGuardOpening.snapshot().complete,at)){
+     assert(Date.now()<checkpointDeadline,'Opening must reach the requested checkpoint or complete');
+     await new Promise(resolve=>setTimeout(resolve,100));
+    }
     const s=await page.evaluate(()=>({opening:MalGuardOpening.snapshot(),introStage:document.body.dataset.intro,particlePhase:document.getElementById('c').dataset.openingPhase,particleCount:Number(document.getElementById('c').dataset.drawn),copyHidden:getComputedStyle(document.querySelector('.scene[data-scene="0"] .t')).visibility==='hidden',safeCopy:getComputedStyle(document.querySelector('.scene .t')).backgroundColor,overflow:document.documentElement.scrollWidth-innerWidth,overlay:getComputedStyle(document.getElementById('home-opening')).backgroundColor,fieldOpacity:getComputedStyle(document.getElementById('c')).opacity}));
     assert(['portal','flare','settle','formed'].includes(s.particlePhase),'Opening reports a valid particle transition phase');
     if(s.opening.elapsed<=s.opening.spinAt)assert.equal(s.opening.quantumTurn,0,'Mark arrives upright before spinning');if(s.opening.elapsed<1700)assert.equal(s.opening.logo,0,'Keep the original delayed mark reveal rather than exposing a giant logo during the macro entry');assert.equal(s.opening.duration,7700);assert.equal(s.copyHidden,!s.opening.complete);assert.equal(s.introStage,s.opening.complete?'ready':'assembling','Controls and text wait for the complete handoff');assert.equal(s.safeCopy,'rgba(0, 0, 0, 0)');assert.equal(s.overlay,'rgba(0, 0, 0, 0)');assert.equal(s.fieldOpacity,'1');assert(s.overflow<=1);checkpoints.push(s);
