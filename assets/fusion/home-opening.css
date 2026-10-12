@@ -4,8 +4,11 @@
 #home-opening[hidden],.home-opening-controls[hidden]{display:none!important}
 #home-scene{position:absolute;inset:0}
 #home-scene canvas{display:block;width:100%;height:100%;background:transparent}
+.opening-projection{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:1}
+#home-opening.projected .opening-fallback{visibility:hidden}
+#home-opening.webgl .opening-projection{visibility:hidden}
 #home-opening::after{content:"";position:absolute;left:var(--opening-x);top:var(--opening-y);width:min(90vmin,820px);aspect-ratio:1;border-radius:50%;pointer-events:none;opacity:var(--opening-burst,0);transform:translate(-50%,-50%) scale(var(--opening-burst-scale,.12));mix-blend-mode:screen;background:radial-gradient(circle,rgba(250,253,255,.96) 0 1.4%,rgba(168,222,255,.72) 3.5%,rgba(80,163,255,.26) 13%,rgba(48,112,255,.10) 33%,transparent 71%);filter:drop-shadow(0 0 calc(14px + var(--opening-energy,0)*38px) rgba(101,189,255,calc(var(--opening-energy,0)*.48)))}
-.opening-fallback{position:absolute;left:var(--opening-x,66%);top:var(--opening-y,45%);width:clamp(380px,62vmin,760px);aspect-ratio:1;perspective:1100px;transform:translate(-50%,-50%);opacity:1;transition:opacity .3s}
+.opening-fallback{position:absolute;left:var(--opening-x,66%);top:var(--opening-y,45%);width:clamp(230px,36vmin,470px);aspect-ratio:1;perspective:1100px;transform:translate(-50%,-50%);opacity:1;transition:opacity .3s}
 #home-opening.webgl .opening-fallback{opacity:0}
 .opening-machine{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(calc(14deg - var(--opening-open,0)*9deg)) rotateY(calc(-30deg + var(--opening-open,0)*30deg)) rotateZ(calc(var(--opening-spin,0deg)*.54)) scale(calc(1.35 - var(--opening-open,0)*.35));filter:drop-shadow(0 10px 18px #0006) drop-shadow(0 0 calc(var(--opening-energy,0)*25px) rgba(93,176,255,.7));opacity:calc(1 - var(--opening-fragments,0))}
 .opening-machine>i{position:absolute;inset:calc(5% + var(--layer)*4%);transform:translateZ(calc((2 - var(--layer))*42px + var(--opening-open,0)*var(--layer)*31px));opacity:calc(.82 - var(--layer)*.12)}

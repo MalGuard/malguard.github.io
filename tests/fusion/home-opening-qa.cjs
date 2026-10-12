@@ -1,11 +1,10 @@
 const {playwright,chromiumLaunch,siteURL}=require('./qa-runtime.cjs'),assert=require('assert'),fs=require('fs'),path=require('path');
 const wk=process.argv[2]==='webkit',base=path.resolve(__dirname,'../../test-results/fusion');let browser,lastPage,gpuPreflight;fs.mkdirSync(base,{recursive:true});
 const smooth=(a,b,n)=>{const v=Math.min(1,Math.max(0,(n-a)/(b-a)));return v*v*v*(v*(v*6-15)+10);};
-assert(fs.readFileSync(path.resolve(__dirname,'../../assets/fusion/home-opening.css'),'utf8').includes('scale(calc(1.35 - var(--opening-open,0)*.35))'),'CSS fallback keeps the larger perspective silhouette and settles to unit scale');
-assert(fs.readFileSync(path.resolve(__dirname,'../../assets/fusion/home-opening.css'),'utf8').includes('width:clamp(380px,62vmin,760px)'),'CSS fallback keeps the close-up portal large enough to match the opening composition');
-const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobile',390,844],['small-mobile',320,568],['zoom-short',360,225],['no-webgl',1280,900],['delayed-timestamps',1280,900],['reduced',1280,900],['failed-scene',1280,900],['failed-controller',1280,900],['scroll-skip',1280,900],['touch-skip',390,844],['pause',390,844],['context-loss',1280,900]];
+const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobile',390,844],['small-mobile',320,568],['zoom-short',360,225],['no-webgl',1280,900],['delayed-timestamps',1280,900],['reduced',1280,900],['failed-scene',1280,900],['failed-projection',1280,900],['failed-controller',1280,900],['scroll-skip',1280,900],['touch-skip',390,844],['pause',390,844],['context-loss',1280,900]];
 (async()=>{
  browser=await(wk?playwright.webkit:playwright.chromium).launch(wk?{headless:!process.env.DISPLAY,...(process.env.TEST_WEBKIT_EXECUTABLE?{executablePath:process.env.TEST_WEBKIT_EXECUTABLE}:{})}:chromiumLaunch);const reports=[],hashes={};for(const file of ['index.html','energy.js','home-opening.css','home-opening.js','home-opening-scene.js'])hashes[file]=require('crypto').createHash('sha256').update(fs.readFileSync(path.resolve(__dirname,'../../',file==='index.html'?file:'assets/fusion/'+file))).digest('hex');
+ hashes['home-opening-projection.js']=require('crypto').createHash('sha256').update(fs.readFileSync(path.resolve(__dirname,'../../assets/fusion/home-opening-projection.js'))).digest('hex');
  const reportFile=`${base}/home-opening-${wk?'webkit':'chromium'}.json`;
  if(process.env.MALGUARD_OPENING_RESUME==='1'&&fs.existsSync(reportFile)){const previous=JSON.parse(fs.readFileSync(reportFile));if(JSON.stringify(previous.sourceSHA256)===JSON.stringify(hashes))reports.push(...previous.profiles);}
  gpuPreflight=reports.find(r=>r.gpuPreflight)?.gpuPreflight;
@@ -20,6 +19,7 @@ const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobi
   if(label==='context-loss')await page.addInitScript(()=>{const native=requestAnimationFrame.bind(window),nativeNow=performance.now.bind(performance);let virtual=nativeNow(),last=0;Object.defineProperty(performance,'now',{configurable:true,value:()=>virtual});window.__restoreContextLossClock=()=>{window.requestAnimationFrame=native;Object.defineProperty(performance,'now',{configurable:true,value:nativeNow});};window.requestAnimationFrame=cb=>native(ts=>{virtual+=last?Math.min(60,ts-last):16;last=ts;cb(virtual);});let factory;Object.defineProperty(window,'createMalGuardHomeScene',{configurable:true,get:()=>factory,set:fn=>{factory=async(...args)=>{const made=await fn(...args);queueMicrotask(()=>made.loseContext());return made;};}});});
   await page.route('**/*',r=>new URL(r.request().url()).origin===new URL(siteURL).origin?r.continue():r.abort());page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))writes.push(r.url());if(r.url().includes('home-opening-scene.js'))sceneRequests.push(r.url());});
   if(label==='failed-scene')await page.route('**/home-opening-scene.js*',route=>route.abort());
+  if(label==='failed-projection')await page.route('**/home-opening-projection.js*',route=>route.abort());
   if(label==='failed-controller')await page.route('**/home-opening.js*',route=>route.abort());
   if(label==='failed-controller'){
    await page.goto(siteURL,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.body.dataset.intro==='ready');
@@ -47,7 +47,7 @@ const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobi
    if(label==='context-loss'){
     await page.waitForFunction(()=>MalGuardOpening.snapshot().failure==='WebGL context lost');assert.equal(await page.evaluate(()=>MalGuardOpening.snapshot().renderer),'css');await page.evaluate(()=>window.__restoreContextLossClock?.());
    }
-   for(const at of label==='desktop'?[650,1600,2400,3100,3800,4400,5100,6400,7530]:label==='mobile'?[650,1600,2400,3100,3800,4400,5100,6400,7530]:[3200]){
+   for(const at of label==='desktop'?[650,1600,2400,3100,3800,4400,5100,6400,7530]:label==='mobile'?[650,1600,2400,3100,3800,4400,5100,6400,7530]:label==='no-webgl'?[650,3200]:[3200]){
     const checkpointDeadline=Date.now()+(label==='4k'?45000:9000);
     while(!await page.evaluate(at=>MalGuardOpening.snapshot().elapsed>=at||MalGuardOpening.snapshot().complete,at)){
      assert(Date.now()<checkpointDeadline,'Opening must reach the requested checkpoint or complete');
@@ -58,7 +58,8 @@ const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobi
     const arrival=smooth(160,1900,s.opening.elapsed),expectedX=(s.opening.compact?.88:.9)+((s.opening.compact?.5:.67)-(s.opening.compact?.88:.9))*arrival,expectedY=(s.opening.compact?.88:.86)+((s.opening.compact?.34:.48)-(s.opening.compact?.88:.86))*arrival;
     assert(Math.abs(s.opening.portalX-expectedX)<1e-8&&Math.abs(s.opening.portalY-expectedY)<1e-8,'Portal restores the original large entrance from the lower-right into the settled composition');
     if(s.opening.elapsed<=s.opening.spinAt)assert.equal(s.opening.quantumTurn,0,'Mark arrives upright before spinning');if(s.opening.elapsed<160)assert.equal(s.opening.logo,0,'Authentic mark stays hidden until the entrance begins');if(s.opening.elapsed>=850)assert.equal(s.opening.logo,1,'Authentic mark is fully visible during the early three-dimensional entrance');assert.equal(s.opening.duration,7700);assert.equal(s.copyHidden,!s.opening.complete);assert.equal(s.introStage,s.opening.complete?'ready':'assembling','Controls and text wait for the complete handoff');assert.equal(s.safeCopy,'rgba(0, 0, 0, 0)');assert.equal(s.overlay,'rgba(0, 0, 0, 0)');assert.equal(s.fieldOpacity,'1');assert(s.overflow<=1);checkpoints.push(s);
-    if(label==='desktop'||label==='mobile')await page.screenshot({path:`${base}/home-opening-${wk?'webkit':'chromium'}-${label}-${at}.png`});
+    if(label==='no-webgl'&&!s.opening.complete){assert(s.opening.projectionMetrics?.authenticLogo&&s.opening.projectionMetrics.frames>0,'Without WebGL the actual mark and aperture still render through perspective geometry');}
+    if(label==='desktop'||label==='mobile'||label==='no-webgl')await page.screenshot({path:`${base}/home-opening-${wk?'webkit':'chromium'}-${label}-${at}.png`});
     if(s.opening.complete)break;
    }
    if(['desktop','mobile'].includes(label)){
