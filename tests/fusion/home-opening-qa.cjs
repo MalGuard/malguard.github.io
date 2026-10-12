@@ -1,6 +1,6 @@
 const {playwright,chromiumLaunch,siteURL}=require('./qa-runtime.cjs'),assert=require('assert'),fs=require('fs'),path=require('path');
 const wk=process.argv[2]==='webkit',base=path.resolve(__dirname,'../../test-results/fusion');let browser,lastPage,gpuPreflight;fs.mkdirSync(base,{recursive:true});
-const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobile',390,844],['small-mobile',320,568],['zoom-short',360,225],['no-webgl',1280,900],['reduced',1280,900],['failed-scene',1280,900],['failed-controller',1280,900],['scroll-skip',1280,900],['touch-skip',390,844],['pause',390,844],['context-loss',1280,900]];
+const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobile',390,844],['small-mobile',320,568],['zoom-short',360,225],['no-webgl',1280,900],['delayed-timestamps',1280,900],['reduced',1280,900],['failed-scene',1280,900],['failed-controller',1280,900],['scroll-skip',1280,900],['touch-skip',390,844],['pause',390,844],['context-loss',1280,900]];
 (async()=>{
  browser=await(wk?playwright.webkit:playwright.chromium).launch(wk?{headless:!process.env.DISPLAY,...(process.env.TEST_WEBKIT_EXECUTABLE?{executablePath:process.env.TEST_WEBKIT_EXECUTABLE}:{})}:chromiumLaunch);const reports=[],hashes={};for(const file of ['index.html','energy.js','home-opening.css','home-opening.js','home-opening-scene.js'])hashes[file]=require('crypto').createHash('sha256').update(fs.readFileSync(path.resolve(__dirname,'../../',file==='index.html'?file:'assets/fusion/'+file))).digest('hex');
  const reportFile=`${base}/home-opening-${wk?'webkit':'chromium'}.json`;
@@ -12,8 +12,9 @@ const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobi
   if(reports.some(r=>r.label===label))continue;
   const page=await browser.newPage({ignoreHTTPSErrors:true,viewport:{width,height},deviceScaleFactor:dpr||1,hasTouch:width<1000,isMobile:width<1000,reducedMotion:label==='reduced'?'reduce':'no-preference'}),errors=[],writes=[],sceneRequests=[];
   lastPage=page;await page.addInitScript(disable=>{Object.defineProperty(navigator,'deviceMemory',{configurable:true,get:()=>8});Object.defineProperty(navigator,'hardwareConcurrency',{get:()=>8});if(disable){const old=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(kind,...args){return /webgl/.test(kind)?null:old.call(this,kind,...args)};}},label==='no-webgl');
-  if(['scroll-skip','touch-skip','pause'].includes(label))await page.addInitScript(()=>Object.defineProperty(navigator,'deviceMemory',{configurable:true,get:()=>2}));
-  if(label==='context-loss')await page.addInitScript(()=>{const native=requestAnimationFrame.bind(window);let virtual=0,last=0;window.__restoreContextLossClock=()=>{window.requestAnimationFrame=native;};window.requestAnimationFrame=cb=>native(ts=>{virtual=last?virtual+Math.min(60,ts-last):ts;last=ts;cb(virtual);});let factory;Object.defineProperty(window,'createMalGuardHomeScene',{configurable:true,get:()=>factory,set:fn=>{factory=async(...args)=>{const made=await fn(...args);queueMicrotask(()=>made.loseContext());return made;};}});});
+  if(['scroll-skip','touch-skip','pause','delayed-timestamps'].includes(label))await page.addInitScript(()=>Object.defineProperty(navigator,'deviceMemory',{configurable:true,get:()=>2}));
+  if(label==='delayed-timestamps')await page.addInitScript(()=>{const native=requestAnimationFrame.bind(window);window.requestAnimationFrame=cb=>native(ts=>cb(ts*.25));});
+  if(label==='context-loss')await page.addInitScript(()=>{const native=requestAnimationFrame.bind(window),nativeNow=performance.now.bind(performance);let virtual=nativeNow(),last=0;Object.defineProperty(performance,'now',{configurable:true,value:()=>virtual});window.__restoreContextLossClock=()=>{window.requestAnimationFrame=native;Object.defineProperty(performance,'now',{configurable:true,value:nativeNow});};window.requestAnimationFrame=cb=>native(ts=>{virtual+=last?Math.min(60,ts-last):16;last=ts;cb(virtual);});let factory;Object.defineProperty(window,'createMalGuardHomeScene',{configurable:true,get:()=>factory,set:fn=>{factory=async(...args)=>{const made=await fn(...args);queueMicrotask(()=>made.loseContext());return made;};}});});
   await page.route('**/*',r=>new URL(r.request().url()).origin===new URL(siteURL).origin?r.continue():r.abort());page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))writes.push(r.url());if(r.url().includes('home-opening-scene.js'))sceneRequests.push(r.url());});
   if(label==='failed-scene')await page.route('**/home-opening-scene.js*',route=>route.abort());
   if(label==='failed-controller')await page.route('**/home-opening.js*',route=>route.abort());
@@ -43,11 +44,15 @@ const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobi
    if(label==='context-loss'){
     await page.waitForFunction(()=>MalGuardOpening.snapshot().failure==='WebGL context lost');assert.equal(await page.evaluate(()=>MalGuardOpening.snapshot().renderer),'css');await page.evaluate(()=>window.__restoreContextLossClock?.());
    }
-   for(const at of label==='desktop'?[650,1600,2400,3100,3650,4120,4900,6030]:label==='mobile'?[650,1600,2400,3100,3650,4120,4900,6030]:[3200]){
-    await page.waitForFunction(at=>MalGuardOpening.snapshot().elapsed>=at||MalGuardOpening.snapshot().complete,at,{polling:50,timeout:9000});
+   for(const at of label==='desktop'?[650,1600,2400,3100,3800,4400,5100,6400,7530]:label==='mobile'?[650,1600,2400,3100,3800,4400,5100,6400,7530]:[3200]){
+    const checkpointDeadline=Date.now()+(label==='4k'?45000:9000);
+    while(!await page.evaluate(at=>MalGuardOpening.snapshot().elapsed>=at||MalGuardOpening.snapshot().complete,at)){
+     assert(Date.now()<checkpointDeadline,'Opening must reach the requested checkpoint or complete');
+     await new Promise(resolve=>setTimeout(resolve,100));
+    }
     const s=await page.evaluate(()=>({opening:MalGuardOpening.snapshot(),introStage:document.body.dataset.intro,particlePhase:document.getElementById('c').dataset.openingPhase,particleCount:Number(document.getElementById('c').dataset.drawn),copyHidden:getComputedStyle(document.querySelector('.scene[data-scene="0"] .t')).visibility==='hidden',safeCopy:getComputedStyle(document.querySelector('.scene .t')).backgroundColor,overflow:document.documentElement.scrollWidth-innerWidth,overlay:getComputedStyle(document.getElementById('home-opening')).backgroundColor,fieldOpacity:getComputedStyle(document.getElementById('c')).opacity}));
     assert(['portal','flare','settle','formed'].includes(s.particlePhase),'Opening reports a valid particle transition phase');
-    if(s.opening.elapsed<=s.opening.spinAt)assert.equal(s.opening.quantumTurn,0,'Mark arrives upright before spinning');assert.equal(s.opening.duration,6200);assert.equal(s.copyHidden,!s.opening.complete);assert.equal(s.introStage,s.opening.complete?'ready':'assembling','Controls and text wait for the complete handoff');assert.equal(s.safeCopy,'rgba(0, 0, 0, 0)');assert.equal(s.overlay,'rgba(0, 0, 0, 0)');assert.equal(s.fieldOpacity,'1');assert(s.overflow<=1);checkpoints.push(s);
+    if(s.opening.elapsed<=s.opening.spinAt)assert.equal(s.opening.quantumTurn,0,'Mark arrives upright before spinning');if(s.opening.elapsed<1700)assert.equal(s.opening.logo,0,'Keep the original delayed mark reveal rather than exposing a giant logo during the macro entry');assert.equal(s.opening.duration,7700);assert.equal(s.copyHidden,!s.opening.complete);assert.equal(s.introStage,s.opening.complete?'ready':'assembling','Controls and text wait for the complete handoff');assert.equal(s.safeCopy,'rgba(0, 0, 0, 0)');assert.equal(s.overlay,'rgba(0, 0, 0, 0)');assert.equal(s.fieldOpacity,'1');assert(s.overflow<=1);checkpoints.push(s);
     if(label==='desktop'||label==='mobile')await page.screenshot({path:`${base}/home-opening-${wk?'webkit':'chromium'}-${label}-${at}.png`});
     if(s.opening.complete)break;
    }
@@ -56,9 +61,20 @@ const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobi
     assert(checkpoints.at(-1).particleCount>0,'The persistent particle field remains visible in its formed state');
     assert(checkpoints.every(x=>x.opening.complete||x.particleCount>0||x.opening.elapsed<x.opening.releaseAt),'The field becomes visible after the portal and stays visible through its handoff');
    }
-   await page.waitForFunction(()=>MalGuardOpening.snapshot().complete,null,{timeout:15000});
+   // Read completion from the harness rather than depending on an in-page
+   // timer in the overloaded software compositor. Keep the real film clock
+   // and all assertions; the Retina driver deadline is not a device benchmark.
+   const completionDeadline=Date.now()+(label==='4k'?45000:15000);
+   while(!await page.evaluate(()=>MalGuardOpening.snapshot().complete)){
+    assert(Date.now()<completionDeadline,'Opening must complete within the software-driver deadline');
+    await new Promise(resolve=>setTimeout(resolve,100));
+   }
   }
-  await page.waitForFunction(()=>document.body.dataset.intro==='ready');await page.waitForFunction(()=>getComputedStyle(document.querySelector('.scene h1 .w')).opacity==='1');
+  const copyDeadline=Date.now()+30000;
+  while(!await page.evaluate(()=>document.body.dataset.intro==='ready'&&getComputedStyle(document.querySelector('.scene h1 .w')).opacity==='1')){
+   assert(Date.now()<copyDeadline,'The completed opening must release fully visible text');
+   await new Promise(resolve=>setTimeout(resolve,100));
+  }
   const final=await page.evaluate(()=>({opening:MalGuardOpening.snapshot(),particlePixelRatio:Number(document.getElementById('c').dataset.pixelRatio),particles:document.getElementById('c').dataset.introComplete,canvas:document.querySelectorAll('#home-scene canvas').length,copy: getComputedStyle(document.querySelector('.scene .t')).visibility,inert:document.querySelector('.scene .t').inert,wordOpacity:getComputedStyle(document.querySelector('.scene h1 .w')).opacity,overflow:document.documentElement.scrollWidth-innerWidth}));
   assert(final.opening.gpuReleased);assert(!final.opening.raf);assert.equal(final.canvas,0);assert.equal(final.copy,'visible');assert(!final.inert);assert.equal(final.wordOpacity,'1');assert(final.overflow<=1);assert.equal(final.particles,'true');metrics=final.opening.metrics;
   if(metrics){assert(metrics.authenticLogo);assert(metrics.drawCalls<90);assert(metrics.triangles<30000);assert(metrics.pixelRatio<=2);}
