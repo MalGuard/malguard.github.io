@@ -18,7 +18,7 @@
   // keeps the model, fallback, particles and copy in the same short sequence.
   const spinAt=3400,releaseAt=5400,gatherAt=6150,formedAt=7450;
   function state(){
-    const compact=innerWidth<=900,arrival=smooth(180,3050,elapsed);
+    const compact=innerWidth<=900,arrival=smooth(160,1900,elapsed);
     const spin=clamp((elapsed-spinAt)/(releaseAt-spinAt)),charge=spin*spin;
     // Integrated positive acceleration: angle and velocity both start at zero,
     // and speed keeps increasing until release, without a second speed jump.
@@ -32,7 +32,7 @@
       burstScale:.12+1.7*smooth(releaseAt-90,releaseAt+620,elapsed),
       handoff:smooth(releaseAt+100,releaseAt+750,elapsed),compact,
       portalX:(compact?.88:.9)+((compact?.5:.67)-(compact?.88:.9))*arrival,
-      portalY:(compact?.13:.17)+((compact?.34:.48)-(compact?.13:.17))*arrival,
+      portalY:(compact?.88:.86)+((compact?.34:.48)-(compact?.88:.86))*arrival,
       quantumTurn,quantumEnergy,charge,
       fragments:smooth(releaseAt-30,releaseAt+290,elapsed)};
   }
