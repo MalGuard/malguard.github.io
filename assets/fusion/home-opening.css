@@ -7,6 +7,7 @@
 .opening-projection{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:1}
 #home-opening.projected .opening-fallback{visibility:hidden}
 #home-opening.webgl .opening-projection{visibility:hidden}
+#home-opening::before{content:"";position:absolute;left:var(--opening-x);top:var(--opening-y);width:min(34vmin,300px);aspect-ratio:1;border-radius:50%;pointer-events:none;opacity:var(--opening-core,0);transform:translate(-50%,-50%);mix-blend-mode:screen;background:radial-gradient(circle,#f3fdff 0 1%,rgba(187,239,255,.86) 3%,rgba(78,178,255,.32) 14%,rgba(41,108,255,.10) 32%,transparent 70%)}
 #home-opening::after{content:"";position:absolute;left:var(--opening-x);top:var(--opening-y);width:min(90vmin,820px);aspect-ratio:1;border-radius:50%;pointer-events:none;opacity:var(--opening-burst,0);transform:translate(-50%,-50%) scale(var(--opening-burst-scale,.12));mix-blend-mode:screen;background:radial-gradient(circle,rgba(250,253,255,.96) 0 1.4%,rgba(168,222,255,.72) 3.5%,rgba(80,163,255,.26) 13%,rgba(48,112,255,.10) 33%,transparent 71%);filter:drop-shadow(0 0 calc(14px + var(--opening-energy,0)*38px) rgba(101,189,255,calc(var(--opening-energy,0)*.48)))}
 .opening-fallback{position:absolute;left:var(--opening-x,66%);top:var(--opening-y,45%);width:clamp(230px,36vmin,470px);aspect-ratio:1;perspective:1100px;transform:translate(-50%,-50%);opacity:1;transition:opacity .3s}
 #home-opening.webgl .opening-fallback{opacity:0}

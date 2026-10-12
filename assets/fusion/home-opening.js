@@ -19,10 +19,10 @@
   const spinAt=3400,releaseAt=5400,gatherAt=6150,formedAt=7450;
   function state(){
     const compact=innerWidth<=900,arrival=smooth(160,1900,elapsed);
-    const spin=clamp((elapsed-spinAt)/(releaseAt-spinAt)),charge=spin*spin;
+    const spin=Math.max(0,(elapsed-spinAt)/(releaseAt-spinAt)),charge=clamp(spin)*clamp(spin);
     // Integrated positive acceleration: angle and velocity both start at zero,
     // and speed keeps increasing until release, without a second speed jump.
-    const quantumTurn=Math.PI*2*3.05*spin*spin*spin;
+    const quantumTurn=Math.PI*2*3.05*(Math.pow(clamp(spin),3)+3*Math.max(0,spin-1));
     const quantumEnergy=(.2*smooth(280,1550,elapsed)+.8*charge)*(1-smooth(releaseAt,releaseAt+250,elapsed));
     const burst=smooth(releaseAt-90,releaseAt+90,elapsed)*(1-smooth(releaseAt+190,releaseAt+650,elapsed));
     return{elapsed,duration,complete,frameDelta,spinAt,releaseAt,gatherAt,formedAt,
@@ -34,6 +34,8 @@
       portalX:(compact?.88:.9)+((compact?.5:.67)-(compact?.88:.9))*arrival,
       portalY:(compact?.88:.86)+((compact?.34:.48)-(compact?.88:.86))*arrival,
       quantumTurn,quantumEnergy,charge,
+      explosionAge:Math.max(0,(elapsed-(releaseAt-30))/1000),
+      coreEnergy:smooth(releaseAt-700,releaseAt+20,elapsed)*(1-smooth(releaseAt+100,releaseAt+650,elapsed)),
       fragments:smooth(releaseAt-30,releaseAt+290,elapsed)};
   }
   function releaseRenderer(){if(renderer){lastMetrics=renderer.metrics();renderer.dispose();renderer=null;}root.classList.remove('webgl');}
@@ -56,6 +58,7 @@
     root.style.setProperty('--opening-burst',s.burst.toFixed(4));root.style.setProperty('--opening-burst-scale',s.burstScale.toFixed(4));
     root.style.setProperty('--opening-x',`${(s.portalX*100).toFixed(3)}%`);root.style.setProperty('--opening-y',`${(s.portalY*100).toFixed(3)}%`);
     root.style.setProperty('--opening-spin',`${(s.quantumTurn*180/Math.PI).toFixed(2)}deg`);root.style.setProperty('--opening-energy',s.quantumEnergy.toFixed(4));root.style.setProperty('--opening-fragments',s.fragments.toFixed(4));
+    root.style.setProperty('--opening-core',s.coreEnergy.toFixed(4));
     root.style.setProperty('--opening-caption',(smooth(1400,2400,elapsed)*(1-smooth(releaseAt-100,releaseAt+200,elapsed))).toFixed(4));
     const beat=elapsed<1700?0:elapsed<3500?1:2;
     if(beat!==caption){caption=beat;root.querySelector('.opening-ident span+span').textContent=['Establish the boundary','Bring the evidence into view','Scan smart. Play safe.'][beat];}
@@ -85,7 +88,7 @@
       const timeout=setTimeout(()=>{script.remove();reject(Error('Opening unavailable'));},3500);
       script.onerror=()=>{clearTimeout(timeout);script.remove();reject(Error('Opening unavailable'));};
       if(embedded){try{script.textContent=atob(embedded.textContent.trim());document.head.append(script);clearTimeout(timeout);resolve();}catch(e){clearTimeout(timeout);reject(e);}}
-      else{script.src='/assets/fusion/home-opening-scene.js?v=20261012-volumetric-entry';script.onload=()=>{clearTimeout(timeout);resolve();};document.head.append(script);}
+      else{script.src='/assets/fusion/home-opening-scene.js?v=20261012-mg-fracture';script.onload=()=>{clearTimeout(timeout);resolve();};document.head.append(script);}
     }).catch(e=>{scriptPromise=null;throw e;});return scriptPromise;
   }
   async function enhance(){

@@ -3,12 +3,16 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
+    "build:opening": "node tools/build-home-opening.mjs",
     "test:static": "python3 tests/validate-site.py",
     "test:experience": "node tests/experience.mjs",
     "test:motion": "node tests/motion-smoke.mjs",
     "build": "python3 tools/build-public-site.py"
   },
   "devDependencies": {
-    "playwright": "1.62.1"
+    "earcut": "3.0.2",
+    "esbuild": "0.25.10",
+    "playwright": "1.62.1",
+    "three": "0.180.0"
   }
 }
