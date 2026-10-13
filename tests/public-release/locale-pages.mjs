@@ -13,7 +13,7 @@ try{
   await page.waitForURL('https://127.0.0.1:8443/console-8d42b69fda13705cc47a.html');
   await page.waitForSelector('#siteEntryGate:not([hidden])');
   await page.locator('.site-entry-shell .mg-language select').selectOption('fa');
-  assert.ok((await page.locator('.site-entry-step h1').first().innerText()).match(/[\u0600-\u06ff]/));
+  assert.ok((await page.locator('#siteAdminPasswordStep h1').innerText()).match(/[\u0600-\u06ff]/));
   await page.locator('#siteAdminPasswordBack').click();
   await page.locator('#sitePublicEntry').click();
   await page.waitForURL('https://127.0.0.1:8443/');
