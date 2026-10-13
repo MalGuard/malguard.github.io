@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://malguard.github.io/"><picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="https://raw.githubusercontent.com/MalGuard/MalGuard/main/assets/malguard-3d-mobile-poster.png" /><source media="(max-width: 600px) and (prefers-reduced-motion: no-preference)" srcset="https://raw.githubusercontent.com/MalGuard/MalGuard/main/assets/malguard-3d-mobile.gif" /><source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/MalGuard/MalGuard/main/assets/malguard-3d-poster.png" /><img src="https://raw.githubusercontent.com/MalGuard/MalGuard/main/assets/malguard-3d.gif" alt="The original MalGuard logo in blue and cyan, rendered in 3D — Inspect before you trust." width="100%" /></picture></a>
+<a href="https://malguard.github.io/"><picture><source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="https://raw.githubusercontent.com/MalGuard/MalGuard/main/assets/malguard-light-3d-mobile-poster.png" /><source media="(max-width: 600px) and (prefers-reduced-motion: no-preference)" srcset="https://raw.githubusercontent.com/MalGuard/MalGuard/main/assets/malguard-light-3d-mobile.gif" /><source media="(prefers-reduced-motion: reduce)" srcset="https://raw.githubusercontent.com/MalGuard/MalGuard/main/assets/malguard-light-3d-poster.png" /><img src="https://raw.githubusercontent.com/MalGuard/MalGuard/main/assets/malguard-light-3d.gif" alt="The original MalGuard logo in blue and cyan, rendered in 3D — Inspect before you trust." width="100%" /></picture></a>
 
 [Website](https://malguard.github.io/) · [Documentation](https://malguard.github.io/docs.html) · [Trust Center](https://malguard.github.io/trust.html) · [Creator](https://github.com/MalGuard)
 
@@ -29,4 +29,4 @@ Explore the [live website](https://malguard.github.io/) for product information,
 
 For contributions to the security core and responsible vulnerability reporting, consult its [contribution guidelines](https://github.com/MalGuard/malguard-core/blob/main/CONTRIBUTING.md) and [security policy](https://github.com/MalGuard/malguard-core/blob/main/SECURITY.md).
 
-<p align="center"><img src="https://raw.githubusercontent.com/MalGuard/MalGuard/main/assets/footer.svg" alt="Security before trust. Evidence first. Clear limits. Better decisions." width="100%" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/MalGuard/MalGuard/main/assets/footer-light.svg" alt="Security before trust. Evidence first. Clear limits. Better decisions." width="100%" /></p>
