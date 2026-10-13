@@ -10,6 +10,7 @@ import json
 paths=[r['path'] for r in json.loads((root/'tests/unified-source-inventory.json').read_text())['routes']]
 paths += ['assets/malguard-unified.css','assets/malguard-unified.js','assets/contextual-header.js','assets/site-entry.js','assets/i18n.mjs','assets/public-release.mjs','assets/public-release-model.mjs','release/malguard-current-release.json','release/malguard-release-history.json']
 paths += [str(p.relative_to(root)) for p in (root/'assets/fusion').rglob('*') if p.is_file()]
+paths += ['assets/secure-forms.css','assets/secure-forms.js','assets/report-form.js','assets/report-proof.worker.js','assets/phone-country.js','assets/i18n-catalog.mjs','assets/flags/US.svg','assets/flags/IR.svg','assets/flags/AF.svg']
 revision = os.environ["GITHUB_SHA"]
 for path in paths:
     expected = sha256((root / path).read_bytes()).hexdigest()

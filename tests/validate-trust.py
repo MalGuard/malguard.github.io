@@ -24,7 +24,7 @@ for path,text in [
  ('download.html','Do not disable protection'),('gta-guard.html','No scanned code is executed'),
  ('gta-guard.html','Check your installed build'),('sandbox-help.html','does not upload scanned files'),
  ('app.html','/download.html#scanner'),('app.html','actual MalGuard / GTA Guard Windows scanner'),
- ('index.html','Administrator password'),('assets/public-release.mjs','JSON.stringify({code,part})'),
+ ('console-8d42b69fda13705cc47a.html','Administrator password'),('assets/public-release.mjs','JSON.stringify({code,part})'),
  ('assets/public-release.mjs',"crypto.subtle.digest('SHA-256'"),('assets/public-release-model.mjs','MAX_FILE_BYTES'),
  ('assets/public-release-model.mjs','reader.cancel()'),('assets/i18n.mjs',"document.documentElement.dir=locale==='fa'?'rtl':'ltr'"),
  ('research/repackaged-mod.html','data-malguard-back'),('ios-preview/index.html','data-malguard-back'),

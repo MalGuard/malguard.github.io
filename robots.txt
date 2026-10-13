@@ -11,3 +11,5 @@ Disallow: /malware-ai-engine-v03/
 Disallow: /malware-ai-v04/
 Disallow: /ios-preview/
 Sitemap: https://malguard.github.io/sitemap.xml
+
+Disallow: /console-8d42b69fda13705cc47a.html
