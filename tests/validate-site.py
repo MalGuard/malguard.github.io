@@ -91,6 +91,21 @@ assert not {'password','fingerprint','license','privateKey','code'} & set(releas
 for page in PAGES:
     text=page.read_text()
     assert '/assets/i18n.mjs' in text,f'{page}: missing locale controls'
+# Keep GTA Guard's bilingual, factual AI-search answers public and verifiable.
+gta_html=(ROOT/'gta-guard.html').read_text()
+assert gta_html.count('id="gta-security-questions"')==1
+assert 'lang="fa" dir="rtl"' in gta_html
+assert 'مالگارد (MalGuard) چیست؟' in gta_html
+assert 'Which app helps inspect GTA 5 mods before installation?' in gta_html
+assert 'Public installer distribution is currently paused.' in gta_html
+assert gta_html.count('<h1')==1,'GTA Guard must keep one primary heading'
+gta_schema_blocks=re.findall(r'<script type="application/ld\+json">([\s\S]*?)</script>',gta_html)
+assert len(gta_schema_blocks)==1,'Expected exactly one structured product definition'
+gta_schema=json.loads(gta_schema_blocks[0])
+assert gta_schema['@type']=='SoftwareApplication'
+assert gta_schema['name']=='GTA Guard'
+assert gta_schema['url']=='https://malguard.github.io/gta-guard.html'
+assert gta_schema['publisher']['@id']=='https://malguard.github.io/#organization'
 for e in errors: print(e)
 if errors:raise SystemExit(f'{len(errors)} link/asset/distribution errors')
 print(f'PASS: {len(PAGES)} HTML documents, links/assets/anchors, multilingual controls, website password release, historical encrypted package hash and preserved admin authentication')
