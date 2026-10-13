@@ -10,11 +10,13 @@ try{
   await context.route('**/*',r=>new URL(r.request().url()).origin==='https://127.0.0.1:8443'?r.continue():r.abort());
   const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('https://127.0.0.1:8443/#mg-console-8d42b69fda13705cc47a');
+  await page.waitForURL('https://127.0.0.1:8443/console-8d42b69fda13705cc47a.html');
   await page.waitForSelector('#siteEntryGate:not([hidden])');
   await page.locator('.site-entry-shell .mg-language select').selectOption('fa');
   assert.ok((await page.locator('.site-entry-step h1').first().innerText()).match(/[\u0600-\u06ff]/));
   await page.locator('#siteAdminPasswordBack').click();
   await page.locator('#sitePublicEntry').click();
+  await page.waitForURL('https://127.0.0.1:8443/');
   for(const path of paths){
    const start=errors.length;await page.goto('https://127.0.0.1:8443'+path);
    await page.waitForFunction(()=>document.documentElement.lang==='fa');
