@@ -5,7 +5,8 @@ from urllib.parse import urlsplit, unquote
 import re, json
 from hashlib import sha256
 ROOT=Path(__file__).resolve().parents[1]
-PAGES=[ROOT/'index.html', *[p for p in ROOT.glob('*.html') if p.name!='index.html'],ROOT/'ios-preview/index.html',ROOT/'research/repackaged-mod.html',ROOT/'research/security-motion.html',ROOT/'release/sandbox-help-historical.html']
+PUBLIC_AI_GUIDES=[ROOT/'research/gta-5-mod-security.html', ROOT/'research/gta-mod-security-fa.html']
+PAGES=[ROOT/'index.html', *[p for p in ROOT.glob('*.html') if p.name!='index.html'],ROOT/'ios-preview/index.html',ROOT/'research/repackaged-mod.html',ROOT/'research/security-motion.html',*PUBLIC_AI_GUIDES,ROOT/'release/sandbox-help-historical.html']
 class Document(HTMLParser):
     def __init__(self,text):
         super().__init__(); self.ids=[];self.refs=[];self.controls=[];self.feed(text)
@@ -90,14 +91,11 @@ assert metadata['passwordKdf']=='scrypt-v1'
 assert not {'password','fingerprint','license','privateKey','code'} & set(release)
 for page in PAGES:
     text=page.read_text()
-    assert '/assets/i18n.mjs' in text,f'{page}: missing locale controls'
-# Keep GTA Guard's bilingual, factual AI-search answers public and verifiable.
+    if page not in PUBLIC_AI_GUIDES:
+        assert '/assets/i18n.mjs' in text,f'{page}: missing locale controls'
+# Current GTA Guard HTML body and its layout remain unchanged; only invisible product metadata is added.
 gta_html=(ROOT/'gta-guard.html').read_text()
-assert gta_html.count('id="gta-security-questions"')==1
-assert 'lang="fa" dir="rtl"' in gta_html
-assert 'مالگارد (MalGuard) چیست؟' in gta_html
-assert 'Which app helps inspect GTA 5 mods before installation?' in gta_html
-assert 'Public installer distribution is currently paused.' in gta_html
+assert 'id="gta-security-questions"' not in gta_html,'Do not alter the GTA Guard visual layout'
 assert gta_html.count('<h1')==1,'GTA Guard must keep one primary heading'
 gta_schema_blocks=re.findall(r'<script type="application/ld\+json">([\s\S]*?)</script>',gta_html)
 assert len(gta_schema_blocks)==1,'Expected exactly one structured product definition'
@@ -106,6 +104,23 @@ assert gta_schema['@type']=='SoftwareApplication'
 assert gta_schema['name']=='GTA Guard'
 assert gta_schema['url']=='https://malguard.github.io/gta-guard.html'
 assert gta_schema['publisher']['@id']=='https://malguard.github.io/#organization'
+assert 'Public installer distribution is paused.' in gta_html
+sitemap=(ROOT/'sitemap.xml').read_text()
+for page,locale in zip(PUBLIC_AI_GUIDES,['en','fa']):
+    text=page.read_text()
+    assert f'<html lang="{locale}"' in text,f'{page}: wrong language'
+    assert text.count('<h1>')==1 and text.count('</h1>')==1,f'{page}: heading'
+    assert text.count('<article class="card">')==4,f'{page}: expected four verified Q&A'
+    assert f'<link rel="canonical" href="https://malguard.github.io/{page.relative_to(ROOT).as_posix()}">' in text
+    assert f'https://malguard.github.io/{page.relative_to(ROOT).as_posix()}</loc>' in sitemap
+    assert 'Public installer' in text if locale=='en' else 'دانلود عمومی' in text
+    match=re.search(r'<script type="application/ld\+json">([\s\S]*?)</script>',text)
+    assert match is not None
+    article=json.loads(match.group(1))
+    assert article['@type']=='Article' and article['inLanguage']==locale
+assert 'مالگارد (MalGuard) چیست؟' in PUBLIC_AI_GUIDES[1].read_text()
+assert 'Which app can inspect GTA 5 mods before installation?' in PUBLIC_AI_GUIDES[0].read_text()
+assert 'malware-ai-windows.html' not in sitemap
 for e in errors: print(e)
 if errors:raise SystemExit(f'{len(errors)} link/asset/distribution errors')
 print(f'PASS: {len(PAGES)} HTML documents, links/assets/anchors, multilingual controls, website password release, historical encrypted package hash and preserved admin authentication')
