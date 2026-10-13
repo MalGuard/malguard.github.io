@@ -111,3 +111,16 @@ body.motion-paused .journey-copy article{filter:none!important}
 @media(max-width:600px){.demo-warning{top:90px}}
 @media(min-width:360px) and (max-width:389px){.story-enhanced .hero-copy h1{font-size:43px;margin-block:12px}.story-enhanced .hero-copy .hero-line{font-size:19px}.story-enhanced .hero-description{font-size:11.5px;line-height:1.65;margin-top:14px}.story-enhanced .hero-actions{margin-top:18px}.story-enhanced .hero-status{margin-top:15px}.story-enhanced .journey-copy h2{margin-block:16px}.story-enhanced .journey-description{line-height:1.7}.story-enhanced .chapter-proof{margin-top:13px;padding-top:10px}.story-enhanced .journey-copy .button{margin-top:18px}}
 @media(max-height:719px){.demo-warning{top:8px}.scanner-app summary{scroll-margin-top:90px}}
+
+/* Factual, bilingual GTA Guard answers remain readable without JavaScript. */
+.gta-answers-section{border-top:1px solid #a3c7e626}
+.gta-answers-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 38px}
+.gta-answers-list article{min-width:0;border-top:1px solid #a3c7e645;padding-top:18px}
+.gta-answers-list h3{margin:0 0 12px;font-size:clamp(16px,1.7vw,21px);line-height:1.5;font-weight:600}
+.gta-answers-list p{font-size:clamp(12px,1.1vw,15px);line-height:1.85;color:#bdd0e1;overflow-wrap:anywhere}
+.gta-answers-list a{color:#d7efff;text-underline-offset:3px}
+.gta-answers-list a:focus-visible{outline:2px solid #d7efff;outline-offset:3px}
+.gta-answers-fa{margin-top:55px;padding-top:38px;border-top:1px solid #a3c7e645;text-align:right}
+.gta-answers-fa>h2{font-size:clamp(24px,3.2vw,37px);line-height:1.55;margin:0 0 28px}
+.gta-answers-fa .gta-answers-list p{line-height:2}
+@media(max-width:700px){.gta-answers-list{grid-template-columns:minmax(0,1fr);gap:23px}.gta-answers-fa{margin-top:35px;padding-top:27px}}
