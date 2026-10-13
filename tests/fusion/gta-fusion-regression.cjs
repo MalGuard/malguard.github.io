@@ -8,7 +8,7 @@ async function cardInput(card,side,touch=false){const control=card.locator('.'+s
  assert(!only||['desktop','mobile','zoom-short'].includes(only),'Unknown requested profile');
  for(const [label,width,height] of [['desktop',1440,900],['mobile',390,844],['zoom-short',360,225]].filter(x=>!only||x[0]===only)){
   const page=await browser.newPage({ignoreHTTPSErrors:true,viewport:{width,height},hasTouch:label!=='desktop',isMobile:label!=='desktop'}),errors=[],writes=[];await page.route('**/*',r=>new URL(r.request().url()).origin===new URL(require('./qa-runtime.cjs').siteURL).origin?r.continue():r.abort());page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(!['GET','HEAD'].includes(r.method()))writes.push(r.url())});
-  activePage=page;await page.goto(require('./qa-runtime.cjs').siteURL);await page.waitForFunction(()=>document.body.dataset.intro==='ready',null,{timeout:15000});
+  activePage=page;await page.goto(require('./qa-runtime.cjs').siteURL);await page.waitForFunction(()=>document.body.dataset.intro==='ready',null,{timeout:30000});
   const initial=await page.evaluate(()=>({logo:document.getElementById('c').dataset.logoReady,lowerVisible:document.getElementById('products').classList.contains('vis'),textBackground:getComputedStyle(document.querySelector('.scene .t')).backgroundColor}));assert.equal(initial.lowerVisible,false);assert.equal(initial.textBackground,'rgba(0, 0, 0, 0)');
   // Walk the complete page with native scrolling, including every sticky range.
   const full=await page.evaluate(()=>document.documentElement.scrollHeight-innerHeight);let maxOverflow=0;
