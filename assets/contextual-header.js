@@ -25,6 +25,8 @@
     ['About', 'The mission behind MalGuard', '/about.html', 'about project'],
     ['Founder', 'Mohammadreza Azardarkhash', '/founder.html', 'founder creator'],
     ['Support', 'Bug reports, false positives and feedback', '/support.html', 'support bug help'],
+    ['Report a concern', 'Send a private report to MalGuard Security', '/report.html', 'bug security report feedback'],
+    ['Project resources', 'Code guides and project policies', '/source.html', 'source policy contribute'],
     ['Downloads', 'Platform availability and verification', '/download.html', 'download install'],
     ['MalGuard App', 'Windows scanner, installation and build checks', '/app.html', 'app mac android ios linux'],
     ['Sandbox Help', 'Isolation requirements and troubleshooting', '/sandbox-help.html', 'sandbox windows errors'],
