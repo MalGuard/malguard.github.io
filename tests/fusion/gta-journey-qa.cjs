@@ -29,6 +29,8 @@ const profiles = negative ? [
   { label: 'phone-edge', width: 360, height: 800, touch: true },
   { label: 'small-tall', width: 320, height: 844, touch: true },
   { label: 'short-mobile', width: 390, height: 740, touch: true },
+  { label: 'iphone-safari', width: 390, height: 664, touch: true },
+  { label: 'iphone-se', width: 375, height: 548, touch: true },
   { label: 'small-mobile', width: 320, height: 568, touch: true },
   { label: 'landscape', width: 844, height: 390, touch: true },
   { label: 'zoom-short', width: 360, height: 225 }
@@ -254,6 +256,7 @@ async function runProfile(profile) {
     }
     if (profile.disableGL || profile.failScene) await page.waitForFunction(() => MalGuardGTA.snapshot().renderFailed, null, { timeout: 15000 });
     await page.waitForTimeout(1150);
+    await page.waitForFunction(()=>!document.querySelector('.hero-copy').getAnimations({subtree:true}).some(a=>a.playState==='running'&&a.effect.getTiming().iterations!==Infinity));
     report.hero = await composition(page, '.hero-copy');
     checkComposition(report.hero, profile, 'hero');
     if (!expectsGL && !profile.disableGL && !profile.failScene && !profile.delayScene) assert.equal(sceneRequests.length, 0, 'the heavy renderer was loaded on a fallback device');
@@ -287,6 +290,9 @@ async function runProfile(profile) {
     await page.waitForFunction(before=>scrollY>before+40,wheelBefore,{timeout:6000});
     report.nativeWheel = !(webkit&&profile.touch);report.nativePageScroll=true;report.touchSwipeLimit=webkit&&profile.touch?'Physical swipe untested; native engine scroll exercised':undefined;report.noObjectDrag = true;
     const enhanced = (await state(page)).enhanced;
+    if(profile.touch&&profile.width<=600&&profile.width>=320&&profile.height>=520&&!profile.reduced){
+      check(enhanced,'Portrait phone lost its scroll journey to the static fallback');
+    }
     report.readingHolds = [];
     if (enhanced) {
       for (const direction of ['forward', 'reverse']) {

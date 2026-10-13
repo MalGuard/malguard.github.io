@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
+    "build:gta": "node tools/build-gta-journey.mjs",
     "build:opening": "node tools/build-home-opening.mjs",
     "test:static": "python3 tests/validate-site.py",
     "test:experience": "node tests/experience.mjs",
@@ -12,6 +13,7 @@
   "devDependencies": {
     "earcut": "3.0.2",
     "esbuild": "0.25.10",
+    "gsap": "3.13.0",
     "playwright": "1.62.1",
     "three": "0.180.0"
   }

@@ -110,7 +110,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
     const controls=hero.querySelector('.intro-controls');controls.style.opacity=String(1-smooth((p-.82)/.08));controls.inert=p>=.90;
   }
   function configureStory(){
-    scrollTrigger?.kill();scrollTrigger=null;releasePortal();const minimum=innerWidth<=600?800:innerWidth<=900?1000:720;enhanced=!reduced.matches&&innerWidth>=360&&innerHeight>=minimum;
+    // Safari's visible portrait viewport is shorter than the device screen.
+    // Use the compact composition, rather than dropping the entire journey.
+    scrollTrigger?.kill();scrollTrigger=null;releasePortal();const minimum=innerWidth<=600?520:innerWidth<=900?1000:720;enhanced=!reduced.matches&&innerWidth>=320&&innerHeight>=minimum;
     document.body.classList.toggle('story-enhanced',enhanced);document.body.classList.toggle('static-story',!enhanced);
     // svh can be smaller than innerHeight when Safari's chrome is collapsed.
     if(enhanced&&stageHost.offsetHeight<minimum){enhanced=false;document.body.classList.remove('story-enhanced');document.body.classList.add('static-story');}
