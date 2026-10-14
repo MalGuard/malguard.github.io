@@ -35,7 +35,7 @@
     {
       "path": "download.html",
       "baselineSHA256": "a6e36d6d077e425bf13dc4213ccc98d52943a12f5f4e817dede91f91b580f0d8",
-      "preparedSHA256": "9892f0f477128935a0884c6367a03056670fb6961aaaeceaa45205f581e219af",
+      "preparedSHA256": "82f5cb2960b93e00b224d48c3026a7622e2b99d0a9af74dfe7c7829af19196aa",
       "surface": "preserved content and functional controls"
     },
     {
@@ -53,13 +53,13 @@
     {
       "path": "gta-guard.html",
       "baselineSHA256": "53c66d1ea8a81b968349a2f47037b25628edc69772fd5e176ca27955b26e8829",
-      "preparedSHA256": "eee31069c5bd2a4e69e5cace6aed790203a5a7861dbb4700da669a7cc1f79f40",
+      "preparedSHA256": "e5dc34ef9cc987c0f317740a322f170cc1469804c759a8294280e170c7c3391c",
       "surface": "approved Fusion"
     },
     {
       "path": "index.html",
       "baselineSHA256": "934a8d0145ace7ff47e1ce2160a903ed9fe3e05a28fedbcccd5e8a532f1acfc7",
-      "preparedSHA256": "90f1f45b2fb0b76bbb772b46be6745e8a2e6f29bbe47dce3ccf4a52716c4de99",
+      "preparedSHA256": "82e5190648dfc8286d77c9c8a80c7dea77c5ec1a174819a9182a97bce349b373",
       "surface": "approved Fusion"
     },
     {
@@ -89,7 +89,7 @@
     {
       "path": "products.html",
       "baselineSHA256": "a2c479eb8788f5ae850464815a46a003c058089e8099a0ccf00fb4eead1fa05f",
-      "preparedSHA256": "0e4b604bc9614d62f521aa8a6ef6ec61951d9c1ea5f2d022bab441c521edd69c",
+      "preparedSHA256": "97b269b17744310b06fa60ce57334740b0014d18cad4d685d9205eb9a448649d",
       "surface": "preserved content and functional controls"
     },
     {

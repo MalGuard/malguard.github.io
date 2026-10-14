@@ -1,9 +1,9 @@
-import {validateRelease, checkBuild, readBounded, readJsonBounded} from './public-release-model.mjs?v=20261008-site-password';
-import {language} from './i18n.mjs?v=20261008-site-password';
+import {validateRelease, checkBuild, readInstaller, readJsonBounded, INSTALLER_URL} from './public-release-model.mjs?v=20261014-public';
+import {language} from './i18n.mjs?v=20261014-public';
 const element = id => document.getElementById(id);
 const words = {
- en: {loading:'Checking release metadata',ready:'Enter the download password provided privately. The server verifies it before sending the installer.',unavailable:'Release details cannot be verified. Download is disabled; try again later.',authorizing:'Verifying the download password',receiving:'Receiving verified installer',verifying:'Checking SHA-256',saved:'Integrity verified. The Windows installer is ready to save.',denied:'The download password is incorrect. No installer was saved.',retry:'The service is busy or temporarily unavailable. Try again shortly.',cancelled:'Download cancelled. No partial installer was saved.',failed:'Download stopped. Network or integrity checks failed; retry from this page.',current:'This is the current build. Installation and launch require no password or device license.',older:'A newer release is available. Review the changes below and download it with your website password.',unknown:'Build not recognized. Its update status cannot be confirmed.',invalid:'Enter the complete build code shown inside MalGuard.'},
- fa: {loading:'در حال بررسی مشخصات انتشار',ready:'رمز دانلود تحویل‌شدهٔ خصوصی را وارد کنید. سرور پیش از ارسال فایل نصب، رمز را بررسی می‌کند.',unavailable:'مشخصات انتشار قابل تأیید نیست. دانلود غیرفعال است؛ بعداً دوباره امتحان کنید.',authorizing:'در حال بررسی رمز دانلود',receiving:'در حال دریافت فایل نصب',verifying:'در حال بررسی SHA-256',saved:'یکپارچگی تأیید شد. فایل نصب ویندوز آمادهٔ ذخیره است.',denied:'رمز دانلود درست نیست. هیچ فایل نصبی ذخیره نشد.',retry:'سرویس مشغول یا موقتاً در دسترس نیست. کمی بعد دوباره امتحان کنید.',cancelled:'دانلود لغو شد. فایل نصب ناقصی ذخیره نشد.',failed:'دانلود متوقف شد. بررسی شبکه یا یکپارچگی ناموفق بود؛ از همین صفحه دوباره امتحان کنید.',current:'این بیلد فعلی است. نصب و اجرای آن به رمز یا مجوز دستگاه نیاز ندارد.',older:'نسخهٔ جدید موجود است. تغییرات زیر را بخوانید و با رمز سایت دانلود کنید.',unknown:'بیلد شناخته نشد؛ وضعیت به‌روزرسانی آن قابل تأیید نیست.',invalid:'کد کامل بیلد را از داخل MalGuard وارد کنید.'}
+ en: {loading:'Checking release metadata',ready:'Download the Windows installer. No password, account or device license is required.',unavailable:'Release details cannot be verified. Download is disabled; try again later.',authorizing:'Verifying the download password',receiving:'Receiving verified installer',verifying:'Checking SHA-256',saved:'Integrity verified. The Windows installer is ready to save.',denied:'The download password is incorrect. No installer was saved.',retry:'The service is busy or temporarily unavailable. Try again shortly.',cancelled:'Download cancelled. No partial installer was saved.',failed:'Download stopped. Network or integrity checks failed; retry from this page.',current:'This is the current build. Installation and launch require no password or device license.',older:'A newer release is available. Review the changes below and download it without a password.',unknown:'Build not recognized. Its update status cannot be confirmed.',invalid:'Enter the complete build code shown inside MalGuard.'},
+ fa: {loading:'در حال بررسی مشخصات انتشار',ready:'فایل نصب ویندوز را دانلود کنید. رمز، حساب کاربری یا مجوز دستگاه لازم نیست.',unavailable:'مشخصات انتشار قابل تأیید نیست. دانلود غیرفعال است؛ بعداً دوباره امتحان کنید.',authorizing:'در حال بررسی رمز دانلود',receiving:'در حال دریافت فایل نصب',verifying:'در حال بررسی SHA-256',saved:'یکپارچگی تأیید شد. فایل نصب ویندوز آمادهٔ ذخیره است.',denied:'رمز دانلود درست نیست. هیچ فایل نصبی ذخیره نشد.',retry:'سرویس مشغول یا موقتاً در دسترس نیست. کمی بعد دوباره امتحان کنید.',cancelled:'دانلود لغو شد. فایل نصب ناقصی ذخیره نشد.',failed:'دانلود متوقف شد. بررسی شبکه یا یکپارچگی ناموفق بود؛ از همین صفحه دوباره امتحان کنید.',current:'این بیلد فعلی است. نصب و اجرای آن به رمز یا مجوز دستگاه نیاز ندارد.',older:'نسخهٔ جدید موجود است. تغییرات زیر را بخوانید و بدون رمز دانلود کنید.',unknown:'بیلد شناخته نشد؛ وضعیت به‌روزرسانی آن قابل تأیید نیست.',invalid:'کد کامل بیلد را از داخل MalGuard وارد کنید.'}
 };
 let release=null, history=[], state='loading', buildState=null, busy=false, received=0, controller=null;
 function render() {
@@ -23,29 +23,17 @@ element('cancelDownload').addEventListener('click',()=>{state='cancelled';contro
 element('downloadForm').addEventListener('submit',async event=>{
  event.preventDefault();
  if(!release||busy)return;
- // The password stays in memory for this transfer; never in a URL, storage or a log.
- let code=element('downloadPassword').value;
- if(!code.trim()){element('downloadPassword').focus();return;}
  busy=true;received=0;
- element('downloadButton').disabled=true;element('downloadPassword').disabled=true;
+ element('downloadButton').disabled=true;
  element('cancelDownload').hidden=false;
  const progress=element('downloadProgress');progress.hidden=false;progress.max=release.size;progress.value=0;
  controller=new AbortController();const totalDeadline=setTimeout(()=>controller.abort(),600000);
  let url=null;
  try{
-  const bytes=new Uint8Array(release.size);state='authorizing';render();
-  for(let part=0;part<release.partCount;part++){
-   const partDeadline=setTimeout(()=>controller.abort(),60000);
-   try{
-    const response=await fetch(release.serviceUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,part}),credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',signal:controller.signal});
-    if(response.status===403){await response.body?.cancel();throw new Error('denied');}
-    if([429,503].includes(response.status)){await response.body?.cancel();throw new Error('retry');}
-    if(!response.ok||response.headers.get('x-part-index')!==String(part)||response.headers.get('x-file-size')!==String(release.size)||response.headers.get('x-file-sha256')!==release.sha256){await response.body?.cancel();throw new Error('integrity');}
-    state='receiving';render();
-    const chunk=await readBounded(response,Math.min(release.partBytes,release.size-received));
-    bytes.set(chunk,received);received+=chunk.length;progress.value=received;render();
-   }finally{clearTimeout(partDeadline);}
-  }
+  state='receiving';render();
+  const response=await fetch(INSTALLER_URL,{method:'GET',credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer',redirect:'error',signal:controller.signal});
+  if(!response.ok){await response.body?.cancel();throw new Error('integrity');}
+  const bytes=await readInstaller(response,release.size,count=>{received=count;progress.value=count;render();});
   state='verifying';render();
   const digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(byte=>byte.toString(16).padStart(2,'0')).join('');
   if(digest!==release.sha256||controller.signal.aborted)throw new Error('integrity');
@@ -54,9 +42,9 @@ element('downloadForm').addEventListener('submit',async event=>{
   state='saved';
  }catch(error){controller.abort();if(state!=='cancelled')state=['denied','retry'].includes(error.message)?error.message:'failed';}
  finally{
-  code='';element('downloadPassword').value='';clearTimeout(totalDeadline);
+  clearTimeout(totalDeadline);
   if(url)setTimeout(()=>URL.revokeObjectURL(url),60000);
-  progress.hidden=true;busy=false;controller=null;element('cancelDownload').hidden=true;element('downloadButton').disabled=false;element('downloadPassword').disabled=false;render();
+  progress.hidden=true;busy=false;controller=null;element('cancelDownload').hidden=true;element('downloadButton').disabled=false;render();
  }
 });
 async function initialize(){
@@ -65,7 +53,7 @@ async function initialize(){
   const response=await fetch('/release/malguard-current-release.json',{cache:'no-store',credentials:'omit',signal:abort.signal});
   if(!response.ok)throw new Error('metadata');
   const verified=validateRelease(await readJsonBounded(response,20000));
-  if(verified.status!=='password-download-ready')throw new Error('metadata');
+  if(verified.status!=='public-download-ready'||verified.serviceUrl!==INSTALLER_URL)throw new Error('metadata');
   release=verified;
   const records=await fetch('/release/malguard-release-history.json',{cache:'no-store',credentials:'omit',signal:abort.signal});
   if(records.ok){history=await readJsonBounded(records,100000);if(!Array.isArray(history)||history.length>1000)throw new Error('history');}

@@ -12,6 +12,7 @@ paths += ['assets/malguard-unified.css','assets/malguard-unified.js','assets/con
 paths += [str(p.relative_to(root)) for p in (root/'assets/fusion').rglob('*') if p.is_file()]
 paths += ['assets/secure-forms.css','assets/secure-forms.js','assets/report-form.js','assets/report-proof.worker.js','assets/phone-country.js','assets/i18n-catalog.mjs','assets/flags/US.svg','assets/flags/IR.svg','assets/flags/AF.svg']
 paths += ['robots.txt','sitemap.xml','llms.txt','og-image-blue.png','og-image.png','favicon.ico','favicon-blue-96.png','favicon-blue-192.png','apple-touch-icon-blue.png']
+paths += ['release/MalGuard-Setup-x64.exe','release/MalGuard-Setup-x64.exe.sha256']
 revision = os.environ["GITHUB_SHA"]
 for path in paths:
     expected = sha256((root / path).read_bytes()).hexdigest()
@@ -38,4 +39,4 @@ for path in paths:
         if time.monotonic() >= deadline:
             raise SystemExit("Published verification failed for " + path + ": " + error)
         time.sleep(3)
-print("PASS: published pages, scripts, visuals and the current password-only release metadata match the reviewed commit")
+print("PASS: published pages, scripts, visuals, public installer and release metadata match the reviewed commit")

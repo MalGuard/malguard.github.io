@@ -35,22 +35,26 @@ release=json.loads((ROOT/'release/malguard-current-release.json').read_text())
 status=json.loads((ROOT/'data/product-status.json').read_text())['products']['gtaGuard']
 legacy=json.loads((ROOT/'release/gta-guard-windows.json').read_text())
 assert historical['status']=='public-download-ready'
-assert release['status']=='password-download-ready'
-assert release['passwordRequired'] is True and release['deviceLicenseRequired'] is False and release['installerPasswordRequired'] is False
+assert release['status']=='public-download-ready'
+assert release['passwordRequired'] is False and release['deviceLicenseRequired'] is False and release['installerPasswordRequired'] is False
 assert release['build']==f"MG-{release['version']}-WIN64-{release['sourceCommit'][:12]}"
 assert re.fullmatch('[a-f0-9]{64}',release['sha256'])
 assert 0<release['size']<=40*1024*1024
-assert release['serviceUrl']=='https://malguard-private-download.vercel.app/api/installer'
-assert release['verification']['nativeInstallChecks']==16
+assert release['serviceUrl']=='/release/MalGuard-Setup-x64.exe'
+assert release['verification']['nativeInstallChecks']==18
+assert release['verification']['linux']['passed']>=1030
+assert release['verification']['windows']['passed']>=1029
+assert release['verification']['desktopUpdateBrowserChecks']==35
 assert release['verification']['setupDeadlineChecks']==5
-assert release['verification']['passwordServiceUnitChecks']==19
+assert release['verification']['passwordServiceUnitChecks']==21
 assert release['verification']['nativeWindowsVerified'] is True
 assert release['verification']['corpusMetricsAvailable'] is False
 assert status['currentVersion']==release['version']
-assert status['distribution']['windowsX64']=='password-download-ready'
+assert status['distribution']['windowsX64']=='public-download-ready'
+assert status['distribution']['passwordRequired'] is False
 assert legacy['installer']['sha256']==release['sha256']
 assert legacy['distribution']['downloadEnabled'] is True
-assert 'type="password"' in (ROOT/'download.html').read_text()
+assert 'type="password"' not in (ROOT/'download.html').read_text()
 assert 'publicAccess: true' in (ROOT/'private-download-service/api/download.js').read_text()
 assert 'Administrator password' in (ROOT/'console-8d42b69fda13705cc47a.html').read_text()
 assert 'siteAdminPassword' not in (ROOT/'index.html').read_text()
@@ -71,13 +75,17 @@ assert sorted(p.name for p in package.parent.iterdir())==[private['filename']], 
 assert not {'password','fingerprint','license','privateKey'} & set(private)
 download=(ROOT/'download.html').read_text()
 assert private['url'] not in download
-assert 'device activation is required' in download
+assert 'Public download, installation and launch require no password or device activation.' in download
+assert 'Download paused' not in download
 assert 'sealed-installer' not in download
-assert not list((ROOT/'release').rglob('*.exe'))
+installer=ROOT/release['serviceUrl'].lstrip('/')
+assert sorted((ROOT/'release').rglob('*.exe'))==[installer], 'Only the reviewed public installer may ship'
+assert installer.stat().st_size==release['size']
+assert installer.read_bytes()[:2]==b'MZ'
+assert sha256(installer.read_bytes()).hexdigest()==release['sha256']
+assert (installer.with_suffix('.exe.sha256')).read_text()==release['sha256']+'  '+release['filename']+'\n'
 server=(ROOT/'private-download-service/installer-release.mjs').read_text()
-assert release['sha256'] in server and release['build'] in server
 metadata=json.loads(server.removeprefix('export const metadata = Object.freeze(').strip().removesuffix(');'))
-assert metadata['size']==release['size'] and metadata['sha256']==release['sha256']
 assert re.fullmatch('[a-f0-9]{64}',metadata['passwordSalt'])
 sealed=[]
 for part in metadata['parts']:
@@ -86,7 +94,7 @@ for part in metadata['parts']:
     assert len(piece)==part['size']
     sealed.append(piece)
 ciphertext=b''.join(sealed)
-assert ciphertext[:6]==b'MGDL1\x00' and len(ciphertext)==release['size']+34
+assert ciphertext[:6]==b'MGDL1\x00' and len(ciphertext)==metadata['size']+34
 assert sha256(ciphertext).hexdigest()==metadata['sealedSha256']
 assert not list((ROOT/'private-download-service').rglob('*.exe'))
 assert set(metadata)=={'filename','size','sha256','build','sealedSha256','passwordSalt','passwordKdf','parts'}
@@ -96,7 +104,7 @@ for page in PAGES:
     text=page.read_text()
     if page not in PUBLIC_AI_GUIDES:
         assert '/assets/i18n.mjs' in text,f'{page}: missing locale controls'
-# Current GTA Guard HTML body and its layout remain unchanged; only invisible product metadata is added.
+# Keep the GTA Guard layout and schema while updating public release availability.
 gta_html=(ROOT/'gta-guard.html').read_text()
 assert 'id="gta-security-questions"' not in gta_html,'Do not alter the GTA Guard visual layout'
 assert gta_html.count('<h1')==1,'GTA Guard must keep one primary heading'
@@ -107,15 +115,14 @@ assert gta_schema['@type']=='SoftwareApplication'
 assert gta_schema['name']=='GTA Guard'
 assert gta_schema['url']=='https://malguard.site/gta-guard.html'
 assert gta_schema['publisher']['@id']=='https://malguard.site/#organization'
-assert 'Public installer distribution is paused.' in gta_html
+assert 'Public Windows download is available without a password.' in gta_html
 # Machine-readable public source directory must be included in the Pages build.
 llms=(ROOT/'llms.txt').read_text(encoding='utf-8')
 assert llms.startswith('# MalGuard | Official gaming-security project')
 assert 'https://malguard.site/gta-guard.html' in llms
 assert 'https://malguard.site/research/gta-mod-security-fa.html' in llms
-assert 'The current Windows x64 preview installer requires password verification' in llms
-assert 'unrestricted public installer distribution is paused' in llms
-assert release['passwordRequired'] is True and release['status']=='password-download-ready'
+assert 'The current Windows x64 preview installer is available without a password' in llms
+assert release['passwordRequired'] is False and release['status']=='public-download-ready'
 assert not any(x in llms for x in ['/console-8d42b69fda13705cc47a.html', '/private-download-service/', '/release/private/'])
 assert "'llms.txt'" in (ROOT/'tools/build-public-site.py').read_text()
 sitemap=(ROOT/'sitemap.xml').read_text()
@@ -152,4 +159,4 @@ assert canonical_base in (ROOT/'llms.txt').read_text()
 
 for e in errors: print(e)
 if errors:raise SystemExit(f'{len(errors)} link/asset/distribution errors')
-print(f'PASS: {len(PAGES)} HTML documents, links/assets/anchors, multilingual controls, website password release, historical encrypted package hash and preserved admin authentication')
+print(f'PASS: {len(PAGES)} HTML documents, links/assets/anchors, multilingual controls, public installer size/SHA-256, historical encrypted package hash and preserved admin authentication')

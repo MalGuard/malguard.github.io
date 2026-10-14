@@ -17,5 +17,6 @@ for name in ['assets','release','data','ios-preview','research']:
 shutil.copy2(root/'.well-known/security.txt',out/'.well-known/security.txt')
 for forbidden in ['api','private-download-service','tests','tools','.git','node_modules','agent-runtime-test-v1','malware-ai-preview-v02']:
  assert not (out/forbidden).exists(),forbidden+' must never be a Pages artifact'
-assert not list(out.rglob('*.exe')),'An installer must not become a public direct download'
+release=json.loads((root/'release/malguard-current-release.json').read_text())
+assert sorted(out.rglob('*.exe'))==[out/release['serviceUrl'].lstrip('/')], 'Only the reviewed public installer may ship'
 print(f'PASS build: {len(routes)} public HTML routes; public assets only; server and test sources excluded.')

@@ -2,62 +2,67 @@
   "schemaVersion": "1.0.0",
   "product": "MalGuard clean-room static scanner",
   "platform": "windows-x64",
-  "version": "1.3.1",
-  "engineVersion": "1.2.1",
-  "build": "MG-1.3.1-WIN64-22511e787034",
-  "sourceCommit": "22511e7870347733b982262eb9efe7f1430a0f4e",
+  "version": "1.3.2",
+  "engineVersion": "1.2.2",
+  "build": "MG-1.3.2-WIN64-c9a9d39f2395",
+  "sourceCommit": "c9a9d39f239518d423366f1108d387ca98c83979",
   "filename": "MalGuard-Setup-x64.exe",
-  "size": 34254848,
-  "sha256": "c0c2bf7b4121ae091d75bb13feedd0c80fa45dd6a53d4ea8021b8705ebff945d",
+  "size": 34295808,
+  "sha256": "9f843bd23ad267bdbf96111a219be75ee5ed68e7b85304ef36d710fb4582621d",
   "installerFormat": "IExpress-PowerShell",
   "authenticodeSigned": false,
   "partBytes": 3145728,
   "partCount": 11,
-  "serviceUrl": "https://malguard-private-download.vercel.app/api/installer",
-  "status": "password-download-ready",
-  "passwordRequired": true,
+  "serviceUrl": "/release/MalGuard-Setup-x64.exe",
+  "status": "public-download-ready",
+  "passwordRequired": false,
   "deviceLicenseRequired": false,
   "installerPasswordRequired": false,
   "changes": {
     "en": [
+      "Public Windows download without a password or device restriction. One-click signed threat updates with real progress and exact new/already-present hash counts.",
       "Content-based file type, size, bounded preview and specific unsupported/malformed explanations.",
       "Actual scan stages, circular light animation and a 0–100 needle gauge; unsupported input has unknown risk.",
       "Reversible evidence card with PNG and full JSON download.",
       "Stronger bounded static analysis, signed intelligence and English/Persian interface.",
-      "Visible installation stages and bounded engine waits; website password only, without archive or device restrictions."
+      "Visible installation stages and bounded engine waits; unrestricted public download, installation and launch."
     ],
     "fa": [
+      "دانلود عمومی ویندوز بدون رمز یا محدودیت دستگاه؛ دریافت اطلاعات جدید با یک دکمه، پیشرفت واقعی و شمارش دقیق هش‌های تازه و ازقبل‌موجود.",
       "تشخیص نوع واقعی فایل، اندازه، پیش‌نمایش محدود و توضیح دقیق فایل پشتیبانی‌نشده یا معیوب.",
       "مرحله‌های واقعی اسکن، حلقهٔ نور و عقربهٔ ریسک صفر تا صد؛ ریسک فایل پشتیبانی‌نشده نامشخص است.",
       "کارت شواهد با قابلیت برگرداندن، دانلود PNG و گزارش کامل JSON.",
       "تحلیل ایستای محدود تقویت‌شده، اطلاعات تهدید امضاشده و رابط انگلیسی/فارسی.",
-      "مرحله‌های قابل مشاهدهٔ نصب و انتظار محدود موتور؛ رمز فقط پیش از دانلود در سایت، بدون محدودیت دستگاه یا رمز بسته."
+      "مرحله‌های قابل مشاهدهٔ نصب و انتظار محدود موتور؛ دانلود عمومی، نصب و اجرا بدون رمز یا محدودیت دستگاه."
     ]
   },
   "onlineUpdates": {
     "configured": true,
     "windowsClientVerified": true,
-    "verifiedRecords": 1680,
-    "verifiedEpoch": 37743664029001
+    "verifiedRecords": 2693,
+    "verifiedEpoch": 38120797600001
   },
   "verification": {
     "installedSyntheticFixtures": 6,
     "linux": {
-      "passed": 1006,
+      "passed": 1030,
       "skipped": 1
     },
     "windows": {
-      "passed": 1005,
+      "passed": 1029,
       "skipped": 2
     },
-    "nativeInstallChecks": 16,
+    "nativeInstallChecks": 18,
     "setupDeadlineChecks": 5,
     "desktopBrowserChecks": 57,
-    "passwordServiceUnitChecks": 19,
+    "passwordServiceUnitChecks": 21,
     "nativeWindowsVerified": true,
     "windows10_11LaptopVerified": false,
     "corpusMetricsAvailable": false,
     "aiAdapterConfigured": false,
-    "windowsRunId": "37783511896"
+    "windowsRunId": "38172511467",
+    "desktopUpdateBrowserChecks": 35,
+    "publicDownloadBrowserChecks": 36,
+    "publicReleaseModelChecks": 24
   }
 }

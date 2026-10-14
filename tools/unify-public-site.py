@@ -101,9 +101,9 @@ for page in page_paths:
  text=text.replace('>Windows download →','>Windows availability →')
  if name=='download.html':
   text=text.replace('The scanner. Ready for your next mod.','Preview status. Evidence before installation.')
-  text=text.replace('<main id="main">','<main id="main"><aside class="notice container" id="public-download-status" style="margin-top:110px"><strong>Download paused.</strong> Public installer distribution remains paused. Existing authorized preview testers can use password-protected access below. No public installer link is offered.</aside>',1)
+  text=text.replace('<main id="main">','<main id="main"><aside class="notice container" id="public-download-status" style="margin-top:110px"><strong>Public download available.</strong> MalGuard is available to everyone without a download password or device restriction.</aside>',1)
  if name=='products.html':
-  text=text.replace('<span>Windows scanner</span>','<span>Download paused</span>')
+  text=text.replace('<span>Windows scanner</span>','<span>Download available</span>')
  if name=='game-scam-guard.html':
   text=text.replace('<h1>Game Scam Guard</h1>','<h1>Game Scam Guard</h1><p class="notice">In development. No public release yet.</p>')
   text=text.replace('<head>', '<head><link rel="canonical" href="https://malguard.site/game-scam-guard.html">',1)

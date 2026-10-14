@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {validateRelease, checkBuild, readBounded, readJsonBounded, SERVICE_URL, PART_BYTES, MAX_FILE_BYTES} from '../../assets/public-release-model.mjs';
+import {validateRelease, checkBuild, readBounded, readInstaller, readJsonBounded, SERVICE_URL, INSTALLER_URL, PART_BYTES, MAX_FILE_BYTES} from '../../assets/public-release-model.mjs';
 // Synthetic metadata is deliberately never published as a real release.
 const fixture = () => ({schemaVersion:'1.0.0',platform:'windows-x64',status:'public-download-ready',serviceUrl:SERVICE_URL,filename:'MalGuard-Setup-x64.exe',version:'1.2.0',engineVersion:'1.1.0',build:'MG-1.2.0-WIN64-aaaaaaaaaaaa',sourceCommit:'a'.repeat(40),sha256:'b'.repeat(64),size:3,partBytes:PART_BYTES,partCount:1,changes:{en:['Synthetic test'],fa:['آزمون مصنوعی']}});
 test('validated release retains immutable bilingual changes',()=>{const input=fixture(),result=validateRelease(input);input.changes.en.push('changed');assert.equal(result.changes.en.length,1);assert.ok(Object.isFrozen(result));});
@@ -15,4 +15,23 @@ test('password release permits only the reviewed server and unrestricted install
  const gated={...fixture(),status:'password-download-ready',serviceUrl:'https://malguard-private-download.vercel.app/api/installer',passwordRequired:true,deviceLicenseRequired:false,installerPasswordRequired:false};
  assert.equal(validateRelease(gated).status,'password-download-ready');
  for(const change of [{serviceUrl:SERVICE_URL},{passwordRequired:false},{deviceLicenseRequired:true},{installerPasswordRequired:true},{serviceUrl:gated.serviceUrl+'?code=public'}])assert.throws(()=>validateRelease({...gated,...change}));
+});
+test('public static installer requires the fixed path and unrestricted release flags',()=>{
+ const release={...fixture(),serviceUrl:INSTALLER_URL,passwordRequired:false,deviceLicenseRequired:false,installerPasswordRequired:false};
+ assert.equal(validateRelease(release).serviceUrl,INSTALLER_URL);
+ for(const change of [{serviceUrl:INSTALLER_URL+'?password=x'},{passwordRequired:true},{deviceLicenseRequired:true},{installerPasswordRequired:true}])assert.throws(()=>validateRelease({...release,...change}));
+});
+test('public file reader reports real bytes and supports a complete installer above the old part limit',async()=>{
+ const bytes=new Uint8Array(PART_BYTES+101);bytes.fill(84);
+ const seen=[];
+ const stream=new ReadableStream({start(c){c.enqueue(bytes.subarray(0,512));c.enqueue(bytes.subarray(512));c.close();}});
+ assert.deepEqual(await readInstaller(new Response(stream),bytes.length,n=>seen.push(n)),bytes);
+ assert.deepEqual(seen,[512,bytes.length]);
+});
+test('public file reader rejects truncation and cancels overflow before offering a download',async()=>{
+ await assert.rejects(readInstaller(new Response(new Uint8Array(3)),4));
+ let cancelled=false;
+ const stream=new ReadableStream({start(c){c.enqueue(new Uint8Array(5));},cancel(){cancelled=true;}});
+ await assert.rejects(readInstaller(new Response(stream),4));assert.ok(cancelled);
+ await assert.rejects(readInstaller(new Response('x'),MAX_FILE_BYTES+1));
 });

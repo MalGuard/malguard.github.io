@@ -1,5 +1,6 @@
 export const SERVICE_URL = 'https://malguard-private-download.vercel.app/api/download';
 export const PASSWORD_SERVICE_URL = 'https://malguard-private-download.vercel.app/api/installer';
+export const INSTALLER_URL = '/release/MalGuard-Setup-x64.exe';
 export const MAX_FILE_BYTES = 40 * 1024 * 1024;
 export const PART_BYTES = 3 * 1024 * 1024;
 const version = /^\d{1,3}\.\d{1,3}\.\d{1,3}$/;
@@ -9,7 +10,9 @@ export function validateRelease(data) {
   if (!data || typeof data !== 'object' || Array.isArray(data) ||
       !['schemaVersion','platform','status','serviceUrl','filename','version','engineVersion','build','sourceCommit','sha256'].every(key => typeof data[key] === 'string') ||
       data.schemaVersion !== '1.0.0' || data.platform !== 'windows-x64' ||
-      !((data.status === 'public-download-ready' && data.serviceUrl === SERVICE_URL) ||
+      !((data.status === 'public-download-ready' && (data.serviceUrl === SERVICE_URL ||
+         (data.serviceUrl === INSTALLER_URL && data.passwordRequired === false &&
+          data.deviceLicenseRequired === false && data.installerPasswordRequired === false))) ||
         (data.status === 'password-download-ready' && data.serviceUrl === PASSWORD_SERVICE_URL &&
          data.passwordRequired === true && data.deviceLicenseRequired === false && data.installerPasswordRequired === false)) ||
       data.filename !== 'MalGuard-Setup-x64.exe' || !version.test(data.version || '') ||
@@ -35,7 +38,13 @@ export function checkBuild(input, latest, history) {
   return history.some(item => item && item.build === normalized && item.supersededBy === latest.build) ? 'older' : 'unknown';
 }
 export async function readBounded(response, expected) {
-  if (!response.body || !Number.isSafeInteger(expected) || expected < 1 || expected > PART_BYTES) throw new Error('integrity');
+  return readBytes(response, expected, PART_BYTES, () => {});
+}
+export async function readInstaller(response, expected, onProgress = () => {}) {
+  return readBytes(response, expected, MAX_FILE_BYTES, onProgress);
+}
+async function readBytes(response, expected, maximum, onProgress) {
+  if (!response.body || !Number.isSafeInteger(expected) || expected < 1 || expected > maximum) throw new Error('integrity');
   const reader = response.body.getReader();
   const bytes = new Uint8Array(expected);
   let position = 0;
@@ -46,6 +55,7 @@ export async function readBounded(response, expected) {
       if (!(value instanceof Uint8Array) || position + value.length > expected) throw new Error('integrity');
       bytes.set(value, position);
       position += value.length;
+      onProgress(position);
     }
     if (position !== expected) throw new Error('integrity');
     return bytes;

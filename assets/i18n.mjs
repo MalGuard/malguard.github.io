@@ -1,4 +1,4 @@
-import {translations} from './i18n-catalog.mjs?v=20261013-secure-pages';
+import {translations} from './i18n-catalog.mjs?v=20261014-public';
 
 let locale='en';
 try {if(localStorage.getItem('malguard-language')==='fa')locale='fa';} catch {}
