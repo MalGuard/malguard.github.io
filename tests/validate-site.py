@@ -113,7 +113,9 @@ llms=(ROOT/'llms.txt').read_text(encoding='utf-8')
 assert llms.startswith('# MalGuard | Official gaming-security project')
 assert 'https://malguard.github.io/gta-guard.html' in llms
 assert 'https://malguard.github.io/research/gta-mod-security-fa.html' in llms
-assert 'Public GTA Guard installer distribution is currently paused' in llms
+assert 'The current Windows x64 preview installer requires password verification' in llms
+assert 'unrestricted public installer distribution is paused' in llms
+assert release['passwordRequired'] is True and release['status']=='password-download-ready'
 assert not any(x in llms for x in ['/console-8d42b69fda13705cc47a.html', '/private-download-service/', '/release/private/'])
 assert "'llms.txt'" in (ROOT/'tools/build-public-site.py').read_text()
 sitemap=(ROOT/'sitemap.xml').read_text()
