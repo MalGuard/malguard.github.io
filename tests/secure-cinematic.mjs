@@ -26,6 +26,8 @@ for(const engine of engines){
     assert(await page.evaluate(()=>MalGuardSecureMotion.snapshot().activeAnimations>0));
     assert(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth<=1));
     const title=await page.locator('.secure-story h1').boundingBox(),nav=await page.locator('#navbar').boundingBox();assert(title.y>=nav.y+nav.height);
+    const language=page.locator('.mg-language select').first();await language.selectOption('fa');await page.waitForFunction(()=>document.documentElement.dir==='rtl'&&document.querySelector('.secure-start span').textContent.startsWith('شروع'));
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth<=1));await language.selectOption('en');await page.waitForFunction(()=>document.documentElement.lang==='en'&&document.querySelector('.secure-start span').textContent.startsWith('Start'));
     await page.locator('.secure-start').focus();await page.keyboard.press('Enter');
     await page.locator('#motionToggle').click();assert(await page.evaluate(()=>MalGuardSecureMotion.snapshot().paused));
     await page.waitForFunction(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).every(a=>a.playState==='paused'&&!a.pending));
