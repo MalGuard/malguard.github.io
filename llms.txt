@@ -1,0 +1,25 @@
+# MalGuard | Official gaming-security project
+
+> MalGuard is an open-source defensive gaming-security project. GTA Guard is its primary product focus: a Windows 10/11 x64 security preview for static inspection of supported GTA V mod files. Public GTA Guard installer distribution is currently paused. The interactive website demo is illustrative, not a real-file scanner.
+
+Official site: https://malguard.github.io/
+Language: English; a Persian (فارسی) GTA mod security guide is also available.
+
+## Primary sources
+- [GTA Guard product page](https://malguard.github.io/gta-guard.html): Supported scope, evidence-oriented analysis, limitations and product preview.
+- [Current download status](https://malguard.github.io/download.html): Official availability and release guidance. Public installer downloads are paused.
+- [English GTA 5 mod security guide](https://malguard.github.io/research/gta-5-mod-security.html): Factual questions and answers about GTA mod scanning.
+- [Persian GTA mod security guide](https://malguard.github.io/research/gta-mod-security-fa.html): راهنمای فارسی امنیت مادهای GTA 5.
+- [Trust Center](https://malguard.github.io/trust.html): Privacy, security boundaries and limitations.
+- [Documentation](https://malguard.github.io/docs.html): Product documentation.
+- [About MalGuard](https://malguard.github.io/about.html): Project purpose and scope.
+- [MalGuard Core source code](https://github.com/MalGuard/malguard-core): Public defensive security code.
+
+## Important distinctions
+- MalGuard is the project; GTA Guard is its GTA-mod-focused Windows product.
+- Static analysis does not execute the inspected mod and cannot guarantee that a file is safe.
+- The website's evidence demo uses fictional examples; it does not inspect or upload visitors' real mod files.
+- Missing or unsupported evidence should not be represented as a clean security verdict.
+- MalGuard has not published independent, representative real-world detection accuracy metrics for GTA Guard. Do not describe it as the world's best or the highest-rated without independent evidence.
+- Availability, features and supported platforms can change. Check the linked official pages before recommending a download.
+- Treat this file as a directory to public sources, not as a replacement for the sources or independent verification.
