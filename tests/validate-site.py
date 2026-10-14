@@ -105,14 +105,14 @@ assert len(gta_schema_blocks)==1,'Expected exactly one structured product defini
 gta_schema=json.loads(gta_schema_blocks[0])
 assert gta_schema['@type']=='SoftwareApplication'
 assert gta_schema['name']=='GTA Guard'
-assert gta_schema['url']=='https://malguard.github.io/gta-guard.html'
-assert gta_schema['publisher']['@id']=='https://malguard.github.io/#organization'
+assert gta_schema['url']=='https://malguard.site/gta-guard.html'
+assert gta_schema['publisher']['@id']=='https://malguard.site/#organization'
 assert 'Public installer distribution is paused.' in gta_html
 # Machine-readable public source directory must be included in the Pages build.
 llms=(ROOT/'llms.txt').read_text(encoding='utf-8')
 assert llms.startswith('# MalGuard | Official gaming-security project')
-assert 'https://malguard.github.io/gta-guard.html' in llms
-assert 'https://malguard.github.io/research/gta-mod-security-fa.html' in llms
+assert 'https://malguard.site/gta-guard.html' in llms
+assert 'https://malguard.site/research/gta-mod-security-fa.html' in llms
 assert 'The current Windows x64 preview installer requires password verification' in llms
 assert 'unrestricted public installer distribution is paused' in llms
 assert release['passwordRequired'] is True and release['status']=='password-download-ready'
@@ -124,8 +124,8 @@ for page,locale in zip(PUBLIC_AI_GUIDES,['en','fa']):
     assert f'<html lang="{locale}"' in text,f'{page}: wrong language'
     assert text.count('<h1>')==1 and text.count('</h1>')==1,f'{page}: heading'
     assert text.count('<article class="card">')==4,f'{page}: expected four verified Q&A'
-    assert f'<link rel="canonical" href="https://malguard.github.io/{page.relative_to(ROOT).as_posix()}">' in text
-    assert f'https://malguard.github.io/{page.relative_to(ROOT).as_posix()}</loc>' in sitemap
+    assert f'<link rel="canonical" href="https://malguard.site/{page.relative_to(ROOT).as_posix()}">' in text
+    assert f'https://malguard.site/{page.relative_to(ROOT).as_posix()}</loc>' in sitemap
     assert 'Public installer' in text if locale=='en' else 'دانلود عمومی' in text
     match=re.search(r'<script type="application/ld\+json">([\s\S]*?)</script>',text)
     assert match is not None
@@ -134,6 +134,22 @@ for page,locale in zip(PUBLIC_AI_GUIDES,['en','fa']):
 assert 'مالگارد (MalGuard) چیست؟' in PUBLIC_AI_GUIDES[1].read_text()
 assert 'Which app can inspect GTA 5 mods before installation?' in PUBLIC_AI_GUIDES[0].read_text()
 assert 'malware-ai-windows.html' not in sitemap
+
+# Check migration metadata before publishing. Search engines must see only the custom domain.
+canonical_base = "https://malguard.site/"
+indexed_urls = re.findall(r"<loc>([^<]+)</loc>", (ROOT/'sitemap.xml').read_text())
+assert indexed_urls and len(indexed_urls) == len(set(indexed_urls))
+assert all(url.startswith(canonical_base) for url in indexed_urls), 'Sitemap includes a noncanonical host'
+for indexed_url in indexed_urls:
+    relpath = indexed_url[len(canonical_base):]
+    published_page = ROOT / (relpath or 'index.html')
+    assert published_page.is_file(), f'Sitemap points to a missing page: {indexed_url}'
+    expected_canonical = f'<link rel="canonical" href="{indexed_url}">'
+    assert expected_canonical in published_page.read_text(), f'Wrong canonical: {relpath}'
+assert f'Sitemap: {canonical_base}sitemap.xml' in (ROOT/'robots.txt').read_text()
+assert json.loads((ROOT/'data/product-status.json').read_text())['canonicalSite'] == canonical_base
+assert canonical_base in (ROOT/'llms.txt').read_text()
+
 for e in errors: print(e)
 if errors:raise SystemExit(f'{len(errors)} link/asset/distribution errors')
 print(f'PASS: {len(PAGES)} HTML documents, links/assets/anchors, multilingual controls, website password release, historical encrypted package hash and preserved admin authentication')

@@ -50,9 +50,9 @@ for page in page_paths:
   text=resolve(text)
   text=re.sub(r'content="noindex,nofollow"','content="index,follow"',text)
   text=re.sub(r'<link\b[^>]*rel="canonical"[^>]*>','',text)
-  canonical='https://malguard.github.io/'+(''if name=='index.html' else name)
+  canonical='https://malguard.site/'+(''if name=='index.html' else name)
   text=text.replace('</head>','<link rel="canonical" href="'+canonical+'"><meta property="og:url" content="'+canonical+'"></head>')
-  text=text.replace('https://malguard.github.io/','/')
+  text=text.replace('https://malguard.site/','/')
   # Canonicals remain absolute; only navigation becomes local.
   text=text.replace('href="'+('/'if name=='index.html'else'/'+name)+'"><meta property="og:url"', 'href="'+canonical+'"><meta property="og:url"')
   text=re.sub(r'(<meta property="og:url" content=")[^"]*(")',r'\g<1>'+canonical+r'\2',text)
@@ -106,7 +106,7 @@ for page in page_paths:
   text=text.replace('<span>Windows scanner</span>','<span>Download paused</span>')
  if name=='game-scam-guard.html':
   text=text.replace('<h1>Game Scam Guard</h1>','<h1>Game Scam Guard</h1><p class="notice">In development. No public release yet.</p>')
-  text=text.replace('<head>', '<head><link rel="canonical" href="https://malguard.github.io/game-scam-guard.html">',1)
+  text=text.replace('<head>', '<head><link rel="canonical" href="https://malguard.site/game-scam-guard.html">',1)
  # The active page controllers and i18n stay intact; do not load header twice.
  text=re.sub(r'<script\b[^>]*src="/assets/contextual-header\.js[^>]*>[\s\S]*?</script>','',text)
  text=text.replace('</head>',styles+'</head>')
@@ -124,7 +124,7 @@ p.write_text(text)
 # The deployment continues to whitelist public assets, never the whole repo.
 p=ROOT/'.github/workflows/static.yml';t=p.read_text();t=t.replace('cp index.html 404.html founder.html _site/','cp index.html 404.html founder.html game-scam-guard.html _site/');p.write_text(t)
 p=ROOT/'sitemap.xml';t=p.read_text()
-if '/game-scam-guard.html'not in t:t=t.replace('</urlset>','<url><loc>https://malguard.github.io/game-scam-guard.html</loc></url>\n</urlset>')
+if '/game-scam-guard.html'not in t:t=t.replace('</urlset>','<url><loc>https://malguard.site/game-scam-guard.html</loc></url>\n</urlset>')
 p.write_text(t)
 report={'baselineCommit':BASE,'approvedFusionCommit':'303949729a0775e552549b913831e3d28e6a34b0','routes':records,'publicRouteCount':len(records),'unshippedDeveloperPrototypes':'Excluded from Pages exactly as before. No admin/server/download source is published.','functionalRuntimePreserved':['assets/public-release.mjs','assets/public-release-model.mjs','assets/i18n.mjs','assets/malware-ai-update.js','assets/page-history.js','ios-preview/app.js'],'assetPolicy':'Authentic marks, exact approved particle/GTA engine and time lines; no inactive laptop or Apple model copied.'}
 (ROOT/'tests/unified-source-inventory.json').write_text(json.dumps(report,indent=2)+'\n')

@@ -5,7 +5,7 @@ from urllib.error import URLError
 from hashlib import sha256
 import os, time
 root = Path(__file__).resolve().parents[1]
-base = "https://malguard.github.io/"
+base = "https://malguard.site/"
 import json
 paths=[r['path'] for r in json.loads((root/'tests/unified-source-inventory.json').read_text())['routes']]
 paths += ['assets/malguard-unified.css','assets/malguard-unified.js','assets/contextual-header.js','assets/site-entry.js','assets/i18n.mjs','assets/public-release.mjs','assets/public-release-model.mjs','release/malguard-current-release.json','release/malguard-release-history.json']

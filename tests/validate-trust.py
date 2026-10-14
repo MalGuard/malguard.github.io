@@ -14,7 +14,7 @@ for path,text in [
  ('trust.html','security.txt'),('trust.html','Unsigned preview'),
  ('scan-mods.html','Scan Mods'),('ai-intelligence.html','AI Intelligence'),
  ('ai-intelligence.html','href="/malware-ai.html">Open Malware AI'),
- ('malware-ai.html','Open Windows Preview'),('malware-ai.html','rel="canonical" href="https://malguard.github.io/malware-ai.html"'),
+ ('malware-ai.html','Open Windows Preview'),('malware-ai.html','rel="canonical" href="https://malguard.site/malware-ai.html"'),
  ('malware-ai.html','"@type": "WebApplication"'),
  ('malware-ai-windows.html','Enter to send'),('malware-ai-windows.html','unicode-bidi:plaintext'),
  ('malware-ai-windows.html','dir="auto"'),('malware-ai-windows.html','applyTextDirection'),

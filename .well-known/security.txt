@@ -1,6 +1,6 @@
 Contact: mailto:malguard.security@gmail.com
-Contact: https://malguard.github.io/report.html?kind=security
-Policy: https://malguard.github.io/security-policy.html
-Canonical: https://malguard.github.io/.well-known/security.txt
+Contact: https://malguard.site/report.html?kind=security
+Policy: https://malguard.site/security-policy.html
+Canonical: https://malguard.site/.well-known/security.txt
 Preferred-Languages: en, fa
 Expires: 2027-09-21T00:00:00.000Z
