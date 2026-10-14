@@ -37,6 +37,8 @@ body.motion-paused .hero-reveal{animation:none!important;opacity:1!important;fil
 .scanner-app{overflow:clip}
 .demo-warning{position:sticky;top:110px;z-index:5;background:#101d2d}
 
+.hero-actions .action-label-compact{display:none}
+@media(max-width:600px){.hero-actions .action-label-full{display:none}.hero-actions .action-label-compact{display:inline}.hero-actions{gap:8px}.hero-actions .button{padding-inline:12px}}
 /* Evidence gateway. One sticky stage, one world and one live HTML panel. */
 .game-context{position:absolute;left:7vw;top:131px;z-index:3;display:flex;align-items:center;gap:23px}.game-context img{width:150px;height:auto;display:block}.game-context>span{font:8px 'JetBrains Mono',monospace;letter-spacing:.12em;color:#9bb8d1}
 .city-fallback{position:absolute;left:-65px;right:-65px;top:-140px;height:230px;display:flex;gap:20px;align-items:flex-end;justify-content:center;opacity:var(--city-opacity,0);transform:perspective(900px) rotateX(12deg);pointer-events:none}
