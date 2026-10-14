@@ -183,9 +183,17 @@
     {
       "path": "core-guide.html",
       "surface": "Native project resource or reporting page"
+    },
+    {
+      "path": "research/gta-5-mod-security.html",
+      "surface": "Reviewed bilingual GTA mod security guide"
+    },
+    {
+      "path": "research/gta-mod-security-fa.html",
+      "surface": "Reviewed bilingual GTA mod security guide"
     }
   ],
-  "publicRouteCount": 25,
+  "publicRouteCount": 35,
   "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
   "functionalRuntimePreserved": [
     "assets/public-release.mjs",
