@@ -56,7 +56,7 @@
 .secure-page[data-secure-state=success]{--vault-state:#b4efd8}.secure-page[data-secure-state=success] .vault-core img{opacity:0}.secure-page[data-secure-state=success] .vault-approval{opacity:1;stroke-dashoffset:0;transition:stroke-dashoffset .5s ease,opacity .25s}
 .secure-page[data-secure-state=error]{--vault-state:#edba8b}.secure-page[data-secure-state=error] .secure-panel{border-color:#d0a17977}
 .secure-page .secure-result:empty{display:none}.secure-page .secure-result.success{background:#0c2422;border-color:#91d8c255}.secure-page .secure-result.error{background:#251c16}
-.secure-page.secure-motion-stopped *,.secure-page.secure-motion-stopped *::before,.secure-page.secure-motion-stopped *::after,html.motion-paused .secure-page *,html.motion-paused .secure-page *::before,html.motion-paused .secure-page *::after,html.page-hidden .secure-page *,html.page-hidden .secure-page *::before,html.page-hidden .secure-page *::after{animation-play-state:paused!important}
+.secure-page.secure-motion-stopped *,.secure-page.secure-motion-stopped *::before,.secure-page.secure-motion-stopped *::after,html.motion-paused .secure-page *,html.motion-paused .secure-page *::before,html.motion-paused .secure-page *::after,html.page-hidden .secure-page *,html.page-hidden .secure-page *::before,html.page-hidden .secure-page *::after{animation-play-state:paused!important;transition:none!important}
 @keyframes vault-route{to{stroke-dashoffset:-100}}
 @keyframes vault-breathe{0%,100%{transform:translateY(0) rotateX(12deg) rotateY(-25deg)}50%{transform:translateY(-9px) rotateX(14deg) rotateY(-21deg)}}
 @keyframes vault-rail{0%,100%{transform:translateX(0);opacity:.25}50%{transform:translateX(100px);opacity:.9}}

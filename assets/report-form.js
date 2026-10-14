@@ -31,7 +31,7 @@
    const response=await fetch(endpoint,{method:'POST',mode:'cors',cache:'no-store',headers:{'content-type':'application/json'},signal:AbortSignal.timeout(15000),body:JSON.stringify(pending.body)});let data={};try{data=await response.json()}catch{}
    if(!response.ok||data.ok!==true||data.status!=='accepted')throw Error(response.status===429?'RATE_LIMITED':data.code||'UNCONFIRMED');
    notice(text(`Your report was accepted by the email service for malguard.security@gmail.com. Thank you.\nReference: ${data.reference}`,`گزارش شما برای ارسال به malguard.security@gmail.com توسط سرویس ایمیل پذیرفته شد. سپاس.\nکد پیگیری: ${data.reference}`),false,true);
-   form.reset();if(requestedKind)document.getElementById('reportKind').value=payload.kind;updateCount();pending=null;document.body.classList.add('report-sent');motion('success');
+   form.reset();document.getElementById('reportKind').value=payload.kind;updateCount();pending=null;document.body.classList.add('report-sent');motion('success');
   }catch(error){
    const rate=error.message==='RATE_LIMITED',expired=error.message==='PROOF_REQUIRED';if(expired)pending=null;
    notice(rate?text('Please wait a few minutes before sending another report. Your text is preserved.','لطفاً چند دقیقه پیش از ارسال دوباره صبر کنید. متن شما حفظ شده است.'):text('Sending could not be confirmed. Your text is preserved. Please retry.','ارسال تأیید نشد. متن شما حفظ شده است؛ لطفاً دوباره تلاش کنید.'),true);

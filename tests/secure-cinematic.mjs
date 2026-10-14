@@ -5,7 +5,7 @@ const base=process.env.MALGUARD_FORM_QA_URL||'https://127.0.0.1:8443';
 const engines=process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chromium','webkit'];
 const reports=[];await mkdir('test-results/secure-cinematic',{recursive:true});
 for(const engine of engines){
- const browser=await({chromium,webkit}[engine]).launch(launchOptions(engine));
+ const browser=await({chromium,webkit}[engine]).launch({...launchOptions(engine),...(engine==='webkit'&&process.env.DISPLAY?{headless:false}:{})});
  try{
   for(const [width,height]of [[320,740],[820,1180],[1440,900]]){
    const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width,height},reducedMotion:'no-preference'});
@@ -30,18 +30,21 @@ for(const engine of engines){
     assert(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth<=1));await language.selectOption('en');await page.waitForFunction(()=>document.documentElement.lang==='en'&&document.querySelector('.secure-start span').textContent.startsWith('Start'));
     await page.locator('.secure-start').focus();await page.keyboard.press('Enter');
     await page.locator('#motionToggle').click();assert(await page.evaluate(()=>MalGuardSecureMotion.snapshot().paused));
+    assert.equal(await page.locator('.vault-slab').first().evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
     await page.waitForFunction(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).every(a=>a.playState==='paused'&&!a.pending));
     const frozen=await page.evaluate(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).map(a=>a.currentTime));await page.waitForTimeout(120);
     assert.deepEqual(await page.evaluate(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).map(a=>a.currentTime)),frozen);
     await page.locator('#motionToggle').click();assert.equal(await page.evaluate(()=>MalGuardSecureMotion.snapshot().paused),false);
     await page.screenshot({path:`test-results/secure-cinematic/${path.includes('console')?'admin':'report'}-${engine}-${width}.png`,fullPage:true});
    }
+   await page.locator('#siteAdminPassword').focus();let reached=false;for(let i=0;i<10;i++){await page.keyboard.press('Shift+Tab');if(await page.locator('.secure-start').evaluate(el=>el===document.activeElement)){reached=true;break;}}assert(reached,'Start must be reachable through the administrator focus loop');await page.keyboard.press('Enter');
    await page.locator('#siteAdminPassword').fill('synthetic-password');assert.match(await page.locator('#passwordSignal').textContent(),/^•+$/);
    assert.equal(await page.locator('#siteAdminPassword').getAttribute('type'),'password');
    await page.locator('#siteAdminPasswordSubmit').click();await page.waitForFunction(()=>document.body.dataset.secureState==='checking');
    assert.equal(await page.locator('.secure-panel').getAttribute('aria-busy'),'true');assert.equal(auth.length,1);releaseAuth();
    await page.waitForFunction(()=>document.body.dataset.secureState==='error');assert.equal(await page.locator('#siteAdminIdentityStep').isVisible(),false);
    allow=true;await page.locator('#siteAdminPasswordSubmit').click();await page.waitForFunction(()=>document.body.dataset.secureState==='identity');assert(await page.locator('#siteAdminIdentityStep').isVisible());assert.equal(await page.locator('#passwordSignal').textContent(),'');
+   await page.locator('#siteAdminName').fill('x');await page.locator('#siteAdminPhone').fill('2025550148');await page.locator('#siteAdminEnter').click();await page.waitForFunction(()=>document.body.dataset.secureState==='error');await page.locator('#siteAdminName').fill('y');await page.locator('#siteAdminEnter').click();await page.waitForFunction(()=>document.body.dataset.secureState==='error');
    await context.setDefaultNavigationTimeout(30000);await page.emulateMedia({reducedMotion:'reduce'});assert(await page.evaluate(()=>MalGuardSecureMotion.snapshot().paused));
    assert.equal(await page.evaluate(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).length),0);
    await page.locator('.secure-start').click();assert(await page.locator('#siteAdminIdentityStep').isVisible());
