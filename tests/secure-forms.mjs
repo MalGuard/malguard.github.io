@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {createHash,randomUUID} from 'node:crypto';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {chromium,webkit,launchOptions} from './browser-runtime.mjs';
-const base='https://127.0.0.1:8443',privatePage='/console-8d42b69fda13705cc47a.html';
+const base=process.env.MALGUARD_FORM_QA_URL||'https://127.0.0.1:8443',privatePage='/console-8d42b69fda13705cc47a.html';
 const engines=process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chromium','webkit'],reports=[];
 await mkdir('test-results/secure-forms',{recursive:true});
 async function settledFocus(page,selector){
@@ -64,9 +64,9 @@ for(const engine of engines){
   assert.deepEqual(errors,[]);reports.push({engine,width,layouts:8,samePageReport:true,shortPersianMessage:true,retryPreserved:true,maskedPassword:true,phoneCountries:['US','IR','AF'],privateAccess:true,errors});await context.close();console.log(`PASS secure forms ${engine} ${width}px`);
  }
  const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:390,height:844},reducedMotion:'no-preference'}),page=await context.newPage();await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
- await page.goto(base+'/report.html');await page.waitForFunction(()=>Number(document.getElementById('secure-field').dataset.frames)>5);const first=await page.locator('#secure-field').getAttribute('data-frames');await page.waitForTimeout(160);assert(Number(await page.locator('#secure-field').getAttribute('data-frames'))>Number(first));
+ await page.goto(base+'/report.html');await page.waitForFunction(()=>window.MalGuardSecureMotion?.snapshot().activeAnimations>0);assert.equal(await page.locator('#secure-field,#secure-volume').count(),0);assert.equal(await page.locator('script[src*="home-opening-projection"]').count(),0);
  await page.locator('#reportMessage').fill('Harmless animation test');assert(await page.evaluate(()=>document.body.classList.contains('is-typing')));
- await page.locator('#motionToggle').click();const held=await page.locator('#secure-field').getAttribute('data-frames');await page.waitForTimeout(150);assert.equal(await page.locator('#secure-field').getAttribute('data-frames'),held);await context.close();
+ await page.locator('#motionToggle').click();assert(await page.evaluate(()=>MalGuardSecureMotion.snapshot().paused));assert.equal(await page.evaluate(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).filter(a=>a.playState==='running').length),0);await context.close();
  await browser.close();
 }
 await writeFile('test-results/secure-forms/report.json',JSON.stringify({status:'PASS',profiles:reports},null,2));

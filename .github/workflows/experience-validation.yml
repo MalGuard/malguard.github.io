@@ -37,6 +37,8 @@ jobs:
           # when an existing page declares upgrade-insecure-requests.
           openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
           python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
+          TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/secure-cinematic.mjs
+          TEST_BROWSER=chromium node tests/secure-cinematic.mjs
           npm run test:experience
           # Use the same display compositor as cinematic WebKit checks.
           xvfb-run --auto-servernum node tests/secure-forms.mjs
