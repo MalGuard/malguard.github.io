@@ -39,6 +39,7 @@ jobs:
           python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
           npm run test:experience
           node tests/secure-forms.mjs
+          node tests/secure-cinematic.mjs
           node tests/public-release/browser.cjs
           node tests/public-release/locale-pages.mjs
       - name: Save screenshots and verification report
