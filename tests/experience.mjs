@@ -164,6 +164,26 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     assert.equal(await page.locator('#radarCount').textContent(),'—');
     await context.close();
   });
+  await check(`${name} Threat Radar sanitizes reviewed source records`,async()=>{
+    const context=await browser.newContext({...fixtureTLS,reducedMotion:'reduce'});
+    const valid={type:'reviewed',ghsa_id:'GHSA-aaaa-bbbb-cccc',cve_id:'CVE-2026-12345',summary:'<img src=x onerror=alert(1)> harmless markup test',severity:'high',published_at:'2026-10-01T00:00:00Z'};
+    const fake={...valid,type:'unreviewed',ghsa_id:'GHSA-zzzz-yyyy-xxxx',summary:'Do not show this'};
+    await context.route('**/*',route=>{
+      const url=new URL(route.request().url());
+      if(url.origin===new URL(base).origin)return route.continue();
+      if(url.hostname==='api.github.com'&&url.pathname==='/advisories')return route.fulfill({status:200,headers:{'access-control-allow-origin':'*'},contentType:'application/json',body:JSON.stringify([valid,fake])});
+      return route.abort();
+    });
+    const page=await context.newPage();await page.goto(base+'/threat-radar.html');await settle(page);
+    await page.waitForFunction(()=>document.querySelectorAll('.radar-item').length===1);
+    assert.equal(await page.locator('.radar-item img').count(),0,'Advisory content must not become HTML');
+    assert.ok((await page.locator('.radar-item h3').textContent()).includes('<img src=x onerror'));
+    assert.equal(await page.locator('#radarCount').textContent(),'1');
+    assert.equal(await page.locator('.radar-item a').getAttribute('href'),'https://github.com/advisories/GHSA-aaaa-bbbb-cccc');
+    await page.locator('#radarSeverity').selectOption('critical');assert.equal(await page.locator('.radar-item').count(),0);
+    await page.locator('#radarSeverity').selectOption('high');assert.equal(await page.locator('.radar-item').count(),1);
+    await context.close();
+  });
   await check(`${name} motion preference and JavaScript-free content`,async()=>{
     const context=await browser.newContext(fixtureTLS);const page=await context.newPage();await page.goto(base+'/');await publicEntry(page);await page.locator('#motionToggle').click();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await page.reload();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await context.close();
     const nojs=await browser.newContext({...fixtureTLS,javaScriptEnabled:false});const p=await nojs.newPage();await p.goto(base+'/');assert.ok(await p.getByRole('heading',{name:'Scan smart. Play safe.'}).isVisible());assert.ok(await p.getByRole('link',{name:'Explore MalGuard'}).isVisible());assert.equal(await p.locator('#siteEntryGate').isVisible(),false);await nojs.close();
