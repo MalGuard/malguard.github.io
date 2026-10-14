@@ -46,7 +46,10 @@ for(const engine of engines){
    assert.equal(await page.locator('.secure-panel').getAttribute('aria-busy'),'true');assert.equal(auth.length,1);releaseAuth();
    await page.waitForFunction(()=>document.body.dataset.secureState==='error');assert.equal(await page.locator('#siteAdminIdentityStep').isVisible(),false);
    allow=true;await page.locator('#siteAdminPasswordSubmit').click();await page.waitForFunction(()=>document.body.dataset.secureState==='identity');assert(await page.locator('#siteAdminIdentityStep').isVisible());assert.equal(await page.locator('#passwordSignal').textContent(),'');
-   await page.locator('#siteAdminName').fill('x');await page.locator('#siteAdminPhone').fill('2025550148');await page.locator('#siteAdminEnter').click();await page.waitForFunction(()=>document.body.dataset.secureState==='error');await page.locator('#siteAdminName').fill('y');await page.locator('#siteAdminEnter').click();await page.waitForFunction(()=>document.body.dataset.secureState==='error');
+   // Satisfy native consent validation before testing the application's short-name
+   // error state. An unchecked required checkbox prevents submit from firing.
+   await page.locator('#siteAdminConsent').check();
+   await page.locator('#siteAdminName').fill('x');await page.locator('#siteAdminPhone').fill('2025550148');await page.locator('#siteAdminEnter').click();await page.waitForFunction(()=>document.body.dataset.secureState==='error');assert.equal(auth.length,2,'Invalid name must not request an administrator session');await page.locator('#siteAdminName').fill('y');await page.locator('#siteAdminEnter').click();await page.waitForFunction(()=>document.body.dataset.secureState==='error');assert.equal(auth.length,2,'Repeated invalid name must not request a session');
    await context.setDefaultNavigationTimeout(30000);await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>MalGuardSecureMotion.snapshot().paused===true);
    await page.waitForFunction(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).length===0);
    await page.locator('.secure-start').click();assert(await page.locator('#siteAdminIdentityStep').isVisible());
