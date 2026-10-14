@@ -1,13 +1,13 @@
 # MalGuard | Official gaming-security project
 
-> MalGuard is an open-source defensive gaming-security project. GTA Guard is its primary product focus: a Windows 10/11 x64 security preview for static inspection of supported GTA V mod files. Public GTA Guard installer distribution is currently paused. The interactive website demo is illustrative, not a real-file scanner.
+> MalGuard is an open-source defensive gaming-security project. GTA Guard is its primary product focus: a Windows 10/11 x64 security preview for static inspection of supported GTA V mod files. The current Windows x64 preview installer requires password verification; unrestricted public installer distribution is paused. The interactive website demo is illustrative, not a real-file scanner.
 
 Official site: https://malguard.github.io/
 Language: English; a Persian (فارسی) GTA mod security guide is also available.
 
 ## Primary sources
 - [GTA Guard product page](https://malguard.github.io/gta-guard.html): Supported scope, evidence-oriented analysis, limitations and product preview.
-- [Current download status](https://malguard.github.io/download.html): Official availability and release guidance. Public installer downloads are paused.
+- [Current download status](https://malguard.github.io/download.html): Official availability and release guidance. The current Windows x64 preview uses password-protected download; unrestricted public downloads are paused.
 - [English GTA 5 mod security guide](https://malguard.github.io/research/gta-5-mod-security.html): Factual questions and answers about GTA mod scanning.
 - [Persian GTA mod security guide](https://malguard.github.io/research/gta-mod-security-fa.html): راهنمای فارسی امنیت مادهای GTA 5.
 - [Trust Center](https://malguard.github.io/trust.html): Privacy, security boundaries and limitations.

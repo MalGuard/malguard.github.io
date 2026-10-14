@@ -9,7 +9,7 @@ out.mkdir()
 routes=json.loads((root/'tests/unified-source-inventory.json').read_text())['routes']
 for record in routes:
  p=Path(record['path']);(out/p).parent.mkdir(parents=True,exist_ok=True);shutil.copy2(root/p,out/p)
-for name in ['robots.txt','sitemap.xml','llms.txt','favicon.ico','favicon-96.png','favicon-192.png']:
+for name in ['robots.txt','sitemap.xml','llms.txt','favicon.ico','favicon-96.png','favicon-192.png','og-image-blue.png','og-image.png','favicon-blue-96.png','favicon-blue-192.png','apple-touch-icon-blue.png']:
  shutil.copy2(root/name,out/name)
 for name in ['assets','release','data','ios-preview','research']:
  shutil.copytree(root/name,out/name,dirs_exist_ok=True)
