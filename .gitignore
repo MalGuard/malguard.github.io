@@ -1,3 +1,4 @@
 node_modules/
 _site/
 test-results/
+services/game-scam-guard/dist/
