@@ -7,6 +7,7 @@ function attach(input){
   if(controllers.has(input))return controllers.get(input);
   let country='US';const wrap=document.createElement('div');wrap.className='phone-field';input.before(wrap);wrap.append(input);input.dir='ltr';input.dataset.phoneInput='';
   const button=document.createElement('button');button.type='button';button.className='phone-country-button';button.setAttribute('aria-haspopup','dialog');
+  let returnFocus=button;
   const flag=document.createElement('img');flag.width=26;flag.height=18;flag.alt='';const code=document.createElement('span');button.append(flag,code);wrap.prepend(button);
   const hint=document.createElement('p');hint.className='phone-format-hint';hint.dataset.i18nDynamic='';hint.id=input.id+'Format';wrap.after(hint);input.setAttribute('aria-describedby',hint.id);
   const dialog=document.createElement('dialog');dialog.className='country-picker';dialog.setAttribute('aria-label','Choose the phone number country');wrap.append(dialog);
@@ -29,11 +30,11 @@ function attach(input){
     for(const c of countries){const prefix='+'+getCountryCallingCode(c),name=n.of(c);if(q&&!`${c} ${name} ${prefix}`.toLocaleLowerCase().includes(q))continue;
       const option=document.createElement('button');option.type='button';option.className='country-option';option.setAttribute('aria-pressed',String(c===country));
       const image=document.createElement('img');image.src='/assets/flags/'+c+'.svg';image.alt='';image.width=26;image.height=18;image.loading='lazy';const text=document.createElement('span');text.textContent=name;const dial=document.createElement('span');dial.textContent=prefix;dial.dir='ltr';option.append(image,text,dial);
-      option.addEventListener('click',()=>{country=c;input.value='';label();format();dialog.close();input.focus();});list.append(option);
+      option.addEventListener('click',()=>{country=c;input.value='';label();format();returnFocus=input;dialog.close();input.focus();});list.append(option);
     }
   }
-  button.addEventListener('click',()=>{search.value='';render();dialog.showModal();button.setAttribute('aria-expanded','true');search.focus();});
-  close.addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>{button.setAttribute('aria-expanded','false');button.focus();});search.addEventListener('input',render);
+  button.addEventListener('click',()=>{returnFocus=button;search.value='';render();dialog.showModal();button.setAttribute('aria-expanded','true');search.focus();});
+  close.addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>{button.setAttribute('aria-expanded','false');returnFocus.focus();});search.addEventListener('input',render);
   dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
   list.addEventListener('keydown',e=>{if(!['ArrowDown','ArrowUp','Home','End'].includes(e.key))return;e.preventDefault();const items=[...list.children],i=items.indexOf(document.activeElement);items[e.key==='Home'?0:e.key==='End'?items.length-1:(i+(e.key==='ArrowDown'?1:-1)+items.length)%items.length]?.focus();});
   input.addEventListener('input',format);input.addEventListener('blur',format);window.addEventListener('malguard-language',()=>{label();format();});
