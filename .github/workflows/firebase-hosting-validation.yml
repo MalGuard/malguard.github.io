@@ -1,0 +1,51 @@
+name: Validate Firebase Hosting preparation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.firebaserc'
+      - 'firebase.json'
+      - '.gitignore'
+      - '.github/firebase/**'
+      - '.github/workflows/firebase-hosting*.yml'
+      - 'tests/firebase-hosting*.mjs'
+      - 'tools/build-public-site.py'
+      - 'docs/firebase-hosting.md'
+  push:
+    branches: [main]
+    paths:
+      - '.firebaserc'
+      - 'firebase.json'
+      - '.gitignore'
+      - '.github/firebase/**'
+      - '.github/workflows/firebase-hosting*.yml'
+      - 'tests/firebase-hosting*.mjs'
+      - 'tools/build-public-site.py'
+      - 'docs/firebase-hosting.md'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Install locked validation tooling
+        run: npm ci --prefix .github/firebase --ignore-scripts --no-audit --no-fund
+      - name: Validate site and Firebase deployment boundary without cloud access
+        run: |
+          python3 tests/validate-trust.py
+          python3 tools/build-public-site.py
+          node tests/firebase-hosting.test.mjs
+      - name: Check real Hosting routing locally with a demo project
+        env:
+          FIREBASE_CLI_DISABLE_UPDATE_CHECK: 'true'
+        run: .github/firebase/node_modules/.bin/firebase emulators:exec --only hosting --project demo-malguard1 --config firebase.json --non-interactive 'node tests/firebase-hosting-emulator.mjs'
