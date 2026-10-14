@@ -15,7 +15,20 @@ jobs:
   remove-public-installers:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Read the current distribution policy
+        id: policy
+        run: |
+          python3 - <<'PY'
+          import json, os
+          release=json.load(open('release/gta-guard-windows.json'))
+          paused=release['distribution']['downloadEnabled'] is not True
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('paused='+str(paused).lower()+'\n')
+          print('Paused release cleanup applies:', paused)
+          PY
       - name: Remove GTA Guard installer assets from public releases
+        if: steps.policy.outputs.paused == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
