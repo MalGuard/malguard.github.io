@@ -108,6 +108,14 @@ assert gta_schema['name']=='GTA Guard'
 assert gta_schema['url']=='https://malguard.github.io/gta-guard.html'
 assert gta_schema['publisher']['@id']=='https://malguard.github.io/#organization'
 assert 'Public installer distribution is paused.' in gta_html
+# Machine-readable public source directory must be included in the Pages build.
+llms=(ROOT/'llms.txt').read_text(encoding='utf-8')
+assert llms.startswith('# MalGuard | Official gaming-security project')
+assert 'https://malguard.github.io/gta-guard.html' in llms
+assert 'https://malguard.github.io/research/gta-mod-security-fa.html' in llms
+assert 'Public GTA Guard installer distribution is currently paused' in llms
+assert not any(x in llms for x in ['/console-8d42b69fda13705cc47a.html', '/private-download-service/', '/release/private/'])
+assert "'llms.txt'" in (ROOT/'tools/build-public-site.py').read_text()
 sitemap=(ROOT/'sitemap.xml').read_text()
 for page,locale in zip(PUBLIC_AI_GUIDES,['en','fa']):
     text=page.read_text()
