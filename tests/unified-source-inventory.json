@@ -27,6 +27,22 @@
       "surface": "preserved content and functional controls"
     },
     {
+      "path": "code-signing.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
+      "path": "console-8d42b69fda13705cc47a.html",
+      "surface": "Private console"
+    },
+    {
+      "path": "contributing.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
+      "path": "core-guide.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
       "path": "docs.html",
       "baselineSHA256": "e004c79fefcb25a095994ed736db40e402a441fe77b8c4c9feaa081c4009992e",
       "preparedSHA256": "fad14c4d92c29dd99841e99484ac8d2dc452ee0c246dfe6a6853fd035e7f1afe",
@@ -63,6 +79,12 @@
       "surface": "approved Fusion"
     },
     {
+      "path": "ios-preview/index.html",
+      "baselineSHA256": "a29be316085a72bbbd7d6f000d75f188a24adfd7a8ee5c0149f595c1b9dbbef7",
+      "preparedSHA256": "5e3e952ec061b74ac78666d70c892986318966fd6f54e4f450387caf6e6ea577",
+      "surface": "preserved content and functional controls"
+    },
+    {
       "path": "labs.html",
       "baselineSHA256": "a20fc365efd95b28ac8163a02b0b5e11ceb6a7b2b7df91c46f5bc641d8485d8d",
       "preparedSHA256": "58652f9fced0cd7223268b0b53213fc557b1a6f9394b1878a67dc96c5b51d9ba",
@@ -81,6 +103,10 @@
       "surface": "preserved content and functional controls"
     },
     {
+      "path": "privacy-policy.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
       "path": "privacy.html",
       "baselineSHA256": "d1ae2e3492fa527ae8ee7aa0499db3668ec30f0d368941aeaa3ac2920bafdb99",
       "preparedSHA256": "a3681494ecc18a355e79d24e3553dd986198a8692a1f9aaab5d2bc14225f6962",
@@ -90,6 +116,36 @@
       "path": "products.html",
       "baselineSHA256": "a2c479eb8788f5ae850464815a46a003c058089e8099a0ccf00fb4eead1fa05f",
       "preparedSHA256": "97b269b17744310b06fa60ce57334740b0014d18cad4d685d9205eb9a448649d",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "release/sandbox-help-historical.html",
+      "baselineSHA256": "b6a1b8fa3be68457c9efa4311fd09dafbbacb38f560a1446b634098b598098c4",
+      "preparedSHA256": "e0f208c26d427badf7e20b0dc1b655db4a0e321ce385c98a7be3da93a09561a0",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "report.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
+      "path": "research/gta-5-mod-security.html",
+      "surface": "Reviewed bilingual GTA mod security guide"
+    },
+    {
+      "path": "research/gta-mod-security-fa.html",
+      "surface": "Reviewed bilingual GTA mod security guide"
+    },
+    {
+      "path": "research/repackaged-mod.html",
+      "baselineSHA256": "83f5e2144d87161913d61bf956572085c58e5e81ace7366c2c1f0f81a500cd9c",
+      "preparedSHA256": "09eaf055de6ebb310aa106ef13da068ad728c35620134bd79d42c941837dabea",
+      "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "research/security-motion.html",
+      "baselineSHA256": "7a1da5c19f22dccb5dd14e465e9bd239d33547ab38c8e630e31cdc04445b4f3f",
+      "preparedSHA256": "cfdff6e277074d83b408f0c555c87e25b47ef672c267bba1e782d4c089a2552a",
       "surface": "preserved content and functional controls"
     },
     {
@@ -111,10 +167,22 @@
       "surface": "preserved content and functional controls"
     },
     {
+      "path": "security-policy.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
+      "path": "source.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
       "path": "support.html",
       "baselineSHA256": "5b7eaa4e6b67256633080b7ce7e1f8b2432e8f21e6d49a4df383d8b25a450753",
       "preparedSHA256": "51bcdddc7244a87abc3b81d60c912ff77ecb89b31cc80f43adb1b246a1477f66",
       "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "threat-radar.html",
+      "surface": "Public GitHub-reviewed advisory viewer with explicit source limitations"
     },
     {
       "path": "tools.html",
@@ -127,73 +195,9 @@
       "baselineSHA256": "fa87f231a1f188b6c8a68ed05e961d30379f3f0218334d7c04d34aba74470a3a",
       "preparedSHA256": "4a9e256cd0feef8d303b3a6b392ae56bb8fbf19f5f77126c5ee67462c720f9f2",
       "surface": "preserved content and functional controls"
-    },
-    {
-      "path": "ios-preview/index.html",
-      "baselineSHA256": "a29be316085a72bbbd7d6f000d75f188a24adfd7a8ee5c0149f595c1b9dbbef7",
-      "preparedSHA256": "5e3e952ec061b74ac78666d70c892986318966fd6f54e4f450387caf6e6ea577",
-      "surface": "preserved content and functional controls"
-    },
-    {
-      "path": "research/repackaged-mod.html",
-      "baselineSHA256": "83f5e2144d87161913d61bf956572085c58e5e81ace7366c2c1f0f81a500cd9c",
-      "preparedSHA256": "09eaf055de6ebb310aa106ef13da068ad728c35620134bd79d42c941837dabea",
-      "surface": "preserved content and functional controls"
-    },
-    {
-      "path": "research/security-motion.html",
-      "baselineSHA256": "7a1da5c19f22dccb5dd14e465e9bd239d33547ab38c8e630e31cdc04445b4f3f",
-      "preparedSHA256": "cfdff6e277074d83b408f0c555c87e25b47ef672c267bba1e782d4c089a2552a",
-      "surface": "preserved content and functional controls"
-    },
-    {
-      "path": "release/sandbox-help-historical.html",
-      "baselineSHA256": "b6a1b8fa3be68457c9efa4311fd09dafbbacb38f560a1446b634098b598098c4",
-      "preparedSHA256": "e0f208c26d427badf7e20b0dc1b655db4a0e321ce385c98a7be3da93a09561a0",
-      "surface": "preserved content and functional controls"
-    },
-    {
-      "path": "report.html",
-      "surface": "Native project resource or reporting page"
-    },
-    {
-      "path": "console-8d42b69fda13705cc47a.html",
-      "surface": "Private console"
-    },
-    {
-      "path": "source.html",
-      "surface": "Native project resource or reporting page"
-    },
-    {
-      "path": "security-policy.html",
-      "surface": "Native project resource or reporting page"
-    },
-    {
-      "path": "privacy-policy.html",
-      "surface": "Native project resource or reporting page"
-    },
-    {
-      "path": "code-signing.html",
-      "surface": "Native project resource or reporting page"
-    },
-    {
-      "path": "contributing.html",
-      "surface": "Native project resource or reporting page"
-    },
-    {
-      "path": "core-guide.html",
-      "surface": "Native project resource or reporting page"
-    },
-    {
-      "path": "research/gta-5-mod-security.html",
-      "surface": "Reviewed bilingual GTA mod security guide"
-    },
-    {
-      "path": "research/gta-mod-security-fa.html",
-      "surface": "Reviewed bilingual GTA mod security guide"
     }
   ],
-  "publicRouteCount": 35,
+  "publicRouteCount": 36,
   "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
   "functionalRuntimePreserved": [
     "assets/public-release.mjs",

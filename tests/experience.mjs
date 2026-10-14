@@ -7,7 +7,7 @@ const base = process.env.TEST_BASE_URL || 'https://127.0.0.1:8443';
 // restricted to this loopback origin; production CSP and TLS remain unchanged.
 assert.equal(base, 'https://127.0.0.1:8443', 'This isolated suite only targets the local HTTPS fixture');
 const fixtureTLS = { ignoreHTTPSErrors: true };
-const routes = ['/', '/products.html', '/tools.html', '/scan-url.html', '/gta-guard.html', '/ai-intelligence.html', '/malware-ai.html', '/malware-ai-windows.html', '/scan-mods.html', '/download.html', '/app.html', '/trust.html', '/privacy.html', '/about.html', '/founder.html', '/docs.html', '/labs.html', '/support.html', '/sandbox-help.html', '/ios-preview/', '/research/repackaged-mod.html','/game-scam-guard.html','/research/security-motion.html','/release/sandbox-help-historical.html','/404.html'];
+const routes = ['/', '/products.html', '/tools.html', '/scan-url.html', '/gta-guard.html', '/threat-radar.html', '/ai-intelligence.html', '/malware-ai.html', '/malware-ai-windows.html', '/scan-mods.html', '/download.html', '/app.html', '/trust.html', '/privacy.html', '/about.html', '/founder.html', '/docs.html', '/labs.html', '/support.html', '/sandbox-help.html', '/ios-preview/', '/research/repackaged-mod.html','/game-scam-guard.html','/research/security-motion.html','/release/sandbox-help-historical.html','/404.html'];
 await mkdir('test-results', { recursive: true });
 const report = { passed: [], failed: [], consoleErrors: [], requestFailures: [] };
 let activePage;
@@ -105,7 +105,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
       for(let i=0;i<3;i++){
         const card=page.locator('#products .card').nth(i);await card.locator('.front .mg-card-control').focus();await page.keyboard.press('Enter');
         assert.equal(await card.getAttribute('data-flipped'),'true');
-        assert.ok((await card.locator('.back').textContent()).includes(['GTA Guard','Malware AI','Game Scam Guard'][i]));
+        assert.ok((await card.locator('.back').textContent()).includes(['GTA Guard','Threat Radar','Game Scam Guard'][i]));
         assert.equal(await card.locator('.front').evaluate(e=>e.inert),true);
         await page.keyboard.press('Escape');assert.equal(await card.getAttribute('data-flipped'),'false');
       }
@@ -129,7 +129,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     await page.locator('#siteAdminPasswordSubmit').click();await page.waitForFunction(()=>document.querySelector('#siteAdminPasswordError').textContent==='Access denied');assert.equal(authCalls,1);assert.equal(await page.locator('#siteAdminIdentityStep').isVisible(),false);
     await page.locator('#siteAdminPasswordBack').click();await page.locator('#sitePublicEntry').click();await page.waitForURL(base+'/');await settle(page);assert.equal(await page.locator('main').evaluate(e=>e.inert),false);await context.close();
   });
-  await check(`${name} private administrator session indicator and advanced AI access`,async()=>{
+  await check(`${name} private administrator session indicator and retired AI product`,async()=>{
     const context=await browser.newContext({...fixtureTLS,reducedMotion:'reduce'});
     await context.route('**/*',async route=>{
       const url=new URL(route.request().url());
@@ -149,10 +149,19 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     await page.waitForURL(base+'/');
     assert.equal(await page.locator('#adminSessionBadge').isVisible(),true);
     assert.match(await page.locator('#adminSessionBadge').innerText(),/ADMIN SESSION ACTIVE/);
-    await page.goto(base+'/malware-ai-windows.html');await page.waitForSelector('#accessGate:not([hidden])');
-    await page.locator('#accessPassword').fill('benign-success-test-password');await page.locator('#accessSubmit').click();
-    await page.waitForFunction(()=>document.getElementById('accessGate').hidden);
-    assert.equal(await page.locator('#aiApp').evaluate(e=>e.classList.contains('access-locked')),false);
+    await page.goto(base+'/malware-ai-windows.html');await settle(page);
+    assert.equal(await page.getByRole('heading',{name:'Now replaced by Threat Radar.'}).count(),1);
+    assert.equal(await page.locator('#accessGate').count(),0,'Retired chat must not expose authentication or messaging');
+    await context.close();
+  });
+  await check(`${name} Threat Radar degrades safely when external data is unavailable`,async()=>{
+    const context=await browser.newContext({...fixtureTLS,reducedMotion:'reduce'});
+    await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
+    const page=await context.newPage();
+    await page.goto(base+'/threat-radar.html');await settle(page);
+    await page.waitForFunction(()=>document.querySelector('#radarStatus').textContent.includes('Public advisory data is unavailable'));
+    assert.equal(await page.locator('.radar-item').count(),0);
+    assert.equal(await page.locator('#radarCount').textContent(),'—');
     await context.close();
   });
   await check(`${name} motion preference and JavaScript-free content`,async()=>{

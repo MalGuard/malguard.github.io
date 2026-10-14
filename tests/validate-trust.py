@@ -1,4 +1,4 @@
-"""Current public scanner claims, retaining unrelated AI, privacy and deploy boundaries."""
+"""Current public scanner and advisory product claims, retaining privacy and deployment boundaries."""
 from pathlib import Path
 import json,re,subprocess,sys
 ROOT=Path(__file__).resolve().parents[1]
@@ -12,14 +12,14 @@ def absent(path,text):
 for path,text in [
  ('index.html','No scan can guarantee'),('gta-guard.html','Static analysis / No scanned code execution'),
  ('trust.html','security.txt'),('trust.html','Unsigned preview'),
- ('scan-mods.html','Scan Mods'),('ai-intelligence.html','AI Intelligence'),
- ('ai-intelligence.html','href="/malware-ai.html">Open Malware AI'),
- ('malware-ai.html','Open Windows Preview'),('malware-ai.html','rel="canonical" href="https://malguard.site/malware-ai.html"'),
- ('malware-ai.html','"@type": "WebApplication"'),
- ('malware-ai-windows.html','Enter to send'),('malware-ai-windows.html','unicode-bidi:plaintext'),
- ('malware-ai-windows.html','dir="auto"'),('malware-ai-windows.html','applyTextDirection'),
- ('assets/experience.css','unicode-bidi:plaintext'),('assets/experience.js',"'#malware-ai':'/malware-ai.html'"),
- ('index.html','/ai-intelligence.html'),('scan-url.html','Scan URL'),('products.html','LIVE PREVIEW'),
+ ('scan-mods.html','Scan Mods'),('threat-radar.html','Threat Radar'),
+ ('ai-intelligence.html','Now replaced by Threat Radar.'),
+ ('malware-ai.html','Now replaced by Threat Radar.'),('threat-radar.html','rel="canonical" href="https://malguard.site/threat-radar.html"'),
+ ('malware-ai.html','noindex,follow'),
+ ('malware-ai-windows.html','noindex,follow'),('threat-radar.html','No invented attack locations.'),
+ ('assets/threat-radar.js','document.createElement'),('assets/threat-radar.js','Public advisory data is unavailable'),
+ ('assets/experience.css','unicode-bidi:plaintext'),('assets/experience.js',"'#malware-ai':'/threat-radar.html'"),
+ ('index.html','/threat-radar.html'),('scan-url.html','Scan URL'),('products.html','PUBLIC ADVISORY FEED'),
  ('download.html','Download Windows EXE'),('download.html','More info'),('download.html','Run anyway'),
  ('download.html','Do not disable protection'),('gta-guard.html','No scanned code is executed'),
  ('gta-guard.html','Check your installed build'),('sandbox-help.html','does not upload scanned files'),

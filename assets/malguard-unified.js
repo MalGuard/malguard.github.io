@@ -26,7 +26,7 @@
  reduced.addEventListener('change',()=>apply(saved));
  document.addEventListener('visibilitychange',()=>root.classList.toggle('page-hidden',document.hidden));
  if(home){
-  const legacy={'#gta-guard':'/gta-guard.html','#malware-ai':'/malware-ai.html','#game-scam-guard':'/game-scam-guard.html','#download':'/download.html','#feedback':'/support.html'};
+  const legacy={'#gta-guard':'/gta-guard.html','#malware-ai':'/threat-radar.html','#game-scam-guard':'/game-scam-guard.html','#download':'/download.html','#feedback':'/support.html'};
   const route=()=>{if(legacy[location.hash])location.replace(legacy[location.hash]);};window.addEventListener('hashchange',route);route();
  }
  if(body.classList.contains('mg-content-page')){
