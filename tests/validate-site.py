@@ -52,7 +52,10 @@ assert legacy['installer']['sha256']==release['sha256']
 assert legacy['distribution']['downloadEnabled'] is True
 assert 'type="password"' in (ROOT/'download.html').read_text()
 assert 'publicAccess: true' in (ROOT/'private-download-service/api/download.js').read_text()
-assert 'Administrator password' in (ROOT/'index.html').read_text()
+assert 'Administrator password' in (ROOT/'console-8d42b69fda13705cc47a.html').read_text()
+assert 'siteAdminPassword' not in (ROOT/'index.html').read_text()
+assert 'id="siteAdminEntry"' not in (ROOT/'console-8d42b69fda13705cc47a.html').read_text()
+assert 'console-8d42b69fda13705cc47a.html' not in (ROOT/'sitemap.xml').read_text()
 assert 'createPasswordDownloadHandler' in (ROOT/'private-download-service/api/installer.js').read_text()
 private=json.loads((ROOT/'release/malguard-private-release.json').read_text())
 assert private['status']=='private-package-ready'

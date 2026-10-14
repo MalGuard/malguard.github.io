@@ -20,20 +20,24 @@
   const identityBack=document.getElementById('siteAdminIdentityBack');
   const identityError=document.getElementById('siteAdminIdentityError');
   let adminPassword='';
-  const optional=gate.dataset.optional==='true';
+  const optional=gate?.dataset.optional==='true';
+  const consolePage=gate?.dataset.console==='true';
+  const privatePath='/console-8d42b69fda13705cc47a.html';
   const adminSessionBadge=document.getElementById('adminSessionBadge');
   const menuControl=document.getElementById('menuBtn');
   function dismiss(){gate.hidden=true;document.body.classList.remove('site-entry-locked');adminPassword='';passwordInput.value='';syncGate();menuControl?.focus({preventScroll:true});}
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&optional&&!gate.hidden){e.preventDefault();dismiss();}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&optional&&gate&&!gate.hidden){e.preventDefault();dismiss();}});
 
   function syncGate(){
-    [...document.body.children].filter(el=>el!==gate && !['SCRIPT','STYLE','NOSCRIPT'].includes(el.tagName)).forEach(el=>{el.inert=!gate.hidden});
+    if(!gate)return;
+    [...document.body.children].filter(el=>el!==gate&&!el.contains(gate)&&!['SCRIPT','STYLE','NOSCRIPT'].includes(el.tagName)).forEach(el=>{el.inert=!gate.hidden});
   }
   const gateObserver=new MutationObserver(syncGate);
-  gateObserver.observe(gate,{attributes:true,attributeFilter:['hidden']});
-  gate.addEventListener('keydown',event=>{
+  if(gate)gateObserver.observe(gate,{attributes:true,attributeFilter:['hidden']});
+  gate?.addEventListener('keydown',event=>{
     if(event.key!=='Tab')return;
-    const controls=[...gate.querySelectorAll('button,input')].filter(el=>!el.disabled&&el.getClientRects().length);
+    if(gate.querySelector('dialog[open]'))return;
+    const controls=[...gate.querySelectorAll('button,input,a,select,textarea')].filter(el=>!el.disabled&&el.getClientRects().length);
     if(event.shiftKey&&document.activeElement===controls[0]){event.preventDefault();controls.at(-1)?.focus()}
     else if(!event.shiftKey&&document.activeElement===controls.at(-1)){event.preventDefault();controls[0]?.focus()}
   });
@@ -65,6 +69,7 @@
     document.body.classList.remove('site-entry-locked');
     syncGate();
     syncAdminSessionBadge();
+    if(consolePage){location.replace('/');return;}
     (document.getElementById('homeContent')||document.querySelector('main'))?.focus({preventScroll:true});
   }
   function syncAdminSessionBadge(){
@@ -95,6 +100,15 @@
     return info;
   }
 
+  if(!gate){
+    try{if(!sessionStorage.getItem('malguard-site-role'))sessionStorage.setItem('malguard-site-role','public')}catch(e){}
+    syncAdminSessionBadge();
+    window.addEventListener('pageshow',syncAdminSessionBadge);
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncAdminSessionBadge()});
+    const forwardPrivate=()=>{if(location.hash==='#mg-console-8d42b69fda13705cc47a')location.replace(privatePath);};
+    window.addEventListener('hashchange',forwardPrivate);forwardPrivate();return;
+  }
+
   passwordToggle?.addEventListener('click',()=>{
     const showing=passwordInput.type==='text';
     passwordInput.type=showing?'password':'text';
@@ -104,7 +118,7 @@
   });
 
   publicEntry.addEventListener('click',()=>enterSite('public'));
-  adminEntry.addEventListener('click',()=>{show('password');setTimeout(()=>passwordInput.focus(),0)});
+  adminEntry?.addEventListener('click',()=>{show('password');setTimeout(()=>passwordInput.focus(),0)});
   passwordBack.addEventListener('click',()=>{adminPassword='';passwordInput.value='';show('choice')});
   identityBack.addEventListener('click',()=>{nameInput.value='';phoneInput.value='';consent.checked=false;show('password');setTimeout(()=>passwordInput.focus(),0)});
 
@@ -127,6 +141,7 @@
       }
       adminPassword=password;
       passwordInput.value='';
+      document.getElementById('passwordSignal')?.replaceChildren();
       show('identity');
       setTimeout(()=>nameInput.focus(),0);
     }catch(error){
@@ -138,10 +153,9 @@
   identityForm.addEventListener('submit',async function(event){
     event.preventDefault();
     const name=nameInput.value.replace(/\s+/g,' ').trim();
-    const phoneRaw=phoneInput.value.trim();
-    const phoneDigits=phoneRaw.replace(/\D/g,'');
+    const phoneRaw=window.MalGuardPhone?.validate(phoneInput);
     if(name.length<2){identityError.textContent='Enter your name before continuing.';nameInput.focus();return}
-    if(phoneDigits.length<8||phoneDigits.length>15||/^([0-9])\1{7,}$/.test(phoneDigits)){identityError.textContent='Enter a valid phone number with 8 to 15 digits.';phoneInput.focus();return}
+    if(!phoneRaw){identityError.textContent='Enter a valid number for the selected country.';phoneInput.focus();return}
     if(!consent.checked){identityError.textContent='You must acknowledge the administrator access log before continuing.';return}
     const enterButton=document.getElementById('siteAdminEnter');
     enterButton.disabled=true;
@@ -157,6 +171,7 @@
       if(!response.ok)throw new Error(data.error||'Access could not be completed');
       if(data.emailConfigured===false)throw new Error('Administrator login email is not configured.');
       if(data.emailSent!==true)throw new Error('Administrator login email could not be sent.');
+      if(!data.sessionToken||!Number.isFinite(Number(data.sessionExpiresAt))||Number(data.sessionExpiresAt)<=Date.now())throw new Error('Secure administrator session was not issued.');
       adminPassword='';
       enterSite('admin',data.sessionToken||'',data.sessionExpiresAt||'');
     }catch(error){
@@ -167,7 +182,9 @@
   let existingRole='';
   try{existingRole=sessionStorage.getItem('malguard-site-role')||''}catch(e){}
   if(optional&&!existingRole){try{sessionStorage.setItem('malguard-site-role','public')}catch(e){}}
-  if(optional||existingRole==='public'||existingRole==='admin'){
+  if(consolePage){
+    gate.hidden=false;show('password');syncGate();setTimeout(()=>passwordInput.focus(),0);
+  }else if(optional||existingRole==='public'||existingRole==='admin'){
     gate.hidden=true;
     document.body.classList.remove('site-entry-locked');
     syncGate();

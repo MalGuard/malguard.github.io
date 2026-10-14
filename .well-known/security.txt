@@ -1,5 +1,6 @@
-Contact: https://github.com/MalGuard/malguard-core/security/policy
-Policy: https://malguard.github.io/trust.html#vulnerability-disclosure
+Contact: mailto:malguard.security@gmail.com
+Contact: https://malguard.github.io/report.html?kind=security
+Policy: https://malguard.github.io/security-policy.html
 Canonical: https://malguard.github.io/.well-known/security.txt
-Preferred-Languages: en
+Preferred-Languages: en, fa
 Expires: 2027-09-21T00:00:00.000Z

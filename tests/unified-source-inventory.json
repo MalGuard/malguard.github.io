@@ -151,9 +151,49 @@
       "baselineSHA256": "b6a1b8fa3be68457c9efa4311fd09dafbbacb38f560a1446b634098b598098c4",
       "preparedSHA256": "e0f208c26d427badf7e20b0dc1b655db4a0e321ce385c98a7be3da93a09561a0",
       "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "report.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
+      "path": "console-8d42b69fda13705cc47a.html",
+      "surface": "Private console"
+    },
+    {
+      "path": "source.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
+      "path": "security-policy.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
+      "path": "privacy-policy.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
+      "path": "code-signing.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
+      "path": "contributing.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
+      "path": "core-guide.html",
+      "surface": "Native project resource or reporting page"
+    },
+    {
+      "path": "research/gta-5-mod-security.html",
+      "surface": "Reviewed bilingual GTA mod security guide"
+    },
+    {
+      "path": "research/gta-mod-security-fa.html",
+      "surface": "Reviewed bilingual GTA mod security guide"
     }
   ],
-  "publicRouteCount": 25,
+  "publicRouteCount": 35,
   "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
   "functionalRuntimePreserved": [
     "assets/public-release.mjs",

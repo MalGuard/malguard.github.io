@@ -124,10 +124,10 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     });
     const page=await context.newPage();await page.goto(base+'/');await settle(page);assert.equal(await page.locator('#siteEntryGate').isVisible(),false);assert.equal(await page.locator('a[href*="admin-access"]').count(),0);assert.equal(await page.locator('#adminSessionBadge').isVisible(),false);
     await page.locator('#menuBtn').click();assert.equal(await page.getByText('Administrator access',{exact:true}).count(),0);
-    await page.goto(base+'/#mg-console-8d42b69fda13705cc47a');await settle(page);assert.ok(await page.locator('#siteEntryGate').isVisible());assert.ok(await page.locator('main').evaluate(e=>e.inert));
+    await page.goto(base+'/#mg-console-8d42b69fda13705cc47a');await page.waitForURL(base+'/console-8d42b69fda13705cc47a.html');await settle(page);assert.ok(await page.locator('#siteEntryGate').isVisible());assert.ok(await page.locator('#navbar').evaluate(e=>e.inert));
     await page.locator('#siteAdminPassword').fill('benign-invalid-test-password');await page.locator('#siteAdminPasswordToggle').click();assert.equal(await page.locator('#siteAdminPassword').getAttribute('type'),'text');await page.locator('#siteAdminPasswordToggle').click();assert.equal(await page.locator('#siteAdminPassword').getAttribute('type'),'password');
     await page.locator('#siteAdminPasswordSubmit').click();await page.waitForFunction(()=>document.querySelector('#siteAdminPasswordError').textContent==='Access denied');assert.equal(authCalls,1);assert.equal(await page.locator('#siteAdminIdentityStep').isVisible(),false);
-    await page.locator('#siteAdminPasswordBack').click();await publicEntry(page);assert.equal(await page.locator('main').evaluate(e=>e.inert),false);await context.close();
+    await page.locator('#siteAdminPasswordBack').click();await page.locator('#sitePublicEntry').click();await page.waitForURL(base+'/');await settle(page);assert.equal(await page.locator('main').evaluate(e=>e.inert),false);await context.close();
   });
   await check(`${name} private administrator session indicator and advanced AI access`,async()=>{
     const context=await browser.newContext({...fixtureTLS,reducedMotion:'reduce'});
@@ -143,10 +143,10 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
       }
       return route.abort();
     });
-    const page=await context.newPage();await page.goto(base+'/#mg-console-8d42b69fda13705cc47a');await settle(page);
+    const page=await context.newPage();await page.goto(base+'/#mg-console-8d42b69fda13705cc47a');await page.waitForURL(base+'/console-8d42b69fda13705cc47a.html');await settle(page);
     await page.locator('#siteAdminPassword').fill('benign-success-test-password');await page.locator('#siteAdminPasswordSubmit').click();
     await page.locator('#siteAdminName').fill('MalGuard Owner');await page.locator('#siteAdminPhone').fill('+1 202 555 0148');await page.locator('#siteAdminConsent').check();await page.locator('#siteAdminEnter').click();
-    await page.waitForFunction(()=>document.getElementById('siteEntryGate').hidden);
+    await page.waitForURL(base+'/');
     assert.equal(await page.locator('#adminSessionBadge').isVisible(),true);
     assert.match(await page.locator('#adminSessionBadge').innerText(),/ADMIN SESSION ACTIVE/);
     await page.goto(base+'/malware-ai-windows.html');await page.waitForSelector('#accessGate:not([hidden])');
