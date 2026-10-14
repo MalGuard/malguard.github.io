@@ -53,7 +53,7 @@ for(const engine of engines){
    console.log(`PASS cinematic forms ${engine} ${width}px`);
   }
  }catch(error){
-  const diagnostic=await activePage?.evaluate(()=>({state:document.body.dataset.secureState,identityHidden:document.getElementById('siteAdminIdentityStep')?.hidden,error:document.getElementById('siteAdminIdentityError')?.textContent,inputs:['siteAdminName','siteAdminPhone'].map(id=>{const el=document.getElementById(id);return {id,length:el?.value.length,valid:el?.validity.valid,missing:el?.validity.valueMissing,validation:el?.validationMessage};}),active:document.activeElement?.id,submitDisabled:document.getElementById('siteAdminEnter')?.disabled})).catch(()=>null);
+  const diagnostic=await activePage?.evaluate(()=>({state:document.body.dataset.secureState,identityHidden:document.getElementById('siteAdminIdentityStep')?.hidden,error:document.getElementById('siteAdminIdentityError')?.textContent,inputs:['siteAdminName','siteAdminPhone'].map(id=>{const el=document.getElementById(id);return {id,length:el?.value.length,valid:el?.validity.valid,missing:el?.validity.valueMissing,validation:el?.validationMessage};}),active:document.activeElement?.id,motionPressed:document.getElementById('motionToggle')?.getAttribute('aria-pressed'),rootClasses:document.documentElement.className,submitDisabled:document.getElementById('siteAdminEnter')?.disabled})).catch(()=>null);
   console.error('FORM DIAGNOSTIC',JSON.stringify({profile:activeProfile,...diagnostic}));await activePage?.screenshot({path:`test-results/secure-cinematic/failure-${engine}.png`,fullPage:true}).catch(()=>{});throw error;
  }finally{await browser.close();}
 }

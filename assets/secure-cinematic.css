@@ -40,6 +40,7 @@
 .secure-page [data-motion-state=busy]::before{width:13px!important;height:13px!important;top:calc(50% - 7px)!important;border:1.5px solid #06132833!important;border-top-color:#061328!important;border-radius:50%;animation:vault-spin .9s linear infinite!important}
 .secure-page [data-motion-state=success]::before{width:12px;height:6px;border:0;border-left:1.7px solid currentColor;border-bottom:1.7px solid currentColor;transform:rotate(-45deg)}
 .secure-page :is(.site-entry-back,.site-password-toggle,.country-picker-close,.phone-country-button,.credential-motion){transition:background .2s,border-color .2s,box-shadow .2s;cursor:pointer}
+.secure-page :is(.secure-start,.secure-submit,.site-entry-button,.credential-motion,.phone-country-button,.site-password-toggle):active{box-shadow:inset 0 2px 12px #07111b44,0 0 18px #9fcfff16!important}
 .secure-page .site-password-toggle:hover{background:#1e3856}.secure-page .site-password-toggle svg{transition:transform .25s}.secure-page .site-password-toggle:hover svg{transform:scale(1.12)}
 .secure-page .site-entry-back{background:#112034!important;border-color:#7ba8d144!important;min-height:48px}.secure-page .site-entry-back:hover{background:#1c3450!important}
 .secure-page .site-entry-consent input{appearance:none;-webkit-appearance:none;width:20px;height:20px;flex:0 0 20px;border:1px solid #7faacb66;border-radius:6px;background:#0b1726;position:relative;cursor:pointer;transition:background .25s,border-color .25s; margin-top:3px}

@@ -27,7 +27,7 @@
   listen(replay,'keydown',event=>{if(event.key!=='Tab')return;event.preventDefault();const controls=gateControls();(event.shiftKey?controls.at(-1):controls[0])?.focus();});
  }
  listen(body,'keydown',()=>{userActivated=true;});
- listen(body,'pointerdown',event=>{userActivated=true;const button=event.target.closest('button');if(!button||!button.closest('.secure-layout')||button.disabled)return;animate(button,[{transform:'scale(1)'},{transform:'scale(.965)'},{transform:'scale(1)'}],{duration:280,easing:'cubic-bezier(.2,.8,.2,1)'});});
+ listen(body,'pointerdown',event=>{userActivated=true;const button=event.target.closest('button');if(!button||!button.closest('.secure-layout')||button.disabled)return;const icon=button.querySelector('svg');if(icon)animate(icon,[{transform:'scale(1)'},{transform:'scale(.84)'},{transform:'scale(1)'}],{duration:280,easing:'cubic-bezier(.2,.8,.2,1)'});});
  listen(panel,'input',event=>{
   const input=event.target;if(!input.matches('input,textarea,select')||input.id==='reportWebsite')return;
   if(!['checking','sending','confirming'].includes(state)){setState('typing');clearTimeout(typingTimer);typingTimer=setTimeout(()=>{body.classList.remove('is-typing');setState(admin?inferAdminPhase():'idle');},1100);}
