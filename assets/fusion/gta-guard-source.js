@@ -110,10 +110,17 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
     const controls=hero.querySelector('.intro-controls');controls.style.opacity=String(1-smooth((p-.82)/.08));controls.inert=p>=.90;
   }
   function configureStory(){
-    scrollTrigger?.kill();scrollTrigger=null;releasePortal();const minimum=innerWidth<=600?800:innerWidth<=900?1000:720;enhanced=!reduced.matches&&innerWidth>=360&&innerHeight>=minimum;
+    // Safari's visible portrait viewport is shorter than the device screen.
+    // Use the compact composition, rather than dropping the entire journey.
+    scrollTrigger?.kill();scrollTrigger=null;releasePortal();const minimum=innerWidth<=600?520:innerWidth<=900?1000:720;enhanced=!reduced.matches&&innerWidth>=320&&innerHeight>=minimum;
     document.body.classList.toggle('story-enhanced',enhanced);document.body.classList.toggle('static-story',!enhanced);
     // svh can be smaller than innerHeight when Safari's chrome is collapsed.
     if(enhanced&&stageHost.offsetHeight<minimum){enhanced=false;document.body.classList.remove('story-enhanced');document.body.classList.add('static-story');}
+    // Height media queries may follow the larger layout viewport while svh
+    // keeps this stage smaller. Size the copy from the stage itself.
+    const portrait=enhanced&&innerWidth<=600,stageHeight=stageHost.offsetHeight;
+    document.body.classList.toggle('gta-portrait-compact',portrait&&stageHeight<=799);
+    document.body.classList.toggle('gta-portrait-short',portrait&&stageHeight<=629);
     if(!enhanced&&renderer){renderer.dispose();renderer=null;document.body.dataset.renderer='css';}
     if(enhanced)scrollTrigger=ScrollTrigger.create({trigger:hero,start:'top top',end:()=>'+='+Math.max(1,hero.offsetHeight-stageHost.offsetHeight),invalidateOnRefresh:true,onUpdate:self=>{scrollPose=self.progress;wake();}});
     else{scrollPose=currentScrollPose=0;}

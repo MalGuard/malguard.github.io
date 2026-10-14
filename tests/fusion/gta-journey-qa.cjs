@@ -29,6 +29,9 @@ const profiles = negative ? [
   { label: 'phone-edge', width: 360, height: 800, touch: true },
   { label: 'small-tall', width: 320, height: 844, touch: true },
   { label: 'short-mobile', width: 390, height: 740, touch: true },
+  { label: 'iphone-safari', width: 390, height: 664, touch: true },
+  { label: 'iphone-se', width: 375, height: 548, touch: true },
+  { label: 'phone-toolbar', width: 430, height: 932, smallHeight: 734, touch: true },
   { label: 'small-mobile', width: 320, height: 568, touch: true },
   { label: 'landscape', width: 844, height: 390, touch: true },
   { label: 'zoom-short', width: 360, height: 225 }
@@ -213,7 +216,8 @@ async function scanEvidence(page, profile, report) {
 
 async function runProfile(profile) {
   const context = await browser.newContext({ ignoreHTTPSErrors:true,viewport: { width: profile.width, height: profile.height }, deviceScaleFactor: profile.dpr || 1, hasTouch: !!profile.touch, isMobile: !!profile.touch, reducedMotion: profile.reduced ? 'reduce' : 'no-preference' });
-  await context.addInitScript(({ memory, disableGL }) => {
+  await context.addInitScript(({ memory, disableGL, smallHeight }) => {
+    if(smallHeight)Object.defineProperty(window,'innerHeight',{configurable:true,get:()=>smallHeight});
     Object.defineProperty(navigator, 'deviceMemory', { get: () => memory });
     Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });
     window.__gtaQAFileReads = [];
@@ -226,7 +230,9 @@ async function runProfile(profile) {
       if (original) File.prototype[method] = function(...args) { window.__gtaQAFileReads.push('File.' + method); return Reflect.apply(original, this, args); };
     }
     if (disableGL) { const original = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function(type, ...args) { return /webgl/.test(type) ? null : original.call(this, type, ...args); }; }
-  }, { memory: profile.memory || 8, disableGL: !!profile.disableGL });
+  }, { memory: profile.memory || 8, disableGL: !!profile.disableGL, smallHeight:profile.smallHeight });
+  // Model Safari's larger layout viewport and smaller stable stage separately.
+  if(profile.smallHeight)await context.route('**/gta-guard.css*',route=>route.fulfill({contentType:'text/css',body:fs.readFileSync(path.resolve(__dirname,'../../assets/fusion/gta-guard.css'),'utf8')+`\n@media(max-width:600px){.story-enhanced .gta-stage{height:${profile.smallHeight}px!important}.story-enhanced .gta-hero{height:${Math.round(profile.smallHeight*3.7)}px!important}.story-enhanced #scanner{margin-top:${90-profile.smallHeight}px!important}}`}));
   if (profile.failScene) await context.route('**/gta-guard-scene.js*', route => route.abort());
   if(profile.delayScene)await context.route('**/gta-guard-scene.js*',async route=>{await new Promise(resolve=>setTimeout(resolve,900));await route.continue();});
   // Allow the local fault/delay fixtures registered above to receive requests.
@@ -254,6 +260,7 @@ async function runProfile(profile) {
     }
     if (profile.disableGL || profile.failScene) await page.waitForFunction(() => MalGuardGTA.snapshot().renderFailed, null, { timeout: 15000 });
     await page.waitForTimeout(1150);
+    await page.waitForFunction(()=>!document.querySelector('.hero-copy').getAnimations({subtree:true}).some(a=>a.playState==='running'&&a.effect.getTiming().iterations!==Infinity));
     report.hero = await composition(page, '.hero-copy');
     checkComposition(report.hero, profile, 'hero');
     if (!expectsGL && !profile.disableGL && !profile.failScene && !profile.delayScene) assert.equal(sceneRequests.length, 0, 'the heavy renderer was loaded on a fallback device');
@@ -287,6 +294,9 @@ async function runProfile(profile) {
     await page.waitForFunction(before=>scrollY>before+40,wheelBefore,{timeout:6000});
     report.nativeWheel = !(webkit&&profile.touch);report.nativePageScroll=true;report.touchSwipeLimit=webkit&&profile.touch?'Physical swipe untested; native engine scroll exercised':undefined;report.noObjectDrag = true;
     const enhanced = (await state(page)).enhanced;
+    if(profile.touch&&profile.width<=600&&profile.width>=320&&profile.height>=520&&!profile.reduced){
+      check(enhanced,'Portrait phone lost its scroll journey to the static fallback');
+    }
     report.readingHolds = [];
     if (enhanced) {
       for (const direction of ['forward', 'reverse']) {

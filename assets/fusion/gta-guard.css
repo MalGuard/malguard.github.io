@@ -111,3 +111,48 @@ body.motion-paused .journey-copy article{filter:none!important}
 @media(max-width:600px){.demo-warning{top:90px}}
 @media(min-width:360px) and (max-width:389px){.story-enhanced .hero-copy h1{font-size:43px;margin-block:12px}.story-enhanced .hero-copy .hero-line{font-size:19px}.story-enhanced .hero-description{font-size:11.5px;line-height:1.65;margin-top:14px}.story-enhanced .hero-actions{margin-top:18px}.story-enhanced .hero-status{margin-top:15px}.story-enhanced .journey-copy h2{margin-block:16px}.story-enhanced .journey-description{line-height:1.7}.story-enhanced .chapter-proof{margin-top:13px;padding-top:10px}.story-enhanced .journey-copy .button{margin-top:18px}}
 @media(max-height:719px){.demo-warning{top:8px}.scanner-app summary{scroll-margin-top:90px}}
+/* Portrait Safari includes browser controls in the screen but not in svh.
+   Keep the whole scroll journey in that actual space, including its controls. */
+@media(max-width:600px){
+ .story-enhanced .gta-stage{height:100svh;min-height:0;padding:0}
+}
+@media(max-width:600px) and (min-height:520px){.demo-warning{top:90px}}
+@media(max-width:600px){
+ .story-enhanced.gta-portrait-compact .hero-art{height:100%;min-height:0}
+ .story-enhanced.gta-portrait-compact .gate-fallback{top:25%;--gate-scale:.45}
+ .story-enhanced.gta-portrait-compact .game-context{top:83px}
+ .story-enhanced.gta-portrait-compact .hero-copy{top:40%;left:7vw;width:86%;margin:0;padding:0;transform:none}
+ .story-enhanced.gta-portrait-compact .hero-copy h1{font-size:38px;margin-block:10px}
+ .story-enhanced.gta-portrait-compact .hero-copy .eyebrow{font-size:7px}
+ .story-enhanced.gta-portrait-compact .hero-copy .hero-line{font-size:18px;line-height:1.35}
+ .story-enhanced.gta-portrait-compact .hero-description{font-size:11px;line-height:1.55;margin-top:12px;max-width:none}
+ .story-enhanced.gta-portrait-compact .hero-actions{margin-top:14px;gap:8px}
+ .story-enhanced.gta-portrait-compact .hero-actions .button{font-size:9px;padding:10px 12px;gap:6px}
+ .story-enhanced.gta-portrait-compact .hero-status{font-size:8px;margin-top:12px}
+ .story-enhanced.gta-portrait-compact .journey-copy{top:43%;left:7vw;width:86%;margin:0;padding:0;transform:none}
+ .story-enhanced.gta-portrait-compact .journey-copy article{margin:0;transform:translateY(var(--chapter-offset,0px))}
+ .story-enhanced.gta-portrait-compact .journey-copy h2{font-size:32px;margin-block:13px;line-height:1.12}
+ .story-enhanced.gta-portrait-compact .journey-description{font-size:11px;line-height:1.55;max-width:none}
+ .story-enhanced.gta-portrait-compact .chapter-proof{font-size:8px;margin-top:12px;padding-top:10px}
+ .story-enhanced.gta-portrait-compact .journey-copy .button{margin-top:14px}
+ .story-enhanced.gta-portrait-compact .journey-rail{bottom:64px;gap:5px}
+ .story-enhanced.gta-portrait-compact .journey-rail>li:not(.rail-line){min-height:34px;padding-top:10px;font-size:8px;gap:4px}
+ .story-enhanced.gta-portrait-compact .hero-footer{bottom:18px;font-size:7px}
+ .story-enhanced.gta-portrait-compact .hero-footer #journey-cue{font-size:6px}
+ .story-enhanced.gta-portrait-compact .intro-controls button{font-size:8px}
+ .story-enhanced.gta-portrait-compact .demo-warning{top:90px}
+}
+@media(max-width:600px){
+ .story-enhanced.gta-portrait-short .gate-fallback{top:24%;--gate-scale:.30}
+ .story-enhanced.gta-portrait-short .hero-copy{top:auto;bottom:114px}
+ .story-enhanced.gta-portrait-short .hero-copy h1{font-size:32px;margin-block:8px}
+ .story-enhanced.gta-portrait-short .hero-copy .hero-line{font-size:16px;line-height:1.3}
+ .story-enhanced.gta-portrait-short .hero-description{font-size:10.5px;line-height:1.45;margin-top:10px}
+ .story-enhanced.gta-portrait-short .hero-actions{margin-top:10px}
+ .story-enhanced.gta-portrait-short .hero-status{font-size:7px;margin-top:9px;gap:5px}
+ .story-enhanced.gta-portrait-short .journey-copy h2{font-size:29px;margin-block:10px}
+ .story-enhanced.gta-portrait-short .journey-copy{top:37%}
+ .story-enhanced.gta-portrait-short .journey-copy article{top:0}
+ .story-enhanced.gta-portrait-short .journey-description{font-size:10.5px;line-height:1.45}
+ .story-enhanced.gta-portrait-short .chapter-proof{font-size:7px;margin-top:10px;padding-top:8px}
+}
