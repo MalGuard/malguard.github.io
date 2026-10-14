@@ -5,6 +5,10 @@ import {chromium,webkit,launchOptions} from './browser-runtime.mjs';
 const base='https://127.0.0.1:8443',privatePage='/console-8d42b69fda13705cc47a.html';
 const engines=process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chromium','webkit'],reports=[];
 await mkdir('test-results/secure-forms',{recursive:true});
+async function settledFocus(page,selector){
+ await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+ assert(await page.locator(selector).evaluate(e=>document.activeElement===e),'Country picker returned focus to the wrong field');
+}
 for(const engine of engines){
  const browser=await({chromium,webkit}[engine]).launch(launchOptions(engine));
  for(const width of [320,390,820,1440]){
@@ -46,15 +50,16 @@ for(const engine of engines){
   await page.locator('#siteAdminPasswordSubmit').click();await page.waitForFunction(()=>document.getElementById('siteAdminPasswordError').textContent==='Access denied');assert.equal(await page.locator('#siteAdminIdentityStep').isVisible(),false);
   authAllow=true;await page.locator('#siteAdminPasswordSubmit').click();await page.waitForSelector('#siteAdminIdentityStep:not([hidden])');await page.locator('#siteAdminName').fill('Synthetic Test');
   const phone=page.locator('#siteAdminPhone');assert.equal(await page.locator('.phone-country-button').getAttribute('data-country'),'US');await phone.fill('2025550148');assert.match(await phone.inputValue(),/202.*555.*0148/);
-  await page.locator('.phone-country-button').click();await page.locator('.country-picker input').fill('+98');await page.locator('.country-option:has(img[src$="/IR.svg"])').click();await phone.fill('09123456789');assert.equal(await page.locator('.phone-country-button').getAttribute('data-country'),'IR');assert.equal(await page.evaluate(()=>MalGuardPhone.validate(document.getElementById('siteAdminPhone'))),'+989123456789');
+  await page.locator('.phone-country-button').click();await page.locator('.country-picker input').fill('+98');await page.locator('.country-option:has(img[src$="/IR.svg"])').click();await settledFocus(page,'#siteAdminPhone');await phone.fill('09123456789');assert.equal(await page.locator('.phone-country-button').getAttribute('data-country'),'IR');assert.equal(await page.evaluate(()=>MalGuardPhone.validate(document.getElementById('siteAdminPhone'))),'+989123456789');
   await phone.fill('+93701234567');assert.equal(await page.locator('.phone-country-button').getAttribute('data-country'),'AF');assert.equal(await page.evaluate(()=>MalGuardPhone.validate(document.getElementById('siteAdminPhone'))),'+93701234567');
   await phone.fill('+12025550148');assert.equal(await page.locator('.phone-country-button').getAttribute('data-country'),'US');
+  await page.locator('.phone-country-button').click();await page.keyboard.press('Escape');await settledFocus(page,'.phone-country-button');
   await page.locator('#siteAdminConsent').check();await page.screenshot({path:`test-results/secure-forms/admin-${engine}-${width}.png`});await page.locator('#siteAdminEnter').click();await page.waitForURL(base+'/');
   assert.equal(authBodies.at(-1).phone,'+12025550148');assert.equal(await page.locator('#adminSessionBadge').isVisible(),true);assert.equal(await page.locator('#siteAdminEntry').count(),0);assert.equal(await page.locator('a[href*="console-"]').count(),0);
   await page.evaluate(()=>{sessionStorage.removeItem('malguard-admin-session');sessionStorage.removeItem('malguard-admin-session-exp');});
   await page.goto(base+'/malware-ai-windows.html');await page.waitForSelector('#accessPassword');await page.waitForFunction(()=>typeof window.MalGuardPhone?.validate==='function'&&document.getElementById('accessPhone').closest('.phone-field')?.querySelector('.phone-country-button'));assert.equal(await page.locator('#accessPhone').getAttribute('data-phone-input'),'');assert.equal(await page.locator('#accessPhone').getAttribute('dir'),'ltr');assert.equal(await page.locator('.phone-country-button').getAttribute('data-country'),'US');
   await page.locator('#accessPassword').fill('benign-ai-test-password');await page.locator('#accessSubmit').click();await page.waitForSelector('#nameStep:not([hidden])');await page.locator('#accessName').fill('Synthetic AI Test');
-  await page.locator('.phone-country-button').click();await page.locator('.country-picker input').fill('+98');await page.locator('.country-option:has(img[src$="/IR.svg"])').click();await page.locator('#accessPhone').fill('09123456789');assert.equal(await page.evaluate(()=>MalGuardPhone.validate(document.getElementById('accessPhone'))),'+989123456789');
+  await page.locator('.phone-country-button').click();await page.locator('.country-picker input').fill('+98');await page.locator('.country-option:has(img[src$="/IR.svg"])').click();await settledFocus(page,'#accessPhone');await page.locator('#accessPhone').fill('09123456789');assert.equal(await page.evaluate(()=>MalGuardPhone.validate(document.getElementById('accessPhone'))),'+989123456789');
   await page.locator('#accessPhone').fill('+93701234567');assert.equal(await page.locator('.phone-country-button').getAttribute('data-country'),'AF');await page.locator('#accessPhone').fill('+12025550148');await page.locator('#accessConsent').check();await page.locator('#accessEnter').click();await page.waitForFunction(()=>document.getElementById('accessGate').hidden);assert.equal(authBodies.at(-1).phone,'+12025550148');assert.equal(await page.locator('#aiApp').evaluate(e=>e.classList.contains('access-locked')),false);
   assert.deepEqual(errors,[]);reports.push({engine,width,layouts:8,samePageReport:true,shortPersianMessage:true,retryPreserved:true,maskedPassword:true,phoneCountries:['US','IR','AF'],privateAccess:true,errors});await context.close();console.log(`PASS secure forms ${engine} ${width}px`);
  }
