@@ -4,6 +4,7 @@ import {chromium,webkit,launchOptions} from './browser-runtime.mjs';
 const base=process.env.MALGUARD_FORM_QA_URL||'https://127.0.0.1:8443';
 const engines=process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chromium','webkit'];
 const reports=[];await mkdir('test-results/secure-cinematic',{recursive:true});
+let activePage,activeProfile;
 for(const engine of engines){
  const browser=await({chromium,webkit}[engine]).launch({...launchOptions(engine),...(engine==='webkit'&&process.env.DISPLAY?{headless:false}:{})});
  try{
@@ -19,7 +20,7 @@ for(const engine of engines){
      return route.fulfill({status:allow?200:401,headers,contentType:'application/json',body:JSON.stringify(allow?{ok:true}:{error:'Access denied'})});
     }external.push(req.url());return route.abort();
    });
-   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
+   const page=await context.newPage();activePage=page;activeProfile={engine,width,height};page.on('pageerror',e=>errors.push(e.message));
    for(const path of ['/report.html','/console-8d42b69fda13705cc47a.html']){
     await page.goto(base+path);await page.waitForFunction(()=>window.MalGuardSecureMotion);await page.waitForTimeout(1100);
     assert.equal(await page.locator('#secure-field,#secure-volume,canvas').count(),0);
@@ -51,6 +52,9 @@ for(const engine of engines){
    assert.deepEqual(errors,[]);assert.deepEqual(external,[]);reports.push({engine,width,height,animatedBackground:true,pauseResume:true,keyboard:true,passwordMasked:true,authStateMatchesResponse:true,reducedMotion:true,errors});await context.close();
    console.log(`PASS cinematic forms ${engine} ${width}px`);
   }
+ }catch(error){
+  const diagnostic=await activePage?.evaluate(()=>({state:document.body.dataset.secureState,identityHidden:document.getElementById('siteAdminIdentityStep')?.hidden,error:document.getElementById('siteAdminIdentityError')?.textContent,inputs:['siteAdminName','siteAdminPhone'].map(id=>{const el=document.getElementById(id);return {id,length:el?.value.length,valid:el?.validity.valid,missing:el?.validity.valueMissing,validation:el?.validationMessage};}),active:document.activeElement?.id,submitDisabled:document.getElementById('siteAdminEnter')?.disabled})).catch(()=>null);
+  console.error('FORM DIAGNOSTIC',JSON.stringify({profile:activeProfile,...diagnostic}));await activePage?.screenshot({path:`test-results/secure-cinematic/failure-${engine}.png`,fullPage:true}).catch(()=>{});throw error;
  }finally{await browser.close();}
 }
 await writeFile('test-results/secure-cinematic/report.json',JSON.stringify({status:'PASS',profiles:reports},null,2));
