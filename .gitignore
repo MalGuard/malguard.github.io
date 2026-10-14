@@ -1,3 +1,6 @@
 node_modules/
 _site/
 test-results/
+.firebase/
+firebase-debug*.log
+gha-creds-*.json

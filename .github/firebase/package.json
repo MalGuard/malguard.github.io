@@ -1,0 +1,10 @@
+{
+  "name": "malguard-firebase-hosting-tooling",
+  "private": true,
+  "version": "1.0.0",
+  "engines": { "node": ">=24" },
+  "devDependencies": {
+    "firebase-tools": "15.33.0",
+    "yaml": "2.8.1"
+  }
+}

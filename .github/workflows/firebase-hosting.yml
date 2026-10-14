@@ -1,0 +1,78 @@
+name: Deploy Firebase Hosting manually
+
+# No push, pull_request, preview channel, or automatic deployment trigger.
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Publish reviewed main to malguard1/malguard: type malguard1/malguard'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-hosting-malguard1-malguard
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      github.repository == 'MalGuard/malguard.github.io' &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'workflow_dispatch' &&
+      inputs.confirmation == 'malguard1/malguard'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: firebase-production
+      url: https://malguard.web.app
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout reviewed main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Check explicit enablement and OIDC configuration
+        env:
+          HOSTING_ENABLED: ${{ vars.FIREBASE_HOSTING_ENABLED }}
+          WIF_PROVIDER: ${{ vars.FIREBASE_WIF_PROVIDER }}
+          SERVICE_ACCOUNT: ${{ vars.FIREBASE_SERVICE_ACCOUNT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$HOSTING_ENABLED" = true || { echo 'Firebase Hosting has not been enabled for this environment.'; exit 1; }
+          [[ "$WIF_PROVIDER" =~ ^projects/[0-9]+/locations/global/workloadIdentityPools/malguard-github/providers/github$ ]] || { echo 'Configure the documented workload identity provider.'; exit 1; }
+          test "$SERVICE_ACCOUNT" = github-hosting@malguard1.iam.gserviceaccount.com || { echo 'Configure the dedicated malguard1 Hosting service account.'; exit 1; }
+
+      - name: Setup deployment tooling runtime
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+
+      - name: Install locked Firebase tooling
+        run: npm ci --prefix .github/firebase --ignore-scripts --no-audit --no-fund
+
+      - name: Build and validate unchanged public site
+        run: |
+          python3 tests/validate-trust.py
+          python3 tools/build-public-site.py
+          node tests/firebase-hosting.test.mjs
+
+      # Authenticate only after build/validation; credentials live outside _site.
+      - name: Authenticate with GitHub OIDC
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.FIREBASE_WIF_PROVIDER }}
+          service_account: ${{ vars.FIREBASE_SERVICE_ACCOUNT }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: Deploy only the configured Hosting site
+        env:
+          FIREBASE_CLI_DISABLE_UPDATE_CHECK: 'true'
+        run: .github/firebase/node_modules/.bin/firebase deploy --only hosting --project malguard1 --config firebase.json --non-interactive
