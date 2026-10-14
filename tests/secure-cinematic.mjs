@@ -47,7 +47,7 @@ for(const engine of engines){
    await page.waitForFunction(()=>document.body.dataset.secureState==='error');assert.equal(await page.locator('#siteAdminIdentityStep').isVisible(),false);
    allow=true;await page.locator('#siteAdminPasswordSubmit').click();await page.waitForFunction(()=>document.body.dataset.secureState==='identity');assert(await page.locator('#siteAdminIdentityStep').isVisible());assert.equal(await page.locator('#passwordSignal').textContent(),'');
    await page.locator('#siteAdminName').fill('x');await page.locator('#siteAdminPhone').fill('2025550148');await page.locator('#siteAdminEnter').click();await page.waitForFunction(()=>document.body.dataset.secureState==='error');await page.locator('#siteAdminName').fill('y');await page.locator('#siteAdminEnter').click();await page.waitForFunction(()=>document.body.dataset.secureState==='error');
-   await context.setDefaultNavigationTimeout(30000);await page.emulateMedia({reducedMotion:'reduce'});assert(await page.evaluate(()=>MalGuardSecureMotion.snapshot().paused));
+   await context.setDefaultNavigationTimeout(30000);await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>MalGuardSecureMotion.snapshot().paused,null,{timeout:5000});
    assert.equal(await page.evaluate(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).length),0);
    await page.locator('.secure-start').click();assert(await page.locator('#siteAdminIdentityStep').isVisible());
    assert.deepEqual(errors,[]);assert.deepEqual(external,[]);reports.push({engine,width,height,animatedBackground:true,pauseResume:true,keyboard:true,passwordMasked:true,authStateMatchesResponse:true,reducedMotion:true,errors});await context.close();
