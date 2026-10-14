@@ -36,7 +36,8 @@ for(const engine of engines){
     const frozen=await page.evaluate(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).map(a=>a.currentTime));await page.waitForTimeout(120);
     assert.deepEqual(await page.evaluate(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).map(a=>a.currentTime)),frozen);
     await page.locator('#motionToggle').click();assert.equal(await page.evaluate(()=>MalGuardSecureMotion.snapshot().paused),false);
-    await page.screenshot({path:`test-results/secure-cinematic/${path.includes('console')?'admin':'report'}-${engine}-${width}.png`,fullPage:true});
+    // Motion was verified above; freeze only while capturing a static image.
+    await page.screenshot({path:`test-results/secure-cinematic/${path.includes('console')?'admin':'report'}-${engine}-${width}.png`,fullPage:true,animations:'disabled'});
    }
    await page.locator('#siteAdminPassword').focus();let reached=false;for(let i=0;i<10;i++){await page.keyboard.press('Shift+Tab');if(await page.locator('.secure-start').evaluate(el=>el===document.activeElement)){reached=true;break;}}assert(reached,'Start must be reachable through the administrator focus loop');await page.keyboard.press('Enter');
    await page.locator('#siteAdminPassword').fill('synthetic-password');assert.match(await page.locator('#passwordSignal').textContent(),/^•+$/);
@@ -54,7 +55,7 @@ for(const engine of engines){
   }
  }catch(error){
   const diagnostic=await activePage?.evaluate(()=>({state:document.body.dataset.secureState,identityHidden:document.getElementById('siteAdminIdentityStep')?.hidden,error:document.getElementById('siteAdminIdentityError')?.textContent,inputs:['siteAdminName','siteAdminPhone'].map(id=>{const el=document.getElementById(id);return {id,length:el?.value.length,valid:el?.validity.valid,missing:el?.validity.valueMissing,validation:el?.validationMessage};}),active:document.activeElement?.id,motionPressed:document.getElementById('motionToggle')?.getAttribute('aria-pressed'),rootClasses:document.documentElement.className,submitDisabled:document.getElementById('siteAdminEnter')?.disabled})).catch(()=>null);
-  console.error('FORM DIAGNOSTIC',JSON.stringify({profile:activeProfile,...diagnostic}));await activePage?.screenshot({path:`test-results/secure-cinematic/failure-${engine}.png`,fullPage:true}).catch(()=>{});throw error;
+  console.error('FORM DIAGNOSTIC',JSON.stringify({profile:activeProfile,...diagnostic}));await activePage?.screenshot({path:`test-results/secure-cinematic/failure-${engine}.png`,fullPage:true,animations:'disabled'}).catch(()=>{});throw error;
  }finally{await browser.close();}
 }
 await writeFile('test-results/secure-cinematic/report.json',JSON.stringify({status:'PASS',profiles:reports},null,2));
