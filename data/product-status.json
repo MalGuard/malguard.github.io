@@ -20,20 +20,19 @@
         "iPhoneBrowserPreview": "available"
       }
     },
-    "malwareAI": {
-      "name": "Malware AI",
-      "status": "live-web-preview",
-      "platforms": {
-        "web": "available",
-        "windowsWebPreview": "available",
-        "iPhoneIPad": "coming-soon",
-        "android": "coming-soon"
-      }
-    },
     "gameScamGuard": {
       "name": "Game Scam Guard",
       "status": "in-development",
       "downloadEnabled": false
+    },
+    "threatRadar": {
+      "name": "Threat Radar",
+      "status": "public-advisory-viewer",
+      "source": "GitHub Global Security Advisories API",
+      "sourceAvailability": "external-dependency",
+      "attackMap": false,
+      "uploadsFiles": false,
+      "detailsUrl": "/threat-radar.html"
     }
   }
 }
