@@ -46,7 +46,16 @@ for(const engine of engines){
    assert.equal(await page.locator('.secure-panel').getAttribute('aria-busy'),'true');assert.equal(auth.length,1);releaseAuth();
    await page.waitForFunction(()=>document.body.dataset.secureState==='error');assert.equal(await page.locator('#siteAdminIdentityStep').isVisible(),false);
    allow=true;await page.locator('#siteAdminPasswordSubmit').click();await page.waitForFunction(()=>document.body.dataset.secureState==='identity');assert(await page.locator('#siteAdminIdentityStep').isVisible());assert.equal(await page.locator('#passwordSignal').textContent(),'');
-   await page.locator('#siteAdminName').fill('x');await page.locator('#siteAdminPhone').fill('2025550148');await page.locator('#siteAdminEnter').click();await page.waitForFunction(()=>document.body.dataset.secureState==='error');await page.locator('#siteAdminName').fill('y');await page.locator('#siteAdminEnter').click();await page.waitForFunction(()=>document.body.dataset.secureState==='error');
+   await page.locator('#siteAdminName').fill('x');await page.locator('#siteAdminPhone').fill('2025550148');
+    const authBeforeInvalidName=auth.length;
+    await page.locator('#siteAdminIdentityForm').evaluate(form=>form.requestSubmit());
+    await page.waitForFunction(()=>document.getElementById('siteAdminIdentityError').textContent==='Enter your name before continuing.');
+    assert.equal(auth.length,authBeforeInvalidName,'Invalid name must never contact the auth endpoint');
+    await page.waitForFunction(()=>document.body.dataset.secureState==='error');
+    await page.locator('#siteAdminName').fill('y');
+    await page.locator('#siteAdminIdentityForm').evaluate(form=>form.requestSubmit());
+    await page.waitForFunction(()=>document.getElementById('siteAdminIdentityError').textContent==='Enter your name before continuing.');
+    assert.equal(auth.length,authBeforeInvalidName,'Repeated invalid names must never submit');
    await context.setDefaultNavigationTimeout(30000);await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>MalGuardSecureMotion.snapshot().paused,null,{timeout:5000});
    assert.equal(await page.evaluate(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).length),0);
    await page.locator('.secure-start').click();assert(await page.locator('#siteAdminIdentityStep').isVisible());
