@@ -11,6 +11,25 @@ export function createApp({ scanSite = scanner.scanSite, scanFiles = scanner.sca
 const app = express();
 app.disable('x-powered-by');
 if (process.env.VERCEL) app.set('trust proxy', 1);
+// Pages hosts the UI; only our explicit first-party origins may call this API.
+// No credentials, wildcard origins, arbitrary requested headers or origin reflection.
+app.use('/api', (req,res,next)=>{
+  res.set({'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
+  res.vary('Origin');
+  const protocol=process.env.VERCEL?'https':process.env.NODE_ENV==='production'?req.protocol:(req.headers['x-forwarded-proto']||req.protocol);
+  const ownOrigin=process.env.PUBLIC_ORIGIN||`${protocol}://${req.headers.host}`;
+  const allowed=new Set([ownOrigin,'https://malguard.site','https://malguard.github.io']);
+  const origin=req.headers.origin;
+  if(origin&&!allowed.has(origin))return res.status(403).json({error:'درخواست باید از داخل برنامه ارسال شود.'});
+  if(origin){res.set('Access-Control-Allow-Origin',origin);}
+  if(req.method==='OPTIONS'){
+    const method=req.headers['access-control-request-method'];
+    const headers=(req.headers['access-control-request-headers']||'').toLowerCase().split(',').map(s=>s.trim()).filter(Boolean);
+    if(!origin||!['GET','POST'].includes(method)||headers.some(h=>h!=='content-type'))return res.status(403).end();
+    return res.set({'Access-Control-Allow-Methods':'GET, POST','Access-Control-Allow-Headers':'Content-Type','Access-Control-Max-Age':'600'}).status(204).end();
+  }
+  next();
+});
 app.use('/api/upload',express.json({limit:'4200kb'}));
 app.use('/api/jobs',express.json({limit:'1600kb'}));
 app.use('/api/advanced', express.json({ limit: '800kb' }));
@@ -18,13 +37,11 @@ app.use(express.json({ limit: '4kb' }));
 app.use('/api', (req, res, next) => {
   res.set({ 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
   // JSON + same-origin POSTs prevent cross-origin scan requests using a visitor's browser.
-  const protocol = process.env.VERCEL ? 'https' : process.env.NODE_ENV === 'production' ? req.protocol : (req.headers['x-forwarded-proto'] || req.protocol);
-  const expectedOrigin = process.env.PUBLIC_ORIGIN || `${protocol}://${req.headers.host}`;
   // Vercel may supply an already-parsed body; enforce the same limits in that case.
   const upload=req.path==='/upload';
   const limit = req.path.startsWith('/jobs/')?1600*1024:req.path === '/advanced' ? 800*1024 :upload?4*1024*1024+8192:4*1024;
   if (req.body && (Buffer.isBuffer(req.body)?req.body.length:Buffer.byteLength(JSON.stringify(req.body))) > limit) return res.status(413).json({error:'حجم درخواست بیش‌ازحد مجاز است. فقط لینک یا گزارش صادرشده را ارسال کنید.'});
-  if (req.method === 'POST' && (!(upload?(req.is('multipart/form-data')||req.is('application/json')):req.is('application/json')) || (req.headers.origin && req.headers.origin !== expectedOrigin))) return res.status(403).json({ error: 'درخواست باید از داخل برنامه ارسال شود.' });
+  if (req.method === 'POST' && !(upload?(req.is('multipart/form-data')||req.is('application/json')):req.is('application/json'))) return res.status(403).json({ error: 'درخواست باید از داخل برنامه ارسال شود.' });
   next();
 });
 const rates = new Map(); let activeScans = 0;
@@ -49,6 +66,12 @@ const handleScan = operation => async (req,res) => {
   }
 };
 app.get('/api/health', (req,res)=>res.json({ status: 'ok', providers: providerStatus(), mode: 'independent-html-and-file', maxFileSize: 12 * 1024 * 1024, maxFiles:128,maxUploadSize:MAX_UPLOAD_BYTES,cloudExecution:cloudExecutionStatus() }));
+app.get('/api/account-config',(req,res)=>{
+  // This is Clerk's intentionally public browser identifier, never a secret key.
+  const key=process.env.GUARD_CLERK_PUBLISHABLE_KEY||'';
+  const configured=/^pk_(test|live)_[A-Za-z0-9]+$/.test(key)&&key.length<1024;
+  res.json({provider:'clerk',configured,publishableKey:configured?key:null});
+});
 app.post('/api/scan', handleScan(body=>scanSite(body?.url,{allowThreatContent:['advanced','ultra'].includes(body?.mode)})));
 app.post('/api/advanced', handleScan(body=>scanFiles(body?.id, body?.token)));
 app.post('/api/jobs/start',handleScan(body=>startJob(body)));
