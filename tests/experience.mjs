@@ -184,6 +184,25 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     await page.locator('#radarSeverity').selectOption('high');assert.equal(await page.locator('.radar-item').count(),1);
     await context.close();
   });
+  await check(`${name} Threat Radar preserves existing brand fonts and colors`,async()=>{
+    const context=await browser.newContext({...fixtureTLS,reducedMotion:'reduce'});
+    await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
+    const page=await context.newPage();
+    await page.goto(base+'/products.html');await settle(page);
+    const original=await page.evaluate(()=>({
+      body:getComputedStyle(document.body).backgroundColor,
+      heading:getComputedStyle(document.querySelector('.product-hero h1')).fontFamily,
+      accent:getComputedStyle(document.documentElement).getPropertyValue('--mg-accent').trim()
+    }));
+    await page.goto(base+'/threat-radar.html');await settle(page);
+    const radar=await page.evaluate(()=>({
+      body:getComputedStyle(document.body).backgroundColor,
+      heading:getComputedStyle(document.querySelector('.radar-hero h1')).fontFamily,
+      accent:getComputedStyle(document.documentElement).getPropertyValue('--mg-accent').trim()
+    }));
+    assert.deepEqual(radar,original,'Radar must inherit the exact existing MalGuard background, heading font and brand accent');
+    await context.close();
+  });
   await check(`${name} motion preference and JavaScript-free content`,async()=>{
     const context=await browser.newContext(fixtureTLS);const page=await context.newPage();await page.goto(base+'/');await publicEntry(page);await page.locator('#motionToggle').click();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await page.reload();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await context.close();
     const nojs=await browser.newContext({...fixtureTLS,javaScriptEnabled:false});const p=await nojs.newPage();await p.goto(base+'/');assert.ok(await p.getByRole('heading',{name:'Scan smart. Play safe.'}).isVisible());assert.ok(await p.getByRole('link',{name:'Explore MalGuard'}).isVisible());assert.equal(await p.locator('#siteEntryGate').isVisible(),false);await nojs.close();
