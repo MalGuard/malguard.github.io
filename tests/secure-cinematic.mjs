@@ -30,12 +30,12 @@ for(const engine of engines){
     const language=page.locator('.mg-language select').first();await language.selectOption('fa');await page.waitForFunction(()=>document.documentElement.dir==='rtl'&&document.querySelector('.secure-start span').textContent.startsWith('شروع'));
     assert(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth<=1));await language.selectOption('en');await page.waitForFunction(()=>document.documentElement.lang==='en'&&document.querySelector('.secure-start span').textContent.startsWith('Start'));
     await page.locator('.secure-start').focus();await page.keyboard.press('Enter');
-    await page.locator('#motionToggle').click();assert(await page.evaluate(()=>MalGuardSecureMotion.snapshot().paused));
+    await page.locator('#motionToggle').click();await page.waitForFunction(()=>MalGuardSecureMotion.snapshot().paused===true);
     assert.equal(await page.locator('.vault-slab').first().evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
     await page.waitForFunction(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).every(a=>a.playState==='paused'&&!a.pending));
     const frozen=await page.evaluate(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).map(a=>a.currentTime));await page.waitForTimeout(120);
     assert.deepEqual(await page.evaluate(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).map(a=>a.currentTime)),frozen);
-    await page.locator('#motionToggle').click();assert.equal(await page.evaluate(()=>MalGuardSecureMotion.snapshot().paused),false);
+    await page.locator('#motionToggle').click();await page.waitForFunction(()=>MalGuardSecureMotion.snapshot().paused===false);
     // Motion was verified above; freeze only while capturing a static image.
     await page.screenshot({path:`test-results/secure-cinematic/${path.includes('console')?'admin':'report'}-${engine}-${width}.png`,fullPage:true,animations:'disabled'});
    }
@@ -47,8 +47,8 @@ for(const engine of engines){
    await page.waitForFunction(()=>document.body.dataset.secureState==='error');assert.equal(await page.locator('#siteAdminIdentityStep').isVisible(),false);
    allow=true;await page.locator('#siteAdminPasswordSubmit').click();await page.waitForFunction(()=>document.body.dataset.secureState==='identity');assert(await page.locator('#siteAdminIdentityStep').isVisible());assert.equal(await page.locator('#passwordSignal').textContent(),'');
    await page.locator('#siteAdminName').fill('x');await page.locator('#siteAdminPhone').fill('2025550148');await page.locator('#siteAdminEnter').click();await page.waitForFunction(()=>document.body.dataset.secureState==='error');await page.locator('#siteAdminName').fill('y');await page.locator('#siteAdminEnter').click();await page.waitForFunction(()=>document.body.dataset.secureState==='error');
-   await context.setDefaultNavigationTimeout(30000);await page.emulateMedia({reducedMotion:'reduce'});assert(await page.evaluate(()=>MalGuardSecureMotion.snapshot().paused));
-   assert.equal(await page.evaluate(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).length),0);
+   await context.setDefaultNavigationTimeout(30000);await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>MalGuardSecureMotion.snapshot().paused===true);
+   await page.waitForFunction(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).length===0);
    await page.locator('.secure-start').click();assert(await page.locator('#siteAdminIdentityStep').isVisible());
    assert.deepEqual(errors,[]);assert.deepEqual(external,[]);reports.push({engine,width,height,animatedBackground:true,pauseResume:true,keyboard:true,passwordMasked:true,authStateMatchesResponse:true,reducedMotion:true,errors});await context.close();
    console.log(`PASS cinematic forms ${engine} ${width}px`);
