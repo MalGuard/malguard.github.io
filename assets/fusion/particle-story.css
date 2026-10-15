@@ -9,6 +9,7 @@
  .particle-story .scene .t .eyebrow{transition:none!important}
  .particle-story .finale{min-height:160svh;display:block;padding:0}
  .particle-story .scene-index,.particle-story .scroll-cue{transition:opacity .2s;opacity:var(--chapter-label,0)}
+ .particle-story.motion-paused .scene-index,.particle-story.motion-paused .scroll-cue{transition:none!important}
 }
 @media(max-width:600px) and (prefers-reduced-motion:no-preference){
  .particle-story .scene .cta{gap:8px}
