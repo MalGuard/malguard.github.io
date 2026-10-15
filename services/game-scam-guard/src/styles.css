@@ -46,3 +46,4 @@
 
 /* Header controls are reachable on touch devices as well as with a mouse. */
 .profile-button,.locale-button{min-height:44px}.profile-button{padding-block:5px}
+.account-modal{max-height:calc(100dvh - 32px);overflow-y:auto}
