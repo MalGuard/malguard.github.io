@@ -92,7 +92,7 @@ function checkComposition(c, profile, label) {
   if (c.state.enhanced) {
     check(Math.abs(c.stage.top) < 2, `${label}: sticky stage moved while a chapter was being read`);
     check(c.text.top >= 70 && c.text.bottom <= profile.height - 65, `${label}: reading copy collided with header/footer or was clipped`);
-    check(c.text.bottom<=c.rail.top-12,`${label}: reading copy collided with the stage rail (copyBottom=${c.text.bottom.toFixed(1)}, railTop=${c.rail.top.toFixed(1)}, viewport=${profile.width}x${profile.height})`);
+    check(c.text.bottom<=c.rail.top-12,`${label}: reading copy collided with the stage rail`);
   }
   if (profile.width > 900) {
     check(c.bounds.left >= c.text.right + 8 || c.bounds.bottom <= c.text.top - 8 || c.bounds.top >= c.text.bottom + 8,
@@ -254,6 +254,10 @@ async function runProfile(profile) {
     }
     if (profile.disableGL || profile.failScene) await page.waitForFunction(() => MalGuardGTA.snapshot().renderFailed, null, { timeout: 15000 });
     await page.waitForTimeout(1150);
+    // The last hero reveal starts 600ms after readiness and lasts 900ms.
+    // Measure the reading hold after its real browser animations and fonts settle.
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForFunction(() => document.querySelector('.hero-copy').getAnimations({ subtree: true }).every(animation => animation.playState === 'finished'), null, { timeout: 7000 });
     report.hero = await composition(page, '.hero-copy');
     checkComposition(report.hero, profile, 'hero');
     if (!expectsGL && !profile.disableGL && !profile.failScene && !profile.delayScene) assert.equal(sceneRequests.length, 0, 'the heavy renderer was loaded on a fallback device');

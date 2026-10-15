@@ -1,0 +1,240 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Shield, ShieldCheck, ScanLine, History, BookOpen, Settings2, ArrowUpLeft, ArrowLeft, Link2, Clipboard, Check, ChevronLeft, ChevronDown, Bell, CircleHelp, Gamepad2, Menu, X, Globe2, FileSearch, Fingerprint, LockKeyhole, ExternalLink, LoaderCircle, CircleAlert, Search, Download, Trash2, CheckCheck, Sparkles, Info, Zap, Server, Copy } from 'lucide-react';
+import './styles.css';
+import { readHistory } from './history.js';
+
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load',()=>navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(()=>{}),{once:true});
+}
+
+const fa = v => new Intl.NumberFormat('fa-IR').format(v);
+const date = v => new Intl.DateTimeFormat('fa-IR', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' }).format(new Date(v));
+const labels = { limited: 'بررسی محدود', warning: 'نیازمند احتیاط', danger: 'تهدید گزارش‌شده', unavailable: 'بررسی ناقص', unscanned: 'بررسی نشده', skipped: 'بررسی نشده',queued:'در صف',blocked:'آدرس مسدود',requires_access:'نیازمند دسترسی',requires_payment:'نیازمند پرداخت',budget_exceeded:'سقف بررسی' };
+const descriptions = { limited: 'در موارد بررسی‌شده نشانهٔ قطعی تهدید پیدا نشد.', warning: 'نشانه‌هایی پیدا شد که نیاز به بررسی بیشتر دارند.', danger: 'این لینک یا فایل در پایگاه تهدید گزارش شده است.', unavailable:'بررسی کامل نشد؛ امنیت موارد نامشخص تأیید نمی‌شود.' };
+const STORAGE_KEY = 'gamescam-guard-history-v1';
+
+function ShieldArt({ busy = false }) {
+  return <div className={`shield-art ${busy ? 'busy' : ''}`} aria-hidden="true">
+    <div className="radar-ring ring-1"/><div className="radar-ring ring-2"/><div className="radar-ring ring-3"/><div className="radar-axis axis-h"/><div className="radar-axis axis-v"/>
+    <span className="radar-dot dot-1"/><span className="radar-dot dot-2"/><span className="radar-dot dot-3"/>
+    <span className="art-cross cross-1">+</span><span className="art-cross cross-2">+</span>
+    <div className="floating-tag tag-lock"><LockKeyhole size={15}/><span>SSL</span></div>
+    <div className="floating-tag tag-hash"><Fingerprint size={17}/><span>SHA-256</span></div>
+    <svg className="big-shield" width="156" height="170" viewBox="0 0 156 170" fill="none">
+      <defs><linearGradient id="shieldFill" x1="40" y1="15" x2="115" y2="153" gradientUnits="userSpaceOnUse"><stop stopColor="#e6ffc9"/><stop offset="1" stopColor="#a9e777"/></linearGradient><linearGradient id="shieldEdge" x1="0" y1="0" x2="156" y2="170"><stop stopColor="#fff"/><stop offset="1" stopColor="#57ad6c"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="9" stdDeviation="8" floodColor="#336e49" floodOpacity=".17"/></filter></defs>
+      <path d="M78 10C57 23 38 29 18 34V77C18 116 44 142 78 160C112 142 138 116 138 77V34C118 29 99 23 78 10Z" fill="url(#shieldFill)" stroke="url(#shieldEdge)" strokeWidth="2" filter="url(#shadow)"/>
+      <path d="M78 25C60 35 45 40 32 44V78C32 107 49 127 78 145C107 127 124 107 124 78V44C111 40 96 35 78 25Z" stroke="#fafff4" strokeWidth="1.5"/>
+      <path d="m52 81 18 18 36-38" stroke="#245c3b" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M24 43v29" stroke="white" strokeWidth="3" strokeLinecap="round" opacity=".65"/>
+    </svg>
+  </div>;
+}
+
+function App() {
+  const [page, setPage] = useState('scan');
+  const [url, setUrl] = useState('');
+  const [mode, setMode] = useState('basic');
+  const [busy, setBusy] = useState(false);
+  const [advancedBusy, setAdvancedBusy] = useState(false);
+  const [scanEvents,setScanEvents]=useState([]);
+  const [pendingJob,setPendingJob]=useState(()=>{try{if(localStorage.getItem('guard-save-history')==='false')return null;const saved=JSON.parse(localStorage.getItem('guard-pending-job')||'null');return saved&&typeof saved.id==='string'&&typeof saved.token==='string'&&saved.token.length<1500*1024&&['advanced','ultra'].includes(saved.mode)&&Number.isInteger(saved.next)&&Number.isInteger(saved.total)?saved:null;}catch{return null;}});
+  const [uploadFile,setUploadFile]=useState(null);
+  const [archivePassword,setArchivePassword]=useState('');
+  const [behaviorConsent,setBehaviorConsent]=useState(false);
+  const scanAbort=useRef(null);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+  const [toast, setToast] = useState('');
+  const [modal, setModal] = useState(null);
+  const [mobileNav, setMobileNav] = useState(false);
+  const [health, setHealth] = useState(null);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [notifications, setNotifications] = useState(false);
+  const [saveHistory, setSaveHistory] = useState(()=> { try { return localStorage.getItem('guard-save-history') !== 'false'; } catch { return false; } });
+  const saveHistoryRef=useRef(saveHistory);saveHistoryRef.current=saveHistory;
+  const [history, setHistory] = useState(()=> { try { return readHistory(localStorage.getItem(STORAGE_KEY)); } catch { return []; } });
+  const inputRef = useRef(null); const reportRef = useRef(null); const modalRef = useRef(null); const priorFocus = useRef(null);
+  useEffect(()=> { fetch('/api/game-scam-guard/health').then(r=>r.json()).then(setHealth).catch(()=>setHealth({status:'unavailable'})); }, []);
+  useEffect(()=> { if (!toast) return; const t = setTimeout(()=>setToast(''),3500); return ()=>clearTimeout(t); }, [toast]);
+  useEffect(()=> { try { localStorage.setItem('guard-save-history', String(saveHistory)); if (saveHistory) localStorage.setItem(STORAGE_KEY, JSON.stringify(history)); else {localStorage.removeItem(STORAGE_KEY);localStorage.removeItem('guard-pending-job');} } catch { /* Browser storage may be unavailable. */ } }, [history, saveHistory]);
+  useEffect(()=> {
+    if (!modal) return;
+    priorFocus.current = document.activeElement;
+    modalRef.current?.querySelector('button')?.focus();
+    const listener = e => {
+      if (e.key === 'Escape') setModal(null);
+      if (e.key === 'Tab') {
+        const nodes = modalRef.current?.querySelectorAll('button:not(:disabled),a[href],input');
+        if (!nodes?.length) return;
+        if (e.shiftKey && document.activeElement === nodes[0]) { e.preventDefault(); nodes[nodes.length-1].focus(); }
+        else if (!e.shiftKey && document.activeElement === nodes[nodes.length-1]) { e.preventDefault(); nodes[0].focus(); }
+      }
+    };
+    document.addEventListener('keydown',listener);
+    return ()=> { document.removeEventListener('keydown',listener); priorFocus.current?.focus(); };
+  }, [modal]);
+
+  function navigate(next) { setPage(next); setMobileNav(false); setError(''); window.scrollTo({top:0,behavior:'smooth'}); }
+  function remember(data) {
+    // Keep evidence locally, but avoid storing screenshots or filling browser storage.
+    const saved = {...data, preview:data.preview ? {status:data.preview.status,detail:data.preview.detail} : undefined};
+    setHistory(previous=>readHistory(JSON.stringify([saved,...previous.filter(h=>h.id !== data.id)])));
+  }
+  async function callApi(endpoint, body) {
+    let response;
+    try { response = await fetch(`/api/game-scam-guard/${endpoint}`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); }
+    catch { throw new Error('اتصال به سرویس بررسی برقرار نشد. اتصال اینترنت را بررسی و دوباره تلاش کنید.'); }
+    let data; try { data = await response.json(); } catch { throw new Error('سرویس بررسی در دسترس نیست. دوباره تلاش کنید.'); }
+    if (!response.ok) throw new Error(data.error || 'بررسی انجام نشد.');
+    return data;
+  }
+  async function runScan(event, link = url) {
+    event?.preventDefault(); if (busy || advancedBusy) return;
+    if (!link.trim()) { setError('اول لینک سایت را وارد کنید.'); inputRef.current?.focus(); return; }
+    setBusy(true); setError(''); setResult(null);
+    try {
+      const data = await callApi('scan',{url:link.trim(),mode}); setResult(data); setUrl(data.url); remember(data); setNotifications(true);
+      if(data.inputAdjusted)setToast('نشانهٔ اضافی متن کپی‌شده از ابتدا یا انتهای لینک حذف شد.');
+      setTimeout(()=>reportRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),100);
+      if (mode !== 'basic' && (data.files.length||data.linkInventory?.retained)) {setBehaviorConsent(false);setModal('advanced');}
+    } catch (e) { setError(e.message); }
+    finally { setBusy(false); }
+  }
+  async function runAdvanced() {
+    if (!result || advancedBusy) return; setModal(null); setAdvancedBusy(true); setError('');setScanEvents([]);
+    try {const job=await callApi('jobs/start',{id:result.id,token:result.scanToken,mode:mode==='ultra'?'ultra':'advanced',consent:true,behaviorConsent});await continueQueue(job);}
+    catch (e) { setError(e.name==='AbortError'?'صف متوقف شد؛ از آخرین دسته می‌توانید ادامه دهید.':e instanceof TypeError?'اتصال به سرویس قطع شد؛ ادامهٔ صف محفوظ است.':e.message); }
+    finally { setAdvancedBusy(false);scanAbort.current=null; }
+  }
+  function saveQueue(job){
+    const saved={id:job.id,token:job.token,mode:job.mode,next:job.next,total:job.targets?.length||job.total||0};setPendingJob(saved);
+    if(saveHistoryRef.current)try{localStorage.setItem('guard-pending-job',JSON.stringify(saved));}catch{setToast('ذخیرهٔ ادامهٔ صف در مرورگر ممکن نشد؛ صفحه را باز نگه دارید.');}
+  }
+  async function continueQueue(first){
+    let job=first;saveQueue(job);
+    for(;;){
+      const controller=new AbortController();scanAbort.current=controller;
+      const response=await fetch('/api/game-scam-guard/jobs/step',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:job.id,token:job.token}),signal:controller.signal});
+      if(!response.ok){const data=await response.json();throw new Error(data.error||'این دسته بررسی نشد؛ ادامهٔ صف محفوظ است.');}
+      const reader=response.body.getReader(),decoder=new TextDecoder();let text='',completed;
+      const line=value=>{if(!value.trim())return;const data=JSON.parse(value);if(data.error)throw new Error(data.error);if(data.event)setScanEvents(events=>[...events,data.event].slice(-12));if(data.job)completed=data;};
+      for(;;){const {done,value}=await reader.read();if(done)break;text+=decoder.decode(value,{stream:true});let index;while((index=text.indexOf('\n'))!==-1){line(text.slice(0,index));text=text.slice(index+1);}}
+      text+=decoder.decode();if(text.trim())line(text);
+      if(!completed)throw new Error('پاسخ کامل دسته دریافت نشد؛ از آخرین دستهٔ ذخیره‌شده ادامه دهید.');
+      job=completed.job;saveQueue(job);
+      if(job.done){setResult(completed.report);remember(completed.report);setPendingJob(null);localStorage.removeItem('guard-pending-job');setToast('گزارش مقصدهای صف آماده شد.');break;}
+    }
+    scanAbort.current=null;
+  }
+  async function resumeQueue(){if(!pendingJob||advancedBusy)return;setMode(pendingJob.mode);setAdvancedBusy(true);setError('');try{await continueQueue(pendingJob);}catch(e){setError(e.name==='AbortError'?'صف متوقف شد؛ می‌توانید از آخرین دسته ادامه دهید.':e instanceof TypeError?'اتصال به سرویس قطع شد؛ ادامهٔ صف محفوظ است.':e.message);}finally{setAdvancedBusy(false);scanAbort.current=null;}}
+  async function runUpload(event){
+    event.preventDefault();if(!uploadFile||busy||advancedBusy)return;
+    if(uploadFile.size>3*1024*1024){setError('سقف فایل آپلودی ۳ مگابایت است.');return;}
+    setAdvancedBusy(true);setError('');setResult(null);setScanEvents([{message:'دریافت و تحلیل فایل انتخاب‌شدهٔ شما'}]);
+    try{const bytes=new Uint8Array(await uploadFile.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=32768)binary+=String.fromCharCode(...bytes.subarray(i,i+32768));
+      const data=await callApi('upload',{name:uploadFile.name,data:btoa(binary),mode:mode==='ultra'?'ultra':'advanced',consent:true,behaviorConsent,password:archivePassword});setResult(data);remember(data);setArchivePassword('');setTimeout(()=>reportRef.current?.scrollIntoView({behavior:'smooth'}),100);
+    }catch(e){setError(e instanceof TypeError?'ارسال فایل یا اتصال کامل نشد؛ دوباره تلاش کنید.':e.message);}finally{setAdvancedBusy(false);}
+  }
+  async function paste() {
+    try { const value = await navigator.clipboard.readText(); setUrl(value.trim()); setError(''); inputRef.current?.focus(); }
+    catch { setToast('برای چسباندن لینک از Ctrl+V یا گزینهٔ چسباندن گوشی استفاده کنید.'); inputRef.current?.focus(); }
+  }
+  async function copyHash(hash) {
+    try { await navigator.clipboard.writeText(hash); setToast('هش فایل کپی شد.'); }
+    catch { setToast('کپی خودکار در این مرورگر در دسترس نیست.'); }
+  }
+  function exportReport() {
+    const file = new Blob([JSON.stringify(result,null,2)], {type:'application/json;charset=utf-8'});
+    const href = URL.createObjectURL(file); const a = document.createElement('a'); a.href=href; a.download=`gamescam-guard-${result.domain}.json`; a.click(); URL.revokeObjectURL(href); setToast('گزارش ذخیره شد.');
+  }
+  const filteredHistory = history.filter(h=>(h.domain.toLowerCase().includes(search.toLowerCase()) || h.title.toLowerCase().includes(search.toLowerCase())) && (filter==='all' || h.status===filter));
+  const pageUnavailable = result?.pageFetch?.status === 'unavailable';
+  const navItems = [{id:'scan',label:'بررسی لینک',icon:ScanLine},{id:'history',label:'تاریخچه بررسی‌ها',icon:History},{id:'guide',label:'چطور کار می‌کند؟',icon:BookOpen}];
+
+  function HistoryTable({ compact = false }) {
+    const rows = compact ? history.slice(0,3) : filteredHistory;
+    return <div className="history-table">
+      <div className="table-row table-heading"><span>وب‌سایت</span><span>وضعیت بررسی</span><span>زمان بررسی</span><span/></div>
+      {!rows.length ? <div className="empty-history"><div className="empty-icon"><History size={24}/></div><div><strong>{history.length ? 'نتیجه‌ای پیدا نشد' : 'اولین بررسی‌ات از اینجا شروع می‌شود'}</strong><p>{history.length ? 'عبارت جستجو یا فیلتر را تغییر بده.' : 'بعد از بررسی یک لینک، گزارش آن را اینجا می‌بینی.'}</p></div>{!compact && !history.length && <button className="text-button" onClick={()=>navigate('scan')}>بررسی اولین لینک <ArrowLeft size={16}/></button>}</div> : rows.map(item=><button key={item.id} className="table-row history-row" onClick={()=>{setResult(item);setUrl(item.url);navigate('scan');setTimeout(()=>reportRef.current?.scrollIntoView({behavior:'smooth'}),100);}}><span className="website-cell"><span className="website-icon"><Globe2 size={17}/></span><span><b dir="ltr">{item.domain}</b><small>{item.advanced?'بررسی سایت و فایل':'بررسی اولیه سایت'}</small></span></span><span><span className={`status-badge ${item.status}`}><i/>{labels[item.status]}</span></span><span className="date-cell">{date(item.createdAt)}</span><ChevronLeft size={17}/></button>)}
+    </div>;
+  }
+
+  return <div className="app-shell">
+    {mobileNav && <div className="nav-backdrop" onClick={()=>setMobileNav(false)}/>}
+    <aside className={`sidebar ${mobileNav?'open':''}`}>
+      <a className="brand" href="#" onClick={e=>{e.preventDefault();navigate('scan');}}><span className="brand-symbol"><ShieldCheck size={27} strokeWidth={1.8}/></span><span><strong>گیم‌اسکم گارد<span className="brand-dot">.</span></strong><small>GAMESCAM GUARD</small></span></a>
+      <div className="sidebar-label">فضای کار شما</div>
+      <nav>{navItems.map(item=><button key={item.id} className={`nav-item ${page===item.id?'active':''}`} onClick={()=>navigate(item.id)}><item.icon size={20}/><span>{item.label}</span>{item.id==='scan' && <span className="nav-active-dot"/>}{item.id==='history' && history.length>0 && <small>{fa(history.length)}</small>}</button>)}</nav>
+      <div className="sidebar-separator"/>
+      <div className="sidebar-label">بیشتر بدانید</div>
+      <button className={`nav-item ${page==='resources'?'active':''}`} onClick={()=>navigate('resources')}><Shield size={20}/><span>راهنمای بازی امن</span><ArrowUpLeft size={16}/></button>
+      <button className={`nav-item ${page==='settings'?'active':''}`} onClick={()=>navigate('settings')}><Settings2 size={20}/><span>تنظیمات</span></button>
+      <div className="sidebar-bottom"><div className="sidebar-tip"><div className="tip-mini-icon"><Gamepad2 size={24}/><Sparkles size={12}/></div><strong>بازی کن، با خیال راحت‌تر.</strong><p>قبل از دانلود یا خرید،<br/>یک قدم برای امنیتت بردار.</p><button onClick={()=>navigate('resources')}>راهنمای گیمرها <ArrowLeft size={16}/></button></div><div className="sidebar-service"><span className={`service-dot ${health?.status==='ok'?'':'offline'}`}/><span>{health?.status==='ok'?'سرویس بررسی فعال است':health?'سرویس در دسترس نیست':'در حال اتصال به سرویس'}</span><small>v1.0</small></div></div>
+    </aside>
+
+    <div className="main-shell">
+      <header className="topbar"><div className="breadcrumb"><button className="icon-button mobile-menu" aria-label="باز کردن منو" onClick={()=>setMobileNav(true)}><Menu size={21}/></button><span>فضای کار</span><ChevronLeft size={14}/><b>{{scan:'بررسی لینک',history:'تاریخچه بررسی‌ها',guide:'چطور کار می‌کند؟',resources:'راهنمای بازی امن',settings:'تنظیمات'}[page]}</b></div><div className="header-actions"><button className="icon-button" aria-label="راهنما" onClick={()=>setModal('help')}><CircleHelp size={20}/></button><div className="notification-wrap"><button className="icon-button" aria-label="اعلان‌ها" onClick={()=>{setModal('notifications');setNotifications(false);}}><Bell size={20}/>{notifications && <i className="notification-dot"/>}</button></div><div className="header-divider"/><span className="profile-avatar">گ</span><span className="profile-name">گیمر عزیز<small>فضای شخصی</small></span></div></header>
+      <main>
+        {page==='scan' && <>
+          <section className="hero"><div className="hero-copy"><div className="eyebrow"><span/>یک قدم جلوتر از کلاهبردارها</div><h1>قبل از کلیک، <span>مطمئن شو.</span></h1><p>لینک بازی، ماد یا فروشگاه را بررسی کن.<br className="mobile-break"/> ما نشانه‌های خطر را قبل از تو پیدا می‌کنیم.</p></div><div className="hero-stamp"><ShieldCheck size={18}/><span>برای گیمرها،<br/><b>با فکر امنیت</b></span><span className="stamp-orbit"/></div></section>
+          <section className="scan-workspace">
+            <div className="scan-card">
+              <div className="scan-tabs" role="tablist" aria-label="نوع بررسی"><button role="tab" aria-selected={mode==='basic'} className={mode==='basic'?'selected':''} onClick={()=>setMode('basic')} disabled={busy||advancedBusy}><Link2 size={18}/>بررسی لینک سایت</button><button role="tab" aria-selected={mode==='advanced'} className={mode==='advanced'?'selected':''} onClick={()=>setMode('advanced')} disabled={busy||advancedBusy}><FileSearch size={18}/>بررسی پیشرفته<span className="tiny-tag">سایت + فایل</span></button><button role="tab" aria-selected={mode==='ultra'} className={mode==='ultra'?'selected':''} onClick={()=>setMode('ultra')} disabled={busy||advancedBusy}><Sparkles size={18}/>فوق‌العاده پیشرفته</button></div>
+              <form onSubmit={runScan} className="scan-form">{mode==='ultra'&&!health?.cloudExecution?.ready&&<p className="preview-unavailable">اجرای ابری فعلاً آماده نیست؛ تحلیل محتوا انجام می‌شود و اجرای مشاهده‌نشده به‌عنوان نتیجهٔ امن گزارش نمی‌شود.</p>}<div className="form-title"><div><h2>این لینک قابل اعتماده؟</h2><p>{mode==='basic'?'آدرس سایت را وارد کن تا بررسی را شروع کنیم.':mode==='advanced'?'با یک تأیید، مقصدها و محتوای فایل‌ها را در صف بررسی می‌کنیم.':'موتور اختصاصی و تحلیل محتوا؛ اجرای رفتاری فقط با محیط ابری آماده انجام می‌شود.'}</p></div><span className="form-icon"><ScanLine size={23}/></span></div><label htmlFor="site-url">لینک وب‌سایت</label><div className={`url-input-wrap ${error?'invalid':''}`}><Link2 size={19}/><input ref={inputRef} id="site-url" type="text" inputMode="url" dir="ltr" autoComplete="url" spellCheck="false" placeholder="https://example.com" value={url} onChange={e=>{setUrl(e.target.value);setError('');}} disabled={busy||advancedBusy} aria-describedby={error?'scan-error':undefined}/><button type="button" className="paste-button" onClick={paste} disabled={busy||advancedBusy}><Clipboard size={15}/><span>چسباندن</span></button></div><div className="input-hint"><LockKeyhole size={12}/><span>لینک روی سرور بررسی می‌شود؛ در دستگاهت باز نمی‌شود.</span></div><div className="scan-action"><button className="primary-button scan-submit" disabled={busy||advancedBusy}>{busy?<LoaderCircle size={19} className="spin"/>:<ScanLine size={19}/>}<span>{busy?'در حال بررسی لینک…':'شروع بررسی'}</span>{!busy&&<ArrowLeft size={17}/>}</button><span className="scan-time"><Zap size={14}/>بدون نصب برنامه</span></div>{error && <div className="error-message" id="scan-error" role="alert"><CircleAlert size={17}/><span>{error}</span></div>}
+                {busy && <div className="scan-progress" role="status"><div className="progress-bar indeterminate"><i/></div><span>درخواست بررسی سایت در حال پردازش است؛ نتیجه پس از دریافت پاسخ نمایش داده می‌شود.</span></div>}
+              </form><div className="scan-card-footer"><span><Check size={14}/>بررسی HTTP و HTTPS</span><span><Check size={14}/>{mode==='ultra'?'اجرا فقط در محیط ابری آماده':'تحلیل بدون اجرای فایل'}</span><span><Check size={14}/>گزارش همراه با شواهد</span></div>
+            </div>
+            <div className="visual-card"><span className="visual-label"><span className={busy?'pulse':''}/>{busy?'گارد در حال بررسی است':'گارد آمادهٔ بررسی است'}</span><ShieldArt busy={busy}/><h3>یک لینک، چند لایه بررسی.</h3><p>از محتوای سایت تا ردپای فایل‌ها؛<br/>هر نشانه، یک تصمیم آگاهانه‌تر.</p><div className="visual-tags"><span><Globe2 size={12}/>وب‌سایت</span><span><FileSearch size={12}/>فایل</span><span><Fingerprint size={12}/>هش</span></div></div>
+          </section>
+          <section className="scan-card upload-panel"><form onSubmit={runUpload} className="scan-form"><h3>فایلِ خریداری‌شده یا خصوصی را بررسی کن</h3><p>فایل در اختیار خودت را انتخاب کن؛ سقف آپلود ۳ مگابایت است. رمز حساب سایت را اینجا وارد نکن.</p><label htmlFor="private-file">فایل برای تحلیل</label><input id="private-file" type="file" onChange={e=>setUploadFile(e.target.files?.[0]||null)} disabled={busy||advancedBusy}/><label htmlFor="archive-password">رمز آرشیو ZIP، اختیاری</label><input id="archive-password" type="password" autoComplete="off" value={archivePassword} onChange={e=>setArchivePassword(e.target.value)} disabled={busy||advancedBusy}/><ExecutionConsent checked={behaviorConsent} onChange={setBehaviorConsent} disabled={busy||advancedBusy} id="upload-execution-consent"/><button className="primary-button" disabled={!uploadFile||busy||advancedBusy}>آپلود و بررسی با رضایت من <FileSearch size={16}/></button></form></section>
+          {!advancedBusy&&pendingJob&&<button className="outline-button" onClick={resumeQueue}>ادامهٔ صف ثبت‌شده ({fa(pendingJob.next||0)} از {fa(pendingJob.total||0)})</button>}{advancedBusy&&!result&&<div className="advanced-loading" role="status"><LoaderCircle className="spin" size={20}/>{scanEvents.at(-1)?.message||'درخواست در حال پردازش است'}</div>}
+          <div className="how-strip"><div><span className="step-icon"><Link2 size={19}/></span><span><b>لینک را وارد کن</b><small>آدرس سایت، فروشگاه یا فایل بازی</small></span><em>01</em></div><ChevronLeft className="step-arrow" size={16}/><div><span className="step-icon"><ScanLine size={19}/></span><span><b>نشانه‌ها را بررسی می‌کنیم</b><small>محتوا، لینک‌ها و گزارش‌های تهدید</small></span><em>02</em></div><ChevronLeft className="step-arrow" size={16}/><div><span className="step-icon"><ShieldCheck size={19}/></span><span><b>با آگاهی تصمیم بگیر</b><small>یک گزارش شفاف، همراه با شواهد</small></span><em>03</em></div></div>
+
+          {result && <section className="report-card" ref={reportRef}>
+            <div className="section-heading"><div><span className="section-kicker">گزارش بررسی واقعی</span><h2>نتیجهٔ بررسی لینک</h2></div><button className="outline-button" onClick={exportReport}><Download size={16}/>ذخیره گزارش</button></div>
+            <div className={`verdict ${result.status}`}><div className="verdict-icon">{result.status==='danger'||pageUnavailable?<CircleAlert size={27}/>:result.status==='warning'?<CircleAlert size={27}/>:<FileSearch size={27}/>}</div><div><strong>{descriptions[result.status]}</strong><p>این نتیجه، تضمین امنیت فایل یا اصالت فروشنده نیست.</p></div><span className={`status-badge ${result.status}`}><i/>{labels[result.status]}</span></div>
+            <div className="report-summary"><div><small>{pageUnavailable?'آدرس بررسی‌شده':'آدرس نهایی مشاهده‌شده'}</small><span className="report-url" dir="ltr">{result.source==='upload'?'فایل دریافت‌شده از دستگاه شما':result.finalUrl}</span></div><div><small>زمان بررسی</small><b>{date(result.createdAt)}</b></div><div><small>لینک‌های صفحه</small><b>{pageUnavailable?'نامشخص':`${fa(result.linkCount)} لینک`}</b></div><div><small>فایل‌های پیدا شده</small><b>{pageUnavailable?'نامشخص':`${fa(result.fileCount)} فایل`}</b></div></div>
+            {pageUnavailable&&<div className="fetch-incomplete" role="status"><CircleAlert size={21}/><div><h3>محتوای سایت مشاهده نشد</h3><p>{result.pageFetch.detail}</p><p>تعداد لینک‌ها و فایل‌ها نامشخص است. {result.pageFetch.attempts>0?`${fa(result.pageFetch.attempts)} تلاش برای دریافت انجام شد.`:''} بررسی پیشرفته به دریافت صفحه نیاز دارد.</p></div>{result.status!=='danger'&&<button className="outline-button" disabled={busy||advancedBusy} onClick={event=>runScan(event,result.url)}>تلاش دوباره برای دریافت سایت <ArrowLeft size={15}/></button>}</div>}
+            {result.preview?.image&&<details className="browser-preview"><summary><Globe2 size={15}/>پیش‌نمایش صفحه‌ای که مرورگر سرور باز کرد<span>مشاهده تصویر <ChevronDown size={13}/></span></summary><img src={result.preview.image} alt={`پیش‌نمایش محتوای مشاهده‌شده از ${result.domain}`} loading="lazy"/><p>{result.preview.detail} تصویر صرفاً برای مشاهده است؛ لینک‌های داخل آن قابل کلیک نیستند.</p></details>}
+            {result.preview?.status==='unavailable'&&<p className="preview-unavailable"><Info size={14}/>{result.preview.detail}</p>}
+            <div className="evidence-grid"><div className="evidence-panel"><h3><Globe2 size={17}/>{pageUnavailable?'وضعیت دریافت سایت':'آنچه در سایت دیدیم'}</h3><small>{pageUnavailable?'محتوای قابل مشاهده':'عنوان صفحه'}</small><h4>{result.title}</h4>{result.description&&<p>{result.description}</p>}{result.headings.length>0&&<div className="heading-chips">{result.headings.map((h,i)=><span key={i}>{h}</span>)}</div>}{result.excerpt&&<details><summary>بخشی از متن دریافت‌شده</summary><p>{result.excerpt}</p></details>}<span className="mime-tag" dir="ltr">{result.contentType}</span></div><div className="evidence-panel"><h3><CheckCheck size={17}/>مراحل انجام‌شده</h3>{result.checks.map((c,i)=><div className="check-row" key={i}>{c.status==='done'?<Check size={16}/>:<Info size={16}/>}<div><b>{c.title}</b><small>{c.detail}</small></div></div>)}</div></div>
+            {result.signals.length>0&&<div className="signals"><h3>نشانه‌های قابل توجه</h3>{result.signals.map((s,i)=><div key={i} className={`signal ${s.level}`}><CircleAlert size={17}/><div><b>{s.title}</b><p>{s.detail}</p></div></div>)}</div>}
+            {result.linkInventory&&<details className="redirect-details"><summary>لینک‌های مشاهده‌شده در صفحه ({fa(result.linkInventory.total)})</summary><p>{result.linkInventory.status==='checked-targets'?'این فهرست به نتیجهٔ صف متصل است؛ وضعیت هر مقصد جداگانه ثبت شده است.':'این فهرست از HTML دریافت‌شده استخراج شده است؛ مقصد هر لینک جداگانه باز و بررسی نشده است.'}</p>{result.linkInventory.links.map(link=><p key={link.position}><b>{fa(link.position)}. {link.label||'بدون عنوان'}</b> · {link.kind==='file'?'لینک فایل':link.kind==='unsupported'?'غیرقابل بررسی':'لینک صفحه'} · {labels[link.status]||link.status}{link.duplicateOf?` · تکرار لینک ${fa(link.duplicateOf)}`:''}<br/>{link.url&&<span dir="ltr">{link.url}</span>}{link.reason&&<span>{link.reason}</span>}</p>)}{result.linkInventory.omitted>0&&<p>{fa(result.linkInventory.omitted)} ردیف به علت سقف اندازه یا تعداد در این فهرست نگهداری نشده است.</p>}</details>}
+            {result.redirects.length>0&&<details className="redirect-details"><summary>مسیر انتقال لینک ({fa(result.redirects.length)})</summary>{result.redirects.map((r,i)=><p key={i} dir="ltr">{r.from} → {r.to} · {r.status}</p>)}</details>}
+            {result.files.length>0&&<div className="files-section"><div className="section-heading"><h3>فایل‌های شناسایی‌شده <span className="count-chip">{fa(result.fileCount)}</span></h3><small>{result.advanced?(result.files.some(file=>file.behavior?.executed)?'شواهد تحلیل و اجرای ابری':'دریافت و تحلیل ایستا بدون اجرا'):'هنوز محتوای فایل‌ها بررسی نشده'}</small></div>{result.files.map(file=><div className="file-row" key={file.id}><span className="file-extension">{file.extension.slice(0,5)}</span><div className="file-info"><b dir="auto">{file.name}</b><small dir="ltr">{result.source==='upload'?'آپلود کاربر':new URL(file.url).hostname}{file.size ? ` · ${(file.size/1024/1024).toFixed(2)} MB` : ''}{file.format ? ` · ${file.format}` : ''}</small>{file.detail&&<p>{file.detail}</p>}{file.routing&&<p className="file-routing">{file.routing.detail}</p>}{file.artifact&&<ArtifactEvidence artifact={file.artifact}/>} {file.behavior&&<BehaviorEvidence behavior={file.behavior}/>}{file.finalUrlReputation&&<><p className="file-final-url" dir="ltr">{file.finalUrl}</p><p className="file-reputation file-final-reputation"><Link2 size={12}/><span>URLhaus مقصد نهایی: {file.finalUrlReputation.message}</span></p></>}{file.urlReputation&&<p className="file-reputation file-url-reputation"><Link2 size={12}/><span>URLhaus: {file.urlReputation.message}</span></p>}{file.reputation&&<p className="file-reputation file-hash-reputation"><Fingerprint size={12}/><span>MalwareBazaar: {file.reputation.message}</span></p>}{file.sha256&&<div className="hash-row"><code dir="ltr">SHA-256: {file.sha256}</code><button className="icon-button" aria-label="کپی هش فایل" onClick={()=>copyHash(file.sha256)}><Copy size={14}/></button></div>}</div><span className={`status-badge ${file.status}`}><i/>{labels[file.status]}</span></div>)}</div>}
+            {!result.advanced && !pageUnavailable && (result.files.length>0||result.linkInventory?.retained>0)&&<div className="advanced-prompt"><span className="advanced-icon"><FileSearch size={24}/></span><div><h3>یک قدم عمیق‌تر؛ بررسی خود فایل‌ها</h3><p>مقصدهای لینک، ساختار فایل و محتوای آرشیو را با موتور مستقل بررسی کن.</p></div><button className="primary-button" disabled={advancedBusy} onClick={()=>setModal('advanced')}>{advancedBusy?<LoaderCircle className="spin" size={17}/>:<Sparkles size={17}/>} {advancedBusy?'در حال بررسی فایل‌ها…':'بررسی پیشرفته'}</button></div>}
+            {advancedBusy&&<div role="status" className="advanced-loading"><LoaderCircle className="spin" size={20}/><div><b>{scanEvents.at(-1)?.message||'درخواست بررسی در حال پردازش است'}</b>{pendingJob&&<p>{fa(pendingJob.next||0)} مقصد ثبت‌شده از {fa(pendingJob.total||0)}</p>}<ul>{scanEvents.slice(-5).map((event,i)=><li key={i}>{event.message}</li>)}</ul></div>{scanAbort.current&&<button type="button" className="outline-button" onClick={()=>scanAbort.current?.abort()}>توقف صف</button>}</div>}
+            {result.destinationResults&&<details className="redirect-details destination-results"><summary>گزارش مقصدهای صف ({fa(result.jobSummary.completed)} از {fa(result.jobSummary.total)})</summary>{result.destinationResults.map(item=><div key={item.id} className="destination-row"><b>{item.title||item.name}</b> · <span>{labels[item.status]||item.status}</span><p dir="ltr">{item.url}</p>{item.detail&&<p>{item.detail}</p>}{item.finalReputation&&<><p dir="ltr">{item.finalUrl}</p><p>URLhaus مقصد نهایی: {item.finalReputation.message}</p></>}{item.reputation&&<p>URLhaus: {item.reputation.message}</p>}{item.fileReputation&&<p>MalwareBazaar: {item.fileReputation.message}</p>}{item.findings?.map((finding,i)=><p key={i}>{finding.title}: {finding.detail}</p>)}{item.routing&&<p>{item.routing.detail}</p>}{item.artifact&&<ArtifactEvidence artifact={item.artifact}/>} {item.behavior&&<BehaviorEvidence behavior={item.behavior}/>}</div>)}{result.jobSummary.omitted>0&&<p>{fa(result.jobSummary.omitted)} مقصد به علت سقف فهرست در این صف قرار نگرفت.</p>}</details>}
+            <details className="limitations"><summary><Info size={15}/>محدودیت‌های این بررسی</summary><ul>{result.limitations.map((l,i)=><li key={i}>{l}</li>)}<li>بررسی پیشرفته تحلیل ایستا و استعلام هش است؛ حالت فوق‌العاده پیشرفته فقط با محیط ابری آماده اجرای محدود دارد. اصالت ماد یا کرک تضمین نمی‌شود.</li></ul></details>
+          </section>}
+
+          <section className="lower-grid"><div className="recent-card"><div className="section-heading"><h2><History size={19}/>بررسی‌های اخیر</h2><button className="text-button" onClick={()=>navigate('history')}>همهٔ بررسی‌ها <ArrowLeft size={15}/></button></div><HistoryTable compact/></div><div className="safety-note"><div className="note-top"><span><Shield size={21}/></span><span className="tiny-label">یادآوری گارد</span></div><h3>هر ماد رایگانی،<br/>به قیمتش نمی‌ارزد.</h3><p>لینک‌های ناشناس می‌توانند حساب بازی یا اطلاعاتت را به خطر بیندازند.</p><button className="text-button" onClick={()=>navigate('resources')}>نشانه‌های یک لینک مشکوک <ArrowUpLeft size={16}/></button></div></section>
+          <div className="provider-strip"><span className="provider-caption"><Server size={15}/>پایگاه‌های اطلاعات تهدید</span><span className="provider-brand">URL<span>haus</span></span><span className="provider-brand bazaar">Malware<span>Bazaar</span></span><button onClick={()=>navigate('settings')} className="provider-status"><i className={health?.providers?.urlhaus?'connected':''}/>{health?.providers?.urlhaus?'اتصال تنظیم شده':'نیازمند کلید دسترسی'}<ChevronLeft size={13}/></button><span className="provider-disclaimer">گزارش نداشتن ≠ امن بودن</span></div>
+        </>}
+
+        {page==='history'&&<><PageTitle eyebrow="گزارش‌های شما" title="تاریخچهٔ بررسی‌ها" text="گزارش‌های قبلی را مرور کن و شواهد هر بررسی را دوباره ببین."/><div className="page-card"><div className="history-controls"><div className="search-input"><Search size={18}/><input aria-label="جستجوی تاریخچه" placeholder="جستجوی نام سایت…" value={search} onChange={e=>setSearch(e.target.value)}/></div><select aria-label="فیلتر وضعیت" value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">همهٔ وضعیت‌ها</option><option value="limited">بررسی محدود</option><option value="warning">نیازمند احتیاط</option><option value="danger">تهدید گزارش‌شده</option></select><button className="outline-button" disabled={!history.length} onClick={()=>setModal('clear')}><Trash2 size={16}/>پاک کردن</button></div><HistoryTable/></div><p className="page-footnote"><LockKeyhole size={14}/>تاریخچه فقط در همین مرورگر ذخیره می‌شود. گزارش‌ها نشان‌دهندهٔ وضعیت در زمان بررسی هستند.</p></>}
+
+        {page==='guide'&&<><PageTitle eyebrow="از لینک تا تصمیم" title="گارد چطور کار می‌کند؟" text="پشت هر نتیجه، یک بررسی مشخص و شواهد قابل مشاهده وجود دارد."/><div className="guide-grid">{[{icon:Link2,title:'۱. لینک را وارد می‌کنی',text:'یک آدرس عمومی HTTP یا HTTPS وارد کن. سایت روی سرور بررسی می‌شود و در مرورگر گوشی تو باز نمی‌شود.'},{icon:Globe2,title:'۲. محتوای سایت بررسی می‌شود',text:'عنوان، متن صفحه، انتقال‌های آدرس، فرم‌ها و لینک‌های فایل را می‌خوانیم. HTTPS به‌تنهایی نشانهٔ معتبر بودن فروشنده نیست.'},{icon:FileSearch,title:'۳. تو بررسی پیشرفته را انتخاب می‌کنی',text:'با یک تأیید، مقصدها و فایل‌های صف بررسی می‌شوند. محتوای ZIP و کدهای قابل تحلیل خوانده می‌شوند؛ اجرا فقط با محیط ابری تأییدشده مجاز است.'},{icon:Fingerprint,title:'۴. شواهد را در گزارش می‌بینی',text:'نوع فایل و هش SHA-256 محاسبه می‌شود. با کلید دسترسی، URLhaus برای لینک و MalwareBazaar برای هش فایل استعلام می‌شود.'}].map((s,i)=><article className="guide-card" key={i}><span className="guide-icon"><s.icon size={25}/></span><h3>{s.title}</h3><p>{s.text}</p></article>)}</div><div className="info-banner"><Info size={24}/><div><h3>«بررسی محدود» دقیقاً یعنی چه؟</h3><p>نشانهٔ قطعی تهدید در موارد بررسی‌شده پیدا نشده؛ هویت فروشنده، همهٔ فایل‌ها و رفتار برنامه تأیید نشده‌اند. صفحات نیازمند جاوااسکریپت یا ورود ممکن است کامل دیده نشوند.</p></div></div><button className="primary-button" onClick={()=>navigate('scan')}>یک لینک را بررسی کن <ArrowLeft size={17}/></button></>}
+
+        {page==='resources'&&<><PageTitle eyebrow="راهنمای بازی امن" title="حسابت ارزش محافظت دارد." text="چند نشانهٔ ساده که قبل از دانلود، نصب یا خرید باید بشناسی."/><div className="articles-grid">{[{tag:'خرید امن',icon:Gamepad2,title:'قبل از خرید فایل بازی، فروشنده را بشناس.',text:'نام دامنه را با وب‌سایت رسمی سازنده مقایسه کن. دربارهٔ فروشنده از منابع مستقل تحقیق کن و برای پرداخت، رمز حساب بازی یا کد تأیید را در اختیار فروشنده نگذار.'},{tag:'دانلود آگاهانه',icon:FileSearch,title:'ماد واقعی یا یک فایل خطرناک؟',text:'نام فایل یا آیکون بازی، اصالت آن را ثابت نمی‌کند. منبع انتشار، توضیحات نسخه و تجربهٔ کاربران را بررسی کن. دستور خاموش کردن آنتی‌ویروس یا اجرای فایل با دسترسی مدیر، نیازمند احتیاط است.'},{tag:'امنیت حساب',icon:LockKeyhole,title:'وعدهٔ سکه و جم رایگان را جدی نگیر.',text:'سایت‌هایی که در برابر منابع رایگان رمز ورود یا کد تأیید می‌خواهند ممکن است فیشینگ باشند. تأیید دومرحله‌ای را فعال کن و برای هر سرویس رمز جداگانه داشته باش.'},{tag:'شناخت لینک',icon:Link2,title:'قفل کنار آدرس، تضمین اعتماد نیست.',text:'HTTPS ارتباط را رمزگذاری می‌کند؛ یک سایت کلاهبرداری هم می‌تواند گواهی معتبر داشته باشد. حروف مشابه در دامنه، انتقال به آدرس دیگر و پرداخت خارج از فروشگاه را بررسی کن.'}].map((article,i)=><article className="article-card" key={i}><div className="article-top"><span className="guide-icon"><article.icon size={24}/></span><span className="article-tag">{article.tag}</span></div><h3>{article.title}</h3><p>{article.text}</p></article>)}</div><div className="info-banner"><ShieldCheck size={26}/><div><h3>یک بررسی، قبل از هر تصمیم</h3><p>وقتی دربارهٔ لینکی مطمئن نیستی، شواهد آن را با گارد بررسی کن.</p></div><button className="primary-button" onClick={()=>navigate('scan')}>بررسی لینک <ArrowLeft size={17}/></button></div></>}
+
+        {page==='settings'&&<><PageTitle eyebrow="فضای شخصی شما" title="تنظیمات گارد" text="وضعیت سرویس و نحوهٔ نگهداری گزارش‌ها را اینجا مدیریت کن."/><div className="settings-grid"><section className="page-card settings-card"><h2><Server size={19}/>اتصال به پایگاه‌های تهدید</h2><p className="settings-desc">کلیدها فقط روی سرور نگهداری می‌شوند و وارد مرورگر نمی‌شوند.</p>{['urlhaus','malwarebazaar'].map(provider=><div className="setting-row" key={provider}><div><b>{provider==='urlhaus'?'URLhaus':'MalwareBazaar'}</b><small>{provider==='urlhaus'?'استعلام گزارش تهدید برای لینک سایت':'استعلام هش فایل در پایگاه بدافزار'}</small></div><span className={`connection-badge ${health?.providers?.[provider]?'connected':''}`}>{health?.providers?.[provider]?'کلید تنظیم شده':'متصل نیست'}</span></div>)}<div className="config-info"><Info size={18}/><p>برای فعال‌سازی، مدیر سایت باید کلید abuse.ch را در متغیر محیطی <code dir="ltr">ABUSECH_AUTH_KEY</code> روی سرور تنظیم کند. برای کلید جداگانهٔ MalwareBazaar از <code dir="ltr">MALWAREBAZAAR_AUTH_KEY</code> استفاده کنید. پاسخ هر استعلام در گزارش مشخص می‌شود.</p></div><a className="text-button" href="https://auth.abuse.ch/" target="_blank" rel="noopener noreferrer">دریافت کلید از abuse.ch <ExternalLink size={15}/></a></section><section className="page-card settings-card"><h2><LockKeyhole size={19}/>حریم خصوصی و تاریخچه</h2><div className="setting-row"><div><b>ذخیرهٔ تاریخچه در این مرورگر</b><small>تا ۳۰ گزارش اخیر برای مرور مجدد</small></div><button role="switch" aria-checked={saveHistory} aria-label="ذخیره تاریخچه" className={`toggle ${saveHistory?'on':''}`} onClick={()=>setSaveHistory(!saveHistory)}><span/></button></div><p className="settings-desc">لینک برای بررسی به سرور ارسال می‌شود. دادهٔ بررسی تا ۳۰ دقیقه در حافظهٔ سرور نگهداری می‌شود؛ فایل‌ها فقط در حافظه دریافت شده و اجرا نمی‌شوند. لینک‌های دارای اطلاعات خصوصی را وارد نکن.</p><button className="outline-button" disabled={!history.length} onClick={()=>setModal('clear')}><Trash2 size={16}/>پاک کردن تاریخچه</button></section></div><div className="info-banner"><FileSearch size={23}/><div><h3>محدودهٔ بررسی فعلی</h3><p>دریافت عمومی HTML و تحلیل ایستای فایل · صف تا ۱۲۸ مقصد؛ هر فایل ۱۲ مگابایت · تحلیل مستقل محتوا · آپلود خصوصی تا ۳ مگابایت · اجرای ابری وابسته به آمادگی محیط</p></div></div></>}
+        <footer className="footer"><span><ShieldCheck size={14}/>گیم‌اسکم گارد؛ همراه بازی‌های امن‌تر.</span><span>با آگاهی کلیک کن <span className="footer-dot">·</span> نسخهٔ ۱.۰</span></footer>
+      </main>
+    </div>
+
+    {toast&&<div className="toast" role="status"><Check size={18}/>{toast}<button aria-label="بستن پیام" onClick={()=>setToast('')}><X size={15}/></button></div>}
+    {modal&&<div className="modal-backdrop" onClick={()=>setModal(null)}><div ref={modalRef} className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" onClick={e=>e.stopPropagation()}><button className="icon-button modal-close" aria-label="بستن" onClick={()=>setModal(null)}><X size={20}/></button><span className="modal-icon">{modal==='advanced'?<FileSearch size={29}/>:modal==='clear'?<Trash2 size={28}/>:modal==='notifications'?<Bell size={28}/>:<CircleHelp size={28}/>}</span><h2 id="modal-title">{modal==='advanced'?'فایل‌ها را هم بررسی کنیم؟':modal==='clear'?'تاریخچه پاک شود؟':modal==='notifications'?'اعلان‌های گارد':'چطور شروع کنم؟'}</h2>{modal==='advanced'?<><p>با تأیید شما، مقصدهای ثبت‌شده در دسته‌های محدود بررسی می‌شوند؛ فایل‌ها برای هش و تحلیل محتوا روی سرور دریافت می‌شوند. سقف هر فایل ۱۲ مگابایت و مجموع دریافت هر صف ۹۶ مگابایت است.</p><div className="modal-note"><Info size={17}/>برای فایلِ پشت ورود یا پرداخت از آپلود نسخهٔ در اختیار خودتان استفاده کنید. ZIP رمزدار با رمز واردشده قابل تحلیل است. اجرای ابری فقط در محیط سازگار و آماده ممکن است؛ نبود گزارش بدافزار تضمین امنیت نیست.</div><ExecutionConsent checked={behaviorConsent} onChange={setBehaviorConsent} id="job-execution-consent"/><div className="modal-actions"><button className="primary-button" onClick={runAdvanced}>بله، بررسی فایل‌ها <ArrowLeft size={17}/></button><button className="outline-button" onClick={()=>setModal(null)}>فعلاً نه</button></div></>:modal==='clear'?<><p>گزارش‌های ذخیره‌شده در این مرورگر حذف می‌شوند. این کار قابل بازگشت نیست.</p><div className="modal-actions"><button className="primary-button" disabled={busy||advancedBusy} onClick={()=>{setHistory([]);setResult(null);setPendingJob(null);localStorage.removeItem('guard-pending-job');setModal(null);setToast('تاریخچه پاک شد.');}}>پاک کردن تاریخچه</button><button className="outline-button" onClick={()=>setModal(null)}>انصراف</button></div></>:modal==='notifications'?<><p>{result?'آخرین بررسی آماده است. نتیجه و شواهد را در گزارش ببین.':'هنوز اعلانی نداری. وقتی بررسی لینک تمام شود، نتیجه همین‌جا نمایش داده می‌شود.'}</p>{result&&<button className="primary-button" onClick={()=>{setModal(null);navigate('scan');setTimeout(()=>reportRef.current?.scrollIntoView({behavior:'smooth'}),100);}}>دیدن آخرین گزارش <ArrowLeft size={17}/></button>}</>:<><p>لینک عمومی سایت بازی یا فروشگاه را کپی کن، در کادر لینک بچسبان و «شروع بررسی» را بزن. گزارش شامل محتوای دیده‌شده و لینک‌های فایل است.</p><div className="modal-note"><Info size={17}/>اگر فایل پیدا شود، می‌توانی بررسی پیشرفته را انتخاب کنی. نتیجهٔ محدود، تضمین امنیت نیست.</div><button className="primary-button" onClick={()=>{setModal(null);navigate('guide');}}>راهنمای کامل <ArrowLeft size={17}/></button></>}</div></div>}
+  </div>;
+}
+
+function BehaviorEvidence({behavior}) {return <details className="artifact-evidence"><summary>گزارش اجرای ابری · {behavior.executed?'اجرا مشاهده شد':'اجرا نشد'}</summary><p>{behavior.reason}</p>{behavior.execution&&<p>زمان اجرا: {fa(behavior.execution.durationMs||0)} میلی‌ثانیه · کد پایان: {behavior.execution.exitCode} · {behavior.teardownConfirmed?'محیط متوقف شد':'توقف محیط تأیید نشد'}</p>}{behavior.createdFiles?.map((file,i)=><p key={i} dir="auto">فایل ایجادشده: {file.name} · {fa(file.size)} بایت{file.sha256&&<><br/><code>{file.sha256}</code></>}</p>)}{behavior.untrustedOutputExcerpt&&<><p>خروجی خود نمونه؛ این متن تأیید امنیت نیست:</p><pre>{behavior.untrustedOutputExcerpt}</pre></>}</details>;}
+
+function ArtifactEvidence({artifact}) {return <details className="artifact-evidence"><summary>شواهد موتور مستقل فایل · {artifact.version}</summary><p>وضعیت تحلیل: {artifact.status==='complete'?'محتوای پشتیبانی‌شده بررسی شد':artifact.status==='needs_password'?'نیازمند رمز':'پوشش ناقص یا قالب پشتیبانی‌نشده'}؛ این بخش تحلیل ایستاست و فایل را اجرا نمی‌کند.</p>{artifact.layers?.map(layer=><p key={layer.id}><b>{layer.title}</b> · {layer.status==='done'?'بررسی شد':'پوشش ناقص'}<br/>{layer.detail}</p>)}{artifact.observedUrls?.length>0&&<p dir="auto">مقصدهای متنی مشاهده‌شده، بدون بازکردن: {artifact.observedUrls.join('، ')}</p>}{artifact.peEngine&&<p>تحلیل ایستای GTA Guard · موتور {artifact.peEngine.version} · قواعد {artifact.peEngine.rulesVersion} · {artifact.peEngine.peValid?'ساختار PE بررسی شد':'ساختار کامل تأیید نشد'}؛ این نتیجه جای اجرای ویندوز یا تأیید ناشر نیست.</p>}{artifact.findings.map((finding,i)=><p key={i}><b>{finding.reason}</b><br/>{finding.location}: {finding.evidence}</p>)}{artifact.archive&&<><p>{fa(artifact.archive.inspected)} عضو خوانده‌شده از {fa(artifact.archive.listed)} عضو فهرست‌شده</p>{artifact.archive.entries.map((entry,i)=><div key={i}><p dir="auto">{entry.name} · {({inspected:'محتوا خوانده شد',directory:'پوشه',needs_password:'نیازمند رمز',password_invalid:'رمز نادرست',blocked:'عضو مسدود',budget_exceeded:'سقف بررسی',nested_inspected:'آرشیو تو در تو بررسی شد',nested_partial:'آرشیو تو در تو ناقص',nested_not_expanded:'سقف عمق آرشیو',format_unsupported:'قالب تحلیل‌نشده',duplicate:'عضو تکراری',unavailable:'تحلیل ناقص'})[entry.status]||entry.status}{entry.sha256&&<><br/><code>{entry.sha256}</code></>}{entry.permissions?.length>0&&<><br/>نام مجوزهای دیده‌شده در دادهٔ مانیفست: {entry.permissions.join('، ')}</>}</p>{entry.nested&&<ArtifactEvidence artifact={entry.nested}/>}</div>)}</>}{(artifact.reportOmittedEntries>0||artifact.reportOmittedFindings>0||artifact.reportOmittedLayers>0)&&<p>بخشی از شواهد جزئی به علت سقف اندازه در این گزارش نگهداری نشده است.</p>}</details>;}
+
+function PageTitle({eyebrow,title,text}) { return <section className="page-title"><div className="eyebrow"><span/>{eyebrow}</div><h1>{title}</h1><p>{text}</p></section>; }
+createRoot(document.getElementById('root')).render(<App/>);
+
+function ExecutionConsent({checked,onChange,disabled=false,id}) {return <label className="execution-consent" htmlFor={id}><input id={id} type="checkbox" checked={checked} disabled={disabled} onChange={event=>onChange(event.target.checked)}/><span>اجازهٔ اجرای فایل ناشناخته در سندباکس ابری را می‌دهم.<small>فقط پس از پاسخ «هش یافت نشد»، برای قالب سازگار، با شبکهٔ بسته و سقف دو تلاش در هر صف؛ در نبود سندباکس، تحلیل چندلایهٔ ایستا انجام می‌شود. ورود یا پرداخت خودکار انجام نمی‌شود.</small></span></label>;}

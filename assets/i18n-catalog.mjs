@@ -1,5 +1,10 @@
-import {persian} from './i18n-fa.mjs';
+import {
+persian} from './i18n-fa.mjs';
 export const translations = {
+  "Open Game Scam Guard preview":"باز کردن نسخهٔ آزمایشی گیم‌اسکم گارد",
+  "Inspect public website content and file evidence in the Persian web app. File analysis and cloud execution each require separate consent.":"محتوای سایت عمومی و شواهد فایل را در برنامهٔ فارسی بررسی کنید. تحلیل فایل و اجرای ابری هرکدام رضایت جداگانه می‌خواهند.",
+  "Open the protected preview with your Vercel account. Unknown results and unavailable services do not confirm safety.":"با حساب ورسل خود وارد نسخهٔ آزمایشی محافظت‌شده شوید. نتیجهٔ نامشخص و در دسترس نبودن سرویس، امنیت را تأیید نمی‌کنند.",
+  "The web preview works on desktop, mobile and iPad. Windows download is still coming soon.":"نسخهٔ وب روی دسکتاپ، موبایل و آی‌پد قابل استفاده است. نسخهٔ دانلودی ویندوز هنوز آماده نیست.",
 ...persian,
 "Threat Radar":"رادار تهدیدات",
 "Threat Radar | MalGuard":"رادار تهدیدات | مالگارد",

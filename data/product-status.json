@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-14",
+  "updatedAt": "2026-10-15",
   "canonicalSite": "https://malguard.site/",
   "products": {
     "gtaGuard": {
@@ -23,7 +23,9 @@
     "gameScamGuard": {
       "name": "Game Scam Guard",
       "status": "in-development",
-      "downloadEnabled": false
+      "downloadEnabled": false,
+      "previewUrl": "https://game-scam-guard-connected.vercel.app/game-scam-guard/",
+      "previewAccess": "vercel-authenticated"
     },
     "threatRadar": {
       "name": "Threat Radar",
