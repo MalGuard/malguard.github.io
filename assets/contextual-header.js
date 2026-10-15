@@ -8,14 +8,12 @@
   if (!navbar || !menuButton || !menu || !searchButton) return;
   const pages = [
     ['Home', 'MalGuard overview', '/', 'home malguard'],
-    ['Products', 'Products and current availability', '/products.html', 'gta guard malware ai scam guard'],
+    ['Products', 'Products and current availability', '/products.html', 'gta guard threat radar scam guard'],
     ['Game Scam Guard', 'In development — no public release', '/game-scam-guard.html', 'game gaming scam'],
-    ['Malware AI', 'Platform-specific web preview', '/malware-ai.html', 'ai preview platforms'],
-    ['Windows AI Preview', 'Malware AI web workspace', '/malware-ai-windows.html', 'ai windows chat'],
     ['iPhone Preview', 'Bounded local mobile inspection', '/ios-preview/', 'iphone ios'],
     ['GTA Guard', 'Clean-room Windows x64 static scanner', '/gta-guard.html', 'mods windows files'],
     ['Scan Mods', 'Supported and planned game-mod tools', '/scan-mods.html', 'gta minecraft roblox'],
-    ['AI Intelligence', 'Malware AI preview and access options', '/ai-intelligence.html', 'chat intelligence malware'],
+    ['Threat Radar', 'GitHub-reviewed public security advisories', '/threat-radar.html', 'threat radar vulnerability advisory github'],
     ['Scan URL', 'Local URL-text inspection', '/scan-url.html', 'url link address'],
     ['Local Tools', 'SHA-256 fingerprinting and link inspection', '/tools.html', 'hash sha256 file fingerprint'],
     ['Trust Center', 'Security, limits and release integrity', '/trust.html', 'security vulnerability policy'],

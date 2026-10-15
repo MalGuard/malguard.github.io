@@ -6,6 +6,7 @@ Official site: https://malguard.site/
 Language: English; a Persian (فارسی) GTA mod security guide is also available.
 
 ## Primary sources
+- [Threat Radar](https://malguard.site/threat-radar.html): Public GitHub-reviewed software advisories with severity and publication dates, not live attack data.
 - [GTA Guard product page](https://malguard.site/gta-guard.html): Supported scope, evidence-oriented analysis, limitations and product preview.
 - [Current download status](https://malguard.site/download.html): Official availability and release guidance. The current Windows x64 preview uses password-protected download; unrestricted public downloads are paused.
 - [English GTA 5 mod security guide](https://malguard.site/research/gta-5-mod-security.html): Factual questions and answers about GTA mod scanning.

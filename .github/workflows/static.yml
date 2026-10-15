@@ -35,7 +35,7 @@ jobs:
 
           cp index.html 404.html founder.html game-scam-guard.html _site/
           cp report.html console-8d42b69fda13705cc47a.html source.html security-policy.html privacy-policy.html code-signing.html contributing.html core-guide.html _site/
-          cp tools.html trust.html privacy.html support.html about.html labs.html docs.html download.html scan-mods.html ai-intelligence.html malware-ai.html malware-ai-windows.html scan-url.html products.html gta-guard.html sandbox-help.html app.html _site/
+          cp tools.html trust.html privacy.html support.html about.html labs.html docs.html download.html scan-mods.html ai-intelligence.html malware-ai.html malware-ai-windows.html threat-radar.html scan-url.html products.html gta-guard.html sandbox-help.html app.html _site/
           cp robots.txt sitemap.xml llms.txt _site/
           cp 2a68c6360d77f77aeab34ac3dc4a85122a8f07aa53cbb3ae.txt _site/
           cp favicon.ico favicon-96.png favicon-192.png favicon-blue-96.png favicon-blue-192.png apple-touch-icon-blue.png og-image.png og-image-blue.png _site/
@@ -60,6 +60,7 @@ jobs:
           test -f _site/ai-intelligence.html
           test -f _site/malware-ai.html
           test -f _site/malware-ai-windows.html
+          test -f _site/threat-radar.html
           test -f _site/scan-url.html
           test -f _site/products.html
           test -f _site/gta-guard.html
