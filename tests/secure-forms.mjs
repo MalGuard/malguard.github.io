@@ -57,11 +57,16 @@ for(const engine of engines){
   await page.locator('#siteAdminConsent').check();await page.screenshot({path:`test-results/secure-forms/admin-${engine}-${width}.png`});await page.locator('#siteAdminEnter').click();await page.waitForURL(base+'/');
   assert.equal(authBodies.at(-1).phone,'+12025550148');assert.equal(await page.locator('#adminSessionBadge').isVisible(),true);assert.equal(await page.locator('#siteAdminEntry').count(),0);assert.equal(await page.locator('a[href*="console-"]').count(),0);
   await page.evaluate(()=>{sessionStorage.removeItem('malguard-admin-session');sessionStorage.removeItem('malguard-admin-session-exp');});
-  await page.goto(base+'/malware-ai-windows.html');await page.waitForSelector('#accessPassword');await page.waitForFunction(()=>typeof window.MalGuardPhone?.validate==='function'&&document.getElementById('accessPhone').closest('.phone-field')?.querySelector('.phone-country-button'));assert.equal(await page.locator('#accessPhone').getAttribute('data-phone-input'),'');assert.equal(await page.locator('#accessPhone').getAttribute('dir'),'ltr');assert.equal(await page.locator('.phone-country-button').getAttribute('data-country'),'US');
-  await page.locator('#accessPassword').fill('benign-ai-test-password');await page.locator('#accessSubmit').click();await page.waitForSelector('#nameStep:not([hidden])');await page.locator('#accessName').fill('Synthetic AI Test');
-  await page.locator('.phone-country-button').click();await page.locator('.country-picker input').fill('+98');await page.locator('.country-option:has(img[src$="/IR.svg"])').click();await settledFocus(page,'#accessPhone');await page.locator('#accessPhone').fill('09123456789');assert.equal(await page.evaluate(()=>MalGuardPhone.validate(document.getElementById('accessPhone'))),'+989123456789');
-  await page.locator('#accessPhone').fill('+93701234567');assert.equal(await page.locator('.phone-country-button').getAttribute('data-country'),'AF');await page.locator('#accessPhone').fill('+12025550148');await page.locator('#accessConsent').check();await page.locator('#accessEnter').click();await page.waitForFunction(()=>document.getElementById('accessGate').hidden);assert.equal(authBodies.at(-1).phone,'+12025550148');assert.equal(await page.locator('#aiApp').evaluate(e=>e.classList.contains('access-locked')),false);
-  assert.deepEqual(errors,[]);reports.push({engine,width,layouts:8,samePageReport:true,shortPersianMessage:true,retryPreserved:true,maskedPassword:true,phoneCountries:['US','IR','AF'],privateAccess:true,errors});await context.close();console.log(`PASS secure forms ${engine} ${width}px`);
+  // The public Malware AI chat is retired, so it must never request credentials or contact auth.
+  const authCallsBeforeRetirement=authBodies.length;
+  await page.goto(base+'/malware-ai-windows.html');
+  await page.waitForFunction(()=>document.documentElement.dataset.experienceReady==='true');
+  assert.equal(await page.getByRole('heading',{name:'Now replaced by Threat Radar.'}).count(),1);
+  assert.equal(await page.locator('#accessGate,#accessPassword,#accessPhone,#aiApp').count(),0,'Retired chat must not expose its old access flow');
+  assert.equal(authBodies.length,authCallsBeforeRetirement,'Retired page must not contact authentication API');
+  assert.equal(await page.locator('meta[name="robots"]').getAttribute('content'),'noindex,follow');
+  assert.ok(await page.locator('a[href="/threat-radar.html"]').count()>0);
+  assert.deepEqual(errors,[]);reports.push({engine,width,layouts:8,samePageReport:true,shortPersianMessage:true,retryPreserved:true,maskedPassword:true,phoneCountries:['US','IR','AF'],privateAccess:true,retiredAIChatDoesNotAuthenticate:true,errors});await context.close();console.log(`PASS secure forms ${engine} ${width}px`);
  }
  const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:390,height:844},reducedMotion:'no-preference'}),page=await context.newPage();await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
  await page.goto(base+'/report.html');await page.waitForFunction(()=>window.MalGuardSecureMotion?.snapshot().activeAnimations>0);assert.equal(await page.locator('#secure-field,#secure-volume').count(),0);assert.equal(await page.locator('script[src*="home-opening-projection"]').count(),0);
