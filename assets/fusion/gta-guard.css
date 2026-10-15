@@ -111,3 +111,12 @@ body.motion-paused .journey-copy article{filter:none!important}
 @media(max-width:600px){.demo-warning{top:90px}}
 @media(min-width:360px) and (max-width:389px){.story-enhanced .hero-copy h1{font-size:43px;margin-block:12px}.story-enhanced .hero-copy .hero-line{font-size:19px}.story-enhanced .hero-description{font-size:11.5px;line-height:1.65;margin-top:14px}.story-enhanced .hero-actions{margin-top:18px}.story-enhanced .hero-status{margin-top:15px}.story-enhanced .journey-copy h2{margin-block:16px}.story-enhanced .journey-description{line-height:1.7}.story-enhanced .chapter-proof{margin-top:13px;padding-top:10px}.story-enhanced .journey-copy .button{margin-top:18px}}
 @media(max-height:719px){.demo-warning{top:8px}.scanner-app summary{scroll-margin-top:90px}}
+/* Reserve the mobile reading region for the additional Windows download action. */
+@media(max-width:600px) and (min-height:720px){
+ .story-enhanced .hero-copy{top:min(45%,calc(100% - 490px))}
+ .story-enhanced .hero-copy h1{margin-block:8px}
+ .story-enhanced .hero-description{margin-top:10px}
+ .story-enhanced .hero-actions{margin-top:12px;gap:6px}
+ .story-enhanced .hero-actions .button{min-height:44px;padding-block:10px}
+ .story-enhanced .hero-status{margin-top:10px}
+}

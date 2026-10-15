@@ -1,0 +1,1964 @@
+{
+  "version": "2.2.0",
+  "engineVersionCompatibility": "2.2.0",
+  "generated_note": "v2.2.0: precision hardening patch. Added risk-floor mechanism so that specific, pre-defined strong evidence combinations (credential theft+C2, keylogging+C2, injection+recon, security tampering+destruction, 3+ independent injection primitives) can never be scored as SAFE regardless of numeric score. A single API or string still never triggers MALICIOUS on its own. Combination rules now support two forms: requires_categories (cross-category) and requires_multiple_in_category (in-category multiplicity, new in 2.2.0). See engine.js changelog for the rest of the hardening pass.",
+  "entropy_threshold": 7.0,
+  "max_score": 100,
+  "safe_threshold": 80,
+  "suspicious_threshold": 50,
+  "severity_weights": {
+    "low": 4,
+    "medium": 10,
+    "high": 20,
+    "critical": 32
+  },
+  "suspicious_strings": [
+    {
+      "id": "STR-001",
+      "category": "keylogging",
+      "pattern": "getasynckeystate",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Polls key state; common in keyloggers but also used by games/mods for input."
+    },
+    {
+      "id": "STR-002",
+      "category": "keylogging",
+      "pattern": "getkeystate",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Reads key state; used by both malware and legitimate input handling."
+    },
+    {
+      "id": "STR-003",
+      "category": "keylogging",
+      "pattern": "getkeyboardstate",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Reads full keyboard state buffer."
+    },
+    {
+      "id": "STR-004",
+      "category": "keylogging",
+      "pattern": "setwindowshookex",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Installs a system-wide hook; used by keyloggers and legitimate tools alike."
+    },
+    {
+      "id": "STR-005",
+      "category": "keylogging",
+      "pattern": "wh_keyboard_ll",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Low-level keyboard hook constant, strongly associated with keyloggers."
+    },
+    {
+      "id": "STR-006",
+      "category": "keylogging",
+      "pattern": "wh_keyboard",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Keyboard hook constant."
+    },
+    {
+      "id": "STR-007",
+      "category": "keylogging",
+      "pattern": "getrawinputdata",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Reads raw input device data; used for both malware and controller/input mods."
+    },
+    {
+      "id": "STR-008",
+      "category": "keylogging",
+      "pattern": "registerrawinputdevices",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Registers for raw input notifications."
+    },
+    {
+      "id": "STR-009",
+      "category": "keylogging",
+      "pattern": "keylog",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Explicit keylogger terminology found in file."
+    },
+    {
+      "id": "STR-010",
+      "category": "keylogging",
+      "pattern": "keyboard_hook",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Explicit keyboard-hook terminology."
+    },
+    {
+      "id": "STR-011",
+      "category": "keylogging",
+      "pattern": "input_hook",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Generic input-hook terminology."
+    },
+    {
+      "id": "STR-012",
+      "category": "keylogging",
+      "pattern": "key_press_log",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Explicit key-press logging terminology."
+    },
+    {
+      "id": "STR-013",
+      "category": "credential_theft",
+      "pattern": "login_data",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Chromium 'Login Data' SQLite file name; strong browser credential theft indicator."
+    },
+    {
+      "id": "STR-014",
+      "category": "credential_theft",
+      "pattern": "web_data",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Chromium 'Web Data' file, stores autofill/payment info."
+    },
+    {
+      "id": "STR-015",
+      "category": "credential_theft",
+      "pattern": "cookies.sqlite",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Firefox cookie database filename."
+    },
+    {
+      "id": "STR-016",
+      "category": "credential_theft",
+      "pattern": "local state",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Chromium 'Local State' file, holds the master encryption key."
+    },
+    {
+      "id": "STR-017",
+      "category": "credential_theft",
+      "pattern": "metamask",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Targets the MetaMask crypto wallet browser extension."
+    },
+    {
+      "id": "STR-018",
+      "category": "credential_theft",
+      "pattern": "exodus wallet",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Targets the Exodus desktop crypto wallet."
+    },
+    {
+      "id": "STR-019",
+      "category": "credential_theft",
+      "pattern": "electrum wallet",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Targets the Electrum Bitcoin wallet."
+    },
+    {
+      "id": "STR-020",
+      "category": "credential_theft",
+      "pattern": "wallet.dat",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Bitcoin-core-style wallet file, classic crypto-stealer target."
+    },
+    {
+      "id": "STR-021",
+      "category": "credential_theft",
+      "pattern": "discord_token",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Targets Discord authentication tokens."
+    },
+    {
+      "id": "STR-022",
+      "category": "credential_theft",
+      "pattern": "\\leveldb",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Chromium LevelDB storage path, often harvested for tokens/sessions."
+    },
+    {
+      "id": "STR-023",
+      "category": "credential_theft",
+      "pattern": "password",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Generic credential-related keyword; weak signal alone."
+    },
+    {
+      "id": "STR-024",
+      "category": "credential_theft",
+      "pattern": "credential",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Generic credential-related keyword; weak signal alone."
+    },
+    {
+      "id": "STR-025",
+      "category": "credential_theft",
+      "pattern": "autofill",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Browser autofill data reference."
+    },
+    {
+      "id": "STR-026",
+      "category": "browser_access",
+      "pattern": "\\google\\chrome\\user data",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Direct reference to the Chrome profile directory."
+    },
+    {
+      "id": "STR-027",
+      "category": "browser_access",
+      "pattern": "\\microsoft\\edge\\user data",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Direct reference to the Edge profile directory."
+    },
+    {
+      "id": "STR-028",
+      "category": "browser_access",
+      "pattern": "\\mozilla\\firefox\\profiles",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Direct reference to the Firefox profile directory."
+    },
+    {
+      "id": "STR-029",
+      "category": "browser_access",
+      "pattern": "\\bravesoftware\\brave-browser",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Direct reference to the Brave profile directory."
+    },
+    {
+      "id": "STR-030",
+      "category": "browser_access",
+      "pattern": "\\opera software\\opera stable",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Direct reference to the Opera profile directory."
+    },
+    {
+      "id": "STR-031",
+      "category": "process_injection",
+      "pattern": "shellcode",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Explicit shellcode terminology."
+    },
+    {
+      "id": "STR-032",
+      "category": "process_injection",
+      "pattern": "reflective_loader",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Reflective DLL loading terminology, common in injected payloads."
+    },
+    {
+      "id": "STR-033",
+      "category": "process_injection",
+      "pattern": "process_hollowing",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Named technique for replacing a legitimate process image with malicious code."
+    },
+    {
+      "id": "STR-034",
+      "category": "process_injection",
+      "pattern": "dll_injection",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Explicit DLL injection terminology."
+    },
+    {
+      "id": "STR-035",
+      "category": "process_injection",
+      "pattern": "manual_map",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Manual-mapping injection terminology."
+    },
+    {
+      "id": "STR-036",
+      "category": "process_injection",
+      "pattern": "payload",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Generic payload terminology; weak signal alone."
+    },
+    {
+      "id": "STR-037",
+      "category": "persistence",
+      "pattern": "currentversion\\run",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Windows Run-key registry path used for auto-start persistence."
+    },
+    {
+      "id": "STR-038",
+      "category": "persistence",
+      "pattern": "currentversion\\runonce",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Windows RunOnce registry path used for auto-start persistence."
+    },
+    {
+      "id": "STR-039",
+      "category": "persistence",
+      "pattern": "schtasks",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Windows scheduled-task command-line tool, commonly abused for persistence."
+    },
+    {
+      "id": "STR-040",
+      "category": "persistence",
+      "pattern": "\\startup\\",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Reference to the Windows Startup folder."
+    },
+    {
+      "id": "STR-041",
+      "category": "persistence",
+      "pattern": "winlogon\\shell",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Winlogon Shell registry value, a known persistence technique."
+    },
+    {
+      "id": "STR-042",
+      "category": "persistence",
+      "pattern": "image file execution options",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "IFEO registry key, abused for persistence/debugger hijacking."
+    },
+    {
+      "id": "STR-043",
+      "category": "anti_analysis",
+      "pattern": "isdebuggerpresent",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Checks for an attached debugger; used by both malware and DRM/anti-cheat."
+    },
+    {
+      "id": "STR-044",
+      "category": "anti_analysis",
+      "pattern": "checkremotedebuggerpresent",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Checks for a remote debugger."
+    },
+    {
+      "id": "STR-045",
+      "category": "anti_analysis",
+      "pattern": "ntqueryinformationprocess",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Low-level process-info query, has many legitimate uses."
+    },
+    {
+      "id": "STR-046",
+      "category": "anti_analysis",
+      "pattern": "vmware",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "VM-detection artifact string; low signal alone."
+    },
+    {
+      "id": "STR-047",
+      "category": "anti_analysis",
+      "pattern": "virtualbox",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "VM-detection artifact string; low signal alone."
+    },
+    {
+      "id": "STR-048",
+      "category": "anti_analysis",
+      "pattern": "sbiedll",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Sandboxie DLL name, checked to detect sandbox environments."
+    },
+    {
+      "id": "STR-049",
+      "category": "anti_analysis",
+      "pattern": "sandboxie",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Sandbox-detection artifact string."
+    },
+    {
+      "id": "STR-050",
+      "category": "anti_analysis",
+      "pattern": "ollydbg",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Debugger process name, checked to detect analysis tools."
+    },
+    {
+      "id": "STR-051",
+      "category": "anti_analysis",
+      "pattern": "x64dbg",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Debugger process name, checked to detect analysis tools."
+    },
+    {
+      "id": "STR-052",
+      "category": "anti_analysis",
+      "pattern": "wireshark",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Network analysis tool name, checked to evade traffic inspection."
+    },
+    {
+      "id": "STR-053",
+      "category": "anti_analysis",
+      "pattern": "procmon",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Sysinternals Process Monitor, checked to evade analysis."
+    },
+    {
+      "id": "STR-054",
+      "category": "anti_analysis",
+      "pattern": "processhacker",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Process Hacker tool name, checked to evade analysis."
+    },
+    {
+      "id": "STR-055",
+      "category": "command_execution",
+      "pattern": "cmd.exe",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Windows command shell reference."
+    },
+    {
+      "id": "STR-056",
+      "category": "command_execution",
+      "pattern": "powershell.exe",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "PowerShell interpreter reference."
+    },
+    {
+      "id": "STR-057",
+      "category": "command_execution",
+      "pattern": "-enc",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "PowerShell encoded-command flag, very common in malicious scripts."
+    },
+    {
+      "id": "STR-058",
+      "category": "command_execution",
+      "pattern": "-encodedcommand",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "PowerShell encoded-command flag, very common in malicious scripts."
+    },
+    {
+      "id": "STR-059",
+      "category": "command_execution",
+      "pattern": "iex(",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "PowerShell Invoke-Expression call, commonly used to run downloaded code."
+    },
+    {
+      "id": "STR-060",
+      "category": "command_execution",
+      "pattern": "invoke-expression",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "PowerShell Invoke-Expression, commonly used to run downloaded code."
+    },
+    {
+      "id": "STR-061",
+      "category": "command_execution",
+      "pattern": "downloadstring",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "PowerShell/.NET WebClient method used to fetch and often execute remote code."
+    },
+    {
+      "id": "STR-062",
+      "category": "command_execution",
+      "pattern": "wscript.shell",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "COM object used to run OS commands from scripts."
+    },
+    {
+      "id": "STR-063",
+      "category": "command_execution",
+      "pattern": "mshta.exe",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Living-off-the-land binary frequently abused to execute remote HTA payloads."
+    },
+    {
+      "id": "STR-064",
+      "category": "command_execution",
+      "pattern": "regsvr32.exe",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Living-off-the-land binary that can be abused to execute remote code (Squiblydoo)."
+    },
+    {
+      "id": "STR-065",
+      "category": "command_execution",
+      "pattern": "bitsadmin",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "BITS admin tool, commonly abused to download payloads."
+    },
+    {
+      "id": "STR-066",
+      "category": "command_execution",
+      "pattern": "certutil -urlcache",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Certutil abused as a file-downloader, a well-known LOLBin technique."
+    },
+    {
+      "id": "STR-067",
+      "category": "file_destruction",
+      "pattern": "vssadmin delete shadows",
+      "type": "string",
+      "severity": "critical",
+      "weight": 32,
+      "confidence": "high",
+      "description": "Deletes Volume Shadow Copies; a hallmark ransomware pre-encryption step."
+    },
+    {
+      "id": "STR-068",
+      "category": "file_destruction",
+      "pattern": "wbadmin delete",
+      "type": "string",
+      "severity": "critical",
+      "weight": 32,
+      "confidence": "high",
+      "description": "Deletes Windows backups; a hallmark ransomware pre-encryption step."
+    },
+    {
+      "id": "STR-069",
+      "category": "file_destruction",
+      "pattern": "bcdedit /set",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Modifies boot configuration, sometimes used to disable recovery options."
+    },
+    {
+      "id": "STR-070",
+      "category": "file_destruction",
+      "pattern": "ransom",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Explicit ransom-related terminology."
+    },
+    {
+      "id": "STR-071",
+      "category": "file_destruction",
+      "pattern": "your files have been encrypted",
+      "type": "string",
+      "severity": "critical",
+      "weight": 32,
+      "confidence": "high",
+      "description": "Classic ransom-note phrasing."
+    },
+    {
+      "id": "STR-072",
+      "category": "file_destruction",
+      "pattern": "decrypt your files",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Classic ransom-note phrasing."
+    },
+    {
+      "id": "STR-073",
+      "category": "security_tampering",
+      "pattern": "taskkill /f /im",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Force-kills a named process, sometimes used to disable security tools."
+    },
+    {
+      "id": "STR-074",
+      "category": "security_tampering",
+      "pattern": "net stop windefend",
+      "type": "string",
+      "severity": "critical",
+      "weight": 32,
+      "confidence": "high",
+      "description": "Directly attempts to stop Windows Defender."
+    },
+    {
+      "id": "STR-075",
+      "category": "security_tampering",
+      "pattern": "sc stop",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Service Control command used to stop services, sometimes security tools."
+    },
+    {
+      "id": "STR-076",
+      "category": "security_tampering",
+      "pattern": "disableantispyware",
+      "type": "string",
+      "severity": "critical",
+      "weight": 32,
+      "confidence": "high",
+      "description": "Registry value used to disable Windows Defender."
+    },
+    {
+      "id": "STR-077",
+      "category": "security_tampering",
+      "pattern": "disablerealtimemonitoring",
+      "type": "string",
+      "severity": "critical",
+      "weight": 32,
+      "confidence": "high",
+      "description": "Registry/PowerShell setting used to disable real-time AV protection."
+    },
+    {
+      "id": "STR-078",
+      "category": "c2_networking",
+      "pattern": "user-agent: mozilla/4.0 (compatible; msie",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Hardcoded legacy User-Agent string, common in older malware HTTP beacons."
+    },
+    {
+      "id": "STR-079",
+      "category": "c2_networking",
+      "pattern": "beacon",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Generic C2 terminology; weak signal alone."
+    },
+    {
+      "id": "STR-080",
+      "category": "c2_networking",
+      "pattern": "c2_server",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Explicit command-and-control terminology."
+    },
+    {
+      "id": "STR-081",
+      "category": "c2_networking",
+      "pattern": "pastebin.com/raw",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Raw Pastebin link pattern, commonly used to host second-stage payloads/configs."
+    },
+    {
+      "id": "STR-082",
+      "category": "c2_networking",
+      "pattern": "discord.com/api/webhooks",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Discord webhook URL pattern, widely abused for stealer log exfiltration."
+    },
+    {
+      "id": "STR-083",
+      "category": "c2_networking",
+      "pattern": "t.me/",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Telegram link, occasionally used as an exfiltration/C2 channel."
+    },
+    {
+      "id": "STR-084",
+      "category": "c2_networking",
+      "pattern": "api.telegram.org/bot",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Telegram Bot API endpoint, commonly abused for stealer exfiltration."
+    },
+    {
+      "id": "STR-085",
+      "category": "data_exfiltration",
+      "pattern": "exfil",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Explicit exfiltration terminology."
+    },
+    {
+      "id": "STR-086",
+      "category": "data_exfiltration",
+      "pattern": "screenshot.jpg",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Hardcoded screenshot filename; weak signal alone."
+    },
+    {
+      "id": "STR-087",
+      "category": "data_exfiltration",
+      "pattern": "system information",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Generic system-info collection terminology."
+    },
+    {
+      "id": "STR-088",
+      "category": "data_exfiltration",
+      "pattern": "grabber",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Common self-description used by info-stealer tools ('grabber')."
+    },
+    {
+      "id": "STR-089",
+      "category": "data_exfiltration",
+      "pattern": "stealer",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Explicit info-stealer terminology."
+    },
+    {
+      "id": "STR-090",
+      "category": "obfuscation",
+      "pattern": "frombase64string",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Base64 decoding call; extremely common, weak signal alone."
+    },
+    {
+      "id": "STR-091",
+      "category": "obfuscation",
+      "pattern": "xor_decrypt",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Explicit XOR-decryption terminology."
+    },
+    {
+      "id": "STR-092",
+      "category": "obfuscation",
+      "pattern": "string_decrypt",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Explicit string-decryption terminology, common in obfuscated malware."
+    },
+    {
+      "id": "STR-093",
+      "category": "obfuscation",
+      "pattern": "api_hash",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "API hashing terminology, used to hide imports from static analysis."
+    },
+    {
+      "id": "STR-094",
+      "category": "packer_artifact",
+      "pattern": "this program cannot be run in dos mode",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "Standard DOS stub text present in virtually all PE files linked by MSVC/MinGW/etc. Informational only — carries no malicious weight."
+    },
+    {
+      "id": "STR-095",
+      "category": "packer_artifact",
+      "pattern": "upx0",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "UPX packer section name artifact."
+    },
+    {
+      "id": "STR-096",
+      "category": "packer_artifact",
+      "pattern": "upx1",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "UPX packer section name artifact."
+    },
+    {
+      "id": "STR-097",
+      "category": "packer_artifact",
+      "pattern": ".vmp0",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "VMProtect section name artifact."
+    },
+    {
+      "id": "STR-098",
+      "category": "packer_artifact",
+      "pattern": ".themida",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Themida protector section name artifact."
+    },
+    {
+      "id": "STR-099",
+      "category": "packer_artifact",
+      "pattern": "enigma protector",
+      "type": "string",
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Enigma Protector self-identification string."
+    },
+    {
+      "id": "STR-100",
+      "category": "gta_abuse",
+      "pattern": "inject into gta5.exe",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Explicitly describes injecting into the GTA5 process, atypical for a normal ASI plugin."
+    },
+    {
+      "id": "STR-101",
+      "category": "gta_abuse",
+      "pattern": "steal gta",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Explicit terminology describing theft of GTA-related assets/accounts."
+    },
+    {
+      "id": "STR-102",
+      "category": "gta_abuse",
+      "pattern": "rockstar_token",
+      "type": "string",
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "References Rockstar Games account/session tokens, a possible account-theft indicator."
+    },
+    {
+      "id": "STR-103",
+      "category": "gta_abuse",
+      "pattern": "social_club_login",
+      "type": "string",
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "References Social Club login data."
+    }
+  ],
+  "dangerous_imports": [
+    {
+      "id": "IMP-001",
+      "capability": "RemoteThreadCreation",
+      "category": "process_injection",
+      "names": [
+        "CreateRemoteThread",
+        "CreateRemoteThreadEx",
+        "NtCreateThreadEx",
+        "RtlCreateUserThread"
+      ],
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Creates a thread inside another process — a core code-injection primitive."
+    },
+    {
+      "id": "IMP-002",
+      "capability": "RemoteMemoryWrite",
+      "category": "process_injection",
+      "names": [
+        "WriteProcessMemory",
+        "NtWriteVirtualMemory"
+      ],
+      "severity": "high",
+      "weight": 20,
+      "confidence": "high",
+      "description": "Writes memory into another process's address space."
+    },
+    {
+      "id": "IMP-003",
+      "capability": "RemoteMemoryRead",
+      "category": "process_injection",
+      "names": [
+        "ReadProcessMemory",
+        "NtReadVirtualMemory"
+      ],
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Reads memory from another process; used by injectors but also debuggers/overlays."
+    },
+    {
+      "id": "IMP-004",
+      "capability": "RemoteMemoryAlloc",
+      "category": "process_injection",
+      "names": [
+        "VirtualAllocEx",
+        "NtAllocateVirtualMemory"
+      ],
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Allocates memory in another process's address space."
+    },
+    {
+      "id": "IMP-005",
+      "capability": "RemoteMemoryProtect",
+      "category": "process_injection",
+      "names": [
+        "VirtualProtectEx",
+        "NtProtectVirtualMemory"
+      ],
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Changes memory protection in another process, often to make injected code executable."
+    },
+    {
+      "id": "IMP-006",
+      "capability": "ThreadContextManipulation",
+      "category": "process_injection",
+      "names": [
+        "SetThreadContext",
+        "GetThreadContext"
+      ],
+      "severity": "high",
+      "weight": 20,
+      "confidence": "medium",
+      "description": "Manipulates a thread's register/context state, used in classic injection techniques."
+    },
+    {
+      "id": "IMP-007",
+      "capability": "ApcInjection",
+      "category": "process_injection",
+      "names": [
+        "QueueUserAPC",
+        "NtQueueApcThread"
+      ],
+      "severity": "high",
+      "weight": 20,
+      "confidence": "medium",
+      "description": "Queues an APC to another thread, a known injection technique."
+    },
+    {
+      "id": "IMP-008",
+      "capability": "ProcessHollowingPrimitive",
+      "category": "process_injection",
+      "names": [
+        "NtUnmapViewOfSection",
+        "ZwUnmapViewOfSection"
+      ],
+      "severity": "high",
+      "weight": 20,
+      "confidence": "medium",
+      "description": "Unmaps a process's image section, a core primitive of process hollowing."
+    },
+    {
+      "id": "IMP-009",
+      "capability": "LocalMemoryAlloc",
+      "category": "memory",
+      "names": [
+        "VirtualAlloc",
+        "VirtualAllocExNuma",
+        "NtAllocateVirtualMemoryEx"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Allocates memory in the current process; extremely common and largely benign."
+    },
+    {
+      "id": "IMP-010",
+      "capability": "LocalMemoryFree",
+      "category": "memory",
+      "names": [
+        "VirtualFree"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Frees previously allocated memory; benign and extremely common."
+    },
+    {
+      "id": "IMP-011",
+      "capability": "ProcessCreation",
+      "category": "execution",
+      "names": [
+        "CreateProcessA",
+        "CreateProcessW",
+        "CreateProcessInternalW",
+        "NtCreateUserProcess"
+      ],
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Spawns a new process; used by both legitimate launchers and malware droppers."
+    },
+    {
+      "id": "IMP-012",
+      "capability": "ShellExecution",
+      "category": "execution",
+      "names": [
+        "ShellExecuteA",
+        "ShellExecuteW",
+        "ShellExecuteExA",
+        "ShellExecuteExW"
+      ],
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Launches a file/command via the shell; common in both installers and malware."
+    },
+    {
+      "id": "IMP-013",
+      "capability": "LegacyExec",
+      "category": "execution",
+      "names": [
+        "WinExec"
+      ],
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Legacy API to run a command line; rarely used by modern legitimate software."
+    },
+    {
+      "id": "IMP-014",
+      "capability": "KeyboardHooking",
+      "category": "keylogging",
+      "names": [
+        "SetWindowsHookExA",
+        "SetWindowsHookExW"
+      ],
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Installs a global input hook; used by keyloggers, but also legitimate overlay/input mods."
+    },
+    {
+      "id": "IMP-015",
+      "capability": "KeyStatePolling",
+      "category": "keylogging",
+      "names": [
+        "GetAsyncKeyState",
+        "GetKeyState",
+        "GetKeyboardState"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Reads keyboard state; extremely common in games and input-remapping mods."
+    },
+    {
+      "id": "IMP-016",
+      "capability": "RawInputCapture",
+      "category": "keylogging",
+      "names": [
+        "GetRawInputData",
+        "RegisterRawInputDevices"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Captures raw input device data; common in games for controller/mouse handling."
+    },
+    {
+      "id": "IMP-017",
+      "capability": "RegistryWrite",
+      "category": "persistence",
+      "names": [
+        "RegSetValueExA",
+        "RegSetValueExW",
+        "RegCreateKeyExA",
+        "RegCreateKeyExW"
+      ],
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Writes registry values/keys; used for both settings storage and persistence."
+    },
+    {
+      "id": "IMP-018",
+      "capability": "RegistryDelete",
+      "category": "persistence",
+      "names": [
+        "RegDeleteKeyA",
+        "RegDeleteKeyW",
+        "RegDeleteValueA",
+        "RegDeleteValueW"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Deletes registry keys/values; common cleanup operation."
+    },
+    {
+      "id": "IMP-019",
+      "capability": "RegistryRead",
+      "category": "persistence",
+      "names": [
+        "RegOpenKeyExA",
+        "RegOpenKeyExW",
+        "RegQueryValueExA",
+        "RegQueryValueExW",
+        "RegEnumKeyExA",
+        "RegEnumKeyExW"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Reads registry keys/values; extremely common and largely benign."
+    },
+    {
+      "id": "IMP-020",
+      "capability": "ServiceControl",
+      "category": "persistence",
+      "names": [
+        "CreateServiceA",
+        "CreateServiceW",
+        "StartServiceA",
+        "StartServiceW",
+        "OpenSCManagerA",
+        "OpenSCManagerW"
+      ],
+      "severity": "high",
+      "weight": 20,
+      "confidence": "medium",
+      "description": "Creates/starts a Windows service, sometimes abused for persistence or privilege escalation."
+    },
+    {
+      "id": "IMP-021",
+      "capability": "FileWrite",
+      "category": "file_ops",
+      "names": [
+        "WriteFile",
+        "NtWriteFile"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Writes to a file; extremely common and largely benign."
+    },
+    {
+      "id": "IMP-022",
+      "capability": "FileRead",
+      "category": "file_ops",
+      "names": [
+        "ReadFile",
+        "NtReadFile"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Reads from a file; extremely common and largely benign."
+    },
+    {
+      "id": "IMP-023",
+      "capability": "FileCreateOpen",
+      "category": "file_ops",
+      "names": [
+        "CreateFileA",
+        "CreateFileW",
+        "NtCreateFile"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Opens/creates a file; extremely common and largely benign."
+    },
+    {
+      "id": "IMP-024",
+      "capability": "FileDelete",
+      "category": "file_ops",
+      "names": [
+        "DeleteFileA",
+        "DeleteFileW"
+      ],
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "low",
+      "description": "Deletes a file; common cleanup operation, but relevant in destructive-behavior combinations."
+    },
+    {
+      "id": "IMP-025",
+      "capability": "FileAttributeTamper",
+      "category": "file_ops",
+      "names": [
+        "SetFileAttributesA",
+        "SetFileAttributesW"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Changes file attributes (e.g. hidden/system), used by both installers and malware to hide files."
+    },
+    {
+      "id": "IMP-026",
+      "capability": "WinsockNetworking",
+      "category": "networking",
+      "names": [
+        "WSAStartup",
+        "WSASocketA",
+        "WSASocketW",
+        "socket",
+        "connect",
+        "send",
+        "recv",
+        "closesocket"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Low-level TCP/IP networking; common in mods with online features, voice chat, or update checks."
+    },
+    {
+      "id": "IMP-027",
+      "capability": "WinInetNetworking",
+      "category": "networking",
+      "names": [
+        "InternetOpenA",
+        "InternetOpenW",
+        "InternetReadFile",
+        "InternetWriteFile",
+        "HttpOpenRequestA",
+        "HttpOpenRequestW",
+        "HttpSendRequestA",
+        "HttpSendRequestW"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "WinINet HTTP networking; common for update-checkers and telemetry as well as malware."
+    },
+    {
+      "id": "IMP-028",
+      "capability": "WinHttpNetworking",
+      "category": "networking",
+      "names": [
+        "WinHttpOpen",
+        "WinHttpConnect",
+        "WinHttpOpenRequest",
+        "WinHttpSendRequest"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "WinHTTP networking; common for legitimate HTTP requests as well as malware."
+    },
+    {
+      "id": "IMP-029",
+      "capability": "DebuggerDetection",
+      "category": "anti_analysis",
+      "names": [
+        "IsDebuggerPresent",
+        "CheckRemoteDebuggerPresent",
+        "NtQueryInformationProcess",
+        "OutputDebugStringA",
+        "OutputDebugStringW"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Debugger-presence checks; used by malware but equally by DRM/anti-cheat in legitimate mods."
+    },
+    {
+      "id": "IMP-030",
+      "capability": "ModuleLoading",
+      "category": "module_loading",
+      "names": [
+        "LoadLibraryA",
+        "LoadLibraryW",
+        "LoadLibraryExA",
+        "LoadLibraryExW",
+        "GetProcAddress",
+        "FreeLibrary",
+        "GetModuleHandleA",
+        "GetModuleHandleW"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Loads DLLs and resolves function addresses; fundamental to virtually all Windows software including all GTA mods."
+    },
+    {
+      "id": "IMP-031",
+      "capability": "LowLevelModuleLoading",
+      "category": "module_loading",
+      "names": [
+        "LdrLoadDll",
+        "LdrGetProcedureAddress"
+      ],
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "low",
+      "description": "Low-level (Nt/Ldr) module loading, less common in typical user-mode application code."
+    },
+    {
+      "id": "IMP-032",
+      "capability": "SyncPrimitives",
+      "category": "synchronization",
+      "names": [
+        "CreateMutexA",
+        "CreateMutexW",
+        "OpenMutexA",
+        "OpenMutexW",
+        "CreateEventA",
+        "CreateEventW",
+        "WaitForSingleObject",
+        "WaitForMultipleObjects"
+      ],
+      "severity": "low",
+      "weight": 4,
+      "confidence": "low",
+      "description": "Standard thread synchronization primitives; extremely common and benign."
+    },
+    {
+      "id": "IMP-033",
+      "capability": "CryptoApiUsage",
+      "category": "obfuscation",
+      "names": [
+        "CryptEncrypt",
+        "CryptDecrypt",
+        "CryptAcquireContextA",
+        "CryptAcquireContextW",
+        "CryptGenKey"
+      ],
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "low",
+      "description": "Windows CryptoAPI usage; used for legitimate encryption as well as ransomware/obfuscation."
+    },
+    {
+      "id": "IMP-034",
+      "capability": "ProcessEnumeration",
+      "category": "process_recon",
+      "names": [
+        "CreateToolhelp32Snapshot",
+        "Process32First",
+        "Process32Next",
+        "EnumProcesses"
+      ],
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Enumerates running processes; used by malware for target discovery, but also by overlay/anti-cheat tools."
+    },
+    {
+      "id": "IMP-035",
+      "capability": "ProcessHandleAccess",
+      "category": "process_recon",
+      "names": [
+        "OpenProcess",
+        "NtOpenProcess"
+      ],
+      "severity": "medium",
+      "weight": 10,
+      "confidence": "medium",
+      "description": "Opens a handle to another process; a prerequisite for both injection and legitimate interop (e.g. overlays)."
+    }
+  ],
+  "gta_markers": [
+    {
+      "id": "GTA-001",
+      "category": "gta_context",
+      "pattern": "gta",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "Generic GTA reference."
+    },
+    {
+      "id": "GTA-002",
+      "category": "gta_context",
+      "pattern": "grand theft auto",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "Full franchise name reference."
+    },
+    {
+      "id": "GTA-003",
+      "category": "gta_context",
+      "pattern": "gta5",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "GTA V short identifier."
+    },
+    {
+      "id": "GTA-004",
+      "category": "gta_context",
+      "pattern": "gta v",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "GTA V short identifier (spaced)."
+    },
+    {
+      "id": "GTA-005",
+      "category": "gta_context",
+      "pattern": "gtav",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "GTA V short identifier (no space)."
+    },
+    {
+      "id": "GTA-006",
+      "category": "gta_context",
+      "pattern": "gta5.exe",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "GTA V executable name reference."
+    },
+    {
+      "id": "GTA-007",
+      "category": "gta_context",
+      "pattern": "gtaiv",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "GTA IV short identifier."
+    },
+    {
+      "id": "GTA-008",
+      "category": "gta_context",
+      "pattern": "gta iv",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "GTA IV short identifier (spaced)."
+    },
+    {
+      "id": "GTA-009",
+      "category": "gta_context",
+      "pattern": "gta online",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "GTA Online reference."
+    },
+    {
+      "id": "GTA-010",
+      "category": "gta_context",
+      "pattern": "scripthook",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "ScriptHook modding framework reference."
+    },
+    {
+      "id": "GTA-011",
+      "category": "gta_context",
+      "pattern": "scripthookv",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "ScriptHookV modding framework reference."
+    },
+    {
+      "id": "GTA-012",
+      "category": "gta_context",
+      "pattern": "scripthookdotnet",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "ScriptHookVDotNet modding framework reference."
+    },
+    {
+      "id": "GTA-013",
+      "category": "gta_context",
+      "pattern": "asi loader",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "ASI Loader reference, standard GTA mod-loading mechanism."
+    },
+    {
+      "id": "GTA-014",
+      "category": "gta_context",
+      "pattern": "dinput8",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "dinput8.dll, the common ASI-loader proxy DLL name."
+    },
+    {
+      "id": "GTA-015",
+      "category": "gta_context",
+      "pattern": "native",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "RAGE 'native' function terminology, standard in GTA scripting."
+    },
+    {
+      "id": "GTA-016",
+      "category": "gta_context",
+      "pattern": "natives",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "RAGE 'natives' function terminology, standard in GTA scripting."
+    },
+    {
+      "id": "GTA-017",
+      "category": "gta_context",
+      "pattern": "rage engine",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "Reference to Rockstar's RAGE game engine."
+    },
+    {
+      "id": "GTA-018",
+      "category": "gta_context",
+      "pattern": "rockstar games",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "Rockstar Games publisher reference."
+    },
+    {
+      "id": "GTA-019",
+      "category": "gta_context",
+      "pattern": "social club",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "Rockstar Social Club platform reference."
+    },
+    {
+      "id": "GTA-020",
+      "category": "gta_context",
+      "pattern": "openiv",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "OpenIV modding tool reference."
+    },
+    {
+      "id": "GTA-021",
+      "category": "gta_context",
+      "pattern": "menyoo",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "Menyoo, a well-known GTA V trainer/mod reference."
+    },
+    {
+      "id": "GTA-022",
+      "category": "gta_context",
+      "pattern": "simple trainer",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "Simple Trainer, a well-known GTA V trainer mod reference."
+    },
+    {
+      "id": "GTA-023",
+      "category": "gta_context",
+      "pattern": "fivem",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "FiveM multiplayer modification platform reference."
+    },
+    {
+      "id": "GTA-024",
+      "category": "gta_context",
+      "pattern": "ragemp",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "RAGE Multiplayer modification platform reference."
+    },
+    {
+      "id": "GTA-025",
+      "category": "gta_context",
+      "pattern": "gta sa",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "GTA: San Andreas short identifier."
+    },
+    {
+      "id": "GTA-026",
+      "category": "gta_context",
+      "pattern": "gta vc",
+      "type": "string",
+      "severity": "info",
+      "weight": 0,
+      "confidence": "high",
+      "description": "GTA: Vice City short identifier."
+    }
+  ],
+  "combination_rules": [
+    {
+      "id": "COMBO-001",
+      "name": "credential_theft_with_exfiltration",
+      "requires_categories": [
+        "credential_theft",
+        "c2_networking"
+      ],
+      "min_categories_matched": 2,
+      "bonus_weight": 25,
+      "confidence": "high",
+      "description": "Credential/browser-data theft indicators combined with network exfiltration indicators.",
+      "risk_floor": "suspicious"
+    },
+    {
+      "id": "COMBO-002",
+      "name": "injection_with_remote_access",
+      "requires_categories": [
+        "process_injection",
+        "process_recon"
+      ],
+      "min_categories_matched": 2,
+      "bonus_weight": 20,
+      "confidence": "high",
+      "description": "Remote process access combined with memory-injection primitives.",
+      "risk_floor": "suspicious"
+    },
+    {
+      "id": "COMBO-003",
+      "name": "keylogging_with_exfiltration",
+      "requires_categories": [
+        "keylogging",
+        "c2_networking"
+      ],
+      "min_categories_matched": 2,
+      "bonus_weight": 22,
+      "confidence": "high",
+      "description": "Keyboard-monitoring indicators combined with network exfiltration indicators.",
+      "risk_floor": "suspicious"
+    },
+    {
+      "id": "COMBO-004",
+      "name": "persistence_with_execution",
+      "requires_categories": [
+        "persistence",
+        "command_execution"
+      ],
+      "min_categories_matched": 2,
+      "bonus_weight": 18,
+      "confidence": "medium",
+      "description": "Persistence-establishment indicators combined with command-execution indicators."
+    },
+    {
+      "id": "COMBO-005",
+      "name": "security_tampering_with_destruction",
+      "requires_categories": [
+        "security_tampering",
+        "file_destruction"
+      ],
+      "min_categories_matched": 2,
+      "bonus_weight": 30,
+      "confidence": "high",
+      "description": "Security-software tampering combined with destructive/ransomware-like behavior — a strong multi-stage-attack signal.",
+      "risk_floor": "malicious"
+    },
+    {
+      "id": "COMBO-006",
+      "name": "packer_with_malicious_signal",
+      "requires_categories": [
+        "packer_artifact",
+        "process_injection"
+      ],
+      "min_categories_matched": 2,
+      "bonus_weight": 15,
+      "confidence": "medium",
+      "description": "Packing/obfuscation indicators combined with independent injection indicators (packing alone is not evidence of malice)."
+    },
+    {
+      "id": "COMBO-007",
+      "name": "multiple_independent_injection_primitives",
+      "requires_multiple_in_category": {
+        "category": "process_injection",
+        "min_distinct_rules": 3
+      },
+      "bonus_weight": 20,
+      "risk_floor": "suspicious",
+      "confidence": "high",
+      "severity": "high",
+      "description": "Three or more independent process-injection primitives (e.g. remote memory allocation + remote memory write + remote thread creation) were found together. A single such API is common in legitimate low-level tooling; three or more acting in concert is a much stronger signal of actual injection capability being assembled, not incidental API use."
+    }
+  ],
+  "packer_section_names": [
+    ".upx0",
+    ".upx1",
+    ".upx2",
+    "upx0",
+    "upx1",
+    "upx2",
+    ".vmp0",
+    ".vmp1",
+    ".vmp2",
+    ".themida",
+    ".taz",
+    ".aspack",
+    ".adata",
+    ".packed",
+    ".enigma1",
+    ".enigma2",
+    ".mpress1",
+    ".mpress2",
+    ".petite",
+    ".nsp0",
+    ".nsp1",
+    ".nsp2",
+    ".perplex",
+    ".pec2",
+    ".pec1",
+    ".ccg"
+  ],
+  "ordinal_import_heuristic": {
+    "id": "HEUR-ORDINAL-RATIO",
+    "description": "A high proportion of imports resolved purely by ordinal (no function name) can indicate deliberate evasion of static name-based scanning, but many legitimate DLLs (e.g. MFC, some MSVC runtime helpers) also use a handful of ordinal imports. This is treated as weak, contextual evidence only.",
+    "min_total_imports": 10,
+    "ratio_threshold": 0.5,
+    "severity": "low",
+    "weight": 6,
+    "confidence": "low",
+    "category": "obfuscation"
+  },
+  "extension_mismatch_heuristic": {
+    "id": "HEUR-EXT-MISMATCH",
+    "description": "The file was uploaded with a .dll/.asi extension, but the PE COFF Characteristics field does not have IMAGE_FILE_DLL set. This can indicate an executable (.exe) renamed to look like a GTA plugin. This is metadata evidence, not proof of malice — some legitimate loader stubs are also built as EXEs.",
+    "severity": "medium",
+    "weight": 10,
+    "confidence": "medium",
+    "category": "metadata_anomaly"
+  },
+  "timestamp_anomaly_heuristic": {
+    "id": "HEUR-TIMESTAMP",
+    "description": "The PE COFF TimeDateStamp is either zero, implausibly old (before the year 1993, predating Win32 PE itself), or in the future relative to the scan time. Timestamps are trivially forgeable and this is purely informational metadata.",
+    "severity": "low",
+    "weight": 3,
+    "confidence": "low",
+    "category": "metadata_anomaly"
+  }
+}

@@ -21,6 +21,7 @@ jobs:
           python3 tests/validate-site.py
           npm ci --ignore-scripts --no-audit --no-fund
           npm run build
+          npm run test:game-scam-guard
           node --check assets/malguard-unified.js
           node --check assets/fusion/home-sections.js
           node --check assets/contextual-header.js

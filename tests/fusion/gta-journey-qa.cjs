@@ -254,6 +254,10 @@ async function runProfile(profile) {
     }
     if (profile.disableGL || profile.failScene) await page.waitForFunction(() => MalGuardGTA.snapshot().renderFailed, null, { timeout: 15000 });
     await page.waitForTimeout(1150);
+    // The last hero reveal starts 600ms after readiness and lasts 900ms.
+    // Measure the reading hold after its real browser animations and fonts settle.
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForFunction(() => document.querySelector('.hero-copy').getAnimations({ subtree: true }).every(animation => animation.playState === 'finished'), null, { timeout: 7000 });
     report.hero = await composition(page, '.hero-copy');
     checkComposition(report.hero, profile, 'hero');
     if (!expectsGL && !profile.disableGL && !profile.failScene && !profile.delayScene) assert.equal(sceneRequests.length, 0, 'the heavy renderer was loaded on a fallback device');
