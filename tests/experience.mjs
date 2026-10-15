@@ -226,6 +226,23 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     assert.equal(await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length),0);
     await context.close();
   });
+  await check(`${name} repeat visit bypasses the intro and manual replay still works`,async()=>{
+    const context=await browser.newContext({...fixtureTLS,viewport:{width:1280,height:900},reducedMotion:'no-preference'});
+    await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
+    const page=await context.newPage();
+    await page.goto(base+'/');
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(()=>sessionStorage.getItem('mg-home-intro-seen-v1')==='1');
+    await page.reload();
+    await page.waitForFunction(()=>document.querySelector('#home-opening').dataset.finished==='repeat-visit');
+    assert.equal(await page.locator('#home-opening').isVisible(),false);
+    assert.equal(await page.locator('.scene[data-scene="0"] .t').evaluate(el=>el.inert),false);
+    await page.locator('#home-opening-replay').click();
+    await page.waitForFunction(()=>document.querySelector('#home-opening').hidden===false);
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('#home-opening').isVisible(),false);
+    await context.close();
+  });
   await browser.close();
 }
 await writeFile('test-results/report'+(selectedBrowser?'-'+selectedBrowser:'')+'.json',JSON.stringify(report,null,2));
