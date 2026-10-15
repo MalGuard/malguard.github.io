@@ -4,14 +4,18 @@ The reviewed Persian web scanner lives here and is built with the parent site's
 `npm run build`. Install dependencies from the repository root with `npm ci`.
 
 - Public entry: `https://malguard.site/game-scam-guard.html`.
-- Stable protected preview: `https://game-scam-guard-connected.vercel.app/game-scam-guard/`.
+- Stable web preview: `https://game-scam-guard-connected.vercel.app/game-scam-guard/`.
 - Same-origin Vercel API namespace: `/api/game-scam-guard/`.
 - Existing MalGuard HTML, administrator authentication and Windows download
   workflows are preserved. The Windows client is not released by this change.
 
 GitHub Pages hosts the public entry only. It cannot run Node functions; the
-entry opens the existing Vercel project with Vercel Authentication. Do not embed
-a share token, bypass cookie, provider key or preview password in public HTML.
+entry opens the existing Vercel project. Its unchanged `all_except_custom_domains`
+protection redirects unauthenticated visitors on immutable deployment URLs to
+Vercel Authentication; the stable Production alias serves the app and API
+without a share link under the existing domain exception. Verify actual alias
+access instead of assuming every project URL requires login. Do not embed a
+share token, bypass cookie, provider key or preview password in public HTML.
 Owner testing may use an independently verified expiring scoped share URL.
 
 Production environment variables remain configured in Vercel, not in source:
