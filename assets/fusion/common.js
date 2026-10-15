@@ -22,6 +22,7 @@
     entries.forEach(e=>{
       if(!e.isIntersecting)return;
       const target=e.target._mgRevealTarget||e.target;
+      if(target.matches('.scene[data-scene]')&&window.MalGuardParticleStory)return;
       if(target.matches('.scene[data-scene="0"]')&&document.body.dataset.intro!=='ready')return;
       if(target.matches('#layers .sticky'))target.classList.add('particle-ready');
       else target.classList.add(target.matches('.scene,.hero')?'in':'show');

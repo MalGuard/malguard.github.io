@@ -1,0 +1,59 @@
+# Particle and typography choreography
+
+Reference: user-provided `MalGuard_Codex_optimized.mov`, 17.584 s, 512 × 910, 24 fps.
+The recording shows someone scrolling a website on a laptop. Its seconds describe
+that demonstration, not a fixed autoplay duration to impose on visitors.
+
+## Observations
+
+| Video interval | Visual behavior |
+| --- | --- |
+| 0–1.4 s | The particle boundary gathers first; the headline then materializes inside its readable space. |
+| 1.4–2.3 s | Form and typography hold together, without continuing to scatter while reading. |
+| 2.3–4.2 s | Typography disappears, the boundary stretches into a passage, and the next form gathers. |
+| 4.2–5.8 s | The next stable composition and its copy arrive together. |
+| 6–7.3 s | A particle-only camera-like transition separates reading states. |
+| 7.3–9.3 s | Another readable hold; typography occupies quiet space above the luminous field. |
+| 9.3–12 s | Copy leaves before the large transition; a new composition then resolves. |
+
+Keep MalGuard's approved security silhouettes, authentic final logo, actual copy,
+current product status and established opening geometry. Transfer the reference's
+relationship between typography, continuous particles and scroll, not its DNA or
+science-themed product messaging.
+
+## Research
+
+Exa reviewed 15 search results across three angles: particle typography,
+reversible native scroll choreography, and adaptive particle quality. Primary
+implementation guidance was checked against:
+
+- [GSAP ScrollTrigger documentation](https://gsap.com/docs/v3/Plugins/ScrollTrigger/):
+  map animation to scroll progress; keep readable holds; preserve native scrolling;
+  recalculate geometry when fonts and viewport change. This implementation uses
+  the existing renderer's single clock instead of introducing another scroll owner.
+- [Codrops Interlude particle transition](https://interlude.crnacura.workers.dev/transitions/particles/):
+  stable particle identities gather into glyphs, breathe, and disperse. MalGuard
+  keeps selectable semantic DOM copy and samples only the glyph dust into the
+  existing field canvas; it adds no dark sheet.
+- [Three.js particle scaling discussion](https://discourse.threejs.org/t/re-scaling-re-sizing-particles-depending-on-screen-size/8810):
+  account for pixel density and projection; particle sizes require deliberate
+  scaling. Here a small precomputed optical sprite atlas replaces square points,
+  with a density/resolution cap and the existing frame-budget adaptation.
+
+## Implementation contract
+
+One native scroll position is smoothed, then used by both shape interpolation and
+the DOM/glyph controller. Each narrative chapter reserves 54% of its scroll range
+for the formed security silhouette. Copy assembles, holds, dissolves into sampled
+glyph particles, and leaves a particle-only passage before the next reading state.
+Scrolling back reverses the same paths; no wheel/touch event is cancelled.
+
+Mobile artwork fits the space between the navigation and the measured reading
+block. Text has no opaque backing surface. Reduced Motion renders readable DOM
+directly. A renderer-loading failure releases all narrative content. High-density
+desktop rendering reaches 3840 × 2160 on a capable DPR-2 viewport; weaker devices
+retain lower budgets rather than loading a heavier 3D particle dependency.
+
+`tests/particle-story.cjs` verifies initial suppression, five exact formed holds,
+glyph dissolution, the particle-only gap, reverse scroll, final authentic-logo
+arrival, touch/desktop reading safety, native 4K dimensions and Reduced Motion.
