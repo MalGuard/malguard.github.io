@@ -46,7 +46,11 @@
     cancelAnimationFrame(raf);raf=0;last=0;root.hidden=true;releaseRenderer();releaseProjection();
     document.body.classList.remove('home-opening-active');
     document.body.dataset.intro='ready';copy.inert=false;copy.closest('.scene').classList.add('in');
-    root.dataset.finished=reason;syncControls();
+    root.dataset.finished=reason;
+    // A completed or dismissed introduction need not block repeat visits in this tab.
+    // Session storage is optional: private browsing/storage denial stays functional.
+    try{sessionStorage.setItem('mg-home-intro-seen-v1','1');}catch{}
+    syncControls();
     if(focus){const h=copy.querySelector('h1');h.tabIndex=-1;h.focus({preventScroll:true});}
     window.dispatchEvent(new CustomEvent('mg:opening-ready'));
   }
@@ -102,8 +106,12 @@
     }catch(e){failure='Three-dimensional opening unavailable';performanceLimited=true;mode='css';}
     finally{if(token===generation)loading=false;}
   }
-  function start(){
-    if(disposed)return;generation++;elapsed=0;complete=false;last=0;caption=-1;mode='css';failure='';qualityFallback=performanceLimited?'frame-budget':'';slowFrames=0;root.classList.remove('fallback-immediate');root.hidden=false;
+  function start(forceReplay=false){
+    if(disposed)return;
+    if(!forceReplay){
+      try{if(sessionStorage.getItem('mg-home-intro-seen-v1')==='1'){finish('repeat-visit');return;}}catch{}
+    }
+    generation++;elapsed=0;complete=false;last=0;caption=-1;mode='css';failure='';qualityFallback=performanceLimited?'frame-budget':'';slowFrames=0;root.classList.remove('fallback-immediate');root.hidden=false;
     document.body.dataset.intro='assembling';document.body.classList.add('home-opening-active');
     copy.inert=true;copy.closest('.scene').classList.remove('in');
     root.removeAttribute('data-finished');syncControls();
@@ -112,10 +120,12 @@
     }
     paint();
     if(reduced.matches||document.body.classList.contains('motion-paused')||scrollY>64||innerHeight<500){finish('direct-entry');return;}
-    enhance();wake();
+    // Let the lightweight projection paint first; defer the large WebGL bundle
+    // until the following frame, without changing the authored animation clock.
+    wake();requestAnimationFrame(()=>{if(!complete&&!disposed)enhance();});
   }
   listen(skip,'click',()=>finish('skip',true));
-  listen(replay,'click',()=>{scrollTo({top:0,behavior:'instant'});window.MalGuardParticles?.restartIntro();start();skip.focus({preventScroll:true});});
+  listen(replay,'click',()=>{scrollTo({top:0,behavior:'instant'});window.MalGuardParticles?.restartIntro();start(true);skip.focus({preventScroll:true});});
   listen(window,'scroll',()=>{if(!complete&&scrollY>64)finish('scroll');syncControls();},{passive:true});
   listen(window,'resize',()=>{if(renderer){if(weak()){mode='css';releaseRenderer();}else renderer.resize();}projection?.resize();if(!complete)paint();syncControls();},{passive:true});
   listen(document,'keydown',e=>{if(e.key==='Escape'&&!complete){e.preventDefault();finish('escape',true);}});
