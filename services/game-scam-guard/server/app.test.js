@@ -4,6 +4,21 @@ import { once } from 'node:events';
 import { createApp } from './app.js';
 import { ScanError } from './network.js';
 
+test('first-party Pages origins receive narrow CORS while other origins are rejected', async () => {
+  const prior=process.env.GUARD_CLERK_PUBLISHABLE_KEY;
+  process.env.GUARD_CLERK_PUBLISHABLE_KEY='pk_test_abcdefghijklmnopqrstuvwxyz';
+  const app=createApp();const server=app.listen(0,'127.0.0.1');await once(server,'listening');
+  const base=`http://127.0.0.1:${server.address().port}`;
+  try {
+    const config=await fetch(`${base}/api/account-config`,{headers:{Origin:'https://malguard.site'}});
+    assert.equal(config.status,200);assert.equal(config.headers.get('access-control-allow-origin'),'https://malguard.site');
+    assert.deepEqual(await config.json(),{provider:'clerk',configured:true,publishableKey:'pk_test_abcdefghijklmnopqrstuvwxyz'});
+    const options=await fetch(`${base}/api/scan`,{method:'OPTIONS',headers:{Origin:'https://malguard.site','Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type'}});
+    assert.equal(options.status,204);assert.equal(options.headers.get('access-control-allow-credentials'),null);
+    assert.equal((await fetch(`${base}/api/health`,{headers:{Origin:'https://attacker.example'}})).status,403);
+  } finally { if(prior===undefined)delete process.env.GUARD_CLERK_PUBLISHABLE_KEY;else process.env.GUARD_CLERK_PUBLISHABLE_KEY=prior;server.closeAllConnections();await new Promise(resolve=>server.close(resolve)); }
+});
+
 test('disconnected clients retain scan slots until the actual work settles', async () => {
   const pending = [];
   let disconnected = 0;

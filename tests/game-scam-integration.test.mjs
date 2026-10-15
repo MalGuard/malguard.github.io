@@ -14,10 +14,10 @@ test('cloud collector identity and server-only artifact boundary are preserved',
   assert.ok(build.includes("root/'services/game-scam-guard/dist',out/'game-scam-guard'"));
   assert.ok(build.includes("for forbidden in ['services','api'"));
 });
-test('public entry uses stable authenticated preview without embedded access token',async()=>{
+test('public entry opens the first-party GameScam Guard route without embedded access token',async()=>{
   const page=await read('game-scam-guard.html');
   assert.ok(page.includes('id="gameScamPreview"'));
-  assert.ok(page.includes('href="https://game-scam-guard-connected.vercel.app/game-scam-guard/"'));
+  assert.ok(page.includes('href="/game-scam-guard/"'));
   assert.ok(!/_vercel_share|protection-bypass|previewPassword/.test(page));
   assert.ok(page.includes('Windows · Coming Soon'));
   assert.ok(page.includes('each require separate consent'));
@@ -28,7 +28,10 @@ test('PWA identity and assets stay inside GameScam Guard path',async()=>{
   assert.ok(manifest.icons.every(icon=>icon.src.startsWith('./icons/')));
   const source=await read('services/game-scam-guard/src/main.jsx');
   assert.ok(source.includes('`${import.meta.env.BASE_URL}sw.js`'));
-  assert.ok(source.includes('fetch(`/api/game-scam-guard/${endpoint}`'));
+  assert.ok(source.includes("from './api.js'"));
+  const api=await read('services/game-scam-guard/src/api.js');
+  assert.ok(api.includes("'https://game-scam-guard-connected.vercel.app'"));
+  assert.ok(api.includes('/api/game-scam-guard/${endpoint}'));
   assert.ok(!source.includes("fetch('/api/health')"));
 });
 test('scoped service worker ignores parent pages, APIs, foreign sites and unsafe methods',async()=>{

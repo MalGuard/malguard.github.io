@@ -7,6 +7,10 @@ from hashlib import sha256
 ROOT=Path(__file__).resolve().parents[1]
 PUBLIC_AI_GUIDES=[ROOT/'research/gta-5-mod-security.html', ROOT/'research/gta-mod-security-fa.html']
 PAGES=[ROOT/'index.html', *[p for p in ROOT.glob('*.html') if p.name!='index.html'],ROOT/'ios-preview/index.html',ROOT/'research/repackaged-mod.html',ROOT/'research/security-motion.html',*PUBLIC_AI_GUIDES,ROOT/'release/sandbox-help-historical.html']
+# The Guard source is compiled and copied to the Pages artifact by the static
+# workflow. Keep this route explicit so a typo cannot hide as a link, while
+# allowing the source-only validator to run before a local build.
+PUBLISHED_APP_ROUTES={'/game-scam-guard/':ROOT/'services/game-scam-guard/index.html'}
 class Document(HTMLParser):
     def __init__(self,text):
         super().__init__(); self.ids=[];self.refs=[];self.controls=[];self.feed(text)
@@ -23,7 +27,7 @@ for page in PAGES:
     for tag,ref in doc.refs:
         u=urlsplit(ref)
         if u.scheme or u.netloc or not ref:continue
-        target=ROOT/unquote(u.path.lstrip('/')) if u.path.startswith('/') else page.parent/unquote(u.path)
+        target=PUBLISHED_APP_ROUTES.get(u.path,ROOT/unquote(u.path.lstrip('/')) if u.path.startswith('/') else page.parent/unquote(u.path))
         if not u.path:target=page
         if target.is_dir():target=target/'index.html'
         if not target.is_file():errors.append(f'{page.name}: missing {ref}');continue
