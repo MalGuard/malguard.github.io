@@ -7,7 +7,8 @@ const encode=value=>Buffer.from(JSON.stringify(value)).toString('base64url');
 const decode=value=>JSON.parse(Buffer.from(value,'base64url').toString('utf8'));
 
 export function createEmailAuth({apiKey=process.env.BREVO_API_KEY,fromEmail=process.env.AUTH_FROM_EMAIL,fetchImpl=fetch,now=()=>Date.now()}={}) {
-  const enabled=typeof apiKey==='string'&&apiKey.length>20&&email(fromEmail);
+  const hasApiKey=typeof apiKey==='string'&&apiKey.length>20,hasFromEmail=!!email(fromEmail);
+  const enabled=hasApiKey&&hasFromEmail;
   const key=enabled?createHash('sha256').update(`gamescam-email-auth-v1\0${apiKey}`).digest():null;
   const attempts=new Map();
   const seal=payload=>{const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key,iv);const body=Buffer.concat([cipher.update(JSON.stringify(payload),'utf8'),cipher.final()]);return `${iv.toString('base64url')}.${cipher.getAuthTag().toString('base64url')}.${body.toString('base64url')}`;};
@@ -25,5 +26,5 @@ export function createEmailAuth({apiKey=process.env.BREVO_API_KEY,fromEmail=proc
   }
   function verify({verificationToken,code}) {if(!enabled)throw error(503,'ارسال کد ایمیل هنوز آماده نشده است.');const payload=open(verificationToken);if(!payload||payload.type!=='code'||payload.expiresAt<now()||!/^\d{6}$/.test(String(code)))throw error(400,'کد تأیید نامعتبر یا منقضی شده است.');const expected=Buffer.from(payload.code),actual=Buffer.from(encode(String(code)));if(expected.length!==actual.length||!timingSafeEqual(expected,actual))throw error(400,'کد تأیید نامعتبر یا منقضی شده است.');return {sessionToken:seal({type:'session',email:payload.email,name:payload.name||payload.email.split('@')[0],expiresAt:now()+SESSION_TTL_MS})};}
   function session({sessionToken}) {if(!enabled)throw error(503,'سرویس حساب هنوز آماده نشده است.');const payload=open(sessionToken);if(!payload||payload.type!=='session'||payload.expiresAt<now())throw error(401,'نشست حساب معتبر نیست.');return {email:payload.email,username:payload.name,expiresAt:payload.expiresAt};}
-  return {enabled:!!enabled,start,verify,session};
+  return {enabled:!!enabled,status:{hasApiKey,hasFromEmail},start,verify,session};
 }

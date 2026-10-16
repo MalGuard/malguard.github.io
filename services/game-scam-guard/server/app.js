@@ -73,7 +73,7 @@ app.get('/api/account-config',(req,res)=>{
   const configured=/^pk_(test|live)_[A-Za-z0-9]+$/.test(key)&&key.length<1024;
   res.json({provider:'clerk',configured,publishableKey:configured?key:null});
 });
-app.get('/api/auth/status',(req,res)=>res.json({provider:'first-party-email',configured:emailAuth.enabled}));
+app.get('/api/auth/status',(req,res)=>res.json({provider:'first-party-email',configured:emailAuth.enabled,...emailAuth.status}));
 app.post('/api/auth/start',async(req,res,next)=>{try{res.json(await emailAuth.start({emailAddress:req.body?.email,name:req.body?.username,ip:req.ip}));}catch(error){next(error);}});
 app.post('/api/auth/verify',(req,res,next)=>{try{res.json(emailAuth.verify({verificationToken:req.body?.verificationToken,code:req.body?.code}));}catch(error){next(error);}});
 app.post('/api/auth/session',(req,res,next)=>{try{res.json(emailAuth.session({sessionToken:req.body?.sessionToken}));}catch(error){next(error);}});
