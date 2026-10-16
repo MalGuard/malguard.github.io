@@ -1,6 +1,6 @@
 // Same-origin private preview API. Vercel Deployment Protection remains the
 // access boundary; no shared-link token or provider key belongs in the client.
-const endpoints=new Set(['health','account-config','auth/status','auth/start','auth/verify','auth/session','scan','advanced','jobs/start','jobs/step','upload']);
+const endpoints=new Set(['health','account-config','auth/status','auth/start','auth/verify','auth/password','auth/session','scan','advanced','jobs/start','jobs/step','upload']);
 module.exports=async function handler(req,res){
   const endpoint=req.query?.endpoint;
   if(typeof endpoint!=='string'||!endpoints.has(endpoint)){

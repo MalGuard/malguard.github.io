@@ -75,7 +75,8 @@ app.get('/api/account-config',(req,res)=>{
 });
 app.get('/api/auth/status',(req,res)=>res.json({provider:'first-party-email',configured:emailAuth.enabled,...emailAuth.status}));
 app.post('/api/auth/start',async(req,res,next)=>{try{res.json(await emailAuth.start({emailAddress:req.body?.email,name:req.body?.username,ip:req.ip}));}catch(error){next(error);}});
-app.post('/api/auth/verify',(req,res,next)=>{try{res.json(emailAuth.verify({verificationToken:req.body?.verificationToken,code:req.body?.code}));}catch(error){next(error);}});
+app.post('/api/auth/verify',async(req,res,next)=>{try{res.json(await emailAuth.verify({verificationToken:req.body?.verificationToken,code:req.body?.code}));}catch(error){next(error);}});
+app.post('/api/auth/password',async(req,res,next)=>{try{res.json(await emailAuth.passwordSignIn({emailAddress:req.body?.email,password:req.body?.password}));}catch(error){next(error);}});
 app.post('/api/auth/session',(req,res,next)=>{try{res.json(emailAuth.session({sessionToken:req.body?.sessionToken}));}catch(error){next(error);}});
 app.post('/api/scan', handleScan(body=>scanSite(body?.url,{allowThreatContent:['advanced','ultra'].includes(body?.mode)})));
 app.post('/api/advanced', handleScan(body=>scanFiles(body?.id, body?.token)));
