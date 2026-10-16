@@ -1,6 +1,5 @@
-/* One persistent Canvas2D particle field. Ten approved security forms preserve
-   the reference's continuous, staggered morphing language; logo points are sampled
-   from the unmodified original MalGuard SVG, never a drawn substitute. */
+/* One persistent light field, with volumetric reference forms and a Canvas
+   fallback. The final logo is sampled from the original MalGuard SVG. */
 (() => {
   'use strict';
   // Timing copied from the supplied Cinematic HTML. 0.06 at 60 Hz,
@@ -37,8 +36,8 @@
   const rgb=Array.from({length:72},(_,n)=>{const h=n/12,f=k=>{const a=(k+h)%6;return .5-.45*Math.max(-1,Math.min(a,4-a,1));};return[f(5),f(3),f(1)];});
   const star=Array.from({length:mobile?180:420},()=>[rnd(),rnd(),.3+rnd()*.8,rnd()*TAU]);
   function rx(y,z,a){return[y*Math.cos(a)-z*Math.sin(a),y*Math.sin(a)+z*Math.cos(a)];}
-  // Approved direction 03: ten security silhouettes, sampled once into the
-  // same particle identities. No bitmap backdrop, outlines or section overlays.
+  // Additional security compositions reuse the same particle identities.
+  // No bitmap backdrop or section overlay replaces the continuous field.
   const names=['Energy aperture','Evidence strands','Signal wave','Inspection vortex','Evidence constellation','Scanning','Threat analysis','Fail-closed','Four layers','Evidence terminal','File hash','Link inspection','Verifiable evidence','MalGuard'];
   function sampleShape(paint,index){
     const off=document.createElement('canvas');off.width=512;off.height=512;
@@ -66,7 +65,7 @@
   sampleShape((c,line)=>{c.save();c.translate(256,256);c.rotate(-.6);for(let x of [-67,67]){c.beginPath();c.roundRect(x-90,-45,180,90,45);c.stroke();}c.restore();for(let r of [170,190]){c.beginPath();c.arc(256,256,r,.2,1.5);c.stroke();c.beginPath();c.arc(256,256,r,PI+.2,PI+1.5);c.stroke();}},11);
   sampleShape((c,line)=>{c.beginPath();c.arc(256,256,145,0,TAU);c.stroke();line([[176,251],[234,309],[338,195]]);for(let a=0;a<TAU;a+=TAU/16)line([[256+Math.cos(a)*168,256+Math.sin(a)*168],[256+Math.cos(a)*184,256+Math.sin(a)*184]]);},12);
   make(i=>[shapes[0][i*3],shapes[0][i*3+1],0,210]);
-  let pointerX=0,pointerY=0,wantedX=0,wantedY=0,textZones=[];
+  let pointerX=0,pointerY=0,wantedX=0,wantedY=0,textZones=[],zonesAt=-1000;
 
   addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){wantedX=e.clientX/W-.5;wantedY=e.clientY/H-.5;}},{passive:true});
   // Readability comes from continuous light falloff, never DOM-shaped black masks.
@@ -80,14 +79,14 @@
   function updateAnchors(){
     const top=el=>{let y=0;for(let node=el;node;node=node.offsetParent)y+=node.offsetTop;return y;};
     const demo=document.getElementById('demo'),layers=document.getElementById('layers'),products=document.getElementById('products');
-    // EXACT reference mapping for its five narrative beats: scroll / (.after - .9H) * 4.
-    // Keep our existing shapes; only copy the reference's normalized scroll timing.
+    // The original reference mapping remains the module-loading fallback.
+    // In normal operation, shape and type share each measured reading hold.
     const narrativeEnd=Math.max(1,top(document.querySelector('.after'))-H*.9);
     const story=window.MalGuardParticleStory;
     anchors=story?story.records.slice(0,5).flatMap(r=>[{y:r.start,v:r.index},{y:r.start+r.height*.54,v:r.index}]):Array.from({length:5},(_,v)=>({y:narrativeEnd*v/4,v}));
     if(story)anchors.push({y:top(document.querySelector('.after')),v:5});
     // Continue the same gradual timeline through our additional Lab / stack / logo.
-    // No short, artificial inter-copy morph windows and no layout changes.
+    // Each additional module retains its existing native scroll range.
     const lab= Math.max(narrativeEnd+H,top(demo)+H*.35);
     const graph=Math.max(lab+H*.75,top(demo)+demo.offsetHeight-H*.25);
     const stack=Math.max(graph+H*.75,top(layers)+H*.5);
@@ -121,6 +120,7 @@
     const elapsed=last?Math.min(250,ts-last):16,dt=Math.min(50,elapsed);last=ts;
     if(!staticMotion)time+=dt*particleSpeed;
     const start=performance.now();
+    if(ts-zonesAt>160){zonesAt=ts;textZones=[...document.querySelectorAll('.after h2,.after h3,.after p,.after a,.after button,.after .tag,.after .section-top,#layers .steps,#demo .lab-copy')].map(el=>el.getBoundingClientRect()).filter(r=>r.width>0&&r.height>0&&r.bottom>0&&r.top<H);}
     scrollPosition=staticMotion?scrollY:referenceTiming.follow(scrollPosition,scrollY,elapsed);
     if(Math.abs(scrollPosition-scrollY)<.05)scrollPosition=scrollY;
     P=shapeAt(scrollPosition);
@@ -219,8 +219,8 @@
       const arc=Math.sin(v*PI),twist=arc*.65,ctw=Math.cos(twist),stw=Math.sin(twist);
       let X=A[j]+(B[j]-A[j])*v,Y=A[j+1]+(B[j+1]-A[j+1])*v,Z=A[j+2]+(B[j+2]-A[j+2])*v;
       const xsw=X*ctw-Z*stw;Z=X*stw+Z*ctw;X=xsw;
-      // Particles arrive with individual delays, settle into our unchanged
-      // fingerprint, then the hero copy is released once every point has arrived.
+      // Individual delays resolve the aperture before the reading hold; the
+      // same points then pass through all subsequent compositions.
       const arrival=staticMotion?1:ease(Math.max(0,Math.min(1,(introElapsed-delay[i]*1200)/2400)));
       const entry=openingState?0:(1-arrival)*(1-smooth(0,.65,P));
       const entryAngle=entry*(1.5+delay[i]);
@@ -272,8 +272,9 @@
       let textLight=1;
       const chamberDistance=Math.hypot((px-(chamberRect.left+chamberRect.width/2))/(chamberRect.width*.85),(py-(chamberRect.top+chamberRect.height/2))/(chamberRect.height*.9));textLight*=.04+.96*smooth(.45,1.3,chamberDistance);
       if(reading&&px>reading.left-5&&px<reading.right+5&&py>reading.top-5&&py<reading.bottom+5)readingHits++;
+      if(!narrative)for(const r of textZones){const dx=Math.max(r.left-px,0,px-r.right),dy=Math.max(r.top-py,0,py-r.bottom);textLight=Math.min(textLight,.025+.975*smooth(20,88,Math.max(dx,dy)));}
       const sparkle=staticMotion?1:.88+.12*Math.sin(time*.001+phases[i]);
-      const exposure=narrative?(reduced.matches?.12:1):light;
+      const exposure=narrative?(reduced.matches?.12:1):light*.65;
       paintPoint(px,py,sz*(i%37===0?6:3.6),hue,exposure*textLight*openingExposure*sparkle*.76);
       if(narrative&&previous&&Math.hypot(px-previous[0],py-previous[1])<65){const c=rgb[Math.floor(hue/5)%72];if(gpu)gpu.line(previous[0],previous[1],px,py,...c,openingExposure*(reduced.matches?.12:1)*(1-cameraTravel*.8)*(k===4?.055:.23));else{ctx.globalAlpha=.23*openingExposure*(reduced.matches?.12:1);ctx.strokeStyle=palette[Math.floor(hue/5)%72];ctx.lineWidth=.55;ctx.beginPath();ctx.moveTo(...previous);ctx.lineTo(px,py);ctx.stroke();}}previous=[px,py];
       drawn++;
