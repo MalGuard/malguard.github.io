@@ -66,12 +66,15 @@ function App() {
   const [history, setHistory] = useState(()=> { try { return readHistory(localStorage.getItem(STORAGE_KEY)); } catch { return []; } });
   const inputRef = useRef(null); const reportRef = useRef(null); const modalRef = useRef(null); const priorFocus = useRef(null);
   useEffect(()=> { fetch(apiUrl('health')).then(r=>r.json()).then(setHealth).catch(()=>setHealth({status:'unavailable'})); }, []);
-  useEffect(()=>{let disposed=false;setAccountState('loading');fetch(apiUrl('account-config')).then(r=>r.ok?r.json():Promise.reject()).then(async config=>{
-    if(!config.configured)throw new Error('not configured');
-    const {Clerk}=await import('@clerk/clerk-js');
-    const instance=new Clerk(config.publishableKey);await instance.load();
-    if(!disposed){setClerk(instance);setAccount(instance.user||null);setAccountState('ready');}
-  }).catch(()=>!disposed&&setAccountState('unavailable'));return()=>{disposed=true;};},[accountRetry]);
+  useEffect(()=>{let disposed=false;setAccount(null);setClerk(null);setAccountState('loading');(async()=>{
+    for(let attempt=0;attempt<3&&!disposed;attempt+=1){try{
+      const response=await fetch(apiUrl('account-config'));if(!response.ok)throw new Error('account_config_unavailable');
+      const config=await response.json();if(!config.configured)throw new Error('account_not_configured');
+      const {Clerk}=await import('@clerk/clerk-js');const instance=new Clerk(config.publishableKey);await instance.load();
+      if(!disposed){setClerk(instance);setAccount(instance.user||null);setAccountState('ready');}return;
+    }catch{if(attempt<2)await new Promise(resolve=>setTimeout(resolve,500*(attempt+1)));}}
+    if(!disposed)setAccountState('unavailable');
+  })();return()=>{disposed=true;};},[accountRetry]);
   useEffect(()=>{try{localStorage.setItem('guard-locale',locale);}catch{};localeLoaded.current=true;localizeDocument(locale);},[locale]);
   useEffect(()=> { if (!toast) return; const t = setTimeout(()=>setToast(''),3500); return ()=>clearTimeout(t); }, [toast]);
   useEffect(()=> { try { localStorage.setItem('guard-save-history', String(saveHistory)); if (saveHistory) localStorage.setItem(STORAGE_KEY, JSON.stringify(history)); else {localStorage.removeItem(STORAGE_KEY);localStorage.removeItem('guard-pending-job');} } catch { /* Browser storage may be unavailable. */ } }, [history, saveHistory]);

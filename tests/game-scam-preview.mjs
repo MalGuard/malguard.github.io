@@ -24,6 +24,7 @@ try{
    const page=await context.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));
    await page.goto(base+'/game-scam-guard.html');assert.equal(await page.locator('#gameScamPreview').getAttribute('href'),'/game-scam-guard/');
    await page.goto(base+'/game-scam-guard/');assert.equal(await page.locator('html').getAttribute('lang'),'en');assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
+   await page.getByRole('button',{name:'Sign in or manage account'}).click();await page.getByRole('button',{name:'Try again'}).waitFor();await page.getByRole('button',{name:'Try again'}).click();await page.getByText('Preparing secure sign-in…').waitFor();await page.getByRole('button',{name:'Try again'}).waitFor();await page.getByRole('button',{name:'Close'}).click();
    await page.getByRole('button',{name:'Change language'}).click();await page.waitForFunction(()=>document.documentElement.lang==='fa');assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
    await page.getByRole('button',{name:'تغییر زبان'}).click();await page.waitForFunction(()=>document.documentElement.lang==='en');
    await page.evaluate(()=>localStorage.setItem('guard-locale','fa'));await page.reload();await page.getByLabel('لینک وب‌سایت').waitFor();
