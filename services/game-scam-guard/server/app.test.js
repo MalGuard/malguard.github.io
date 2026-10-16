@@ -80,3 +80,8 @@ test('failed scans release their slots and preserve the JSON error response', as
     await new Promise(resolve => server.close(resolve));
   }
 });
+
+test('account registration passes the complete profile and exposes account availability',async()=>{
+  let received;const emailAuth={enabled:true,status:{},start:async input=>{received=input;return {verificationToken:'fixture-token'};},availability:async input=>({email:input.emailAddress==='used@example.com'?'taken':'available',username:input.username==='taken_name'?'taken':'available'}),verify:async()=>({sessionToken:'fixture'}),passwordSignIn:async()=>({sessionToken:'fixture'}),session:()=>({email:'player@example.com'})};const app=createApp({emailAuth});const server=app.listen(0,'127.0.0.1');await once(server,'listening');const base=`http://127.0.0.1:${server.address().port}`;
+  try{const profile={firstName:'Alex',lastName:'Morgan',birthDate:'2000-01-01',username:'player_guard',password:'StrongPass1'};const start=await fetch(`${base}/api/auth/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'player@example.com',profile})});assert.equal(start.status,200);assert.deepEqual(received,{emailAddress:'player@example.com',name:undefined,profile,ip:'127.0.0.1'});const availability=await fetch(`${base}/api/auth/availability`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'used@example.com',username:'taken_name'})});assert.deepEqual(await availability.json(),{email:'taken',username:'taken'});}finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+});

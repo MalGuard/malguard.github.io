@@ -26,3 +26,12 @@ test('profile signup hashes a valid password and creates a persistent account on
   const started=await auth.start({emailAddress:'player@example.com',profile:{firstName:'محمد',lastName:'آذر درخش',birthDate:'2000-01-01',username:'محمد Guard',password:'StrongPass1'}});assert.equal(created,undefined);const code=body.htmlContent.match(/>(\d{6})</)[1];const verified=await auth.verify({verificationToken:started.verificationToken,code});
   assert.match(created.passwordHash,/^scrypt\$/);assert.equal(created.passwordHash.includes('StrongPass1'),false);assert.equal(auth.session(verified).firstName,'محمد');
 });
+
+test('profile signup identifies an existing email and username before it sends a code',async()=>{
+  let sends=0;const emailAccount={id:'email-1',email:'used@example.com',username:'used_name'};const usernameAccount={id:'user-1',email:'other@example.com',username:'taken_name'};const store={enabled:true,status:{hasUrl:true,hasServiceKey:true},findByEmail:async value=>value===emailAccount.email?emailAccount:null,findByUsername:async value=>value===usernameAccount.username?usernameAccount:null,create:async()=>{throw new Error('not reached');}};const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',accountStore:store,fetchImpl:async()=>{sends++;return {ok:true};}});const profile={firstName:'Alex',lastName:'Morgan',birthDate:'2000-01-01',username:'fresh_name',password:'StrongPass1'};
+  await assert.rejects(()=>auth.start({emailAddress:'used@example.com',profile}),{status:409,message:'This email is already registered. Sign in instead.'});
+  await assert.rejects(()=>auth.start({emailAddress:'new@example.com',profile:{...profile,username:'taken_name'}}),{status:409,message:'This username is already taken. Choose another username.'});
+  assert.equal(sends,0);
+  assert.deepEqual(await auth.availability({emailAddress:'used@example.com',username:'taken_name'}),{email:'taken',username:'taken'});
+  assert.deepEqual(await auth.availability({emailAddress:'new@example.com',username:'fresh_name'}),{email:'available',username:'available'});
+});

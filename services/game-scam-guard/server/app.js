@@ -46,6 +46,14 @@ app.use('/api', (req, res, next) => {
   next();
 });
 const rates = new Map(); let activeScans = 0;
+const authRates = new Map();
+app.use('/api/auth', (req,res,next) => {
+  const now=Date.now(),key=req.ip||'unknown',entry=authRates.get(key);
+  if(!entry||entry.until<now)authRates.set(key,{count:1,until:now+60*1000});
+  else if(++entry.count>30)return res.status(429).json({error:'تعداد درخواست‌های حساب زیاد است؛ یک دقیقه دیگر تلاش کنید.'});
+  for(const [ip,item] of authRates)if(item.until<now)authRates.delete(ip);
+  next();
+});
 app.use(['/api/scan', '/api/advanced','/api/jobs','/api/upload'], (req, res, next) => {
   const now = Date.now(); const key = `${req.ip}|${req.originalUrl.startsWith('/api/jobs/')?'job':'normal'}`;
   const rate = rates.get(key);
@@ -74,7 +82,8 @@ app.get('/api/account-config',(req,res)=>{
   res.json({provider:'clerk',configured,publishableKey:configured?key:null});
 });
 app.get('/api/auth/status',(req,res)=>res.json({provider:'first-party-email',configured:emailAuth.enabled,...emailAuth.status}));
-app.post('/api/auth/start',async(req,res,next)=>{try{res.json(await emailAuth.start({emailAddress:req.body?.email,name:req.body?.username,ip:req.ip}));}catch(error){next(error);}});
+app.post('/api/auth/availability',async(req,res,next)=>{try{res.json(await emailAuth.availability({emailAddress:req.body?.email,username:req.body?.username}));}catch(error){next(error);}});
+app.post('/api/auth/start',async(req,res,next)=>{try{res.json(await emailAuth.start({emailAddress:req.body?.email,name:req.body?.username,profile:req.body?.profile,ip:req.ip}));}catch(error){next(error);}});
 app.post('/api/auth/verify',async(req,res,next)=>{try{res.json(await emailAuth.verify({verificationToken:req.body?.verificationToken,code:req.body?.code}));}catch(error){next(error);}});
 app.post('/api/auth/password',async(req,res,next)=>{try{res.json(await emailAuth.passwordSignIn({emailAddress:req.body?.email,password:req.body?.password}));}catch(error){next(error);}});
 app.post('/api/auth/session',(req,res,next)=>{try{res.json(emailAuth.session({sessionToken:req.body?.sessionToken}));}catch(error){next(error);}});
