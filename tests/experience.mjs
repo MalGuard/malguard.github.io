@@ -236,6 +236,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     await page.reload();
     await page.waitForFunction(()=>document.querySelector('#home-opening').dataset.finished==='repeat-visit');
     assert.equal(await page.locator('#home-opening').isVisible(),false);
+    await page.waitForFunction(()=>!document.querySelector('.scene[data-scene="0"] .t').inert&&getComputedStyle(document.querySelector('.scene h1 .w')).opacity==='1',null,{timeout:5000});
     assert.equal(await page.locator('.scene[data-scene="0"] .t').evaluate(el=>el.inert),false);
     await page.locator('#home-opening-replay').click();
     await page.waitForFunction(()=>document.querySelector('#home-opening').hidden===false);

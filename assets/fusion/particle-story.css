@@ -1,0 +1,40 @@
+/* One scroll clock owns the readable hold and the flight between chapters. */
+@media(prefers-reduced-motion:no-preference){
+ .mg-fusion[data-intro="assembling"] .story .scene .t{visibility:hidden}
+ .particle-story .story .scene{display:block;min-height:200svh;padding:0;position:relative}
+ .particle-story .scene .t{position:sticky;top:var(--reading-top,30svh);padding:0;margin:0;background:transparent!important;visibility:var(--copy-visibility,hidden);pointer-events:var(--copy-events,none);perspective:800px;text-shadow:none}
+ .particle-story .scene .t>*{opacity:var(--element-opacity,0)!important;filter:blur(var(--element-blur,0px))!important;transform:translate3d(0,var(--element-y,0px),0) scale(var(--element-scale,1))!important;transform-origin:50% 50%;transition:none!important}
+ .particle-story .scene .t h1,.particle-story .scene .t h2{opacity:1!important;filter:none!important;transform:none!important}
+ .particle-story .scene .t .w{opacity:var(--word-opacity,0)!important;filter:blur(var(--word-blur,0px))!important;transform:translate3d(var(--word-x,0px),var(--word-y,0px),0) scale(var(--word-scale,1))!important;transition:none!important}
+ .particle-story .scene .t .eyebrow{transition:none!important}
+ .particle-story .finale{min-height:160svh;display:block;padding:0}
+ .particle-story .scene-index,.particle-story .scroll-cue{transition:opacity .2s;opacity:var(--chapter-label,0)}
+ .particle-story.motion-paused .scene-index,.particle-story.motion-paused .scroll-cue{transition:none!important}
+}
+@media(max-width:600px) and (prefers-reduced-motion:no-preference){
+ .particle-story .scene .cta{gap:8px}
+ .particle-story .scene .cta .btn{font-size:11px;padding:11px 14px;min-height:44px}
+ .particle-story .scene .chips span{font-size:10px}
+ body.particle-story[data-intro="ready"] .home-opening-controls{right:130px;bottom:16px}
+ .particle-story .motion-control{min-height:44px}
+}
+/* Short phones and rotated tablets need two safe columns rather than forcing
+   a whole heading, controls and artwork into the same vertical half. */
+@media(max-width:900px) and (max-height:700px) and (prefers-reduced-motion:no-preference){
+ .particle-story .scene .t{width:56%;max-width:none}
+ .particle-story .scene h1{font-size:27px;line-height:1.15}
+ .particle-story .scene h2{font-size:25px;line-height:1.17}
+ .particle-story .scene p{font-size:10.5px;line-height:1.65;margin:12px 0 14px}
+ .particle-story .scene .eyebrow{font-size:8px;margin-bottom:12px}
+ .particle-story .scene .cta{gap:6px}
+ .particle-story .scene .cta .btn{font-size:9.5px;padding:9px 8px;min-height:44px}
+ .particle-story .scene .chips{margin-top:14px;gap:4px}
+ .particle-story .scene .chips span{font-size:8.5px;padding:5px 6px}
+ body.particle-story[data-intro="ready"] .home-opening-controls{right:12px;bottom:76px}
+ body.particle-story[data-intro="ready"] .home-opening-controls button{font-size:9px;padding:8px;min-height:44px}
+ .particle-story .motion-control{right:12px;font-size:9px;max-width:105px;min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+ .particle-story .scene .t{visibility:visible!important;pointer-events:auto!important}
+ .particle-story .scene .t>*,.particle-story .scene .w{opacity:1!important;filter:none!important;transform:none!important;transition:none!important}
+}

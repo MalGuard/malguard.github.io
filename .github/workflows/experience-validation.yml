@@ -82,6 +82,15 @@ jobs:
           else
             npm run test:motion
           fi
+      - name: Verify particle text assembly, reverse scroll and readable holds
+        env:
+          TEST_BROWSER: ${{ matrix.browser }}
+        run: |
+          if [ "$TEST_BROWSER" = "webkit" ]; then
+            xvfb-run --auto-servernum node tests/particle-story.cjs
+          else
+            node tests/particle-story.cjs
+          fi
       - name: Capture desktop and mobile visual review
         if: matrix.browser == 'chromium'
         run: node tests/visual-review.mjs

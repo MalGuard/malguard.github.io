@@ -22,14 +22,19 @@
   function gauss(){return(rnd()+rnd()+rnd()-1.5)/1.5;}
   const weak=(navigator.hardwareConcurrency||4)<=4||(navigator.deviceMemory||8)<=4;
   const mobile=matchMedia('(max-width:900px)').matches;
-  const N=mobile?(weak?1600:2600):(weak?3400:6200);
+  const N=mobile?(weak?2200:3400):(weak?4800:9000);
   let compositionX=0,compositionY=0,compositionScale=0;
-  let active=N,W=0,H=0,D=1,anchors=[],target=0,P=0,raf=0,last=0,time=0,frames=0,measure=0,paused=false,visible=!document.hidden;
+  let active=N,W=0,H=0,D=1,anchors=[],target=0,P=0,scrollPosition=scrollY,raf=0,last=0,time=0,frames=0,measure=0,paused=false,visible=!document.hidden;
   const delay=new Float32Array(N),flow=new Float32Array(N*3),phases=new Float32Array(N);
   for(let i=0;i<N;i++){delay[i]=rnd()*referenceTiming.particleDelay;phases[i]=rnd()*TAU;for(let k=0;k<3;k++)flow[i*3+k]=gauss();}
   const shapes=[],hues=[];
   function make(fn){const a=new Float32Array(N*3),h=new Float32Array(N);for(let i=0;i<N;i++){const p=fn(i);a.set(p.slice(0,3),i*3);h[i]=p[3];}shapes.push(a);hues.push(h);}
   const palette=Array.from({length:72},(_,i)=>`hsla(${i*5},95%,62%,.9)`);
+  // A precomputed optical sprite: sharp white cores, colored falloff, no square
+  // pixels or full-screen bloom passes. The same atlas serves every scene.
+  const atlas=document.createElement('canvas');atlas.width=72*16;atlas.height=16;
+  const atlasContext=atlas.getContext('2d');
+  for(let i=0;i<72;i++){const x=i*16+8,g=atlasContext.createRadialGradient(x,8,0,x,8,8);g.addColorStop(0,'rgba(235,248,255,.98)');g.addColorStop(.16,`hsla(${i*5},92%,78%,.94)`);g.addColorStop(.42,`hsla(${i*5},90%,63%,.35)`);g.addColorStop(1,`hsla(${i*5},90%,58%,0)`);atlasContext.fillStyle=g;atlasContext.fillRect(i*16,0,16,16);}
   const star=Array.from({length:mobile?180:420},()=>[rnd(),rnd(),.3+rnd()*.8,rnd()*TAU]);
   function rx(y,z,a){return[y*Math.cos(a)-z*Math.sin(a),y*Math.sin(a)+z*Math.cos(a)];}
   // Approved direction 03: ten security silhouettes, sampled once into the
@@ -69,7 +74,7 @@
   // Readability comes from continuous light falloff, never DOM-shaped black masks.
   function smooth(a,b,x){const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);}
   function resize(){
-    W=canvas.clientWidth;H=canvas.clientHeight;D=Math.min(devicePixelRatio||1,weak?1.25:2);
+    W=canvas.clientWidth;H=canvas.clientHeight;D=Math.min(devicePixelRatio||1,weak?1.5:2);
     canvas.width=Math.round(W*D);canvas.height=Math.round(H*D);canvas.dataset.pixelRatio=String(D);ctx.setTransform(D,0,0,D,0,0);
     updateAnchors();
     scroll();
@@ -80,7 +85,9 @@
     // EXACT reference mapping for its five narrative beats: scroll / (.after - .9H) * 4.
     // Keep our existing shapes; only copy the reference's normalized scroll timing.
     const narrativeEnd=Math.max(1,top(document.querySelector('.after'))-H*.9);
-    anchors=Array.from({length:5},(_,v)=>({y:narrativeEnd*v/4,v}));
+    const story=window.MalGuardParticleStory;
+    anchors=story?story.records.slice(0,5).flatMap(r=>[{y:r.start,v:r.index},{y:r.start+r.height*.54,v:r.index}]):Array.from({length:5},(_,v)=>({y:narrativeEnd*v/4,v}));
+    if(story)anchors.push({y:top(document.querySelector('.after')),v:5});
     // Continue the same gradual timeline through our additional Lab / stack / logo.
     // No short, artificial inter-copy morph windows and no layout changes.
     const lab= Math.max(narrativeEnd+H,top(demo)+H*.35);
@@ -101,7 +108,6 @@
     return 13;
   }
   function scroll(){
-    updateAnchors();
     const y=scrollY;target=shapeAt(y);
 
     const max=document.documentElement.scrollHeight-H;bar.style.width=`${Math.max(0,Math.min(100,y/Math.max(1,max)*100))}%`;
@@ -117,8 +123,9 @@
     const elapsed=last?Math.min(250,ts-last):16,dt=Math.min(50,elapsed);last=ts;
     if(!staticMotion)time+=dt*particleSpeed;
     const start=performance.now();
-    P=staticMotion?target:referenceTiming.follow(P,target,elapsed);
-    if(Math.abs(target-P)<.001)P=target;
+    scrollPosition=staticMotion?scrollY:referenceTiming.follow(scrollPosition,scrollY,elapsed);
+    if(Math.abs(scrollPosition-scrollY)<.05)scrollPosition=scrollY;
+    P=shapeAt(scrollPosition);
     let openingTime=null,openingState=null;
     if(!introComplete){
       const opening=window.MalGuardOpening?.state();
@@ -134,14 +141,20 @@
     }
     canvas.dataset.introProgress=String(Math.min(1,introElapsed/introDuration));
     canvas.dataset.introComplete=String(introComplete);
-    ctx.globalCompositeOperation='source-over';ctx.fillStyle=staticMotion?'#000000':'rgba(0,0,0,.34)';ctx.fillRect(0,0,W,H);
+    ctx.globalCompositeOperation='source-over';ctx.fillStyle='#020409';ctx.fillRect(0,0,W,H);
     const wide=W>900||(W>650&&H<550);
     const finalWeight=smooth(12.35,13,P);
     const chamberRect=document.getElementById('sc3').getBoundingClientRect();
     const layerRect=document.getElementById('layers').getBoundingClientRect(),rightCopy=wide&&layerRect.top<H*.3&&layerRect.bottom>H*.7;
-    const goalX=W*(wide?(rightCopy?.27:.62+finalWeight*.10):.5);
-    const goalY=H*(wide?.5:.4);
-    const immersiveScale=wide?Math.min(W*.31,H*.27):Math.min(W*.40,H*.27);
+    const readingRecord=window.MalGuardParticleStory?.records[Math.min(4,Math.round(P))];
+    const readingTop=readingRecord?parseFloat(readingRecord.copy.style.getPropertyValue('--reading-top')):H*.52;
+    const readingOnRight=readingRecord&&readingRecord.copy.getBoundingClientRect().left>W*.35;
+    const skyTop=(document.querySelector('nav')?.getBoundingClientRect().bottom||70)+24;
+    const skyBottom=Math.max(skyTop+90,readingTop-28);
+    const shortTouch=W<=900&&H<=700;
+    const goalX=shortTouch?W*(readingOnRight?.18:.82):W*(wide?(rightCopy||readingOnRight?.27:.70+finalWeight*.03):.5);
+    const goalY=shortTouch?H*.36:wide?H*.5:(skyTop+skyBottom)*.5;
+    const immersiveScale=shortTouch?Math.min(W*.10,H*.20):wide?Math.min(W*.31,H*.27):Math.min(W*.34,(skyBottom-skyTop)/3.2);
     const finalScale=wide?Math.min(W*.22,H*.28):Math.min(W*.33,H*.26);
     const goalScale=immersiveScale+(finalScale-immersiveScale)*finalWeight;
     const settle=staticMotion?1:1-Math.exp(-elapsed/100);
@@ -149,14 +162,15 @@
     compositionY=compositionY?compositionY+(goalY-compositionY)*settle:goalY;
     compositionScale=compositionScale?compositionScale+(goalScale-compositionScale)*settle:goalScale;
     const cx=compositionX,cy=compositionY,scale=compositionScale;
-    for(const s of star){const x=s[0]*W,y=s[1]*H;ctx.globalAlpha=staticMotion?.26:.18+.1*Math.sin(time*.00065+s[3]);ctx.fillStyle='#91a9cb';ctx.fillRect(x,y,s[2],s[2]);}
+    const cameraTravel=staticMotion?0:Math.sin((P-Math.floor(P))*PI)**2;
+    for(const s of star){const x=s[0]*W+(s[0]-.5)*W*cameraTravel*.7,y=s[1]*H+(s[1]-.5)*H*cameraTravel*.7;ctx.globalAlpha=staticMotion?.26:.18+.16*Math.sin(time*.00065+s[3]);ctx.fillStyle='#91b9df';ctx.fillRect(x,y,s[2]*(1+cameraTravel*2),s[2]*(1+cameraTravel*2));}
     ctx.globalAlpha=1;
     const k=Math.min(12,Math.floor(P)),t=P-k,A=shapes[k],B=shapes[k+1],HA=hues[k],HB=hues[k+1];
     const logoWeight=k===12?ease(Math.max(0,(t-.45)/.55)):0;
     pointerX+=(wantedX-pointerX)*.05;pointerY+=(wantedY-pointerY)*.05;
     const ang=(staticMotion?0:Math.sin(time*.00013)*.17+pointerX*.22)*(1-logoWeight),ca=Math.cos(ang),sa=Math.sin(ang);
     const tilt=staticMotion?0:pointerY*.18,ct=Math.cos(tilt),st=Math.sin(tilt);
-    let drawn=0,underText=0;
+    let drawn=0,underText=0,minX=W,maxX=0,minY=H,maxY=0;
     // During the opening's opaque geometry shot, particles have no exposure.
     // Save their draw cost until the continuous field joins the handoff.
     if(openingTime===null&&window.MalGuardOpening){openingState=window.MalGuardOpening.state();openingTime=openingState.elapsed;}
@@ -165,6 +179,8 @@
     const openingExposure=openingTime===null||openingState?.complete?1:smooth(releaseAt,releaseAt+100,openingTime);
     const openingPhase=openingTime===null?'idle':openingTime<releaseAt?'portal':openingTime<releaseAt+650?'flare':openingTime<formedAt?'settle':'formed';
     canvas.dataset.openingPhase=openingPhase;
+    const story=window.MalGuardParticleStory;
+    story?.update(scrollPosition,openingState,elapsed,staticMotion,P);
     // The physical aperture and emitted field share the exact viewport origin.
     const burstX=W*(openingState?.portalX??cx/W),burstY=H*(openingState?.portalY??cy/H);
     const burstRadius=Math.min(W,H)*.68;
@@ -209,6 +225,9 @@
       Y=X*Math.sin(entryAngle)+Y*Math.cos(entryAngle);X=ex;
       X+=flow[j]*entry*2.3;Y+=flow[j+1]*entry*1.8;Z+=flow[j+2]*entry;
       X+=flow[j]*arc*.75;Y+=flow[j+1]*arc*.5;Z+=flow[j+2]*arc*.65;
+      // A camera-like passage through the shared field happens only between
+      // readable holds. Forward and reverse scroll use identical trajectories.
+      X*=1+cameraTravel*.48;Y*=1+cameraTravel*.35;Z-=cameraTravel*.65;
       const breathing=staticMotion?1:1+Math.sin(time*.0009+phases[i])*.014;
       X*=breathing;Y*=breathing;
       if(!staticMotion){X+=Math.sin(time*.0007+phases[i])*.018*(1-logoWeight);Y+=Math.cos(time*.0009+phases[i])*.018*(1-logoWeight);}
@@ -236,22 +255,29 @@
         }
       }
       if(px<0||px>W||py<0||py>H)continue;
+      minX=Math.min(minX,px);maxX=Math.max(maxX,px);minY=Math.min(minY,py);maxY=Math.max(maxY,py);
       const hue=(HA[i]+(HB[i]-HA[i])*v+360)%360;
-      const sz=Math.max(.7,Math.min(2.6,f*1.6));
+      const sz=Math.max(.65,Math.min(2.6,f*(.75+(i%11)/15)));
       // Every point remains present across the full viewport. The text side is softly lit.
       const light=wide?(rightCopy?.05+.55*(1-smooth(.26,.52,px/W)):.16+.74*smooth(.2,.72,px/W)):.14+.76*(1-smooth(.28,.8,py/H));
       if(wide?px<W*.45:py>H*.45)underText++;
       let textLight=1;
       const chamberDistance=Math.hypot((px-(chamberRect.left+chamberRect.width/2))/(chamberRect.width*.85),(py-(chamberRect.top+chamberRect.height/2))/(chamberRect.height*.9));textLight*=.04+.96*smooth(.45,1.3,chamberDistance);
-      ctx.globalAlpha=light*textLight*openingExposure;ctx.fillStyle=palette[Math.floor(hue/5)%72];ctx.fillRect(px,py,sz,sz);
+      const sparkle=staticMotion?1:.78+.22*Math.sin(time*.001+phases[i]);
+      ctx.globalAlpha=light*textLight*openingExposure*sparkle;
+      const bin=Math.floor(hue/5)%72,radius=sz*(i%19===0?3:1.8);
+      ctx.drawImage(atlas,bin*16,0,16,16,px-radius,py-radius,radius*2,radius*2);
       drawn++;
     }
+    const glyphs=openingState&&!openingState.complete?0:story?.drawDust(ctx,cx,cy,time)||0;
+    canvas.dataset.glyphParticles=String(glyphs);canvas.dataset.cameraTravel=cameraTravel.toFixed(3);
+    canvas.dataset.cloudBounds=[minX,minY,maxX,maxY].map(n=>n.toFixed(1)).join(',');
     ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
     const cost=performance.now()-start;frames++;measure+=cost;
     // Adapt once per 90 frames. No new arrays, no particle identity changes.
     if(frames>=90){if(measure/frames>12){active=Math.max(900,Math.floor(active*.8));}frames=0;measure=0;}
     canvas.dataset.phase=Number.isInteger(target)?'hold':'morph';canvas.dataset.held=String(Number.isInteger(target)&&P===target);
-    canvas.dataset.renderer='immersive-security-field';canvas.dataset.form=names[Math.round(P)];canvas.dataset.formCount='14';canvas.dataset.blackMasks='0';canvas.dataset.filaments='0';canvas.dataset.scene=P.toFixed(3);canvas.dataset.target=target.toFixed(3);canvas.dataset.particles=String(active);canvas.dataset.drawn=String(drawn);canvas.dataset.masked='0';canvas.dataset.underText=String(underText);canvas.dataset.frameMs=cost.toFixed(2);canvas.dataset.logoReady=String(logoReady);
+    canvas.dataset.renderer='optical-security-field';canvas.dataset.form=names[Math.round(P)];canvas.dataset.formCount='14';canvas.dataset.blackMasks='0';canvas.dataset.filaments='0';canvas.dataset.scene=P.toFixed(3);canvas.dataset.target=target.toFixed(3);canvas.dataset.particles=String(active);canvas.dataset.drawn=String(drawn);canvas.dataset.masked='0';canvas.dataset.underText=String(underText);canvas.dataset.frameMs=cost.toFixed(2);canvas.dataset.logoReady=String(logoReady);
     if(!staticMotion)raf=requestAnimationFrame(draw);
   }
   let logoReady=false;
@@ -273,6 +299,7 @@
   logo.onerror=()=>{canvas.dataset.assetError='Original logo could not be decoded';requestStill();};
   logo.src='/assets/fusion/assets/malguard-logo.svg';
   addEventListener('scroll',scroll,{passive:true});
+  addEventListener('mg:story-measured',()=>{updateAnchors();scroll();});
   let lastWidth=innerWidth;
   addEventListener('resize',()=>{
     // Mobile Safari toolbar height changes do not reseed shapes or reset scroll smoothing.
@@ -283,7 +310,7 @@
   reduced.addEventListener('change',()=>{cancelAnimationFrame(raf);raf=0;requestStill();});
   window.MalGuardParticles={timeline:[],shapeAt,referenceTiming,restartIntro:()=>{
     introElapsed=0;introComplete=false;document.body.dataset.intro='assembling';
-    scenes[0].classList.remove('in');requestStill();
+    window.MalGuardParticleStory?.reset();scenes[0].classList.remove('in');requestStill();
   }};
   resize();
   // WebKit may finalize fixed-canvas metrics after its initial mobile layout.
