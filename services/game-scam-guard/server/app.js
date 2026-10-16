@@ -6,8 +6,9 @@ import { ScanError } from './network.js';
 import {startScanJob,stepScanJob,scanJobReport} from './scan-jobs.js';
 import {readUpload,scanUploadedFile,MAX_UPLOAD_BYTES} from './uploads.js';
 import {cloudExecutionStatus} from './cloud-execution.js';
+import {createEmailAuth} from './email-auth.js';
 
-export function createApp({ scanSite = scanner.scanSite, scanFiles = scanner.scanFiles, providerStatus = scanner.providerStatus,startJob=startScanJob,stepJob=stepScanJob,uploadScan=scanUploadedFile } = {}) {
+export function createApp({ scanSite = scanner.scanSite, scanFiles = scanner.scanFiles, providerStatus = scanner.providerStatus,startJob=startScanJob,stepJob=stepScanJob,uploadScan=scanUploadedFile,emailAuth=createEmailAuth() } = {}) {
 const app = express();
 app.disable('x-powered-by');
 if (process.env.VERCEL) app.set('trust proxy', 1);
@@ -72,6 +73,10 @@ app.get('/api/account-config',(req,res)=>{
   const configured=/^pk_(test|live)_[A-Za-z0-9]+$/.test(key)&&key.length<1024;
   res.json({provider:'clerk',configured,publishableKey:configured?key:null});
 });
+app.get('/api/auth/status',(req,res)=>res.json({provider:'first-party-email',configured:emailAuth.enabled}));
+app.post('/api/auth/start',async(req,res,next)=>{try{res.json(await emailAuth.start({emailAddress:req.body?.email,name:req.body?.username,ip:req.ip}));}catch(error){next(error);}});
+app.post('/api/auth/verify',(req,res,next)=>{try{res.json(emailAuth.verify({verificationToken:req.body?.verificationToken,code:req.body?.code}));}catch(error){next(error);}});
+app.post('/api/auth/session',(req,res,next)=>{try{res.json(emailAuth.session({sessionToken:req.body?.sessionToken}));}catch(error){next(error);}});
 app.post('/api/scan', handleScan(body=>scanSite(body?.url,{allowThreatContent:['advanced','ultra'].includes(body?.mode)})));
 app.post('/api/advanced', handleScan(body=>scanFiles(body?.id, body?.token)));
 app.post('/api/jobs/start',handleScan(body=>startJob(body)));
@@ -89,6 +94,7 @@ app.post('/api/upload',async(req,res,next)=>{
   activeScans++;try{const upload=await readUpload(req);const report=await uploadScan(upload);if(!res.destroyed)res.json(report);}catch(error){next(error);}finally{activeScans--;}
 });
 app.use('/api', (error,req,res,next)=> {
+  if (Number.isInteger(error.status)&&error.status>=400&&error.status<600) return res.status(error.status).json({error:error.message});
   if (error instanceof ScanError) return res.status(error.status).json({ error: error.message });
   if (error.type === 'entity.too.large') return res.status(413).json({error:req.path.startsWith('/upload')?'حجم درخواست فایل بیش‌ازحد مجاز است؛ سقف فایل آپلودی ۳ مگابایت است.':'حجم درخواست بیش‌ازحد مجاز است. فقط لینک یا گزارش صادرشده را ارسال کنید.'});
   if (error.type === 'entity.parse.failed') return res.status(400).json({error:'درخواست نامعتبر است.'});
