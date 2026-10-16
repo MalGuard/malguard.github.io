@@ -1,11 +1,8 @@
 // Account creation, OTP verification, throttling and session persistence belong
 // to the identity provider. This app never invents an OTP or stores a password.
-export async function sendEmailCode(clerk,mode,details){
-  const email=typeof details==='string'?details:details?.email;
+export async function sendEmailCode(clerk,mode,email){
   if(mode==='signup'){
-    const username=details?.username?.trim();const password=details?.password;
-    if(!username||!password)throw Object.assign(new Error('signup_details_required'),{code:'signup_details_required'});
-    const attempt=await clerk.client.signUp.create({username,emailAddress:email,password});
+    const attempt=await clerk.client.signUp.create({emailAddress:email});
     await attempt.prepareEmailAddressVerification({strategy:'email_code'});
     return attempt;
   }
