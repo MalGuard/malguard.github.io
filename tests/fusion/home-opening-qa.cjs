@@ -90,7 +90,10 @@ const profiles=[['desktop',1440,900],['4k',1920,1080,2],['ipad',820,1180],['mobi
    }
   }
   const copyDeadline=Date.now()+30000;
-  while(!await page.evaluate(()=>document.body.dataset.intro==='ready'&&getComputedStyle(document.querySelector('.scene h1 .w')).opacity==='1')){
+  // A staggered glyph handoff completes after the first word becomes sharp.
+  // Wait for every word and the real interactive-copy boundary, including when
+  // requestAnimationFrame timestamps are deliberately slowed by this fixture.
+  while(!await page.evaluate(()=>document.body.dataset.intro==='ready'&&!document.querySelector('.scene .t').inert&&[...document.querySelectorAll('.scene h1 .w')].every(w=>getComputedStyle(w).opacity==='1'))){
    assert(Date.now()<copyDeadline,'The completed opening must release fully visible text');
    await new Promise(resolve=>setTimeout(resolve,100));
   }
