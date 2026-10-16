@@ -13,7 +13,7 @@
   const introDuration=3000;
   const tryGPU=!!window.createMalGuardFieldRenderer&&!matchMedia('(prefers-reduced-motion:reduce)').matches;
   let canvas=document.getElementById('c'),gpu=tryGPU?window.createMalGuardFieldRenderer(canvas):null,ctx;
-  function canvasFallback(){if(gpu){gpu.dispose();gpu=null;}const next=canvas.cloneNode(false);canvas.replaceWith(next);canvas=next;ctx=canvas.getContext('2d',{alpha:false});canvas.width=Math.round(W*D);canvas.height=Math.round(H*D);ctx?.setTransform(D,0,0,D,0,0);active=Math.min(active,mobile?3000:5000);last=0;if(!drawing)requestStill();}
+  function canvasFallback(){if(gpu){gpu.dispose();gpu=null;}const next=canvas.cloneNode(false);canvas.replaceWith(next);canvas=next;ctx=canvas.getContext('2d',{alpha:false});canvas.width=Math.round(W*D);canvas.height=Math.round(H*D);canvas.dataset.drawn='0';canvas.dataset.held='false';canvas.dataset.backend='recovering';ctx?.setTransform(D,0,0,D,0,0);active=Math.min(active,mobile?3000:5000);last=0;if(!drawing)requestStill();}
   if(!gpu){if(tryGPU){const next=canvas.cloneNode(false);canvas.replaceWith(next);canvas=next;}ctx=canvas.getContext('2d',{alpha:false});}
   if(!gpu&&!ctx)return;
   canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();canvasFallback();});
@@ -171,7 +171,7 @@
     pointerX+=(wantedX-pointerX)*.05;pointerY+=(wantedY-pointerY)*.05;
     const ang=(staticMotion?0:Math.sin(time*.00013)*.17+pointerX*.22)*(1-logoWeight),ca=Math.cos(ang),sa=Math.sin(ang);
     const tilt=staticMotion?0:pointerY*.18,ct=Math.cos(tilt),st=Math.sin(tilt);
-    let drawn=0,underText=0,readingHits=0,minX=W,maxX=0,minY=H,maxY=0;
+    let drawn=0,underText=0,readingHits=0,quadrants=0,minX=W,maxX=0,minY=H,maxY=0;
     const reading=storyCopy();function storyCopy(){const rec=window.MalGuardParticleStory?.records.find(r=>r.opacity>.8&&r.scene.getBoundingClientRect().top<H&&r.scene.getBoundingClientRect().bottom>0);return rec?.copy.getBoundingClientRect();}
     // During the opening's opaque geometry shot, particles have no exposure.
     // Save their draw cost until the continuous field joins the handoff.
@@ -213,8 +213,9 @@
       }
     }
     let previous=null;
-    for(let i=0;i<(openingSuppressed?0:active);i++){
-      const j=i*3;
+    for(let slot=0;slot<(openingSuppressed?0:active);slot++){
+      // Ordered parametric forms must be sampled across their entire bank.
+      const i=Math.floor(slot*N/active),j=i*3;
       const v=referenceTiming.mix(t,delay[i]);
       const arc=Math.sin(v*PI),twist=arc*.65,ctw=Math.cos(twist),stw=Math.sin(twist);
       let X=A[j]+(B[j]-A[j])*v,Y=A[j+1]+(B[j+1]-A[j+1])*v,Z=A[j+2]+(B[j+2]-A[j+2])*v;
@@ -263,6 +264,7 @@
         }
       }
       if(px<0||px>W||py<0||py>H)continue;
+      quadrants|=1<<((px>cx?1:0)+(py>cy?2:0));
       minX=Math.min(minX,px);maxX=Math.max(maxX,px);minY=Math.min(minY,py);maxY=Math.max(maxY,py);
       const hue=(HA[i]+(HB[i]-HA[i])*v+360)%360;
       const sz=Math.max(.65,Math.min(2.6,f*(.75+(i%11)/15)));
@@ -282,8 +284,8 @@
     const glyphs=openingState&&!openingState.complete?0:story?.drawDust(gpu?.dust||ctx,cx,cy,time)||0;
     canvas.dataset.glyphParticles=String(glyphs);canvas.dataset.cameraTravel=cameraTravel.toFixed(3);
     canvas.dataset.cloudBounds=[minX,minY,maxX,maxY].map(n=>n.toFixed(1)).join(',');
-    if(ctx){ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';}try{gpu?.draw(W,H,D);}catch{canvasFallback();}
-    canvas.dataset.readingHits=String(readingHits);canvas.dataset.depthMode='volumetric';canvas.dataset.backend=gpu?'webgl':'canvas';
+    if(ctx){ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';}try{gpu?.draw(W,H,D);}catch{canvasFallback();drawing=false;requestStill();return;}
+    canvas.dataset.quadrants=String(quadrants);canvas.dataset.readingHits=String(readingHits);canvas.dataset.depthMode='volumetric';canvas.dataset.backend=gpu?'webgl':'canvas';
     const cost=performance.now()-start;frames++;measure+=cost;
     // Adapt once per 90 frames. No new arrays, no particle identity changes.
     if(frames>=90){if(measure/frames>12){active=Math.max(Math.floor(gpu?N*.65:Math.min(N*.55,mobile?2200:3500)),Math.floor(active*.9));}frames=0;measure=0;}
