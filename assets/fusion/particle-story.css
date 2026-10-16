@@ -38,3 +38,11 @@
  .particle-story .scene .t{visibility:visible!important;pointer-events:auto!important}
  .particle-story .scene .t>*,.particle-story .scene .w{opacity:1!important;filter:none!important;transform:none!important;transition:none!important}
 }
+/* The aperture surrounds a quiet reading volume; the light is geometry,
+   never a plate over the canvas. Waves live below their reading composition. */
+@media(min-width:901px) and (prefers-reduced-motion:no-preference){
+ .particle-story .scene[data-scene="0"] .t{width:min(640px,68vw);max-width:640px;margin-inline:auto;text-align:center}
+ .particle-story .scene[data-scene="0"] h1{max-width:none}
+ .particle-story .scene[data-scene="0"] p{margin-inline:auto}
+ .particle-story .scene[data-scene="0"] .cta,.particle-story .scene[data-scene="0"] .chips{justify-content:center}
+}
