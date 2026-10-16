@@ -5,7 +5,7 @@ import {createEmailAuth} from './email-auth.js';
 test('first-party email auth sends a code through Brevo and issues an expiring opaque session',async()=>{
   let body;const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',now:()=>1000,fetchImpl:async(_url,options)=>{body=JSON.parse(options.body);return {ok:true};}});
   const started=await auth.start({emailAddress:'Player@Example.com',name:'player_guard',ip:'198.51.100.7'});
-  assert.equal(auth.enabled,true);assert.match(started.verificationToken,/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);assert.equal(body.to[0].email,'player@example.com');
+  assert.equal(auth.enabled,true);assert.deepEqual(auth.status,{hasApiKey:true,hasFromEmail:true});assert.match(started.verificationToken,/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);assert.equal(body.to[0].email,'player@example.com');
   const code=body.htmlContent.match(/>(\d{6})</)[1];const verified=auth.verify({verificationToken:started.verificationToken,code});const session=auth.session(verified);
   assert.deepEqual(session,{email:'player@example.com',username:'player_guard',expiresAt:1000+30*24*60*60*1000});
 });
