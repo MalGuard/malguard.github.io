@@ -1,8 +1,8 @@
 import {createCipheriv,createDecipheriv,createHash,randomBytes,timingSafeEqual} from 'node:crypto';
 
 const CODE_TTL_MS=10*60*1000,SESSION_TTL_MS=30*24*60*60*1000;
-const email=value=>typeof value==='string'&&value.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)?value.trim().toLowerCase():null;
-const username=value=>typeof value==='string'&&/^[a-zA-Z0-9_-]{3,32}$/.test(value)?value:null;
+const email=value=>{const normalized=typeof value==='string'?value.trim():'';return normalized.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)?normalized.toLowerCase():null;};
+const username=value=>{const normalized=typeof value==='string'?value.trim():'';return normalized.length>=3&&normalized.length<=48&&/^[\p{L}\p{N}][\p{L}\p{N} _-]*[\p{L}\p{N}]$/u.test(normalized)?normalized:null;};
 const encode=value=>Buffer.from(JSON.stringify(value)).toString('base64url');
 const decode=value=>JSON.parse(Buffer.from(value,'base64url').toString('utf8'));
 

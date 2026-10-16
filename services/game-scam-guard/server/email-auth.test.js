@@ -14,3 +14,9 @@ test('first-party email auth rejects bad codes and does not expose them in its r
   const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',fetchImpl:async()=>({ok:true})});const started=await auth.start({emailAddress:'player@example.com',ip:'198.51.100.7'});
   await assert.rejects(async()=>auth.verify({verificationToken:started.verificationToken,code:'000000'}),{status:400});assert.deepEqual(Object.keys(started),['verificationToken']);
 });
+
+test('first-party email auth accepts a Persian username and trims the email address',async()=>{
+  let body;const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',fetchImpl:async(_url,options)=>{body=JSON.parse(options.body);return {ok:true};}});
+  const started=await auth.start({emailAddress:'  player@example.com ',name:'محمد آذر درخش'});const code=body.htmlContent.match(/>(\d{6})</)[1];const verified=auth.verify({verificationToken:started.verificationToken,code});
+  assert.equal(body.to[0].email,'player@example.com');assert.equal(auth.session(verified).username,'محمد آذر درخش');
+});
