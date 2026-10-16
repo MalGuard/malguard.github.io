@@ -57,3 +57,30 @@ retain lower budgets rather than loading a heavier 3D particle dependency.
 `tests/particle-story.cjs` verifies initial suppression, five exact formed holds,
 glyph dissolution, the particle-only gap, reverse scroll, final authentic-logo
 arrival, touch/desktop reading safety, native 4K dimensions and Reduced Motion.
+
+
+## October 16: reference light-field revision
+
+The reference was re-examined at one-second intervals from the reattached film.
+Its visible distinction is an organic luminous boundary, connected filaments,
+real depth and a wave filling the lower viewport. Traced security icons did not
+reproduce that visual language, and the former adaptation could decay to 900
+points. The revised first five forms use parametric 3D surfaces: aperture,
+intertwined evidence strands, wave, funnel and spiral disc. Copy remains semantic
+DOM, emerging inside the aperture and above the wave. Product content and the
+existing authentic-logo opening film are unchanged.
+
+The existing field canvas now uses a small WebGL 1 renderer when available.
+Emission is blurred in two separable quarter-resolution passes and added to the
+field before sharp particles; no background element is placed over copy. Ambient
+stars do not participate in bloom. Field projection, glyph dust, scroll clock
+and particle identities remain shared. Density has a useful lower bound rather
+than progressively disappearing. Reduced Motion lowers exposure and uses the
+Canvas renderer on initial load. Context loss, shader failure and a missing
+renderer recover the Canvas surface while preserving HTML controls and scroll.
+GPU buffers, programs, framebuffers and textures are released on disposal.
+
+Tests additionally cover the hollow reading volume, the lower wave composition,
+context loss, a missing GPU renderer and WebGL unavailability. Full native scroll,
+reverse choreography, final authentic-logo formation and transparent copy remain
+required in both Chromium and WebKit.

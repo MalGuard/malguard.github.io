@@ -36,7 +36,7 @@
   if(disposed)return;width=innerWidth;height=innerHeight;
   for(const r of records){
    // The copy's sticky destination, not its in-flight visual transform, is measured.
-   const readingTop=Math.max(94,Math.min(width<=900?height*.50:height*.5-r.copy.offsetHeight*.5,height-r.copy.offsetHeight-(height<=700?32:76)));
+   const readingTop=Math.max(94,Math.min(width>900&&(r.index===2||r.index===4)?height*.12:width<=900?height*.50:height*.5-r.copy.offsetHeight*.5,height-r.copy.offsetHeight-(height<=700?32:76)));
    r.copy.style.setProperty('--reading-top',readingTop.toFixed(1)+'px');
    r.start=offset(r.scene).y;r.height=r.scene.offsetHeight;sample(r);
   }
