@@ -1,12 +1,18 @@
-import {createCipheriv,createDecipheriv,createHash,randomBytes,timingSafeEqual} from 'node:crypto';
+import {createCipheriv,createDecipheriv,createHash,randomBytes,scrypt,timingSafeEqual} from 'node:crypto';
+import {promisify} from 'node:util';
+import {createAccountStore} from './account-store.js';
 
 const CODE_TTL_MS=10*60*1000,SESSION_TTL_MS=30*24*60*60*1000;
 const email=value=>{const normalized=typeof value==='string'?value.trim():'';return normalized.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)?normalized.toLowerCase():null;};
 const username=value=>{const normalized=typeof value==='string'?value.trim():'';return normalized.length>=3&&normalized.length<=48&&/^[\p{L}\p{N}][\p{L}\p{N} _-]*[\p{L}\p{N}]$/u.test(normalized)?normalized:null;};
+const person=value=>{const normalized=typeof value==='string'?value.trim():'';return normalized.length>=1&&normalized.length<=80&&/^[\p{L}][\p{L} '-]*[\p{L}]$/u.test(normalized)?normalized:null;};
+const birthDate=value=>{if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return null;const date=new Date(`${value}T12:00:00Z`),now=new Date();if(Number.isNaN(date)||date>now)return null;const age=now.getUTCFullYear()-date.getUTCFullYear()-(now.getUTCMonth()<date.getUTCMonth()||(now.getUTCMonth()===date.getUTCMonth()&&now.getUTCDate()<date.getUTCDate())?1:0);return age>=12?value:null;};
+const password=value=>typeof value==='string'&&value.length>=10&&value.length<=128&&/[a-z]/.test(value)&&/[A-Z]/.test(value)&&/\d/.test(value)?value:null;
+const derive=promisify(scrypt);
 const encode=value=>Buffer.from(JSON.stringify(value)).toString('base64url');
 const decode=value=>JSON.parse(Buffer.from(value,'base64url').toString('utf8'));
 
-export function createEmailAuth({apiKey=process.env.BREVO_API_KEY,fromEmail=process.env.AUTH_FROM_EMAIL,fetchImpl=fetch,now=()=>Date.now()}={}) {
+export function createEmailAuth({apiKey=process.env.BREVO_API_KEY,fromEmail=process.env.AUTH_FROM_EMAIL,fetchImpl=fetch,now=()=>Date.now(),accountStore=createAccountStore()}={}) {
   const hasApiKey=typeof apiKey==='string'&&apiKey.length>20,hasFromEmail=!!email(fromEmail);
   const enabled=hasApiKey&&hasFromEmail;
   const key=enabled?createHash('sha256').update(`gamescam-email-auth-v1\0${apiKey}`).digest():null;
@@ -14,17 +20,20 @@ export function createEmailAuth({apiKey=process.env.BREVO_API_KEY,fromEmail=proc
   const seal=payload=>{const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key,iv);const body=Buffer.concat([cipher.update(JSON.stringify(payload),'utf8'),cipher.final()]);return `${iv.toString('base64url')}.${cipher.getAuthTag().toString('base64url')}.${body.toString('base64url')}`;};
   const open=token=>{try{const [iv,tag,body]=String(token||'').split('.');if(!iv||!tag||!body)return null;const cipher=createDecipheriv('aes-256-gcm',key,Buffer.from(iv,'base64url'));cipher.setAuthTag(Buffer.from(tag,'base64url'));return JSON.parse(Buffer.concat([cipher.update(Buffer.from(body,'base64url')),cipher.final()]).toString('utf8'));}catch{return null;}};
   const error=(status,message)=>Object.assign(new Error(message),{status});
-  async function start({emailAddress,name,ip=''}) {
+  const session=account=>({sessionToken:seal({type:'session',id:account.id||null,email:account.email,name:account.username||account.name||account.email.split('@')[0],firstName:account.firstName||null,lastName:account.lastName||null,birthDate:account.birthDate||null,expiresAt:now()+SESSION_TTL_MS})});
+  async function start({emailAddress,name,profile,ip=''}) {
     if(!enabled)throw error(503,'ارسال کد ایمیل هنوز آماده نشده است.');
-    const address=email(emailAddress),profile=name===undefined?null:username(name);if(!address||name!==undefined&&!profile)throw error(400,'ایمیل یا نام کاربری معتبر نیست.');
+    const address=email(emailAddress),legacyName=name===undefined?null:username(name);if(!address||name!==undefined&&!legacyName)throw error(400,'ایمیل یا نام کاربری معتبر نیست.');
+    let pendingProfile=null;if(profile!==undefined){if(!accountStore.enabled)throw error(503,'ثبت‌نام با گذرواژه هنوز آماده نشده است.');const firstName=person(profile?.firstName),lastName=person(profile?.lastName),user=username(profile?.username),date=birthDate(profile?.birthDate),pass=password(profile?.password);if(!firstName||!lastName||!user||!date||!pass)throw error(400,'اطلاعات ثبت‌نام یا گذرواژه معتبر نیست.');if(await accountStore.findByEmail(address)||await accountStore.findByUsername(user))throw error(409,'این ایمیل یا نام کاربری پیش‌تر استفاده شده است.');const salt=randomBytes(16);const hash=Buffer.from(await derive(pass,salt,64)).toString('base64url');pendingProfile={email:address,username:user,firstName,lastName,birthDate:date,passwordHash:`scrypt$${salt.toString('base64url')}$${hash}`};}
     const rateKey=`${ip}|${address}`,entry=attempts.get(rateKey),time=now();if(entry&&entry.until>time&&entry.count>=3)throw error(429,'تعداد درخواست کد زیاد است؛ چند دقیقه دیگر تلاش کنید.');
     attempts.set(rateKey,{count:(entry?.until>time?entry.count:0)+1,until:time+15*60*1000});for(const [key,item]of attempts)if(item.until<time)attempts.delete(key);
     const code=String(Math.floor(100000+Math.random()*900000));
     const response=await fetchImpl('https://api.brevo.com/v3/smtp/email',{method:'POST',headers:{'api-key':apiKey,'content-type':'application/json','accept':'application/json'},body:JSON.stringify({sender:{name:'GameScam Guard',email:fromEmail},to:[{email:address}],subject:'Your GameScam Guard verification code',htmlContent:`<p>Your GameScam Guard verification code is:</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${code}</p><p>This code expires in 10 minutes.</p>`})});
     if(!response.ok)throw error(502,'ارسال کد ایمیل ممکن نشد؛ کمی بعد دوباره تلاش کنید.');
-    return {verificationToken:seal({type:'code',email:address,name:profile,code:encode(code),expiresAt:time+CODE_TTL_MS})};
+    return {verificationToken:seal({type:'code',email:address,name:legacyName,profile:pendingProfile,code:encode(code),expiresAt:time+CODE_TTL_MS})};
   }
-  function verify({verificationToken,code}) {if(!enabled)throw error(503,'ارسال کد ایمیل هنوز آماده نشده است.');const payload=open(verificationToken);if(!payload||payload.type!=='code'||payload.expiresAt<now()||!/^\d{6}$/.test(String(code)))throw error(400,'کد تأیید نامعتبر یا منقضی شده است.');const expected=Buffer.from(payload.code),actual=Buffer.from(encode(String(code)));if(expected.length!==actual.length||!timingSafeEqual(expected,actual))throw error(400,'کد تأیید نامعتبر یا منقضی شده است.');return {sessionToken:seal({type:'session',email:payload.email,name:payload.name||payload.email.split('@')[0],expiresAt:now()+SESSION_TTL_MS})};}
-  function session({sessionToken}) {if(!enabled)throw error(503,'سرویس حساب هنوز آماده نشده است.');const payload=open(sessionToken);if(!payload||payload.type!=='session'||payload.expiresAt<now())throw error(401,'نشست حساب معتبر نیست.');return {email:payload.email,username:payload.name,expiresAt:payload.expiresAt};}
-  return {enabled:!!enabled,status:{hasApiKey,hasFromEmail},start,verify,session};
+  async function verify({verificationToken,code}) {if(!enabled)throw error(503,'ارسال کد ایمیل هنوز آماده نشده است.');const payload=open(verificationToken);if(!payload||payload.type!=='code'||payload.expiresAt<now()||!/^\d{6}$/.test(String(code)))throw error(400,'کد تأیید نامعتبر یا منقضی شده است.');const expected=Buffer.from(payload.code),actual=Buffer.from(encode(String(code)));if(expected.length!==actual.length||!timingSafeEqual(expected,actual))throw error(400,'کد تأیید نامعتبر یا منقضی شده است.');const account=payload.profile?await accountStore.create(payload.profile):accountStore.enabled?(await accountStore.findByEmail(payload.email))||{email:payload.email,username:payload.name||payload.email.split('@')[0]}:{email:payload.email,username:payload.name||payload.email.split('@')[0]};return session(account);}
+  async function passwordSignIn({emailAddress,password:pass}){if(!enabled||!accountStore.enabled)throw error(503,'ورود با گذرواژه هنوز آماده نشده است.');const address=email(emailAddress);if(!address||typeof pass!=='string')throw error(400,'ایمیل یا گذرواژه معتبر نیست.');const account=await accountStore.findByEmail(address);const [method,salt,expected]=String(account?.passwordHash||'').split('$');if(method!=='scrypt'||!salt||!expected)throw error(401,'ایمیل یا گذرواژه نادرست است.');const actual=Buffer.from(await derive(pass,Buffer.from(salt,'base64url'),64)).toString('base64url');if(actual.length!==expected.length||!timingSafeEqual(Buffer.from(actual),Buffer.from(expected)))throw error(401,'ایمیل یا گذرواژه نادرست است.');return session(account);}
+  function readSession({sessionToken}) {if(!enabled)throw error(503,'سرویس حساب هنوز آماده نشده است.');const payload=open(sessionToken);if(!payload||payload.type!=='session'||payload.expiresAt<now())throw error(401,'نشست حساب معتبر نیست.');return {email:payload.email,username:payload.name,firstName:payload.firstName||null,lastName:payload.lastName||null,birthDate:payload.birthDate||null,expiresAt:payload.expiresAt};}
+  return {enabled:!!enabled,status:{hasApiKey,hasFromEmail,persistentAccounts:accountStore.enabled,...accountStore.status},start,verify,passwordSignIn,session:readSession};
 }
