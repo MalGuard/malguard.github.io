@@ -175,7 +175,7 @@
     const blend=smooth(0,1,P-firstBeat);
     function composition(beat){
       const portal=narrative&&beat===0;
-      const x=shortTouch?W*(readingOnRight?.18:.82):W*(wide?(narrative?(portal?.5:beat===2||beat===4?(lowWide?.82:.53):beat===3?.80:.76):(rightCopy||readingOnRight?.27:.70+finalWeight*.03)):.5);
+      const x=shortTouch?W*(readingOnRight?.18:.82):W*(wide?(narrative?(portal?.5:beat===2||beat===4?(lowWide?.82:.53):beat===3?.84:.76):(rightCopy||readingOnRight?.27:.70+finalWeight*.03)):.5);
       const y=shortTouch?H*.36:wide?(narrative?(beat===2||beat===4?(lowWide?H*.5:H*(beat===4?.90:.83)):H*.5):H*.5):(skyTop+skyBottom)*.5;
       const scale=shortTouch?Math.min(W*.07,H*.12):wide?(narrative?(portal?Math.min(W*.25,H*.31):beat===2||beat===4?(lowWide?Math.min(W*.10,H*.12):Math.min(W*.18,H*(beat===4?.24:.29))):beat===3?Math.min(W*.20,H*.21):Math.min(W*.26,H*.25)):Math.min(W*.31,H*.27)):Math.min(W*(portal?.24:.26),(skyBottom-skyTop)/(beat===1?4.3:3.8));
       return[x,y,scale];
