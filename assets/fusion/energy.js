@@ -147,9 +147,16 @@
     const finalWeight=smooth(12.35,13,P);
     const chamberRect=document.getElementById('sc3').getBoundingClientRect();
     const layerRect=document.getElementById('layers').getBoundingClientRect(),rightCopy=wide&&layerRect.top<H*.3&&layerRect.bottom>H*.7;
-    const readingRecord=window.MalGuardParticleStory?.records[Math.min(4,Math.round(P))];
-    const readingTop=readingRecord?parseFloat(readingRecord.copy.style.getPropertyValue('--reading-top')):H*.52;
-    const readingOnRight=readingRecord&&readingRecord.copy.getBoundingClientRect().left>W*.35;
+    const readingRecords=window.MalGuardParticleStory?.records||[];
+    const readingIndex=Math.min(4,Math.floor(P));
+    const nextReadingIndex=Math.min(4,readingIndex+1);
+    const readingBlend=smooth(0,1,P-readingIndex);
+    const readingAt=index=>{
+      const value=parseFloat(readingRecords[index]?.copy.style.getPropertyValue('--reading-top'));
+      return Number.isFinite(value)?value:H*.52;
+    };
+    // Do not swap reading geometry abruptly when the next chapter approaches.
+    const readingTop=readingAt(readingIndex)+(readingAt(nextReadingIndex)-readingAt(readingIndex))*readingBlend;
     const skyTop=(document.querySelector('nav')?.getBoundingClientRect().bottom||70)+24;
     const skyBottom=Math.max(skyTop+90,readingTop-28);
     const shortTouch=W<=900&&H<=700;
@@ -160,7 +167,9 @@
     const blend=smooth(0,1,P-firstBeat);
     function composition(beat){
       const portal=narrative&&beat===0;
-      const x=shortTouch?W*(readingOnRight?.18:.82):W*(wide?(narrative?(portal?.5:beat===2||beat===4?(lowWide?.82:.53):beat===3?.84:.76):(rightCopy||readingOnRight?.27:.70+finalWeight*.03)):.5);
+      const beatReading=readingRecords[Math.min(4,beat)];
+      const textOnRight=!!beatReading&&beatReading.copy.getBoundingClientRect().left>W*.35;
+      const x=shortTouch?W*(textOnRight?.18:.82):W*(wide?(narrative?(portal?.5:beat===2||beat===4?(lowWide?.82:.53):beat===3?.84:.76):(rightCopy||textOnRight?.27:.70+finalWeight*.03)):.5);
       const y=shortTouch?H*.36:wide?(narrative?(beat===2||beat===4?(lowWide?H*.5:H*(beat===4?.90:.83)):H*.5):H*.5):(skyTop+skyBottom)*.5;
       const scale=shortTouch?Math.min(W*.07,H*.12):wide?(narrative?(portal?Math.min(W*.25,H*.31):beat===2||beat===4?(lowWide?Math.min(W*.10,H*.12):Math.min(W*.18,H*(beat===4?.24:.29))):beat===3?Math.min(W*.20,H*.21):Math.min(W*.26,H*.25)):Math.min(W*.31,H*.27)):Math.min(W*(portal?.24:.26),(skyBottom-skyTop)/(beat===1?4.3:3.8));
       return[x,y,scale];
