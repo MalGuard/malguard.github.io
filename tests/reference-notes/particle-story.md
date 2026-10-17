@@ -42,12 +42,14 @@ implementation guidance was checked against:
 
 ## Implementation contract
 
-Native scroll directly drives both the particle field and the DOM/glyph controller.
-Each chapter's silhouette is fully formed at its 20% reading checkpoint. Shapes
-morph continuously between checkpoints, scattering and reconverging without a
-lagging scroll clock. Upright DNA-like strands lead into an open hand. Copy still
-assembles, holds, dissolves into glyph particles, and leaves a particle-only gap.
-Reverse scroll retraces the same paths; no wheel/touch event is cancelled.
+Native scroll directly drives the particle field and readable DOM text. The
+original security forms, including the upright DNA-like evidence strands and wave,
+are unchanged. Every chapter reaches its final shape by 12% scroll progress and
+holds it through 54%, giving users time to read without automatic transitions.
+Between chapters, stable particle identities disperse and reassemble along a
+reversible trajectory that spans 58% of a chapter. The camera and the particles
+freeze when the user stops scrolling; no delayed easing or idle movement remains.
+The separately controlled opening and reduced-motion fallback remain intact.
 
 Mobile artwork fits the space between the navigation and the measured reading
 block. Text has no opaque backing surface. Reduced Motion renders readable DOM
@@ -67,7 +69,7 @@ Its visible distinction is an organic luminous boundary, connected filaments,
 real depth and a wave filling the lower viewport. Traced security icons did not
 reproduce that visual language, and the former adaptation could decay to 900
 points. The revised first five forms use parametric 3D surfaces: aperture,
-intertwined evidence strands, an open hand, funnel and spiral disc. Copy remains semantic
+intertwined evidence strands, wave, funnel and spiral disc. Copy remains semantic
 DOM, emerging inside the aperture and above the wave. Product content and the
 existing authentic-logo opening film are unchanged.
 
