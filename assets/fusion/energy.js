@@ -2,13 +2,10 @@
    fallback. The final logo is sampled from the original MalGuard SVG. */
 (() => {
   'use strict';
-  // Timing copied from the supplied Cinematic HTML. 0.06 at 60 Hz,
-  // delay in [0, .5), cubic smoothstep over .5 of each scroll interval.
-  const particleSpeed=.92; // Subtle 8% reduction; shapes and scroll destinations stay unchanged.
-  const referenceTiming={follow60:.06,particleDelay:.5,particleDuration:.5,
-    revealThreshold:.35,wordStagger:.07,
-    follow:(p,target,ms)=>p+(target-p)*(1-Math.pow(.94,ms*particleSpeed/(1000/60))),
-    mix:(t,delay)=>{const q=Math.max(0,Math.min(1,(t-delay)/.5));return q*q*(3-2*q);}};
+  // Native scroll directly drives shape changes without waiting thresholds.
+  const particleSpeed=.92;
+  const referenceTiming={particleDelay:.5,particleDuration:1,revealThreshold:.35,wordStagger:.07,
+    mix:(t,delay)=>{const q=Math.max(0,Math.min(1,t));return q+(delay-.25)*.12*Math.sin(Math.PI*q);}};
   let introElapsed=0,introComplete=false;
   const introDuration=3000;
   const tryGPU=!!window.createMalGuardFieldRenderer&&!matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -38,7 +35,7 @@
   function rx(y,z,a){return[y*Math.cos(a)-z*Math.sin(a),y*Math.sin(a)+z*Math.cos(a)];}
   // Additional security compositions reuse the same particle identities.
   // No bitmap backdrop or section overlay replaces the continuous field.
-  const names=['Energy aperture','Evidence strands','Signal wave','Inspection vortex','Evidence constellation','Scanning','Threat analysis','Fail-closed','Four layers','Evidence terminal','File hash','Link inspection','Verifiable evidence','MalGuard'];
+  const names=['Energy aperture','Evidence strands','Open hand','Inspection vortex','Evidence constellation','Scanning','Threat analysis','Fail-closed','Four layers','Evidence terminal','File hash','Link inspection','Verifiable evidence','MalGuard'];
   function sampleShape(paint,index){
     const off=document.createElement('canvas');off.width=512;off.height=512;
     const c=off.getContext('2d',{willReadFrequently:true});
@@ -53,7 +50,27 @@
   // five compositions; these are surfaces in depth, not traced bitmap icons.
   make(i=>{const lane=i%7,a=Math.floor(i/7)/Math.ceil(N/7)*TAU,v=lane*TAU/7,r=1.55+Math.cos(v)*.035+Math.sin(a*9+v)*.025+Math.sin(a*17+v*2)*.012;return[Math.cos(a)*r*1.38,Math.sin(a)*r,Math.sin(v)*.07+Math.sin(a*5)*.025,195+(Math.sin(a)+1)*65+(Math.cos(a)+1)*6];});
   make(i=>{const u=rnd(),y=(u-.5)*3.6,a=u*17+(i%2)*PI,r=.57+gauss()*.065;if(i%6===0){const k=Math.floor(u*34)/34,t=rnd(),b=k*17;return[Math.cos(b)*r*(1-2*t),(k-.5)*3.6,Math.sin(b)*r*(1-2*t),205];}return[Math.cos(a)*r,y,Math.sin(a)*r,190+u*70];});
-  make(i=>{const cols=180,rows=Math.ceil(N/cols),x=(i%cols)/(cols-1)*6-3,z=(Math.floor(i/cols)/Math.max(1,rows-1)-.5)*2.2,y=Math.sin(x*1.5+z*2)*.18+Math.sin(x*3.7-z)*.045;return[x,y+z*.26,z,190+(x+3)/6*95];});
+  // A filled open hand, sampled into the existing persistent 3D particle bank.
+  sampleShape(c=>{
+    c.beginPath();c.moveTo(206,439);
+    c.bezierCurveTo(187,407,175,368,153,339);
+    c.bezierCurveTo(132,314,101,295,105,272);
+    c.bezierCurveTo(109,250,128,246,146,264);
+    c.lineTo(190,305);c.lineTo(185,168);
+    c.bezierCurveTo(183,141,200,131,214,145);
+    c.bezierCurveTo(220,150,223,161,223,178);
+    c.lineTo(230,279);c.lineTo(238,115);
+    c.bezierCurveTo(240,89,257,82,268,97);
+    c.bezierCurveTo(272,102,274,109,274,126);
+    c.lineTo(275,278);c.lineTo(281,146);
+    c.bezierCurveTo(282,122,301,115,312,133);
+    c.bezierCurveTo(317,141,318,151,317,165);
+    c.lineTo(317,281);c.lineTo(321,186);
+    c.bezierCurveTo(324,166,341,161,349,178);
+    c.bezierCurveTo(352,186,352,193,350,206);
+    c.lineTo(339,336);c.bezierCurveTo(338,381,325,418,307,445);
+    c.closePath();c.fill();c.lineWidth=3;c.stroke();
+  },2);
   make(i=>{const a=i/N*TAU*71,r=.30+Math.pow(rnd(),.55)*2.1,y=-.62/(r+.12)+.30;return[Math.cos(a)*r,y+Math.sin(a)*r*.22,Math.sin(a)*r*.78,200+(r/2.4)*65];});
   make(i=>{if(i%23===0)return[gauss()*.2,gauss()*.08,gauss()*.2,35+rnd()*25];const r=Math.pow((i%Math.ceil(N/3))/Math.ceil(N/3),.75)*2.4+.01,a=Math.floor(i/Math.ceil(N/3))*TAU/3+r*2.5+gauss()*.12,z=Math.sin(a)*r;return[Math.cos(a)*r,z*.24+gauss()*.045,z*.9,200+r/2.4*90];});
   sampleShape((c,line)=>{for(let r=48;r<=177;r+=31){c.beginPath();c.arc(256,256,r,.08,TAU-.1);c.stroke();}c.lineWidth=3;line([[256,76],[256,436]]);line([[76,256],[436,256]]);for(let a=0;a<TAU;a+=.18){const r=65+(a/TAU)*105;c.beginPath();c.arc(256+Math.cos(a)*r,256+Math.sin(a)*r,2.7,0,TAU);c.fill();}},5);
@@ -83,7 +100,8 @@
     // In normal operation, shape and type share each measured reading hold.
     const narrativeEnd=Math.max(1,top(document.querySelector('.after'))-H*.9);
     const story=window.MalGuardParticleStory;
-    anchors=story?story.records.slice(0,5).flatMap(r=>[{y:r.start,v:r.index},{y:r.start+r.height*.54,v:r.index}]):Array.from({length:5},(_,v)=>({y:narrativeEnd*v/4,v}));
+    // Continuous transitions between reading checkpoints, not 54% frozen holds.
+    anchors=story?story.records.slice(0,5).map(r=>({y:r.start+r.height*.2,v:r.index})):Array.from({length:5},(_,v)=>({y:narrativeEnd*v/4,v}));
     if(story)anchors.push({y:top(document.querySelector('.after')),v:5});
     // Continue the same gradual timeline through our additional Lab / stack / logo.
     // Each additional module retains its existing native scroll range.
@@ -100,7 +118,7 @@
   function shapeAt(y){
     for(let i=0;i<anchors.length-1;i++){
       const a=anchors[i],b=anchors[i+1];
-      if(y<=b.y){const p=Math.max(0,Math.min(1,(y-a.y)/Math.max(1,b.y-a.y)));return a.v+(b.v-a.v)*p;}
+      if(y<=b.y){if(Math.abs(y-a.y)<1)return a.v;if(Math.abs(y-b.y)<1)return b.v;const p=Math.max(0,Math.min(1,(y-a.y)/Math.max(1,b.y-a.y)));return a.v+(b.v-a.v)*p;}
     }
     return 13;
   }
@@ -121,8 +139,8 @@
     if(!staticMotion)time+=dt*particleSpeed;
     const start=performance.now();
     if(ts-zonesAt>160){zonesAt=ts;textZones=[...document.querySelectorAll('.after h2,.after h3,.after p,.after a,.after button,.after .tag,.after .section-top,#layers .steps,#demo .lab-copy')].map(el=>el.getBoundingClientRect()).filter(r=>r.width>0&&r.height>0&&r.bottom>0&&r.top<H);}
-    scrollPosition=staticMotion?scrollY:referenceTiming.follow(scrollPosition,scrollY,elapsed);
-    if(Math.abs(scrollPosition-scrollY)<.05)scrollPosition=scrollY;
+    // Rendering is synchronized to the actual scrollY, no late catch-up.
+    scrollPosition=scrollY;
     P=shapeAt(scrollPosition);
     let openingTime=null,openingState=null;
     if(!introComplete){
@@ -169,8 +187,10 @@
     const k=Math.min(12,Math.floor(P)),t=P-k,A=shapes[k],B=shapes[k+1],HA=hues[k],HB=hues[k+1];
     const logoWeight=k===12?ease(Math.max(0,(t-.45)/.55)):0;
     pointerX+=(wantedX-pointerX)*.05;pointerY+=(wantedY-pointerY)*.05;
-    const ang=(staticMotion?0:Math.sin(time*.00013)*.17+pointerX*.22)*(1-logoWeight),ca=Math.cos(ang),sa=Math.sin(ang);
-    const tilt=staticMotion?0:pointerY*.18,ct=Math.cos(tilt),st=Math.sin(tilt);
+    // DNA remains vertical from the beginning of its formation.
+    const freeRotation=1-smooth(0,.15,P)*(1-smooth(1.08,1.35,P));
+    const ang=(staticMotion?0:Math.sin(time*.00013)*.17+pointerX*.22)*(1-logoWeight)*freeRotation,ca=Math.cos(ang),sa=Math.sin(ang);
+    const tilt=(staticMotion?0:pointerY*.18)*freeRotation,ct=Math.cos(tilt),st=Math.sin(tilt);
     let drawn=0,underText=0,readingHits=0,quadrants=0,minX=W,maxX=0,minY=H,maxY=0;
     const reading=storyCopy();function storyCopy(){const rec=window.MalGuardParticleStory?.records.find(r=>r.opacity>.8&&r.scene.getBoundingClientRect().top<H&&r.scene.getBoundingClientRect().bottom>0);return rec?.copy.getBoundingClientRect();}
     // During the opening's opaque geometry shot, particles have no exposure.
@@ -236,9 +256,9 @@
       X*=breathing;Y*=breathing;
       if(!staticMotion&&k>=5){X+=Math.sin(time*.0007+phases[i])*.018*(1-logoWeight);Y+=Math.cos(time*.0009+phases[i])*.018*(1-logoWeight);}
       if(k===0){const ripple=staticMotion?1:1+Math.sin(Math.atan2(Y,X)*7+time*.00045)*.018+Math.sin(Math.atan2(Y,X)*17-time*.0007)*.01;X*=ripple;Y*=ripple;}
-      if(k===0&&wide){const a=staticMotion?0:time*.000065,c=Math.cos(a),s=Math.sin(a),q=X;X=q*c-Y*s;Y=q*s+Y*c;}
+      if(k===0&&wide){const a=staticMotion?0:time*.000065*(1-smooth(0,.15,P)),c=Math.cos(a),s=Math.sin(a),q=X;X=q*c-Y*s;Y=q*s+Y*c;}
       if(k===0&&!wide)X/=1.38;
-      if(k===1){const a=staticMotion?0:time*.00018,c=Math.cos(a),s=Math.sin(a),q=X;X=q*c+Z*s;Z=-q*s+Z*c;}
+      // No independent DNA rotation: only the scroll-controlled morph moves it.
       if(k===2&&!staticMotion)Y+=Math.sin(X*2+Z+time*.0006)*.065;
       const X2=X*ca+Z*sa,Z2=-X*sa+Z*ca,Y2=Y*ct-Z2*st,Z3=Y*st+Z2*ct;
       const f=4.8/(Z3+4.8);
