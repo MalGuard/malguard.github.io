@@ -81,8 +81,9 @@
     const narrativeEnd=Math.max(1,top(document.querySelector('.after'))-H*.9);
     const story=window.MalGuardParticleStory;
     // The text holds the matching shape during the readable 54% of each scene.
-    // Shape transitions follow scroll as soon as the reading interval ends.
-    anchors=story?story.records.slice(0,5).flatMap(r=>[{y:r.start,v:r.index},{y:r.start+r.height*.54,v:r.index}]):Array.from({length:5},(_,v)=>({y:narrativeEnd*v/4,v}));
+    // Shape transitions follow scroll as soon as the reading interval ends;
+    // arrival takes until 12% of the next chapter, giving a longer, slower flight.
+    anchors=story?story.records.slice(0,5).flatMap(r=>[{y:r.start+r.height*.12,v:r.index},{y:r.start+r.height*.54,v:r.index}]):Array.from({length:5},(_,v)=>({y:narrativeEnd*v/4,v}));
     if(story)anchors.push({y:top(document.querySelector('.after')),v:5});
     // Continue the same gradual timeline through our additional Lab / stack / logo.
     // Each additional module retains its existing native scroll range.
