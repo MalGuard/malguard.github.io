@@ -26,6 +26,26 @@ for(const engine of engines){const browser=await playwright[engine].launch(engin
    else assert(s.cloud[3]<=s.copy.top-6||s.cloud[0]>=s.copy.right+6||s.cloud[2]<=s.copy.left-6,'Particle mass overlaps touch reading copy: '+JSON.stringify(s));
    holds.push(s);if(index===0)await page.screenshot({path:`test-results/particle-story/${engine}-${label}-hold.png`});
   }
+  // Readable holds are scroll intervals, not autoplay durations.
+  await seek(page,1,.27);const holdA=await snapshot(page,1);
+  await seek(page,1,.47);const holdB=await snapshot(page,1);
+  assert.equal(holdA.scene,1,'Chapter changed before copy was readable');
+  assert.equal(holdB.scene,1,'Form did not hold while reading');
+  assert(holdB.wordOpacity>.99,'Reading text faded too early');
+  // Once scroll stops, both the field geometry and the camera must freeze.
+  await page.waitForTimeout(250);
+  const idleA=await page.locator('#c').evaluate(c=>c.toDataURL());
+  await page.waitForTimeout(300);
+  const idleB=await page.locator('#c').evaluate(c=>c.toDataURL());
+  assert.equal(idleA,idleB,'Particles kept animating without scroll');
+  await seek(page,1,.61);const morphA=(await snapshot(page,1)).scene;
+  await seek(page,1,.70);const morphB=(await snapshot(page,1)).scene;
+  await seek(page,1,.79);const morphC=(await snapshot(page,1)).scene;
+  assert(morphA>1.01&&morphB>morphA+.02&&morphC>morphB+.02,'Scroll-driven flight stalled');
+  await seek(page,1,.70);assert(Math.abs((await snapshot(page,1)).scene-morphB)<.004,'Reverse scroll changed path');
+  const timing=await page.evaluate(()=>[0,.005,.1,.25,.5,.75,.9,1].map(t=>[MalGuardParticles.referenceTiming.mix(t,0),MalGuardParticles.referenceTiming.mix(t,.5)]));
+  for(let i=1;i<timing.length;i++)for(let lane=0;lane<2;lane++)assert(timing[i][lane]>timing[i-1][lane],'Particle mix contains a dead zone');
+  assert(timing[0].every(v=>v===0)&&timing.at(-1).every(v=>v===1),'Morph endpoints invalid');
   await seek(page,0,.65);const dissolve=await snapshot(page,0);assert.equal(dissolve.phase,'dissolve');assert(dissolve.wordOpacity<.1);assert(dissolve.glyphs>0,'Heading glyphs must become visible particles');assert(dissolve.travel>.1);await page.screenshot({path:`test-results/particle-story/${engine}-${label}-dissolve.png`});
   await seek(page,0,.86);assert((await snapshot(page,0)).opacity<.01,'A particle-only passage must separate readable chapters');
   await seek(page,1,.2);assert((await snapshot(page,1)).wordOpacity>.99);await seek(page,0,.2);assert((await snapshot(page,0)).wordOpacity>.99,'Reverse scroll must reform the earlier text');
