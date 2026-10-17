@@ -103,6 +103,10 @@
       "surface": "preserved content and functional controls"
     },
     {
+      "path": "press.html",
+      "surface": "New factual editorial resource; no runtime or download changes"
+    },
+    {
       "path": "privacy-policy.html",
       "surface": "Native project resource or reporting page"
     },
@@ -137,10 +141,18 @@
       "surface": "Reviewed bilingual GTA mod security guide"
     },
     {
+      "path": "research/mod-download-checklist.html",
+      "surface": "New factual editorial resource; no runtime or download changes"
+    },
+    {
       "path": "research/repackaged-mod.html",
       "baselineSHA256": "83f5e2144d87161913d61bf956572085c58e5e81ace7366c2c1f0f81a500cd9c",
       "preparedSHA256": "09eaf055de6ebb310aa106ef13da068ad728c35620134bd79d42c941837dabea",
       "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "research/scan-result-limits.html",
+      "surface": "New factual editorial resource; no runtime or download changes"
     },
     {
       "path": "research/security-motion.html",
@@ -165,6 +177,10 @@
       "baselineSHA256": "e5e1989d7d357b3200682d53af06e0ec9a7b81ff298403b48c12b292bac0ff41",
       "preparedSHA256": "a1950001fd9d69d7ee51f36e8cb590441d73e61b79958332d57c04ad16b883ce",
       "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "security-evidence.html",
+      "surface": "New factual editorial resource; no runtime or download changes"
     },
     {
       "path": "security-policy.html",
@@ -197,7 +213,7 @@
       "surface": "preserved content and functional controls"
     }
   ],
-  "publicRouteCount": 36,
+  "publicRouteCount": 40,
   "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
   "functionalRuntimePreserved": [
     "assets/public-release.mjs",
