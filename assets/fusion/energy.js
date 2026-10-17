@@ -111,7 +111,7 @@
     const product=Math.max(stack+H,top(products)-H*.35);
     const work=Math.max(product+H,top(document.getElementById('inside-analysis'))-H*.25),tools=Math.max(work+H,top(document.getElementById('local-tools'))-H*.25),trust=Math.max(tools+H,top(document.getElementById('trust'))-H*.25);
     const finale=Math.max(trust+H,top(scenes[5])-H*.35);
-    anchors.push({y:lab,v:5},{y:graph,v:6},{y:stack,v:7},{y:Math.max(stack,product-H*.8),v:7},{y:product,v:8},{y:Math.max(product,work-H*.7),v:8},{y:work,v:9},{y:Math.max(work,tools-H*.8),v:9},{y:tools,v:10},{y:tools+H*.6,v:11},{y:trust,v:12},{y:Math.max(trust,finale-H*1.175),v:12},{y:finale,v:13});
+    anchors.push({y:lab,v:5},{y:graph,v:6},{y:stack,v:7},{y:product,v:8},{y:work,v:9},{y:tools,v:10},{y:tools+H*.6,v:11},{y:trust,v:12},{y:finale,v:13});
     window.MalGuardParticles.timeline=anchors.map(h=>({...h}));
     window.MalGuardParticles.narrativeEnd=narrativeEnd;
   }
@@ -168,10 +168,22 @@
     const skyTop=(document.querySelector('nav')?.getBoundingClientRect().bottom||70)+24;
     const skyBottom=Math.max(skyTop+90,readingTop-28);
     const shortTouch=W<=900&&H<=700;
-    const narrative=P<4.01,beat=Math.min(4,Math.round(P)),portal=narrative&&beat===0,lowWide=wide&&H<750;
-    const goalX=shortTouch?W*(readingOnRight?.18:.82):W*(wide?(narrative?(portal?.5:beat===2||beat===4?(lowWide?.82:.53):beat===3?.80:.76):(rightCopy||readingOnRight?.27:.70+finalWeight*.03)):.5);
-    const goalY=shortTouch?H*.36:wide?(narrative?(beat===2||beat===4?(lowWide?H*.5:H*(beat===4?.90:.83)):H*.5):H*.5):(skyTop+skyBottom)*.5;
-    const immersiveScale=shortTouch?Math.min(W*.07,H*.12):wide?(narrative?(portal?Math.min(W*.25,H*.31):beat===2||beat===4?(lowWide?Math.min(W*.10,H*.12):Math.min(W*.18,H*(beat===4?.24:.29))):beat===3?Math.min(W*.20,H*.21):Math.min(W*.26,H*.25)):Math.min(W*.31,H*.27)):Math.min(W*(portal?.24:.26),(skyBottom-skyTop)/(beat===1?4.3:3.8));
+    // Interpolate camera placement between forms. Rounded beat selection used
+    // to jump suddenly across a chapter midpoint during otherwise smooth morphs.
+    const narrative=P<4.01,lowWide=wide&&H<750;
+    const firstBeat=Math.min(4,Math.floor(P)),nextBeat=Math.min(4,firstBeat+1);
+    const blend=smooth(0,1,P-firstBeat);
+    function composition(beat){
+      const portal=narrative&&beat===0;
+      const x=shortTouch?W*(readingOnRight?.18:.82):W*(wide?(narrative?(portal?.5:beat===2||beat===4?(lowWide?.82:.53):beat===3?.80:.76):(rightCopy||readingOnRight?.27:.70+finalWeight*.03)):.5);
+      const y=shortTouch?H*.36:wide?(narrative?(beat===2||beat===4?(lowWide?H*.5:H*(beat===4?.90:.83)):H*.5):H*.5):(skyTop+skyBottom)*.5;
+      const scale=shortTouch?Math.min(W*.07,H*.12):wide?(narrative?(portal?Math.min(W*.25,H*.31):beat===2||beat===4?(lowWide?Math.min(W*.10,H*.12):Math.min(W*.18,H*(beat===4?.24:.29))):beat===3?Math.min(W*.20,H*.21):Math.min(W*.26,H*.25)):Math.min(W*.31,H*.27)):Math.min(W*(portal?.24:.26),(skyBottom-skyTop)/(beat===1?4.3:3.8));
+      return[x,y,scale];
+    }
+    const from=composition(firstBeat),to=composition(nextBeat);
+    const goalX=from[0]+(to[0]-from[0])*blend;
+    const goalY=from[1]+(to[1]-from[1])*blend;
+    const immersiveScale=from[2]+(to[2]-from[2])*blend;
     const finalScale=wide?Math.min(W*.22,H*.28):Math.min(W*.33,H*.26);
     const goalScale=immersiveScale+(finalScale-immersiveScale)*finalWeight;
     const settle=staticMotion?1:1-Math.exp(-elapsed/100);
