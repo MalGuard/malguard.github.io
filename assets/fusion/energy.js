@@ -102,7 +102,7 @@
     const story=window.MalGuardParticleStory;
     // Continuous transitions between reading checkpoints, not 54% frozen holds.
     anchors=story?story.records.slice(0,5).map(r=>({y:r.start+r.height*.2,v:r.index})):Array.from({length:5},(_,v)=>({y:narrativeEnd*v/4,v}));
-    if(story)anchors.push({y:top(document.querySelector('.after')),v:5});
+    // No extra form-five checkpoint here: it would pause the field again.
     // Continue the same gradual timeline through our additional Lab / stack / logo.
     // Each additional module retains its existing native scroll range.
     const lab= Math.max(narrativeEnd+H,top(demo)+H*.35);
