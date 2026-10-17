@@ -26,6 +26,15 @@ for(const engine of engines){const browser=await playwright[engine].launch(engin
    else assert(s.cloud[3]<=s.copy.top-6||s.cloud[0]>=s.copy.right+6||s.cloud[2]<=s.copy.left-6,'Particle mass overlaps touch reading copy: '+JSON.stringify(s));
    holds.push(s);if(index===0)await page.screenshot({path:`test-results/particle-story/${engine}-${label}-hold.png`});
   }
+  // Scroll position owns morph progress; small steps and reverse are deterministic.
+  await seek(page,1,.27);const morphA=(await snapshot(page,1)).scene;
+  await seek(page,1,.37);const morphB=(await snapshot(page,1)).scene;
+  await seek(page,1,.47);const morphC=(await snapshot(page,1)).scene;
+  assert(morphA>1.01&&morphB>morphA+.02&&morphC>morphB+.02,'Scroll morph stalled');
+  await seek(page,1,.37);assert(Math.abs((await snapshot(page,1)).scene-morphB)<.004,'Reverse morph differs');
+  const timing=await page.evaluate(()=>[0,.005,.1,.25,.5,.75,.9,1].map(t=>[MalGuardParticles.referenceTiming.mix(t,0),MalGuardParticles.referenceTiming.mix(t,.5)]));
+  for(let i=1;i<timing.length;i++)for(let lane=0;lane<2;lane++)assert(timing[i][lane]>timing[i-1][lane],'Particle mix contains a dead zone');
+  assert(timing[0].every(v=>v===0)&&timing.at(-1).every(v=>v===1),'Morph endpoints invalid');
   await seek(page,0,.65);const dissolve=await snapshot(page,0);assert.equal(dissolve.phase,'dissolve');assert(dissolve.wordOpacity<.1);assert(dissolve.glyphs>0,'Heading glyphs must become visible particles');assert(dissolve.travel>.1);await page.screenshot({path:`test-results/particle-story/${engine}-${label}-dissolve.png`});
   await seek(page,0,.86);assert((await snapshot(page,0)).opacity<.01,'A particle-only passage must separate readable chapters');
   await seek(page,1,.2);assert((await snapshot(page,1)).wordOpacity>.99);await seek(page,0,.2);assert((await snapshot(page,0)).wordOpacity>.99,'Reverse scroll must reform the earlier text');
