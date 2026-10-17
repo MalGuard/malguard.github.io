@@ -260,3 +260,16 @@ Object.assign(persian,{
 });
 
 Object.assign(persian,{'Encrypted or unsupported payloads can remain unreadable; the current scanner does not execute samples.':'محتوای رمزگذاری‌شده یا پشتیبانی‌نشده ممکن است خوانده نشود؛ اسکنر فعلی نمونه‌ها را اجرا نمی‌کند.'});
+
+// Keep public product availability wording consistent in English and Persian.
+Object.assign(persian, {
+  "Web preview": "پیش‌نمایش وب",
+  "Windows in development": "نسخهٔ ویندوز در حال توسعه",
+  "Web preview available; Windows app in development.": "پیش‌نمایش وب در دسترس است؛ نسخهٔ ویندوز در حال توسعه است.",
+  "Web preview available": "پیش‌نمایش وب در دسترس است",
+  "Web scanner preview is available.": "نسخهٔ آزمایشی اسکنر وب در دسترس است.",
+  "Windows installer is still in development.": "نصب‌کنندهٔ ویندوز همچنان در حال توسعه است.",
+  "Open web preview": "باز کردن پیش‌نمایش وب",
+  "Web preview for suspicious gaming links and evidence-led reports. The Windows installer is still in development.": "پیش‌نمایش وب برای بررسی لینک‌های مشکوک بازی و گزارش‌های مبتنی بر شواهد در دسترس است؛ نصب‌کنندهٔ ویندوز همچنان در حال توسعه است.",
+  "Web preview for gaming scam checks; Windows installer is still in development.": "پیش‌نمایش وب برای بررسی کلاهبرداری‌های بازی در دسترس است؛ نصب‌کنندهٔ ویندوز همچنان در حال توسعه است.",
+});
