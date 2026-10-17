@@ -37,6 +37,7 @@ jobs:
 
           cp index.html 404.html founder.html game-scam-guard.html _site/
           cp report.html console-8d42b69fda13705cc47a.html source.html security-policy.html privacy-policy.html code-signing.html contributing.html core-guide.html _site/
+          cp press.html security-evidence.html _site/
           cp tools.html trust.html privacy.html support.html about.html labs.html docs.html download.html scan-mods.html ai-intelligence.html malware-ai.html malware-ai-windows.html threat-radar.html scan-url.html products.html gta-guard.html sandbox-help.html app.html _site/
           cp robots.txt sitemap.xml llms.txt _site/
           cp 2a68c6360d77f77aeab34ac3dc4a85122a8f07aa53cbb3ae.txt _site/
@@ -56,6 +57,8 @@ jobs:
           test -f _site/game-scam-guard/index.html
           test -f _site/tools.html
           test -f _site/trust.html
+          test -f _site/press.html
+          test -f _site/security-evidence.html
           test -f _site/docs.html
           test -f _site/download.html
           test -f _site/release/gta-guard-windows.json

@@ -6,7 +6,7 @@ import re, json
 from hashlib import sha256
 ROOT=Path(__file__).resolve().parents[1]
 PUBLIC_AI_GUIDES=[ROOT/'research/gta-5-mod-security.html', ROOT/'research/gta-mod-security-fa.html']
-PAGES=[ROOT/'index.html', *[p for p in ROOT.glob('*.html') if p.name!='index.html'],ROOT/'ios-preview/index.html',ROOT/'research/repackaged-mod.html',ROOT/'research/security-motion.html',*PUBLIC_AI_GUIDES,ROOT/'release/sandbox-help-historical.html']
+PAGES=[ROOT/'index.html', *[p for p in ROOT.glob('*.html') if p.name!='index.html'],ROOT/'ios-preview/index.html',ROOT/'research/repackaged-mod.html',ROOT/'research/security-motion.html',*PUBLIC_AI_GUIDES,ROOT/'research/mod-download-checklist.html',ROOT/'research/scan-result-limits.html',ROOT/'release/sandbox-help-historical.html']
 # The Guard source is compiled and copied to the Pages artifact by the static
 # workflow. Keep this route explicit so a typo cannot hide as a link, while
 # allowing the source-only validator to run before a local build.
@@ -164,3 +164,27 @@ assert canonical_base in (ROOT/'llms.txt').read_text()
 for e in errors: print(e)
 if errors:raise SystemExit(f'{len(errors)} link/asset/distribution errors')
 print(f'PASS: {len(PAGES)} HTML documents, links/assets/anchors, multilingual controls, public installer size/SHA-256, historical encrypted package hash and preserved admin authentication')
+
+
+# Editorial trust pack: newly indexed pages have one H1, safe local links,
+# public locale controls, and are wired into the source-only public build.
+editorial_paths = [
+    'press.html',
+    'security-evidence.html',
+    'research/mod-download-checklist.html',
+    'research/scan-result-limits.html',
+]
+inventory = json.loads((ROOT/'tests/unified-source-inventory.json').read_text())
+for path in editorial_paths:
+    doc = (ROOT/path).read_text(encoding='utf-8')
+    assert doc.count('<h1>') == 1 and doc.count('</h1>') == 1, path
+    assert f'https://malguard.site/{path}</loc>' in sitemap, path
+    assert f'<link rel="canonical" href="https://malguard.site/{path}">' in doc, path
+    assert '/assets/i18n.mjs' in doc, path
+    assert any(route['path'] == path for route in inventory['routes']), path
+    assert f'https://malguard.site/{path}' in llms, path
+assert 'href="/press.html"' in (ROOT/'founder.html').read_text()
+assert 'href="/security-evidence.html"' in (ROOT/'trust.html').read_text()
+assert 'href="/research/mod-download-checklist.html"' in (ROOT/'labs.html').read_text()
+assert 'href="/research/scan-result-limits.html"' in (ROOT/'labs.html').read_text()
+assert inventory['publicRouteCount'] == len(inventory['routes'])
