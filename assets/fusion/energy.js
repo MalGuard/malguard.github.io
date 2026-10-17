@@ -119,7 +119,9 @@
     if(canvas.clientWidth!==W||canvas.clientHeight!==H)resize();
     ctx?.setTransform(D,0,0,D,0,0);
     const elapsed=last?Math.min(250,ts-last):16,dt=Math.min(50,elapsed);last=ts;
-    if(!staticMotion)time+=dt*particleSpeed;
+    // Autonomous glow/time updates end with the opening. From then on the
+    // field is deterministic for a given scroll position, even after redraws.
+    if(!staticMotion&&!introComplete)time+=dt*particleSpeed;
     const start=performance.now();
     if(ts-zonesAt>160){zonesAt=ts;textZones=[...document.querySelectorAll('.after h2,.after h3,.after p,.after a,.after button,.after .tag,.after .section-top,#layers .steps,#demo .lab-copy')].map(el=>el.getBoundingClientRect()).filter(r=>r.width>0&&r.height>0&&r.bottom>0&&r.top<H);}
     // Rendering is synchronized to the actual scrollY, no late catch-up.
