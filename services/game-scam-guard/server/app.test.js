@@ -50,7 +50,6 @@ test('disconnected clients retain scan slots until the actual work settles', asy
     for (const controller of controllers) controller.abort();
     await closed;
     assert.equal((await post('probe')).status,503,'Closing the connection must not free unfinished scan work');
-    assert.equal((await fetch(url.replace('/scan','/advanced'),{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})).status,503);
     for (const resolve of pending) resolve({status:'finished'});
     await Promise.all(requests);
     // A health response crosses the event loop after the settled handlers release their slots.

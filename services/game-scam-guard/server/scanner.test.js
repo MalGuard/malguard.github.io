@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeUrl, publicAddress, resolvePublic, fetchPublic } from './network.js';
-import { identifyFile, parsePage, providerStatus, scanFiles } from './scanner.js';
+import { parsePage, providerStatus } from './scanner.js';
 import { abuseAuthKey, malwareBazaarAuthKey, urlhausAuthKey, createBazaarClient, mapBazaarResult, lookupUrl } from './threat-intel.js';
 
 test('URL normalization accepts both web protocols and rejects credentials, ports and non-web schemes', () => {
@@ -24,16 +24,16 @@ test('all DNS answers must be public, and alternative loopback URL spellings are
   assert.equal(pinned.address,'8.8.8.8');
 });
 
-test('page evidence includes title, headings and deduplicated downloadable links without script text', () => {
+test('page evidence records download links as excluded without retrieving file content', () => {
   const html=Buffer.from('<html><head><title>Game Store</title><meta name="description" content="Games and mods"></head><body><h1>FC mods</h1><h2>Downloads</h2><a href="/mods/mod.zip">A mod</a><a href="/mods/mod.zip">Duplicate</a><a href="https://other.example/app.apk">App</a><a download href="/download?id=1">Installer</a><a href="/about">About</a><script>free gems</script></body></html>');
   const evidence=parsePage(html,'https://store.example/index',{'content-type':'text/html'});
   assert.equal(evidence.title,'Game Store');
   assert.equal(evidence.description,'Games and mods');
   assert.deepEqual(evidence.headings,['FC mods','Downloads']);
-  assert.equal(evidence.fileCount,3);
-  assert.equal(evidence.files[0].url,'https://store.example/mods/mod.zip');
-  assert.equal(evidence.files[1].external,true);
-  assert.equal(evidence.files[0].status,'unscanned');
+  assert.equal(evidence.fileCount,0);
+  assert.deepEqual(evidence.files,[]);
+  assert.equal(evidence.linkInventory.links.filter(link=>link.kind==='file').length,4);
+  assert.ok(!evidence.signals.some(signal=>signal.code==='file_links_excluded'));
   assert.equal(evidence.signals.some(s=>s.title==='ادعاهای نیازمند احتیاط'),false);
   assert.ok(!evidence.excerpt.includes('free gems'));
 });
@@ -45,18 +45,9 @@ test('HTTP and suspicious claims create caution signals without claiming a malwa
   assert.equal(evidence.signals.some(s=>s.title==='فرم ورود شناسایی شد'),true);
 });
 
-test('file signature detects executables, archives and HTML responses without running them', () => {
-  assert.equal(identifyFile(Buffer.from('MZbinary')),'PE / Windows executable');
-  assert.equal(identifyFile(Buffer.from([0x7f,0x45,0x4c,0x46])),'ELF executable');
-  assert.equal(identifyFile(Buffer.from([0x50,0x4b,0x03,0x04])),'ZIP / APK archive');
-  assert.equal(identifyFile(Buffer.from('%PDF-1.7')),'PDF document');
-  assert.equal(identifyFile(Buffer.from('<!DOCTYPE html><html>Login first</html>')),'HTML page');
-  assert.equal(identifyFile(Buffer.from('unknown')),'Unknown binary / text');
-});
-
-test('advanced requests require a live server-issued report rather than an arbitrary download URL', async () => {
-  await assert.rejects(scanFiles('https://example.com/file.exe'), /منقضی/);
+test('website provider status exposes only URLhaus', () => {
   assert.equal(typeof providerStatus().urlhaus,'boolean');
+  assert.deepEqual(Object.keys(providerStatus()),['urlhaus']);
 });
 
 const sampleHash = 'a'.repeat(64);
@@ -132,7 +123,7 @@ test('original GTA credential variable is compatible and the new variable takes 
     delete process.env.ABUSECH_AUTH_KEY;
     process.env.MALGUARD_ABUSECH_AUTH_KEY='legacy-fixture';
     assert.equal(abuseAuthKey(),'legacy-fixture');
-    assert.deepEqual(providerStatus(),{urlhaus:true,malwarebazaar:true});
+    assert.deepEqual(providerStatus(),{urlhaus:true});
     process.env.ABUSECH_AUTH_KEY='new-fixture';
     assert.equal(abuseAuthKey(),'new-fixture');
   } finally {
@@ -154,7 +145,7 @@ test('a separate MalwareBazaar key authenticates hash queries without replacing 
   try {
     for (const key of keys) delete process.env[key];
     process.env.MALWAREBAZAAR_AUTH_KEY = 'bazaar-fixture';
-    assert.deepEqual(providerStatus(),{urlhaus:false,malwarebazaar:true});
+    assert.deepEqual(providerStatus(),{urlhaus:false});
     let sent;
     const client = createBazaarClient({fetchImpl:async (url,request)=> {
       sent = request.headers['Auth-Key'];
@@ -204,9 +195,9 @@ test('URLhaus can explicitly reuse the existing abuse.ch Bazaar key without chan
     assert.equal(process.env.ABUSECH_AUTH_KEY,'original-fixture');
     assert.equal(malwareBazaarAuthKey(),'valid-shared-fixture');
     delete process.env.ABUSECH_AUTH_KEY;
-    assert.deepEqual(providerStatus(),{urlhaus:true,malwarebazaar:true});
+    assert.deepEqual(providerStatus(),{urlhaus:true});
     delete process.env.MALWAREBAZAAR_AUTH_KEY;
-    assert.deepEqual(providerStatus(),{urlhaus:false,malwarebazaar:false});
+    assert.deepEqual(providerStatus(),{urlhaus:false});
     process.env.ABUSECH_AUTH_KEY='original-fixture';
     assert.equal(urlhausAuthKey(),undefined,'Explicit source never silently substitutes another secret');
     delete process.env.URLHAUS_AUTH_KEY_SOURCE;
@@ -216,4 +207,40 @@ test('URLhaus can explicitly reuse the existing abuse.ch Bazaar key without chan
   } finally {
     for(const key of keys){if(previous[key]===undefined)delete process.env[key];else process.env[key]=previous[key];}
   }
+});
+
+test('website result is green-safe only for retrieved HTML with no warning or threat signal', async()=>{
+  const report=await (await import('./scanner.js')).scanSite('https://safe.example/',{
+    validate:async()=>{},lookup:async()=>({status:'not_found',message:'No known URLhaus report; this is not a safety guarantee.'}),
+    transport:async()=>({status:200,headers:{'content-type':'text/html'},bytes:Buffer.from('<title>Safe fixture</title><p>Welcome</p>'),url:'https://safe.example/',redirects:[]}),
+    preview:async()=>{throw new Error('Basic scan must not start the cloud browser');}
+  });
+  assert.equal(report.status,'limited');
+  assert.equal(report.preview.status,'skipped');
+});
+
+test('unresolvable domains are never reported as safe',async()=>{
+  const report=await (await import('./scanner.js')).scanSite('https://missing.example/',{
+    validate:async()=>{throw Object.assign(new Error('not found'),{code:'ENOTFOUND'});},
+    lookup:async()=>({status:'not_found',message:'No known URLhaus report; this is not a safety guarantee.'})
+  });
+  assert.equal(report.status,'unavailable');
+  assert.equal(report.pageFetch.reason,'domain_not_found');
+  assert.match(report.pageFetch.detail,/دامنه پیدا نشد/);
+});
+
+test('a direct file result is unavailable and is never sent to the browser preview',async()=>{
+  let previews=0;
+  const report=await (await import('./scanner.js')).scanSite('https://download.example/track.mp3',{
+    validate:async()=>{},lookup:async()=>({status:'not_found',message:'No known URLhaus report; this is not a safety guarantee.'}),
+    transport:async()=>({status:200,headers:{'content-type':'audio/mpeg'},bytes:Buffer.alloc(0),url:'https://download.example/track.mp3',redirects:[]}),
+    preview:async()=>{previews++;return {status:'done'};},allowCloudPreview:true
+  });
+  assert.equal(report.status,'unavailable');assert.equal(report.fileScanExcluded,true);assert.equal(previews,0);
+});
+
+test('cloud browser preview requires the explicit advanced website selection',async()=>{
+  let previews=0;const options={validate:async()=>{},lookup:async()=>({status:'not_found',message:'No known URLhaus report; this is not a safety guarantee.'}),transport:async()=>({status:200,headers:{'content-type':'text/html'},bytes:Buffer.from('<title>Preview fixture</title>'),url:'https://preview.example/',redirects:[]}),preview:async()=>{previews++;return {status:'done',image:'data:image/jpeg;base64,fixture',detail:'Fixture'};}};
+  const basic=await (await import('./scanner.js')).scanSite('https://preview.example/',options);assert.equal(basic.preview.status,'skipped');assert.equal(previews,0);
+  const advanced=await (await import('./scanner.js')).scanSite('https://preview.example/',{...options,allowCloudPreview:true});assert.equal(advanced.preview.status,'done');assert.equal(previews,1);
 });

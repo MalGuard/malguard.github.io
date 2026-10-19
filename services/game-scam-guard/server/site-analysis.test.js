@@ -15,8 +15,9 @@ test('independent form analysis reports actual destinations and methods without 
 
 test('document base is used for download discovery and form action, while omitted action uses document URL',()=>{
   const report=parsePage(Buffer.from('<base href="https://cdn.example/mods/"><a href="file.zip">Mod</a><form method="post"><input type="password"></form><form action="pay" method="post"><input autocomplete="cc-number"></form>'),'https://store.example/shop/');
-  assert.equal(report.files[0].url,'https://cdn.example/mods/file.zip');
-  assert.equal(report.linkInventory.links[0].url,report.files[0].url);
+  assert.deepEqual(report.files,[]);
+  assert.equal(report.linkInventory.links[0].url,'https://cdn.example/mods/file.zip');
+  assert.equal(report.linkInventory.links[0].kind,'file');
   const signals=report.signals.filter(signal=>signal.rule==='sensitive_form_external');assert.equal(signals.length,1);assert.match(signals[0].detail,/فرم 2.*cdn.example\/mods\/pay/);
   assert.ok(!report.signals.some(signal=>signal.rule==='sensitive_form_get'));
 });
@@ -36,7 +37,7 @@ test('all 54 observed link rows and exact received-HTML hash are retained withou
   const report=parsePage(html,'https://store.example/');
   assert.equal(report.linkInventory.total,54);assert.equal(report.linkInventory.retained,54);assert.equal(report.linkInventory.omitted,0);
   assert.ok(report.linkInventory.links.every(link=>link.status==='unscanned'));
-  assert.equal(report.fileCount,54);assert.equal(report.files.length,54);
+  assert.equal(report.fileCount,0);assert.equal(report.files.length,0);assert.equal(report.linkInventory.links.filter(link=>link.kind==='file').length,54);
   assert.equal(report.siteAnalysis.htmlSha256,createHash('sha256').update(html).digest('hex'));
 });
 

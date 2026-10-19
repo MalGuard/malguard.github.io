@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {fetchSitePage,scanSite,scanFiles} from './scanner.js';
+import {fetchSitePage,scanSite} from './scanner.js';
 import {normalizeUrl,ScanError} from './network.js';
 
 const timeout=()=>new ScanError('fixture timeout',422,'request_timeout');
@@ -47,7 +47,6 @@ test('page timeout preserves independent reputation in an honest report and bloc
   assert.equal(report.inputAdjusted,true);assert.equal(report.url,page.url);
   assert.equal(report.title,'محتوای صفحه دریافت نشد');assert.deepEqual(report.files,[]);
   assert.equal(report.checks[0].status,'unavailable');assert.equal(report.checks[1].status,'done');
-  await assert.rejects(scanFiles(report.id,report.scanToken),{status:409});
 });
 
 test('private input never reaches page or provider; a known threat still blocks a stalled page',async()=> {
@@ -58,14 +57,13 @@ test('private input never reaches page or provider; a known threat still blocks 
     if(signal.aborted)abort();else signal.addEventListener('abort',abort,{once:true});
   })});
   assert.equal(report.status,'danger');assert.equal(report.pageFetch.reason,'threat_blocked');
-  await assert.rejects(scanFiles(report.id,report.scanToken),/تهدید/);
 });
 
-test('recovered scan keeps actual page evidence, file discovery and a usable server-issued report',async()=> {
+test('recovered scan keeps actual page evidence, excluded download links and a usable server-issued report',async()=> {
   let calls=0;
   const report=await scanSite(page.url,{validate:async()=>{},lookup:async()=>unknown,transport:async()=>{if(++calls===1)throw timeout();return page;},preview:async()=>({status:'unavailable',detail:'Fixture preview disabled'})});
   assert.equal(report.title,'Recovered store');assert.equal(report.pageFetch.status,'done');
-  assert.equal(report.pageFetch.attempts,2);assert.equal(report.files[0].url,'https://example.com/mod.zip');
+  assert.equal(report.pageFetch.attempts,2);assert.deepEqual(report.files,[]);assert.ok(report.linkInventory.links.some(link=>link.kind==='file'&&link.url==='https://example.com/mod.zip'));
   assert.ok(report.scanToken.startsWith('r1.'));
 });
 
@@ -79,6 +77,6 @@ test('simultaneous page and provider failures remain inconclusive without false 
 
 test('explicit passive advanced mode can inspect a listed page while retaining its threat verdict',async()=>{
   const report=await scanSite(page.url,{allowThreatContent:true,validate:async()=>{},lookup:async()=>({status:'listed',message:'Synthetic listed fixture'}),transport:async()=>page,preview:async()=>{throw new Error('No dangerous preview');}});
-  assert.equal(report.status,'danger');assert.equal(report.pageFetch.status,'done');assert.equal(report.files.length,1);assert.equal(report.preview.status,'skipped');
+  assert.equal(report.status,'danger');assert.equal(report.pageFetch.status,'done');assert.equal(report.files.length,0);assert.equal(report.preview.status,'skipped');
   let calls=0;await assert.rejects(scanSite('http://127.0.0.1/',{allowThreatContent:true,lookup:async()=>{calls++;}}),{status:400});assert.equal(calls,0);
 });

@@ -4,12 +4,10 @@ import { fileURLToPath } from 'node:url';
 import * as scanner from './scanner.js';
 import { ScanError } from './network.js';
 import {startScanJob,stepScanJob,scanJobReport} from './scan-jobs.js';
-import {readUpload,scanUploadedFile,MAX_UPLOAD_BYTES} from './uploads.js';
-import {cloudExecutionStatus} from './cloud-execution.js';
 import {createEmailAuth} from './email-auth.js';
 import {createGoogleAuth} from './google-auth.js';
 
-export function createApp({ scanSite = scanner.scanSite, scanFiles = scanner.scanFiles, providerStatus = scanner.providerStatus,startJob=startScanJob,stepJob=stepScanJob,uploadScan=scanUploadedFile,emailAuth=createEmailAuth(),googleAuth=createGoogleAuth(),appOrigin='https://malguard.site/game-scam-guard/' } = {}) {
+export function createApp({ scanSite = scanner.scanSite, providerStatus = scanner.providerStatus,startJob=startScanJob,stepJob=stepScanJob,emailAuth=createEmailAuth(),googleAuth=createGoogleAuth(),appOrigin='https://malguard.site/game-scam-guard/' } = {}) {
 const app = express();
 app.disable('x-powered-by');
 if (process.env.VERCEL) app.set('trust proxy', 1);
@@ -32,18 +30,15 @@ app.use('/api', (req,res,next)=>{
   }
   next();
 });
-app.use('/api/upload',express.json({limit:'4200kb'}));
 app.use('/api/jobs',express.json({limit:'1600kb'}));
-app.use('/api/advanced', express.json({ limit: '800kb' }));
 app.use(express.json({ limit: '4kb' }));
 app.use('/api', (req, res, next) => {
   res.set({ 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
   // JSON + same-origin POSTs prevent cross-origin scan requests using a visitor's browser.
   // Vercel may supply an already-parsed body; enforce the same limits in that case.
-  const upload=req.path==='/upload';
-  const limit = req.path.startsWith('/jobs/')?1600*1024:req.path === '/advanced' ? 800*1024 :upload?4*1024*1024+8192:4*1024;
+  const limit = req.path.startsWith('/jobs/')?1600*1024:4*1024;
   if (req.body && (Buffer.isBuffer(req.body)?req.body.length:Buffer.byteLength(JSON.stringify(req.body))) > limit) return res.status(413).json({error:'حجم درخواست بیش‌ازحد مجاز است. فقط لینک یا گزارش صادرشده را ارسال کنید.'});
-  if (req.method === 'POST' && !(upload?(req.is('multipart/form-data')||req.is('application/json')):req.is('application/json'))) return res.status(403).json({ error: 'درخواست باید از داخل برنامه ارسال شود.' });
+  if (req.method === 'POST' && !req.is('application/json')) return res.status(403).json({ error: 'درخواست باید از داخل برنامه ارسال شود.' });
   next();
 });
 const rates = new Map(); let activeScans = 0;
@@ -55,7 +50,7 @@ app.use('/api/auth', (req,res,next) => {
   for(const [ip,item] of authRates)if(item.until<now)authRates.delete(ip);
   next();
 });
-app.use(['/api/scan', '/api/advanced','/api/jobs','/api/upload'], (req, res, next) => {
+app.use(['/api/scan','/api/jobs'], (req, res, next) => {
   const now = Date.now(); const key = `${req.ip}|${req.originalUrl.startsWith('/api/jobs/')?'job':'normal'}`;
   const rate = rates.get(key);
   if (!rate || rate.until < now) rates.set(key, { count: 1, until: now + 60000 });
@@ -75,7 +70,7 @@ const handleScan = operation => async (req,res) => {
     activeScans--;
   }
 };
-app.get('/api/health', (req,res)=>res.json({ status: 'ok', providers: providerStatus(), mode: 'independent-html-and-file', maxFileSize: 12 * 1024 * 1024, maxFiles:128,maxUploadSize:MAX_UPLOAD_BYTES,cloudExecution:cloudExecutionStatus() }));
+app.get('/api/health', (req,res)=>res.json({ status: 'ok', providers: {urlhaus:providerStatus().urlhaus}, mode: 'website-link-inspection', maxLinkedPages:128 }));
 app.get('/api/account-config',(req,res)=>{
   // This is Clerk's intentionally public browser identifier, never a secret key.
   const key=process.env.GUARD_CLERK_PUBLISHABLE_KEY||'';
@@ -91,8 +86,7 @@ app.post('/api/auth/start',async(req,res,next)=>{try{res.json(await emailAuth.st
 app.post('/api/auth/verify',async(req,res,next)=>{try{res.json(await emailAuth.verify({verificationToken:req.body?.verificationToken,code:req.body?.code}));}catch(error){next(error);}});
 app.post('/api/auth/password',async(req,res,next)=>{try{res.json(await emailAuth.passwordSignIn({emailAddress:req.body?.email,password:req.body?.password}));}catch(error){next(error);}});
 app.post('/api/auth/session',(req,res,next)=>{try{res.json(emailAuth.session({sessionToken:req.body?.sessionToken}));}catch(error){next(error);}});
-app.post('/api/scan', handleScan(body=>scanSite(body?.url,{allowThreatContent:['advanced','ultra'].includes(body?.mode)})));
-app.post('/api/advanced', handleScan(body=>scanFiles(body?.id, body?.token)));
+app.post('/api/scan', handleScan(body=>scanSite(body?.url,{allowThreatContent:body?.mode==='advanced',allowCloudPreview:body?.mode==='advanced'})));
 app.post('/api/jobs/start',handleScan(body=>startJob(body)));
 app.post('/api/jobs/step',async(req,res,next)=>{
   if(activeScans>=8)return res.status(503).json({error:'سرویس مشغول است؛ کمی بعد دوباره تلاش کنید.'});
@@ -103,14 +97,10 @@ app.post('/api/jobs/step',async(req,res,next)=>{
   catch(error){if(res.headersSent){if(!res.destroyed)res.end(JSON.stringify({error:error instanceof ScanError?error.message:'بررسی این دسته کامل نشد؛ از مرحلهٔ قبل ادامه دهید.'})+'\n');}else next(error);}
   finally{activeScans--;}
 });
-app.post('/api/upload',async(req,res,next)=>{
-  if(activeScans>=8)return res.status(503).json({error:'سرویس مشغول است؛ کمی بعد دوباره تلاش کنید.'});
-  activeScans++;try{const upload=await readUpload(req);const report=await uploadScan(upload);if(!res.destroyed)res.json(report);}catch(error){next(error);}finally{activeScans--;}
-});
 app.use('/api', (error,req,res,next)=> {
   if (Number.isInteger(error.status)&&error.status>=400&&error.status<600) return res.status(error.status).json({error:error.message});
   if (error instanceof ScanError) return res.status(error.status).json({ error: error.message });
-  if (error.type === 'entity.too.large') return res.status(413).json({error:req.path.startsWith('/upload')?'حجم درخواست فایل بیش‌ازحد مجاز است؛ سقف فایل آپلودی ۳ مگابایت است.':'حجم درخواست بیش‌ازحد مجاز است. فقط لینک یا گزارش صادرشده را ارسال کنید.'});
+  if (error.type === 'entity.too.large') return res.status(413).json({error:'حجم درخواست بیش‌ازحد مجاز است. فقط لینک یا گزارش صادرشده را ارسال کنید.'});
   if (error.type === 'entity.parse.failed') return res.status(400).json({error:'درخواست نامعتبر است.'});
   console.error('Scan request failed:', error.code || error.name);
   res.status(502).json({ error: 'دسترسی به سایت ممکن نشد. آدرس، اتصال یا گواهی سایت را بررسی کنید.' });
