@@ -146,6 +146,14 @@ assert 'مالگارد (MalGuard) چیست؟' in PUBLIC_AI_GUIDES[1].read_text()
 assert 'Which app can inspect GTA 5 mods before installation?' in PUBLIC_AI_GUIDES[0].read_text()
 assert 'malware-ai-windows.html' not in sitemap
 
+
+# The web preview is distinct from the unreleased Game Scam Guard Windows installer.
+assert 'Web preview available; Windows app in development.' in (ROOT/'index.html').read_text()
+assert 'Web preview for gaming scam checks; Windows installer is still in development.' in (ROOT/'products.html').read_text()
+assert 'href="/game-scam-guard/"' in (ROOT/'index.html').read_text()
+assert '<a href="/malware-ai.html">Malware AI</a>' not in (ROOT/'game-scam-guard.html').read_text()
+assert json.loads((ROOT/'data/product-status.json').read_text())['products']['gameScamGuard']['downloadEnabled'] is False
+
 # Check migration metadata before publishing. Search engines must see only the custom domain.
 canonical_base = "https://malguard.site/"
 indexed_urls = re.findall(r"<loc>([^<]+)</loc>", (ROOT/'sitemap.xml').read_text())
