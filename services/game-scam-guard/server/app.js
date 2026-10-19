@@ -90,7 +90,11 @@ app.post('/api/scan', handleScan(body=>scanSite(body?.url,{allowThreatContent:bo
 app.post('/api/scan/live',async(req,res,next)=>{
   if(activeScans>=8)return res.status(503).json({error:'سرویس مشغول است؛ کمی بعد دوباره تلاش کنید.'});
   activeScans++;
-  const emit=event=>{if(!res.destroyed){if(!res.headersSent)res.type('application/x-ndjson');res.write(JSON.stringify({event})+'\n');}};
+  // Keep the first validation notice buffered. If public-address validation
+  // fails, the client receives a proper HTTP 400 JSON error rather than a
+  // misleading successful stream containing an error row.
+  const pendingEvents=[];
+  const emit=event=>{if(res.destroyed)return;if(!res.headersSent&&event.phase==='url_validation'){pendingEvents.push(event);return;}if(!res.headersSent){res.type('application/x-ndjson');for(const pending of pendingEvents)res.write(JSON.stringify({event:pending})+'\n');pendingEvents.length=0;}res.write(JSON.stringify({event})+'\n');};
   try{const body=req.body||{};const result=await scanSite(body.url,{allowThreatContent:body.mode==='advanced',allowCloudPreview:body.mode==='advanced',browserMode:body.browserMode,onEvent:emit});if(!res.destroyed){if(!res.headersSent)res.type('application/x-ndjson');res.end(JSON.stringify({result})+'\n');}}
   catch(error){if(res.headersSent){if(!res.destroyed)res.end(JSON.stringify({error:error instanceof ScanError?error.message:'بررسی کامل نشد.'})+'\n');}else next(error);}
   finally{activeScans--;}

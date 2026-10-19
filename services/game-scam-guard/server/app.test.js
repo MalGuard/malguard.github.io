@@ -103,3 +103,9 @@ test('live scan route streams verified stage events before its final report',asy
   const server=app.listen(0,'127.0.0.1');await once(server,'listening');const base=`http://127.0.0.1:${server.address().port}`;
   try{const response=await fetch(`${base}/api/scan/live`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:'https://example.com',mode:'advanced'})});assert.equal(response.status,200);const rows=(await response.text()).trim().split('\n').map(JSON.parse);assert.equal(rows[0].event.phase,'url_validation');assert.equal(rows[1].event.phase,'cloud_browser_done');assert.equal(rows[2].result.preview.status,'done');}finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 });
+
+test('live validation failures retain their HTTP error status before any stream begins',async()=>{
+  const app=createApp({scanSite:async(_url,{onEvent})=>{onEvent({phase:'url_validation',message:'Validating the public website address'});throw new ScanError('Private addresses are blocked.',400);}});
+  const server=app.listen(0,'127.0.0.1');await once(server,'listening');const base=`http://127.0.0.1:${server.address().port}`;
+  try{const response=await fetch(`${base}/api/scan/live`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:'http://127.0.0.1/'})});assert.equal(response.status,400);assert.deepEqual(await response.json(),{error:'Private addresses are blocked.'});}finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+});
