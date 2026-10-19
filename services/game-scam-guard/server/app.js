@@ -70,7 +70,7 @@ const handleScan = operation => async (req,res) => {
     activeScans--;
   }
 };
-app.get('/api/health', (req,res)=>res.json({ status: 'ok', providers: {urlhaus:providerStatus().urlhaus}, mode: 'website-link-inspection', maxLinkedPages:128 }));
+app.get('/api/health', (req,res)=>res.json({ status: 'ok', providers: providerStatus(), mode: 'website-link-inspection', maxLinkedPages:128 }));
 app.get('/api/account-config',(req,res)=>{
   // This is Clerk's intentionally public browser identifier, never a secret key.
   const key=process.env.GUARD_CLERK_PUBLISHABLE_KEY||'';
