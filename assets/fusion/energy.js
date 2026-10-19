@@ -4,6 +4,17 @@
   'use strict';
   // Timing copied from the supplied Cinematic HTML. 0.06 at 60 Hz,
   // delay in [0, .5), cubic smoothstep over .5 of each scroll interval.
+  // In this isolated preview the field stops at the real original galaxy form (4).
+  // Any device that cannot sustain a live field still gets readable, static content.
+  const lowPower = matchMedia('(prefers-reduced-motion: reduce)').matches ||
+    navigator.connection?.saveData === true ||
+    (typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 2) ||
+    (typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 2);
+  if(lowPower){
+    document.body.classList.add('mg-static-field');
+    const surface=document.getElementById('c');if(surface)surface.hidden=true;
+    return;
+  }
   const particleSpeed=.92; // Subtle 8% reduction; shapes and scroll destinations stay unchanged.
   const referenceTiming={follow60:.06,particleDelay:.5,particleDuration:.5,
     revealThreshold:.35,wordStagger:.07,
@@ -15,7 +26,7 @@
   let canvas=document.getElementById('c'),gpu=tryGPU?window.createMalGuardFieldRenderer(canvas):null,ctx;
   function canvasFallback(){if(gpu){gpu.dispose();gpu=null;}const next=canvas.cloneNode(false);canvas.replaceWith(next);canvas=next;ctx=canvas.getContext('2d',{alpha:false});canvas.width=Math.round(W*D);canvas.height=Math.round(H*D);canvas.dataset.drawn='0';canvas.dataset.held='false';canvas.dataset.backend='recovering';ctx?.setTransform(D,0,0,D,0,0);active=Math.min(active,mobile?3000:5000);last=0;if(!drawing)requestStill();}
   if(!gpu){if(tryGPU){const next=canvas.cloneNode(false);canvas.replaceWith(next);canvas=next;}ctx=canvas.getContext('2d',{alpha:false});}
-  if(!gpu&&!ctx)return;
+  if(!gpu&&!ctx){document.body.classList.add('mg-static-field');canvas.hidden=true;return;}
   canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();canvasFallback();});
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const scenes=[...document.querySelectorAll('.scene[data-scene]')];
@@ -23,11 +34,11 @@
   let seed=71473;
   function rnd(){seed=(seed*16807)%2147483647;return(seed-1)/2147483646;}
   function gauss(){return(rnd()+rnd()+rnd()-1.5)/1.5;}
-  const weak=(navigator.hardwareConcurrency||4)<=4||(navigator.deviceMemory||8)<=4;
+  const weak=(navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=4;
   const mobile=matchMedia('(max-width:900px)').matches;
-  const N=gpu?(mobile?(weak?4600:6800):(weak?8500:14500)):(mobile?2800:5200);
+  const N=gpu?(mobile?(weak?1750:2600):(weak?3300:5000)):(mobile?(weak?850:1250):(weak?1650:2500));
   let compositionX=0,compositionY=0,compositionScale=0;
-  let active=N,W=0,H=0,D=1,anchors=[],target=0,P=0,scrollPosition=scrollY,raf=0,last=0,time=0,drawing=false,frames=0,measure=0,paused=false,visible=!document.hidden;
+  let active=N,W=0,H=0,D=1,anchors=[],target=0,P=0,scrollPosition=scrollY,raf=0,last=0,time=0,drawing=false,frames=0,measure=0,paused=false,visible=!document.hidden,wakeUntil=performance.now()+8400,slowFrames=0;
   const delay=new Float32Array(N),flow=new Float32Array(N*3),phases=new Float32Array(N);
   for(let i=0;i<N;i++){delay[i]=rnd()*referenceTiming.particleDelay;phases[i]=rnd()*TAU;for(let k=0;k<3;k++)flow[i*3+k]=gauss();}
   const shapes=[],hues=[];
@@ -71,44 +82,34 @@
   // Readability comes from continuous light falloff, never DOM-shaped black masks.
   function smooth(a,b,x){const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);}
   function resize(){
-    W=canvas.clientWidth;H=canvas.clientHeight;D=Math.min(devicePixelRatio||1,weak?1.5:2);
+    W=canvas.clientWidth;H=canvas.clientHeight;D=Math.min(devicePixelRatio||1,mobile?1.25:(weak?1.4:1.6));
     canvas.width=Math.round(W*D);canvas.height=Math.round(H*D);canvas.dataset.pixelRatio=String(D);ctx?.setTransform(D,0,0,D,0,0);
     updateAnchors();
     scroll();
   }
   function updateAnchors(){
+    // One section per visual beat; no artificial Lab/stack/product timeline remains.
+    const sections=[...document.querySelectorAll('.story .scene[data-scene]')];
     const top=el=>{let y=0;for(let node=el;node;node=node.offsetParent)y+=node.offsetTop;return y;};
-    const demo=document.getElementById('demo'),layers=document.getElementById('layers'),products=document.getElementById('products');
-    // The original reference mapping remains the module-loading fallback.
-    // In normal operation, shape and type share each measured reading hold.
-    const narrativeEnd=Math.max(1,top(document.querySelector('.after'))-H*.9);
-    const story=window.MalGuardParticleStory;
-    anchors=story?story.records.slice(0,5).flatMap(r=>[{y:r.start,v:r.index},{y:r.start+r.height*.54,v:r.index}]):Array.from({length:5},(_,v)=>({y:narrativeEnd*v/4,v}));
-    if(story)anchors.push({y:top(document.querySelector('.after')),v:5});
-    // Continue the same gradual timeline through our additional Lab / stack / logo.
-    // Each additional module retains its existing native scroll range.
-    const lab= Math.max(narrativeEnd+H,top(demo)+H*.35);
-    const graph=Math.max(lab+H*.75,top(demo)+demo.offsetHeight-H*.25);
-    const stack=Math.max(graph+H*.75,top(layers)+H*.5);
-    const product=Math.max(stack+H,top(products)-H*.35);
-    const work=Math.max(product+H,top(document.getElementById('inside-analysis'))-H*.25),tools=Math.max(work+H,top(document.getElementById('local-tools'))-H*.25),trust=Math.max(tools+H,top(document.getElementById('trust'))-H*.25);
-    const finale=Math.max(trust+H,top(scenes[5])-H*.35);
-    anchors.push({y:lab,v:5},{y:graph,v:6},{y:stack,v:7},{y:Math.max(stack,product-H*.8),v:7},{y:product,v:8},{y:Math.max(product,work-H*.7),v:8},{y:work,v:9},{y:Math.max(work,tools-H*.8),v:9},{y:tools,v:10},{y:tools+H*.6,v:11},{y:trust,v:12},{y:Math.max(trust,finale-H*1.175),v:12},{y:finale,v:13});
-    window.MalGuardParticles.timeline=anchors.map(h=>({...h}));
-    window.MalGuardParticles.narrativeEnd=narrativeEnd;
+    anchors=sections.map((scene,index)=>({
+      y:index===0?0:Math.max(0,top(scene)+scene.offsetHeight*.30-H*.46),
+      v:Math.min(4,index)
+    }));
+    for(let i=1;i<anchors.length;i++)anchors[i].y=Math.max(anchors[i].y,anchors[i-1].y+1);
+    window.MalGuardParticles && (window.MalGuardParticles.timeline=anchors.map(a=>({...a})));
   }
   function shapeAt(y){
     for(let i=0;i<anchors.length-1;i++){
       const a=anchors[i],b=anchors[i+1];
       if(y<=b.y){const p=Math.max(0,Math.min(1,(y-a.y)/Math.max(1,b.y-a.y)));return a.v+(b.v-a.v)*p;}
     }
-    return 13;
+    return 4;
   }
   function scroll(){
     const y=scrollY;target=shapeAt(y);
 
     const max=document.documentElement.scrollHeight-H;bar.style.width=`${Math.max(0,Math.min(100,y/Math.max(1,max)*100))}%`;
-    if(reduced.matches||paused)requestStill();
+    wakeUntil=performance.now()+380;requestStill();
   }
   function requestStill(){if(!raf&&visible)raf=requestAnimationFrame(draw);}
   function ease(t){return t*t*t*(t*(t*6-15)+10);}
@@ -120,7 +121,7 @@
     const elapsed=last?Math.min(250,ts-last):16,dt=Math.min(50,elapsed);last=ts;
     if(!staticMotion)time+=dt*particleSpeed;
     const start=performance.now();
-    if(ts-zonesAt>160){zonesAt=ts;textZones=[...document.querySelectorAll('.after h2,.after h3,.after p,.after a,.after button,.after .tag,.after .section-top,#layers .steps,#demo .lab-copy')].map(el=>el.getBoundingClientRect()).filter(r=>r.width>0&&r.height>0&&r.bottom>0&&r.top<H);}
+    if(ts-zonesAt>240){zonesAt=ts;textZones=[...document.querySelectorAll('.story .scene .t')].map(el=>el.getBoundingClientRect()).filter(r=>r.width>0&&r.height>0&&r.bottom>0&&r.top<H);}
     scrollPosition=staticMotion?scrollY:referenceTiming.follow(scrollPosition,scrollY,elapsed);
     if(Math.abs(scrollPosition-scrollY)<.05)scrollPosition=scrollY;
     P=shapeAt(scrollPosition);
@@ -141,19 +142,19 @@
     canvas.dataset.introComplete=String(introComplete);
     gpu?.begin();if(ctx){ctx.globalCompositeOperation='source-over';ctx.fillStyle='#020409';ctx.fillRect(0,0,W,H);ctx.globalCompositeOperation='lighter';}
     const wide=W>900||(W>650&&H<550);
-    const finalWeight=smooth(12.35,13,P);
-    const chamberRect=document.getElementById('sc3').getBoundingClientRect();
-    const layerRect=document.getElementById('layers').getBoundingClientRect(),rightCopy=wide&&layerRect.top<H*.3&&layerRect.bottom>H*.7;
+    const finalWeight=0;
+    const chamberRect={left:-100000,top:-100000,width:1,height:1};
+    const rightCopy=false;
     const readingRecord=window.MalGuardParticleStory?.records[Math.min(4,Math.round(P))];
     const readingTop=readingRecord?parseFloat(readingRecord.copy.style.getPropertyValue('--reading-top')):H*.52;
     const readingOnRight=readingRecord&&readingRecord.copy.getBoundingClientRect().left>W*.35;
     const skyTop=(document.querySelector('nav')?.getBoundingClientRect().bottom||70)+24;
     const skyBottom=Math.max(skyTop+90,readingTop-28);
     const shortTouch=W<=900&&H<=700;
-    const narrative=P<4.01,beat=Math.min(4,Math.round(P)),portal=narrative&&beat===0,lowWide=wide&&H<750;
-    const goalX=shortTouch?W*(readingOnRight?.18:.82):W*(wide?(narrative?(portal?.5:beat===2||beat===4?(lowWide?.82:.53):beat===3?.80:.76):(rightCopy||readingOnRight?.27:.70+finalWeight*.03)):.5);
-    const goalY=shortTouch?H*.36:wide?(narrative?(beat===2||beat===4?(lowWide?H*.5:H*(beat===4?.90:.83)):H*.5):H*.5):(skyTop+skyBottom)*.5;
-    const immersiveScale=shortTouch?Math.min(W*.07,H*.12):wide?(narrative?(portal?Math.min(W*.25,H*.31):beat===2||beat===4?(lowWide?Math.min(W*.10,H*.12):Math.min(W*.18,H*(beat===4?.24:.29))):beat===3?Math.min(W*.20,H*.21):Math.min(W*.26,H*.25)):Math.min(W*.31,H*.27)):Math.min(W*(portal?.24:.26),(skyBottom-skyTop)/(beat===1?4.3:3.8));
+    const narrative=true,beat=Math.min(4,Math.round(P)),portal=beat===0;
+    const goalX=wide?W*(portal?.57:.76):W*.5;
+    const goalY=wide?H*.47:H*.265;
+    const immersiveScale=wide?Math.min(W*.20,H*.27):Math.min(W*.26,H*.20);
     const finalScale=wide?Math.min(W*.22,H*.28):Math.min(W*.33,H*.26);
     const goalScale=immersiveScale+(finalScale-immersiveScale)*finalWeight;
     const settle=staticMotion?1:1-Math.exp(-elapsed/100);
@@ -288,10 +289,19 @@
     canvas.dataset.quadrants=String(quadrants);canvas.dataset.readingHits=String(readingHits);canvas.dataset.depthMode='volumetric';canvas.dataset.backend=gpu?'webgl':'canvas';
     const cost=performance.now()-start;frames++;measure+=cost;
     // Adapt once per 90 frames. No new arrays, no particle identity changes.
-    if(frames>=90){if(measure/frames>12){active=Math.max(Math.floor(gpu?N*.65:Math.min(N*.55,mobile?2200:3500)),Math.floor(active*.9));}frames=0;measure=0;}
+    if(cost>45)slowFrames++;else slowFrames=Math.max(0,slowFrames-1);
+    if(slowFrames>=7){
+      canvas.style.display='none';document.body.classList.add('mg-static-field');
+      gpu?.dispose();gpu=null;drawing=false;return;
+    }
+    if(frames>=45){if(measure/frames>12){active=Math.max(Math.floor(N*.52),Math.floor(active*.87));}frames=0;measure=0;}
     canvas.dataset.phase=Number.isInteger(target)?'hold':'morph';canvas.dataset.held=String(Number.isInteger(target)&&P===target);
-    canvas.dataset.renderer='volumetric-light-field';canvas.dataset.form=names[Math.round(P)];canvas.dataset.formCount='14';canvas.dataset.blackMasks='0';canvas.dataset.filaments=String(narrative?1:0);canvas.dataset.scene=P.toFixed(3);canvas.dataset.target=target.toFixed(3);canvas.dataset.particles=String(active);canvas.dataset.drawn=String(drawn);canvas.dataset.masked='0';canvas.dataset.underText=String(underText);canvas.dataset.frameMs=cost.toFixed(2);canvas.dataset.logoReady=String(logoReady);
-    drawing=false;if(!staticMotion)raf=requestAnimationFrame(draw);
+    canvas.dataset.renderer='volumetric-light-field';canvas.dataset.form=names[Math.round(P)];canvas.dataset.formCount='5';canvas.dataset.blackMasks='0';canvas.dataset.filaments=String(narrative?1:0);canvas.dataset.scene=P.toFixed(3);canvas.dataset.target=target.toFixed(3);canvas.dataset.particles=String(active);canvas.dataset.drawn=String(drawn);canvas.dataset.masked='0';canvas.dataset.underText=String(underText);canvas.dataset.frameMs=cost.toFixed(2);canvas.dataset.logoReady=String(logoReady);
+    drawing=false;
+    // Draw only during opening and actual scroll transitions. Stop when the visitor stops.
+    if(!staticMotion && (document.body.dataset.intro==='assembling' || performance.now()<wakeUntil || Math.abs(scrollPosition-scrollY)>.15)){
+      raf=requestAnimationFrame(draw);
+    }
   }
   let logoReady=false;
   const logo=new Image();
