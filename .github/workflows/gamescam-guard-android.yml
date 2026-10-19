@@ -1,0 +1,34 @@
+name: Build GameScam Guard Android test APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'apps/gamescam-guard-android/**'
+      - '.github/workflows/gamescam-guard-android.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  debug-apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/gamescam-guard-android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android platform
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Build debug APK
+        run: ./gradlew --no-daemon :app:assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gamescam-guard-android-debug
+          path: apps/gamescam-guard-android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

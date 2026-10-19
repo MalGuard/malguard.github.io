@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import { readFile, stat } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+const root=path.dirname(fileURLToPath(import.meta.url));
+const read=relative=>readFile(path.join(root,relative),'utf8');
+const exists=relative=>stat(path.join(root,relative));
+const manifest=await read('app/src/main/AndroidManifest.xml');
+const activity=await read('app/src/main/java/site/malguard/gamescamguard/MainActivity.java');
+const workflow=await read('../../.github/workflows/gamescam-guard-android.yml');
+const wrapper=await read('gradle/wrapper/gradle-wrapper.properties');
+assert.match(manifest,/android:usesCleartextTraffic="false"/);
+assert.match(manifest,/android:allowBackup="false"/);
+assert.match(manifest,/android:networkSecurityConfig="@xml\/network_security_config"/);
+assert.match(activity,/setAllowFileAccess\(false\)/);
+assert.match(activity,/setAllowContentAccess\(false\)/);
+assert.match(activity,/MIXED_CONTENT_NEVER_ALLOW/);
+assert.match(activity,/startSafeBrowsing/);
+assert.match(activity,/malguard\.site/);
+assert.match(activity,/game-scam-guard-connected\.vercel\.app/);
+assert.match(workflow,/:app:assembleDebug/);
+assert.match(workflow,/actions\/upload-artifact@v4/);
+assert.match(wrapper,/distributionSha256Sum=[a-f0-9]{64}/);
+for (const asset of ['gradlew','gradle/wrapper/gradle-wrapper.jar','app/src/main/res/drawable-nodpi/gamescam_guard_icon.png','app/src/main/res/mipmap-xxxhdpi/ic_launcher.png']) await exists(asset);
+console.log('PASS: Android project security settings, Gradle wrapper, workflow and icon assets are present.');
