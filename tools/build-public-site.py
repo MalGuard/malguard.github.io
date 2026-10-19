@@ -3,6 +3,7 @@ from pathlib import Path
 import json,shutil,subprocess,sys
 root=Path(__file__).resolve().parents[1]
 subprocess.run([sys.executable,str(root/'tests/validate-site.py')],check=True)
+subprocess.run([sys.executable,str(root/'tests/test-galaxy-preview.py')],check=True)
 out=root/'_site'
 if out.exists():shutil.rmtree(out)
 out.mkdir()
