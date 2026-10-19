@@ -5,9 +5,10 @@ import { renderPreview } from './browser.js';
 import { urlhausAuthKey, lookupUrl } from './threat-intel.js';
 import { reportTokens } from './report-token.js';
 import { inspectSite } from './site-analysis.js';
+import { remoteProviderStatus, startBrowserbaseLive, fetchWithTinyFish } from './remote-browser.js';
 const riskyTerms = /crack|keygen|cheat|unlimited\s*(coins|gems)|free\s*(coins|gems)|کرک|چیت|سکه\s*نامحدود|جم\s*رایگان/i;
 const sessions = new Map();
-export const providerStatus = () => ({ urlhaus: Boolean(urlhausAuthKey()) });
+export const providerStatus = () => ({ urlhaus: Boolean(urlhausAuthKey()), ...remoteProviderStatus() });
 
 // Retry only transient page failures, once, within a single overall budget.
 export async function fetchSitePage(url,{transport=fetchPublic,signal,totalTimeout=22000,timeout=11000,now=Date.now}={}) {
@@ -63,7 +64,7 @@ export function parsePage(bytes, baseUrl, headers = {}) {
   return { title, description, headings, excerpt: pageText, files: files.slice(0, 128), fileCount: files.length, linkCount: $('a[href]').length, signals, contentType: headers['content-type'] || 'نامشخص',siteAnalysis:{...independent.siteAnalysis,htmlSha256:createHash('sha256').update(bytes).digest('hex'),receivedBytes:bytes.length},linkInventory:independent.linkInventory };
 }
 
-export async function scanSite(input,{transport=fetchPublic,lookup=lookupUrl,preview=renderPreview,validate=resolvePublic,pageOptions={},allowThreatContent=false,allowCloudPreview=false,onEvent=()=>{}}={}) {
+export async function scanSite(input,{transport=fetchPublic,lookup=lookupUrl,preview=renderPreview,validate=resolvePublic,pageOptions={},allowThreatContent=false,allowCloudPreview=false,browserMode='isolated',browserbase=startBrowserbaseLive,tinyfish=fetchWithTinyFish,onEvent=()=>{}}={}) {
   const requested = normalizeUrl(input);
   onEvent({phase:'url_validation',message:'Validating the public website address'});
   // Reject private/local addresses before any provider request. A DNS outage is
@@ -99,14 +100,33 @@ export async function scanSite(input,{transport=fetchPublic,lookup=lookupUrl,pre
   if ([intel.status, finalIntel.status].includes('listed')) evidence.signals.unshift({ level: 'danger', title: 'لینک در پایگاه تهدید گزارش شده', detail: 'URLhaus برای لینک اولیه یا مقصد نهایی گزارش تهدید دارد. از دانلود و پرداخت خودداری کنید.' });
   if (page.redirects.some(r => new URL(r.from).hostname !== new URL(r.to).hostname)) evidence.signals.push({ level: 'warning', title: 'انتقال به دامنهٔ دیگر', detail: 'لینک به یک دامنهٔ دیگر منتقل شد. آدرس نهایی را پیش از خرید کنترل کنید.' });
   const status = evidence.signals.some(s=>s.level==='danger') ? 'danger' : evidence.statusOverride || (evidence.signals.some(s=>s.level==='warning') ? 'warning' : 'limited');
-  if(isHtml && status !== 'danger' && allowCloudPreview)onEvent({phase:'cloud_browser',message:'Rendering an isolated cloud-browser snapshot'});
-  const image = isHtml && status !== 'danger' && allowCloudPreview ? await preview(page.url, page.bytes) : {status:'skipped',detail:isHtml ? 'Cloud-browser preview is available after you choose Advanced website scan.' : 'No browser preview is created for a direct file link.'};
-  if(image.status==='done')onEvent({phase:'cloud_browser_done',message:'Isolated browser snapshot is ready'});
-  else if(isHtml && allowCloudPreview)onEvent({phase:'cloud_browser_unavailable',message:'The isolated browser preview was unavailable; HTML evidence is still shown'});
+  const remote = { browserbase: {status:'not_requested'}, tinyfish: {status:'not_requested'} };
+  let image = {status:'skipped',detail:isHtml ? 'Cloud-browser preview is available after you choose Advanced website scan.' : 'No browser preview is created for a direct file link.'};
+  // A known threat never receives an external browser run. For public HTML with
+  // no known threat, the owner-selected source can collect additional evidence.
+  if (isHtml && status !== 'danger' && allowCloudPreview && browserMode === 'browserbase') {
+    onEvent({phase:'browserbase_starting',message:'Starting a view-only Browserbase session for the public page'});
+    remote.browserbase = await browserbase(page.url,{onLiveReady:({liveUrl})=>onEvent({phase:'browserbase_live',message:'Live Browserbase view is ready',liveUrl})});
+    if (remote.browserbase.status === 'done') onEvent({phase:'browserbase_done',message:'Browserbase loaded the public page with restricted navigation'});
+    else onEvent({phase:'browserbase_unavailable',message:remote.browserbase.detail});
+  }
+  if (isHtml && status !== 'danger' && allowCloudPreview && browserMode === 'tinyfish') {
+    onEvent({phase:'tinyfish_fetch',message:'Requesting read-only TinyFish page evidence'});
+    remote.tinyfish = await tinyfish(page.url);
+    onEvent({phase:remote.tinyfish.status === 'done' ? 'tinyfish_done' : 'tinyfish_unavailable',message:remote.tinyfish.status === 'done' ? 'TinyFish returned public page evidence' : remote.tinyfish.detail});
+  }
+  if (isHtml && status !== 'danger' && allowCloudPreview && remote.browserbase.status !== 'done' && browserMode !== 'tinyfish') {
+    onEvent({phase:'cloud_browser',message:'Rendering an isolated cloud-browser snapshot'});
+    image = await preview(page.url, page.bytes);
+    if(image.status==='done')onEvent({phase:'cloud_browser_done',message:'Isolated browser snapshot is ready'});
+    else onEvent({phase:'cloud_browser_unavailable',message:'The isolated browser preview was unavailable; HTML evidence is still shown'});
+  }
   const id = randomUUID();
-  const result = { id, url: requested.href, finalUrl: page.url, domain: new URL(page.url).hostname, createdAt: new Date().toISOString(), status, ...evidence, preview:image, redirects: page.redirects, reputation: intel, finalReputation: finalIntel, advanced: false,inputAdjusted,pageFetch:{status:'done',attempts:page.attempts},
+  const result = { id, url: requested.href, finalUrl: page.url, domain: new URL(page.url).hostname, createdAt: new Date().toISOString(), status, ...evidence, preview:image, remote, redirects: page.redirects, reputation: intel, finalReputation: finalIntel, advanced: false,inputAdjusted,pageFetch:{status:'done',attempts:page.attempts},
     checks: [{ title: isHtml ? 'دریافت محتوای سایت' : 'مشاهدهٔ سرآیند لینک مستقیم فایل', status: 'done', detail: isHtml ? `HTTP ${page.status} · ${(page.bytes.length/1024).toFixed(1)} KB` : `HTTP ${page.status} · The file was not retrieved or analyzed in GameScam Guard.` }, { title: 'بررسی ارتباط', status: 'done', detail: new URL(page.url).protocol === 'https:' ? 'HTTPS · اعتبارسنجی گواهی انجام شد' : 'HTTP · بدون رمزگذاری' }, { title: 'بررسی نشانه‌های صفحه', status: 'done', detail: `${evidence.linkCount} لینک در HTML دریافت‌شده بررسی شد` }, { title: 'استعلام URLhaus', status: ['listed','not_found'].includes(intel.status) ? 'done' : 'unavailable', detail: intel.message }],
     limitations: ['این بررسی محتوای عمومی HTML را می‌خواند؛ در پیش‌نمایش مرورگر، جاوااسکریپت، ورود، خرید و دانلود خودکار غیرفعال هستند.', 'عدم مشاهدهٔ تهدید به معنی تأیید اصالت فروشنده یا تضمین امنیت نیست.', 'Direct file links are not retrieved or analyzed here; use GTA Guard for files.'] };
   if (result.siteAnalysis) result.checks.splice(3,0,{title:'تحلیل مستقل محتوای HTML',status:'done',detail:`موتور ${result.siteAnalysis.version} · فرم‌ها، منابع اسکریپت، انتقال HTML و فهرست لینک‌ها بررسی شدند؛ جاوااسکریپت اجرا نشده است.`});
+  if (remote.browserbase.status !== 'not_requested') result.checks.push({title:'Browserbase Live',status:remote.browserbase.status==='done'?'done':'unavailable',detail:remote.browserbase.detail});
+  if (remote.tinyfish.status !== 'not_requested') result.checks.push({title:'TinyFish Fetch',status:remote.tinyfish.status==='done'?'done':'unavailable',detail:remote.tinyfish.detail});
   return rememberSite(result);
 }

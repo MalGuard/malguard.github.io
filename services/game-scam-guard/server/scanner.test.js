@@ -45,9 +45,9 @@ test('HTTP and suspicious claims create caution signals without claiming a malwa
   assert.equal(evidence.signals.some(s=>s.title==='فرم ورود شناسایی شد'),true);
 });
 
-test('website provider status exposes only URLhaus', () => {
+test('website provider status exposes URLhaus and optional remote evidence sources without keys', () => {
   assert.equal(typeof providerStatus().urlhaus,'boolean');
-  assert.deepEqual(Object.keys(providerStatus()),['urlhaus']);
+  assert.deepEqual(Object.keys(providerStatus()),['urlhaus','browserbase','tinyfish']);
 });
 
 const sampleHash = 'a'.repeat(64);
@@ -123,7 +123,7 @@ test('original GTA credential variable is compatible and the new variable takes 
     delete process.env.ABUSECH_AUTH_KEY;
     process.env.MALGUARD_ABUSECH_AUTH_KEY='legacy-fixture';
     assert.equal(abuseAuthKey(),'legacy-fixture');
-    assert.deepEqual(providerStatus(),{urlhaus:true});
+    assert.deepEqual(providerStatus(),{urlhaus:true,browserbase:false,tinyfish:false});
     process.env.ABUSECH_AUTH_KEY='new-fixture';
     assert.equal(abuseAuthKey(),'new-fixture');
   } finally {
@@ -145,7 +145,7 @@ test('a separate MalwareBazaar key authenticates hash queries without replacing 
   try {
     for (const key of keys) delete process.env[key];
     process.env.MALWAREBAZAAR_AUTH_KEY = 'bazaar-fixture';
-    assert.deepEqual(providerStatus(),{urlhaus:false});
+    assert.deepEqual(providerStatus(),{urlhaus:false,browserbase:false,tinyfish:false});
     let sent;
     const client = createBazaarClient({fetchImpl:async (url,request)=> {
       sent = request.headers['Auth-Key'];
@@ -195,9 +195,9 @@ test('URLhaus can explicitly reuse the existing abuse.ch Bazaar key without chan
     assert.equal(process.env.ABUSECH_AUTH_KEY,'original-fixture');
     assert.equal(malwareBazaarAuthKey(),'valid-shared-fixture');
     delete process.env.ABUSECH_AUTH_KEY;
-    assert.deepEqual(providerStatus(),{urlhaus:true});
+    assert.deepEqual(providerStatus(),{urlhaus:true,browserbase:false,tinyfish:false});
     delete process.env.MALWAREBAZAAR_AUTH_KEY;
-    assert.deepEqual(providerStatus(),{urlhaus:false});
+    assert.deepEqual(providerStatus(),{urlhaus:false,browserbase:false,tinyfish:false});
     process.env.ABUSECH_AUTH_KEY='original-fixture';
     assert.equal(urlhausAuthKey(),undefined,'Explicit source never silently substitutes another secret');
     delete process.env.URLHAUS_AUTH_KEY_SOURCE;
@@ -243,4 +243,14 @@ test('cloud browser preview requires the explicit advanced website selection',as
   let previews=0;const options={validate:async()=>{},lookup:async()=>({status:'not_found',message:'No known URLhaus report; this is not a safety guarantee.'}),transport:async()=>({status:200,headers:{'content-type':'text/html'},bytes:Buffer.from('<title>Preview fixture</title>'),url:'https://preview.example/',redirects:[]}),preview:async()=>{previews++;return {status:'done',image:'data:image/jpeg;base64,fixture',detail:'Fixture'};}};
   const basic=await (await import('./scanner.js')).scanSite('https://preview.example/',options);assert.equal(basic.preview.status,'skipped');assert.equal(previews,0);
   const advanced=await (await import('./scanner.js')).scanSite('https://preview.example/',{...options,allowCloudPreview:true});assert.equal(advanced.preview.status,'done');assert.equal(previews,1);
+});
+
+test('known threats never start Browserbase or TinyFish, while unknown public HTML may request the selected source', async()=>{
+  const page={status:200,headers:{'content-type':'text/html'},bytes:Buffer.from('<title>Public fixture</title>'),url:'https://public.example/',redirects:[]};
+  let browserbase=0,tinyfish=0;
+  const known=await (await import('./scanner.js')).scanSite(page.url,{validate:async()=>{},allowCloudPreview:true,browserMode:'browserbase',lookup:async()=>({status:'listed',message:'Known fixture threat'}),transport:async()=>page,browserbase:async()=>{browserbase++;return {status:'done'};},tinyfish:async()=>{tinyfish++;return {status:'done'};}});
+  assert.equal(known.status,'danger');assert.equal(browserbase,0);assert.equal(tinyfish,0);
+  const events=[];
+  const unknown=await (await import('./scanner.js')).scanSite(page.url,{validate:async()=>{},allowCloudPreview:true,browserMode:'browserbase',lookup:async()=>({status:'not_found',message:'No known URLhaus report; this is not a safety guarantee.'}),transport:async()=>page,browserbase:async(_url,{onLiveReady})=>{browserbase++;onLiveReady({liveUrl:'https://live.example/view'});return {status:'done',provider:'browserbase',liveUrl:'https://live.example/view',detail:'Fixture live view'};},onEvent:event=>events.push(event)});
+  assert.equal(browserbase,1);assert.equal(unknown.remote.browserbase.status,'done');assert.equal(unknown.preview.status,'skipped');assert.equal(events.some(event=>event.liveUrl==='https://live.example/view'),true);
 });

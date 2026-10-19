@@ -86,12 +86,12 @@ app.post('/api/auth/start',async(req,res,next)=>{try{res.json(await emailAuth.st
 app.post('/api/auth/verify',async(req,res,next)=>{try{res.json(await emailAuth.verify({verificationToken:req.body?.verificationToken,code:req.body?.code}));}catch(error){next(error);}});
 app.post('/api/auth/password',async(req,res,next)=>{try{res.json(await emailAuth.passwordSignIn({emailAddress:req.body?.email,password:req.body?.password}));}catch(error){next(error);}});
 app.post('/api/auth/session',(req,res,next)=>{try{res.json(emailAuth.session({sessionToken:req.body?.sessionToken}));}catch(error){next(error);}});
-app.post('/api/scan', handleScan(body=>scanSite(body?.url,{allowThreatContent:body?.mode==='advanced',allowCloudPreview:body?.mode==='advanced'})));
+app.post('/api/scan', handleScan(body=>scanSite(body?.url,{allowThreatContent:body?.mode==='advanced',allowCloudPreview:body?.mode==='advanced',browserMode:body?.browserMode})));
 app.post('/api/scan/live',async(req,res,next)=>{
   if(activeScans>=8)return res.status(503).json({error:'سرویس مشغول است؛ کمی بعد دوباره تلاش کنید.'});
   activeScans++;
   const emit=event=>{if(!res.destroyed){if(!res.headersSent)res.type('application/x-ndjson');res.write(JSON.stringify({event})+'\n');}};
-  try{const body=req.body||{};const result=await scanSite(body.url,{allowThreatContent:body.mode==='advanced',allowCloudPreview:body.mode==='advanced',onEvent:emit});if(!res.destroyed){if(!res.headersSent)res.type('application/x-ndjson');res.end(JSON.stringify({result})+'\n');}}
+  try{const body=req.body||{};const result=await scanSite(body.url,{allowThreatContent:body.mode==='advanced',allowCloudPreview:body.mode==='advanced',browserMode:body.browserMode,onEvent:emit});if(!res.destroyed){if(!res.headersSent)res.type('application/x-ndjson');res.end(JSON.stringify({result})+'\n');}}
   catch(error){if(res.headersSent){if(!res.destroyed)res.end(JSON.stringify({error:error instanceof ScanError?error.message:'بررسی کامل نشد.'})+'\n');}else next(error);}
   finally{activeScans--;}
 });
