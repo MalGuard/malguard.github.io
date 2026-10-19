@@ -19,9 +19,9 @@ test('first-party Pages origins receive narrow CORS while other origins are reje
   } finally { if(prior===undefined)delete process.env.GUARD_CLERK_PUBLISHABLE_KEY;else process.env.GUARD_CLERK_PUBLISHABLE_KEY=prior;server.closeAllConnections();await new Promise(resolve=>server.close(resolve)); }
 });
 
-test('health reports optional remote evidence availability without returning provider keys', async () => {
-  const app=createApp({providerStatus:()=>({urlhaus:true,browserbase:true,tinyfish:false})});const server=app.listen(0,'127.0.0.1');await once(server,'listening');
-  try { const response=await fetch(`http://127.0.0.1:${server.address().port}/api/health`);assert.equal(response.status,200);assert.deepEqual((await response.json()).providers,{urlhaus:true,browserbase:true,tinyfish:false}); }
+test('health reports URLhaus availability without exposing configuration values', async () => {
+  const app=createApp({providerStatus:()=>({urlhaus:true})});const server=app.listen(0,'127.0.0.1');await once(server,'listening');
+  try { const response=await fetch(`http://127.0.0.1:${server.address().port}/api/health`);assert.equal(response.status,200);assert.deepEqual((await response.json()).providers,{urlhaus:true}); }
   finally {server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 });
 
