@@ -9,7 +9,7 @@
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const duration=7700,clamp=(n,a=0,b=1)=>Math.min(b,Math.max(a,n));
   const smooth=(a,b,n)=>{const v=clamp((n-a)/(b-a));return v*v*v*(v*(v*6-15)+10);};
-  const weak=()=>innerWidth<=600||innerHeight<500||(navigator.deviceMemory||8)<=2||(navigator.hardwareConcurrency||8)<4||navigator.connection?.saveData;
+  const weak=()=>innerWidth<=600||innerHeight<500||(navigator.deviceMemory||8)<=4||(navigator.hardwareConcurrency||8)<=4||navigator.connection?.saveData;
   let elapsed=0,complete=false,raf=0,last=0,renderer=null,projection=null,loading=false,disposed=false,generation=0;
   let mode='css',failure='',lastMetrics=null,scriptPromise=null,frameCount=0,caption=-1,frameDelta=16,slowFrames=0,qualityFallback='',performanceLimited=false;
   const cleanups=[];
