@@ -82,7 +82,7 @@ app.get('/api/account-config',(req,res)=>{
   const configured=/^pk_(test|live)_[A-Za-z0-9]+$/.test(key)&&key.length<1024;
   res.json({provider:'clerk',configured,publishableKey:configured?key:null});
 });
-app.get('/api/auth/status',(req,res)=>res.json({provider:'first-party-email',configured:emailAuth.enabled,...emailAuth.status,google:{configured:emailAuth.enabled&&googleAuth.enabled}}));
+app.get('/api/auth/status',(req,res)=>res.json({provider:'first-party-email',configured:emailAuth.enabled,...emailAuth.status,google:{...googleAuth.status,configured:emailAuth.enabled&&googleAuth.enabled}}));
 app.get('/api/auth/google/start',(req,res,next)=>{try{if(!emailAuth.enabled)throw Object.assign(new Error('Google sign-in is not ready yet.'),{status:503});res.redirect(302,googleAuth.start());}catch(error){next(error);}});
 app.get('/api/auth/google/callback',async(req,res)=>{try{const profile=await googleAuth.complete({state:req.query?.state,code:req.query?.code,error:req.query?.error});const result=await emailAuth.googleAccount(profile);const fragment=result.kind==='session'?`guard-session=${encodeURIComponent(result.sessionToken)}`:`guard-google-signup=${encodeURIComponent(result.signupToken)}`;res.redirect(302,`${appOrigin}#${fragment}`);}catch(error){res.redirect(302,`${appOrigin}#guard-auth-error=${encodeURIComponent(error.message||'Google sign-in could not be completed.')}`);}});
 app.post('/api/auth/google/complete-signup',async(req,res,next)=>{try{res.json(await emailAuth.completeGoogleSignup({signupToken:req.body?.signupToken,profile:req.body?.profile}));}catch(error){next(error);}});
