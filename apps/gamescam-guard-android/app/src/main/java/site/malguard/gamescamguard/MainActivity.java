@@ -3,6 +3,7 @@ package site.malguard.gamescamguard;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -37,8 +38,8 @@ public final class MainActivity extends Activity {
         settings.setMediaPlaybackRequiresUserGesture(true);
         settings.setGeolocationEnabled(false);
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) webView.startSafeBrowsing(result -> { });
-        if (BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) WebView.startSafeBrowsing(this, result -> { });
+        if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) WebView.setWebContentsDebuggingEnabled(true);
         webView.setWebViewClient(new GuardWebClient());
         setContentView(webView);
         webView.loadUrl(HOME_URL);
