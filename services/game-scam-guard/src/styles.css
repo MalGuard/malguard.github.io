@@ -49,3 +49,4 @@
 /* Header controls are reachable on touch devices as well as with a mouse. */
 .profile-button,.locale-button{min-height:44px}.profile-button{padding-block:5px}
 .account-modal{max-height:calc(100dvh - 32px);overflow-y:auto}
+.google-button{width:100%;min-height:44px;border:1px solid #d6ded7;border-radius:12px;background:#fff;color:#183126;font:inherit;font-weight:800;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}.google-button b{color:#4285f4;font-size:19px}.social-divider{display:flex;align-items:center;gap:10px;color:#7b897e;font-size:.8rem;margin:13px 0}.social-divider span{height:1px;background:#e1e8e2;flex:1}
