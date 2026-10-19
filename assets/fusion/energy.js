@@ -9,7 +9,9 @@
   const lowPower = matchMedia('(prefers-reduced-motion: reduce)').matches ||
     navigator.connection?.saveData === true ||
     (typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 2) ||
-    (typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 2);
+    (typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 2) ||
+    (innerWidth > 900 && ((typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 4) ||
+      (typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 4)));
   if(lowPower){
     document.body.classList.add('mg-static-field');
     const surface=document.getElementById('c');if(surface)surface.hidden=true;
