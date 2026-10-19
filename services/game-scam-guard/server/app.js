@@ -50,7 +50,7 @@ app.use('/api/auth', (req,res,next) => {
   for(const [ip,item] of authRates)if(item.until<now)authRates.delete(ip);
   next();
 });
-app.use(['/api/scan','/api/jobs'], (req, res, next) => {
+app.use(['/api/scan','/api/scan/live','/api/jobs'], (req, res, next) => {
   const now = Date.now(); const key = `${req.ip}|${req.originalUrl.startsWith('/api/jobs/')?'job':'normal'}`;
   const rate = rates.get(key);
   if (!rate || rate.until < now) rates.set(key, { count: 1, until: now + 60000 });
@@ -87,6 +87,14 @@ app.post('/api/auth/verify',async(req,res,next)=>{try{res.json(await emailAuth.v
 app.post('/api/auth/password',async(req,res,next)=>{try{res.json(await emailAuth.passwordSignIn({emailAddress:req.body?.email,password:req.body?.password}));}catch(error){next(error);}});
 app.post('/api/auth/session',(req,res,next)=>{try{res.json(emailAuth.session({sessionToken:req.body?.sessionToken}));}catch(error){next(error);}});
 app.post('/api/scan', handleScan(body=>scanSite(body?.url,{allowThreatContent:body?.mode==='advanced',allowCloudPreview:body?.mode==='advanced'})));
+app.post('/api/scan/live',async(req,res,next)=>{
+  if(activeScans>=8)return res.status(503).json({error:'سرویس مشغول است؛ کمی بعد دوباره تلاش کنید.'});
+  activeScans++;
+  const emit=event=>{if(!res.destroyed){if(!res.headersSent)res.type('application/x-ndjson');res.write(JSON.stringify({event})+'\n');}};
+  try{const body=req.body||{};const result=await scanSite(body.url,{allowThreatContent:body.mode==='advanced',allowCloudPreview:body.mode==='advanced',onEvent:emit});if(!res.destroyed){if(!res.headersSent)res.type('application/x-ndjson');res.end(JSON.stringify({result})+'\n');}}
+  catch(error){if(res.headersSent){if(!res.destroyed)res.end(JSON.stringify({error:error instanceof ScanError?error.message:'بررسی کامل نشد.'})+'\n');}else next(error);}
+  finally{activeScans--;}
+});
 app.post('/api/jobs/start',handleScan(body=>startJob(body)));
 app.post('/api/jobs/step',async(req,res,next)=>{
   if(activeScans>=8)return res.status(503).json({error:'سرویس مشغول است؛ کمی بعد دوباره تلاش کنید.'});

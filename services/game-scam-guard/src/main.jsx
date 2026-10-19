@@ -99,12 +99,23 @@ function App() {
     if (!response.ok) throw new Error(data.error || 'بررسی انجام نشد.');
     return data;
   }
+  async function callLiveScan(body) {
+    let response;
+    try { response=await fetch(apiUrl('scan/live'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); }
+    catch { throw new Error('اتصال به سرویس بررسی برقرار نشد. اتصال اینترنت را بررسی و دوباره تلاش کنید.'); }
+    if(!response.ok){let data={};try{data=await response.json();}catch{}throw new Error(data.error||'بررسی انجام نشد.');}
+    if(!response.body)throw new Error('نمای زندهٔ بررسی در این مرورگر در دسترس نیست.');
+    const reader=response.body.getReader(),decoder=new TextDecoder();let text='',result;
+    const line=value=>{if(!value.trim())return;const data=JSON.parse(value);if(data.error)throw new Error(data.error);if(data.event)setScanEvents(events=>[...events,data.event].slice(-8));if(data.result)result=data.result;};
+    for(;;){const {done,value}=await reader.read();if(done)break;text+=decoder.decode(value,{stream:true});let index;while((index=text.indexOf('\n'))!==-1){line(text.slice(0,index));text=text.slice(index+1);}}
+    text+=decoder.decode();if(text.trim())line(text);if(!result)throw new Error('پاسخ کامل بررسی دریافت نشد.');return result;
+  }
   async function runScan(event, link = url) {
     event?.preventDefault(); if (busy || advancedBusy) return;
     if (!link.trim()) { setError('اول لینک سایت را وارد کنید.'); inputRef.current?.focus(); return; }
-    setBusy(true); setError(''); setResult(null);
+    setBusy(true); setError(''); setResult(null);setScanEvents([]);
     try {
-      const data = await callApi('scan',{url:link.trim(),mode}); setResult(data); setUrl(data.url); remember(data); setNotifications(true);
+      const data = await callLiveScan({url:link.trim(),mode}); setResult(data); setUrl(data.url); remember(data); setNotifications(true);
       if(data.inputAdjusted)setToast('نشانهٔ اضافی متن کپی‌شده از ابتدا یا انتهای لینک حذف شد.');
       setTimeout(()=>reportRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),100);
       if (mode === 'advanced' && data.linkInventory?.links?.some(link=>link.kind==='page')) setModal('advanced');
@@ -181,7 +192,7 @@ function App() {
             <div className="scan-card">
               <div className="scan-tabs" role="tablist" aria-label="Scan type"><button role="tab" aria-selected={mode==='basic'} className={mode==='basic'?'selected':''} onClick={()=>setMode('basic')} disabled={busy||advancedBusy}><Link2 size={18}/>Website scan</button><button role="tab" aria-selected={mode==='advanced'} className={mode==='advanced'?'selected':''} onClick={()=>setMode('advanced')} disabled={busy||advancedBusy}><Globe2 size={18}/>Advanced website scan<span className="tiny-tag">public pages</span></button></div>
               <form onSubmit={runScan} className="scan-form"><div className="form-title"><div><h2>Is this website trustworthy?</h2><p>{mode==='basic'?'Enter a public website address to start a passive scan.':'After your confirmation, public website pages found on this site are scanned in bounded batches.'}</p></div><span className="form-icon"><ScanLine size={23}/></span></div><label htmlFor="site-url">لینک وب‌سایت</label><div className={`url-input-wrap ${error?'invalid':''}`}><Link2 size={19}/><input ref={inputRef} id="site-url" type="text" inputMode="url" dir="ltr" autoComplete="url" spellCheck="false" placeholder="https://example.com" value={url} onChange={e=>{setUrl(e.target.value);setError('');}} disabled={busy||advancedBusy} aria-describedby={error?'scan-error':undefined}/><button type="button" className="paste-button" onClick={paste} disabled={busy||advancedBusy}><Clipboard size={15}/><span>چسباندن</span></button></div><div className="input-hint"><LockKeyhole size={12}/><span>لینک روی سرور بررسی می‌شود؛ در دستگاهت باز نمی‌شود.</span></div><div className="scan-action"><button className="primary-button scan-submit" disabled={busy||advancedBusy}>{busy?<LoaderCircle size={19} className="spin"/>:<ScanLine size={19}/>}<span>{busy?'در حال بررسی لینک…':'شروع بررسی'}</span>{!busy&&<ArrowLeft size={17}/>}</button><span className="scan-time"><Zap size={14}/>بدون نصب برنامه</span></div>{error && <div className="error-message" id="scan-error" role="alert"><CircleAlert size={17}/><span>{error}</span></div>}
-                {busy && <div className="scan-progress" role="status"><div className="progress-bar indeterminate"><i/></div><span>درخواست بررسی سایت در حال پردازش است؛ نتیجه پس از دریافت پاسخ نمایش داده می‌شود.</span></div>}
+                {busy && <div className="scan-progress live-scan" role="status"><div className="progress-bar indeterminate"><i/></div><span>درخواست بررسی سایت در حال پردازش است؛ نتیجه پس از دریافت پاسخ نمایش داده می‌شود.</span><div className="live-browser"><div className="live-browser-bar"><span/><span/><span/><b>Isolated cloud browser</b></div><div className="live-browser-screen"><Globe2 size={20}/><strong>{scanEvents.at(-1)?.message||'Preparing a protected browser session'}</strong><small>Public pages only · no sign-in · no payment · no downloads · JavaScript disabled</small><ol>{scanEvents.slice(-4).map((event,index)=><li key={`${event.phase}-${index}`}>{event.message}</li>)}</ol></div></div></div>}
               </form><div className="scan-card-footer"><span><Check size={14}/>HTTP and HTTPS checks</span><span><Check size={14}/>No file upload or execution</span><span><Check size={14}/>Evidence-led report</span></div>
             </div>
             <div className="visual-card"><span className="visual-label"><span className={busy?'pulse':''}/>{busy?'گارد در حال بررسی است':'گارد آمادهٔ بررسی است'}</span><ShieldArt busy={busy}/><h3>یک لینک، چند لایه بررسی.</h3><p>From public page content to linked pages;<br/>each signal supports a clearer decision.</p><div className="visual-tags"><span><Globe2 size={12}/>Website</span><span><Link2 size={12}/>Public links</span><span><ShieldCheck size={12}/>Threat signals</span></div></div>

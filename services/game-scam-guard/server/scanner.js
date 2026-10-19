@@ -63,8 +63,9 @@ export function parsePage(bytes, baseUrl, headers = {}) {
   return { title, description, headings, excerpt: pageText, files: files.slice(0, 128), fileCount: files.length, linkCount: $('a[href]').length, signals, contentType: headers['content-type'] || 'نامشخص',siteAnalysis:{...independent.siteAnalysis,htmlSha256:createHash('sha256').update(bytes).digest('hex'),receivedBytes:bytes.length},linkInventory:independent.linkInventory };
 }
 
-export async function scanSite(input,{transport=fetchPublic,lookup=lookupUrl,preview=renderPreview,validate=resolvePublic,pageOptions={},allowThreatContent=false,allowCloudPreview=false}={}) {
+export async function scanSite(input,{transport=fetchPublic,lookup=lookupUrl,preview=renderPreview,validate=resolvePublic,pageOptions={},allowThreatContent=false,allowCloudPreview=false,onEvent=()=>{}}={}) {
   const requested = normalizeUrl(input);
+  onEvent({phase:'url_validation',message:'Validating the public website address'});
   // Reject private/local addresses before any provider request. A DNS outage is
   // inconclusive, while the guarded page transport still validates every connection.
   let preflightError;
@@ -73,7 +74,9 @@ export async function scanSite(input,{transport=fetchPublic,lookup=lookupUrl,pre
   catch(error) { if(error.status===400)throw error;preflightError=error; }
   finally {clearTimeout(validationTimer);}
   const controller=new AbortController();
-  const intelTask=Promise.resolve().then(()=>lookup(requested.href)).catch(()=>({status:'unavailable',message:'استعلام URLhaus انجام نشد؛ امنیت این لینک تأیید نمی‌شود.'})).then(intel=>{if(intel.status==='listed'&&!allowThreatContent)controller.abort();return intel;});
+  onEvent({phase:'threat_lookup',message:'Checking known URL threat reports'});
+  const intelTask=Promise.resolve().then(()=>lookup(requested.href)).catch(()=>({status:'unavailable',message:'استعلام URLhaus انجام نشد؛ امنیت این لینک تأیید نمی‌شود.'})).then(intel=>{onEvent({phase:'threat_lookup_done',message:intel.status==='listed'?'A known threat report was found':'Known URL threat lookup completed'});if(intel.status==='listed'&&!allowThreatContent)controller.abort();return intel;});
+  onEvent({phase:'fetch_page',message:'Retrieving the public HTML page through the guarded network'});
   const pageTask=preflightError?Promise.reject(preflightError):fetchSitePage(requested,{transport,signal:controller.signal,...pageOptions});
   const [pageOutcome,intel]=await Promise.all([pageTask.then(value=>({value}),error=>({error})),intelTask]);
   if(pageOutcome.error?.status===400)throw pageOutcome.error;
@@ -84,6 +87,7 @@ export async function scanSite(input,{transport=fetchPublic,lookup=lookupUrl,pre
     return rememberSite({id:randomUUID(),url:requested.href,finalUrl:requested.href,domain:requested.hostname,createdAt:new Date().toISOString(),status:listed?'danger':'unavailable',title:'محتوای صفحه دریافت نشد',description:'گزارش حاضر بر پایهٔ بررسی آدرس و پاسخ پایگاه تهدید است؛ داخل سایت مشاهده نشده است.',headings:[],excerpt:'',contentType:'نامشخص',files:[],fileCount:0,linkCount:0,signals:[{level:listed?'danger':'warning',title:listed?'لینک در پایگاه تهدید گزارش شده':'بررسی محتوای سایت کامل نشد',detail:listed?intel.message:failure.detail}],redirects:[],reputation:intel,finalReputation:intel,advanced:false,inputAdjusted,pageFetch:{status:'unavailable',...failure,attempts:pageOutcome.error.attempts||0},preview:{status:'skipped',detail:'بدون دریافت صفحه، پیش‌نمایش ساخته نمی‌شود.'},checks:[{title:'دریافت محتوای سایت',status:'unavailable',detail:failure.detail},{title:'استعلام URLhaus',status:['listed','not_found'].includes(intel.status)?'done':'unavailable',detail:intel.message}],limitations:['محتوای سایت، عنوان آن و لینک‌های عمومی قابل مشاهده نبودند؛ تعداد صفحه‌های پیوندشده نامشخص است.','عدم وجود گزارش در پایگاه تهدید به معنی امن بودن نیست.','بررسی پیشرفته تا دریافت محتوای سایت ممکن نیست.']});
   }
   const page=pageOutcome.value;
+  onEvent({phase:'page_received',message:'Public page received; inspecting its visible HTML'});
   const mime = String(page.headers['content-type'] || '').toLowerCase();
   let evidence;
   const isHtml = mime.includes('html') || (!mime && /^\s*<!doctype html|^\s*<html/i.test(page.bytes.toString('utf8',0,100)));
@@ -95,7 +99,10 @@ export async function scanSite(input,{transport=fetchPublic,lookup=lookupUrl,pre
   if ([intel.status, finalIntel.status].includes('listed')) evidence.signals.unshift({ level: 'danger', title: 'لینک در پایگاه تهدید گزارش شده', detail: 'URLhaus برای لینک اولیه یا مقصد نهایی گزارش تهدید دارد. از دانلود و پرداخت خودداری کنید.' });
   if (page.redirects.some(r => new URL(r.from).hostname !== new URL(r.to).hostname)) evidence.signals.push({ level: 'warning', title: 'انتقال به دامنهٔ دیگر', detail: 'لینک به یک دامنهٔ دیگر منتقل شد. آدرس نهایی را پیش از خرید کنترل کنید.' });
   const status = evidence.signals.some(s=>s.level==='danger') ? 'danger' : evidence.statusOverride || (evidence.signals.some(s=>s.level==='warning') ? 'warning' : 'limited');
+  if(isHtml && status !== 'danger' && allowCloudPreview)onEvent({phase:'cloud_browser',message:'Rendering an isolated cloud-browser snapshot'});
   const image = isHtml && status !== 'danger' && allowCloudPreview ? await preview(page.url, page.bytes) : {status:'skipped',detail:isHtml ? 'Cloud-browser preview is available after you choose Advanced website scan.' : 'No browser preview is created for a direct file link.'};
+  if(image.status==='done')onEvent({phase:'cloud_browser_done',message:'Isolated browser snapshot is ready'});
+  else if(isHtml && allowCloudPreview)onEvent({phase:'cloud_browser_unavailable',message:'The isolated browser preview was unavailable; HTML evidence is still shown'});
   const id = randomUUID();
   const result = { id, url: requested.href, finalUrl: page.url, domain: new URL(page.url).hostname, createdAt: new Date().toISOString(), status, ...evidence, preview:image, redirects: page.redirects, reputation: intel, finalReputation: finalIntel, advanced: false,inputAdjusted,pageFetch:{status:'done',attempts:page.attempts},
     checks: [{ title: isHtml ? 'دریافت محتوای سایت' : 'مشاهدهٔ سرآیند لینک مستقیم فایل', status: 'done', detail: isHtml ? `HTTP ${page.status} · ${(page.bytes.length/1024).toFixed(1)} KB` : `HTTP ${page.status} · The file was not retrieved or analyzed in GameScam Guard.` }, { title: 'بررسی ارتباط', status: 'done', detail: new URL(page.url).protocol === 'https:' ? 'HTTPS · اعتبارسنجی گواهی انجام شد' : 'HTTP · بدون رمزگذاری' }, { title: 'بررسی نشانه‌های صفحه', status: 'done', detail: `${evidence.linkCount} لینک در HTML دریافت‌شده بررسی شد` }, { title: 'استعلام URLhaus', status: ['listed','not_found'].includes(intel.status) ? 'done' : 'unavailable', detail: intel.message }],

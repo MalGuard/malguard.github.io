@@ -91,3 +91,9 @@ test('Google callback issues a completion ticket for a new verified Google ident
   const app=createApp({emailAuth,googleAuth,appOrigin:'https://app.example/game-scam-guard/'});const server=app.listen(0,'127.0.0.1');await once(server,'listening');const base=`http://127.0.0.1:${server.address().port}`;
   try{const start=await fetch(`${base}/api/auth/google/start`,{redirect:'manual'});assert.equal(start.status,302);assert.equal(start.headers.get('location'),'https://accounts.google.com/o/oauth2/v2/auth?fixture=1');const callback=await fetch(`${base}/api/auth/google/callback?state=fixture&code=fixture-code`,{redirect:'manual'});assert.equal(callback.status,302);assert.equal(callback.headers.get('location'),'https://app.example/game-scam-guard/#guard-google-signup=signed-google-ticket');}finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 });
+
+test('live scan route streams verified stage events before its final report',async()=>{
+  const app=createApp({scanSite:async(url,{onEvent})=>{onEvent({phase:'url_validation',message:'Validating the public website address'});onEvent({phase:'cloud_browser_done',message:'Isolated browser snapshot is ready'});return {url,status:'limited',preview:{status:'done'}};}});
+  const server=app.listen(0,'127.0.0.1');await once(server,'listening');const base=`http://127.0.0.1:${server.address().port}`;
+  try{const response=await fetch(`${base}/api/scan/live`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:'https://example.com',mode:'advanced'})});assert.equal(response.status,200);const rows=(await response.text()).trim().split('\n').map(JSON.parse);assert.equal(rows[0].event.phase,'url_validation');assert.equal(rows[1].event.phase,'cloud_browser_done');assert.equal(rows[2].result.preview.status,'done');}finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+});
