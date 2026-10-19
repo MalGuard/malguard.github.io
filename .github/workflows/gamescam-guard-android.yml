@@ -24,8 +24,12 @@ jobs:
           java-version: '17'
       - name: Install Android platform
         run: |
-          yes | sdkmanager --licenses > /dev/null
-          sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+          sdk_root="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          sdkmanager="$(find "$sdk_root/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+          test -n "$sdkmanager"
+          yes | "$sdkmanager" --licenses > /dev/null
+          "$sdkmanager" 'platforms;android-35' 'build-tools;35.0.0'
+          printf 'sdk.dir=%s\n' "$sdk_root" > local.properties
       - name: Build debug APK
         run: ./gradlew --no-daemon :app:assembleDebug
       - uses: actions/upload-artifact@v4
