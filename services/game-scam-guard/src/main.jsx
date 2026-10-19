@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Shield, ShieldCheck, ScanLine, History, BookOpen, Settings2, ArrowUpLeft, ArrowLeft, Link2, Clipboard, Check, ChevronLeft, ChevronDown, Bell, CircleHelp, Gamepad2, Menu, X, Globe2, FileSearch, Fingerprint, LockKeyhole, ExternalLink, LoaderCircle, CircleAlert, Search, Download, Trash2, CheckCheck, Sparkles, Info, Zap, Server, Copy, UserRound } from 'lucide-react';
+import { Shield, ShieldCheck, ScanLine, History, BookOpen, Settings2, ArrowUpLeft, ArrowLeft, Link2, Clipboard, Check, ChevronLeft, ChevronDown, Bell, CircleHelp, Gamepad2, Menu, X, Globe2, FileSearch, LockKeyhole, ExternalLink, LoaderCircle, CircleAlert, Search, Download, Trash2, CheckCheck, Sparkles, Info, Zap, Server, Copy, UserRound } from 'lucide-react';
 import './styles.css';
 import { readHistory } from './history.js';
 import { apiUrl } from './api.js';
@@ -23,7 +23,7 @@ function ShieldArt({ busy = false }) {
     <span className="radar-dot dot-1"/><span className="radar-dot dot-2"/><span className="radar-dot dot-3"/>
     <span className="art-cross cross-1">+</span><span className="art-cross cross-2">+</span>
     <div className="floating-tag tag-lock"><LockKeyhole size={15}/><span>SSL</span></div>
-    <div className="floating-tag tag-hash"><Fingerprint size={17}/><span>SHA-256</span></div>
+    <div className="floating-tag tag-hash"><Globe2 size={17}/><span>PUBLIC WEB</span></div>
     <svg className="big-shield" width="156" height="170" viewBox="0 0 156 170" fill="none">
       <defs><linearGradient id="shieldFill" x1="40" y1="15" x2="115" y2="153" gradientUnits="userSpaceOnUse"><stop stopColor="#e6ffc9"/><stop offset="1" stopColor="#a9e777"/></linearGradient><linearGradient id="shieldEdge" x1="0" y1="0" x2="156" y2="170"><stop stopColor="#fff"/><stop offset="1" stopColor="#57ad6c"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="9" stdDeviation="8" floodColor="#336e49" floodOpacity=".17"/></filter></defs>
       <path d="M78 10C57 23 38 29 18 34V77C18 116 44 142 78 160C112 142 138 116 138 77V34C118 29 99 23 78 10Z" fill="url(#shieldFill)" stroke="url(#shieldEdge)" strokeWidth="2" filter="url(#shadow)"/>
@@ -187,7 +187,7 @@ function App() {
             <div className="visual-card"><span className="visual-label"><span className={busy?'pulse':''}/>{busy?'گارد در حال بررسی است':'گارد آمادهٔ بررسی است'}</span><ShieldArt busy={busy}/><h3>یک لینک، چند لایه بررسی.</h3><p>From public page content to linked pages;<br/>each signal supports a clearer decision.</p><div className="visual-tags"><span><Globe2 size={12}/>Website</span><span><Link2 size={12}/>Public links</span><span><ShieldCheck size={12}/>Threat signals</span></div></div>
           </section>
           {!advancedBusy&&pendingJob&&<button className="outline-button" onClick={resumeQueue}>ادامهٔ صف ثبت‌شده ({fa(pendingJob.next||0)} از {fa(pendingJob.total||0)})</button>}{advancedBusy&&!result&&<div className="advanced-loading" role="status"><LoaderCircle className="spin" size={20}/>{scanEvents.at(-1)?.message||'درخواست در حال پردازش است'}</div>}
-          <div className="how-strip"><div><span className="step-icon"><Link2 size={19}/></span><span><b>لینک را وارد کن</b><small>آدرس سایت، فروشگاه یا فایل بازی</small></span><em>01</em></div><ChevronLeft className="step-arrow" size={16}/><div><span className="step-icon"><ScanLine size={19}/></span><span><b>نشانه‌ها را بررسی می‌کنیم</b><small>محتوا، لینک‌ها و گزارش‌های تهدید</small></span><em>02</em></div><ChevronLeft className="step-arrow" size={16}/><div><span className="step-icon"><ShieldCheck size={19}/></span><span><b>با آگاهی تصمیم بگیر</b><small>یک گزارش شفاف، همراه با شواهد</small></span><em>03</em></div></div>
+          <div className="how-strip"><div><span className="step-icon"><Link2 size={19}/></span><span><b>لینک را وارد کن</b><small>آدرس سایت یا فروشگاه بازی</small></span><em>01</em></div><ChevronLeft className="step-arrow" size={16}/><div><span className="step-icon"><ScanLine size={19}/></span><span><b>نشانه‌ها را بررسی می‌کنیم</b><small>محتوا، لینک‌ها و گزارش‌های تهدید</small></span><em>02</em></div><ChevronLeft className="step-arrow" size={16}/><div><span className="step-icon"><ShieldCheck size={19}/></span><span><b>با آگاهی تصمیم بگیر</b><small>یک گزارش شفاف، همراه با شواهد</small></span><em>03</em></div></div>
 
           {result && <section className="report-card" ref={reportRef}>
             <div className="section-heading"><div><span className="section-kicker">گزارش بررسی واقعی</span><h2>نتیجهٔ بررسی لینک</h2></div><button className="outline-button" onClick={exportReport}><Download size={16}/>ذخیره گزارش</button></div>
