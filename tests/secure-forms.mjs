@@ -42,7 +42,9 @@ for(const engine of engines){
    if(route==='/contributing.html'){
     // Contributor tasks intentionally link to the official core repository;
     // reporting, authentication and the other document readers stay on-site.
-    for(const href of githubLinks){
+    const contributorLinks=await page.locator('a[href]').evaluateAll(links=>links.map(link=>link.href).filter(href=>new URL(href).origin!==location.origin));
+    assert.equal(contributorLinks.length,7,'All seven contributor repository links must remain available');
+    for(const href of contributorLinks){
      const target=new URL(href);
      assert.equal(target.origin,'https://github.com','Contributor links must use the official GitHub origin');
      assert.match(target.pathname,/^\/MalGuard\/malguard-core(?:\/|$)/,'Contributor links must stay within the official core repository');
