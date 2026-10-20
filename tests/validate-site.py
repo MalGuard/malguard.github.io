@@ -84,6 +84,15 @@ assert 'Download paused' not in download
 assert 'sealed-installer' not in download
 installer=ROOT/release['serviceUrl'].lstrip('/')
 assert sorted((ROOT/'release').rglob('*.exe'))==[installer], 'Only the reviewed public installer may ship'
+android_release=json.loads((ROOT/'release/gamescam-guard-android.json').read_text())
+assert android_release['platform']=='android' and android_release['signing']=='debug-test'
+assert android_release['automaticUpdates'] is False
+assert re.fullmatch('[a-f0-9]{64}',android_release['sha256'])
+android_apk=ROOT/android_release['url'].lstrip('/')
+assert android_apk.is_file() and android_apk.stat().st_size==android_release['size']
+assert sha256(android_apk.read_bytes()).hexdigest()==android_release['sha256']
+assert (ROOT/android_release['sha256Url'].lstrip('/')).read_text()==android_release['sha256']+'  '+android_release['filename']+'\n'
+assert android_apk.read_bytes()[:2]==b'PK', 'Android package must be a ZIP/APK container'
 assert installer.stat().st_size==release['size']
 assert installer.read_bytes()[:2]==b'MZ'
 assert sha256(installer.read_bytes()).hexdigest()==release['sha256']
