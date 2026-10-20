@@ -43,6 +43,7 @@ jobs:
           npm run test:experience
           TEST_BROWSER=chromium node tests/game-scam-preview.mjs
           node tests/game-scam-extended-flow.mjs
+          node tests/game-scam-learning.mjs
           node tests/game-scam-isolation.mjs
           # Use the same display compositor as cinematic WebKit checks.
           xvfb-run --auto-servernum node tests/secure-forms.mjs

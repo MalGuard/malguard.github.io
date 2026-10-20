@@ -1,0 +1,527 @@
+{
+  "schema": 1,
+  "generatedAt": "2026-10-20T16:32:46.441Z",
+  "engineVersion": "2.0.0",
+  "dataset": "authored-synthetic-regression-v1",
+  "independentEvaluation": false,
+  "randomSample": false,
+  "realMalwareExecuted": false,
+  "sourceFiles": {
+    "server/scanner.js": "49a3af2bcf2bf2812e5222b368b86a7d6ec0dc02a644d920ce8845c3dd7d7003",
+    "server/site-analysis.js": "95512ee3bf5ccfc8ea60a5e15192909574c1061faf8b19b8c93f473d57592d6e",
+    "server/deep-analysis.js": "5e1aacb6ea839a4e40b5da29dd3fc7e73e87443b538e03ab54892b54f119a5d9",
+    "server/script-facts.js": "639d11114a9b4d4d7922e6102de5480406785e7e520048ea5e73df004437919c",
+    "server/analysis-fixtures.js": "0a8a06b70fd01206eacd6a81ba6d2f3272aac1a3b1d86f8339a10326f7b2d34f",
+    "shared/analyzer-catalog.js": "feb21b7b4163c7dcf38fdb7d9c401a12f8df08a5bf5e4a885d36c1efc0e51e18"
+  },
+  "summary": {
+    "cases": 34,
+    "passed": 34,
+    "failed": 0,
+    "expectedObservations": 20,
+    "observationsMatched": 20,
+    "benignControls": 14,
+    "benignControlsWithoutWarnings": 14,
+    "medianParseMs": 2.082,
+    "p95ParseMs": 8.218
+  },
+  "limitations": [
+    "Fixtures are selected by the developers and overlap the regression suite.",
+    "This is not a held-out, independently labeled or representative threat dataset.",
+    "These counts must not be advertised as real-world detection accuracy, a zero-day detection rate or a safety guarantee.",
+    "No reputation provider, remote VM or physical Samsung device is evaluated here.",
+    "Parser latency excludes network fetches, provider calls, browser rendering and user-device overhead."
+  ],
+  "cases": [
+    {
+      "id": "expected-observation-1",
+      "group": "expected-observation",
+      "module": "url-identity",
+      "name": "url-identity",
+      "inputSha256": "026269c057fb69b17a6079bd42d3818dcb1574ca5d897be9aba63167d6e05c69",
+      "url": "https://stеam.example/",
+      "expectedRule": "mixed_script_host",
+      "observedRules": [
+        "mixed_script_host"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 14.911
+    },
+    {
+      "id": "expected-observation-2",
+      "group": "expected-observation",
+      "module": "brand-domain",
+      "name": "brand-domain",
+      "inputSha256": "026269c057fb69b17a6079bd42d3818dcb1574ca5d897be9aba63167d6e05c69",
+      "url": "https://steam.login.example/",
+      "expectedRule": "brand_in_unofficial_host",
+      "observedRules": [
+        "brand_in_unofficial_host"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 2.359
+    },
+    {
+      "id": "expected-observation-3",
+      "group": "expected-observation",
+      "module": "form-destinations",
+      "name": "form-destinations",
+      "inputSha256": "edfe1592783a8da9170f3e79243cfa715506f052f0ad5d16353c589cbbb8cfe3",
+      "url": "https://store.example/",
+      "expectedRule": "sensitive_form_external",
+      "observedRules": [
+        "sensitive_form_external"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 6.005
+    },
+    {
+      "id": "expected-observation-4",
+      "group": "expected-observation",
+      "module": "form-methods",
+      "name": "form-methods",
+      "inputSha256": "4ba652d1b9758a5032ee2d415a99b00f79e94f48e238a027fefac2192fa63b65",
+      "url": "https://store.example/",
+      "expectedRule": "sensitive_form_get",
+      "observedRules": [
+        "sensitive_form_get"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 3.09
+    },
+    {
+      "id": "expected-observation-5",
+      "group": "expected-observation",
+      "module": "verification-codes",
+      "name": "verification-codes",
+      "inputSha256": "db2956c09f143139739065ff3eb9f2bdb0582b532e1d4c0124e9943eb955d6c8",
+      "url": "https://store.example/",
+      "expectedRule": "code_form_boundary",
+      "observedRules": [
+        "code_form_boundary"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 2.616
+    },
+    {
+      "id": "expected-observation-6",
+      "group": "expected-observation",
+      "module": "wallet-secrets",
+      "name": "wallet-secrets",
+      "inputSha256": "c1412d9df500ae82fc14f47a5ec49ddbe35b271e97b018a2bf5056461b447a0d",
+      "url": "https://store.example/",
+      "expectedRule": "wallet_secret_form",
+      "observedRules": [
+        "wallet_secret_form"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 3.422
+    },
+    {
+      "id": "expected-observation-7",
+      "group": "expected-observation",
+      "module": "payment-boundary",
+      "name": "payment-boundary",
+      "inputSha256": "9774b635d146b0ebcc7eb0f782259360e8aa6bcae6516380c1cd26206a52599e",
+      "url": "https://store.example/",
+      "expectedRule": "unencrypted_payment",
+      "observedRules": [
+        "sensitive_form_http",
+        "sensitive_form_external",
+        "unencrypted_payment"
+      ],
+      "warningCount": 3,
+      "passed": true,
+      "elapsedMs": 1.807
+    },
+    {
+      "id": "expected-observation-8",
+      "group": "expected-observation",
+      "module": "script-transport",
+      "name": "script-transport",
+      "inputSha256": "6aa43f866c82e9c2872a679229737fa3eb526fd542325c7d4526d985e36d65e1",
+      "url": "https://store.example/",
+      "expectedRule": "active_mixed_content",
+      "observedRules": [
+        "active_mixed_content",
+        "external_script_without_integrity"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 2.177
+    },
+    {
+      "id": "expected-observation-9",
+      "group": "expected-observation",
+      "module": "script-obfuscation",
+      "name": "script-obfuscation",
+      "inputSha256": "465ee447f550ee50cf809e8d9240f8862f9fac846f96dade77f2d7598a30f8b6",
+      "url": "https://store.example/",
+      "expectedRule": "encoded_dynamic_code",
+      "observedRules": [
+        "encoded_dynamic_code"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 8.218
+    },
+    {
+      "id": "expected-observation-10",
+      "group": "expected-observation",
+      "module": "credential-network",
+      "name": "credential-network",
+      "inputSha256": "e61d896f4ee8217eccda5ba126d9c09433a49b565b389840dc30f905265a05b3",
+      "url": "https://store.example/",
+      "expectedRule": "credential_external_request",
+      "observedRules": [
+        "credential_external_request"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 4.692
+    },
+    {
+      "id": "expected-observation-11",
+      "group": "expected-observation",
+      "module": "clipboard-traps",
+      "name": "clipboard-traps",
+      "inputSha256": "daf5538ff7c4c66da9b4687f6b07228547fa7f58aafa9f34e9c4c0587a3f2cd3",
+      "url": "https://store.example/",
+      "expectedRule": "clipboard_shell_trap",
+      "observedRules": [
+        "clipboard_shell_trap"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 2.23
+    },
+    {
+      "id": "expected-observation-12",
+      "group": "expected-observation",
+      "module": "script-navigation",
+      "name": "script-navigation",
+      "inputSha256": "d01c3dd335919da68cfac9d6beb0f8573d9097a32f1396723f04db39694b6afa",
+      "url": "https://store.example/",
+      "expectedRule": "external_script_redirect",
+      "observedRules": [
+        "external_script_redirect"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 4.481
+    },
+    {
+      "id": "expected-observation-13",
+      "group": "expected-observation",
+      "module": "html-redirects",
+      "name": "html-redirects",
+      "inputSha256": "a540ff1db3175f9a274e5754f6ec956556d1481e64189db41c163fab7a80c139",
+      "url": "https://store.example/",
+      "expectedRule": "html_external_redirect",
+      "observedRules": [
+        "html_external_redirect"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 3.102
+    },
+    {
+      "id": "expected-observation-14",
+      "group": "expected-observation",
+      "module": "link-mismatch",
+      "name": "link-mismatch",
+      "inputSha256": "5e19b6e666e21eca3ea1c3f2d370ec507395f812606adf3a7f1a29127ff4da7b",
+      "url": "https://store.example/",
+      "expectedRule": "link_destination_mismatch",
+      "observedRules": [
+        "link_destination_mismatch"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 5.247
+    },
+    {
+      "id": "expected-observation-15",
+      "group": "expected-observation",
+      "module": "frame-boundaries",
+      "name": "frame-boundaries",
+      "inputSha256": "cd6331a2d4a00a119730fcdbcd42b6f38a2e0a87f4746bf77cc73e337f8148fb",
+      "url": "https://store.example/",
+      "expectedRule": "external_login_frame",
+      "observedRules": [
+        "external_login_frame"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 1.738
+    },
+    {
+      "id": "expected-observation-16",
+      "group": "expected-observation",
+      "module": "embedded-plugins",
+      "name": "embedded-plugins",
+      "inputSha256": "7c104df3486ca1439758d8731195b9f428032684ccee2c7074e39732d398ce8d",
+      "url": "https://store.example/",
+      "expectedRule": "active_legacy_plugin",
+      "observedRules": [
+        "active_legacy_plugin"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 1.324
+    },
+    {
+      "id": "expected-observation-17",
+      "group": "expected-observation",
+      "module": "service-workers",
+      "name": "service-workers",
+      "inputSha256": "b761c51902cf27ebdac23005637f1574104ef673fa9a7e694c869f1e14ac04d5",
+      "url": "https://store.example/",
+      "expectedRule": "service_worker_registration",
+      "observedRules": [
+        "service_worker_registration"
+      ],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 5.822
+    },
+    {
+      "id": "expected-observation-18",
+      "group": "expected-observation",
+      "module": "encoded-documents",
+      "name": "encoded-documents",
+      "inputSha256": "3a2e8871cf834f86a10b51c80c249d10d4e0fea885b1fe468db42c6ed7061762",
+      "url": "https://store.example/",
+      "expectedRule": "active_embedded_document",
+      "observedRules": [
+        "active_embedded_document"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 2.082
+    },
+    {
+      "id": "expected-observation-19",
+      "group": "expected-observation",
+      "module": "web-mining",
+      "name": "web-mining",
+      "inputSha256": "d6e80486aa56960e8745770be178676115ceec7aeab40871c3dc1a4f009f7a15",
+      "url": "https://store.example/",
+      "expectedRule": "known_mining_script",
+      "observedRules": [
+        "external_script_without_integrity",
+        "known_mining_script"
+      ],
+      "warningCount": 1,
+      "passed": true,
+      "elapsedMs": 8.047
+    },
+    {
+      "id": "expected-observation-20",
+      "group": "expected-observation",
+      "module": "resource-integrity",
+      "name": "resource-integrity",
+      "inputSha256": "1ecd84171a4fe364162050725b027d5801006de7cdcd4dda6f415de1b54287c7",
+      "url": "https://store.example/",
+      "expectedRule": "external_script_without_integrity",
+      "observedRules": [
+        "external_script_without_integrity"
+      ],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 0.851
+    },
+    {
+      "id": "benign-control-1",
+      "group": "benign-control",
+      "module": null,
+      "name": "plain-public-page",
+      "inputSha256": "b0f5347914cb58c34f31978f41a0c805904d8a6b1c63bbc5556a43912482e6db",
+      "url": "https://store.example/",
+      "expectedRule": null,
+      "observedRules": [],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 1.314
+    },
+    {
+      "id": "benign-control-2",
+      "group": "benign-control",
+      "module": null,
+      "name": "same-origin-password-post",
+      "inputSha256": "0615b54443da8720b15dacfcc26cb5d311534ccad36769ed6285b0a754ec2bc2",
+      "url": "https://store.example/",
+      "expectedRule": null,
+      "observedRules": [],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 1.449
+    },
+    {
+      "id": "benign-control-3",
+      "group": "benign-control",
+      "module": null,
+      "name": "same-origin-code-post",
+      "inputSha256": "f62fdf175cac916d4274357728aefd1314b9031e012b46d952ec07f86f4293dd",
+      "url": "https://store.example/",
+      "expectedRule": null,
+      "observedRules": [],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 1.015
+    },
+    {
+      "id": "benign-control-4",
+      "group": "benign-control",
+      "module": null,
+      "name": "official-brand-domain",
+      "inputSha256": "27f1a45cf4d1cbbd871964531219986e8ae682fda1c947f650a6b74b7cef9f37",
+      "url": "https://help.steampowered.com/",
+      "expectedRule": null,
+      "observedRules": [],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 1.085
+    },
+    {
+      "id": "benign-control-5",
+      "group": "benign-control",
+      "module": null,
+      "name": "unrelated-substring",
+      "inputSha256": "0b1f4eae7997ae1f46eb106b74b7768ec730bb057dbda8c1da7eded4aff975a8",
+      "url": "https://steamship.example/",
+      "expectedRule": null,
+      "observedRules": [],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 0.8
+    },
+    {
+      "id": "benign-control-6",
+      "group": "benign-control",
+      "module": null,
+      "name": "educational-wording",
+      "inputSha256": "3e1d6fa24778b6d36ed46b69918f08190987568a8a2481e5f110d7137ad6c1d3",
+      "url": "https://store.example/",
+      "expectedRule": null,
+      "observedRules": [
+        "gaming_risk_language"
+      ],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 0.995
+    },
+    {
+      "id": "benign-control-7",
+      "group": "benign-control",
+      "module": null,
+      "name": "comment-only-obfuscation",
+      "inputSha256": "c14d348ed256dd6f105a399dedcdbc1fc7fce07358f8149a90a68a3c9c5b57cf",
+      "url": "https://store.example/",
+      "expectedRule": null,
+      "observedRules": [],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 2.556
+    },
+    {
+      "id": "benign-control-8",
+      "group": "benign-control",
+      "module": null,
+      "name": "string-only-obfuscation",
+      "inputSha256": "74175632ab802230a7f739bcf2a99c1ce31c220e4d160c0eb837e01bbb9c5f34",
+      "url": "https://store.example/",
+      "expectedRule": null,
+      "observedRules": [],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 0.82
+    },
+    {
+      "id": "benign-control-9",
+      "group": "benign-control",
+      "module": null,
+      "name": "json-data",
+      "inputSha256": "892c8cc156715934eb8db96bd7ea0722311ed0afeedaf52df970226a22106bce",
+      "url": "https://store.example/",
+      "expectedRule": null,
+      "observedRules": [],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 1.338
+    },
+    {
+      "id": "benign-control-10",
+      "group": "benign-control",
+      "module": null,
+      "name": "comment-only-credential-code",
+      "inputSha256": "30ca0cba5d3d01e5ece224fbc74d53b1ff1cdc9adc61ce3478b35f2d895974b9",
+      "url": "https://store.example/",
+      "expectedRule": null,
+      "observedRules": [],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 1.151
+    },
+    {
+      "id": "benign-control-11",
+      "group": "benign-control",
+      "module": null,
+      "name": "safe-pwa-context",
+      "inputSha256": "b761c51902cf27ebdac23005637f1574104ef673fa9a7e694c869f1e14ac04d5",
+      "url": "https://store.example/",
+      "expectedRule": null,
+      "observedRules": [
+        "service_worker_registration"
+      ],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 1.29
+    },
+    {
+      "id": "benign-control-12",
+      "group": "benign-control",
+      "module": null,
+      "name": "ordinary-clipboard",
+      "inputSha256": "d531368f407f9cd7fe9b870341662985dfb69d905855108e4c75a7500919cfff",
+      "url": "https://store.example/",
+      "expectedRule": null,
+      "observedRules": [],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 0.812
+    },
+    {
+      "id": "benign-control-13",
+      "group": "benign-control",
+      "module": null,
+      "name": "nonlatin-domain",
+      "inputSha256": "d473f11400063c18c4876ebc7a976d0658547fc607624a61f1063e259dc1a92b",
+      "url": "https://مثال.example/",
+      "expectedRule": null,
+      "observedRules": [],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 1.062
+    },
+    {
+      "id": "benign-control-14",
+      "group": "benign-control",
+      "module": null,
+      "name": "same-origin-redirect",
+      "inputSha256": "8b63510d2492653a09150e7b665a1025be95374f0d21185e5c2ea2b9ff27d46c",
+      "url": "https://store.example/",
+      "expectedRule": null,
+      "observedRules": [],
+      "warningCount": 0,
+      "passed": true,
+      "elapsedMs": 1.598
+    }
+  ]
+}

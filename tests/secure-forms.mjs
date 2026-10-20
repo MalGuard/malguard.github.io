@@ -12,10 +12,11 @@ async function settledFocus(page,selector){
 for(const engine of engines){
  const browser=await({chromium,webkit}[engine]).launch(launchOptions(engine));
  for(const width of [320,390,820,1440]){
-  const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width,height:900},reducedMotion:'reduce'});let mode='accept',captured=[],authBodies=[],authAllow=false;
+  const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width,height:900},reducedMotion:'reduce'});let mode='accept',captured=[],authBodies=[],authAllow=false;const automaticGithubNavigations=[];
   const cors={'access-control-allow-origin':base,'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'content-type'};
   await context.route('**/*',async route=>{
    const request=route.request(),url=new URL(request.url());if(url.origin===base)return route.continue();
+   if(request.isNavigationRequest()&&url.hostname==='github.com')automaticGithubNavigations.push(url.href);
    if(url.origin==='https://malware-ai-gray.vercel.app'){
     if(request.method()==='OPTIONS')return route.fulfill({status:204,headers:cors});
     if(url.pathname==='/api/report'){
@@ -37,7 +38,16 @@ for(const engine of engines){
    assert.equal((await page.goto(base+route)).status(),200);await page.waitForFunction(()=>document.documentElement.dataset.experienceReady==='true');
    assert(await page.locator('h1').first().isVisible());assert((await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth))<=1,route+' horizontal overflow');
    const heading=await page.locator('h1').first().boundingBox(),header=await page.locator('#navbar').boundingBox();assert(heading.y>=header.y+header.height,route+' heading overlaps the shared header');
-   assert.equal(await page.locator('a[href*="github.com"]').count(),0,route+' redirects a visitor to GitHub');
+   // The contributor page intentionally links to official contribution tasks.
+   // Keep form routes self-contained and reject automatic external navigation.
+   assert.equal(new URL(page.url()).origin,base,route+' left the first-party origin');
+   assert.equal(new URL(page.url()).pathname,route,route+' navigated without user interaction');
+   assert.equal(await page.locator('meta[http-equiv="refresh" i]').count(),0,route+' contains a timed redirect');
+   assert.deepEqual(automaticGithubNavigations,[],route+' attempted automatic GitHub navigation');
+   if(route==='/contributing.html'){
+    const links=await page.locator('a[href*="github.com"]').evaluateAll(nodes=>nodes.map(node=>node.href));assert.ok(links.length>0);
+    assert.ok(links.every(href=>{const url=new URL(href);return url.protocol==='https:'&&url.hostname==='github.com'&&url.pathname.startsWith('/MalGuard/malguard-core/');}),'Contributor links must lead to the official project');
+   }else assert.equal(await page.locator('a[href*="github.com"]').count(),0,route+' unexpectedly links a form visitor to GitHub');
   }
   await page.goto(base+'/report.html?kind=security');assert.equal(await page.locator('#reportKind').inputValue(),'security');
   await page.locator('#reportMessage').fill('سلام');await page.locator('#reportSubmit').click();await page.waitForFunction(()=>document.querySelector('#reportResult').classList.contains('success'),null,{timeout:30000});

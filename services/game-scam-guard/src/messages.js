@@ -1,4 +1,5 @@
 export const messages={
+ fullGuide:['Guide, training video and technical articles','راهنما، فیلم آموزشی و مقاله‌های فنی'],
  threatAddress:['Observed address {count}','نشانی مشاهده‌شدهٔ {count}'],
  configured:['Configured','پیکربندی شده'],stopScan:['Stop scan','توقف بررسی'],negativeCase:['Benign fixture {count}','نمونهٔ بی‌خطر {count}'],findingsCount:['{count} caution signals','{count} نشانهٔ نیازمند توجه'],phaseThreatDone:['Threat source lookup completed','استعلام منبع تهدید تکمیل شد'],phaseBrowserDone:['Isolated browser snapshot is ready','تصویر مرورگر ایزوله آماده شد'],
  scan:['Scan','بررسی'],history:['History','تاریخچه'],settings:['Settings','تنظیمات'],selfTest:['Self-test','خودآزمایی'],help:['Help','راهنما'],account:['Sign in or manage account','ورود یا مدیریت حساب'],language:['Change language','تغییر زبان'],
