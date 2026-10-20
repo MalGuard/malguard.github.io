@@ -6,6 +6,7 @@ import {fetchPublic,normalizeUrl,resolvePublic,ScanError} from './network.js';
 import {parsePage} from './scanner.js';
 import {lookupReputation} from './threat-intel.js';
 import {assessPage} from './page-assessment.js';
+import {inspectRedirectReputation,reportReputations} from './redirect-intel.js';
 
 export const jobTokens=createReportTokens({maxBytes:1024*1024});
 const MAX_TARGETS=128,MAX_TOTAL_BYTES=96*1024*1024;
@@ -71,11 +72,8 @@ export async function inspectJobTarget(target,{transport=fetchPublic,urlLookup=l
     const response=await transport(target.url,{limit:Math.min(2*1024*1024,maxBytes),htmlLimit:Math.min(2*1024*1024,maxBytes),htmlOnly:true,totalTimeout:20000,timeout:10000,signal});
     result.bytesRead=response.bytes.length;result.finalUrl=response.url;
     result.reputation=await intelPromise;
-    if(response.url!==target.url){
-      onEvent({phase:'final_url_lookup',message:'استعلام URLhaus برای مقصد نهایی انتقال لینک'});
-      result.finalReputation=await Promise.resolve().then(()=>urlLookup(response.url)).catch(()=>({status:'unavailable',message:'استعلام URLhaus برای مقصد نهایی کامل نشد.'}));
-    }
-    const knownUrlThreat=[result.reputation.status,result.finalReputation?.status].includes('listed');
+    Object.assign(result,await inspectRedirectReputation(target.url,response,result.reputation,{lookup:urlLookup,onEvent}));
+    const knownUrlThreat=reportReputations(result).some(item=>item.status==='listed');
     const mime=String(response.headers['content-type']||'').toLowerCase();
     const html=mime.includes('html')||/^\s*<!doctype html|^\s*<html/i.test(response.bytes.toString('utf8',0,120));
     if(html){
@@ -83,7 +81,7 @@ export async function inspectJobTarget(target,{transport=fetchPublic,urlLookup=l
       if(response.bytes.length>2*1024*1024)throw new ScanError('صفحهٔ مقصد از سقف تحلیل HTML بیشتر است.');
       const page=parsePage(response.bytes,response.url,response.headers);
       result.title=page.title;result.kind='page';result.linkCount=page.linkCount;result.fileCount=page.fileCount;result.siteAnalysis=page.siteAnalysis;result.analysisEngine=page.analysisEngine;
-      const assessed=assessPage({signals:page.signals,analysisEngine:page.analysisEngine,redirects:response.redirects,reputation:result.reputation,finalReputation:result.finalReputation});
+      const assessed=assessPage({signals:page.signals,analysisEngine:page.analysisEngine,redirects:response.redirects,reputation:result.reputation,finalReputation:result.finalReputation,urlReputations:result.urlReputations});
       // Keep all bounded HTML findings, including the reason for a redirect or
       // threat verdict; a linked-page report must not silently lose its evidence.
       result.findings=assessed.signals;
@@ -101,11 +99,11 @@ export async function inspectJobTarget(target,{transport=fetchPublic,urlLookup=l
     result.reputation=await intelPromise;
     if(error.remoteStatus===401||error.remoteStatus===403)result.accessRequirement='requires_access';
     else if(error.remoteStatus===402)result.accessRequirement='requires_payment';
-    const knownThreat=[result.reputation.status,result.finalReputation?.status,result.fileReputation?.status].includes('listed');
+    const knownThreat=[...reportReputations(result),result.fileReputation].some(item=>item?.status==='listed');
     result.failureStatus=error.status===400?'blocked':result.accessRequirement||'unavailable';
     result.status=knownThreat?'danger':result.failureStatus;
     const failure=error instanceof ScanError?error.message:'دریافت یا تحلیل این مقصد کامل نشد؛ امنیت تأیید نمی‌شود.';
-    const threatEvidence=[result.reputation,result.finalReputation,result.fileReputation].filter(intel=>intel?.status==='listed').map(intel=>intel.message);
+    const threatEvidence=[...reportReputations(result),result.fileReputation].filter(intel=>intel?.status==='listed').map(intel=>intel.message);
     result.detail=[...threatEvidence,failure].join(' ');
     return result;
   }

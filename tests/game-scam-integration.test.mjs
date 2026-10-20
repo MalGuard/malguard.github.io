@@ -40,7 +40,7 @@ test('scoped service worker ignores parent pages, APIs, foreign sites and unsafe
   const context={self:{location:{href:'https://example.test/game-scam-guard/sw.js',origin:'https://example.test'},addEventListener:(name,fn)=>listeners[name]=fn,skipWaiting:async()=>{},clients:{claim:async()=>{}}},URL,caches:{open:async()=>({addAll:async urls=>cached=urls}),keys:async()=>[]}};
   vm.runInNewContext(await read('services/game-scam-guard/public/sw.js'),context);
   let install;listeners.install({waitUntil:promise=>install=promise});await install;
-  assert.deepEqual([...cached],['/game-scam-guard/','/game-scam-guard/manifest.webmanifest','/game-scam-guard/favicon.svg']);
+  assert.deepEqual([...cached],['/game-scam-guard/','/game-scam-guard/manifest.webmanifest','/game-scam-guard/favicon.svg','/game-scam-guard/icons/icon-192.png','/game-scam-guard/icons/icon-512.png','/game-scam-guard/icons/apple-touch-icon.png']);
   for(const [url,method,mode]of [['/','GET','navigate'],['/download.html','GET','navigate'],['/api/game-scam-guard/scan','GET','navigate'],['/game-scam-guard/unknown-file.exe','GET','no-cors'],['https://foreign.test/game-scam-guard/','GET','navigate'],['/game-scam-guard/','POST','navigate']]){
     let handled=false;listeners.fetch({request:{url:new URL(url,context.self.location.origin).href,method,mode},respondWith:()=>handled=true});assert.equal(handled,false,url);
   }

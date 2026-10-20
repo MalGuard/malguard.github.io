@@ -9,6 +9,7 @@ import {inspectionLayers} from './inspection-layers.js';
 import { inspectSite } from './site-analysis.js';
 import { assessPage } from './page-assessment.js';
 import {analyzeWebsite} from './deep-analysis.js';
+import {inspectRedirectReputation} from './redirect-intel.js';
 const riskyTerms = /crack|keygen|cheat|unlimited\s*(coins|gems)|free\s*(coins|gems)|کرک|چیت|سکه\s*نامحدود|جم\s*رایگان/i;
 const sessions = new Map();
 export const providerStatus = () => ({ urlhaus: Boolean(urlhausAuthKey()),openphish:phishingFeedEnabled() });
@@ -101,8 +102,8 @@ export async function scanSite(input,{transport=fetchPublic,lookup=lookupReputat
   else {
     evidence = { title: 'Direct file link', description: 'This address leads to a file or non-HTML content. GameScam Guard does not retrieve, hash, analyze, or execute files; use GTA Guard for file analysis.', headings: [], excerpt: '', fileCount: 0, linkCount: 0, signals: [{level:'info',title:'File analysis is handled by GTA Guard',detail:'Only the response headers were observed. The file was not downloaded, hashed, analyzed, or executed.'}], contentType: mime, files: [], fileScanExcluded:true, statusOverride:'unavailable' };
   }
-  const finalIntel = page.url !== requested.href ? await Promise.resolve().then(()=>lookup(page.url)).catch(()=>({status:'unavailable',message:'Final URL threat lookup did not complete.'})) : intel;
-  const assessed=assessPage({...evidence,redirects:page.redirects,reputation:intel,finalReputation:finalIntel});
+  const {urlReputations,finalReputation:finalIntel}=await inspectRedirectReputation(requested.href,page,intel,{lookup,onEvent});
+  const assessed=assessPage({...evidence,redirects:page.redirects,reputation:intel,finalReputation:finalIntel,urlReputations});
   evidence.signals=assessed.signals;
   const {status}=assessed;
   let image = {status:'skipped',detail:isHtml ? 'Cloud-browser preview is available after you choose Advanced website scan.' : 'No browser preview is created for a direct file link.'};
@@ -115,9 +116,11 @@ export async function scanSite(input,{transport=fetchPublic,lookup=lookupReputat
     else onEvent({phase:'cloud_browser_unavailable',message:'The isolated browser preview was unavailable; HTML evidence is still shown'});
   }
   onEvent({phase:'analysis_done',message:isHtml?'Independent HTML analysis completed; preparing the evidence report':'No HTML page was received; preparing the file-exclusion report'});
+  const threatSources=urlReputations.flatMap(item=>item.reputation.sources||[item.reputation]).filter(item=>item.status!=='unconfigured');
+  const threatComplete=threatSources.length>0&&threatSources.every(item=>['listed','not_found'].includes(item.status));
   const id = randomUUID();
-  const result = { id, url: requested.href, finalUrl: page.url, domain: new URL(page.url).hostname, createdAt: new Date().toISOString(), status, ...evidence, preview:image, redirects: page.redirects, reputation: intel, finalReputation: finalIntel, advanced: false,scanMode:allowCloudPreview?'advanced':'basic',responseHeaders:{csp:!!page.headers['content-security-policy'],hsts:!!page.headers['strict-transport-security'],noSniff:String(page.headers['x-content-type-options']||'').toLowerCase()==='nosniff'},inputAdjusted,pageFetch:{status:'done',attempts:page.attempts},
-    checks: [{ title: isHtml ? 'دریافت محتوای سایت' : 'مشاهدهٔ سرآیند لینک مستقیم فایل', status: 'done', detail: isHtml ? `HTTP ${page.status} · ${(page.bytes.length/1024).toFixed(1)} KB` : `HTTP ${page.status} · The file was not retrieved or analyzed in GameScam Guard.` }, { title: 'بررسی ارتباط', status: 'done', detail: new URL(page.url).protocol === 'https:' ? 'HTTPS · اعتبارسنجی گواهی انجام شد' : 'HTTP · بدون رمزگذاری' }, { title: 'بررسی نشانه‌های صفحه', status: isHtml?'done':'unavailable', detail: isHtml?`${evidence.linkCount} لینک در HTML دریافت‌شده بررسی شد`:'No HTML body was received; no page-content check was completed.' }, { title: 'استعلام منابع تهدید', status: ['listed','not_found'].includes(intel.status) ? 'done' : 'unavailable', detail: intel.message }],
+  const result = { id, url: requested.href, finalUrl: page.url, domain: new URL(page.url).hostname, createdAt: new Date().toISOString(), status, ...evidence, preview:image, redirects: page.redirects, reputation: intel, finalReputation: finalIntel, urlReputations, advanced: false,scanMode:allowCloudPreview?'advanced':'basic',responseHeaders:{csp:!!page.headers['content-security-policy'],hsts:!!page.headers['strict-transport-security'],noSniff:String(page.headers['x-content-type-options']||'').toLowerCase()==='nosniff'},inputAdjusted,pageFetch:{status:'done',attempts:page.attempts},
+    checks: [{ title: isHtml ? 'دریافت محتوای سایت' : 'مشاهدهٔ سرآیند لینک مستقیم فایل', status: 'done', detail: isHtml ? `HTTP ${page.status} · ${(page.bytes.length/1024).toFixed(1)} KB` : `HTTP ${page.status} · The file was not retrieved or analyzed in GameScam Guard.` }, { title: 'بررسی ارتباط', status: 'done', detail: new URL(page.url).protocol === 'https:' ? 'HTTPS · اعتبارسنجی گواهی انجام شد' : 'HTTP · بدون رمزگذاری' }, { title: 'بررسی نشانه‌های صفحه', status: isHtml?'done':'unavailable', detail: isHtml?`${evidence.linkCount} لینک در HTML دریافت‌شده بررسی شد`:'No HTML body was received; no page-content check was completed.' }, { title: 'استعلام منابع تهدید', status: threatComplete ? 'done' : 'unavailable', detail: `${urlReputations.length} observed addresses · ${threatComplete?'Configured source lookups completed':'Required threat-source evidence is incomplete'}. No safety guarantee.` }],
     limitations: ['این بررسی محتوای عمومی HTML را می‌خواند؛ در پیش‌نمایش مرورگر، جاوااسکریپت، ورود، خرید و دانلود خودکار غیرفعال هستند.', 'عدم مشاهدهٔ تهدید به معنی تأیید اصالت فروشنده یا تضمین امنیت نیست.', 'Direct file links are not retrieved or analyzed here; use GTA Guard for files.'] };
   if (result.siteAnalysis) result.checks.splice(3,0,{title:'تحلیل مستقل محتوای HTML',status:'done',detail:`موتور ${result.siteAnalysis.version} · فرم‌ها، منابع اسکریپت، انتقال HTML و فهرست لینک‌ها بررسی شدند؛ جاوااسکریپت اجرا نشده است.`});
   return rememberSite(result);

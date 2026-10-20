@@ -54,7 +54,7 @@ export async function lookupUrl(value, {authKeyProvider = urlhausAuthKey, transp
   try {
     const body = new URLSearchParams({url:value}).toString();
     const response = await transport('https://urlhaus-api.abuse.ch/v1/url/',{
-      method:'POST',noRedirect:true,limit:1024*1024,
+      method:'POST',noRedirect:true,limit:1024*1024,timeout:7000,totalTimeout:10000,
       headers:{'Auth-Key':authKey,'Content-Type':'application/x-www-form-urlencoded','Content-Length':Buffer.byteLength(body)},body,
     });
     if ([401,403].includes(response.status)) return authError(`http_${response.status}`);
@@ -77,6 +77,7 @@ export async function lookupFileHash(hash) {
 }
 
 export async function lookupReputation(value,{urlhaus=lookupUrl,phishing=lookupPhishingUrl}={}){
+ const address=new URL(value);address.hash='';value=address.href;
  const tasks=[['urlhaus',urlhaus],['openphish',phishing]];
  const sources=await Promise.all(tasks.map(async([provider,lookup])=>{try{return {...await lookup(value),provider};}catch{return {provider,status:'unavailable',message:'The source did not respond.'};}}));
  const listed=sources.filter(source=>source.status==='listed'),checked=sources.filter(source=>['listed','not_found'].includes(source.status));

@@ -1,5 +1,6 @@
 // These are evidence categories, not fifteen independent antivirus engines.
 // "Inspected" describes coverage and never certifies a website as harmless.
+import {reportReputations} from './redirect-intel.js';
 export function inspectionLayers(report) {
   const html=report.siteAnalysis;
   const received=report.pageFetch?.status==='done'&&!!html;
@@ -11,7 +12,7 @@ export function inspectionLayers(report) {
   row('network','Public network boundary',received?'inspected':'unavailable',received?'Resolved addresses and redirect connections passed public-IP validation.':'A complete public-page connection was not established.');
   row('transport','Connection encryption',received?'inspected':'unavailable',received?(report.finalUrl.startsWith('https:')?'HTTPS certificate validation remained enabled.':'The final page uses unencrypted HTTP.'):report.pageFetch?.detail||'Connection evidence is unavailable.');
   row('redirects','HTTP redirect chain',received?'inspected':'unavailable',received?`${report.redirects?.length||0} HTTP redirects recorded.`:'A complete redirect chain was not observed.');
-  const providers=[report.reputation,report.finalReputation].filter(Boolean).flatMap(item=>item.sources||[item]);
+  const providers=reportReputations(report).flatMap(item=>item.sources||[item]);
   const requestedProviders=providers.filter(item=>item.status!=='unconfigured');
   row('reputation','Threat intelligence sources',providers.some(item=>item.status==='listed')?'finding':requestedProviders.length&&requestedProviders.every(item=>['not_found','listed'].includes(item.status))?'inspected':'unavailable',providers.map(item=>item.message).join(' ')||'The threat database was not queried.');
   row('identity','Received HTML evidence',received?'inspected':'unavailable',received?`${html.receivedBytes} bytes received; SHA-256 ${html.htmlSha256}.`:'No HTML body was available to hash or inspect.');

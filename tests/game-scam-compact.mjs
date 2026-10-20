@@ -11,7 +11,7 @@ const image='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCA
 const html=Buffer.from('<html><title>Owned UI fixture</title><body><p>Public information</p><a href="/one">One</a><a href="/two">Two</a><a href="/three">Three</a><a href="/download.zip">Excluded download</a><script>navigator.serviceWorker.register("/fixture-sw.js");</script></body></html>');
 let childStatus='limited',hold=false,release,previewCalls=0;
 const api=createApp({emailAuth:{enabled:true,status:{},availability:async()=>({email:'available',username:'available'}),start:async()=>({verificationToken:'owned-ticket'}),verify:async()=>({sessionToken:'owned-session'}),session:()=>({email:'player@example.com',firstName:'Fixture'})},providerStatus:()=>({urlhaus:true,openphish:false}),
- scanSite:async(url,options)=>{await new Promise(resolve=>setTimeout(resolve,150));return scanSite(url,{...options,validate:async address=>{if(['127.0.0.1','169.254.169.254'].includes(address.hostname))throw Object.assign(new Error('Private addresses'),{status:400});},lookup:async()=>({status:'not_found',message:'Owned threat source fixture',sources:[{provider:'urlhaus',status:'not_found',message:'Owned fixture'},{provider:'openphish',status:'unconfigured',message:'Disabled'}]}),transport:async address=>({url:address.href,status:200,headers:{'content-type':'text/html'},bytes:html,redirects:[]}),preview:async()=>({status:'done',image,detail:'Owned fixture snapshot'})});},
+ scanSite:async(url,options)=>{await new Promise(resolve=>setTimeout(resolve,150));return scanSite(url,{...options,validate:async address=>{if(['127.0.0.1','169.254.169.254'].includes(address.hostname))throw Object.assign(new Error('Private addresses'),{status:400});},lookup:async()=>({status:'not_found',message:'Owned threat source fixture',sources:[{provider:'urlhaus',status:'not_found',message:'Owned fixture'},{provider:'openphish',status:'unconfigured',message:'Disabled'}]}),transport:async address=>({url:address.href,status:200,headers:{'content-type':'text/html'},bytes:html,redirects:[{from:address.href,to:new URL('/hop',address).href,status:302},{from:new URL('/hop',address).href,to:address.href,status:302}]}),preview:async()=>({status:'done',image,detail:'Owned fixture snapshot'})});},
  preparePreview:job=>prepareJobPreview(job,{transport:async url=>({url,bytes:html}),preview:async()=>{previewCalls++;return {status:'done',image,detail:'Owned fixture snapshot'};}}),
  stepJob:(input,options)=>stepScanJob(input,{...options,inspect:async target=>{if(hold&&target.url.endsWith('/two'))await new Promise(resolve=>{release=resolve;});return {...target,status:childStatus,detail:'Owned fixture destination'};}})
 });
@@ -49,6 +49,7 @@ try{
  page=await context.newPage();page.setDefaultTimeout(15000);page.on('pageerror',error=>errors.push(error.message));
  await page.goto(`http://127.0.0.1:${server.address().port}/game-scam-guard/`);
  assert.equal(await page.locator('html').getAttribute('lang'),'en');await assertLanguage('en');
+ assert.equal(await page.locator('.g-brand-logo').evaluate(img=>img.complete&&img.naturalWidth===192),true);
  for(const viewport of [{width:320,height:740},{width:390,height:844},{width:820,height:1080},{width:1440,height:1000}]){
   await page.setViewportSize(viewport);const size=await page.evaluate(()=>({width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,scrollHeight:document.documentElement.scrollHeight}));
   assert.ok(size.scrollWidth<=size.width,'No horizontal scroll');assert.ok(size.scrollHeight<=size.height*1.05,'The initial screen fits without a long landing page');evidence.viewports.push({...viewport,initialHeight:size.scrollHeight});
@@ -65,6 +66,7 @@ try{
  record('compact initial and completed screens at 320/390/820/1440px; details closed by default');
  await page.setViewportSize({width:390,height:844});
  for(const panel of ['Overview','Evidence','Coverage','Linked pages','Threat sources']){await details(panel);await assertLanguage('en');}
+ await details('Threat sources');assert.equal(await page.locator('.g-url-sources').count(),2);assert.equal(await page.locator('.g-url-sources p[dir=ltr]').last().innerText(),'https://example.com/hop');
  await details('Coverage');assert.equal(await page.locator('.analysis-modules article').count(),20);await assertReadable('.analysis-modules b,.g-intro h1');record('20 actual analysis modules and all English report panels');
  await page.getByRole('button',{name:'Change language',exact:true}).click();assert.equal(await page.locator('html').getAttribute('lang'),'fa');
  for(const panel of ['خلاصه','شواهد','پوشش','صفحه‌های مرتبط','منابع تهدید']){await details(panel);await assertLanguage('fa');}

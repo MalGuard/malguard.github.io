@@ -76,3 +76,13 @@ test('corrupt rendered routing and layer evidence are rejected before history re
   assert.deepEqual(readHistory(JSON.stringify([report])),[report]);
   for(const file of [{...report.files[0],routing:{...routing,detail:{}}},{...report.files[0],artifact:{...analysis,layers:[null]}},{...report.files[0],artifact:{...analysis,observedUrls:[{}]}}])assert.deepEqual(readHistory(JSON.stringify([{...report,files:[file]}])),[]);
 });
+
+test('redirect source evidence is validated before reopening root and destination reports',()=>{
+ const trail=[{url:'https://example.com/hop',reputation:{status:'listed',message:'Synthetic test observation'}}];
+ const report={...valid,urlReputations:trail};assert.deepEqual(readHistory(JSON.stringify([report])),[report]);
+ for(const value of [{},[null],[{url:'javascript:example',reputation:trail[0].reputation}],[{url:trail[0].url,reputation:{status:{},message:'Invalid'}}],Array(6).fill(trail[0])])assert.deepEqual(readHistory(JSON.stringify([{...valid,urlReputations:value}])),[]);
+ const destination={id:'child',name:'Child',url:'https://example.com/child',kind:'page',status:'danger',urlReputations:trail};
+ const parent={...valid,destinationResults:[destination],jobSummary:{total:1,completed:1,omitted:0,bytesRead:0,done:true}};
+ assert.deepEqual(readHistory(JSON.stringify([parent])),[parent]);
+ assert.deepEqual(readHistory(JSON.stringify([{...parent,destinationResults:[{...destination,urlReputations:[null]}]}])),[]);
+});

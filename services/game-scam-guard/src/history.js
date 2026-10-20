@@ -10,6 +10,7 @@ const webUrl = value => {
 };
 const reputationItem=value=>isObject(value)&&text(value.status)&&text(value.message);
 const reputation = value => value === undefined || (reputationItem(value)&&(value.sources===undefined||(Array.isArray(value.sources)&&value.sources.length<=8&&value.sources.every(item=>reputationItem(item)&&text(item.provider)))));
+const urlReputations=value=>value===undefined||(Array.isArray(value)&&value.length<=5&&value.every(item=>isObject(item)&&webUrl(item.url)&&reputationItem(item.reputation)&&reputation(item.reputation)));
 const localized=value=>value===undefined||(isObject(value)&&['en','fa'].every(locale=>isObject(value[locale])&&text(value[locale].title)&&text(value[locale].detail)));
 const signal=value=>isObject(value)&&text(value.title)&&text(value.detail)&&localized(value.localized)&&(value.evidence===undefined||list(value.evidence,text));
 const analysisEngine=value=>value===undefined||(isObject(value)&&text(value.version)&&Array.isArray(value.modules)&&value.modules.length<=64&&value.modules.every(item=>isObject(item)&&text(item.id)&&['inspected','finding','incomplete'].includes(item.status)&&count(item.findings))&&isObject(value.limits)&&count(value.limits.omittedScripts)&&typeof value.limits.javaScriptExecuted==='boolean');
@@ -28,7 +29,7 @@ const artifact=(value,depth=0)=>value===undefined||(depth<=2&&isObject(value)&&t
   &&(value.archive===undefined||(isObject(value.archive)&&count(value.archive.inspected)&&count(value.archive.listed)&&list(value.archive.entries,item=>isObject(item)&&text(item.name)&&text(item.status)&&count(item.size)&&optionalText(item.sha256)&&(item.permissions===undefined||list(item.permissions,text))&&artifact(item.nested,depth+1)&&peEvidence(item.peEngine)))));
 const routing=value=>value===undefined||(isObject(value)&&text(value.code)&&text(value.detail)&&typeof value.fallback==='boolean');
 const destination=value=>isObject(value)&&['id','name','kind','status'].every(key=>text(value[key]))&&webUrl(value.url)&&optionalText(value.title)&&optionalText(value.detail)&&artifact(value.artifact)&&behavior(value.behavior)&&routing(value.routing)
-  &&reputation(value.reputation)&&reputation(value.fileReputation)&&reputation(value.finalReputation)
+  &&reputation(value.reputation)&&reputation(value.fileReputation)&&reputation(value.finalReputation)&&urlReputations(value.urlReputations)
   &&(value.finalUrl===undefined||webUrl(value.finalUrl))
   &&analysisEngine(value.analysisEngine)
   &&(value.findings===undefined||list(value.findings,signal));
@@ -72,7 +73,7 @@ function report(value) {
     && list(value.checks, item => isObject(item) && ['title', 'status', 'detail'].every(key => text(item[key])))
     && list(value.signals, item => signal(item)&&text(item.level))
     && list(value.redirects, item => isObject(item) && webUrl(item.from) && webUrl(item.to) && count(item.status))
-    && reputation(value.reputation) && reputation(value.finalReputation)
+    && reputation(value.reputation) && reputation(value.finalReputation) && urlReputations(value.urlReputations)
     && inventory(value.linkInventory) && siteAnalysis(value.siteAnalysis)
     && (value.destinationResults===undefined||list(value.destinationResults,destination))
     && (value.destinationResults===undefined||value.jobSummary!==undefined)
