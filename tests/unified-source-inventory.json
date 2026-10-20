@@ -67,6 +67,10 @@
       "surface": "preserved content and functional controls"
     },
     {
+      "path": "gamescam-guard-android.html",
+      "surface": "GameScam Guard Android test release and installation guidance"
+    },
+    {
       "path": "gta-guard.html",
       "baselineSHA256": "53c66d1ea8a81b968349a2f47037b25628edc69772fd5e176ca27955b26e8829",
       "preparedSHA256": "e5dc34ef9cc987c0f317740a322f170cc1469804c759a8294280e170c7c3391c",
@@ -213,7 +217,7 @@
       "surface": "preserved content and functional controls"
     }
   ],
-  "publicRouteCount": 40,
+  "publicRouteCount": 41,
   "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
   "functionalRuntimePreserved": [
     "assets/public-release.mjs",

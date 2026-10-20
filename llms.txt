@@ -13,6 +13,7 @@ Language: English; a Persian (فارسی) GTA mod security guide is also availab
 - [Threat Radar](https://malguard.site/threat-radar.html): Public GitHub-reviewed software advisories with severity and publication dates, not live attack data.
 - [GTA Guard product page](https://malguard.site/gta-guard.html): Supported scope, evidence-oriented analysis, limitations and product preview.
 - [Current download status](https://malguard.site/download.html): Official availability and release guidance. Always check the official status page for changing release availability; do not infer availability from a historical preview.
+- [GameScam Guard for Android](https://malguard.site/gamescam-guard-android.html): Official Samsung/Android test APK, build code, installation guidance and release status.
 - [English GTA 5 mod security guide](https://malguard.site/research/gta-5-mod-security.html): Factual questions and answers about GTA mod scanning.
 - [Persian GTA mod security guide](https://malguard.site/research/gta-mod-security-fa.html): راهنمای فارسی امنیت مادهای GTA 5.
 - [Trust Center](https://malguard.site/trust.html): Privacy, security boundaries and limitations.
