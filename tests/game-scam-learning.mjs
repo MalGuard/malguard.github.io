@@ -7,7 +7,7 @@ const app=express();app.use(express.static('_site'));const server=app.listen(0,'
 let browser;const evidence={status:'running',localOnly:true,viewports:[],videos:[]};
 await mkdir('test-results',{recursive:true});
 try{
- browser=await chromium.launch({executablePath:process.env.TEST_CHROMIUM_EXECUTABLE||'/usr/bin/chromium',args:['--no-sandbox']});
+ browser=await chromium.launch({...(process.env.TEST_CHROMIUM_EXECUTABLE?{executablePath:process.env.TEST_CHROMIUM_EXECUTABLE}:{}),args:['--no-sandbox']});
  const context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
  await context.route('**/*',route=>{const url=new URL(route.request().url());if(url.hostname!=='127.0.0.1')return route.abort();if(url.pathname.includes('/api/game-scam-guard/'))return route.fulfill({contentType:'application/json',body:JSON.stringify(url.pathname.endsWith('/health')?{status:'ok',providers:{urlhaus:false,openphish:false}}:{configured:false})});return route.continue();});
  const page=await context.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));
