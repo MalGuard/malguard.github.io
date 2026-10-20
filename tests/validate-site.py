@@ -7,11 +7,6 @@ from hashlib import sha256
 ROOT=Path(__file__).resolve().parents[1]
 PUBLIC_AI_GUIDES=[ROOT/'research/gta-5-mod-security.html', ROOT/'research/gta-mod-security-fa.html']
 PAGES=[ROOT/'index.html', *[p for p in ROOT.glob('*.html') if p.name!='index.html'],ROOT/'ios-preview/index.html',ROOT/'research/repackaged-mod.html',ROOT/'research/security-motion.html',*PUBLIC_AI_GUIDES,ROOT/'research/mod-download-checklist.html',ROOT/'research/scan-result-limits.html',
-    'research/windows-signatures-hashes-and-smartscreen.html',
-    'research/game-mod-archives-file-types.html',
-    'research/fake-gaming-download-links.html',
-    'research/contributing-to-open-source-security.html',
-    'research/windows-file-signatures-fa.html',
     ROOT/'research/windows-signatures-hashes-and-smartscreen.html',
     ROOT/'research/game-mod-archives-file-types.html',
     ROOT/'research/fake-gaming-download-links.html',
@@ -193,6 +188,11 @@ editorial_paths = [
     'security-evidence.html',
     'research/mod-download-checklist.html',
     'research/scan-result-limits.html',
+    'research/windows-signatures-hashes-and-smartscreen.html',
+    'research/game-mod-archives-file-types.html',
+    'research/fake-gaming-download-links.html',
+    'research/contributing-to-open-source-security.html',
+    'research/windows-file-signatures-fa.html',
 ]
 inventory = json.loads((ROOT/'tests/unified-source-inventory.json').read_text())
 for path in editorial_paths:
