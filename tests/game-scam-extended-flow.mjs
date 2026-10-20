@@ -41,7 +41,7 @@ try{
     await page.locator('.advanced-prompt button').click();
     await page.getByRole('button',{name:'Scan public pages',exact:true}).click();
     await page.locator('.assessment-comparison').waitFor();
-    assert.equal(await page.locator(`.verdict.${status}`).count(),1);
+    assert.equal(await page.locator(`.verdict.${status}`).count(),1);assert.equal(await page.locator('.verdict .status-badge').isVisible(),true);
     assert.equal(await page.locator('.assessment-comparison .status-badge.limited').first().count(),1);
     const report=await page.evaluate(()=>JSON.parse(localStorage.getItem('gamescam-guard-history-v1'))[0]);
     assert.equal(report.initialAssessment.status,'limited');
@@ -59,6 +59,13 @@ try{
     await mkdir('test-results',{recursive:true});
     await page.screenshot({path:`test-results/game-scam-extended-${status}.png`,fullPage:true});
   }
+  await page.getByLabel('Website link').fill('http://example.com/');
+  await page.getByRole('button',{name:'Start scan',exact:true}).click();
+  await page.locator('.signal.warning').waitFor();
+  const warningBackground=await page.locator('.signal.warning').first().evaluate(el=>getComputedStyle(el).backgroundColor);
+  assert.notEqual(warningBackground,'rgb(255, 252, 243)','Warning evidence must not retain a pale background under light dark-theme text');
+  assert.equal(await page.locator('.verdict .status-badge').isVisible(),true);
+  await page.screenshot({path:'test-results/game-scam-warning-mobile.png',fullPage:false});
   assert.equal(previewCalls,3);assert.deepEqual(errors,[]);
   console.log('PASS: visible scan activity, basic-to-advanced browser upgrade, original verdict preservation, excluded downloads, explained coverage/threat changes and 15 evidence categories at 320/390/820/1440px.');
 }finally{

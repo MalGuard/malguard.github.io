@@ -133,3 +133,16 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,s
 @media(prefers-reduced-motion:reduce){.scan-orbit:before,.scan-activity-track i{animation:none}}
 
 @media(max-width:600px){.how-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.how-strip>div{flex-direction:column;text-align:center;gap:8px;min-width:0}.how-strip>.step-arrow,.how-strip em{display:none}.how-strip b{font-size:12px;white-space:normal;line-height:1.7}.how-strip small{font-size:11px;white-space:normal;line-height:1.8}.hero-copy p{font-size:13px;line-height:1.9}.form-title p,.input-hint{font-size:12px;line-height:1.8}}
+
+/* Warning evidence must remain legible on the portal's dark surfaces. */
+.signal{background:#101c2b;border-color:rgba(166,201,238,.2)}
+.signal.warning{background:rgba(255,193,113,.08);border-color:rgba(255,193,113,.3)}
+.signal.danger{background:rgba(255,125,143,.08);border-color:rgba(255,125,143,.3)}
+.signal b{color:#edf4ff}.signal p{color:#bdcadd}.signal.warning>svg{color:#ffc171}.signal.danger>svg{color:#ffadba}
+.verdict .status-badge{display:inline-flex;white-space:normal;line-height:1.6;font-size:12px}
+@media(max-width:600px){
+ .report-summary>div:nth-child(n){grid-column:auto;grid-row:auto}
+ .topbar{flex-wrap:wrap;height:auto;min-height:64px;padding-block:8px;gap:8px}
+ .header-actions{flex:1;justify-content:flex-end}.profile-name{display:block;font-size:12px}.profile-name small{font-size:10px}
+ .visual-card{display:none}.verdict strong{font-size:13px}.verdict p{font-size:11px}.signal b{font-size:13px}
+}
