@@ -137,6 +137,18 @@
       "surface": "Native project resource or reporting page"
     },
     {
+      "path": "research/contributing-to-open-source-security.html",
+      "surface": "Public educational research; no active scanning or runtime code"
+    },
+    {
+      "path": "research/fake-gaming-download-links.html",
+      "surface": "Public educational research; no active scanning or runtime code"
+    },
+    {
+      "path": "research/game-mod-archives-file-types.html",
+      "surface": "Public educational research; no active scanning or runtime code"
+    },
+    {
       "path": "research/gta-5-mod-security.html",
       "surface": "Reviewed bilingual GTA mod security guide"
     },
@@ -163,6 +175,14 @@
       "baselineSHA256": "7a1da5c19f22dccb5dd14e465e9bd239d33547ab38c8e630e31cdc04445b4f3f",
       "preparedSHA256": "cfdff6e277074d83b408f0c555c87e25b47ef672c267bba1e782d4c089a2552a",
       "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "research/windows-file-signatures-fa.html",
+      "surface": "Public educational research; no active scanning or runtime code"
+    },
+    {
+      "path": "research/windows-signatures-hashes-and-smartscreen.html",
+      "surface": "Public educational research; no active scanning or runtime code"
     },
     {
       "path": "sandbox-help.html",
@@ -217,7 +237,7 @@
       "surface": "preserved content and functional controls"
     }
   ],
-  "publicRouteCount": 41,
+  "publicRouteCount": 46,
   "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
   "functionalRuntimePreserved": [
     "assets/public-release.mjs",
