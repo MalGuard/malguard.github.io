@@ -22,10 +22,21 @@
     },
     "gameScamGuard": {
       "name": "Game Scam Guard",
-      "status": "in-development",
-      "downloadEnabled": false,
-      "previewUrl": "https://game-scam-guard-connected.vercel.app/game-scam-guard/",
-      "previewAccess": "vercel-authenticated"
+      "status": "public-web-and-android-test",
+      "downloadEnabled": true,
+      "previewUrl": "https://malguard.site/game-scam-guard/",
+      "previewAccess": "public",
+      "detailsUrl": "/game-scam-guard.html",
+      "android": {
+        "status": "debug-test-apk",
+        "version": "1.0.0",
+        "releaseCode": "GSG-ANDROID-1.0.0-B7ABB01",
+        "applicationId": "site.malguard.gamescamguard",
+        "minimumAndroid": "8.0 (API 26)",
+        "detailsUrl": "/gamescam-guard-android.html",
+        "artifactRunUrl": "https://github.com/MalGuard/malguard.github.io/actions/runs/39309423470",
+        "automaticUpdates": false
+      }
     },
     "threatRadar": {
       "name": "Threat Radar",

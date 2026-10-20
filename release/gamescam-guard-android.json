@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0.0",
+  "product": "GameScam Guard",
+  "platform": "android",
+  "version": "1.0.0",
+  "releaseCode": "GSG-ANDROID-1.0.0-B7ABB01",
+  "sourceCommit": "b7abb01da69797412a9bed59b453d632b9a67361",
+  "applicationId": "site.malguard.gamescamguard",
+  "minimumSdk": 26,
+  "minimumAndroid": "8.0",
+  "artifactName": "gamescam-guard-android-debug",
+  "artifactRunUrl": "https://github.com/MalGuard/malguard.github.io/actions/runs/39309423470",
+  "apkFilename": "app-debug.apk",
+  "distribution": "github-actions-artifact",
+  "signing": "debug-test",
+  "automaticUpdates": false,
+  "changes": [
+    "Initial Samsung/Android test app.",
+    "Hardened WebView opens only approved MalGuard destinations in-app.",
+    "HTTPS-only, Safe Browsing where supported, no file/content access, mixed content, geolocation, or third-party cookies."
+  ]
+}
