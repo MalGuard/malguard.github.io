@@ -38,16 +38,17 @@ test('page evidence records download links as excluded without retrieving file c
   assert.ok(!evidence.excerpt.includes('free gems'));
 });
 
-test('HTTP and suspicious claims create caution signals without claiming a malware verdict', () => {
+test('HTTP remains caution while gaming words are context rather than a malware verdict', () => {
   const evidence=parsePage(Buffer.from('<title>FC crack</title><body>Unlimited coins<input type="password"></body>'),'http://store.example');
-  assert.equal(evidence.signals.filter(s=>s.level==='warning').length,2);
+  assert.equal(evidence.signals.filter(s=>s.level==='warning').length,1);
+  assert.ok(evidence.signals.some(s=>s.rule==='gaming_risk_language'&&s.level==='info'),'Keyword mentions are context; actionable form or network evidence determines caution');
   assert.equal(evidence.signals.some(s=>s.level==='danger'),false);
   assert.equal(evidence.signals.some(s=>s.title==='فرم ورود شناسایی شد'),true);
 });
 
-test('website provider status exposes only URLhaus configuration', () => {
+test('website provider status exposes configuration flags without credential values', () => {
   assert.equal(typeof providerStatus().urlhaus,'boolean');
-  assert.deepEqual(Object.keys(providerStatus()),['urlhaus']);
+  assert.deepEqual(Object.keys(providerStatus()),['urlhaus','openphish']);
 });
 
 const sampleHash = 'a'.repeat(64);
@@ -123,7 +124,7 @@ test('original GTA credential variable is compatible and the new variable takes 
     delete process.env.ABUSECH_AUTH_KEY;
     process.env.MALGUARD_ABUSECH_AUTH_KEY='legacy-fixture';
     assert.equal(abuseAuthKey(),'legacy-fixture');
-    assert.deepEqual(providerStatus(),{urlhaus:true});
+    assert.deepEqual(providerStatus(),{urlhaus:true,openphish:process.env.GUARD_OPENPHISH_ENABLED==='true'});
     process.env.ABUSECH_AUTH_KEY='new-fixture';
     assert.equal(abuseAuthKey(),'new-fixture');
   } finally {
@@ -145,7 +146,7 @@ test('a separate MalwareBazaar key authenticates hash queries without replacing 
   try {
     for (const key of keys) delete process.env[key];
     process.env.MALWAREBAZAAR_AUTH_KEY = 'bazaar-fixture';
-    assert.deepEqual(providerStatus(),{urlhaus:false});
+    assert.deepEqual(providerStatus(),{urlhaus:false,openphish:process.env.GUARD_OPENPHISH_ENABLED==='true'});
     let sent;
     const client = createBazaarClient({fetchImpl:async (url,request)=> {
       sent = request.headers['Auth-Key'];
@@ -195,9 +196,9 @@ test('URLhaus can explicitly reuse the existing abuse.ch Bazaar key without chan
     assert.equal(process.env.ABUSECH_AUTH_KEY,'original-fixture');
     assert.equal(malwareBazaarAuthKey(),'valid-shared-fixture');
     delete process.env.ABUSECH_AUTH_KEY;
-    assert.deepEqual(providerStatus(),{urlhaus:true});
+    assert.deepEqual(providerStatus(),{urlhaus:true,openphish:process.env.GUARD_OPENPHISH_ENABLED==='true'});
     delete process.env.MALWAREBAZAAR_AUTH_KEY;
-    assert.deepEqual(providerStatus(),{urlhaus:false});
+    assert.deepEqual(providerStatus(),{urlhaus:false,openphish:process.env.GUARD_OPENPHISH_ENABLED==='true'});
     process.env.ABUSECH_AUTH_KEY='original-fixture';
     assert.equal(urlhausAuthKey(),undefined,'Explicit source never silently substitutes another secret');
     delete process.env.URLHAUS_AUTH_KEY_SOURCE;

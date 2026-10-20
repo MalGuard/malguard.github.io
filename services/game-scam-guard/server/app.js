@@ -5,6 +5,7 @@ import * as scanner from './scanner.js';
 import { ScanError } from './network.js';
 import {startScanJob,stepScanJob,scanJobReport,prepareJobPreview} from './scan-jobs.js';
 import {createEmailAuth} from './email-auth.js';
+import {cachedSelfTest} from './self-test.js';
 
 export function createApp({ scanSite = scanner.scanSite, providerStatus = scanner.providerStatus,startJob=startScanJob,stepJob=stepScanJob,emailAuth=createEmailAuth(),preparePreview=prepareJobPreview } = {}) {
 const app = express();
@@ -73,6 +74,7 @@ const handleScan = operation => async (req,res) => {
   }
 };
 app.get('/api/health', (req,res)=>res.json({ status: 'ok', providers: providerStatus(), mode: 'website-link-inspection', maxLinkedPages:128 }));
+app.get('/api/self-test',(req,res)=>res.json(cachedSelfTest()));
 app.get('/api/account-config',(req,res)=>{
   // This is Clerk's intentionally public browser identifier, never a secret key.
   const key=process.env.GUARD_CLERK_PUBLISHABLE_KEY||'';

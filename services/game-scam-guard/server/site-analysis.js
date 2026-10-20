@@ -1,6 +1,7 @@
 // Independent inspection of received HTML. This module never connects to a URL,
 // executes JavaScript, submits forms, or collects entered field values.
-export const SITE_ENGINE_VERSION = '1.1.0';
+export const SITE_ENGINE_VERSION = '2.0.0';
+import {scriptFacts} from './script-facts.js';
 export const FILE_LINK = /\.(exe|msi|apk|xapk|zip|rar|7z|dmg|pkg|iso|dll|asi|bat|cmd|ps1|scr|jar|deb|tar|gz|pdf|js|mjs|cjs|py|sh|elf|lua)(?:$|[?#])/i;
 const short = (text, limit = 180) => String(text || '').replace(/\s+/g, ' ').trim().slice(0, limit);
 
@@ -11,7 +12,7 @@ export function documentBase($, pageUrl) {
   } catch { return pageUrl; }
 }
 
-const endpoint = url => `${url.origin}${url.pathname}`; // No query, fragment, or credentials in form evidence.
+const endpoint = url => {const value=`${url.origin}${url.pathname}`;return value.length>300?value.slice(0,299)+'…':value;}; // No query, fragment, credentials or unbounded path in form evidence.
 const webTarget = (value, base) => {
   try {
     const url = new URL(value, base);
@@ -68,6 +69,7 @@ export function inspectSite($, pageUrl) {
   let externalScripts = 0;
   let inlineScripts = 0;
   let nonExecutableScripts = 0;
+  let syntaxScripts=0,syntaxBytes=0,scriptSyntaxOmitted=0;
   $('script').each((index, element) => {
     const script = $(element);
     const type = String(script.attr('type') || '').split(';')[0].trim().toLowerCase();
@@ -83,10 +85,12 @@ export function inspectSite($, pageUrl) {
     } else {
       inlineScripts++;
       const source = script.html() || '';
-      const decoder = /\b(?:atob|unescape|fromCharCode)\s*\(/.exec(source);
-      const executor = /\b(?:eval|Function)\s*\(/.exec(source);
-      if (decoder && executor) {
-        add('encoded_dynamic_code', 'رمزگشایی و اجرای پویای کد در اسکریپت', `در اسکریپت داخلی ${index + 1} نشانه‌های ${short(decoder[0],40)} و ${short(executor[0],40)} دیده شد. این الگو در کد سالم هم ممکن است وجود داشته باشد و اثبات بدافزار نیست؛ کد اجرا نشده است.`);
+      if(!source.trim())return;
+      if(syntaxScripts>=256||syntaxBytes+source.length>512*1024){scriptSyntaxOmitted++;return;}
+      syntaxScripts++;syntaxBytes+=source.length;
+      const facts=scriptFacts(source);
+      if (facts.encodedEvaluation) {
+        add('encoded_dynamic_code', 'رمزگشایی و اجرای پویای کد در اسکریپت', `در اسکریپت داخلی ${index + 1} رمزگشایی داخل ارزیابی پویا دیده شد. این الگو در کد سالم هم ممکن است وجود داشته باشد و اثبات بدافزار نیست؛ کد اجرا نشده است.`);
       }
     }
   });
@@ -136,7 +140,7 @@ export function inspectSite($, pageUrl) {
   return {
     signals,
     siteAnalysis:{engine:'GameScam Guard HTML',version:SITE_ENGINE_VERSION,status:'done',scope:'received-html',rulesChecked:7,
-      sensitiveForms,externalScripts,inlineScripts,nonExecutableScripts,refreshCount,deceptiveLinks,javaScriptExecuted:false,fileContentsRead:false},
+      sensitiveForms,externalScripts,inlineScripts,nonExecutableScripts,refreshCount,deceptiveLinks,scriptSyntaxOmitted,javaScriptExecuted:false,fileContentsRead:false},
     linkInventory:{total:totalLinks,retained:links.length,omitted,links,status:'discovered-only'},
     base,
   };

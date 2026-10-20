@@ -20,6 +20,14 @@ test('history preserves complete reports while dropping old or corrupted records
   assert.deepEqual(readHistory(JSON.stringify([...broken,valid])),[valid]);
 });
 
+test('new localized findings, module coverage and source arrays are validated before rendering',()=>{
+ const engine={version:'2.0.0',modules:[{id:'form-destinations',status:'finding',findings:1}],limits:{omittedScripts:0,javaScriptExecuted:false}};
+ const signal={level:'warning',title:'Original',detail:'Original detail',localized:{en:{title:'Finding',detail:'Observed'},fa:{title:'یافته',detail:'مشاهده شد'}},evidence:['https://example.com/']};
+ const item={...valid,analysisEngine:engine,signals:[signal],reputation:{status:'not_found',message:'Snapshot',sources:[{provider:'urlhaus',status:'not_found',message:'Snapshot'}]}};
+ assert.deepEqual(readHistory(JSON.stringify([item])),[item]);
+ for(const damaged of [{...item,analysisEngine:{...engine,modules:{}}},{...item,signals:[{...signal,localized:{en:{title:{}},fa:{title:'یافته',detail:'شرح'}}}]},{...item,reputation:{...item.reputation,sources:{}}},{...item,signals:[{...signal,evidence:[{}]}]}])assert.deepEqual(readHistory(JSON.stringify([damaged])),[]);
+});
+
 test('history recovers from invalid storage and limits valid records to thirty', () => {
   for (const raw of ['{broken','null','{}','[null,2,"old"]']) assert.deepEqual(readHistory(raw),[]);
   assert.equal(readHistory(JSON.stringify(Array.from({length:40},(_,index)=>({...valid,id:String(index)})))).length,30);

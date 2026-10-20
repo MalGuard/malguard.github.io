@@ -6,7 +6,7 @@
   "functions": {
     "api/game-scam-guard.js": {
       "maxDuration": 180,
-      "includeFiles": "services/game-scam-guard/server/{preview-worker.mjs,artifact-worker.mjs,artifact-engine.js,cloud-execution-worker.py,vendor/**}"
+      "includeFiles": "services/game-scam-guard/server/{preview-worker.mjs,preview-renderer.mjs,artifact-worker.mjs,artifact-engine.js,cloud-execution-worker.py,vendor/**}"
     }
   },
   "rewrites": [

@@ -4,7 +4,7 @@ import {inspectionLayers} from './inspection-layers.js';
 import {createReportTokens,reportTokens} from './report-token.js';
 import {fetchPublic,normalizeUrl,resolvePublic,ScanError} from './network.js';
 import {parsePage} from './scanner.js';
-import {lookupUrl} from './threat-intel.js';
+import {lookupReputation} from './threat-intel.js';
 import {assessPage} from './page-assessment.js';
 
 export const jobTokens=createReportTokens({maxBytes:1024*1024});
@@ -59,7 +59,7 @@ function jobDto(state,codec){
   return {...state,results:state.results.map(result=>({...targets.get(result.id),...result})),token:codec.issue(snapshot)};
 }
 
-export async function inspectJobTarget(target,{transport=fetchPublic,urlLookup=lookupUrl,validate=resolvePublic,maxBytes=2*1024*1024,signal,onEvent=()=>{}}={}){
+export async function inspectJobTarget(target,{transport=fetchPublic,urlLookup=lookupReputation,validate=resolvePublic,maxBytes=2*1024*1024,signal,onEvent=()=>{}}={}){
   const result={id:target.id,url:target.url,name:target.name,kind:target.kind,status:'unavailable'};
   let timer;
   try{await Promise.race([validate(normalizeUrl(target.url)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new ScanError('نام دامنه در زمان مجاز پاسخ نداد.')),5000);})]);}
@@ -82,8 +82,8 @@ export async function inspectJobTarget(target,{transport=fetchPublic,urlLookup=l
       onEvent({phase:'content_analysis',message:'تحلیل مستقل صفحهٔ مقصد'});
       if(response.bytes.length>2*1024*1024)throw new ScanError('صفحهٔ مقصد از سقف تحلیل HTML بیشتر است.');
       const page=parsePage(response.bytes,response.url,response.headers);
-      result.title=page.title;result.kind='page';result.linkCount=page.linkCount;result.fileCount=page.fileCount;result.siteAnalysis=page.siteAnalysis;
-      const assessed=assessPage({signals:page.signals,redirects:response.redirects,reputation:result.reputation,finalReputation:result.finalReputation});
+      result.title=page.title;result.kind='page';result.linkCount=page.linkCount;result.fileCount=page.fileCount;result.siteAnalysis=page.siteAnalysis;result.analysisEngine=page.analysisEngine;
+      const assessed=assessPage({signals:page.signals,analysisEngine:page.analysisEngine,redirects:response.redirects,reputation:result.reputation,finalReputation:result.finalReputation});
       // Keep all bounded HTML findings, including the reason for a redirect or
       // threat verdict; a linked-page report must not silently lose its evidence.
       result.findings=assessed.signals;
