@@ -37,7 +37,19 @@ for(const engine of engines){
    assert.equal((await page.goto(base+route)).status(),200);await page.waitForFunction(()=>document.documentElement.dataset.experienceReady==='true');
    assert(await page.locator('h1').first().isVisible());assert((await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth))<=1,route+' horizontal overflow');
    const heading=await page.locator('h1').first().boundingBox(),header=await page.locator('#navbar').boundingBox();assert(heading.y>=header.y+header.height,route+' heading overlaps the shared header');
-   assert.equal(await page.locator('a[href*="github.com"]').count(),0,route+' redirects a visitor to GitHub');
+   assert.equal(page.url(),base+route,route+' must render on the first-party site');
+   const githubLinks=await page.locator('a[href*="github.com"]').evaluateAll(links=>links.map(link=>link.href));
+   if(route==='/contributing.html'){
+    // Contributor tasks intentionally link to the official core repository;
+    // reporting, authentication and the other document readers stay on-site.
+    const contributorLinks=await page.locator('a[href]').evaluateAll(links=>links.map(link=>link.href).filter(href=>new URL(href).origin!==location.origin));
+    assert.equal(contributorLinks.length,7,'All seven contributor repository links must remain available');
+    for(const href of contributorLinks){
+     const target=new URL(href);
+     assert.equal(target.origin,'https://github.com','Contributor links must use the official GitHub origin');
+     assert.match(target.pathname,/^\/MalGuard\/malguard-core(?:\/|$)/,'Contributor links must stay within the official core repository');
+    }
+   }else assert.equal(githubLinks.length,0,route+' must not send a visitor to GitHub');
   }
   await page.goto(base+'/report.html?kind=security');assert.equal(await page.locator('#reportKind').inputValue(),'security');
   await page.locator('#reportMessage').fill('سلام');await page.locator('#reportSubmit').click();await page.waitForFunction(()=>document.querySelector('#reportResult').classList.contains('success'),null,{timeout:30000});
