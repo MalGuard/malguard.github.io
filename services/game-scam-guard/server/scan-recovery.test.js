@@ -80,3 +80,16 @@ test('explicit passive advanced mode can inspect a listed page while retaining i
   assert.equal(report.status,'danger');assert.equal(report.pageFetch.status,'done');assert.equal(report.files.length,0);assert.equal(report.preview.status,'skipped');
   let calls=0;await assert.rejects(scanSite('http://127.0.0.1/',{allowThreatContent:true,lookup:async()=>{calls++;}}),{status:400});assert.equal(calls,0);
 });
+
+test('DNS timeout remains a timeout rather than falsely declaring the domain nonexistent',async()=>{
+  const report=await scanSite(page.url,{validate:async()=>{throw new ScanError('DNS slow',422,'dns_timeout');},lookup:async()=>unknown});
+  assert.equal(report.status,'unavailable');assert.equal(report.pageFetch.reason,'timeout');
+  assert.equal(report.inspectionLayers.length,15);assert.equal(report.inspectionLayers.find(row=>row.id==='identity').status,'unavailable');
+});
+
+test('a failed final-URL lookup preserves received independent evidence and marks provider coverage unavailable',async()=>{
+  let calls=0;
+  const report=await scanSite(page.url,{validate:async()=>{},lookup:async()=>{if(++calls>1)throw new Error('Fixture provider failure');return unknown;},transport:async()=>({...page,url:'https://final.example.com/',redirects:[{from:page.url,to:'https://final.example.com/',status:302}]})});
+  assert.equal(report.title,'Recovered store');assert.equal(report.finalReputation.status,'unavailable');
+  assert.equal(report.inspectionLayers.find(row=>row.id==='reputation').status,'unavailable');
+});

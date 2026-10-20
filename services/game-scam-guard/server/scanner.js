@@ -4,6 +4,7 @@ import { fetchPublic, normalizeUrl, cleanUrlInput, resolvePublic, ScanError } fr
 import { renderPreview } from './browser.js';
 import { urlhausAuthKey, lookupUrl } from './threat-intel.js';
 import { reportTokens } from './report-token.js';
+import {inspectionLayers} from './inspection-layers.js';
 import { inspectSite } from './site-analysis.js';
 const riskyTerms = /crack|keygen|cheat|unlimited\s*(coins|gems)|free\s*(coins|gems)|کرک|چیت|سکه\s*نامحدود|جم\s*رایگان/i;
 const sessions = new Map();
@@ -27,14 +28,15 @@ export async function fetchSitePage(url,{transport=fetchPublic,signal,totalTimeo
 }
 
 function pageFailure(error) {
-  if(['ENOTFOUND','EAI_NONAME','ENODATA','dns_timeout'].includes(error.code))return {reason:'domain_not_found',detail:'این دامنه پیدا نشد. املای آدرس را بررسی کنید و دوباره تلاش کنید.'};
-  if(['request_timeout','ETIMEDOUT'].includes(error.code))return {reason:'timeout',detail:'سایت در زمان مجاز پاسخ کامل نداد. وضعیت استعلام پایگاه تهدید جداگانه در گزارش آمده است؛ محتوای سایت و صفحه‌های آن قابل تأیید نیستند.'};
+  if(['ENOTFOUND','EAI_NONAME','ENODATA'].includes(error.code))return {reason:'domain_not_found',detail:'این دامنه پیدا نشد. املای آدرس را بررسی کنید و دوباره تلاش کنید.'};
+  if(['request_timeout','ETIMEDOUT','dns_timeout'].includes(error.code))return {reason:'timeout',detail:'سایت در زمان مجاز پاسخ کامل نداد. وضعیت استعلام پایگاه تهدید جداگانه در گزارش آمده است؛ محتوای سایت و صفحه‌های آن قابل تأیید نیستند.'};
   if(error.remoteStatus)return {reason:'http_error',detail:`سایت پاسخ HTTP ${error.remoteStatus} داد؛ محتوای صفحه دریافت نشد.`};
   if(/CERT|TLS|SSL/.test(error.code||''))return {reason:'tls_error',detail:'اتصال دارای گواهی قابل تأیید نبود. کنترل گواهی غیرفعال نشده و محتوای سایت دریافت نشده است.'};
   return {reason:'network_error',detail:'دریافت محتوای سایت از سرور ممکن نشد؛ این به‌تنهایی امن یا خطرناک بودن سایت را ثابت نمی‌کند.'};
 }
 
 function rememberSite(result) {
+  result.inspectionLayers=inspectionLayers(result);
   result.scanToken=reportTokens.issue(result);
   sessions.set(result.id,{result,expires:Date.now()+30*60*1000,running:false});
   for(const [key,value]of sessions)if(value.expires<Date.now())sessions.delete(key);
@@ -75,7 +77,7 @@ export async function scanSite(input,{transport=fetchPublic,lookup=lookupUrl,pre
   finally {clearTimeout(validationTimer);}
   const controller=new AbortController();
   onEvent({phase:'threat_lookup',message:'Checking known URL threat reports'});
-  const intelTask=Promise.resolve().then(()=>lookup(requested.href)).catch(()=>({status:'unavailable',message:'استعلام URLhaus انجام نشد؛ امنیت این لینک تأیید نمی‌شود.'})).then(intel=>{onEvent({phase:'threat_lookup_done',message:intel.status==='listed'?'A known threat report was found':'Known URL threat lookup completed'});if(intel.status==='listed'&&!allowThreatContent)controller.abort();return intel;});
+  const intelTask=Promise.resolve().then(()=>lookup(requested.href)).catch(()=>({status:'unavailable',message:'استعلام URLhaus انجام نشد؛ امنیت این لینک تأیید نمی‌شود.'})).then(intel=>{onEvent({phase:['listed','not_found'].includes(intel.status)?'threat_lookup_done':'threat_lookup_unavailable',message:intel.status==='listed'?'A known threat report was found':intel.status==='not_found'?'Known URL threat lookup completed':'The URLhaus lookup was unavailable; independent page inspection continues'});if(intel.status==='listed'&&!allowThreatContent)controller.abort();return intel;});
   onEvent({phase:'fetch_page',message:'Retrieving the public HTML page through the guarded network'});
   const pageTask=preflightError?Promise.reject(preflightError):fetchSitePage(requested,{transport,signal:controller.signal,...pageOptions});
   const [pageOutcome,intel]=await Promise.all([pageTask.then(value=>({value}),error=>({error})),intelTask]);
@@ -95,7 +97,7 @@ export async function scanSite(input,{transport=fetchPublic,lookup=lookupUrl,pre
   else {
     evidence = { title: 'Direct file link', description: 'This address leads to a file or non-HTML content. GameScam Guard does not retrieve, hash, analyze, or execute files; use GTA Guard for file analysis.', headings: [], excerpt: '', fileCount: 0, linkCount: 0, signals: [{level:'info',title:'File analysis is handled by GTA Guard',detail:'Only the response headers were observed. The file was not downloaded, hashed, analyzed, or executed.'}], contentType: mime, files: [], fileScanExcluded:true, statusOverride:'unavailable' };
   }
-  const finalIntel = page.url !== requested.href ? await lookup(page.url) : intel;
+  const finalIntel = page.url !== requested.href ? await Promise.resolve().then(()=>lookup(page.url)).catch(()=>({status:'unavailable',message:'Final URL threat lookup did not complete.'})) : intel;
   if ([intel.status, finalIntel.status].includes('listed')) evidence.signals.unshift({ level: 'danger', title: 'لینک در پایگاه تهدید گزارش شده', detail: 'URLhaus برای لینک اولیه یا مقصد نهایی گزارش تهدید دارد. از دانلود و پرداخت خودداری کنید.' });
   if (page.redirects.some(r => new URL(r.from).hostname !== new URL(r.to).hostname)) evidence.signals.push({ level: 'warning', title: 'انتقال به دامنهٔ دیگر', detail: 'لینک به یک دامنهٔ دیگر منتقل شد. آدرس نهایی را پیش از خرید کنترل کنید.' });
   const status = evidence.signals.some(s=>s.level==='danger') ? 'danger' : evidence.statusOverride || (evidence.signals.some(s=>s.level==='warning') ? 'warning' : 'limited');
@@ -108,9 +110,10 @@ export async function scanSite(input,{transport=fetchPublic,lookup=lookupUrl,pre
     if(image.status==='done')onEvent({phase:'cloud_browser_done',message:'Isolated browser snapshot is ready'});
     else onEvent({phase:'cloud_browser_unavailable',message:'The isolated browser preview was unavailable; HTML evidence is still shown'});
   }
+  onEvent({phase:'analysis_done',message:isHtml?'Independent HTML analysis completed; preparing the evidence report':'No HTML page was received; preparing the file-exclusion report'});
   const id = randomUUID();
-  const result = { id, url: requested.href, finalUrl: page.url, domain: new URL(page.url).hostname, createdAt: new Date().toISOString(), status, ...evidence, preview:image, redirects: page.redirects, reputation: intel, finalReputation: finalIntel, advanced: false,inputAdjusted,pageFetch:{status:'done',attempts:page.attempts},
-    checks: [{ title: isHtml ? 'دریافت محتوای سایت' : 'مشاهدهٔ سرآیند لینک مستقیم فایل', status: 'done', detail: isHtml ? `HTTP ${page.status} · ${(page.bytes.length/1024).toFixed(1)} KB` : `HTTP ${page.status} · The file was not retrieved or analyzed in GameScam Guard.` }, { title: 'بررسی ارتباط', status: 'done', detail: new URL(page.url).protocol === 'https:' ? 'HTTPS · اعتبارسنجی گواهی انجام شد' : 'HTTP · بدون رمزگذاری' }, { title: 'بررسی نشانه‌های صفحه', status: 'done', detail: `${evidence.linkCount} لینک در HTML دریافت‌شده بررسی شد` }, { title: 'استعلام URLhaus', status: ['listed','not_found'].includes(intel.status) ? 'done' : 'unavailable', detail: intel.message }],
+  const result = { id, url: requested.href, finalUrl: page.url, domain: new URL(page.url).hostname, createdAt: new Date().toISOString(), status, ...evidence, preview:image, redirects: page.redirects, reputation: intel, finalReputation: finalIntel, advanced: false,scanMode:allowCloudPreview?'advanced':'basic',responseHeaders:{csp:!!page.headers['content-security-policy'],hsts:!!page.headers['strict-transport-security'],noSniff:String(page.headers['x-content-type-options']||'').toLowerCase()==='nosniff'},inputAdjusted,pageFetch:{status:'done',attempts:page.attempts},
+    checks: [{ title: isHtml ? 'دریافت محتوای سایت' : 'مشاهدهٔ سرآیند لینک مستقیم فایل', status: 'done', detail: isHtml ? `HTTP ${page.status} · ${(page.bytes.length/1024).toFixed(1)} KB` : `HTTP ${page.status} · The file was not retrieved or analyzed in GameScam Guard.` }, { title: 'بررسی ارتباط', status: 'done', detail: new URL(page.url).protocol === 'https:' ? 'HTTPS · اعتبارسنجی گواهی انجام شد' : 'HTTP · بدون رمزگذاری' }, { title: 'بررسی نشانه‌های صفحه', status: isHtml?'done':'unavailable', detail: isHtml?`${evidence.linkCount} لینک در HTML دریافت‌شده بررسی شد`:'No HTML body was received; no page-content check was completed.' }, { title: 'استعلام URLhaus', status: ['listed','not_found'].includes(intel.status) ? 'done' : 'unavailable', detail: intel.message }],
     limitations: ['این بررسی محتوای عمومی HTML را می‌خواند؛ در پیش‌نمایش مرورگر، جاوااسکریپت، ورود، خرید و دانلود خودکار غیرفعال هستند.', 'عدم مشاهدهٔ تهدید به معنی تأیید اصالت فروشنده یا تضمین امنیت نیست.', 'Direct file links are not retrieved or analyzed here; use GTA Guard for files.'] };
   if (result.siteAnalysis) result.checks.splice(3,0,{title:'تحلیل مستقل محتوای HTML',status:'done',detail:`موتور ${result.siteAnalysis.version} · فرم‌ها، منابع اسکریپت، انتقال HTML و فهرست لینک‌ها بررسی شدند؛ جاوااسکریپت اجرا نشده است.`});
   return rememberSite(result);

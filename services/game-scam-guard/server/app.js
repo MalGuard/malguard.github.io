@@ -3,11 +3,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as scanner from './scanner.js';
 import { ScanError } from './network.js';
-import {startScanJob,stepScanJob,scanJobReport} from './scan-jobs.js';
+import {startScanJob,stepScanJob,scanJobReport,prepareJobPreview} from './scan-jobs.js';
 import {createEmailAuth} from './email-auth.js';
-import {createGoogleAuth} from './google-auth.js';
 
-export function createApp({ scanSite = scanner.scanSite, providerStatus = scanner.providerStatus,startJob=startScanJob,stepJob=stepScanJob,emailAuth=createEmailAuth(),googleAuth=createGoogleAuth(),appOrigin='https://malguard.site/game-scam-guard/' } = {}) {
+export function createApp({ scanSite = scanner.scanSite, providerStatus = scanner.providerStatus,startJob=startScanJob,stepJob=stepScanJob,emailAuth=createEmailAuth(),preparePreview=prepareJobPreview } = {}) {
 const app = express();
 app.disable('x-powered-by');
 if (process.env.VERCEL) app.set('trust proxy', 1);
@@ -77,10 +76,7 @@ app.get('/api/account-config',(req,res)=>{
   const configured=/^pk_(test|live)_[A-Za-z0-9]+$/.test(key)&&key.length<1024;
   res.json({provider:'clerk',configured,publishableKey:configured?key:null});
 });
-app.get('/api/auth/status',(req,res)=>res.json({provider:'first-party-email',configured:emailAuth.enabled,...emailAuth.status,google:{...googleAuth.status,configured:emailAuth.enabled&&googleAuth.enabled}}));
-app.get('/api/auth/google/start',(req,res,next)=>{try{if(!emailAuth.enabled)throw Object.assign(new Error('Google sign-in is not ready yet.'),{status:503});res.redirect(302,googleAuth.start());}catch(error){next(error);}});
-app.get('/api/auth/google/callback',async(req,res)=>{try{const profile=await googleAuth.complete({state:req.query?.state,code:req.query?.code,error:req.query?.error});const result=await emailAuth.googleAccount(profile);const fragment=result.kind==='session'?`guard-session=${encodeURIComponent(result.sessionToken)}`:`guard-google-signup=${encodeURIComponent(result.signupToken)}`;res.redirect(302,`${appOrigin}#${fragment}`);}catch(error){res.redirect(302,`${appOrigin}#guard-auth-error=${encodeURIComponent(error.message||'Google sign-in could not be completed.')}`);}});
-app.post('/api/auth/google/complete-signup',async(req,res,next)=>{try{res.json(await emailAuth.completeGoogleSignup({signupToken:req.body?.signupToken,profile:req.body?.profile}));}catch(error){next(error);}});
+app.get('/api/auth/status',(req,res)=>res.json({provider:'first-party-email',configured:emailAuth.enabled,...emailAuth.status}));
 app.post('/api/auth/availability',async(req,res,next)=>{try{res.json(await emailAuth.availability({emailAddress:req.body?.email,username:req.body?.username}));}catch(error){next(error);}});
 app.post('/api/auth/start',async(req,res,next)=>{try{res.json(await emailAuth.start({emailAddress:req.body?.email,name:req.body?.username,profile:req.body?.profile,ip:req.ip}));}catch(error){next(error);}});
 app.post('/api/auth/verify',async(req,res,next)=>{try{res.json(await emailAuth.verify({verificationToken:req.body?.verificationToken,code:req.body?.code}));}catch(error){next(error);}});
@@ -99,7 +95,7 @@ app.post('/api/scan/live',async(req,res,next)=>{
   catch(error){if(res.headersSent){if(!res.destroyed)res.end(JSON.stringify({error:error instanceof ScanError?error.message:'بررسی کامل نشد.'})+'\n');}else next(error);}
   finally{activeScans--;}
 });
-app.post('/api/jobs/start',handleScan(body=>startJob(body)));
+app.post('/api/jobs/start',handleScan(async body=>preparePreview(await startJob(body))));
 app.post('/api/jobs/step',async(req,res,next)=>{
   if(activeScans>=8)return res.status(503).json({error:'سرویس مشغول است؛ کمی بعد دوباره تلاش کنید.'});
   activeScans++;const controller=new AbortController();

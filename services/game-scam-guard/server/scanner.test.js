@@ -251,3 +251,8 @@ test('advanced public HTML uses only the built-in isolated preview', async()=>{
   const report=await (await import('./scanner.js')).scanSite(page.url,{validate:async()=>{},allowCloudPreview:true,lookup:async()=>({status:'not_found',message:'No known URLhaus report; this is not a safety guarantee.'}),transport:async()=>page,preview:async()=>{previews++;return {status:'done',detail:'Fixture preview'};}});
   assert.equal(previews,1);assert.equal(report.preview.status,'done');assert.equal(Object.hasOwn(report,'remote'),false);
 });
+
+
+test('empty public DNS answers are domain-not-found, not a private-address rejection',async()=>{
+  await assert.rejects(()=>resolvePublic(new URL('https://missing.example.com'),async()=>[]),{status:422,code:'ENOTFOUND'});
+});

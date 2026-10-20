@@ -1,4 +1,4 @@
-const CACHE = 'gamescam-guard-site-v3';
+const CACHE = 'gamescam-guard-site-v4';
 const APP_PATH = new URL('./',self.location.href).pathname;
 const asset = name => `${APP_PATH}${name}`;
 self.addEventListener('install', event => {
