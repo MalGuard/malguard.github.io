@@ -9,7 +9,7 @@
   "minimumSdk": 26,
   "minimumAndroid": "8.0",
   "artifactName": "gamescam-guard-android-debug",
-  "artifactRunUrl": "https://github.com/MalGuard/malguard.github.io/actions/runs/39309423470",
+  "artifactRunUrl": "https://github.com/MalGuard/malguard.github.io/actions/runs/39378639121",
   "apkFilename": "app-debug.apk",
   "distribution": "github-actions-artifact",
   "signing": "debug-test",
@@ -18,5 +18,11 @@
     "Initial Samsung/Android test app.",
     "Hardened WebView opens only approved MalGuard destinations in-app.",
     "HTTPS-only, Safe Browsing where supported, no file/content access, mixed content, geolocation, or third-party cookies."
-  ]
+  ],
+  "filename": "GameScam-Guard-1.0.0-android-debug.apk",
+  "url": "/release/GameScam-Guard-1.0.0-android-debug.apk",
+  "sha256": "ca3749a817131186e2577f77ee56c28605263ed20a1ef8de34002a0adbc75c47",
+  "size": 1838719,
+  "sha256Url": "/release/GameScam-Guard-1.0.0-android-debug.apk.sha256",
+  "buildRunUrl": "https://github.com/MalGuard/malguard.github.io/actions/runs/39378639121"
 }

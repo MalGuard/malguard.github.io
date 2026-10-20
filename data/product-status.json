@@ -34,8 +34,12 @@
         "applicationId": "site.malguard.gamescamguard",
         "minimumAndroid": "8.0 (API 26)",
         "detailsUrl": "/gamescam-guard-android.html",
-        "artifactRunUrl": "https://github.com/MalGuard/malguard.github.io/actions/runs/39309423470",
-        "automaticUpdates": false
+        "artifactRunUrl": "https://github.com/MalGuard/malguard.github.io/actions/runs/39378639121",
+        "automaticUpdates": false,
+        "downloadUrl": "/release/GameScam-Guard-1.0.0-android-debug.apk",
+        "sha256": "ca3749a817131186e2577f77ee56c28605263ed20a1ef8de34002a0adbc75c47",
+        "size": 1838719,
+        "buildRunUrl": "https://github.com/MalGuard/malguard.github.io/actions/runs/39378639121"
       }
     },
     "threatRadar": {
