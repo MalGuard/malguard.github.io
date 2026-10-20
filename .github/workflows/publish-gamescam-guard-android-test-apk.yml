@@ -28,7 +28,11 @@ jobs:
           sdk_root="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
           sdkmanager="$(find "$sdk_root/cmdline-tools" -type f -name sdkmanager | head -n 1)"
           test -n "$sdkmanager"
+          # sdkmanager exits successfully after it closes stdin; suppress only the expected
+          # SIGPIPE from `yes` while preserving the sdkmanager result.
+          set +o pipefail
           yes | "$sdkmanager" --licenses > /dev/null
+          set -o pipefail
           "$sdkmanager" 'platforms;android-35' 'build-tools;35.0.0'
           printf 'sdk.dir=%s\n' "$sdk_root" > local.properties
       - name: Build installable test APK
