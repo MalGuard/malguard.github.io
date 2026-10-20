@@ -1,0 +1,83 @@
+name: MalGuard beta feedback (benign tests only)
+description: Reproducible feedback for MalGuard, GTA Guard, the website or documentation. No real malware.
+title: "[Beta feedback] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping us test MalGuard. Use harmless, synthetic files or test data only.
+        Do not attach real malware, unknown executables, private files, credentials, tokens, sensitive URLs, personal data or unredacted logs.
+        Report suspected security vulnerabilities privately using https://github.com/MalGuard/malguard-core/blob/main/SECURITY.md.
+        Do not disable platform warnings, bypass security controls, or execute suspicious files to reproduce a result.
+  - type: dropdown
+    id: product
+    attributes:
+      label: Affected component
+      options:
+        - GTA Guard (Windows preview)
+        - Game Scam Guard
+        - Website
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: build
+    attributes:
+      label: Build or version (if known)
+      description: Leave blank if you do not know it; do not post license keys.
+      placeholder: "e.g. version shown on the About screen"
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feedback category
+      options:
+        - Unexpected warning or possible false positive
+        - Unclear or inconclusive result
+        - Installation or update issue
+        - Usability or accessibility
+        - Documentation issue
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps with benign data
+      description: Explain a minimal, harmless way to reproduce this. Do not upload executable samples.
+      placeholder: "1. Open ...\n2. Select a harmless synthetic fixture ...\n3. Observe ..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result and any visible error
+      description: Redact personal data, access tokens, private URLs, paths containing names and unneeded device identifiers.
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Platform
+      options:
+        - Windows 11
+        - Windows 10
+        - Android
+        - iOS / iPadOS
+        - Web browser
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safe reporting confirmation
+      options:
+        - label: I used benign data and removed secrets and personal information.
+          required: true
