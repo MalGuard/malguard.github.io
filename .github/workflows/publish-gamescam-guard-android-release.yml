@@ -65,4 +65,7 @@ jobs:
           if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --title "GameScam Guard Android 1.1.0" --notes "Signed Android 8.0+ direct-install release."
           fi
-          gh release upload "$RELEASE_TAG" "$apk#$RELEASE_ASSET" --clobber --repo "$GITHUB_REPOSITORY"
+          release_apk="$RUNNER_TEMP/$RELEASE_ASSET"
+          cp "$apk" "$release_apk"
+          gh release delete-asset "$RELEASE_TAG" app-release.apk --yes --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1 || true
+          gh release upload "$RELEASE_TAG" "$release_apk" --clobber --repo "$GITHUB_REPOSITORY"
