@@ -85,7 +85,8 @@ assert 'sealed-installer' not in download
 installer=ROOT/release['serviceUrl'].lstrip('/')
 assert sorted((ROOT/'release').rglob('*.exe'))==[installer], 'Only the reviewed public installer may ship'
 android_release=json.loads((ROOT/'release/gamescam-guard-android.json').read_text())
-assert android_release['platform']=='android' and android_release['signing']=='debug-test'
+assert android_release['platform']=='android' and android_release['signing']=='release-v2'
+assert re.fullmatch('[a-f0-9]{64}',android_release['signerCertificateSha256'])
 assert android_release['automaticUpdates'] is False
 assert re.fullmatch('[a-f0-9]{64}',android_release['sha256'])
 android_apk=ROOT/android_release['url'].lstrip('/')

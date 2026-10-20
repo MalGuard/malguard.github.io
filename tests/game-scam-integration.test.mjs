@@ -19,8 +19,9 @@ test('public entry opens the first-party GameScam Guard route without embedded a
   assert.ok(page.includes('id="gameScamPreview"'));
   assert.ok(page.includes('href="/game-scam-guard/"'));
   assert.ok(!/_vercel_share|protection-bypass|previewPassword/.test(page));
-  assert.ok(page.includes('Windows · Coming Soon'));
-  assert.ok(page.includes('each require separate consent'));
+  assert.ok(page.includes('Android signed app'));
+  assert.ok(page.includes('GSG-ANDROID-1.1.0-FA09663'));
+  assert.ok(page.includes('release signing (APK Signature Scheme v2)'));
 });
 test('PWA identity and assets stay inside GameScam Guard path',async()=>{
   const manifest=JSON.parse(await read('services/game-scam-guard/public/manifest.webmanifest'));
