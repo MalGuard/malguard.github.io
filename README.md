@@ -23,6 +23,16 @@ Explore the [live website](https://malguard.site/) for product information, docu
 | [Trust Center](https://malguard.site/trust.html) | Security, privacy and project transparency |
 | [MalGuard Core](https://github.com/MalGuard/malguard-core) | Public defensive inspection and isolation foundations |
 
+## Beta feedback and safer testing
+
+Help improve MalGuard by reporting reproducible problems using **harmless synthetic fixtures** only. Use the [beta feedback form](https://github.com/MalGuard/malguard.github.io/issues/new?template=beta-feedback.yml) for website, Windows preview, and product documentation feedback.
+
+- Include the affected component, build/version (when known), expected behavior, observed behavior, and minimal steps to reproduce.
+- Do **not** upload or link real malware, private files, credentials, API keys, authentication tokens, personal data, or raw telemetry.
+- Never bypass browser/OS protection prompts or weaken isolation to collect a bug report.
+- Suspected security vulnerabilities should be reported privately using the [core security policy](https://github.com/MalGuard/malguard-core/blob/main/SECURITY.md), not a public issue.
+- A scanner result, including SAFE, cannot guarantee a file or website is harmless.
+
 ## Our principle
 
 **Inspect before you trust.** Security tooling should explain the evidence, the uncertainty and its own limits. A clean scan cannot guarantee that a file, mod or destination is harmless.
