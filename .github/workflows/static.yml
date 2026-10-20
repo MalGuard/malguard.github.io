@@ -35,7 +35,7 @@ jobs:
           rm -rf _site
           mkdir -p _site/.well-known
 
-          cp index.html 404.html founder.html game-scam-guard.html _site/
+          cp index.html 404.html founder.html game-scam-guard.html gamescam-guard-android.html _site/
           cp report.html console-8d42b69fda13705cc47a.html source.html security-policy.html privacy-policy.html code-signing.html contributing.html core-guide.html _site/
           cp press.html security-evidence.html _site/
           cp tools.html trust.html privacy.html support.html about.html labs.html docs.html download.html scan-mods.html ai-intelligence.html malware-ai.html malware-ai-windows.html threat-radar.html scan-url.html products.html gta-guard.html sandbox-help.html app.html _site/
@@ -55,6 +55,7 @@ jobs:
           test ! -e _site/malware-ai-preview-v02
           test -f _site/.well-known/security.txt
           test -f _site/game-scam-guard/index.html
+          test -f _site/gamescam-guard-android.html
           test -f _site/tools.html
           test -f _site/trust.html
           test -f _site/press.html
