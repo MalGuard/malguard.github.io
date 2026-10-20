@@ -6,7 +6,17 @@ import re, json
 from hashlib import sha256
 ROOT=Path(__file__).resolve().parents[1]
 PUBLIC_AI_GUIDES=[ROOT/'research/gta-5-mod-security.html', ROOT/'research/gta-mod-security-fa.html']
-PAGES=[ROOT/'index.html', *[p for p in ROOT.glob('*.html') if p.name!='index.html'],ROOT/'ios-preview/index.html',ROOT/'research/repackaged-mod.html',ROOT/'research/security-motion.html',*PUBLIC_AI_GUIDES,ROOT/'research/mod-download-checklist.html',ROOT/'research/scan-result-limits.html',ROOT/'release/sandbox-help-historical.html']
+PAGES=[ROOT/'index.html', *[p for p in ROOT.glob('*.html') if p.name!='index.html'],ROOT/'ios-preview/index.html',ROOT/'research/repackaged-mod.html',ROOT/'research/security-motion.html',*PUBLIC_AI_GUIDES,ROOT/'research/mod-download-checklist.html',ROOT/'research/scan-result-limits.html',
+    'research/windows-signatures-hashes-and-smartscreen.html',
+    'research/game-mod-archives-file-types.html',
+    'research/fake-gaming-download-links.html',
+    'research/contributing-to-open-source-security.html',
+    'research/windows-file-signatures-fa.html',
+    ROOT/'research/windows-signatures-hashes-and-smartscreen.html',
+    ROOT/'research/game-mod-archives-file-types.html',
+    ROOT/'research/fake-gaming-download-links.html',
+    ROOT/'research/contributing-to-open-source-security.html',
+    ROOT/'research/windows-file-signatures-fa.html',ROOT/'release/sandbox-help-historical.html']
 # The Guard source is compiled and copied to the Pages artifact by the static
 # workflow. Keep this route explicit so a typo cannot hide as a link, while
 # allowing the source-only validator to run before a local build.
