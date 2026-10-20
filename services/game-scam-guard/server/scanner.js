@@ -6,6 +6,7 @@ import { urlhausAuthKey, lookupUrl } from './threat-intel.js';
 import { reportTokens } from './report-token.js';
 import {inspectionLayers} from './inspection-layers.js';
 import { inspectSite } from './site-analysis.js';
+import { assessPage } from './page-assessment.js';
 const riskyTerms = /crack|keygen|cheat|unlimited\s*(coins|gems)|free\s*(coins|gems)|کرک|چیت|سکه\s*نامحدود|جم\s*رایگان/i;
 const sessions = new Map();
 export const providerStatus = () => ({ urlhaus: Boolean(urlhausAuthKey()) });
@@ -98,9 +99,9 @@ export async function scanSite(input,{transport=fetchPublic,lookup=lookupUrl,pre
     evidence = { title: 'Direct file link', description: 'This address leads to a file or non-HTML content. GameScam Guard does not retrieve, hash, analyze, or execute files; use GTA Guard for file analysis.', headings: [], excerpt: '', fileCount: 0, linkCount: 0, signals: [{level:'info',title:'File analysis is handled by GTA Guard',detail:'Only the response headers were observed. The file was not downloaded, hashed, analyzed, or executed.'}], contentType: mime, files: [], fileScanExcluded:true, statusOverride:'unavailable' };
   }
   const finalIntel = page.url !== requested.href ? await Promise.resolve().then(()=>lookup(page.url)).catch(()=>({status:'unavailable',message:'Final URL threat lookup did not complete.'})) : intel;
-  if ([intel.status, finalIntel.status].includes('listed')) evidence.signals.unshift({ level: 'danger', title: 'لینک در پایگاه تهدید گزارش شده', detail: 'URLhaus برای لینک اولیه یا مقصد نهایی گزارش تهدید دارد. از دانلود و پرداخت خودداری کنید.' });
-  if (page.redirects.some(r => new URL(r.from).hostname !== new URL(r.to).hostname)) evidence.signals.push({ level: 'warning', title: 'انتقال به دامنهٔ دیگر', detail: 'لینک به یک دامنهٔ دیگر منتقل شد. آدرس نهایی را پیش از خرید کنترل کنید.' });
-  const status = evidence.signals.some(s=>s.level==='danger') ? 'danger' : evidence.statusOverride || (evidence.signals.some(s=>s.level==='warning') ? 'warning' : 'limited');
+  const assessed=assessPage({...evidence,redirects:page.redirects,reputation:intel,finalReputation:finalIntel});
+  evidence.signals=assessed.signals;
+  const {status}=assessed;
   let image = {status:'skipped',detail:isHtml ? 'Cloud-browser preview is available after you choose Advanced website scan.' : 'No browser preview is created for a direct file link.'};
   // Advanced scans render only the guarded, already-received public HTML in the
   // built-in isolated preview. No third-party remote browser is contacted.

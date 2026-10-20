@@ -9,28 +9,29 @@ import {createApp} from '../services/game-scam-guard/server/app.js';
 import {scanSite} from '../services/game-scam-guard/server/scanner.js';
 import {stepScanJob,prepareJobPreview} from '../services/game-scam-guard/server/scan-jobs.js';
 
-const html=Buffer.from('<html><title>Owned UI fixture</title><body><h1>Owned UI fixture</h1><a href="/public-page">Public page</a><a href="/download.zip">Download excluded</a></body></html>');
-let childStatus='limited',previewCalls=0;
+const html=Buffer.from('<html><title>Owned UI fixture</title><body><h1>Owned UI fixture</h1><a href="/public-page">Public page</a><a href="/public-page-two">Second page</a><a href="/public-page-three">Third page</a><a href="/download.zip">Download excluded</a></body></html>');
+let childStatus='limited',previewCalls=0,holdQueue=true,releaseQueue;
 const app=express();
 const api=createApp({
   emailAuth:{enabled:true,status:{}},providerStatus:()=>({urlhaus:false}),
   scanSite:async(url,options)=>{
     await new Promise(resolve=>setTimeout(resolve,250));
-    return scanSite(url,{...options,validate:async()=>{},lookup:async()=>({status:'not_found',message:'Fixture URL not listed; not a safety guarantee.'}),transport:async address=>({url:address.href,status:200,headers:{'content-type':'text/html'},bytes:html,redirects:[]})});
+    return scanSite(url,{...options,validate:async()=>{},lookup:async()=>({status:'not_found',message:'Fixture URL not listed; not a safety guarantee.'}),transport:async address=>({url:address.href,status:200,headers:{'content-type':'text/html'},bytes:html,redirects:[]}),preview:async()=>({status:'done',detail:'Authored second-site snapshot',image:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZV0AAAAASUVORK5CYII='})});
   },
   preparePreview:job=>prepareJobPreview(job,{transport:async url=>({url,bytes:html}),preview:async()=>{previewCalls++;return {status:'done',detail:'Authored fixture snapshot; no live video.',image:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZV0AAAAASUVORK5CYII='};}}),
-  stepJob:(input,options)=>stepScanJob(input,{...options,inspect:async target=>({...target,status:childStatus,detail:childStatus==='unavailable'?'Fixture page did not respond.':'Authored fixture destination inspected.'})}),
+  stepJob:(input,options)=>stepScanJob(input,{...options,inspect:async target=>{if(holdQueue&&target.url.endsWith('/public-page-two'))await new Promise(resolve=>{releaseQueue=resolve;});await new Promise(resolve=>setTimeout(resolve,150));return {...target,status:childStatus,detail:childStatus==='unavailable'?'Fixture page did not respond.':'Authored fixture destination inspected.'};}}),
 });
 app.use('/api/game-scam-guard',(req,res,next)=>{req.url='/api'+req.url;api(req,res,next);});
 app.use(express.static('_site'));
 const server=app.listen(0,'127.0.0.1');await once(server,'listening');
 let browser;
 try{
-  browser=await chromium.launch({args:['--no-sandbox']});
+  browser=await chromium.launch({...(process.env.TEST_CHROMIUM_EXECUTABLE?{executablePath:process.env.TEST_CHROMIUM_EXECUTABLE}:{}),args:['--no-sandbox']});
   const context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});
   await context.route('**/*',route=>new URL(route.request().url()).hostname==='127.0.0.1'?route.continue():route.abort());
   const page=await context.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto(`http://127.0.0.1:${server.address().port}/game-scam-guard/`);
+  await mkdir('test-results',{recursive:true});
   for(const status of ['limited','unavailable','danger']){
     childStatus=status;
     await page.getByLabel('Website link').fill('https://example.com/');
@@ -40,6 +41,16 @@ try{
     assert.equal(await page.locator('.verdict.limited').count(),1);
     await page.locator('.advanced-prompt button').click();
     await page.getByRole('button',{name:'Scan public pages',exact:true}).click();
+    if(status==='limited'){
+      await page.waitForFunction(()=>document.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')==='1');
+      assert.equal(await page.getByRole('progressbar').getAttribute('aria-valuemax'),'3');
+      await page.locator('.scan-activity').screenshot({path:'test-results/game-scam-live-progress.png'});
+      await page.getByRole('button',{name:'Open menu',exact:true}).click();
+      await page.getByRole('button',{name:'Settings',exact:true}).click();
+      await page.locator('.active-scan-return').waitFor();
+      await page.locator('.active-scan-return').click();
+      holdQueue=false;releaseQueue();
+    }
     await page.locator('.assessment-comparison').waitFor();
     assert.equal(await page.locator(`.verdict.${status}`).count(),1);assert.equal(await page.locator('.verdict .status-badge').isVisible(),true);
     assert.equal(await page.locator('.assessment-comparison .status-badge.limited').first().count(),1);
@@ -67,7 +78,29 @@ try{
   assert.equal(await page.locator('.verdict .status-badge').isVisible(),true);
   await page.screenshot({path:'test-results/game-scam-warning-mobile.png',fullPage:false});
   assert.equal(previewCalls,3);assert.deepEqual(errors,[]);
-  console.log('PASS: visible scan activity, basic-to-advanced browser upgrade, original verdict preservation, excluded downloads, explained coverage/threat changes and 15 evidence categories at 320/390/820/1440px.');
+  // Persist a queue for site A, then scan site B with a screenshot. Resuming A
+  // must never copy B's screenshot into A's evidence report.
+  const pending=await page.evaluate(async()=>{
+    const post=async(endpoint,body)=>{const response=await fetch('/api/game-scam-guard/'+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!response.ok)throw new Error('Fixture request failed');return response.json();};
+    const report=await post('scan',{url:'https://example.com/',mode:'basic'});
+    const job=await post('jobs/start',{id:report.id,token:report.scanToken,mode:'advanced',consent:true});
+    const saved={id:job.id,token:job.token,mode:job.mode,next:job.next,total:job.targets.length};
+    localStorage.setItem('guard-pending-job',JSON.stringify(saved));return saved;
+  });
+  assert.equal(pending.total,3);childStatus='limited';
+  await page.reload();
+  await page.getByRole('tab',{name:/Advanced website scan/}).click();
+  await page.getByLabel('Website link').fill('https://second.example.com/');
+  await page.getByRole('button',{name:'Start scan',exact:true}).click();
+  await page.getByRole('button',{name:'Not now',exact:true}).click();
+  assert.equal(await page.locator('.browser-preview img').count(),1);
+  await page.locator('button').filter({hasText:/Resume saved queue/}).click();
+  await page.locator('.assessment-comparison').waitFor();
+  await page.waitForFunction(()=>!localStorage.getItem('guard-pending-job'));
+  assert.equal(await page.locator('.browser-preview img').count(),0,'Resumed site A must not show site B screenshot');
+  const resumed=await page.evaluate(()=>JSON.parse(localStorage.getItem('gamescam-guard-history-v1'))[0]);
+  assert.equal(resumed.domain,'example.com');assert.deepEqual(errors,[]);
+  console.log('PASS: streamed per-target progress, navigation during scanning, cross-site queue screenshot isolation, basic-to-advanced browser upgrade, preserved original verdict, excluded downloads and explained coverage/threat changes at 320/390/820/1440px.');
 }finally{
-  await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
+  releaseQueue?.();await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
 }

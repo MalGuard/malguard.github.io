@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import { createApp } from './app.js';
 import { ScanError } from './network.js';
+import express from 'express';
 
 test('first-party Pages origins receive narrow CORS while other origins are rejected', async () => {
   const prior=process.env.GUARD_CLERK_PUBLISHABLE_KEY;
@@ -114,5 +115,19 @@ test('email-only accounts do not advertise Google or expose OAuth routes',async(
       const response=await fetch(`${base}/api/auth/google/${route}`,route==='complete-signup'?{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}:{});
       assert.equal(response.status,404);assert.equal(response.headers.get('location'),null);
     }
+  }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+});
+
+test('mounted APIs retain separate scan and continuation limits without bypassing either limit',async()=>{
+  const api=createApp({scanSite:async()=>({status:'limited'}),startJob:async()=>({status:'fixture-job'}),preparePreview:async job=>job});
+  const outer=express();outer.use('/api/game-scam-guard',(req,res,next)=>{req.url='/api'+req.url;api(req,res,next);});
+  const server=outer.listen(0,'127.0.0.1');await once(server,'listening');
+  const base=`http://127.0.0.1:${server.address().port}/api/game-scam-guard`;
+  const post=path=>fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  try{
+    for(let i=0;i<12;i++){const response=await post('/scan');assert.equal(response.status,200);await response.text();}
+    const limited=await post('/scan');assert.equal(limited.status,429);await limited.text();
+    for(let i=0;i<40;i++){const response=await post('/jobs/start');assert.equal(response.status,200,`Continuation ${i+1} must use its separate budget`);await response.text();}
+    const jobLimited=await post('/jobs/start');assert.equal(jobLimited.status,429);await jobLimited.text();
   }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 });

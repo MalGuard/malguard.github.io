@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {ScanError} from './network.js';
 import {createReportTokens} from './report-token.js';
 import {startScanJob,stepScanJob,scanJobReport,inspectJobTarget,prepareJobPreview} from './scan-jobs.js';
+import {scanSite} from './scanner.js';
 
 const pages=Array.from({length:6},(_,i)=>({position:i+1,label:`Page ${i}`,url:`https://example.com/page-${i}`,kind:'page',status:'unscanned'}));
 const downloads=[{position:7,label:'Installer',url:'https://example.com/game.zip',kind:'file',status:'unscanned'}];
@@ -63,4 +64,35 @@ test('advanced browser upgrade renders only the exact signed HTML and preserves 
   const options={codec:c,transport:async()=>({url:parent.finalUrl,bytes}),preview:async()=>{renders++;return {status:'done',detail:'Fixture browser snapshot',image:'data:image/jpeg;base64,'+'A'.repeat(1500000)};}};
   const upgraded=await prepareJobPreview(job,options);assert.equal(upgraded.parent.preview.status,'done');assert.equal(upgraded.parent.status,parent.status);assert.equal(renders,1);assert.equal(c.read(upgraded.token,upgraded.id).result.parent.preview.image,undefined);
   const changed=await prepareJobPreview(job,{...options,transport:async()=>({url:parent.finalUrl,bytes:Buffer.from('Changed')})});assert.equal(changed.parent.preview.status,'unavailable');assert.match(changed.parent.preview.detail,/changed/);assert.equal(renders,1);
+});
+
+test('submitted and linked pages use the same redirect and threat assessment policy',async()=>{
+  const requested='https://example.com/';
+  const final='https://destination.example.com/';
+  for(const listed of [false,true]){
+    const response={url:final,status:200,headers:{'content-type':'text/html'},bytes:Buffer.from('<html><title>Owned parity fixture</title><body>Public page</body></html>'),redirects:[{from:requested,to:final,status:302}]};
+    const lookup=async url=>({status:listed&&url===final?'listed':'not_found',message:'Authored threat-intelligence fixture'});
+    const options={validate:async()=>{},transport:async()=>response};
+    const original=await scanSite(requested,{...options,lookup});
+    const linked=await inspectJobTarget({id:'parity',url:requested,name:'Page',kind:'page'},{...options,urlLookup:lookup});
+    assert.equal(original.status,listed?'danger':'warning');
+    assert.equal(linked.status,original.status);
+    assert.deepEqual(linked.findings,original.signals);
+    assert.ok(linked.findings.some(signal=>signal.rule==='cross_domain_redirect'));
+    if(listed)assert.ok(linked.findings.some(signal=>signal.rule==='urlhaus_report'));
+  }
+});
+
+test('streamed progress counts each processed target before a batch completes and resumes monotonically',async()=>{
+  let {job,c}=start();const events=[];let inspected=0;
+  const options={codec:c,onEvent:event=>events.push(event),inspect:async target=>({...target,status:++inspected===2?'unavailable':'limited'})};
+  job=await stepScanJob({id:job.id,token:job.token},options);
+  assert.deepEqual(events.filter(event=>event.phase==='item_finished').map(event=>event.completed),[1,2,3,4]);
+  assert.ok(events.filter(event=>event.phase==='item_finished').every(event=>event.total===6));
+  assert.equal(job.done,false);
+  job=await stepScanJob({id:job.id,token:job.token},options);
+  assert.equal(job.done,true);
+  assert.deepEqual(events.filter(event=>event.phase==='item_finished').map(event=>event.completed),[1,2,3,4,5,6]);
+  assert.deepEqual(events.filter(event=>event.phase==='item_started').map(event=>event.completed),[0,1,2,3,4,5]);
+  assert.equal(events.filter(event=>event.phase==='item_finished')[1].status,'unavailable');
 });

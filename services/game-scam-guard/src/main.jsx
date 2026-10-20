@@ -46,6 +46,7 @@ function App() {
   const [busy, setBusy] = useState(false);
   const [advancedBusy, setAdvancedBusy] = useState(false);
   const [scanEvents,setScanEvents]=useState([]);
+  const [scanStartedAt,setScanStartedAt]=useState(null);
   const [pendingJob,setPendingJob]=useState(()=>{try{if(localStorage.getItem('guard-save-history')==='false')return null;const saved=JSON.parse(localStorage.getItem('guard-pending-job')||'null');return saved&&typeof saved.id==='string'&&typeof saved.token==='string'&&saved.token.length<1500*1024&&saved.mode==='advanced'&&Number.isInteger(saved.next)&&Number.isInteger(saved.total)?saved:null;}catch{return null;}});
   const scanAbort=useRef(null);
   const [result, setResult] = useState(null);
@@ -111,7 +112,7 @@ function App() {
   async function runScan(event, link = url) {
     event?.preventDefault(); if (busy || advancedBusy) return;
     if (!link.trim()) { setError('اول لینک سایت را وارد کنید.'); inputRef.current?.focus(); return; }
-    setBusy(true); setError(''); setResult(null);setScanEvents([]);
+    setBusy(true); setError(''); setResult(null);setScanEvents([]);setScanStartedAt(Date.now());
     try {
       const data = await callLiveScan({url:link.trim(),mode}); setResult(data); setUrl(data.url); remember(data); setNotifications(true);
       if(data.inputAdjusted)setToast('نشانهٔ اضافی متن کپی‌شده از ابتدا یا انتهای لینک حذف شد.');
@@ -121,7 +122,7 @@ function App() {
     finally { setBusy(false); }
   }
   async function runAdvanced() {
-    if (!result || advancedBusy) return; setModal(null); setAdvancedBusy(true); setError('');setScanEvents([{phase:'advanced_start',message:'Preparing linked-page inspection and matching browser evidence'}]);setTimeout(()=>reportRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),100);
+    if (!result || advancedBusy || busy) return; setModal(null); setAdvancedBusy(true); setScanStartedAt(Date.now());setError('');setScanEvents([{phase:'advanced_start',message:'Preparing linked-page inspection and matching browser evidence'}]);setTimeout(()=>reportRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),100);
     try {const job=await callApi('jobs/start',{id:result.id,token:result.scanToken,mode:'advanced',consent:true});await continueQueue(job);}
     catch (e) { setError(e.name==='AbortError'?'صف متوقف شد؛ از آخرین دسته می‌توانید ادامه دهید.':e instanceof TypeError?'اتصال به سرویس قطع شد؛ ادامهٔ صف محفوظ است.':e.message); }
     finally { setAdvancedBusy(false);scanAbort.current=null; }
@@ -131,7 +132,9 @@ function App() {
     if(saveHistoryRef.current)try{localStorage.setItem('guard-pending-job',JSON.stringify(saved));}catch{setToast('ذخیرهٔ ادامهٔ صف در مرورگر ممکن نشد؛ صفحه را باز نگه دارید.');}
   }
   async function continueQueue(first){
-    const browserPreview=first.parent?.preview?.image?first.parent.preview:result?.preview;
+    // A resumed queue may belong to a different page than the report currently
+    // open. Never attach that report's screenshot to the queued website.
+    const browserPreview=first.parent?.preview?.image?first.parent.preview:first.parent?.id===result?.id?result?.preview:undefined;
     let job=first;saveQueue(job);
     for(;;){
       const controller=new AbortController();scanAbort.current=controller;
@@ -147,7 +150,7 @@ function App() {
     }
     scanAbort.current=null;
   }
-  async function resumeQueue(){if(!pendingJob||advancedBusy)return;setMode(pendingJob.mode);setAdvancedBusy(true);setError('');try{await continueQueue(pendingJob);}catch(e){setError(e.name==='AbortError'?'صف متوقف شد؛ می‌توانید از آخرین دسته ادامه دهید.':e instanceof TypeError?'اتصال به سرویس قطع شد؛ ادامهٔ صف محفوظ است.':e.message);}finally{setAdvancedBusy(false);scanAbort.current=null;}}
+  async function resumeQueue(){if(!pendingJob||advancedBusy||busy)return;setMode(pendingJob.mode);setAdvancedBusy(true);setScanStartedAt(Date.now());setScanEvents([]);setError('');try{await continueQueue(pendingJob);}catch(e){setError(e.name==='AbortError'?'صف متوقف شد؛ می‌توانید از آخرین دسته ادامه دهید.':e instanceof TypeError?'اتصال به سرویس قطع شد؛ ادامهٔ صف محفوظ است.':e.message);}finally{setAdvancedBusy(false);scanAbort.current=null;}}
   async function paste() {
     try { const value = await navigator.clipboard.readText(); setUrl(value.trim()); setError(''); inputRef.current?.focus(); }
     catch { setToast('برای چسباندن لینک از Ctrl+V یا گزینهٔ چسباندن گوشی استفاده کنید.'); inputRef.current?.focus(); }
@@ -165,7 +168,7 @@ function App() {
     const rows = compact ? history.slice(0,3) : filteredHistory;
     return <div className="history-table">
       <div className="table-row table-heading"><span>وب‌سایت</span><span>وضعیت بررسی</span><span>زمان بررسی</span><span/></div>
-      {!rows.length ? <div className="empty-history"><div className="empty-icon"><History size={24}/></div><div><strong>{history.length ? 'نتیجه‌ای پیدا نشد' : 'اولین بررسی‌ات از اینجا شروع می‌شود'}</strong><p>{history.length ? 'عبارت جستجو یا فیلتر را تغییر بده.' : 'بعد از بررسی یک لینک، گزارش آن را اینجا می‌بینی.'}</p></div>{!compact && !history.length && <button className="text-button" onClick={()=>navigate('scan')}>بررسی اولین لینک <ArrowLeft size={16}/></button>}</div> : rows.map(item=><button key={item.id} className="table-row history-row" onClick={()=>{setResult(item);setUrl(item.url);navigate('scan');setTimeout(()=>reportRef.current?.scrollIntoView({behavior:'smooth'}),100);}}><span className="website-cell"><span className="website-icon"><Globe2 size={17}/></span><span><b dir="ltr">{item.domain}</b><small>{item.advanced?'Advanced website scan':'Website scan'}</small></span></span><span><span className={`status-badge ${item.status}`}><i/>{labels[item.status]}</span></span><span className="date-cell">{date(item.createdAt)}</span><ChevronLeft size={17}/></button>)}
+      {!rows.length ? <div className="empty-history"><div className="empty-icon"><History size={24}/></div><div><strong>{history.length ? 'نتیجه‌ای پیدا نشد' : 'اولین بررسی‌ات از اینجا شروع می‌شود'}</strong><p>{history.length ? 'عبارت جستجو یا فیلتر را تغییر بده.' : 'بعد از بررسی یک لینک، گزارش آن را اینجا می‌بینی.'}</p></div>{!compact && !history.length && <button className="text-button" onClick={()=>navigate('scan')}>بررسی اولین لینک <ArrowLeft size={16}/></button>}</div> : rows.map(item=><button key={item.id} className="table-row history-row" disabled={busy||advancedBusy} onClick={()=>{setResult(item);setUrl(item.url);navigate('scan');setTimeout(()=>reportRef.current?.scrollIntoView({behavior:'smooth'}),100);}}><span className="website-cell"><span className="website-icon"><Globe2 size={17}/></span><span><b dir="ltr">{item.domain}</b><small>{item.advanced?'Advanced website scan':'Website scan'}</small></span></span><span><span className={`status-badge ${item.status}`}><i/>{labels[item.status]}</span></span><span className="date-cell">{date(item.createdAt)}</span><ChevronLeft size={17}/></button>)}
     </div>;
   }
 
@@ -185,18 +188,19 @@ function App() {
     <div className="main-shell">
       <header className="topbar"><div className="breadcrumb"><button className="icon-button mobile-menu" aria-label="باز کردن منو" onClick={()=>setMobileNav(true)}><Menu size={21}/></button><span>فضای کار</span><ChevronLeft size={14}/><b>{{scan:'بررسی لینک',history:'تاریخچه بررسی‌ها',guide:'چطور کار می‌کند؟',resources:'راهنمای بازی امن',settings:'تنظیمات'}[page]}</b></div><div className="header-actions"><button className="locale-button" aria-label="تغییر زبان" onClick={()=>setLocale(current=>current==='en'?'fa':'en')}><Globe2 size={17}/><span>{locale==='en'?'FA':'EN'}</span></button><button className="icon-button" aria-label="راهنما" onClick={()=>setModal('help')}><CircleHelp size={20}/></button><div className="notification-wrap"><button className="icon-button" aria-label="اعلان‌ها" onClick={()=>{setModal('notifications');setNotifications(false);}}><Bell size={20}/>{notifications && <i className="notification-dot"/>}</button></div><div className="header-divider"/><button className="profile-button" aria-label="Sign in or manage account" onClick={()=>setModal('account')}><span className="profile-avatar">{account?(account.firstName?.slice(0,1)||account.username?.slice(0,1)||account.email?.slice(0,1)||'?').toUpperCase():<UserRound size={16} aria-hidden="true"/>}</span><span className="profile-name">{account?.firstName||account?.username||account?.email||'Gamer'}<small>{account?'Personal space':'Sign in · Sign up'}</small></span></button></div></header>
       <main>
+        {page!=='scan'&&(busy||advancedBusy)&&<button type="button" className="active-scan-return" onClick={()=>navigate('scan')}><LoaderCircle size={18} className="spin"/><span>{locale==='fa'?'بررسی همچنان در حال انجام است؛ نمایش پیشرفت':'Scan is still running · view progress'}</span><ArrowLeft size={17}/></button>}
         {page==='scan' && <>
           <section className="hero"><div className="hero-copy"><div className="eyebrow"><span/>یک قدم جلوتر از کلاهبردارها</div><h1>قبل از کلیک، <span>مطمئن شو.</span></h1><p>لینک بازی، ماد یا فروشگاه را بررسی کن.<br className="mobile-break"/> ما نشانه‌های خطر را قبل از تو پیدا می‌کنیم.</p></div><div className="hero-stamp"><ShieldCheck size={18}/><span>برای گیمرها،<br/><b>با فکر امنیت</b></span><span className="stamp-orbit"/></div></section>
           <section className="scan-workspace">
             <div className="scan-card">
               <div className="scan-tabs" role="tablist" aria-label="Scan type"><button role="tab" aria-selected={mode==='basic'} className={mode==='basic'?'selected':''} onClick={()=>setMode('basic')} disabled={busy||advancedBusy}><Link2 size={18}/>Website scan</button><button role="tab" aria-selected={mode==='advanced'} className={mode==='advanced'?'selected':''} onClick={()=>setMode('advanced')} disabled={busy||advancedBusy}><Globe2 size={18}/>Advanced website scan<span className="tiny-tag">public pages</span></button></div>
               <form onSubmit={runScan} className="scan-form"><div className="form-title"><div><h2>Is this website trustworthy?</h2><p>{mode==='basic'?'Enter a public website address to start a passive scan.':'After your confirmation, public website pages found on this site are scanned in bounded batches.'}</p></div><span className="form-icon"><ScanLine size={23}/></span></div><label htmlFor="site-url">لینک وب‌سایت</label><div className={`url-input-wrap ${error?'invalid':''}`}><Link2 size={19}/><input ref={inputRef} id="site-url" type="text" inputMode="url" dir="ltr" autoComplete="url" spellCheck="false" placeholder="https://example.com" value={url} onChange={e=>{setUrl(e.target.value);setError('');}} disabled={busy||advancedBusy} aria-describedby={error?'scan-error':undefined}/><button type="button" className="paste-button" onClick={paste} disabled={busy||advancedBusy}><Clipboard size={15}/><span>چسباندن</span></button></div><div className="input-hint"><LockKeyhole size={12}/><span>لینک روی سرور بررسی می‌شود؛ در دستگاهت باز نمی‌شود.</span></div><div className="scan-action"><button className="primary-button scan-submit" disabled={busy||advancedBusy}>{busy?<LoaderCircle size={19} className="spin"/>:<ScanLine size={19}/>}<span>{busy?'در حال بررسی لینک…':'شروع بررسی'}</span>{!busy&&<ArrowLeft size={17}/>}</button><span className="scan-time"><Zap size={14}/>بدون نصب برنامه</span></div>{error && <div className="error-message" id="scan-error" role="alert"><CircleAlert size={17}/><span>{error}</span></div>}
-                {busy&&<ScanActivity events={scanEvents} mode={mode} locale={locale}/>}
+                {busy&&<ScanActivity events={scanEvents} mode={mode} locale={locale} startedAt={scanStartedAt}/>}
               </form><div className="scan-card-footer"><span><Check size={14}/>HTTP and HTTPS checks</span><span><Check size={14}/>No file upload or execution</span><span><Check size={14}/>Evidence-led report</span></div>
             </div>
-            <div className="visual-card"><span className="visual-label"><span className={busy?'pulse':''}/>{busy?'گارد در حال بررسی است':'گارد آمادهٔ بررسی است'}</span><ShieldArt busy={busy}/><h3>یک لینک، چند لایه بررسی.</h3><p>From public page content to linked pages;<br/>each signal supports a clearer decision.</p><div className="visual-tags"><span><Globe2 size={12}/>Website</span><span><Link2 size={12}/>Public links</span><span><ShieldCheck size={12}/>Threat signals</span></div></div>
+            <div className="visual-card"><span className="visual-label"><span className={busy||advancedBusy?'pulse':''}/>{busy||advancedBusy?'گارد در حال بررسی است':'گارد آمادهٔ بررسی است'}</span><ShieldArt busy={busy||advancedBusy}/><h3>یک لینک، چند لایه بررسی.</h3><p>From public page content to linked pages;<br/>each signal supports a clearer decision.</p><div className="visual-tags"><span><Globe2 size={12}/>Website</span><span><Link2 size={12}/>Public links</span><span><ShieldCheck size={12}/>Threat signals</span></div></div>
           </section>
-          {!advancedBusy&&pendingJob&&<button className="outline-button" onClick={resumeQueue}>ادامهٔ صف ثبت‌شده ({fa(pendingJob.next||0)} از {fa(pendingJob.total||0)})</button>}{advancedBusy&&!result&&<div className="advanced-loading" role="status"><LoaderCircle className="spin" size={20}/>{scanEvents.at(-1)?.message||'درخواست در حال پردازش است'}</div>}
+          {!advancedBusy&&pendingJob&&<button className="outline-button" disabled={busy} onClick={resumeQueue}>{locale==='fa'?`ادامهٔ صف ثبت‌شده (${fa(pendingJob.next||0)} از ${fa(pendingJob.total||0)})`:`Resume saved queue (${fa(pendingJob.next||0)} of ${fa(pendingJob.total||0)})`}</button>}{advancedBusy&&!result&&<ScanActivity events={scanEvents} mode="linked" locale={locale} startedAt={scanStartedAt} completed={pendingJob?.next||0} total={pendingJob?.total||0} onStop={scanAbort.current?()=>scanAbort.current.abort():undefined}/>}
           {!result&&<div className="how-strip"><div><span className="step-icon"><Link2 size={19}/></span><span><b>لینک را وارد کن</b><small>آدرس سایت یا فروشگاه بازی</small></span><em>01</em></div><ChevronLeft className="step-arrow" size={16}/><div><span className="step-icon"><ScanLine size={19}/></span><span><b>نشانه‌ها را بررسی می‌کنیم</b><small>محتوا، لینک‌ها و گزارش‌های تهدید</small></span><em>02</em></div><ChevronLeft className="step-arrow" size={16}/><div><span className="step-icon"><ShieldCheck size={19}/></span><span><b>با آگاهی تصمیم بگیر</b><small>یک گزارش شفاف، همراه با شواهد</small></span><em>03</em></div></div>}
 
           {result && <section className="report-card" ref={reportRef}>
@@ -215,7 +219,7 @@ function App() {
             {result.linkInventory&&<details className="redirect-details"><summary>صفحه‌های عمومی مشاهده‌شده ({fa(result.linkInventory.links.filter(link=>link.kind==='page').length)})</summary><p>{result.linkInventory.status==='checked-targets'?'این فهرست به نتیجهٔ صف متصل است؛ وضعیت هر صفحه جداگانه ثبت شده است.':'این فهرست از HTML دریافت‌شده استخراج شده است؛ مقصد هر صفحه جداگانه باز و بررسی نشده است.'}</p>{result.linkInventory.links.filter(link=>link.kind==='page'||link.kind==='unsupported').map(link=><p key={link.position}><b>{fa(link.position)}. {link.label||'بدون عنوان'}</b> · {link.kind==='unsupported'?'غیرقابل بررسی':'لینک صفحه'} · {labels[link.status]||link.status}{link.duplicateOf?` · تکرار لینک ${fa(link.duplicateOf)}`:''}<br/>{link.url&&<span dir="ltr">{link.url}</span>}{link.reason&&<span>{link.reason}</span>}</p>)}{result.linkInventory.omitted>0&&<p>{fa(result.linkInventory.omitted)} ردیف به علت سقف اندازه یا تعداد در این فهرست نگهداری نشده است.</p>}</details>}
             {result.redirects.length>0&&<details className="redirect-details"><summary>مسیر انتقال لینک ({fa(result.redirects.length)})</summary>{result.redirects.map((r,i)=><p key={i} dir="ltr">{r.from} → {r.to} · {r.status}</p>)}</details>}
             {!result.advanced && !pageUnavailable && result.siteAnalysis && (result.scanMode!=='advanced'||result.linkInventory?.links?.some(link=>link.kind==='page'))&&<div className="advanced-prompt"><span className="advanced-icon"><Globe2 size={24}/></span><div><h3>Go deeper: inspect website evidence</h3><p>Request a matching isolated browser snapshot and inspect discovered public pages. The initial assessment stays visible.</p></div><button className="primary-button" disabled={advancedBusy} onClick={()=>setModal('advanced')}>{advancedBusy?<LoaderCircle className="spin" size={17}/>:<Sparkles size={17}/>} {advancedBusy?'Scanning linked pages…':'Advanced website scan'}</button></div>}
-            {advancedBusy&&<ScanActivity events={scanEvents} mode="linked" locale={locale} completed={pendingJob?.next||0} total={pendingJob?.total||0} onStop={scanAbort.current?()=>scanAbort.current.abort():undefined}/>}
+            {advancedBusy&&<ScanActivity events={scanEvents} mode="linked" locale={locale} startedAt={scanStartedAt} completed={pendingJob?.next||0} total={pendingJob?.total||0} onStop={scanAbort.current?()=>scanAbort.current.abort():undefined}/>}
             {result.destinationResults&&<details className="redirect-details destination-results"><summary>گزارش مقصدهای صف ({fa(result.jobSummary.completed)} از {fa(result.jobSummary.total)})</summary>{result.destinationResults.map(item=><div key={item.id} className="destination-row"><b>{item.title||item.name}</b> · <span>{labels[item.status]||item.status}</span><p dir="ltr">{item.url}</p>{item.detail&&<p>{item.detail}</p>}{item.finalReputation&&<><p dir="ltr">{item.finalUrl}</p><p>URLhaus مقصد نهایی: {item.finalReputation.message}</p></>}{item.reputation&&<p>URLhaus: {item.reputation.message}</p>}{item.findings?.map((finding,i)=><p key={i}>{finding.title}: {finding.detail}</p>)}</div>)}{result.jobSummary.omitted>0&&<p>{fa(result.jobSummary.omitted)} مقصد به علت سقف فهرست در این صف قرار نگرفت.</p>}</details>}
             <details className="limitations"><summary><Info size={15}/>محدودیت‌های این بررسی</summary><ul>{result.limitations.map((l,i)=><li key={i}>{l}</li>)}<li>GameScam Guard does not upload, hash, inspect, or execute files. Use GTA Guard for file analysis.</li></ul></details>
           </section>}
@@ -241,18 +245,22 @@ function App() {
 }
 
 
-function ScanActivity({events,mode,locale,completed=0,total=0,onStop}){
-  const [seconds,setSeconds]=useState(0);
-  useEffect(()=>{const started=Date.now();const timer=setInterval(()=>setSeconds(Math.floor((Date.now()-started)/1000)),1000);return()=>clearInterval(timer);},[]);
+function ScanActivity({events,mode,locale,startedAt,completed=0,total=0,onStop}){
+  const elapsed=()=>Math.max(0,Math.floor((Date.now()-(startedAt||Date.now()))/1000));
+  const [seconds,setSeconds]=useState(elapsed);
+  useEffect(()=>{setSeconds(elapsed());const timer=setInterval(()=>setSeconds(elapsed()),1000);return()=>clearInterval(timer);},[startedAt]);
   const fa=locale==='fa';
   const latest=events.at(-1);
   const browserStage=latest?.phase?.startsWith('cloud_browser');
+  const progress=[...events].reverse().find(event=>Number.isInteger(event.completed)&&Number.isInteger(event.total)&&event.completed>=0&&event.completed<=event.total);
+  const count=progress?.completed??completed,maximum=progress?.total??total;
+  const determinate=mode==='linked'&&maximum>0;
   return <section className="scan-activity" role="status" aria-live="polite" aria-atomic="false">
     <div className="scan-activity-heading"><span className="scan-orbit" aria-hidden="true"><ShieldCheck size={22}/></span><div><h3>{mode==='linked'?(fa?'بررسی صفحه‌های مرتبط':'Inspecting linked pages'):(fa?'بررسی وب‌سایت در حال انجام است':'Website scan in progress')}</h3><p>{latest?.message||(fa?'در حال اعتبارسنجی نشانی عمومی':'Validating the public website address')}</p></div><time>{seconds}s</time></div>
-    <div className="scan-activity-track" aria-hidden="true"><i/></div>
+    <div className={'scan-activity-track'+(determinate?' determinate':'')} role="progressbar" aria-label={fa?'پیشرفت بررسی':'Scan progress'} aria-valuemin={0} aria-valuemax={determinate?maximum:undefined} aria-valuenow={determinate?count:undefined}><i style={determinate?{width:`${count/maximum*100}%`}:undefined}/></div>
     <div className="scan-activity-scope"><Globe2 size={15}/><span>{browserStage?(fa?'تهیهٔ تصویر در مرورگر ایزوله؛ پخش زنده نیست':'Creating an isolated browser snapshot · not a live video'):(fa?'بررسی شبکه، HTML و گزارش تهدید؛ بدون ارسال فرم':'Network, HTML and threat checks · no forms submitted')}</span></div>
-    {mode==='linked'&&<p>{completed} / {total} {fa?'مقصد تکمیل شده':'destinations completed'}</p>}
-    <ol>{events.slice(-5).map((event,index)=><li key={`${event.phase}-${index}`}><Check size={12}/><span>{event.message}</span></li>)}</ol>
+    {mode==='linked'&&maximum>0&&<p className="scan-progress-count" dir="auto">{count} / {maximum} {fa?'مقصد پردازش شده؛ خطاها در گزارش می‌آیند':'destinations processed · failures remain in the report'}</p>}
+    <ol>{events.slice(-5).map((event,index,visible)=><li key={`${event.phase}-${index}`}>{event.phase?.includes('unavailable')||['unavailable','blocked','requires_access','requires_payment','budget_exceeded'].includes(event.status)?<Info size={12}/>:index===visible.length-1&&!['item_finished','completed','analysis_done','batch_completed'].includes(event.phase)&&!event.phase?.endsWith('_done')?<LoaderCircle className="spin" size={12}/>:<Check size={12}/>}<span>{event.message}</span></li>)}</ol>
     {onStop&&<button type="button" className="outline-button" onClick={onStop}>{fa?'توقف و حفظ پیشرفت':'Stop and keep progress'}</button>}
   </section>;
 }
