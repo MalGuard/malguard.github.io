@@ -35,11 +35,3 @@ test('profile signup identifies an existing email and username before it sends a
   assert.deepEqual(await auth.availability({emailAddress:'used@example.com',username:'taken_name'}),{email:'taken',username:'taken'});
   assert.deepEqual(await auth.availability({emailAddress:'new@example.com',username:'fresh_name'}),{email:'available',username:'available'});
 });
-
-test('a verified Google identity creates an account only after profile completion, then signs in by email match',async()=>{
-  const accounts=[];const store={enabled:true,status:{hasUrl:true,hasServiceKey:true},findByEmail:async value=>accounts.find(item=>item.email===value)||null,findByUsername:async value=>accounts.find(item=>item.username===value)||null,create:async profile=>{const account={...profile,id:'google-1'};accounts.push(account);return account;}};
-  const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',accountStore:store,fetchImpl:async()=>({ok:true})});
-  const pending=await auth.googleAccount({emailAddress:'player@example.com',firstName:'Alex',lastName:'Morgan'});assert.equal(pending.kind,'signup');assert.equal('sessionToken' in pending,false);
-  const created=await auth.completeGoogleSignup({signupToken:pending.signupToken,profile:{firstName:'Alex',lastName:'Morgan',birthDate:'2000-01-01',username:'google_player'}});assert.equal(auth.session(created).email,'player@example.com');assert.match(accounts[0].passwordHash,/^google\$/);
-  const existing=await auth.googleAccount({emailAddress:'player@example.com'});assert.equal(existing.kind,'session');assert.equal(auth.session(existing).username,'google_player');
-});

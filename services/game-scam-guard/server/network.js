@@ -61,7 +61,8 @@ export async function resolvePublic(url, resolver = resolveDomain) {
   const host = url.hostname.replace(/^\[|\]$/g, '');
   if (host === 'localhost' || /\.(localhost|local|internal|test|invalid)$/i.test(host)) throw new ScanError('آدرس‌های محلی و شبکهٔ خصوصی قابل بررسی نیستند.', 400);
   const answers = ipaddr.isValid(host) ? [{ address: host, family: ipaddr.parse(host).kind() === 'ipv4' ? 4 : 6 }] : await resolver(host, { all: true });
-  if (!answers.length || answers.some(a => !publicAddress(a.address))) throw new ScanError('این آدرس به شبکهٔ خصوصی یا غیرعمومی اشاره می‌کند.', 400);
+  if (!answers.length) throw new ScanError('این دامنه پیدا نشد. املای آدرس را بررسی کنید.',422,'ENOTFOUND');
+  if (answers.some(a => !publicAddress(a.address))) throw new ScanError('این آدرس به شبکهٔ خصوصی یا غیرعمومی اشاره می‌کند.', 400);
   return answers.find(a => a.family === 4) || answers[0];
 }
 

@@ -41,6 +41,8 @@ jobs:
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/secure-cinematic.mjs
           TEST_BROWSER=chromium node tests/secure-cinematic.mjs
           npm run test:experience
+          TEST_BROWSER=chromium node tests/game-scam-preview.mjs
+          node tests/game-scam-extended-flow.mjs
           # Use the same display compositor as cinematic WebKit checks.
           xvfb-run --auto-servernum node tests/secure-forms.mjs
           node tests/public-release/browser.cjs

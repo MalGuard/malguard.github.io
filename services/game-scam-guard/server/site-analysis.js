@@ -1,6 +1,6 @@
 // Independent inspection of received HTML. This module never connects to a URL,
 // executes JavaScript, submits forms, or collects entered field values.
-export const SITE_ENGINE_VERSION = '1.0.0';
+export const SITE_ENGINE_VERSION = '1.1.0';
 export const FILE_LINK = /\.(exe|msi|apk|xapk|zip|rar|7z|dmg|pkg|iso|dll|asi|bat|cmd|ps1|scr|jar|deb|tar|gz|pdf|js|mjs|cjs|py|sh|elf|lua)(?:$|[?#])/i;
 const short = (text, limit = 180) => String(text || '').replace(/\s+/g, ' ').trim().slice(0, limit);
 
@@ -106,12 +106,21 @@ export function inspectSite($, pageUrl) {
 
   const links = [];
   const seen = new Map();
-  let totalLinks = 0; let bytes = 0; let omitted = 0;
+  let totalLinks = 0; let bytes = 0; let omitted = 0; let deceptiveLinks=0;
   $('a[href]').each((_, element) => {
     const node = $(element);
     const position = ++totalLinks;
     const target = webTarget(node.attr('href'), base);
     if (target) target.hash = '';
+    // Compare only explicit URL labels. Brand names alone are not evidence of impersonation.
+    const label=short(node.text(),200);
+    if(target&&/^https?:\/\/[^\s]+$/i.test(label)){
+      const advertised=webTarget(label,page.href);
+      if(advertised&&advertised.hostname.replace(/^www\./,'')!==target.hostname.replace(/^www\./,'')){
+        deceptiveLinks++;
+        add('link_destination_mismatch','Displayed link destination does not match',`A link displays ${advertised.hostname} but points to ${target.hostname}. It may be a tracking redirect or a deceptive link; neither destination was opened by this check.`);
+      }
+    }
     const url = target?.href;
     const duplicateOf = url ? seen.get(url) : undefined;
     if (url && !duplicateOf) seen.set(url, position);
@@ -126,8 +135,8 @@ export function inspectSite($, pageUrl) {
 
   return {
     signals,
-    siteAnalysis:{engine:'GameScam Guard HTML',version:SITE_ENGINE_VERSION,status:'done',scope:'received-html',rulesChecked:6,
-      sensitiveForms,externalScripts,inlineScripts,nonExecutableScripts,refreshCount,javaScriptExecuted:false,fileContentsRead:false},
+    siteAnalysis:{engine:'GameScam Guard HTML',version:SITE_ENGINE_VERSION,status:'done',scope:'received-html',rulesChecked:7,
+      sensitiveForms,externalScripts,inlineScripts,nonExecutableScripts,refreshCount,deceptiveLinks,javaScriptExecuted:false,fileContentsRead:false},
     linkInventory:{total:totalLinks,retained:links.length,omitted,links,status:'discovered-only'},
     base,
   };

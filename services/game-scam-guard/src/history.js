@@ -9,6 +9,8 @@ const webUrl = value => {
   try { return ['http:', 'https:'].includes(new URL(value).protocol); } catch { return false; }
 };
 const reputation = value => value === undefined || (isObject(value) && text(value.status) && text(value.message));
+const layers=value=>value===undefined||list(value,item=>isObject(item)&&text(item.id)&&text(item.title)&&text(item.detail)&&['inspected','finding','unavailable','not_requested'].includes(item.status));
+const verdict=value=>['limited','warning','danger','unavailable'].includes(value);
 const targetStatuses=['unscanned','queued','limited','warning','danger','unavailable','blocked','requires_access','requires_payment','budget_exceeded'];
 const peEvidence=value=>value===undefined||value===null||(isObject(value)&&text(value.version)&&(value.rulesVersion===null||optionalText(value.rulesVersion))&&typeof value.peValid==='boolean');
 const behavior=value=>value===undefined||(isObject(value)&&text(value.status)&&typeof value.executed==='boolean'&&text(value.reason)&&optionalText(value.untrustedOutputExcerpt)
@@ -54,6 +56,9 @@ function report(value) {
     && ['limited', 'warning', 'danger', 'unavailable'].includes(value.status)
     && typeof value.advanced === 'boolean' && count(value.linkCount) && count(value.fileCount)
     && (value.discoveredFileCount===undefined||count(value.discoveredFileCount))
+    && layers(value.inspectionLayers)
+    && (value.initialAssessment===undefined||(isObject(value.initialAssessment)&&verdict(value.initialAssessment.status)&&value.initialAssessment.scope==='submitted-page'))
+    && (value.linkedAssessment===undefined||(isObject(value.linkedAssessment)&&verdict(value.linkedAssessment.status)&&text(value.linkedAssessment.reason)&&['threats','warnings','incomplete','omitted','excluded'].every(key=>count(value.linkedAssessment[key]))))
     && optionalText(value.scanToken)
     && (value.inputAdjusted === undefined || typeof value.inputAdjusted === 'boolean')
     && (value.pageFetch === undefined || (isObject(value.pageFetch) && ['done','unavailable'].includes(value.pageFetch.status) && optionalText(value.pageFetch.detail) && optionalText(value.pageFetch.reason) && count(value.pageFetch.attempts)))

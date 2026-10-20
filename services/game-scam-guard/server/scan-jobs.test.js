@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ScanError} from './network.js';
 import {createReportTokens} from './report-token.js';
-import {startScanJob,stepScanJob,scanJobReport,inspectJobTarget} from './scan-jobs.js';
+import {startScanJob,stepScanJob,scanJobReport,inspectJobTarget,prepareJobPreview} from './scan-jobs.js';
 
 const pages=Array.from({length:6},(_,i)=>({position:i+1,label:`Page ${i}`,url:`https://example.com/page-${i}`,kind:'page',status:'unscanned'}));
 const downloads=[{position:7,label:'Installer',url:'https://example.com/game.zip',kind:'file',status:'unscanned'}];
@@ -13,7 +13,7 @@ const start=(report=base,c=codec())=>({c,job:startScanJob({id:'root',token:'fixt
 test('website queue accepts only observed public page links and omits downloads',()=>{
   assert.throws(()=>startScanJob({consent:false}),{status:400});
   assert.throws(()=>startScanJob({mode:'ultra',consent:true},{readReport:()=>base}),{status:400});
-  const {job}=start();assert.equal(job.targets.length,6);assert.ok(job.targets.every(target=>target.kind==='page'));assert.equal(job.omittedTargets,1);
+  const {job}=start();assert.equal(job.targets.length,6);assert.ok(job.targets.every(target=>target.kind==='page'));assert.equal(job.omittedTargets,0);assert.equal(job.excludedTargets,1);
 });
 
 test('bounded page queue persists across signed batches and preserves each result',async()=>{
@@ -45,4 +45,22 @@ test('reported URL threat survives inaccessible linked content',async()=>{
   const error=Object.assign(new ScanError('HTTP 403; fixture content unavailable'),{remoteStatus:403,bytesRead:0});
   const result=await inspectJobTarget(target,{validate:async()=>{},urlLookup:async()=>({status:'listed',message:'Fixture URL threat'}),transport:async()=>{throw error;}});
   assert.equal(result.status,'danger');assert.equal(result.accessRequirement,'requires_access');
+});
+
+
+test('excluded downloads do not degrade a clean page and original caution survives incomplete children',async()=>{
+  let {job,c}=start();while(!job.done)job=await stepScanJob({id:job.id,token:job.token},{codec:c,inspect:async target=>({...target,status:'limited'})});
+  const clean=scanJobReport(job);assert.equal(clean.status,'limited');assert.equal(clean.initialAssessment.status,'limited');assert.equal(clean.jobSummary.excluded,1);
+  const partial=scanJobReport({...job,parent:{...base,status:'warning'},results:[...job.results,{id:'unreachable',status:'unavailable'}]});
+  assert.equal(partial.status,'warning');assert.equal(partial.initialAssessment.status,'warning');assert.equal(partial.linkedAssessment.incomplete,1);
+  const threat=scanJobReport({...job,results:[{id:'bad',status:'danger'}]});assert.equal(threat.status,'danger');assert.equal(threat.initialAssessment.status,'limited');assert.match(threat.linkedAssessment.reason,/threat evidence/);
+});
+
+test('advanced browser upgrade renders only the exact signed HTML and preserves the verdict',async()=>{
+  const {createHash}=await import('node:crypto');const bytes=Buffer.from('<html>Original page</html>');
+  const parent={...base,siteAnalysis:{htmlSha256:createHash('sha256').update(bytes).digest('hex')},preview:{status:'skipped',detail:'Not requested'}};
+  const {job,c}=start(parent);let renders=0;
+  const options={codec:c,transport:async()=>({url:parent.finalUrl,bytes}),preview:async()=>{renders++;return {status:'done',detail:'Fixture browser snapshot',image:'data:image/jpeg;base64,'+'A'.repeat(1500000)};}};
+  const upgraded=await prepareJobPreview(job,options);assert.equal(upgraded.parent.preview.status,'done');assert.equal(upgraded.parent.status,parent.status);assert.equal(renders,1);assert.equal(c.read(upgraded.token,upgraded.id).result.parent.preview.image,undefined);
+  const changed=await prepareJobPreview(job,{...options,transport:async()=>({url:parent.finalUrl,bytes:Buffer.from('Changed')})});assert.equal(changed.parent.preview.status,'unavailable');assert.match(changed.parent.preview.detail,/changed/);assert.equal(renders,1);
 });

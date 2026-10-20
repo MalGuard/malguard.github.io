@@ -1,8 +1,0 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import {createGoogleAuth} from './google-auth.js';
-
-const options=()=>{let saved;const auth=createGoogleAuth({clientId:'fixture.apps.googleusercontent.com',clientSecret:'x'.repeat(32),now:()=>1000,fetchImpl:async(url,request)=>{if(url.includes('/token')){saved=request;return {ok:true,json:async()=>({access_token:'fixture-token'})};}return {ok:true,json:async()=>({email:'Player@example.com',email_verified:true,given_name:'Alex',family_name:'Morgan'})};}});return {auth,get request(){return saved;}}};
-
-test('Google OAuth uses a signed state and returns only a verified Google profile',async()=>{const fixture=options(),url=new URL(fixture.auth.start()),state=url.searchParams.get('state');const profile=await fixture.auth.complete({state,code:'x'.repeat(24)});assert.deepEqual(profile,{email:'player@example.com',firstName:'Alex',lastName:'Morgan'});assert.match(fixture.request.body,/client_secret=/);});
-test('Google OAuth rejects a modified state and an unverified provider profile',async()=>{const fixture=options(),state=new URL(fixture.auth.start()).searchParams.get('state');await assert.rejects(()=>fixture.auth.complete({state:`x${state}`,code:'x'.repeat(24)}),{status:400});const auth=createGoogleAuth({clientId:'fixture.apps.googleusercontent.com',clientSecret:'x'.repeat(32),now:()=>1000,fetchImpl:async url=>url.includes('/token')?{ok:true,json:async()=>({access_token:'fixture'})}:{ok:true,json:async()=>({email:'player@example.com',email_verified:false})}});await assert.rejects(()=>auth.complete({state:new URL(auth.start()).searchParams.get('state'),code:'x'.repeat(24)}),{status:401});});

@@ -91,13 +91,6 @@ test('account registration passes the complete profile and exposes account avail
   try{const profile={firstName:'Alex',lastName:'Morgan',birthDate:'2000-01-01',username:'player_guard',password:'StrongPass1'};const start=await fetch(`${base}/api/auth/start`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'player@example.com',profile})});assert.equal(start.status,200);assert.deepEqual(received,{emailAddress:'player@example.com',name:undefined,profile,ip:'127.0.0.1'});const availability=await fetch(`${base}/api/auth/availability`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'used@example.com',username:'taken_name'})});assert.deepEqual(await availability.json(),{email:'taken',username:'taken'});}finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 });
 
-test('Google callback issues a completion ticket for a new verified Google identity',async()=>{
-  const emailAuth={enabled:true,status:{},googleAccount:async profile=>{assert.equal(profile.email,'player@example.com');return {kind:'signup',signupToken:'signed-google-ticket'};},completeGoogleSignup:async()=>({sessionToken:'fixture'})};
-  const googleAuth={enabled:true,status:{configured:true},start:()=> 'https://accounts.google.com/o/oauth2/v2/auth?fixture=1',complete:async()=>({email:'player@example.com',firstName:'Alex',lastName:'Morgan'})};
-  const app=createApp({emailAuth,googleAuth,appOrigin:'https://app.example/game-scam-guard/'});const server=app.listen(0,'127.0.0.1');await once(server,'listening');const base=`http://127.0.0.1:${server.address().port}`;
-  try{const start=await fetch(`${base}/api/auth/google/start`,{redirect:'manual'});assert.equal(start.status,302);assert.equal(start.headers.get('location'),'https://accounts.google.com/o/oauth2/v2/auth?fixture=1');const callback=await fetch(`${base}/api/auth/google/callback?state=fixture&code=fixture-code`,{redirect:'manual'});assert.equal(callback.status,302);assert.equal(callback.headers.get('location'),'https://app.example/game-scam-guard/#guard-google-signup=signed-google-ticket');}finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
-});
-
 test('live scan route streams verified stage events before its final report',async()=>{
   const app=createApp({scanSite:async(url,{onEvent})=>{onEvent({phase:'url_validation',message:'Validating the public website address'});onEvent({phase:'cloud_browser_done',message:'Isolated browser snapshot is ready'});return {url,status:'limited',preview:{status:'done'}};}});
   const server=app.listen(0,'127.0.0.1');await once(server,'listening');const base=`http://127.0.0.1:${server.address().port}`;
@@ -108,4 +101,18 @@ test('live validation failures retain their HTTP error status before any stream 
   const app=createApp({scanSite:async(_url,{onEvent})=>{onEvent({phase:'url_validation',message:'Validating the public website address'});throw new ScanError('Private addresses are blocked.',400);}});
   const server=app.listen(0,'127.0.0.1');await once(server,'listening');const base=`http://127.0.0.1:${server.address().port}`;
   try{const response=await fetch(`${base}/api/scan/live`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:'http://127.0.0.1/'})});assert.equal(response.status,400);assert.deepEqual(await response.json(),{error:'Private addresses are blocked.'});}finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+});
+
+
+test('email-only accounts do not advertise Google or expose OAuth routes',async()=>{
+  const emailAuth={enabled:true,status:{hasApiKey:true,hasFromEmail:true}};
+  const server=createApp({emailAuth}).listen(0,'127.0.0.1');await once(server,'listening');
+  const base=`http://127.0.0.1:${server.address().port}`;
+  try{
+    assert.deepEqual(await (await fetch(`${base}/api/auth/status`)).json(),{provider:'first-party-email',configured:true,hasApiKey:true,hasFromEmail:true});
+    for(const route of ['start','callback','complete-signup']){
+      const response=await fetch(`${base}/api/auth/google/${route}`,route==='complete-signup'?{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}:{});
+      assert.equal(response.status,404);assert.equal(response.headers.get('location'),null);
+    }
+  }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 });

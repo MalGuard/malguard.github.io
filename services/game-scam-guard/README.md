@@ -1,47 +1,58 @@
 # GameScam Guard site integration
 
-The reviewed Persian web scanner lives here and is built with the parent site's
-`npm run build`. Install dependencies from the repository root with `npm ci`.
+GameScam Guard is a website-only scanner served at
+`https://malguard.site/game-scam-guard/`. The signed Android 1.1.0 app loads this
+first-party interface in a restricted WebView; UI and server fixes reach the
+installed app without replacing its APK. The public APK is linked from
+`https://malguard.site/gamescam-guard-android.html`.
 
-- Public entry: `https://malguard.site/game-scam-guard.html`.
-- Stable web preview: `https://game-scam-guard-connected.vercel.app/game-scam-guard/`.
-- Same-origin Vercel API namespace: `/api/game-scam-guard/`.
-- Existing MalGuard HTML, administrator authentication and Windows download
-  workflows are preserved. The Windows client is not released by this change.
+Install dependencies at the repository root. `npm run build` builds the React
+interface and copies only approved public assets to `_site`. GitHub Pages hosts
+the interface; the existing `game-scam-guard-connected` Vercel project serves the
+API at `/api/game-scam-guard/`. Never embed server/provider/signing secrets in
+public assets.
 
-GitHub Pages hosts the public entry only. It cannot run Node functions; the
-entry opens the existing Vercel project. Its unchanged `all_except_custom_domains`
-protection redirects unauthenticated visitors on immutable deployment URLs to
-Vercel Authentication; the stable Production alias serves the app and API
-without a share link under the existing domain exception. Verify actual alias
-access instead of assuming every project URL requires login. Do not embed a
-share token, bypass cookie, provider key or preview password in public HTML.
-Owner testing may use an independently verified expiring scoped share URL.
+## Inspection scope
 
-Production environment variables remain configured in Vercel, not in source:
-`ABUSECH_AUTH_KEY`, `MALWAREBAZAAR_AUTH_KEY`, `GUARD_REPORT_SECRET`,
-`URLHAUS_AUTH_KEY_SOURCE`, and the four `GUARD_CLOUD_*` activation controls.
-Do not decrypt/copy them or enable paid upgrades. Sandbox readiness describes
-configuration, not an audit of remaining quota. Missing hashes, provider
-errors, unsupported behavior and absent consent retain honest static fallback.
+- Website scan: guarded public DNS/connections, URLhaus, received HTML identity,
+  sensitive forms, script patterns, redirects and link inventory. A clean
+  observation does not verify a seller or guarantee safety.
+- Advanced website scan: an isolated, JavaScript-disabled browser snapshot and,
+  after explicit confirmation, a bounded queue of observed public page targets.
+  A basic-to-advanced upgrade preserves the original verdict. Fresh HTML must
+  match its signed SHA-256 before generating an upgrade snapshot.
+- Fifteen report categories describe **coverage**, not fifteen antivirus engines.
+  Unavailable or unrequested checks stay visible. Original page and broader
+  linked-page verdicts are displayed separately, with reasons for a change.
+- Files, downloads, uploads, file hashing and file execution are excluded. Files
+  belong to GTA Guard. MalwareBazaar is not a website reputation engine.
+- Email/password or email-code accounts use the existing Brevo/account store.
+  Google OAuth and its routes are removed. Previously created Google accounts
+  can use their email-code sign-in. No automatic email is sent by these tests.
+- Browser preview remains behind its existing server opt-in and snapshot setup.
+  No paid upgrade or new provider is required. Missing browser infrastructure
+  reports unavailable and does not invent a screenshot or execution result.
 
-The engine and pinned cloud collector are copied unchanged from the reviewed
-standalone source. The integration changes only frontend base paths, PWA scope
-and API dispatch. Cloud collector SHA-256:
-`1886250255a8d690a362b5f6aa5a343b1c65de291e0d9bea2136b245c45b951b`.
-No suspicious specimen may be executed in development, tests or CI.
-
-Verification:
+## Verification
 
 ```sh
 npm run test:game-scam-guard
 npm run test:static
 npm run build
-NODE_ENV=production GUARD_BROWSER_SANDBOX=false node tests/game-scam-preview.mjs
+TEST_BROWSER=chromium node tests/game-scam-preview.mjs
+node tests/game-scam-extended-flow.mjs
+node apps/gamescam-guard-android/verify-project.mjs
 ```
 
-The last command uses an owned loopback server, benign authored JSON and public
-Example Domain. Browser binaries/libraries must match the installed Playwright.
-The local service worker must stay under `/game-scam-guard/`; it must not cache
-MalGuard parent pages, API responses or received file bytes. The static builder
-copies built frontend assets only, excluding service sources and credentials.
+The UI tests use an owned loopback server and authored fixtures, with private
+address/CORS checks against the local API. Set `PLAYWRIGHT_BROWSERS_PATH` for the
+installed browser location when needed. They test responsive account/report
+layouts and the complete initial-to-extended report flow, including independent
+threat and coverage outcomes. No suspicious specimen may be executed in
+development, tests or CI. Browser emulation does not replace physical Samsung
+installation/WebView or Safari testing.
+
+The service worker is scoped to `/game-scam-guard/` and uses network-first fetches.
+It must never cache parent pages, APIs, credentials or scanned content. The pinned
+legacy collector remains server-only; its source SHA-256 is
+`1886250255a8d690a362b5f6aa5a343b1c65de291e0d9bea2136b245c45b951b`.

@@ -59,3 +59,9 @@ test('new independent report survives a cross-instance capability with no threat
   const restored=capabilities.read(capabilities.issue(report),report.id).result;
   assert.equal(restored.linkInventory.retained,54);assert.equal(restored.siteAnalysis.htmlSha256,report.siteAnalysis.htmlSha256);
 });
+
+
+test('explicit URL labels are compared with actual link hosts without guessing brand identity',()=>{
+  const report=parsePage(Buffer.from('<html><a href="https://other.example/path">https://store.example/</a><a href="https://www.store.example/path">https://store.example/</a><a href="https://other.example/">Game Store</a></html>'),'https://example.com/',{'content-type':'text/html'});
+  assert.equal(report.siteAnalysis.deceptiveLinks,1);assert.equal(report.signals.filter(item=>item.rule==='link_destination_mismatch').length,1);
+});

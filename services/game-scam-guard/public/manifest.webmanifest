@@ -2,14 +2,14 @@
   "id": "./",
   "name": "GameScam Guard",
   "short_name": "GameScam Guard",
-  "description": "Check gaming links and file evidence before you download or buy.",
+  "description": "Inspect public gaming websites and linked pages with visible evidence.",
   "lang": "en",
   "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f7f9f8",
-  "theme_color": "#0e2524",
+  "background_color": "#030303",
+  "theme_color": "#030303",
   "icons": [
     {
       "src": "./icons/icon-192.png",

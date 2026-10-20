@@ -9,5 +9,4 @@ export const sendEmailCode=({email,username,profile})=>request('auth/start',{ema
 export const checkAccountAvailability=({email,username})=>request('auth/availability',{email,username});
 export const verifyEmailCode=({verificationToken,code})=>request('auth/verify',{verificationToken,code});
 export const signInWithPassword=({email,password})=>request('auth/password',{email,password});
-export const completeGoogleSignup=({signupToken,profile})=>request('auth/google/complete-signup',{signupToken,profile});
 export const readEmailSession=sessionToken=>request('auth/session',{sessionToken});
