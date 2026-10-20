@@ -1,5 +1,6 @@
 import originalClient from './vendor/malwarebazaar-client.cjs';
 import { fetchPublic } from './network.js';
+import {lookupPhishingUrl} from './phishing-feed.js';
 
 const { MalwareBazaarClient } = originalClient;
 
@@ -53,7 +54,7 @@ export async function lookupUrl(value, {authKeyProvider = urlhausAuthKey, transp
   try {
     const body = new URLSearchParams({url:value}).toString();
     const response = await transport('https://urlhaus-api.abuse.ch/v1/url/',{
-      method:'POST',noRedirect:true,limit:1024*1024,
+      method:'POST',noRedirect:true,limit:1024*1024,timeout:7000,totalTimeout:10000,
       headers:{'Auth-Key':authKey,'Content-Type':'application/x-www-form-urlencoded','Content-Length':Buffer.byteLength(body)},body,
     });
     if ([401,403].includes(response.status)) return authError(`http_${response.status}`);
@@ -73,4 +74,12 @@ export async function lookupUrl(value, {authKeyProvider = urlhausAuthKey, transp
 
 export async function lookupFileHash(hash) {
   return mapBazaarResult(await createBazaarClient().lookupSha256(hash));
+}
+
+export async function lookupReputation(value,{urlhaus=lookupUrl,phishing=lookupPhishingUrl}={}){
+ const address=new URL(value);address.hash='';value=address.href;
+ const tasks=[['urlhaus',urlhaus],['openphish',phishing]];
+ const sources=await Promise.all(tasks.map(async([provider,lookup])=>{try{return {...await lookup(value),provider};}catch{return {provider,status:'unavailable',message:'The source did not respond.'};}}));
+ const listed=sources.filter(source=>source.status==='listed'),checked=sources.filter(source=>['listed','not_found'].includes(source.status));
+ return {status:listed.length?'listed':checked.length?'not_found':'unavailable',message:listed.length?'A known threat source reported this exact URL.':'Only successful source lookups are observations; absent or unavailable data does not establish safety.',sources,coverage:{checked:checked.length,configured:sources.filter(source=>source.status!=='unconfigured').length},checkedAt:new Date().toISOString()};
 }

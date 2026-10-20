@@ -5,6 +5,7 @@ import * as scanner from './scanner.js';
 import { ScanError } from './network.js';
 import {startScanJob,stepScanJob,scanJobReport,prepareJobPreview} from './scan-jobs.js';
 import {createEmailAuth} from './email-auth.js';
+import {cachedSelfTest} from './self-test.js';
 
 export function createApp({ scanSite = scanner.scanSite, providerStatus = scanner.providerStatus,startJob=startScanJob,stepJob=stepScanJob,emailAuth=createEmailAuth(),preparePreview=prepareJobPreview } = {}) {
 const app = express();
@@ -50,10 +51,13 @@ app.use('/api/auth', (req,res,next) => {
   next();
 });
 app.use(['/api/scan','/api/scan/live','/api/jobs'], (req, res, next) => {
-  const now = Date.now(); const key = `${req.ip}|${req.originalUrl.startsWith('/api/jobs/')?'job':'normal'}`;
+  // Classify the matched middleware route, including when the API is mounted
+  // behind a first-party prefix. The external URL is not a stable route key.
+  const jobRequest=req.baseUrl.endsWith('/api/jobs');
+  const now = Date.now(); const key = `${req.ip}|${jobRequest?'job':'normal'}`;
   const rate = rates.get(key);
   if (!rate || rate.until < now) rates.set(key, { count: 1, until: now + 60000 });
-  else if (++rate.count > (req.originalUrl.startsWith('/api/jobs/')?40:12)) return res.status(429).json({ error: 'تعداد درخواست‌ها زیاد است. یک دقیقه دیگر تلاش کنید.' });
+  else if (++rate.count > (jobRequest?40:12)) return res.status(429).json({ error: 'تعداد درخواست‌ها زیاد است. یک دقیقه دیگر تلاش کنید.' });
   for (const [ip, entry] of rates) if (entry.until < now) rates.delete(ip);
   next();
 });
@@ -70,6 +74,7 @@ const handleScan = operation => async (req,res) => {
   }
 };
 app.get('/api/health', (req,res)=>res.json({ status: 'ok', providers: providerStatus(), mode: 'website-link-inspection', maxLinkedPages:128 }));
+app.get('/api/self-test',(req,res)=>res.json(cachedSelfTest()));
 app.get('/api/account-config',(req,res)=>{
   // This is Clerk's intentionally public browser identifier, never a secret key.
   const key=process.env.GUARD_CLERK_PUBLISHABLE_KEY||'';

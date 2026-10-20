@@ -8,7 +8,12 @@ const webUrl = value => {
   if (!text(value)) return false;
   try { return ['http:', 'https:'].includes(new URL(value).protocol); } catch { return false; }
 };
-const reputation = value => value === undefined || (isObject(value) && text(value.status) && text(value.message));
+const reputationItem=value=>isObject(value)&&text(value.status)&&text(value.message);
+const reputation = value => value === undefined || (reputationItem(value)&&(value.sources===undefined||(Array.isArray(value.sources)&&value.sources.length<=8&&value.sources.every(item=>reputationItem(item)&&text(item.provider)))));
+const urlReputations=value=>value===undefined||(Array.isArray(value)&&value.length<=5&&value.every(item=>isObject(item)&&webUrl(item.url)&&reputationItem(item.reputation)&&reputation(item.reputation)));
+const localized=value=>value===undefined||(isObject(value)&&['en','fa'].every(locale=>isObject(value[locale])&&text(value[locale].title)&&text(value[locale].detail)));
+const signal=value=>isObject(value)&&text(value.title)&&text(value.detail)&&localized(value.localized)&&(value.evidence===undefined||list(value.evidence,text));
+const analysisEngine=value=>value===undefined||(isObject(value)&&text(value.version)&&Array.isArray(value.modules)&&value.modules.length<=64&&value.modules.every(item=>isObject(item)&&text(item.id)&&['inspected','finding','incomplete'].includes(item.status)&&count(item.findings))&&isObject(value.limits)&&count(value.limits.omittedScripts)&&typeof value.limits.javaScriptExecuted==='boolean');
 const layers=value=>value===undefined||list(value,item=>isObject(item)&&text(item.id)&&text(item.title)&&text(item.detail)&&['inspected','finding','unavailable','not_requested'].includes(item.status));
 const verdict=value=>['limited','warning','danger','unavailable'].includes(value);
 const targetStatuses=['unscanned','queued','limited','warning','danger','unavailable','blocked','requires_access','requires_payment','budget_exceeded'];
@@ -24,9 +29,10 @@ const artifact=(value,depth=0)=>value===undefined||(depth<=2&&isObject(value)&&t
   &&(value.archive===undefined||(isObject(value.archive)&&count(value.archive.inspected)&&count(value.archive.listed)&&list(value.archive.entries,item=>isObject(item)&&text(item.name)&&text(item.status)&&count(item.size)&&optionalText(item.sha256)&&(item.permissions===undefined||list(item.permissions,text))&&artifact(item.nested,depth+1)&&peEvidence(item.peEngine)))));
 const routing=value=>value===undefined||(isObject(value)&&text(value.code)&&text(value.detail)&&typeof value.fallback==='boolean');
 const destination=value=>isObject(value)&&['id','name','kind','status'].every(key=>text(value[key]))&&webUrl(value.url)&&optionalText(value.title)&&optionalText(value.detail)&&artifact(value.artifact)&&behavior(value.behavior)&&routing(value.routing)
-  &&reputation(value.reputation)&&reputation(value.fileReputation)&&reputation(value.finalReputation)
+  &&reputation(value.reputation)&&reputation(value.fileReputation)&&reputation(value.finalReputation)&&urlReputations(value.urlReputations)
   &&(value.finalUrl===undefined||webUrl(value.finalUrl))
-  &&(value.findings===undefined||list(value.findings,item=>isObject(item)&&text(item.title)&&text(item.detail)));
+  &&analysisEngine(value.analysisEngine)
+  &&(value.findings===undefined||list(value.findings,signal));
 const inventory = value => value === undefined || (isObject(value)
   && ['total','retained','omitted'].every(key => count(value[key]))
   && value.retained + value.omitted === value.total && ['discovered-only','checked-targets'].includes(value.status)
@@ -57,6 +63,7 @@ function report(value) {
     && typeof value.advanced === 'boolean' && count(value.linkCount) && count(value.fileCount)
     && (value.discoveredFileCount===undefined||count(value.discoveredFileCount))
     && layers(value.inspectionLayers)
+    && analysisEngine(value.analysisEngine)
     && (value.initialAssessment===undefined||(isObject(value.initialAssessment)&&verdict(value.initialAssessment.status)&&value.initialAssessment.scope==='submitted-page'))
     && (value.linkedAssessment===undefined||(isObject(value.linkedAssessment)&&verdict(value.linkedAssessment.status)&&text(value.linkedAssessment.reason)&&['threats','warnings','incomplete','omitted','excluded'].every(key=>count(value.linkedAssessment[key]))))
     && optionalText(value.scanToken)
@@ -64,9 +71,9 @@ function report(value) {
     && (value.pageFetch === undefined || (isObject(value.pageFetch) && ['done','unavailable'].includes(value.pageFetch.status) && optionalText(value.pageFetch.detail) && optionalText(value.pageFetch.reason) && count(value.pageFetch.attempts)))
     && list(value.headings, text) && list(value.limitations, text) && list(value.files, file)
     && list(value.checks, item => isObject(item) && ['title', 'status', 'detail'].every(key => text(item[key])))
-    && list(value.signals, item => isObject(item) && ['level', 'title', 'detail'].every(key => text(item[key])))
+    && list(value.signals, item => signal(item)&&text(item.level))
     && list(value.redirects, item => isObject(item) && webUrl(item.from) && webUrl(item.to) && count(item.status))
-    && reputation(value.reputation) && reputation(value.finalReputation)
+    && reputation(value.reputation) && reputation(value.finalReputation) && urlReputations(value.urlReputations)
     && inventory(value.linkInventory) && siteAnalysis(value.siteAnalysis)
     && (value.destinationResults===undefined||list(value.destinationResults,destination))
     && (value.destinationResults===undefined||value.jobSummary!==undefined)

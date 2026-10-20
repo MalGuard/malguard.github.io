@@ -9,7 +9,7 @@
     "test:experience": "node tests/experience.mjs",
     "test:motion": "node tests/motion-smoke.mjs",
     "build": "npm run build:game-scam-guard && python3 tools/build-public-site.py",
-    "build:game-scam-guard": "vite build --config services/game-scam-guard/vite.config.js",
+    "build:game-scam-guard": "node tools/build-gamescam-guide.mjs && vite build --config services/game-scam-guard/vite.config.js",
     "test:game-scam-guard": "node tests/game-scam-integration.test.mjs && npm --prefix services/game-scam-guard test"
   },
   "devDependencies": {
@@ -35,6 +35,7 @@
     "ipaddr.js": "^2.2.0",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@babel/parser": "7.29.9"
   }
 }

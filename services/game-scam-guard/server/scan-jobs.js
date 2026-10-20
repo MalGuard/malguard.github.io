@@ -4,7 +4,9 @@ import {inspectionLayers} from './inspection-layers.js';
 import {createReportTokens,reportTokens} from './report-token.js';
 import {fetchPublic,normalizeUrl,resolvePublic,ScanError} from './network.js';
 import {parsePage} from './scanner.js';
-import {lookupUrl} from './threat-intel.js';
+import {lookupReputation} from './threat-intel.js';
+import {assessPage} from './page-assessment.js';
+import {inspectRedirectReputation,reportReputations} from './redirect-intel.js';
 
 export const jobTokens=createReportTokens({maxBytes:1024*1024});
 const MAX_TARGETS=128,MAX_TOTAL_BYTES=96*1024*1024;
@@ -58,7 +60,7 @@ function jobDto(state,codec){
   return {...state,results:state.results.map(result=>({...targets.get(result.id),...result})),token:codec.issue(snapshot)};
 }
 
-export async function inspectJobTarget(target,{transport=fetchPublic,urlLookup=lookupUrl,validate=resolvePublic,maxBytes=2*1024*1024,signal,onEvent=()=>{}}={}){
+export async function inspectJobTarget(target,{transport=fetchPublic,urlLookup=lookupReputation,validate=resolvePublic,maxBytes=2*1024*1024,signal,onEvent=()=>{}}={}){
   const result={id:target.id,url:target.url,name:target.name,kind:target.kind,status:'unavailable'};
   let timer;
   try{await Promise.race([validate(normalizeUrl(target.url)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new ScanError('نام دامنه در زمان مجاز پاسخ نداد.')),5000);})]);}
@@ -70,20 +72,20 @@ export async function inspectJobTarget(target,{transport=fetchPublic,urlLookup=l
     const response=await transport(target.url,{limit:Math.min(2*1024*1024,maxBytes),htmlLimit:Math.min(2*1024*1024,maxBytes),htmlOnly:true,totalTimeout:20000,timeout:10000,signal});
     result.bytesRead=response.bytes.length;result.finalUrl=response.url;
     result.reputation=await intelPromise;
-    if(response.url!==target.url){
-      onEvent({phase:'final_url_lookup',message:'استعلام URLhaus برای مقصد نهایی انتقال لینک'});
-      result.finalReputation=await Promise.resolve().then(()=>urlLookup(response.url)).catch(()=>({status:'unavailable',message:'استعلام URLhaus برای مقصد نهایی کامل نشد.'}));
-    }
-    const knownUrlThreat=[result.reputation.status,result.finalReputation?.status].includes('listed');
+    Object.assign(result,await inspectRedirectReputation(target.url,response,result.reputation,{lookup:urlLookup,onEvent}));
+    const knownUrlThreat=reportReputations(result).some(item=>item.status==='listed');
     const mime=String(response.headers['content-type']||'').toLowerCase();
     const html=mime.includes('html')||/^\s*<!doctype html|^\s*<html/i.test(response.bytes.toString('utf8',0,120));
     if(html){
       onEvent({phase:'content_analysis',message:'تحلیل مستقل صفحهٔ مقصد'});
       if(response.bytes.length>2*1024*1024)throw new ScanError('صفحهٔ مقصد از سقف تحلیل HTML بیشتر است.');
       const page=parsePage(response.bytes,response.url,response.headers);
-      result.title=page.title;result.kind='page';result.linkCount=page.linkCount;result.fileCount=page.fileCount;result.siteAnalysis=page.siteAnalysis;
-      result.findings=page.signals.slice(0,12);
-      result.status=knownUrlThreat?'danger':target.kind==='file'||page.signals.some(s=>s.level==='warning')?'warning':'limited';
+      result.title=page.title;result.kind='page';result.linkCount=page.linkCount;result.fileCount=page.fileCount;result.siteAnalysis=page.siteAnalysis;result.analysisEngine=page.analysisEngine;
+      const assessed=assessPage({signals:page.signals,analysisEngine:page.analysisEngine,redirects:response.redirects,reputation:result.reputation,finalReputation:result.finalReputation,urlReputations:result.urlReputations});
+      // Keep all bounded HTML findings, including the reason for a redirect or
+      // threat verdict; a linked-page report must not silently lose its evidence.
+      result.findings=assessed.signals;
+      result.status=assessed.status;
       result.detail=target.kind==='file'?'مقصد به‌جای فایل یک صفحهٔ HTML برگرداند؛ ممکن است ورود یا دسترسی دیگری لازم باشد.':'محتوای این مقصد دریافت و تحلیل شد؛ لینک‌های داخل آن خودکار دنبال نشده‌اند.';
     }else{
       // A page destination changed into a direct download. Do not receive, hash,
@@ -97,11 +99,11 @@ export async function inspectJobTarget(target,{transport=fetchPublic,urlLookup=l
     result.reputation=await intelPromise;
     if(error.remoteStatus===401||error.remoteStatus===403)result.accessRequirement='requires_access';
     else if(error.remoteStatus===402)result.accessRequirement='requires_payment';
-    const knownThreat=[result.reputation.status,result.finalReputation?.status,result.fileReputation?.status].includes('listed');
+    const knownThreat=[...reportReputations(result),result.fileReputation].some(item=>item?.status==='listed');
     result.failureStatus=error.status===400?'blocked':result.accessRequirement||'unavailable';
     result.status=knownThreat?'danger':result.failureStatus;
     const failure=error instanceof ScanError?error.message:'دریافت یا تحلیل این مقصد کامل نشد؛ امنیت تأیید نمی‌شود.';
-    const threatEvidence=[result.reputation,result.finalReputation,result.fileReputation].filter(intel=>intel?.status==='listed').map(intel=>intel.message);
+    const threatEvidence=[...reportReputations(result),result.fileReputation].filter(intel=>intel?.status==='listed').map(intel=>intel.message);
     result.detail=[...threatEvidence,failure].join(' ');
     return result;
   }
@@ -118,13 +120,13 @@ export async function stepScanJob({id,token}={}, {codec=jobTokens,inspect=inspec
     // public fetch, final-URL lookup, bounded parser and hash intelligence.
     if(state.next>first&&now()-started>85000)break;
     if(signal?.aborted)throw new ScanError('بررسی لغو شد؛ از آخرین مرحلهٔ ذخیره‌شده می‌توانید ادامه دهید.',409);
-    const target=state.targets[state.next];emit({phase:'item_started',message:`بررسی مقصد ${state.next+1} از ${state.targets.length}`,targetId:target.id});
+    const target=state.targets[state.next];emit({phase:'item_started',message:`بررسی مقصد ${state.next+1} از ${state.targets.length}`,targetId:target.id,completed:state.next,total:state.targets.length});
     let result;
     if(state.bytesRead>=MAX_TOTAL_BYTES)result={...target,status:'budget_exceeded',detail:'سقف مجموع دریافت ۹۶ مگابایت رسیده است؛ این مقصد بررسی نشده است.'};
     else result=await inspect(target,{signal,maxBytes:Math.min(2*1024*1024,MAX_TOTAL_BYTES-state.bytesRead),onEvent:event=>emit({...event,targetId:target.id})});
     state.bytesRead+=result.bytesRead||0;delete result.bytesRead;
 
-    target.status=result.status;if(result.kind==='file'&&result.name)target.name=result.name;const stored={...result};delete stored.url;delete stored.name;state.results.push(stored);emit({phase:'item_finished',message:`نتیجهٔ مقصد ${state.next+1} ثبت شد`,targetId:target.id,status:result.status});
+    target.status=result.status;if(result.kind==='file'&&result.name)target.name=result.name;const stored={...result};delete stored.url;delete stored.name;state.results.push(stored);emit({phase:'item_finished',message:`نتیجهٔ مقصد ${state.next+1} ثبت شد`,targetId:target.id,status:result.status,completed:state.next+1,total:state.targets.length});
   }
   state.done=state.next===state.targets.length;
   emit({phase:state.done?'completed':'batch_completed',message:state.done?'گزارش همهٔ مقصدهای صف آماده شد.':'این دسته بررسی شد؛ دستهٔ بعدی قابل ادامه است.'});

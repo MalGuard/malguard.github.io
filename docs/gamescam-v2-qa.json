@@ -1,0 +1,44 @@
+{
+  "base_commit": "fc9939e2ba7d0a4bcfdc75d7b5bdf90a3b710012",
+  "prior_local_commit": "5972dec",
+  "branch": "codex/gamescam-scan-continuity",
+  "published": false,
+  "service_tests": {
+    "total": 135,
+    "failed": 0
+  },
+  "analysis_checks": 20,
+  "in_app_self_test_cases": 38,
+  "browser_suites": {
+    "game-scam-compact.json": "passed",
+    "game-scam-preview.json": "passed",
+    "game-scam-isolation.json": "passed"
+  },
+  "viewports": [
+    {
+      "width": 320,
+      "height": 740,
+      "initialHeight": 740
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "initialHeight": 844
+    },
+    {
+      "width": 820,
+      "height": 1080,
+      "initialHeight": 1080
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "initialHeight": 1000
+    }
+  ],
+  "physical_samsung_tested": false,
+  "remote_vm_executed": false,
+  "webkit_tested": false,
+  "apk_sha256": "2d9ace0304e0f37d03cf2c32c87c262495730ce2287ec9ff239420d20a2053eb",
+  "optional_phishing_feed_enabled_in_production_by_this_change": false
+}

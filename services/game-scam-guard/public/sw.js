@@ -1,8 +1,8 @@
-const CACHE = 'gamescam-guard-site-v4';
+const CACHE = 'gamescam-guard-site-v5';
 const APP_PATH = new URL('./',self.location.href).pathname;
 const asset = name => `${APP_PATH}${name}`;
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll([APP_PATH,asset('manifest.webmanifest'),asset('favicon.svg')])).then(()=>self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll([APP_PATH,asset('manifest.webmanifest'),asset('favicon.svg'),asset('icons/icon-192.png'),asset('icons/icon-512.png'),asset('icons/apple-touch-icon.png')])).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('gamescam-guard-site-') && key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));

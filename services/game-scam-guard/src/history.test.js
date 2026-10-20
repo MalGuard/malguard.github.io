@@ -20,6 +20,14 @@ test('history preserves complete reports while dropping old or corrupted records
   assert.deepEqual(readHistory(JSON.stringify([...broken,valid])),[valid]);
 });
 
+test('new localized findings, module coverage and source arrays are validated before rendering',()=>{
+ const engine={version:'2.0.0',modules:[{id:'form-destinations',status:'finding',findings:1}],limits:{omittedScripts:0,javaScriptExecuted:false}};
+ const signal={level:'warning',title:'Original',detail:'Original detail',localized:{en:{title:'Finding',detail:'Observed'},fa:{title:'یافته',detail:'مشاهده شد'}},evidence:['https://example.com/']};
+ const item={...valid,analysisEngine:engine,signals:[signal],reputation:{status:'not_found',message:'Snapshot',sources:[{provider:'urlhaus',status:'not_found',message:'Snapshot'}]}};
+ assert.deepEqual(readHistory(JSON.stringify([item])),[item]);
+ for(const damaged of [{...item,analysisEngine:{...engine,modules:{}}},{...item,signals:[{...signal,localized:{en:{title:{}},fa:{title:'یافته',detail:'شرح'}}}]},{...item,reputation:{...item.reputation,sources:{}}},{...item,signals:[{...signal,evidence:[{}]}]}])assert.deepEqual(readHistory(JSON.stringify([damaged])),[]);
+});
+
 test('history recovers from invalid storage and limits valid records to thirty', () => {
   for (const raw of ['{broken','null','{}','[null,2,"old"]']) assert.deepEqual(readHistory(raw),[]);
   assert.equal(readHistory(JSON.stringify(Array.from({length:40},(_,index)=>({...valid,id:String(index)})))).length,30);
@@ -67,4 +75,14 @@ test('corrupt rendered routing and layer evidence are rejected before history re
   const report={...valid,files:[{...valid.files[0],artifact:analysis,routing}]};
   assert.deepEqual(readHistory(JSON.stringify([report])),[report]);
   for(const file of [{...report.files[0],routing:{...routing,detail:{}}},{...report.files[0],artifact:{...analysis,layers:[null]}},{...report.files[0],artifact:{...analysis,observedUrls:[{}]}}])assert.deepEqual(readHistory(JSON.stringify([{...report,files:[file]}])),[]);
+});
+
+test('redirect source evidence is validated before reopening root and destination reports',()=>{
+ const trail=[{url:'https://example.com/hop',reputation:{status:'listed',message:'Synthetic test observation'}}];
+ const report={...valid,urlReputations:trail};assert.deepEqual(readHistory(JSON.stringify([report])),[report]);
+ for(const value of [{},[null],[{url:'javascript:example',reputation:trail[0].reputation}],[{url:trail[0].url,reputation:{status:{},message:'Invalid'}}],Array(6).fill(trail[0])])assert.deepEqual(readHistory(JSON.stringify([{...valid,urlReputations:value}])),[]);
+ const destination={id:'child',name:'Child',url:'https://example.com/child',kind:'page',status:'danger',urlReputations:trail};
+ const parent={...valid,destinationResults:[destination],jobSummary:{total:1,completed:1,omitted:0,bytesRead:0,done:true}};
+ assert.deepEqual(readHistory(JSON.stringify([parent])),[parent]);
+ assert.deepEqual(readHistory(JSON.stringify([{...parent,destinationResults:[{...destination,urlReputations:[null]}]}])),[]);
 });
