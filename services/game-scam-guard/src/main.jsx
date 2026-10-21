@@ -34,7 +34,7 @@ const displaySource=source=>source?.provider==='openphish'?'OpenPhish':'URLhaus'
 
 function App(){
  const [locale,setLocale]=useState(()=>read('guard-locale-v2')==='fa'?'fa':'en');
- const [page,setPage]=useState('scan'),[url,setUrl]=useState(''),[mode,setMode]=useState('basic');
+ const [page,setPage]=useState('scan'),[url,setUrl]=useState(()=>{try{const value=new URLSearchParams(location.hash.slice(1)).get('inspect');if(!value||value.length>8192)return '';const parsed=new URL(value);return ['https:','http:'].includes(parsed.protocol)&&!parsed.username&&!parsed.password?parsed.href:'';}catch{return '';}}),[mode,setMode]=useState('basic');
  const [result,setResult]=useState(null),[busy,setBusy]=useState(false),[linked,setLinked]=useState(false),[events,setEvents]=useState([]),[started,setStarted]=useState(null);
  const [pending,setPending]=useState(pendingFromStorage),[activeQueue,setActiveQueue]=useState(null);
  const [error,setError]=useState(null),[toast,setToast]=useState(''),[modal,setModal]=useState(null);
