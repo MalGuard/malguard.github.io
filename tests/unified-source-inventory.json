@@ -241,7 +241,7 @@
       "surface": "preserved content and functional controls"
     }
   ],
-  "publicRouteCount": 46,
+  "publicRouteCount": 47,
   "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
   "functionalRuntimePreserved": [
     "assets/public-release.mjs",
