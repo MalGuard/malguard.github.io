@@ -1,4 +1,4 @@
-const CACHE = 'gamescam-guard-site-v5';
+const CACHE = 'gamescam-guard-site-v6';
 const APP_PATH = new URL('./',self.location.href).pathname;
 const asset = name => `${APP_PATH}${name}`;
 self.addEventListener('install', event => {
@@ -12,12 +12,13 @@ self.addEventListener('fetch', event => {
   // Never control MalGuard pages, API responses, external destinations or files.
   if (event.request.method !== 'GET' || url.origin !== self.location.origin || !url.pathname.startsWith(APP_PATH)) return;
   const relative = url.pathname.slice(APP_PATH.length);
-  if (event.request.mode !== 'navigate' && !/^(assets\/|fonts\/|icons\/|favicon\.svg$|manifest\.webmanifest$)/.test(relative)) return;
+  if (event.request.mode !== 'navigate' && !/^(assets\/|fonts\/|icons\/|favicon\.svg$|manifest\.webmanifest$|learn\/language\.js$)/.test(relative)) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const key = event.request.mode === 'navigate' ? APP_PATH : event.request;
+    // Localized guides are independent documents, never the app-shell fallback.
+    const key = event.request.mode === 'navigate' && !relative.startsWith('learn/') ? APP_PATH : event.request;
     try {
-      const response = await fetch(event.request);
+      const response = await fetch(event.request,event.request.mode==='navigate'?{cache:'no-cache'}:undefined);
       if (response.ok && !response.redirected) await cache.put(key,response.clone());
       return response;
     } catch {

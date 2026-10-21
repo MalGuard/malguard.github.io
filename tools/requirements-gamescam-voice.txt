@@ -1,0 +1,4 @@
+# Optional offline tutorial authoring only; not a website runtime dependency.
+piper-tts==1.8.0
+onnxruntime==1.31.0
+numpy==2.5.4

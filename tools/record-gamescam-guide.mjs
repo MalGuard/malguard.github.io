@@ -79,13 +79,13 @@ if(!preview)for(const locale of ['en','fa']){
  assert.ok(info.streams.some(stream=>stream.codec_type==='audio'));assert.ok(Math.abs(Number(info.format.duration)-previous)<0.2,'Audio timing must cover the complete clip');
  audioInputs[locale]={...input,file};
 }
-const metadata={version:2,scope:'real-local-ui-with-authored-html-and-simulated-threat-responses',audio:!preview,preview,syntheticTestOnly:Boolean(manifest?.syntheticTestOnly),published:false,frameRate:25,cursor:'visible arrow with eased motion and click rings',videos:[]};
+const metadata={version:2,scope:'real-local-ui-with-authored-html-and-simulated-threat-responses',audio:!preview,preview,syntheticTestOnly:Boolean(manifest?.syntheticTestOnly),published:false,narration:preview?null:{engine:manifest.engine,offline:manifest.offline,source:manifest.source,voices:Object.fromEntries(['en','fa'].map(language=>{const v=manifest[language];return [language,{voice:v.voice,datasetLicense:v.datasetLicense,modelSha256:v.modelSha256,audioSha256:v.audioSha256}];}))},frameRate:25,cursor:'visible arrow with eased motion and click rings',videos:[]};
 let browser;
 await mkdir(outputPath,{recursive:true});
 try{
  browser=await chromium.launch({...(process.env.TEST_CHROMIUM_EXECUTABLE?{executablePath:process.env.TEST_CHROMIUM_EXECUTABLE}:{}),args:['--no-sandbox']});
  for(const locale of ['en','fa']){
-  const recordingStart=Date.now();
+  let recordingStart;
   const context=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'no-preference',recordVideo:{dir:resolve(outputPath,'raw'),size:{width:1280,height:1000}}});
   await context.route('**/*',route=>new URL(route.request().url()).hostname==='127.0.0.1'?route.continue():route.abort());
   const page=await context.newPage();page.setDefaultTimeout(15000);const errors=[];page.on('pageerror',error=>errors.push(error.message));
@@ -99,12 +99,22 @@ try{
    const caption=document.createElement('div');caption.id='training-caption';caption.innerHTML='<b></b><p></p>';document.body.append(caption);
    const cursor=document.createElement('div');cursor.id='training-pointer';cursor.innerHTML='<svg viewBox="0 0 37 46"><path d="M3 2 L4 34 L13 26 L21 42 L28 38 L20 23 L32 22 Z" fill="#fff" stroke="#07182b" stroke-width="2.5" stroke-linejoin="round"/></svg>';document.body.append(cursor);
   },badge);
+  // A real video-frame marker anchors the browser's recording clock. Context
+  // creation and page loading must not be included in the narration clock.
+  await page.evaluate(({title,body})=>{
+   document.querySelector('#training-caption b').textContent=title;
+   document.querySelector('#training-caption p').textContent=body;
+   const marker=document.createElement('div');marker.id='training-sync';marker.style.cssText='position:fixed;inset:0;background:#00ff00;z-index:2147483647';document.body.append(marker);
+  },{title:strings[locale].chapters[0][0],body:strings[locale].chapters[0][1]});
+  await pause(500);
+  recordingStart=await page.evaluate(()=>{document.querySelector('#training-sync').remove();return Date.now();});
+  await mkdir(resolve(outputPath,'raw',locale),{recursive:true});
   let cursor={x:80,y:140};const movements=[];const chapters=[];
   const click=async(locator,activate=true)=>{
    await locator.evaluate(el=>el.scrollIntoView({behavior:'smooth',block:'nearest'}));await pause(650);
    let box=await locator.boundingBox();assert.ok(box,'Pointer target must be visible');
    if(box.y+box.height>800){await page.evaluate(delta=>window.scrollBy({top:delta,behavior:'smooth'}),box.y+box.height-760);await pause(650);box=await locator.boundingBox();}
-   const next={x:box.x+box.width/2,y:box.y+box.height/2};assert.ok(next.y>35&&next.y<835,'A caption must not hide the pointer target');
+   const next=activate?{x:box.x+box.width/2,y:box.y+box.height/2}:await locator.evaluate(el=>{const range=document.createRange();range.selectNodeContents(el);const r=range.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};});assert.ok(next.y>35&&next.y<835,'A caption must not hide the pointer target');
    await page.evaluate(async({from,to})=>{const pointer=document.querySelector('#training-pointer');const animation=pointer.animate([{transform:`translate(${from.x}px,${from.y}px)`},{transform:`translate(${to.x}px,${to.y}px)`}],{duration:850,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});await animation.finished;pointer.style.transform=`translate(${to.x}px,${to.y}px)`;animation.cancel();},{from:cursor,to:next});
    cursor=next;await page.mouse.move(next.x,next.y);await pause(180);
    if(!activate){movements.push({time:(Date.now()-recordingStart)/1000,action:'point',...next});await pause(450);return;}
@@ -115,9 +125,11 @@ try{
   const scene=async(index,action)=>{
    const [title,body]=strings[locale].chapters[index];const start=(Date.now()-recordingStart)/1000;
    await page.evaluate(({title,body})=>{document.querySelector('#training-caption b').textContent=title;document.querySelector('#training-caption p').textContent=body;},{title,body});
+   const titleBox=await page.locator('#training-caption b').evaluate(el=>{const range=document.createRange();range.selectNodeContents(el);const r=range.getBoundingClientRect();return {x:Math.floor(r.x)-2,y:Math.floor(r.y)-2,width:Math.ceil(r.width)+4,height:Math.ceil(r.height)+4};});
+   await page.screenshot({path:resolve(outputPath,'raw',locale,`caption-full-${index}.png`)});
    const spoken=audioInputs[locale]?.chapters[index];const length=spoken?spoken.end-spoken.start+1.0:[10,8,10,9,9,13,11,13,10][index];
    await action?.();await pause(Math.max(650,(start+length)*1000-(Date.now()-recordingStart)));
-   chapters.push({start,end:(Date.now()-recordingStart)/1000,title,body,narration:narration[locale].chapters[index]});
+   chapters.push({start,end:(Date.now()-recordingStart)/1000,title,body,titleBox,narration:narration[locale].chapters[index]});
    console.log(`${locale}: recorded chapter ${index+1}/9`);
   };
   const details=async name=>{const root=page.locator('.g-report-details');if(await root.getAttribute('open')===null)await click(root.locator(':scope > summary'));await click(root.getByRole('tab',{name,exact:true}));await root.evaluate(el=>el.scrollIntoView({behavior:'smooth',block:'center'}));await pause(700);};
@@ -135,6 +147,12 @@ try{
    assert.deepEqual(errors,[]);
   }finally{await context.close();}
   const source=await video.path(),target=resolve(outputPath,`training-${locale}.mp4`),offset=chapters[0].start,duration=chapters.at(-1).end-offset;
+  const markerProbe=spawnSync('ffmpeg',['-v','error','-i',source,'-vf','crop=8:8:0:0,scale=1:1:flags=neighbor,format=rgb24','-r','25','-f','rawvideo','pipe:1'],{maxBuffer:1024*1024});
+  assert.equal(markerProbe.status,0,markerProbe.stderr?.toString());
+  let seenMarker=false,markerEnd=-1;
+  for(let pixel=0;pixel<markerProbe.stdout.length;pixel+=3){const [r,g,b]=markerProbe.stdout.subarray(pixel,pixel+3),green=g>220&&r<40&&b<40;if(green)seenMarker=true;else if(seenMarker){markerEnd=pixel/3/25;break;}}
+  assert.ok(markerEnd>=0,'The recording must contain an explicit synchronization marker');
+  const captureOffset=markerEnd+offset;
   let audioFile;
   if(!preview){
    audioFile=resolve(outputPath,`narration-${locale}.wav`);const filters=[];
@@ -145,12 +163,21 @@ try{
    filters.push(chapters.map((_,i)=>`[a${i}]`).join('')+'concat=n=9:v=0:a=1,loudnorm=I=-16:TP=-1.5:LRA=11[out]');
    await run(['-i',audioInputs[locale].file,'-filter_complex',filters.join(';'),'-map','[out]','-ar','48000','-c:a','pcm_s16le',audioFile]);
   }
-  await run(['-ss',String(offset),'-i',source,...(audioFile?['-i',audioFile]:[]),'-t',String(duration),'-map','0:v:0',...(audioFile?['-map','1:a:0','-c:a','aac','-b:a','128k']:['-an']),'-c:v','libx264','-threads','2','-preset','veryfast','-crf','22','-r','25','-pix_fmt','yuv420p','-movflags','+faststart',target]);
-  await run(['-i',target,'-c:v','libvpx-vp9','-crf','34','-b:v','0','-cpu-used','6','-row-mt','1','-threads','2',...(audioFile?['-c:a','libopus','-b:a','96k']:['-an']),resolve(outputPath,`training-${locale}.webm`)]);
+  await run(['-ss',String(captureOffset),'-i',source,...(audioFile?['-i',audioFile]:[]),'-t',String(duration),'-map','0:v:0',...(audioFile?['-map','1:a:0','-c:a','aac','-b:a','128k']:['-an']),'-c:v','libx264','-threads','2','-preset','veryfast','-crf','22','-r','25','-pix_fmt','yuv420p','-movflags','+faststart',target]);
+  const captionMatches=[];
+  for(const [index,chapter] of chapters.entries()){
+   const box=chapter.titleBox,actual=resolve(outputPath,'raw',locale,`caption-frame-${index}.png`);
+   await run(['-i',resolve(outputPath,'raw',locale,`caption-full-${index}.png`),'-vf',`crop=${box.width}:${box.height}:${box.x}:${box.y}:exact=1`,'-frames:v','1',resolve(outputPath,'raw',locale,`caption-${index}.png`)]);
+   await run(['-ss',String(chapter.end-offset-.3),'-i',target,'-vf',`crop=${box.width}:${box.height}:${box.x}:${box.y}:exact=1`,'-frames:v','1',actual]);
+   const comparison=spawnSync('ffmpeg',['-hide_banner','-i',resolve(outputPath,'raw',locale,`caption-${index}.png`),'-i',actual,'-lavfi',"[0:v]format=gray,lut=y='if(gt(val,96),255,0)',gblur=sigma=0.6[a];[1:v]format=gray,lut=y='if(gt(val,96),255,0)',gblur=sigma=0.6[b];[a][b]ssim",'-f','null','-'],{encoding:'utf8'});
+   assert.equal(comparison.status,0,comparison.stderr);const score=Number(comparison.stderr.match(/All:([0-9.]+)/)?.[1]);
+   assert.ok(score>.88,`${locale} chapter ${index+1} caption is out of sync or unreadable: SSIM ${score}`);captionMatches.push(score);
+  }
+  await run(['-i',target,'-c:v','libvpx-vp9','-crf','30','-b:v','0','-deadline','realtime','-cpu-used','6','-row-mt','1','-threads','2',...(audioFile?['-c:a','libopus','-b:a','96k']:['-an']),resolve(outputPath,`training-${locale}.webm`)]);
   const stamp=seconds=>{const ms=Math.round(seconds*1000);return `${String(Math.floor(ms/3600000)).padStart(2,'0')}:${String(Math.floor(ms/60000)%60).padStart(2,'0')}:${String(Math.floor(ms/1000)%60).padStart(2,'0')}.${String(ms%1000).padStart(3,'0')}`;};
   await writeFile(resolve(outputPath,`training-${locale}.vtt`),'WEBVTT\n\n'+chapters.map((item,index)=>`${index+1}\n${stamp(item.start-offset)} --> ${stamp(item.end-offset)}\n${preview?item.title+'\n'+item.body:item.narration}\n`).join('\n'));
-  metadata.videos.push({locale,duration,chapters:chapters.map(item=>({...item,start:item.start-offset,end:item.end-offset})),movements:movements.map(item=>({...item,time:item.time-offset}))});
+  metadata.videos.push({locale,duration,captureOffset,captionMatches,chapters:chapters.map(item=>({...item,start:item.start-offset,end:item.end-offset})),movements:movements.map(item=>({...item,time:item.time-offset}))});
   await writeFile(resolve(outputPath,'training-manifest.json'),JSON.stringify(metadata,null,2));
-  console.log(`PASS: ${locale} ${preview?'VISUAL PREVIEW (no narration)':'narrated walkthrough'}; ${duration.toFixed(1)} s, 25 fps, ${movements.length} pointer targets, 9 asserted UI chapters.`);
+  console.log(`PASS: ${locale} ${preview?'VISUAL PREVIEW (no narration)':manifest?.syntheticTestOnly?'SYNTHETIC AUDIO TEST':'narrated walkthrough'}; ${duration.toFixed(1)} s, 25 fps, ${movements.length} pointer targets, 9 asserted UI chapters.`);
  }
 }finally{await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

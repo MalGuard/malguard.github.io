@@ -1,46 +1,37 @@
 WEBVTT
 
 1
-00:00:00.000 --> 00:00:03.800
-Start with a public website
-Paste a public website URL. GameScam Guard inspects received page evidence.
+00:00:00.000 --> 00:00:08.743
+Welcome to GameScam Guard. Follow the pointer through this harmless training example. First, enter a public website address.
 
 2
-00:00:03.800 --> 00:00:09.200
-Watch the scan
-Progress and the result appear on the same screen.
+00:00:08.744 --> 00:00:15.166
+Select Start scan. Watch the progress here, then read the result on the same screen.
 
 3
-00:00:09.200 --> 00:00:13.600
-Read the coverage
-One engine performs 20 distinct static checks. It does not execute website scripts.
+00:00:15.167 --> 00:00:23.458
+Open View details, then Coverage. This shows twenty distinct static checks, and which checks completed.
 
 4
-00:00:13.600 --> 00:00:17.600
-Inspect the whole redirect path
-Threat sources shows observations for the initial, intermediate and final addresses.
+00:00:23.464 --> 00:00:33.725
+Choose Threat sources. Review the submitted address, each redirect, and the final destination separately.
 
 5
-00:00:17.600 --> 00:00:21.600
-Choose the additional scope
-Confirm linked-page inspection. The submitted-page assessment is preserved.
+00:00:33.726 --> 00:00:40.632
+For a wider inspection, select Inspect linked pages. Read the scope before confirming.
 
 6
-00:00:21.600 --> 00:00:27.200
-Understand new threat evidence
-This training destination has a simulated report. The expanded assessment explains the change.
+00:00:40.635 --> 00:00:54.670
+Select Scan public pages. This example adds a simulated threat report from a linked destination. The original assessment stays visible, so you can see why the expanded result changes.
 
 7
-00:00:27.200 --> 00:00:31.400
-Run the built-in self-test
-38 selected harmless fixtures test detection, benign controls and security boundaries.
+00:00:54.677 --> 00:01:04.508
+Open Self-test and select Run self-test. These thirty-eight harmless examples check selected detection rules and security boundaries.
 
 8
-00:00:31.400 --> 00:00:36.400
-Recognize missing evidence
-A simulated provider outage gives an incomplete result, not a claim of safety.
+00:01:04.511 --> 00:01:16.530
+Back in Scan, this second example simulates a source outage. An incomplete inspection means evidence is missing. Retry later before relying on that result.
 
 9
-00:00:36.400 --> 00:00:40.400
-Review the source settings
-Know which sources are configured. A completed observation is not a safety guarantee.
+00:01:16.535 --> 00:01:29.184
+Finally, open Settings to review your sources and privacy choices. Use these observations to make an informed decision before signing in, paying, or downloading.
