@@ -3,8 +3,10 @@
 import assert from 'node:assert/strict';
 import express from 'express';
 import {once} from 'node:events';
-import {spawn} from 'node:child_process';
-import {mkdir,writeFile,copyFile} from 'node:fs/promises';
+import {spawn,spawnSync} from 'node:child_process';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {mkdir,writeFile,readFile,access} from 'node:fs/promises';
 import {setTimeout as pause} from 'node:timers/promises';
 import {chromium} from 'playwright';
 import {createApp} from '../services/game-scam-guard/server/app.js';
@@ -55,50 +57,127 @@ const strings={
   ['وضعیت منابع را ببینید','منابع پیکربندی‌شده را بشناسید. مشاهدهٔ کامل به معنی تضمین امنیت نیست.']
  ]}
 };
-const metadata={scope:'real-local-ui-with-authored-html-and-simulated-threat-responses',audio:false,published:false,videos:[]};
+// Narration is an explicit input. A visual preview never overwrites public films.
+const preview=process.argv.includes('--visual-preview');
+const outputPath=resolve(process.env.GSG_TRAINING_OUTPUT||'test-results/narrated-training');
+assert.notEqual(outputPath,resolve(fileURLToPath(output)),'Record outside public/learn, review the files, then copy the complete bilingual set.');
+const narration=JSON.parse(await readFile(new URL('./gamescam-narration.json',import.meta.url),'utf8'));
+const manifestPath=process.env.GSG_NARRATION_MANIFEST;
+assert.ok(preview||manifestPath,'Set GSG_NARRATION_MANIFEST to the reviewed bilingual audio manifest, or use --visual-preview.');
+const manifest=manifestPath?JSON.parse(await readFile(manifestPath,'utf8')):null;
+const run=async args=>{const child=spawn('ffmpeg',['-hide_banner','-loglevel','error','-y',...args],{stdio:['ignore','ignore','pipe']});let error='';child.stderr.on('data',chunk=>error+=chunk);const [code]=await once(child,'close');assert.equal(code,0,error||'FFmpeg failed');};
+const audioInputs={};
+if(!preview)for(const locale of ['en','fa']){
+ const input=manifest[locale];assert.equal(input?.language,locale);assert.equal(input?.transcript,narration[locale].chapters.join('\n\n'),'Narration must match the reviewed script');
+ assert.equal(input.chapters?.length,9);const file=resolve(dirname(resolve(manifestPath)),input.file);await access(file);
+ let previous=0;for(const [index,chapter] of input.chapters.entries()){
+  assert.ok(Number.isFinite(chapter.start)&&Number.isFinite(chapter.end)&&chapter.end>chapter.start);
+  assert.ok(Math.abs(chapter.start-previous)<0.03,'Audio chapters must cover the complete narration without gaps');
+  if(index===0)assert.equal(chapter.start,0);previous=chapter.end;
+ }
+ const probe=spawnSync('ffprobe',['-v','error','-show_streams','-show_format','-of','json',file],{encoding:'utf8'});assert.equal(probe.status,0);const info=JSON.parse(probe.stdout);
+ assert.ok(info.streams.some(stream=>stream.codec_type==='audio'));assert.ok(Math.abs(Number(info.format.duration)-previous)<0.2,'Audio timing must cover the complete clip');
+ audioInputs[locale]={...input,file};
+}
+const metadata={version:2,scope:'real-local-ui-with-authored-html-and-simulated-threat-responses',audio:!preview,preview,syntheticTestOnly:Boolean(manifest?.syntheticTestOnly),published:false,narration:preview?null:{engine:manifest.engine,offline:manifest.offline,source:manifest.source,voices:Object.fromEntries(['en','fa'].map(language=>{const v=manifest[language];return [language,{voice:v.voice,datasetLicense:v.datasetLicense,modelSha256:v.modelSha256,audioSha256:v.audioSha256}];}))},frameRate:25,cursor:'visible arrow with eased motion and click rings',videos:[]};
 let browser;
-await mkdir(output,{recursive:true});await mkdir('/workspace/malguard-inspection',{recursive:true});
+await mkdir(outputPath,{recursive:true});
 try{
- browser=await chromium.launch({executablePath:process.env.TEST_CHROMIUM_EXECUTABLE||'/usr/bin/chromium',args:['--no-sandbox']});
+ browser=await chromium.launch({...(process.env.TEST_CHROMIUM_EXECUTABLE?{executablePath:process.env.TEST_CHROMIUM_EXECUTABLE}:{}),args:['--no-sandbox']});
  for(const locale of ['en','fa']){
-  const context=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'reduce'});
+  let recordingStart;
+  const context=await browser.newContext({viewport:{width:1280,height:1000},reducedMotion:'no-preference',recordVideo:{dir:resolve(outputPath,'raw'),size:{width:1280,height:1000}}});
   await context.route('**/*',route=>new URL(route.request().url()).hostname==='127.0.0.1'?route.continue():route.abort());
   const page=await context.newPage();page.setDefaultTimeout(15000);const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto(`http://127.0.0.1:${server.address().port}/game-scam-guard/`);
   if(locale==='fa')await page.getByRole('button',{name:'Change language',exact:true}).click();
-  assert.equal(await page.locator('html').getAttribute('lang'),locale);
-  await page.addStyleTag({content:'.g-app{padding-top:48px!important;padding-bottom:155px!important}#training-badge{position:fixed;top:0;inset-inline:0;z-index:9999;padding:6px 18px;text-align:center;background:#573b11;color:#ffe0a2;font:600 14px Vazirmatn,system-ui}#training-caption{position:fixed;bottom:0;inset-inline:0;z-index:9999;padding:17px 40px 20px;background:#081223f5;border-top:2px solid #5aacf1;text-align:center;font-family:Vazirmatn,system-ui;line-height:1.7;color:#eef6ff}#training-caption b{display:block;font-size:23px}#training-caption p{margin:4px 0 0;font-size:20px;color:#c6ddf5}'});
-  await page.evaluate(badge=>{const top=document.createElement('div');top.id='training-badge';top.textContent=badge;document.body.append(top);const caption=document.createElement('div');caption.id='training-caption';caption.innerHTML='<b></b><p></p>';document.body.append(caption);},strings[locale].badge);
-  const target=new URL(`training-${locale}.mp4`,output);
-  const encoder=spawn('ffmpeg',['-hide_banner','-loglevel','error','-y','-f','image2pipe','-framerate','5','-vcodec','mjpeg','-i','pipe:0','-an','-c:v','libx264','-threads','2','-preset','veryfast','-crf','23','-pix_fmt','yuv420p','-movflags','+faststart',target.pathname],{stdio:['pipe','ignore','pipe']});
-  let encoderError='';encoder.stderr.on('data',data=>encoderError+=data.toString());const encoderFinished=once(encoder,'close');
-  let running=true,frames=0;const chapters=[];
-  const capturing=(async()=>{while(running){const start=Date.now();const jpeg=await page.screenshot({type:'jpeg',quality:85,animations:'disabled'});if(!encoder.stdin.write(jpeg))await once(encoder.stdin,'drain');frames++;await pause(Math.max(1,200-(Date.now()-start)));}})();
-  const scene=async(index,action)=>{
-   const [title,body]=strings[locale].chapters[index];chapters.push({start:frames/5,title,body});
-   await page.evaluate(({title,body})=>{document.querySelector('#training-caption b').textContent=title;document.querySelector('#training-caption p').textContent=body;},{title,body});
-   await action?.();await pause(4000);
+  assert.equal(await page.locator('html').getAttribute('lang'),locale);await page.evaluate(()=>document.fonts.ready);
+  await page.addStyleTag({content:`html{scroll-behavior:smooth}*{cursor:none!important}.g-app{padding-top:48px!important;padding-bottom:170px!important}#training-badge{position:fixed;top:0;inset-inline:0;z-index:2147483645;padding:6px 18px;text-align:center;background:#573b11;color:#ffe0a2;font:600 14px Vazirmatn,system-ui;pointer-events:none}#training-caption{position:fixed;bottom:0;inset-inline:0;z-index:2147483645;padding:14px 38px 18px;background:#081223f5;border-top:2px solid #5aacf1;text-align:center;font-family:Vazirmatn,system-ui;line-height:1.7;color:#eef6ff;pointer-events:none}#training-caption b{display:block;font-size:23px}#training-caption p{margin:3px 0 0;font-size:20px;color:#c6ddf5}#training-pointer{position:fixed;top:0;left:0;width:37px;height:46px;transform:translate(80px,140px);z-index:2147483647;pointer-events:none;filter:drop-shadow(0 2px 3px #000)}.training-ring{position:fixed;width:26px;height:26px;border:3px solid #64dfff;background:#64dfff55;border-radius:50%;z-index:2147483646;pointer-events:none}`});
+  const badge=strings[locale].badge+(preview?(locale==='en'?' · VISUAL PREVIEW · NARRATION PENDING':' · پیش‌نمایش تصویر · صدا در انتظار تولید'):'');
+  await page.evaluate(badge=>{
+   const top=document.createElement('div');top.id='training-badge';top.textContent=badge;document.body.append(top);
+   const caption=document.createElement('div');caption.id='training-caption';caption.innerHTML='<b></b><p></p>';document.body.append(caption);
+   const cursor=document.createElement('div');cursor.id='training-pointer';cursor.innerHTML='<svg viewBox="0 0 37 46"><path d="M3 2 L4 34 L13 26 L21 42 L28 38 L20 23 L32 22 Z" fill="#fff" stroke="#07182b" stroke-width="2.5" stroke-linejoin="round"/></svg>';document.body.append(cursor);
+  },badge);
+  // A real video-frame marker anchors the browser's recording clock. Context
+  // creation and page loading must not be included in the narration clock.
+  await page.evaluate(({title,body})=>{
+   document.querySelector('#training-caption b').textContent=title;
+   document.querySelector('#training-caption p').textContent=body;
+   const marker=document.createElement('div');marker.id='training-sync';marker.style.cssText='position:fixed;inset:0;background:#00ff00;z-index:2147483647';document.body.append(marker);
+  },{title:strings[locale].chapters[0][0],body:strings[locale].chapters[0][1]});
+  await pause(500);
+  recordingStart=await page.evaluate(()=>{document.querySelector('#training-sync').remove();return Date.now();});
+  await mkdir(resolve(outputPath,'raw',locale),{recursive:true});
+  let cursor={x:80,y:140};const movements=[];const chapters=[];
+  const click=async(locator,activate=true)=>{
+   await locator.evaluate(el=>el.scrollIntoView({behavior:'smooth',block:'nearest'}));await pause(650);
+   let box=await locator.boundingBox();assert.ok(box,'Pointer target must be visible');
+   if(box.y+box.height>800){await page.evaluate(delta=>window.scrollBy({top:delta,behavior:'smooth'}),box.y+box.height-760);await pause(650);box=await locator.boundingBox();}
+   const next=activate?{x:box.x+box.width/2,y:box.y+box.height/2}:await locator.evaluate(el=>{const range=document.createRange();range.selectNodeContents(el);const r=range.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};});assert.ok(next.y>35&&next.y<835,'A caption must not hide the pointer target');
+   await page.evaluate(async({from,to})=>{const pointer=document.querySelector('#training-pointer');const animation=pointer.animate([{transform:`translate(${from.x}px,${from.y}px)`},{transform:`translate(${to.x}px,${to.y}px)`}],{duration:850,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});await animation.finished;pointer.style.transform=`translate(${to.x}px,${to.y}px)`;animation.cancel();},{from:cursor,to:next});
+   cursor=next;await page.mouse.move(next.x,next.y);await pause(180);
+   if(!activate){movements.push({time:(Date.now()-recordingStart)/1000,action:'point',...next});await pause(450);return;}
+   await page.evaluate(({x,y})=>{const ring=document.createElement('div');ring.className='training-ring';ring.style.left=`${x-13}px`;ring.style.top=`${y-13}px`;document.body.append(ring);ring.animate([{transform:'scale(.6)',opacity:1},{transform:'scale(2.5)',opacity:0}],{duration:650,easing:'ease-out'}).finished.then(()=>ring.remove());},next);
+   await page.mouse.click(next.x,next.y);movements.push({time:(Date.now()-recordingStart)/1000,action:'click',...next});await pause(300);
   };
-  const details=async name=>{const root=page.locator('.g-report-details');if(await root.getAttribute('open')===null)await root.locator(':scope > summary').click();await root.getByRole('tab',{name,exact:true}).click();await root.scrollIntoViewIfNeeded();};
+  const type=async value=>{const input=page.getByLabel(locale==='en'?'Website link':'لینک وب‌سایت');await click(input);await input.fill('');await input.pressSequentially(value,{delay:35});};
+  const scene=async(index,action)=>{
+   const [title,body]=strings[locale].chapters[index];const start=(Date.now()-recordingStart)/1000;
+   await page.evaluate(({title,body})=>{document.querySelector('#training-caption b').textContent=title;document.querySelector('#training-caption p').textContent=body;},{title,body});
+   const titleBox=await page.locator('#training-caption b').evaluate(el=>{const range=document.createRange();range.selectNodeContents(el);const r=range.getBoundingClientRect();return {x:Math.floor(r.x)-2,y:Math.floor(r.y)-2,width:Math.ceil(r.width)+4,height:Math.ceil(r.height)+4};});
+   await page.screenshot({path:resolve(outputPath,'raw',locale,`caption-full-${index}.png`)});
+   const spoken=audioInputs[locale]?.chapters[index];const length=spoken?spoken.end-spoken.start+1.0:[10,8,10,9,9,13,11,13,10][index];
+   await action?.();await pause(Math.max(650,(start+length)*1000-(Date.now()-recordingStart)));
+   chapters.push({start,end:(Date.now()-recordingStart)/1000,title,body,titleBox,narration:narration[locale].chapters[index]});
+   console.log(`${locale}: recorded chapter ${index+1}/9`);
+  };
+  const details=async name=>{const root=page.locator('.g-report-details');if(await root.getAttribute('open')===null)await click(root.locator(':scope > summary'));await click(root.getByRole('tab',{name,exact:true}));await root.evaluate(el=>el.scrollIntoView({behavior:'smooth',block:'center'}));await pause(700);};
+  const video=page.video();
   try{
-   await scene(0,()=>page.getByLabel(locale==='en'?'Website link':'لینک وب‌سایت').fill('https://example.com/training'));
-   await scene(1,async()=>{await page.getByRole('button',{name:locale==='en'?'Start scan':'شروع بررسی',exact:true}).click();await page.locator('.verdict.limited').waitFor();});
+   await scene(0,()=>type('https://example.com/training'));
+   await scene(1,async()=>{await click(page.getByRole('button',{name:locale==='en'?'Start scan':'شروع بررسی',exact:true}));await page.locator('.verdict.limited').waitFor();});
    await scene(2,()=>details(locale==='en'?'Coverage':'پوشش'));assert.equal(await page.locator('.analysis-modules article').count(),20);
-   await scene(3,()=>details(locale==='en'?'Threat sources':'منابع تهدید'));assert.equal(await page.locator('.g-url-sources').count(),3);
-   await scene(4,async()=>{await page.getByRole('button',{name:locale==='en'?'Inspect linked pages':'بررسی صفحه‌های مرتبط',exact:true}).click();await page.getByRole('dialog').waitFor();});
-   await scene(5,async()=>{await page.getByRole('button',{name:locale==='en'?'Scan public pages':'بررسی صفحه‌های عمومی',exact:true}).click();await page.locator('.verdict.danger').waitFor();await page.evaluate(()=>window.scrollTo(0,0));});
-   await scene(6,async()=>{await page.getByRole('button',{name:locale==='en'?'Self-test':'خودآزمایی',exact:true}).click();await page.getByRole('button',{name:locale==='en'?'Run self-test':'اجرای خودآزمایی',exact:true}).click();await page.locator('.g-test-result.passed').waitFor();});
-   await scene(7,async()=>{await page.getByRole('button',{name:locale==='en'?'Scan':'بررسی',exact:true}).click();await page.getByLabel(locale==='en'?'Website link':'لینک وب‌سایت').fill('https://example.com/provider-unavailable');await page.getByRole('button',{name:locale==='en'?'Start scan':'شروع بررسی',exact:true}).click();await page.locator('.verdict.unavailable').waitFor();});
-   await scene(8,()=>page.getByRole('button',{name:locale==='en'?'Settings':'تنظیمات',exact:true}).click());
+   await scene(3,async()=>{await details(locale==='en'?'Threat sources':'منابع تهدید');const rows=page.locator('.g-url-sources');assert.equal(await rows.count(),3);for(const row of await rows.all())await click(row.locator('p'),false);});
+   await scene(4,async()=>{await click(page.getByRole('button',{name:locale==='en'?'Inspect linked pages':'بررسی صفحه‌های مرتبط',exact:true}));await page.getByRole('dialog').waitFor();});
+   await scene(5,async()=>{await click(page.getByRole('button',{name:locale==='en'?'Scan public pages':'بررسی صفحه‌های عمومی',exact:true}));await page.locator('.verdict.danger').waitFor();await page.evaluate(()=>window.scrollTo({top:0,behavior:'smooth'}));await pause(650);});
+   await scene(6,async()=>{await click(page.getByRole('button',{name:locale==='en'?'Self-test':'خودآزمایی',exact:true}));await click(page.getByRole('button',{name:locale==='en'?'Run self-test':'اجرای خودآزمایی',exact:true}));await page.locator('.g-test-result.passed').waitFor();});
+   await scene(7,async()=>{await click(page.getByRole('button',{name:locale==='en'?'Scan':'بررسی',exact:true}));await type('https://example.com/provider-unavailable');await click(page.getByRole('button',{name:locale==='en'?'Start scan':'شروع بررسی',exact:true}));await page.locator('.verdict.unavailable').waitFor();});
+   await scene(8,()=>click(page.getByRole('button',{name:locale==='en'?'Settings':'تنظیمات',exact:true})));
    assert.deepEqual(errors,[]);
-  }finally{running=false;await capturing;encoder.stdin.end();const [code]=await encoderFinished;if(code!==0)throw new Error(encoderError||'Video encoding failed');await context.close();}
-  const duration=frames/5;metadata.videos.push({locale,duration,frames,chapters});
+  }finally{await context.close();}
+  const source=await video.path(),target=resolve(outputPath,`training-${locale}.mp4`),offset=chapters[0].start,duration=chapters.at(-1).end-offset;
+  const markerProbe=spawnSync('ffmpeg',['-v','error','-i',source,'-vf','crop=8:8:0:0,scale=1:1:flags=neighbor,format=rgb24','-r','25','-f','rawvideo','pipe:1'],{maxBuffer:1024*1024});
+  assert.equal(markerProbe.status,0,markerProbe.stderr?.toString());
+  let seenMarker=false,markerEnd=-1;
+  for(let pixel=0;pixel<markerProbe.stdout.length;pixel+=3){const [r,g,b]=markerProbe.stdout.subarray(pixel,pixel+3),green=g>220&&r<40&&b<40;if(green)seenMarker=true;else if(seenMarker){markerEnd=pixel/3/25;break;}}
+  assert.ok(markerEnd>=0,'The recording must contain an explicit synchronization marker');
+  const captureOffset=markerEnd+offset;
+  let audioFile;
+  if(!preview){
+   audioFile=resolve(outputPath,`narration-${locale}.wav`);const filters=[];
+   for(const [i,chapter] of chapters.entries()){
+    const audio=audioInputs[locale].chapters[i],length=chapter.end-chapter.start;
+    filters.push(`[0:a]atrim=start=${audio.start}:end=${audio.end},asetpts=PTS-STARTPTS,adelay=400:all=1,apad,atrim=duration=${length}[a${i}]`);
+   }
+   filters.push(chapters.map((_,i)=>`[a${i}]`).join('')+'concat=n=9:v=0:a=1,loudnorm=I=-16:TP=-1.5:LRA=11[out]');
+   await run(['-i',audioInputs[locale].file,'-filter_complex',filters.join(';'),'-map','[out]','-ar','48000','-c:a','pcm_s16le',audioFile]);
+  }
+  await run(['-ss',String(captureOffset),'-i',source,...(audioFile?['-i',audioFile]:[]),'-t',String(duration),'-map','0:v:0',...(audioFile?['-map','1:a:0','-c:a','aac','-b:a','128k']:['-an']),'-c:v','libx264','-threads','2','-preset','veryfast','-crf','22','-r','25','-pix_fmt','yuv420p','-movflags','+faststart',target]);
+  const captionMatches=[];
+  for(const [index,chapter] of chapters.entries()){
+   const box=chapter.titleBox,actual=resolve(outputPath,'raw',locale,`caption-frame-${index}.png`);
+   await run(['-i',resolve(outputPath,'raw',locale,`caption-full-${index}.png`),'-vf',`crop=${box.width}:${box.height}:${box.x}:${box.y}:exact=1`,'-frames:v','1',resolve(outputPath,'raw',locale,`caption-${index}.png`)]);
+   await run(['-ss',String(chapter.end-offset-.3),'-i',target,'-vf',`crop=${box.width}:${box.height}:${box.x}:${box.y}:exact=1`,'-frames:v','1',actual]);
+   const comparison=spawnSync('ffmpeg',['-hide_banner','-i',resolve(outputPath,'raw',locale,`caption-${index}.png`),'-i',actual,'-lavfi',"[0:v]format=gray,lut=y='if(gt(val,96),255,0)',gblur=sigma=0.6[a];[1:v]format=gray,lut=y='if(gt(val,96),255,0)',gblur=sigma=0.6[b];[a][b]ssim",'-f','null','-'],{encoding:'utf8'});
+   assert.equal(comparison.status,0,comparison.stderr);const score=Number(comparison.stderr.match(/All:([0-9.]+)/)?.[1]);
+   assert.ok(score>.88,`${locale} chapter ${index+1} caption is out of sync or unreadable: SSIM ${score}`);captionMatches.push(score);
+  }
+  await run(['-i',target,'-c:v','libvpx-vp9','-crf','30','-b:v','0','-deadline','realtime','-cpu-used','6','-row-mt','1','-threads','2',...(audioFile?['-c:a','libopus','-b:a','96k']:['-an']),resolve(outputPath,`training-${locale}.webm`)]);
   const stamp=seconds=>{const ms=Math.round(seconds*1000);return `${String(Math.floor(ms/3600000)).padStart(2,'0')}:${String(Math.floor(ms/60000)%60).padStart(2,'0')}:${String(Math.floor(ms/1000)%60).padStart(2,'0')}.${String(ms%1000).padStart(3,'0')}`;};
-  await writeFile(new URL(`training-${locale}.vtt`,output),'WEBVTT\n\n'+chapters.map((item,index)=>`${index+1}\n${stamp(item.start)} --> ${stamp(chapters[index+1]?.start??duration)}\n${item.title}\n${item.body}\n`).join('\n'));
-  await copyFile(target,`/workspace/malguard-inspection/gamescam-training-${locale}.mp4`);
-  const webm=spawn('ffmpeg',['-hide_banner','-loglevel','error','-y','-i',target.pathname,'-an','-c:v','libvpx-vp9','-crf','35','-b:v','0','-cpu-used','4','-threads','2',new URL(`training-${locale}.webm`,output).pathname],{stdio:'ignore'});
-  const [webmCode]=await once(webm,'close');assert.equal(webmCode,0,'Open-codec video fallback must encode');
-  console.log(`PASS: ${locale} walkthrough encoded; ${duration.toFixed(1)} seconds, 9 chapters, real UI assertions passed.`);
+  await writeFile(resolve(outputPath,`training-${locale}.vtt`),'WEBVTT\n\n'+chapters.map((item,index)=>`${index+1}\n${stamp(item.start-offset)} --> ${stamp(item.end-offset)}\n${preview?item.title+'\n'+item.body:item.narration}\n`).join('\n'));
+  metadata.videos.push({locale,duration,captureOffset,captionMatches,chapters:chapters.map(item=>({...item,start:item.start-offset,end:item.end-offset})),movements:movements.map(item=>({...item,time:item.time-offset}))});
+  await writeFile(resolve(outputPath,'training-manifest.json'),JSON.stringify(metadata,null,2));
+  console.log(`PASS: ${locale} ${preview?'VISUAL PREVIEW (no narration)':manifest?.syntheticTestOnly?'SYNTHETIC AUDIO TEST':'narrated walkthrough'}; ${duration.toFixed(1)} s, 25 fps, ${movements.length} pointer targets, 9 asserted UI chapters.`);
  }
- await writeFile('/workspace/malguard-inspection/gamescam-training-metadata.json',JSON.stringify(metadata,null,2));
 }finally{await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

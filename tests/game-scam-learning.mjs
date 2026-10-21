@@ -30,18 +30,44 @@ try{
   }
   const video=await page.locator('video').evaluate(async video=>{
    video.load();await new Promise((resolve,reject)=>{if(video.readyState>=1)return resolve();video.addEventListener('loadedmetadata',resolve,{once:true});video.addEventListener('error',()=>reject(new Error('Training video failed to load')),{once:true});});
-   await video.play();await new Promise(resolve=>setTimeout(resolve,600));video.pause();return {duration:video.duration,width:video.videoWidth,height:video.videoHeight,time:video.currentTime,error:video.error?.code||null};
-  });assert.equal(video.error,null);assert.ok(video.duration>=30&&video.duration<=120);assert.ok(video.time>0);assert.equal(video.width,1280);evidence.videos.push({locale,...video});
+   const audio=new AudioContext(),meter=audio.createAnalyser();audio.createMediaElementSource(video).connect(meter);meter.connect(audio.destination);video.__learningAudio={audio,meter};await audio.resume();
+   await video.play();let peak=0;for(let i=0;i<15;i++){await new Promise(resolve=>setTimeout(resolve,80));const samples=new Float32Array(meter.fftSize);meter.getFloatTimeDomainData(samples);peak=Math.max(peak,Math.sqrt(samples.reduce((sum,x)=>sum+x*x,0)/samples.length));}video.pause();return {duration:video.duration,width:video.videoWidth,height:video.videoHeight,time:video.currentTime,audioPeakRms:peak,error:video.error?.code||null};
+  });assert.equal(video.error,null);assert.ok(video.duration>=30&&video.duration<=120);assert.ok(video.time>0);assert.equal(video.width,1280);assert.ok(video.audioPeakRms>.005,'The narrated MP4 must decode a real audio signal');evidence.videos.push({locale,...video});
   const source=await page.locator('video source[type="video/mp4"]').getAttribute('src');const range=await context.request.get(new URL(source,page.url()).href,{headers:{Range:'bytes=0-1023'}});assert.equal(range.status(),206);assert.match(range.headers()['content-type'],/video\/mp4/);
   const fallback=await page.locator('video source[type="video/webm"]').getAttribute('src');
   const fallbackVideo=await page.locator('video').evaluate(async(video,src)=>{
    video.src=src;video.load();await new Promise((resolve,reject)=>{video.addEventListener('loadedmetadata',resolve,{once:true});video.addEventListener('error',()=>reject(new Error('Open-codec fallback failed to load')),{once:true});});
-   await video.play();await new Promise(resolve=>setTimeout(resolve,300));video.pause();return {duration:video.duration,time:video.currentTime};
-  },fallback);assert.ok(fallbackVideo.duration>=30&&fallbackVideo.time>0,'Open-codec fallback must actually play');
+   await video.play();const meter=video.__learningAudio.meter;let peak=0;for(let i=0;i<15;i++){await new Promise(resolve=>setTimeout(resolve,80));const samples=new Float32Array(meter.fftSize);meter.getFloatTimeDomainData(samples);peak=Math.max(peak,Math.sqrt(samples.reduce((sum,x)=>sum+x*x,0)/samples.length));}video.pause();return {duration:video.duration,time:video.currentTime,audioPeakRms:peak};
+  },fallback);assert.ok(fallbackVideo.duration>=30&&fallbackVideo.time>0,'Open-codec fallback must actually play');assert.ok(fallbackVideo.audioPeakRms>.005,'The narrated WebM must decode a real audio signal');evidence.videos.push({locale,format:'webm',...fallbackVideo});
   const report=await context.request.get(new URL('./evaluation.json',page.url()).href);assert.equal(report.status(),200);const data=await report.json();assert.equal(data.summary.cases,34);assert.equal(data.summary.failed,0);assert.equal(data.independentEvaluation,false);
   const paper=await context.request.get(new URL('./technical-report.md',page.url()).href);assert.equal(paper.status(),200);assert.match(await paper.text(),/not a peer-reviewed paper/);
+  const other=locale==='en'?'fa':'en';
+  const languageMenu=page.getByRole('navigation',{name:locale==='en'?'Video language':'زبان فیلم',exact:true});
+  assert.equal(await languageMenu.locator('[aria-current="page"]').getAttribute('lang'),locale);
+  await page.locator('video').evaluate(video=>video.play());
+  await languageMenu.getByRole('link',{name:other==='fa'?'فارسی':'English',exact:true}).click();
+  assert.equal(await page.locator('html').getAttribute('lang'),other);
+  assert.equal(new URL(page.url()).hash,'#movie','Changing video language must keep the player in view');
+  assert.match(await page.locator('video source[type="video/mp4"]').getAttribute('src'),new RegExp(`training-${other}\\.mp4`));
+  assert.equal(await page.locator('video').evaluate(video=>video.paused&&!video.muted&&video.volume===1),true,'The new language is ready to play with sound; the previous player must not keep playing');
+  await page.getByRole('link',{name:other==='fa'?'بازگشت به برنامه':'Back to the app',exact:true}).click();
+  await page.locator('.g-brand-logo').waitFor();assert.equal(await page.locator('html').getAttribute('lang'),other,'The selected training language must also persist in the app');
+  await page.goto(base+'/game-scam-guard/learn/'+(locale==='fa'?'fa.html':'index.html'));
   await page.getByRole('link',{name:locale==='en'?'Back to the app':'بازگشت به برنامه',exact:true}).click();await page.locator('.g-brand-logo').waitFor();assert.equal(await page.locator('html').getAttribute('lang'),locale);
  }
- assert.deepEqual(errors,[]);evidence.status='passed';console.log('PASS: both guides, two localized articles, 20 check descriptions, local report downloads, MP4 decoding/playback/range requests, both help links and four viewport sizes.');
+ await page.goto(base+'/game-scam-guard/');
+ await page.evaluate(()=>Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>setTimeout(()=>reject(new Error('App service worker did not become ready')),10000))]));
+ await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller),null,{timeout:10000});
+ await page.goto(base+'/game-scam-guard/learn/fa.html');
+ const cachedApp=await page.evaluate(async()=>{const names=await caches.keys();const cache=await caches.open(names.find(name=>name.startsWith('gamescam-guard-site-')));const response=await cache.match('/game-scam-guard/');return response?.text();});
+ assert.match(cachedApp,/id=["']root["']/,'Visiting a guide must preserve the cached app shell');
+ await context.setOffline(true);
+ try{
+  await page.reload();assert.equal(await page.locator('html').getAttribute('lang'),'fa','The Persian guide must retain its own offline document');
+  await page.getByRole('link',{name:'بازگشت به برنامه',exact:true}).click();await page.locator('.g-brand-logo').waitFor();
+  assert.equal(await page.locator('html').getAttribute('lang'),'fa','Returning from the offline guide must open the app in the chosen language');
+ }finally{await context.setOffline(false);}
+ evidence.offlineGuideAndAppShell='passed';
+ assert.deepEqual(errors,[]);evidence.status='passed';console.log('PASS: both guides, two localized articles, 20 check descriptions, local report downloads, MP4 decoding/playback/range requests, both help links, player-language switching in both directions, persisted app language, offline guide/app separation and four viewport sizes.');
 }catch(error){evidence.status='failed';evidence.error=error.message;process.exitCode=1;console.error(error.stack);}
 finally{await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await writeFile('test-results/game-scam-learning.json',JSON.stringify(evidence,null,2));}

@@ -61,3 +61,17 @@ These sources describe the referenced technologies. They do not endorse or certi
 ## خلاصهٔ فارسی
 
 این گزارش فنی، روش بررسی و آزمون قابل بازتولیدِ موتور را مستند می‌کند. دادهٔ ارزیابی، بیست نمونهٔ منتخب برای مشاهدهٔ قاعده و چهارده نمونهٔ بی‌خطر است. نتیجهٔ واقعی هر اجرا، هش ورودی‌ها و هش فایل‌های منبع در فایل همراه ثبت می‌شود. نمونه‌ها مستقل یا نمایندهٔ همهٔ تهدیدهای جهان نیستند؛ بنابراین نتیجهٔ آن‌ها، درصد تشخیص عمومی یا تضمین امنیت محسوب نمی‌شود. فیلم‌های آموزشی از رابط واقعی با محتوای بی‌خطر و پاسخ ساختگی منابع ضبط می‌شوند و نقش آموزش دارند. بررسی مرورگر محلی، بررسی سامسونگ واقعی و آزمون ماشین ایزولهٔ تولید، شواهد جداگانه می‌خواهند.
+
+
+## Reproducing the narrated tutorials
+
+The English and Persian walkthroughs contain locally generated neural narration from Piper 1.8.0. The synthesis and recording tools are `tools/generate-gamescam-narration.py` and `tools/record-gamescam-guide.mjs`; the scripts, immutable model revision and checksums are in `tools/gamescam-narration.json`. No paid speech API or browser speech-synthesis feature is required. Each language has nine measured speech chapters. The training frames use harmless authored pages and simulated URL reports.
+
+English voice: `en_US-ljspeech-high`, trained from the public-domain LJ Speech dataset. Persian voice: `fa_IR-amir-medium`, whose model card identifies the dataset as CC0. The immutable model repository revision is `5041a7a49ae5b3a0f30e6837769eb03fdbb231bd`:
+
+- English model card: https://huggingface.co/rhasspy/piper-voices/blob/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/en/en_US/ljspeech/high/MODEL_CARD
+- Persian model card: https://huggingface.co/rhasspy/piper-voices/blob/5041a7a49ae5b3a0f30e6837769eb03fdbb231bd/fa/fa_IR/amir/medium/MODEL_CARD
+- Piper software and GPL-3.0-or-later license: https://github.com/OHF-Voice/piper1-gpl
+- LJ Speech dataset: https://keithito.com/LJ-Speech-Dataset/
+
+The published `training-manifest.json` records source audio/model hashes, per-chapter timing, pointer targets and title-frame comparisons. Video is captured at 25 fps with eased pointer motion and visible click rings. MP4 uses H.264/AAC; WebM uses VP9/Opus. A recorded synchronization marker is removed from the final film. Encoded chapter titles are checked against their rendered text masks; browser tests check decoded audio signals, playback, range requests, both language switches, four viewport sizes and separate offline guide/app documents. These are media and interface checks, not evidence of general threat-detection accuracy or a human listening evaluation.

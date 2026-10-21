@@ -1,0 +1,49 @@
+{
+  "model": "piper-tts@1.8.0",
+  "en": {
+    "voice": "LJ Speech (neural English)",
+    "voiceId": "en_US-ljspeech-high",
+    "chapters": [
+      "Welcome to GameScam Guard. Follow the pointer through this harmless training example. First, enter a public website address.",
+      "Select Start scan. Watch the progress here, then read the result on the same screen.",
+      "Open View details, then Coverage. This shows twenty distinct static checks, and which checks completed.",
+      "Choose Threat sources. Review the submitted address, each redirect, and the final destination separately.",
+      "For a wider inspection, select Inspect linked pages. Read the scope before confirming.",
+      "Select Scan public pages. This example adds a simulated threat report from a linked destination. The original assessment stays visible, so you can see why the expanded result changes.",
+      "Open Self-test and select Run self-test. These thirty-eight harmless examples check selected detection rules and security boundaries.",
+      "Back in Scan, this second example simulates a source outage. An incomplete inspection means evidence is missing. Retry later before relying on that result.",
+      "Finally, open Settings to review your sources and privacy choices. Use these observations to make an informed decision before signing in, paying, or downloading."
+    ],
+    "directory": "en/en_US/ljspeech/high",
+    "modelSha256": "5d4f08ba6a2a48c44592eed3ce56bf85e9de3dd4e20df90541ae68a8310c029a",
+    "configGitBlob": "e4c9cbdf41a9c5fadd5eb7633513435342184918",
+    "cardGitBlob": "ddd2c7524cadf38f78a9b268ad957079e9815383",
+    "datasetLicense": "public domain",
+    "lengthScale": 1.04
+  },
+  "fa": {
+    "voice": "Amir (neural Persian)",
+    "voiceId": "fa_IR-amir-medium",
+    "chapters": [
+      "به گیم اسکم گارد خوش آمدید. در این نمونهٔ آموزشی بی‌خطر، نشانگر را دنبال کنید. ابتدا نشانی عمومی یک وب‌سایت را وارد کنید.",
+      "شروع بررسی را بزنید. پیشرفت کار را اینجا ببینید و سپس نتیجه را در همین صفحه بخوانید.",
+      "نمایش جزئیات و سپس پوشش را باز کنید. این بخش بیست بررسی ایستا و وضعیت تکمیل هرکدام را نشان می‌دهد.",
+      "منابع تهدید را انتخاب کنید. پاسخ نشانی اولیه، انتقال‌های میانی و مقصد نهایی را جداگانه ببینید.",
+      "برای بررسی بیشتر، بررسی صفحه‌های مرتبط را بزنید. پیش از تأیید، دامنهٔ بررسی را بخوانید.",
+      "بررسی صفحه‌های عمومی را بزنید. در این نمونه، یک مقصد مرتبط گزارش ساختگی تهدید دارد. ارزیابی اولیه حفظ می‌شود تا دلیل تغییر نتیجهٔ گسترده‌تر را ببینید.",
+      "خودآزمایی را باز کنید و اجرای خودآزمایی را بزنید. این سی و هشت نمونهٔ بی‌خطر، قواعد منتخب تشخیص و مرزهای امنیتی را می‌سنجند.",
+      "به بررسی برگردید. نمونهٔ دوم، اختلال یک منبع را شبیه‌سازی می‌کند. بررسی ناقص یعنی بخشی از شواهد در دسترس نیست. پیش از اتکا به نتیجه، بعداً دوباره تلاش کنید.",
+      "در پایان، تنظیمات را باز کنید و منابع و گزینه‌های حریم خصوصی را ببینید. پیش از ورود، پرداخت یا دانلود، با توجه به این شواهد تصمیم بگیرید."
+    ],
+    "directory": "fa/fa_IR/amir/medium",
+    "modelSha256": "fb815380d969ea372b0b21b0de14421f58fe481047e153e69685d079b6e1a9d1",
+    "configGitBlob": "73407fafdb2a36ff47c820881390a90fd6cf2b17",
+    "cardGitBlob": "a4e9f75147e5a5ee12b7f85bb8d29f4a65dd4a88",
+    "datasetLicense": "CC0",
+    "lengthScale": 1.07
+  },
+  "source": {
+    "repo": "rhasspy/piper-voices",
+    "revision": "5041a7a49ae5b3a0f30e6837769eb03fdbb231bd"
+  }
+}
