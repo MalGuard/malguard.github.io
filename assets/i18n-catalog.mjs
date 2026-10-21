@@ -76,6 +76,7 @@ export const translations = {
 "Core privacy policy | MalGuard":"حریم خصوصی هسته | MalGuard",
 "Code signing | MalGuard":"امضای کد | MalGuard",
 "Contributing | MalGuard":"مشارکت | MalGuard",
+"Contribute to MalGuard | Open-source game security developer opportunities":"مشارکت در MalGuard | فرصت‌های توسعه متن‌باز امنیت بازی",
 "Core guide | MalGuard":"راهنمای هسته | MalGuard",
 "Your message and optional contact details are emailed to MalGuard Security. Include harmless reproduction steps if you can. Do not attach malware, passwords, or private keys.":"پیام و اطلاعات تماس اختیاری شما به ایمیل بخش امنیت MalGuard فرستاده می‌شود. در صورت امکان، روش بازتولید بی‌خطر مشکل را بنویسید. بدافزار، رمز یا کلید خصوصی نفرستید.",
 'MALGUARD DESKTOP':'دسکتاپ MalGuard','Install the scanner, not a website wrapper.':'اسکنر واقعی را نصب کنید.',
