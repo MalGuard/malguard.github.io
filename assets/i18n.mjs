@@ -2,12 +2,15 @@ import {translations} from './i18n-catalog.mjs?v=20261014-public';
 
 let locale='en';
 try {if(localStorage.getItem('malguard-language')==='fa')locale='fa';} catch {}
+const englishOnlyArticle=document.documentElement.dataset.articleLanguage==='en';
+if(englishOnlyArticle)locale='en';
 export const language=()=>locale;
 const originals=new WeakMap();
 const attributes=new WeakMap();
 const initialTitle=document.title;
 const normalize=text=>text.replace(/\s+/g,' ').trim();
 function translate() {
+  if(englishOnlyArticle){document.documentElement.lang='en';document.documentElement.dir='ltr';document.title=initialTitle;return;}
   document.documentElement.lang=locale;document.documentElement.dir=locale==='fa'?'rtl':'ltr';
   document.title=locale==='fa'?(translations[initialTitle]||initialTitle):initialTitle;
   const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
@@ -36,7 +39,7 @@ function translate() {
 const wrapper=document.createElement('label');wrapper.className='mg-language';wrapper.setAttribute('aria-label','Language / زبان');
 const selector=document.createElement('select');selector.setAttribute('aria-label','Language / زبان');
 for(const [value,text]of [['en','English'],['fa','فارسی']]){const option=document.createElement('option');option.value=value;option.textContent=text;selector.append(option);}
-selector.value=locale;wrapper.append(selector);(document.querySelector('.nav-actions')||document.body).append(wrapper);
+selector.value=locale;wrapper.append(selector);if(!englishOnlyArticle)(document.querySelector('.nav-actions')||document.body).append(wrapper);
 function changeLanguage(value){locale=value==='fa'?'fa':'en';try{localStorage.setItem('malguard-language',locale);}catch{}translate();window.dispatchEvent(new Event('malguard-language'));}
 selector.addEventListener('change',()=>changeLanguage(selector.value));
 const gate=document.querySelector('.site-entry-shell');

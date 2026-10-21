@@ -11,6 +11,7 @@ PAGES=[ROOT/'index.html', *[p for p in ROOT.glob('*.html') if p.name!='index.htm
     ROOT/'research/game-mod-archives-file-types.html',
     ROOT/'research/fake-gaming-download-links.html',
     ROOT/'research/contributing-to-open-source-security.html',
+    ROOT/'research/security-test-evidence-for-contributors.html',
     ROOT/'research/windows-file-signatures-fa.html',ROOT/'release/sandbox-help-historical.html']
 # The Guard source is compiled and copied to the Pages artifact by the static
 # workflow. Keep this route explicit so a typo cannot hide as a link, while

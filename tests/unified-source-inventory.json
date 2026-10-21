@@ -137,6 +137,10 @@
       "surface": "Native project resource or reporting page"
     },
     {
+      "path": "research/security-test-evidence-for-contributors.html",
+      "surface": "Public technical research on safe synthetic security tests; no active scanning or runtime code"
+    },
+    {
       "path": "research/contributing-to-open-source-security.html",
       "surface": "Public educational research; no active scanning or runtime code"
     },
@@ -237,7 +241,7 @@
       "surface": "preserved content and functional controls"
     }
   ],
-  "publicRouteCount": 46,
+  "publicRouteCount": 47,
   "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
   "functionalRuntimePreserved": [
     "assets/public-release.mjs",
