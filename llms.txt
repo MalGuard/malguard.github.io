@@ -26,6 +26,7 @@ Language: English; a Persian (فارسی) GTA mod security guide is also availab
 - [What is inside a mod archive?](https://malguard.site/research/game-mod-archives-file-types.html): Extensions, archive structures, unseen files and limits of non-executing inspection.
 - [Recognizing suspicious game download links](https://malguard.site/research/fake-gaming-download-links.html): Check domains, redirects, deceptive prompts and what link scans do not prove.
 - [How to contribute to a security project](https://malguard.site/research/contributing-to-open-source-security.html): First PRs, harmless fixtures, transparent tests and private vulnerability reporting.
+- [Evidence-driven security tests for contributors](https://malguard.site/research/security-test-evidence-for-contributors.html): Reproducible synthetic test fixtures, explicit assertions, safe failure reporting and limits of passing checks.
 - [راهنمای فارسی امضای دیجیتال و SHA-256](https://malguard.site/research/windows-file-signatures-fa.html): تفاوت هش فایل، اعتبار امضا و هشدارهای ویندوز.
 
 ## Important distinctions
