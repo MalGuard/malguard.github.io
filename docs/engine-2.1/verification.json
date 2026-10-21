@@ -1,0 +1,449 @@
+{
+  "checkedAt": "2026-10-21T19:29:33.253Z",
+  "target": "https://malguard.site/",
+  "status": "unavailable",
+  "pageFetch": {
+    "status": "done",
+    "attempts": 1
+  },
+  "analysisEngine": {
+    "version": "2.1.0",
+    "modules": [
+      {
+        "id": "url-identity",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "brand-domain",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "form-destinations",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "form-methods",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "verification-codes",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "wallet-secrets",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "payment-boundary",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "script-transport",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "script-obfuscation",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "credential-network",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "clipboard-traps",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "script-navigation",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "html-redirects",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "link-mismatch",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "frame-boundaries",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "embedded-plugins",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "service-workers",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "encoded-documents",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "web-mining",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      },
+      {
+        "id": "resource-integrity",
+        "status": "inspected",
+        "findings": 0,
+        "coverage": "complete"
+      }
+    ],
+    "limits": {
+      "inlineScriptBytes": 0,
+      "omittedScripts": 0,
+      "omittedForms": 0,
+      "omittedFrames": 0,
+      "omittedPlugins": 0,
+      "javaScriptExecuted": false,
+      "externalScriptsFetched": false
+    },
+    "secondaryPass": {
+      "status": "done",
+      "documentsAnalyzed": 0,
+      "omittedDocuments": 0,
+      "decodedBytes": 0,
+      "maxDocuments": 8,
+      "maxDepth": 2,
+      "maxBytes": 131072,
+      "javaScriptExecuted": false,
+      "externalResourcesFetched": false
+    }
+  },
+  "preview": {
+    "status": "done",
+    "isolation": {
+      "javaScriptEnabled": false,
+      "networkPolicy": "deny-all",
+      "siteScriptsExecuted": false,
+      "blockedRequests": 0,
+      "documentServed": true
+    }
+  },
+  "providers": [
+    {
+      "provider": "urlhaus",
+      "status": "unconfigured"
+    },
+    {
+      "provider": "openphish",
+      "status": "unconfigured"
+    }
+  ],
+  "events": [
+    {
+      "phase": "url_validation"
+    },
+    {
+      "phase": "threat_lookup"
+    },
+    {
+      "phase": "fetch_page"
+    },
+    {
+      "phase": "threat_lookup_unavailable"
+    },
+    {
+      "phase": "page_received"
+    },
+    {
+      "phase": "secondary_analysis"
+    },
+    {
+      "phase": "cloud_browser"
+    },
+    {
+      "phase": "cloud_browser_done"
+    },
+    {
+      "phase": "analysis_done"
+    }
+  ],
+  "selfTest": {
+    "version": "2.1.0",
+    "scope": "synthetic-offline",
+    "status": "passed",
+    "checkedAt": "2026-10-21T19:29:33.384Z",
+    "durationMs": 131,
+    "summary": {
+      "total": 42,
+      "passed": 42,
+      "failed": 0
+    },
+    "checks": [
+      {
+        "id": "url-identity",
+        "module": "url-identity",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "brand-domain",
+        "module": "brand-domain",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "form-destinations",
+        "module": "form-destinations",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "form-methods",
+        "module": "form-methods",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "verification-codes",
+        "module": "verification-codes",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "wallet-secrets",
+        "module": "wallet-secrets",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "payment-boundary",
+        "module": "payment-boundary",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "script-transport",
+        "module": "script-transport",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "script-obfuscation",
+        "module": "script-obfuscation",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "credential-network",
+        "module": "credential-network",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "clipboard-traps",
+        "module": "clipboard-traps",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "script-navigation",
+        "module": "script-navigation",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "html-redirects",
+        "module": "html-redirects",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "link-mismatch",
+        "module": "link-mismatch",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "frame-boundaries",
+        "module": "frame-boundaries",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "embedded-plugins",
+        "module": "embedded-plugins",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "service-workers",
+        "module": "service-workers",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "encoded-documents",
+        "module": "encoded-documents",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "web-mining",
+        "module": "web-mining",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "resource-integrity",
+        "module": "resource-integrity",
+        "status": "passed",
+        "kind": "detection"
+      },
+      {
+        "id": "plain-public-page",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "same-origin-password-post",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "same-origin-code-post",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "official-brand-domain",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "unrelated-substring",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "educational-wording",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "comment-only-obfuscation",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "string-only-obfuscation",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "json-data",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "comment-only-credential-code",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "safe-pwa-context",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "ordinary-clipboard",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "nonlatin-domain",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "same-origin-redirect",
+        "status": "passed",
+        "kind": "false-positive"
+      },
+      {
+        "id": "private-network-boundary",
+        "kind": "boundary",
+        "status": "passed"
+      },
+      {
+        "id": "credential-url-boundary",
+        "kind": "boundary",
+        "status": "passed"
+      },
+      {
+        "id": "report-token-integrity",
+        "kind": "boundary",
+        "status": "passed"
+      },
+      {
+        "id": "secret-value-redaction",
+        "kind": "boundary",
+        "status": "passed"
+      },
+      {
+        "id": "brand-spelling-review",
+        "module": "brand-domain",
+        "kind": "detection",
+        "status": "passed"
+      },
+      {
+        "id": "official-brand-boundary",
+        "kind": "false-positive",
+        "status": "passed"
+      },
+      {
+        "id": "embedded-form-second-pass",
+        "module": "form-methods",
+        "kind": "detection",
+        "status": "passed"
+      },
+      {
+        "id": "embedded-expansion-boundary",
+        "kind": "boundary",
+        "status": "passed"
+      }
+    ]
+  }
+}

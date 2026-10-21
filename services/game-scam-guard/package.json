@@ -4,6 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node server/redirect-intel.test.js && node server/deep-analysis.test.js && node server/phishing-feed.test.js && node src/messages.test.js && node server/scanner.test.js && node server/site-analysis.test.js && node server/scan-jobs.test.js && node server/scan-recovery.test.js && node server/report-token.test.js && node server/cloud-browser.test.js && node src/history.test.js && node src/email-account.test.js && node server/email-auth.test.js && node server/app.test.js"
+    "test": "node server/redirect-intel.test.js && node server/deep-analysis.test.js && node server/secondary-analysis.test.js && node server/phishing-feed.test.js && node src/messages.test.js && node server/scanner.test.js && node server/site-analysis.test.js && node server/scan-jobs.test.js && node server/scan-recovery.test.js && node server/report-token.test.js && node server/cloud-browser.test.js && node src/history.test.js && node src/email-account.test.js && node server/email-auth.test.js && node server/app.test.js"
   }
 }

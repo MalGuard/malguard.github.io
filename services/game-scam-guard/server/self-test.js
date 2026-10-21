@@ -23,6 +23,14 @@ export function runSelfTest(){
  checks.push({id:'report-token-integrity',kind:'boundary',status:tamperBlocked?'passed':'failed'});
  const report=parsePage(Buffer.from('<form method="post" action="https://other.example/?token=do-not-copy"><input type="password" value="do-not-copy"></form>'),'https://store.example/');
  checks.push({id:'secret-value-redaction',kind:'boundary',status:JSON.stringify(report).includes('do-not-copy')?'failed':'passed'});
+ const typo=parsePage(Buffer.from('<p>Owned fixture</p>'),'https://poblox.com/');
+ checks.push({id:'brand-spelling-review',module:'brand-domain',kind:'detection',status:typo.signals.some(s=>s.rule==='brand_typo_host')?'passed':'failed'});
+ const official=parsePage(Buffer.from('<p>Owned fixture</p>'),'https://www.roblox.com/');
+ checks.push({id:'official-brand-boundary',kind:'false-positive',status:official.signals.some(s=>s.module==='brand-domain')?'failed':'passed'});
+ const nested=parsePage(Buffer.from('<iframe srcdoc="&lt;form method=get action=https://other.example/&gt;&lt;input type=password&gt;&lt;/form&gt;"></iframe>'),'https://store.example/');
+ checks.push({id:'embedded-form-second-pass',module:'form-methods',kind:'detection',status:nested.signals.some(s=>s.rule==='sensitive_form_get'&&s.documentScope==='embedded')?'passed':'failed'});
+ const oversized=parsePage(Buffer.from('<iframe srcdoc="'+'x'.repeat(128*1024+1)+'"></iframe>'),'https://store.example/');
+ checks.push({id:'embedded-expansion-boundary',kind:'boundary',status:oversized.analysisEngine.secondaryPass.status==='incomplete'?'passed':'failed'});
  const passed=checks.filter(check=>check.status==='passed').length;
  return {version:ANALYSIS_VERSION,scope:'synthetic-offline',status:passed===checks.length?'passed':'failed',checkedAt:new Date().toISOString(),durationMs:Math.round(performance.now()-started),summary:{total:checks.length,passed,failed:checks.length-passed},checks};
 }

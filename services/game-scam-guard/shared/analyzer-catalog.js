@@ -1,9 +1,9 @@
 // Distinct, testable checks in one website analysis engine. These are not
 // independent commercial antivirus products or promises of complete detection.
-export const ANALYSIS_VERSION='2.0.0';
+export const ANALYSIS_VERSION='2.1.0';
 export const analyzerCatalog=[
  ['url-identity','URL identity','هویت نشانی','Checks IP-literal and mixed-script hostnames.','نشانی‌های عددی و دامنه‌های دارای خط‌های نوشتاری مخلوط بررسی می‌شوند.'],
- ['brand-domain','Gaming brand impersonation','جعل دامنهٔ برند بازی','Checks deceptive brand tokens in the actual hostname.','توکن‌های فریبندهٔ برند در نام واقعی دامنه بررسی می‌شوند.'],
+ ['brand-domain','Gaming brand impersonation','جعل دامنهٔ برند بازی','Checks brand tokens, single-character typos, transpositions and digit lookalikes in actual hostnames.','توکن برند، غلط یک‌حرفی، جابه‌جایی حروف و ارقام مشابه در نام واقعی دامنه بررسی می‌شوند.'],
  ['form-destinations','Sensitive form destinations','مقصد فرم‌های حساس','Checks where password and payment forms send data.','مقصد ارسال فرم‌های رمز و پرداخت بررسی می‌شود.'],
  ['form-methods','Sensitive form methods','روش ارسال فرم‌های حساس','Checks for sensitive values exposed through GET.','احتمال قرارگرفتن دادهٔ حساس در نشانی با روش گت بررسی می‌شود.'],
  ['verification-codes','Verification code collection','جمع‌آوری کد تأیید','Checks code forms for insecure or external destinations.','مقصد ناامن یا بیرونی فرم‌های کد تأیید بررسی می‌شود.'],

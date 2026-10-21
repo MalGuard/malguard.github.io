@@ -29,7 +29,7 @@ test('syntax, size and AST limits remain visible and never execute authored code
  assert.equal(globalThis.__guardExecuted,undefined);scriptFacts('globalThis.__guardExecuted=true');assert.equal(globalThis.__guardExecuted,undefined);
 });
 test('offline self-test actually exercises detection, negatives, boundaries and report integrity',()=>{
- const report=runSelfTest();assert.equal(report.status,'passed');assert.equal(report.summary.total,38);assert.equal(report.summary.failed,0);
+ const report=runSelfTest();assert.equal(report.status,'passed');assert.equal(report.summary.total,42);assert.equal(report.summary.failed,0);
  assert.equal(report.scope,'synthetic-offline');assert.ok(report.durationMs<3000);
 });
 

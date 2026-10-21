@@ -2,10 +2,9 @@ import {domainToUnicode} from 'node:url';
 import ipaddr from 'ipaddr.js';
 import {analyzerCatalog,ANALYSIS_VERSION} from '../shared/analyzer-catalog.js';
 import {documentBase} from './site-analysis.js';
+import {brandIdentitySignals} from '../shared/brand-identity.js';
 import {scriptFacts} from './script-facts.js';
 
-const brands=[['steam',['steampowered.com','steamcommunity.com']],['epicgames',['epicgames.com']],['rockstar',['rockstargames.com']],['roblox',['roblox.com']],['minecraft',['minecraft.net']],['discord',['discord.com','discord.gg']]];
-const belongs=(host,domains)=>domains.some(domain=>host===domain||host.endsWith('.'+domain));
 const endpoint=url=>url.origin+url.pathname; // Deliberately excludes query tokens and field values.
 const web=(value,base)=>{try{const url=new URL(value,base);return ['http:','https:'].includes(url.protocol)&&!url.username&&!url.password?url:null;}catch{return null;}};
 const ruleModules={sensitive_form_unreadable:'form-destinations',sensitive_form_http:'form-destinations',sensitive_form_external:'form-destinations',sensitive_form_get:'form-methods',active_mixed_content:'script-transport',encoded_dynamic_code:'script-obfuscation',html_external_redirect:'html-redirects',link_destination_mismatch:'link-mismatch'};
@@ -35,10 +34,7 @@ export function analyzeWebsite($,pageUrl,baseSignals=[]){
  const scripts=[/\p{Script=Latin}/u,/\p{Script=Cyrillic}/u,/\p{Script=Greek}/u];
  if(unicode.split('.').some(label=>scripts.filter(pattern=>pattern.test(label)).length>1))add('url-identity','mixed_script_host','The hostname mixes look-alike writing systems. Confirm the exact destination.','نام دامنه، خط‌های نوشتاری شبیه به هم را ترکیب کرده است. مقصد دقیق را بررسی کنید.',{evidence:[host,unicode]});
  if(ipaddr.isValid(host))add('url-identity','ip_literal_host','The address uses a numeric IP instead of a named website; ownership needs separate verification.','نشانی به‌جای نام وب‌سایت از آی‌پی عددی استفاده می‌کند؛ مالکیت باید جداگانه بررسی شود.',{level:'info',evidence:[host]});
- for(const [brand,official]of brands){
-   // Token boundaries avoid flagging innocent words such as "steamship".
-   if(!belongs(host,official)&&new RegExp(`(?:^|[.-])${brand}(?:[.-]|$)`,'i').test(host))add('brand-domain','brand_in_unofficial_host','A gaming brand appears in a hostname outside its listed official domains. This is not proof of impersonation.','نام برند بازی در دامنه‌ای بیرون از دامنه‌های رسمی فهرست‌شده دیده شد. این موضوع به‌تنهایی اثبات جعل نیست.',{evidence:[host,brand]});
- }
+ for(const signal of brandIdentitySignals(pageUrl))signals.push(signal);
  $('form').slice(0,256).each((_,el)=>{
    const form=$(el),action=form.attr('action'),target=web(action||page.href,action?base:page.href);
    const code=form.find('input').toArray().some(input=>/one-time-code/i.test($(input).attr('autocomplete')||'')||/^(?:otp|one.?time.?code|verification.?code|2fa|mfa)$/i.test($(input).attr('name')||''));
