@@ -82,6 +82,8 @@ jobs:
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/gta6-shared-experience.mjs
           TEST_BROWSER=chromium node tests/product-card-hero-backdrops.mjs
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/product-card-hero-backdrops.mjs
+          TEST_BROWSER=chromium node tests/opaque-menu-static-gta.mjs
+          TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/opaque-menu-static-gta.mjs
 
   cinematic:
     needs: responsive-and-functional
