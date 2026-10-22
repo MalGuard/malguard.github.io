@@ -46,7 +46,7 @@ try {
   assert.equal(await title.getAttribute('data-mg-typed'),'','Offscreen content typed before scroll');
   await title.scrollIntoViewIfNeeded();
   await page.waitForFunction(()=>[...document.querySelectorAll('main h2')].some(n=>n.hasAttribute('data-mg-typed')&&n.dataset.mgTyped?.length>0),null,{timeout:5000});
-  const concurrent=await page.locator('.mg-precision-type-target[data-mg-typed]').evaluateAll(els=>els.filter(e=>e.dataset.mgTyped?.length>0).length);
+  const concurrent=await page.locator('.mg-precision-type-target[data-mg-typing-active]').count();
   assert.ok(concurrent<=1,'Typewriter must have a single active job');
   console.log('PASS',route,'scroll-triggered sequential typing');
  }
