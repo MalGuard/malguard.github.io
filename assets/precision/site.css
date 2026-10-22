@@ -49,3 +49,21 @@ main,.site-footer{position:relative}.hero{position:relative;isolation:isolate;mi
 @media(max-width:920px){.precision-nav-inner{width:min(100% - 36px,1280px);gap:16px}.precision-nav-links{display:none}.precision-nav-mobile{display:block}.precision-nav-scan{margin-left:auto}}
 @media(max-width:460px){.precision-nav-inner{min-height:60px;width:calc(100% - 24px)}.precision-nav-scan{font-size:10px;padding:10px}.precision-nav-brand{font-size:14px}}
 @media(prefers-reduced-motion:reduce){.precision-nav *{animation:none!important;transition:none!important}}
+
+
+/* Sequential coding typography: homepage only. Reuse the bundled JetBrains Mono. */
+.precision-home [data-type]{font-family:var(--mono)!important}
+.precision-home .hero h1{font-size:clamp(52px,11vw,102px);letter-spacing:-.065em}
+.precision-home #navbar .mg-brand,.precision-home #navbar .mg-primary-links a,.precision-home #navbar .nav-download{font-family:var(--mono)!important}
+.type-system body.precision-home #navbar:not([data-reveal-state=active]):not([data-reveal-state=complete]){opacity:0;pointer-events:none}
+.type-system body.precision-home #navbar:not([data-nav-motion=complete]) :is(.nav-icon,.menu-btn){visibility:hidden;pointer-events:none}
+.type-system body.precision-home .type-link[data-type-state=pending]{visibility:hidden;pointer-events:none}
+.precision-home .type-link>.type-ink{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;overflow:visible}
+.precision-home .mg-brand.type-link>.type-ink{left:36px;justify-content:flex-start}
+.precision-home .mg-primary-links .type-link>.type-ink,.precision-home .text-link.type-link>.type-ink{justify-content:flex-start}
+.type-system body.precision-home .type-link:not([data-type-state=complete])>svg,
+.type-system body.precision-home .mg-brand.type-link:not([data-type-state=complete])>img{visibility:hidden}
+.precision-home .type-cursor.vertical{height:.9em}
+.precision-home .type-cursor.vertical:after{width:3px;height:100%;bottom:-.05em;left:.1em;animation:mg-coding-caret .85s steps(1,end) infinite}
+@keyframes mg-coding-caret{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.precision-home .type-cursor.vertical:after{animation:none!important}}
