@@ -58,7 +58,14 @@ for(const name of names){
    assert.ok(layout.heading,'Visible semantic homepage heading');
    assert.equal(layout.bodyBg,'rgb(8, 10, 14)','Homepage design background changed');
    assert.equal(layout.urls.length,3);
+   assert.equal(await page.locator('.hero-actions>a[data-type="button"]').count(),2,
+    'Homepage CTAs should be queued as typed actions');
+   assert.equal(await page.locator('#navbar .mg-brand[data-type="button"]').count(),1,
+    'Header brand should participate in the single typing queue');
    const menu=page.locator('#menuBtn');
+   if(!profile.reduced)await page.waitForFunction(()=>
+    document.querySelector('#navbar')?.dataset.navMotion==='complete',
+    null,{timeout:16000});
    await menu.click();
    assert.equal(await menu.getAttribute('aria-expanded'),'true','Mobile menu does not open');
    await page.keyboard.press('Escape');
