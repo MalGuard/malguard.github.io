@@ -71,10 +71,10 @@
      node.dataset.typeRuns=String(Number(node.dataset.typeRuns||0)+1);
      // Keep visible code-style typing, but never block the queue with long copy.
      const timing=node.dataset.type==='button'
-      ? {per:30,min:210,max:440}
+      ? {per:32,min:250,max:490}
       : node.dataset.type==='title'
-       ? {per:40,min:320,max:900}
-       : {per:21,min:340,max:1350};
+       ? {per:43,min:360,max:990}
+       : {per:23,min:390,max:1450};
      const duration=Math.min(timing.max,Math.max(timing.min,pieces.length*timing.per));
      job={...job,kind:'text',pieces,text,cursor,duration,blink:65};
     }else if(node.hasAttribute('data-count-group')){
