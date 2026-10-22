@@ -37,14 +37,15 @@ for(const name of names){
    assert.equal(response.status(),200,'Homepage failed to load');
    await page.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true');
    await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true');
-   await page.waitForFunction(()=>document.querySelector('.flow-stage')?.dataset.renderer==='vector');
+   await page.waitForFunction(()=>['vector','webgl'].includes(document.querySelector('.flow-stage')?.dataset.renderer));
+   if(!profile.gpu)assert.equal(await page.locator('.flow-stage').getAttribute('data-renderer'),'vector','Disabled WebGL must use vector fallback');
    assert.equal(await page.locator('#products article.product').count(),3,'Three product cards retained');
    assert.deepEqual(await page.locator('#products article.product a.text-link').evaluateAll(nodes=>
     nodes.map(n=>new URL(n.href).pathname)),[
     '/gta-guard.html','/game-scam-guard.html','/threat-radar.html'
    ],'Product destinations unchanged');
    assert.equal(await page.locator('#products canvas').count(),0,'No heavyweight product renderer');
-   assert.equal(await page.locator('.flow-stage canvas').count(),0,'GPU-free vector stages');
+   assert.equal(await page.locator('.flow-stage .flow-poster').count(),1,'SVG fallback must always remain available');
    const layout=await page.evaluate(()=>({
     width:document.documentElement.clientWidth,
     scroll:document.documentElement.scrollWidth,
