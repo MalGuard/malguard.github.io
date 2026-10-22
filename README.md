@@ -12,7 +12,7 @@ The public home of **MalGuard**, an open-source defensive security project for s
 
 Explore the [live website](https://malguard.site/) for product information, documentation, local tools and current release availability.
 
-## Explore the platform
+## GTA VI Security Center\n\nThe [GTA VI Security Center](https://malguard.site/gta6-security.html) summarizes publisher release facts (as of 22 October 2026), attributed fake-download campaigns, a privacy-preserving **local URL-structure warning check**, and relevant original research. The local tool performs **no network requests**, no malicious URL or file scanning, and no guarantee of safety. GTA VI-specific game protection is not validated or advertised. The existing Game Scam Guard is a separate service with distinct scope. The original homepage hero and animations remain unchanged.\n\n## Explore the platform
 
 | Destination | What you will find |
 | :--- | :--- |
