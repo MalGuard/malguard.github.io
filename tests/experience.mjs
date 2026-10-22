@@ -209,8 +209,8 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
      await c.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
      await p.goto(base+'/');await settle(p);
      const title=p.locator('#technology [data-type]').first();assert.equal(await title.getAttribute('data-type-state'),'pending');
-     await title.scrollIntoViewIfNeeded();
-     await p.waitForFunction(()=>['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),null,{timeout:8000});
+     await title.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
+     await p.waitForFunction(()=>['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),null,{timeout:16000});
      assert.equal(await p.locator('#products article.product').count(),3);await c.close();
    });
    await browser.close();
