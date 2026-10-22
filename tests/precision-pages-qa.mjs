@@ -44,16 +44,7 @@ try {
   const title=page.locator('main h2').first();
   assert.ok(await title.count());
   assert.equal(await title.getAttribute('data-type-state'),'pending','Offscreen content typed before scroll');
-  await title.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(600);
-  console.log('TYPE DIAGNOSTIC',route,await page.evaluate(()=>({
-   hidden:document.hidden,ready:document.documentElement.dataset.precisionTypeReady,
-   enabled:document.documentElement.classList.contains('type-system'),
-   first:[...document.querySelectorAll('main [data-type]')].slice(0,6).map(n=>({
-    tag:n.tagName,state:n.dataset.typeState,runs:n.dataset.typeRuns||'0',
-    rect:(()=>{const r=n.getBoundingClientRect();return [Math.round(r.top),Math.round(r.bottom),Math.round(r.height)]})()
-   }))
-  })));
+  await title.evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
   await page.waitForFunction(()=>[...document.querySelectorAll('main h2')].some(n=>Number(n.dataset.typeRuns)>0),null,{timeout:12000});
   const concurrent=await page.locator('main [data-type-state=typing]').count();
   assert.ok(concurrent<=1,'Typewriter must have a single active job');
