@@ -21,7 +21,7 @@ try {
       bg:getComputedStyle(body).backgroundColor,
       heading:h?getComputedStyle(h).fontFamily:'',
       overflow:doc.scrollWidth>doc.clientWidth+1,
-      typed:document.querySelectorAll('.mg-precision-type-target').length,
+      typed:document.querySelectorAll('main .type-ink').length,
       primary:document.querySelector('main .btn.primary,main .button.primary'),
     };
    });
@@ -40,13 +40,13 @@ try {
  const page=await c.newPage();
  for(const route of ['/products.html','/docs.html','/research/gta-mod-security-fa.html']){
   await page.goto(base+route);
-  await page.waitForFunction(()=>document.querySelectorAll('.mg-precision-type-target').length>1,null,{timeout:6000});
+  await page.waitForFunction(()=>document.querySelectorAll('main [data-type]').length>1,null,{timeout:6000});
   const title=page.locator('main h2').first();
   assert.ok(await title.count());
-  assert.equal(await title.getAttribute('data-mg-typed'),'','Offscreen content typed before scroll');
+  assert.equal(await title.getAttribute('data-type-state'),'pending','Offscreen content typed before scroll');
   await title.scrollIntoViewIfNeeded();
-  await page.waitForFunction(()=>[...document.querySelectorAll('main h2')].some(n=>n.hasAttribute('data-mg-typed')&&n.dataset.mgTyped?.length>0),null,{timeout:5000});
-  const concurrent=await page.locator('.mg-precision-type-target[data-mg-typing-active]').count();
+  await page.waitForFunction(()=>[...document.querySelectorAll('main h2 .type-ink')].some(n=>n.textContent.length>0),null,{timeout:5000});
+  const concurrent=await page.locator('main [data-type-state=typing]').count();
   assert.ok(concurrent<=1,'Typewriter must have a single active job');
   console.log('PASS',route,'scroll-triggered sequential typing');
  }
