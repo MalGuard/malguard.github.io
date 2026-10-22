@@ -77,6 +77,10 @@
       "surface": "approved Fusion"
     },
     {
+      "path": "gta6-security.html",
+      "surface": "Public game-scam education and local-only URL structure warning checks"
+    },
+    {
       "path": "index.html",
       "baselineSHA256": "934a8d0145ace7ff47e1ce2160a903ed9fe3e05a28fedbcccd5e8a532f1acfc7",
       "preparedSHA256": "82e5190648dfc8286d77c9c8a80c7dea77c5ec1a174819a9182a97bce349b373",
@@ -237,7 +241,7 @@
       "surface": "preserved content and functional controls"
     }
   ],
-  "publicRouteCount": 46,
+  "publicRouteCount": 47,
   "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
   "functionalRuntimePreserved": [
     "assets/public-release.mjs",
