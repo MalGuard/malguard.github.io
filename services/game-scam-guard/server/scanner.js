@@ -8,6 +8,8 @@ import { reportTokens } from './report-token.js';
 import {inspectionLayers} from './inspection-layers.js';
 import { inspectSite } from './site-analysis.js';
 import { assessPage } from './page-assessment.js';
+import {brandIdentitySignals} from '../shared/brand-identity.js';
+import {analyzeEmbeddedDocuments} from './secondary-analysis.js';
 import {analyzeWebsite} from './deep-analysis.js';
 import {inspectRedirectReputation} from './redirect-intel.js';
 const riskyTerms = /crack|keygen|cheat|unlimited\s*(coins|gems)|free\s*(coins|gems)|کرک|چیت|سکه\s*نامحدود|جم\s*رایگان/i;
@@ -52,6 +54,15 @@ export function parsePage(bytes, baseUrl, headers = {}) {
   const $ = load(bytes.toString('utf8'));
   const independent = inspectSite($, baseUrl);
   const analysisEngine=analyzeWebsite($,baseUrl,independent.signals);
+ const secondary=analyzeEmbeddedDocuments($,baseUrl);
+ analysisEngine.signals.push(...secondary.signals);
+ for(const module of analysisEngine.modules){
+  const findings=analysisEngine.signals.filter(item=>item.module===module.id);
+  module.findings=findings.length;
+  if(findings.some(item=>['warning','danger'].includes(item.level)))module.status='finding';
+  if(secondary.summary.omittedDocuments&&!['url-identity','brand-domain'].includes(module.id)){module.coverage='limited';if(module.status!=='finding')module.status='incomplete';}
+ }
+ analysisEngine.secondaryPass=secondary.summary;
   const clean = v => v.replace(/\s+/g, ' ').trim().slice(0, 240);
   const title = clean($('title').first().text()) || 'بدون عنوان';
   const description = clean($('meta[name="description"]').attr('content') || '');
@@ -67,7 +78,7 @@ export function parsePage(bytes, baseUrl, headers = {}) {
   if ($('input[type="password"]').length) signals.push({ level: 'info', title: 'فرم ورود شناسایی شد', detail: 'فرم درخواست رمز در صفحه وجود دارد. هویت رسمی سایت باید جداگانه تأیید شود.' });
   signals.push(...analysisEngine.signals);
   if (independent.linkInventory.omitted) signals.push({level:'info',title:'فهرست لینک‌ها کامل نگهداری نشده',detail:`${independent.linkInventory.total} لینک در HTML دیده شد؛ ${independent.linkInventory.omitted} ردیف به علت سقف اندازه یا تعداد در فهرست جزئیات نگهداری نشده است. مقصد لینک‌ها جداگانه باز نشده‌اند.`});
-  return { title, description, headings, excerpt: pageText, files: files.slice(0, 128), fileCount: files.length, linkCount: $('a[href]').length, signals, analysisEngine:{version:analysisEngine.version,modules:analysisEngine.modules,limits:analysisEngine.limits},contentType: headers['content-type'] || 'نامشخص',siteAnalysis:{...independent.siteAnalysis,htmlSha256:createHash('sha256').update(bytes).digest('hex'),receivedBytes:bytes.length},linkInventory:independent.linkInventory };
+  return { title, description, headings, excerpt: pageText, files: files.slice(0, 128), fileCount: files.length, linkCount: $('a[href]').length, signals, analysisEngine:{version:analysisEngine.version,modules:analysisEngine.modules,limits:analysisEngine.limits,secondaryPass:analysisEngine.secondaryPass},contentType: headers['content-type'] || 'نامشخص',siteAnalysis:{...independent.siteAnalysis,htmlSha256:createHash('sha256').update(bytes).digest('hex'),receivedBytes:bytes.length},linkInventory:independent.linkInventory };
 }
 
 export async function scanSite(input,{transport=fetchPublic,lookup=lookupReputation,preview=renderPreview,validate=resolvePublic,pageOptions={},allowThreatContent=false,allowCloudPreview=false,onEvent=()=>{}}={}) {
@@ -91,14 +102,14 @@ export async function scanSite(input,{transport=fetchPublic,lookup=lookupReputat
   if(pageOutcome.error) {
     const listed=intel.status==='listed';
     const failure=listed&&!allowThreatContent?{reason:'threat_blocked',detail:'گزارش تهدید دریافت شد؛ دریافت محتوای سایت متوقف شد.'}:pageFailure(pageOutcome.error);
-    return rememberSite({id:randomUUID(),url:requested.href,finalUrl:requested.href,domain:requested.hostname,createdAt:new Date().toISOString(),status:listed?'danger':'unavailable',title:'محتوای صفحه دریافت نشد',description:'گزارش حاضر بر پایهٔ بررسی آدرس و پاسخ پایگاه تهدید است؛ داخل سایت مشاهده نشده است.',headings:[],excerpt:'',contentType:'نامشخص',files:[],fileCount:0,linkCount:0,signals:[{level:listed?'danger':'warning',title:listed?'لینک در پایگاه تهدید گزارش شده':'بررسی محتوای سایت کامل نشد',detail:listed?intel.message:failure.detail}],redirects:[],reputation:intel,finalReputation:intel,advanced:false,inputAdjusted,pageFetch:{status:'unavailable',...failure,attempts:pageOutcome.error.attempts||0},preview:{status:'skipped',detail:'بدون دریافت صفحه، پیش‌نمایش ساخته نمی‌شود.'},checks:[{title:'دریافت محتوای سایت',status:'unavailable',detail:failure.detail},{title:'استعلام منابع تهدید',status:['listed','not_found'].includes(intel.status)?'done':'unavailable',detail:intel.message}],limitations:['محتوای سایت، عنوان آن و لینک‌های عمومی قابل مشاهده نبودند؛ تعداد صفحه‌های پیوندشده نامشخص است.','عدم وجود گزارش در پایگاه تهدید به معنی امن بودن نیست.','بررسی پیشرفته تا دریافت محتوای سایت ممکن نیست.']});
+    return rememberSite({id:randomUUID(),url:requested.href,finalUrl:requested.href,domain:requested.hostname,createdAt:new Date().toISOString(),status:listed?'danger':'unavailable',title:'محتوای صفحه دریافت نشد',description:'گزارش حاضر بر پایهٔ بررسی آدرس و پاسخ پایگاه تهدید است؛ داخل سایت مشاهده نشده است.',headings:[],excerpt:'',contentType:'نامشخص',files:[],fileCount:0,linkCount:0,signals:[...brandIdentitySignals(requested.href),{level:listed?'danger':'warning',title:listed?'لینک در پایگاه تهدید گزارش شده':'بررسی محتوای سایت کامل نشد',detail:listed?intel.message:failure.detail}],redirects:[],reputation:intel,finalReputation:intel,advanced:false,inputAdjusted,pageFetch:{status:'unavailable',...failure,attempts:pageOutcome.error.attempts||0},preview:{status:'skipped',detail:'بدون دریافت صفحه، پیش‌نمایش ساخته نمی‌شود.'},checks:[{title:'دریافت محتوای سایت',status:'unavailable',detail:failure.detail},{title:'استعلام منابع تهدید',status:['listed','not_found'].includes(intel.status)?'done':'unavailable',detail:intel.message}],limitations:['محتوای سایت، عنوان آن و لینک‌های عمومی قابل مشاهده نبودند؛ تعداد صفحه‌های پیوندشده نامشخص است.','عدم وجود گزارش در پایگاه تهدید به معنی امن بودن نیست.','بررسی پیشرفته تا دریافت محتوای سایت ممکن نیست.']});
   }
   const page=pageOutcome.value;
   onEvent({phase:'page_received',message:'Public page received; inspecting its visible HTML'});
   const mime = String(page.headers['content-type'] || '').toLowerCase();
   let evidence;
   const isHtml = mime.includes('html') || (!mime && /^\s*<!doctype html|^\s*<html/i.test(page.bytes.toString('utf8',0,100)));
-  if (isHtml) evidence = parsePage(page.bytes, page.url, page.headers);
+  if (isHtml) {onEvent({phase:'secondary_analysis',message:'Running 20 HTML checks and a bounded second pass over embedded documents'});evidence = parsePage(page.bytes, page.url, page.headers);}
   else {
     evidence = { title: 'Direct file link', description: 'This address leads to a file or non-HTML content. GameScam Guard does not retrieve, hash, analyze, or execute files; use GTA Guard for file analysis.', headings: [], excerpt: '', fileCount: 0, linkCount: 0, signals: [{level:'info',title:'File analysis is handled by GTA Guard',detail:'Only the response headers were observed. The file was not downloaded, hashed, analyzed, or executed.'}], contentType: mime, files: [], fileScanExcluded:true, statusOverride:'unavailable' };
   }

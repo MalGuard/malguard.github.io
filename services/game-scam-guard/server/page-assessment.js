@@ -1,9 +1,13 @@
 // Use the same evidence policy for the submitted page and every linked page.
 // Provider failures are coverage gaps; neither missing data nor an absent report
 // establishes safety. Signals describe observed evidence, never brand trust.
+import {brandIdentitySignals} from '../shared/brand-identity.js';
 import {reportReputations} from './redirect-intel.js';
 export function assessPage({signals = [], redirects = [], reputation, finalReputation, urlReputations, statusOverride,analysisEngine}) {
   const findings = [...signals];
+  for(const url of new Set((redirects||[]).flatMap(item=>[item.from,item.to]))){
+    for(const finding of brandIdentitySignals(url))if(!findings.some(item=>item.rule===finding.rule&&item.evidence?.[0]===finding.evidence[0]))findings.push(finding);
+  }
   const intel=reportReputations({reputation,finalReputation,urlReputations});
   if (intel.some(item=>item.status==='listed')) {
     findings.unshift({level:'danger',rule:'urlhaus_report',title:'لینک در پایگاه تهدید گزارش شده',detail:'برای یک نشانی در مسیر انتقال، منبع اطلاعات تهدید گزارش دارد. از دانلود و پرداخت خودداری کنید.'});

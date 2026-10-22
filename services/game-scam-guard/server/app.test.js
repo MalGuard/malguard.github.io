@@ -134,6 +134,6 @@ test('mounted APIs retain separate scan and continuation limits without bypassin
 
 test('self-test runs inert fixtures, returns bounded diagnostics and discloses no production credentials',async()=>{
  const server=createApp().listen(0,'127.0.0.1');await once(server,'listening');
- try{const response=await fetch(`http://127.0.0.1:${server.address().port}/api/self-test`);assert.equal(response.status,200);assert.equal(response.headers.get('cache-control'),'no-store');const result=await response.json();assert.equal(result.scope,'synthetic-offline');assert.equal(result.summary.failed,0);assert.equal(result.summary.total,38);assert.ok(JSON.stringify(result).length<12000);assert.ok(!JSON.stringify(result).includes('self-test-fixture-only'));}
+ try{const response=await fetch(`http://127.0.0.1:${server.address().port}/api/self-test`);assert.equal(response.status,200);assert.equal(response.headers.get('cache-control'),'no-store');const result=await response.json();assert.equal(result.scope,'synthetic-offline');assert.equal(result.summary.failed,0);assert.equal(result.summary.total,42);assert.ok(JSON.stringify(result).length<12000);assert.ok(!JSON.stringify(result).includes('self-test-fixture-only'));}
  finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 });
