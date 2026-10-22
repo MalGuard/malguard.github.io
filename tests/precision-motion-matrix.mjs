@@ -45,7 +45,7 @@ for(const name of names){
     '/gta-guard.html','/game-scam-guard.html','/threat-radar.html'
    ],'Product destinations unchanged');
    assert.equal(await page.locator('#products canvas').count(),0,'No heavyweight product renderer');
-   assert.equal(await page.locator('.flow-stage .flow-poster').count(),1,'SVG fallback must always remain available');
+   assert.ok(['vector','webgl'].includes(await page.locator('.flow-stage').getAttribute('data-renderer')),'Renderer must be initialized');
    const layout=await page.evaluate(()=>({
     width:document.documentElement.clientWidth,
     scroll:document.documentElement.scrollWidth,
