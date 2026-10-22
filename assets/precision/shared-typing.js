@@ -4,7 +4,7 @@
  const root=document.documentElement,body=document.body;
  if(!body?.classList.contains('mg-precision-shared'))return;
  const reduce=matchMedia('(prefers-reduced-motion: reduce)');
- const isLowPower=()=>reduce.matches||navigator.connection?.saveData||(navigator.hardwareConcurrency>0&&navigator.hardwareConcurrency<=2);
+ const isLowPower=()=>reduce.matches||navigator.connection?.saveData;
  if(!('IntersectionObserver' in window)||isLowPower())return;
  const selector='main h1,main h2,main h3,main p';
  const skip='form,nav,footer,[aria-live],.result,.results,.verdict,.scan-result,.scanner-result,.terminal,.code-block,pre,code,.status,.badge,.actions,.mg-app-shell,.mg-interactive,.mg-security-simulator,[contenteditable],details:not([open])';
