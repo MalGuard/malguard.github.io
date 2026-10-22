@@ -57,7 +57,9 @@
  },{rootMargin:'0px 0px -6% 0px',threshold:[0,.14,.35,1]});
  nodes.forEach(el=>observer.observe(el));
  reduce.addEventListener?.('change',event=>{if(event.matches)flush()});
- const langWatch=new MutationObserver(flush);langWatch.observe(root,{attributes:true,attributeFilter:['lang','dir']});
+ const langAtStart=root.lang,dirAtStart=root.dir;
+ const langWatch=new MutationObserver(()=>{if(root.lang!==langAtStart||root.dir!==dirAtStart)flush();});
+ langWatch.observe(root,{attributes:true,attributeFilter:['lang','dir']});
  window.addEventListener('pagehide',flush,{once:true});
  document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else next()});
  // Restore copy if the animation controller stalls; never leave important text invisible.
