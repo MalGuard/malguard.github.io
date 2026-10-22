@@ -74,6 +74,8 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
           python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
+          TEST_BROWSER=chromium node tests/opaque-menu-static-gta.mjs
+          TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/opaque-menu-static-gta.mjs
           TEST_BROWSER=chromium node tests/precision-motion-matrix.mjs
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/precision-motion-matrix.mjs
           TEST_BROWSER=chromium node tests/precision-shared-typing.mjs
@@ -82,8 +84,6 @@ jobs:
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/gta6-shared-experience.mjs
           TEST_BROWSER=chromium node tests/product-card-hero-backdrops.mjs
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/product-card-hero-backdrops.mjs
-          TEST_BROWSER=chromium node tests/opaque-menu-static-gta.mjs
-          TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/opaque-menu-static-gta.mjs
 
   cinematic:
     needs: responsive-and-functional
