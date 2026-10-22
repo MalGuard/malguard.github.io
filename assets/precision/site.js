@@ -47,7 +47,7 @@
     const nav=document.getElementById('navbar');
     if(nav){
      nav.dataset.reveal='nav';nav.dataset.revealState='pending';nav.dataset.navMotion='pending';
-     nav.querySelectorAll('.mg-brand,.mg-primary-links a,.nav-download').forEach(markLink);
+     nav.querySelectorAll('.mg-brand,.mg-primary-links a,.nav-download').forEach(link=>{if(link.getClientRects().length)markLink(link);});
     }
     document.querySelectorAll('.hero-actions>a.button,#products a.text-link,#technology a.text-link,.home-tools a.text-link').forEach(markLink);
    }
@@ -118,6 +118,8 @@
     viewportSyncQueued=false;
     for(const n of nodes){
      if(done.has(n))continue;
+     // Hidden desktop-only links must never hold the mobile header hostage.
+     if(n.closest('#navbar')&&!n.getClientRects().length){complete(n);continue;}
      const r=n.getBoundingClientRect();
      if(r.height>0&&r.bottom>0&&r.top<innerHeight*.94){
       visible.add(n);pending.add(n);
