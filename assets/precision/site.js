@@ -25,7 +25,7 @@
    const shared=document.body.classList.contains('mg-precision-shared');
    if(shared){
     // Public editorial text only, never forms, live verdicts or interactive results.
-    const excluded='form,nav,footer,[aria-live],[role="status"],[role="alert"],.result,.verdict,.scan-result,.status,.badge,.counter,.actions,pre,code,[contenteditable],details:not([open]),.site-search'+(document.body.classList.contains('gta-static')?'':',.gta-stage');
+    const excluded='form,nav,footer,[aria-live],[role="status"],[role="alert"],.result,.verdict,.scan-result,.status,.badge,.counter,.actions,pre,code,[contenteditable],details:not([open]),.site-search,.scam-model-composition'+(document.body.classList.contains('gta-static')?'':',.gta-stage');
     for(const el of document.querySelectorAll('main h1,main h2,main h3,main h4,main p,main .eyebrow,main .kicker,main .gta6-type-line')){
      if(el.closest(excluded)||el.isContentEditable||el.children.length||el.hasAttribute('data-type'))continue;
      const value=el.textContent.trim();
