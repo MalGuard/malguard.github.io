@@ -16,7 +16,6 @@
   observer?.unobserve(node);
  };
  const finish=()=>{stopped=true;clearTimeout(timer);observer?.disconnect();active=null;pending.clear();nodes.forEach(complete);root.classList.remove('type-system');};
- window.addEventListener('error',finish,{once:true});window.addEventListener('unhandledrejection',finish,{once:true});
  motion.addEventListener('change',e=>{if(e.matches)finish();});
  if(eligible){root.classList.add('type-system');}
  function init(){
@@ -84,3 +83,6 @@
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
+
+/* Keep the small-screen menu usable without disturbing viewport typing. */
+document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;const details=document.querySelector('.precision-nav-mobile[open]');if(details){details.open=false;details.querySelector('summary')?.focus();}});
