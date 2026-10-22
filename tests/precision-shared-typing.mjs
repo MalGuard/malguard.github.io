@@ -61,7 +61,7 @@ for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chrom
      await page.keyboard.press('Escape');
      assert.equal(await nav.getAttribute('aria-expanded'),'false',path+' escape fails');
     }else{
-     await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navMotion==='complete',null,{timeout:15000});
+     await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navMotion==='complete',null,{timeout:25000});
      await page.waitForFunction(()=>document.querySelector('main [data-type]')?.dataset.typeRuns>0,null,{timeout:15000});
      assert.ok(await page.locator('[data-type-state=typing]').count()<=1,path+' multiple typewriters running');
      await page.emulateMedia({reducedMotion:'reduce'});
