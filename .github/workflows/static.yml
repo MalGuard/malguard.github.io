@@ -32,6 +32,8 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           npm run build:game-scam-guard
           python3 tests/validate-site.py
+          node --check assets/precision/site.js
+          test -f assets/precision/shared-pages.css
           rm -rf _site
           mkdir -p _site/.well-known
 
