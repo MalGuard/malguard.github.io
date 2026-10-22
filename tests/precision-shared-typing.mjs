@@ -26,7 +26,7 @@ for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chrom
      navFont:getComputedStyle(document.querySelector('#navbar .mg-brand')).fontFamily,
      scroll:document.documentElement.scrollWidth,width:document.documentElement.clientWidth,
      ctas:document.querySelectorAll('main a[data-type="button"]').length,
-     script:[...document.scripts].some(s=>s.src.includes('site.js?v=unified-coding-20261022')||s.src.includes('site.js?v=gta-static-typing-20261022'))
+     script:[...document.scripts].some(s=>s.src.includes('site.js?v=slightly-faster-typing-20261022'))
     }));
     // Hamburger menu must not inherit the obsolete teal/green experience theme.
     const palette=await page.evaluate(()=>{
