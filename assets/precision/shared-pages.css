@@ -1,7 +1,7 @@
 /* MalGuard Precision system for public editorial pages. Keep the original shared navbar. */
 @font-face{font-family:MGPrecisionSora;src:url('/assets/fusion/assets/font-8.ttf') format('truetype');font-weight:600;font-display:swap}
 @font-face{font-family:MGPrecisionMono;src:url('/assets/fusion/assets/font-3.ttf') format('truetype');font-weight:400;font-display:swap}
-body.mg-precision-shared{
+body.mg-precision-shared,body.mg-unified.mg-precision-shared,body.mg-unified.mg-content-page.mg-precision-shared{
  --mg-bg:#080a0e;--mg-surface:#10141b;--mg-text:#f4f5f7;--mg-muted:#aeb4bd;--mg-line:#343942;--mg-accent:#b8c9df;
  --bg:#080a0e;--panel:#10141b;--panel2:#121923;--surface:#10141b;--text:#f4f5f7;--muted:#aeb4bd;--line:#343942;
  --blue:#b8c9df;--blue2:#d1ddeb;--cyan:#b8c9df;--radius:10px;
