@@ -20,6 +20,17 @@
  if(eligible){root.classList.add('type-system');}
  function init(){
   try{
+   if(document.body.classList.contains('mg-precision-shared')){
+    const excluded='form,nav,footer,[aria-live],.result,.verdict,.scan-result,pre,code,.status,.badge,.actions,[contenteditable],details:not([open])';
+    for(const el of document.querySelectorAll('main h1,main h2,main h3,main p')){
+     if(el.closest(excluded)||el.isContentEditable||el.children.length||el.hasAttribute('data-type'))continue;
+     const value=el.textContent.trim();
+     if(value.length<5||value.length>310||!el.getClientRects().length)continue;
+     el.classList.add('type');el.dataset.type=el.matches('h1,h2,h3')?'title':'body';el.dataset.typeState='pending';
+     const source=document.createElement('span');source.className='type-source';
+     while(el.firstChild)source.append(el.firstChild);el.append(source);
+    }
+   }
    nodes=[...document.querySelectorAll('[data-type],[data-reveal],[data-count-group]')];root.dataset.precisionTypeReady='true';
    if(!eligible||stopped){finish();return;}
    const segmenter=Intl.Segmenter?new Intl.Segmenter('en',{granularity:'grapheme'}):null;
