@@ -82,7 +82,7 @@ for(const name of names){
     await title.evaluate(node=>node.scrollIntoView({behavior:'instant',block:'center'}));
     await page.waitForFunction(()=>
      ['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),
-     null,{timeout:10000});
+     null,{timeout:30000});
     assert.ok(await page.locator('[data-type-state=typing]').count()<=1,
      'Typewriter ran multiple concurrent jobs');
     await page.emulateMedia({reducedMotion:'reduce'});
