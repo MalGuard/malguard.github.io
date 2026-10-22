@@ -258,3 +258,9 @@ body.mg-precision-shared .type-cursor.vertical:after{
 @media(prefers-reduced-motion:reduce){
  body.mg-precision-shared .type-cursor.vertical:after{animation:none!important}
 }
+
+/* Keep expanded taskbar links and functional form actions in the same mono family. */
+body.mg-precision-shared #navbar :is(.nav-links a,.nav-links button,.mg-menu-label),
+body.mg-precision-shared main :is(button,input,textarea,select,label){
+ font-family:MGPrecisionMono,JetBrains,ui-monospace,Consolas,monospace!important;
+}
