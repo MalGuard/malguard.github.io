@@ -166,8 +166,8 @@ body.mg-precision-shared .product-stack>.compare{grid-column:1/-1!important}
 body.mg-unified.mg-precision-shared,body.mg-unified.mg-content-page.mg-precision-shared{
  --precision-bg:#080a0e;--precision-surface:#11161d;--precision-text:#f5f5f5;
  --precision-muted:#a1a1aa;--precision-line:#3a414c;
- --precision-heading:Sora,MGPrecisionSora,Arial,sans-serif;
- --precision-code:JetBrains,MGPrecisionMono,ui-monospace,monospace;
+ --precision-heading:MGPrecisionSora,Sora,Arial,sans-serif;
+ --precision-code:MGPrecisionMono,JetBrains,ui-monospace,monospace;
  background:var(--precision-bg)!important;color:var(--precision-text)!important
 }
 body.mg-precision-shared main :is(h1,h2,h3,h4){
