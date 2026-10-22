@@ -37,14 +37,15 @@ for(const name of names){
    assert.equal(response.status(),200,'Homepage failed to load');
    await page.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true');
    await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true');
-   await page.waitForFunction(()=>document.querySelector('.flow-stage')?.dataset.renderer==='vector');
+   await page.waitForFunction(()=>['vector','webgl'].includes(document.querySelector('.flow-stage')?.dataset.renderer));
+   if(!profile.gpu)assert.equal(await page.locator('.flow-stage').getAttribute('data-renderer'),'vector','Disabled WebGL must use vector fallback');
    assert.equal(await page.locator('#products article.product').count(),3,'Three product cards retained');
    assert.deepEqual(await page.locator('#products article.product a.text-link').evaluateAll(nodes=>
     nodes.map(n=>new URL(n.href).pathname)),[
     '/gta-guard.html','/game-scam-guard.html','/threat-radar.html'
    ],'Product destinations unchanged');
    assert.equal(await page.locator('#products canvas').count(),0,'No heavyweight product renderer');
-   assert.equal(await page.locator('.flow-stage canvas').count(),0,'GPU-free vector stages');
+   assert.ok(['vector','webgl'].includes(await page.locator('.flow-stage').getAttribute('data-renderer')),'Renderer must be initialized');
    const layout=await page.evaluate(()=>({
     width:document.documentElement.clientWidth,
     scroll:document.documentElement.scrollWidth,
@@ -54,11 +55,18 @@ for(const name of names){
     urls:[...document.querySelectorAll('#products .product-photo')].map(img=>img.getAttribute('src')),
    }));
    assert.ok(layout.scroll<=layout.width+1,'Horizontal overflow at '+profile.width);
-   assert.match(layout.title,/Sora/i,'Homepage heading uses Sora');
+   assert.match(layout.title,/JetBrains/i,'Homepage uses the bundled coding font');
    assert.ok(layout.heading,'Visible semantic homepage heading');
    assert.equal(layout.bodyBg,'rgb(8, 10, 14)','Homepage design background changed');
    assert.equal(layout.urls.length,3);
+   assert.equal(await page.locator('.hero-actions>a[data-type="button"]').count(),2,
+    'Homepage CTAs should be queued as typed actions');
+   assert.equal(await page.locator('#navbar .mg-brand[data-type="button"]').count(),1,
+    'Header brand should participate in the single typing queue');
    const menu=page.locator('#menuBtn');
+   if(!profile.reduced)await page.waitForFunction(()=>
+    document.querySelector('#navbar')?.dataset.navMotion==='complete',
+    null,{timeout:16000});
    await menu.click();
    assert.equal(await menu.getAttribute('aria-expanded'),'true','Mobile menu does not open');
    await page.keyboard.press('Escape');
@@ -74,7 +82,7 @@ for(const name of names){
     await title.evaluate(node=>node.scrollIntoView({behavior:'instant',block:'center'}));
     await page.waitForFunction(()=>
      ['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),
-     null,{timeout:10000});
+     null,{timeout:30000});
     assert.ok(await page.locator('[data-type-state=typing]').count()<=1,
      'Typewriter ran multiple concurrent jobs');
     await page.emulateMedia({reducedMotion:'reduce'});

@@ -14,6 +14,8 @@
    node.dataset.countState='complete';node.querySelectorAll('.counter').forEach(n=>{n.dataset.countState='complete';n.querySelector('.count-ink')?.remove();});
   }
   observer?.unobserve(node);
+  const nav=node.closest('#navbar');
+  if(nav&&[...nav.querySelectorAll('[data-type]')].every(n=>done.has(n)))nav.dataset.navMotion='complete';
  };
  const finish=()=>{stopped=true;clearTimeout(timer);observer?.disconnect();active=null;pending.clear();nodes.forEach(complete);root.classList.remove('type-system');};
  motion.addEventListener('change',e=>{if(e.matches)finish();});
@@ -31,6 +33,24 @@
      while(el.firstChild)source.append(el.firstChild);el.append(source);
     }
    }
+   // The navigation and every CTA join the SAME queue as headings and paragraphs.
+   // Keep original anchor text and destinations in the DOM for accessibility and SEO.
+   if(document.body.classList.contains('precision-home')){
+    const markLink=link=>{
+     if(link.querySelector(':scope > .type-source'))return;
+     const textNodes=[...link.childNodes].filter(n=>n.nodeType===3&&n.textContent.trim());
+     if(!textNodes.length)return;
+     const source=document.createElement('span');source.className='type-source';
+     textNodes[0].before(source);textNodes.forEach(n=>source.append(n));
+     link.classList.add('type','type-link');link.dataset.type='button';link.dataset.typeState='pending';
+    };
+    const nav=document.getElementById('navbar');
+    if(nav){
+     nav.dataset.reveal='nav';nav.dataset.revealState='pending';nav.dataset.navMotion='pending';
+     nav.querySelectorAll('.mg-brand,.mg-primary-links a,.nav-download').forEach(link=>{if(link.getClientRects().length)markLink(link);});
+    }
+    document.querySelectorAll('.hero-actions>a.button,#products a.text-link,#technology a.text-link,.home-tools a.text-link').forEach(markLink);
+   }
    nodes=[...document.querySelectorAll('[data-type],[data-reveal],[data-count-group]')].filter(n=>!n.hasAttribute('data-type')||!!n.querySelector(':scope > .type-source'));root.dataset.precisionTypeReady='true';
    if(!eligible||stopped){finish();return;}
    const segmenter=Intl.Segmenter?new Intl.Segmenter('en',{granularity:'grapheme'}):null;
@@ -47,9 +67,9 @@
      const source=node.querySelector('.type-source').textContent;
      const pieces=segmenter?[...segmenter.segment(source)].map(p=>p.segment):Array.from(source);
      const ink=document.createElement('span');ink.className='type-ink';ink.setAttribute('aria-hidden','true');
-     const text=document.createTextNode(''),cursor=document.createElement('span');cursor.className='type-cursor '+(node.dataset.type==='title'?'vertical':'underscore');ink.append(text,cursor);node.append(ink);
+     const text=document.createTextNode(''),cursor=document.createElement('span');cursor.className='type-cursor vertical';ink.append(text,cursor);node.append(ink);
      node.dataset.typeRuns=String(Number(node.dataset.typeRuns||0)+1);
-     job={...job,kind:'text',pieces,text,cursor,duration:Math.min(node.dataset.type==='title'?560:760,Math.max(240,pieces.length*14)),blink:100};
+     job={...job,kind:'text',pieces,text,cursor,duration:Math.max(240,pieces.length*(node.dataset.type==='button'?70:node.dataset.type==='title'?85:50)),blink:140};
     }else if(node.hasAttribute('data-count-group')){
      const counters=[...node.querySelectorAll('.counter')].map(n=>{const ink=document.createElement('span');ink.className='count-ink';ink.setAttribute('aria-hidden','true');ink.textContent='0';n.append(ink);n.dataset.countRuns=String(Number(n.dataset.countRuns||0)+1);return {n,ink,value:Number(n.dataset.count)};});
      node.dataset.countRuns=String(Number(node.dataset.countRuns||0)+1);
@@ -84,7 +104,7 @@
      job.counters.forEach(({ink,value})=>ink.textContent=formatter.format(prefix<4?Math.min(prefix,value):Math.min(value,Math.max(Math.min(4,value),Math.round(value*ease)))));
      if(p===1){node.dataset.countElapsed=String(Math.round(elapsed));complete(node);active=null;advance();return;}
     }else if(p===1){complete(node);active=null;advance();return;}
-    timer=setTimeout(tick,24);
+    timer=setTimeout(tick,32);
    };
    observer=new IntersectionObserver(entries=>{
     for(const entry of entries){const n=entry.target;if(entry.isIntersecting&&entry.intersectionRatio>=.18){visible.add(n);pending.add(n);}else{visible.delete(n);if(active?.node===n)stopJob();}}
@@ -98,6 +118,8 @@
     viewportSyncQueued=false;
     for(const n of nodes){
      if(done.has(n))continue;
+     // Hidden desktop-only links must never hold the mobile header hostage.
+     if(n.closest('#navbar')&&!n.getClientRects().length){complete(n);continue;}
      const r=n.getBoundingClientRect();
      if(r.height>0&&r.bottom>0&&r.top<innerHeight*.94){
       visible.add(n);pending.add(n);

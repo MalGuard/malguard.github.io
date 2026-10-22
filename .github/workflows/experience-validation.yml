@@ -59,6 +59,24 @@ jobs:
           path: test-results/
           if-no-files-found: warn
           retention-days: 14
+  # Independent of the public download tests: a failure there must not hide
+  # homepage typewriter and responsive-navigation regressions.
+  coding-typing-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Verify viewport typing, menus and reduced-motion fallback
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
+          python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
+          TEST_BROWSER=chromium node tests/precision-motion-matrix.mjs
+          TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/precision-motion-matrix.mjs
+
   cinematic:
     needs: responsive-and-functional
     runs-on: ubuntu-latest
