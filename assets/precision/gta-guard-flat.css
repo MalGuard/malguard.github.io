@@ -77,3 +77,7 @@ body.gta-static .hero-art,body.gta-static #gta-scene{display:none!important}
  }
  body.gta-static #scanner{padding-top:55px!important}
 }
+
+/* Without the old scroll portal, the formerly sticky warning must stay in normal
+   flow so it cannot cover the evidence-demo submit button on desktop. */
+body.gta-static .scanner-app .demo-warning{position:static!important;top:auto!important;z-index:auto!important}
