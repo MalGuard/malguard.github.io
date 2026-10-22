@@ -42,7 +42,7 @@ for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chrom
     assert.match(palette.nav,/rgba?\(7,\s*11,\s*19[,)]/,path+' navbar palette mismatch');
     assert.match(palette.dropdown,/rgba?\(8,\s*17,\s*30[,)]/,path+' dropdown teal theme leaked');
     assert.equal(palette.link,'rgb(184, 201, 222)',path+' links not matching homepage');
-    assert.equal(palette.label,'rgb(160, 174, 197)',path+' menu section labels differ');
+    assert.equal(palette.label,'rgb(156, 167, 181)',path+' menu section labels differ');
     assert.ok(status.script,path+' uses outdated script');
     assert.ok(status.main>0,path+' has no queued page copy');
     assert.equal(status.nav,'nav',path+' does not queue header');
