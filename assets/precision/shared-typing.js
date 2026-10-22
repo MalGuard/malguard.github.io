@@ -16,17 +16,17 @@
    return r.width>0&&r.height>0&&Math.min(r.bottom,innerHeight*.94)-Math.max(0,r.top)>=Math.min(height*.14,innerHeight*.19);
  };
  const cleanup=el=>{if(!el)return;el.classList.remove('mg-precision-type-target');el.classList.add('mg-precision-type-complete');
-   el.removeAttribute('data-mg-typed');el.style.removeProperty('--mg-precision-ink');queue.delete(el);revealed.add(el);observer?.unobserve(el);
+   el.removeAttribute('data-mg-typed');el.removeAttribute('data-mg-typing-active');el.style.removeProperty('--mg-precision-ink');queue.delete(el);revealed.add(el);observer?.unobserve(el);
  };
  const revealAll=()=>{stopped=true;clearTimeout(timer);observer?.disconnect();active=null;nodes.forEach(cleanup);};
- const pause=()=>{if(!active)return;active.elapsed+=performance.now()-active.start;active=null;clearTimeout(timer);};
+ const pause=()=>{if(!active)return;active.elapsed+=performance.now()-active.start;active.el.removeAttribute('data-mg-typing-active');active=null;clearTimeout(timer);};
  const next=()=>{if(stopped||active||document.hidden)return;
    const el=nodes.find(x=>queue.has(x)&&!revealed.has(x)&&inViewport(x));if(!el)return;
    let job=work.get(el);if(!job){const letters=parts(el.getAttribute('data-mg-original')||el.textContent.trim());
      job={el,letters,elapsed:0,duration:Math.max(300,Math.min(el.matches('p')?1200:690,letters.length*(el.matches('p')?15:18))),start:0};
      work.set(el,job);
    }
-   active=job;job.start=performance.now();tick();
+   active=job;job.el.setAttribute('data-mg-typing-active','true');job.start=performance.now();tick();
  };
  function tick(){if(!active||stopped)return;
    const job=active,now=performance.now();lastTick=now;
