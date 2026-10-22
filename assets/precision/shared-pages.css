@@ -220,7 +220,7 @@ body.mg-unified.mg-precision-shared main :is(h1,h2,h3,h4),
 body.mg-precision-shared main [data-type]{
  font-family:MGPrecisionMono,JetBrains,ui-monospace,Consolas,monospace!important;
 }
-body.mg-precision-shared #navbar :is(.mg-brand,.mg-primary-links a,.nav-download){
+body.mg-precision-shared #navbar :is(.mg-brand,.mg-primary-links a,.nav-links a,.nav-download,.mg-menu-label){
  font-family:MGPrecisionMono,JetBrains,ui-monospace,Consolas,monospace!important;
 }
 body.mg-precision-shared main :is(.btn,.button,.action-button,.release-button,.platform-button,.download-button,a[role="button"],button[type="submit"]){
