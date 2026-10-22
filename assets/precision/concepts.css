@@ -82,7 +82,7 @@
 
 /* Real code-editor bar caret instead of a permanently visible typed pipe. */
 .precision-home .hero-description .terminal-rest{font-size:0;animation:none!important;transform:none}
-.precision-home .hero-description .terminal-rest::after{content:"";display:inline-block;vertical-align:baseline;width:3px;height:1em;background:currentColor;animation:mg-coding-caret .85s steps(1,end) infinite;animation-play-state:paused}
+.precision-home .hero-description .terminal-rest::after{content:"";display:inline-block;vertical-align:baseline;font-size:12px;width:3px;height:1em;background:currentColor;animation:mg-coding-caret .85s steps(1,end) infinite;animation-play-state:paused}
 .precision-home .hero-motion-active .hero-description .terminal-rest::after{animation-play-state:running}
 .precision-home .hero-description .type-cursor.vertical:after{width:3px;height:.95em;bottom:-.05em;animation:mg-coding-caret .85s steps(1,end) infinite}
 @media(prefers-reduced-motion:reduce){.precision-home .hero-description .terminal-rest::after{animation:none!important}}
