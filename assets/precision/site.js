@@ -25,7 +25,7 @@
    const shared=document.body.classList.contains('mg-precision-shared');
    if(shared){
     // Public editorial text only, never forms, live verdicts or interactive results.
-    const excluded='form,nav,footer,[aria-live],[role="status"],[role="alert"],.result,.verdict,.scan-result,.status,.badge,.counter,.actions,pre,code,[contenteditable],details:not([open]),.site-search'+(document.body.classList.contains('gta-static')?'':',.gta-stage');
+    const excluded='form,nav,footer,[aria-live],[role="status"],[role="alert"],.result,.verdict,.scan-result,.status,.badge,.counter,.actions,pre,code,[contenteditable],details:not([open]),.site-search,.scam-model-composition'+(document.body.classList.contains('gta-static')?'':',.gta-stage');
     for(const el of document.querySelectorAll('main h1,main h2,main h3,main h4,main p,main .eyebrow,main .kicker,main .gta6-type-line')){
      if(el.closest(excluded)||el.isContentEditable||el.children.length||el.hasAttribute('data-type'))continue;
      const value=el.textContent.trim();
@@ -79,10 +79,10 @@
      node.dataset.typeRuns=String(Number(node.dataset.typeRuns||0)+1);
      // Keep visible code-style typing, but never block the queue with long copy.
      const timing=node.dataset.type==='button'
-      ? {per:32,min:250,max:490}
+      ? {per:29,min:230,max:455}
       : node.dataset.type==='title'
-       ? {per:43,min:360,max:990}
-       : {per:23,min:390,max:1450};
+       ? {per:39,min:335,max:900}
+       : {per:21,min:360,max:1320};
      const duration=Math.min(timing.max,Math.max(timing.min,pieces.length*timing.per));
      job={...job,kind:'text',pieces,text,cursor,duration,blink:65};
     }else if(node.hasAttribute('data-count-group')){

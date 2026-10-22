@@ -1,0 +1,113 @@
+/* Game Scam Guard: balanced, accessible AI brand illustration on the original
+   product-card photo. Editorial artwork only: no provider integration implied. */
+body.mg-precision-shared .mg-card-hero--scam{
+ min-height:495px;
+ padding:122px 0 110px;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-hero-layout{
+ display:grid;grid-template-columns:minmax(0,1.17fr) minmax(335px,.83fr);
+ align-items:center;gap:clamp(18px,3vw,44px);
+ width:100%;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-hero-copy{
+ min-width:0;max-width:670px;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-hero-copy .eyebrow{
+ font-size:11px;letter-spacing:.12em;margin-bottom:17px;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-hero-copy h1{
+ font-size:clamp(37px,4vw,61px);line-height:1.18;
+ max-width:100%;letter-spacing:-.045em;margin:0 0 23px;
+ text-wrap:balance;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-hero-copy > p:not(.eyebrow){
+ max-width:65ch;font-size:clamp(14px,1.18vw,16px);
+ line-height:1.88;letter-spacing:.004em;margin:0;
+ text-wrap:pretty;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-model-composition{
+ position:relative;isolation:isolate;
+ height:345px;min-width:0;width:100%;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-model-composition::before{
+ content:"";position:absolute;inset:19% 11%;z-index:-1;
+ background:radial-gradient(ellipse,#b1c0d61d 0%,transparent 67%);
+ pointer-events:none;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-model-mark{
+ position:absolute;box-sizing:border-box;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:12px;width:150px;height:150px;
+ border-radius:22px;
+ border:1px solid #c2d0e035;
+ background:linear-gradient(145deg,#252c36eb,#10151de8);
+ box-shadow:0 16px 40px #0009,inset 0 1px 0 #ffffff12;
+ backdrop-filter:blur(3px);
+ -webkit-backdrop-filter:blur(3px);
+ color:#e8edf4;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-model-mark img{
+ width:78px;height:78px;display:block;object-fit:contain;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-model-mark span{
+ color:#dce3ec;font:500 12px/1.4 MGPrecisionMono,JetBrains,ui-monospace,monospace;
+ letter-spacing:.025em;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-model-mark--chatgpt{
+ top:1%;left:10%;z-index:3;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-model-mark--claude{
+ top:26%;right:1%;z-index:2;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-model-mark--grok{
+ bottom:1%;left:26%;z-index:1;
+}
+body.mg-precision-shared .mg-card-hero--scam .scam-model-footnote{
+ position:absolute;bottom:-13px;right:5%;
+ margin:0;color:#9dabbc!important;
+ font:9px/1.5 MGPrecisionMono,JetBrains,ui-monospace,monospace;
+ letter-spacing:.03em;text-shadow:none;
+}
+@media(max-width:940px){
+ body.mg-precision-shared .mg-card-hero--scam{padding:113px 0 94px;}
+ body.mg-precision-shared .mg-card-hero--scam .scam-hero-layout{
+  grid-template-columns:minmax(0,1fr);gap:22px;
+ }
+ body.mg-precision-shared .mg-card-hero--scam .scam-hero-copy{
+  max-width:720px;
+ }
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-composition{
+  width:min(100%,590px);height:315px;margin-inline:auto;
+ }
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark--chatgpt{left:11%}
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark--claude{right:10%}
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark--grok{left:37%}
+}
+@media(max-width:530px){
+ body.mg-precision-shared .mg-card-hero--scam{min-height:0;padding:108px 0 86px;}
+ body.mg-precision-shared .mg-card-hero--scam .scam-hero-copy h1{
+  font-size:clamp(31px,9vw,43px);line-height:1.25;margin-bottom:19px;
+ }
+ body.mg-precision-shared .mg-card-hero--scam .scam-hero-copy > p:not(.eyebrow){
+  font-size:13px;line-height:1.88;
+ }
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-composition{
+  width:100%;height:242px;margin-top:4px;
+ }
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark{
+  width:116px;height:116px;border-radius:17px;gap:7px;
+ }
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark img{width:59px;height:59px}
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark span{font-size:10px}
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark--chatgpt{left:1%;top:0}
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark--claude{right:2%;top:24%}
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark--grok{left:23%;bottom:0}
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-footnote{
+  right:0;bottom:-22px;font-size:8px;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark{
+  transition:none!important;animation:none!important;
+ }
+}
