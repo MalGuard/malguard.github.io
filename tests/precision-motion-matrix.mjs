@@ -54,7 +54,7 @@ for(const name of names){
     urls:[...document.querySelectorAll('#products .product-photo')].map(img=>img.getAttribute('src')),
    }));
    assert.ok(layout.scroll<=layout.width+1,'Horizontal overflow at '+profile.width);
-   assert.match(layout.title,/Sora/i,'Homepage heading uses Sora');
+   assert.match(layout.title,/JetBrains/i,'Homepage uses the bundled coding font');
    assert.ok(layout.heading,'Visible semantic homepage heading');
    assert.equal(layout.bodyBg,'rgb(8, 10, 14)','Homepage design background changed');
    assert.equal(layout.urls.length,3);
