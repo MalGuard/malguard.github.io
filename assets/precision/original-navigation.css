@@ -44,3 +44,5 @@
 @media(max-width:900px){.precision-home #navbar .mg-primary-links{display:none!important}}
 
 .precision-home{padding-top:88px}.precision-home .skip{position:fixed;left:16px;top:-100px;z-index:3000;padding:12px;background:#dcecff;color:#020409;clip-path:none;width:auto;height:auto;overflow:visible}.precision-home .skip:focus{top:80px}
+
+.precision-home [hidden]{display:none!important}.precision-home #navbar{color:#e5edf8}.precision-home #navbar button{cursor:pointer}.precision-home .site-search button{cursor:pointer}
