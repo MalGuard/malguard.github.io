@@ -1,0 +1,69 @@
+/* Card-to-page continuity: reuse the exact visual from each MalGuard homepage
+   product card, only on the destination page's opening section. No motion cost. */
+.mg-precision-shared .mg-card-hero{
+ position:relative;isolation:isolate;overflow:hidden;
+ padding:110px 0 104px;min-height:350px;
+ display:flex;align-items:center;
+ background:#080a0e!important;
+}
+.mg-precision-shared .mg-card-hero--scam{
+ --mg-card-image:url('/assets/precision/scam-card-960.webp');
+ --mg-card-focus:64% 50%;
+}
+.mg-precision-shared .mg-card-hero--radar{
+ --mg-card-image:url('/assets/precision/ai-card.svg');
+ --mg-card-focus:60% 50%;
+}
+.mg-precision-shared .mg-card-hero::before{
+ content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+ background-image:
+  linear-gradient(90deg,rgba(8,10,14,.91) 0%,rgba(8,10,14,.67) 49%,rgba(8,10,14,.36) 100%),
+  linear-gradient(180deg,rgba(8,10,14,.28) 0%,rgba(8,10,14,.22) 46%,rgba(8,10,14,.87) 100%),
+  var(--mg-card-image);
+ background-position:center,var(--mg-card-focus),var(--mg-card-focus);
+ background-size:cover;
+ background-repeat:no-repeat;
+}
+.mg-precision-shared .mg-card-hero::after{
+ content:"";position:absolute;inset:auto 0 0;height:34%;z-index:1;pointer-events:none;
+ background:linear-gradient(180deg,transparent,#080a0e);
+}
+.mg-precision-shared .mg-card-hero > .container{
+ position:relative;z-index:2;width:min(1140px,calc(100% - 48px));
+}
+.mg-precision-shared .mg-card-hero :is(h1,h2,p,.eyebrow){
+ text-shadow:0 2px 20px rgba(0,0,0,.4);
+}
+.mg-precision-shared .mg-card-hero :is(p,.eyebrow){color:#dae2ee!important}
+@media(max-width:700px){
+ .mg-precision-shared .mg-card-hero{min-height:310px;padding:96px 0 84px;}
+ .mg-precision-shared .mg-card-hero::before{
+  background-image:
+   linear-gradient(90deg,rgba(8,10,14,.9),rgba(8,10,14,.6)),
+   linear-gradient(180deg,rgba(8,10,14,.4),rgba(8,10,14,.23) 38%,rgba(8,10,14,.93)),
+   var(--mg-card-image);
+  background-position:center,center,62% 50%;
+ }
+ .mg-precision-shared .mg-card-hero > .container{width:min(1140px,calc(100% - 32px))}
+}
+/* GTA Guard keeps its existing interactive gate, intro/story timeline and copy.
+   The card photo is just the static scene backdrop, faded into the next section. */
+body.mg-gta #gta-stage{
+ background-image:
+  linear-gradient(90deg,rgba(2,4,9,.84) 0%,rgba(2,4,9,.63) 48%,rgba(2,4,9,.36) 100%),
+  linear-gradient(180deg,rgba(2,4,9,.27) 0%,rgba(2,4,9,.32) 58%,#020409 100%),
+  url('/assets/precision/gta-card-960.webp')!important;
+ background-position:center,center,center 43%!important;
+ background-size:cover!important;
+ background-repeat:no-repeat!important;
+ background-attachment:scroll!important;
+}
+@media(max-width:900px){
+ body.mg-gta #gta-stage{
+  background-image:
+   linear-gradient(180deg,rgba(2,4,9,.24) 0%,rgba(2,4,9,.48) 43%,rgba(2,4,9,.89) 77%,#020409 100%),
+   linear-gradient(90deg,rgba(2,4,9,.52),rgba(2,4,9,.36)),
+   url('/assets/precision/gta-card-960.webp')!important;
+  background-position:center,center,58% 42%!important;
+ }
+}
