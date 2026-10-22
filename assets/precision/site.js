@@ -31,7 +31,7 @@
      while(el.firstChild)source.append(el.firstChild);el.append(source);
     }
    }
-   nodes=[...document.querySelectorAll('[data-type],[data-reveal],[data-count-group]')];root.dataset.precisionTypeReady='true';
+   nodes=[...document.querySelectorAll('[data-type],[data-reveal],[data-count-group]')].filter(n=>!n.hasAttribute('data-type')||!!n.querySelector(':scope > .type-source'));root.dataset.precisionTypeReady='true';
    if(!eligible||stopped){finish();return;}
    const segmenter=Intl.Segmenter?new Intl.Segmenter('en',{granularity:'grapheme'}):null;
    const inView=node=>{
@@ -60,6 +60,9 @@
    const advance=()=>{
     if(stopped||active||document.hidden)return;
     const node=nodes.find(n=>pending.has(n)&&!done.has(n)&&inView(n));if(!node)return;
+    // Locale updates can replace text nodes after registration. The translated text
+    // is authoritative: never type over it or dereference a removed source node.
+    if(node.hasAttribute('data-type')&&!node.querySelector(':scope > .type-source')){complete(node);advance();return;}
     const job=jobs.get(node)||create(node);active=job;job.started=performance.now();
     if(job.kind==='text'){node.dataset.typeState='typing';node.classList.add('typing');}
     if(job.kind==='reveal')node.dataset.revealState='active';
