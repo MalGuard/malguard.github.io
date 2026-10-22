@@ -51,7 +51,7 @@
      nav.querySelectorAll('.mg-brand,.mg-primary-links a,.nav-download').forEach(link=>{if(link.getClientRects().length)markLink(link);});
     }
     if(shared){
-     const actions='main a.btn,main a.button,main a.action-button,main a.release-button,main a.platform-button,main a.download-button,main a[role="button"],main .actions>a,main .hero-actions>a,main .legacy-actions>a,main .action-group>a,main button.button:not([type="submit"]),main button.btn:not([type="submit"])';
+     const actions='main a.btn,main a.button,main a.action-button,main a.release-button,main a.platform-button,main a.download-button,main a.mg-home-product-link,main a.mg-home-product-extra,main a[role="button"],main .actions>a,main .hero-actions>a,main .legacy-actions>a,main .action-group>a,main button.button:not([type="submit"]),main button.btn:not([type="submit"])';
      document.querySelectorAll(actions).forEach(link=>{
       if(!link.closest('form,[aria-live],[role="dialog"],.site-search,.result,.verdict,.scan-result')&&link.getClientRects().length&&!link.hasAttribute('disabled'))markLink(link);
      });
