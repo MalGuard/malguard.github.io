@@ -28,6 +28,21 @@ for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chrom
      ctas:document.querySelectorAll('main a[data-type="button"]').length,
      script:[...document.scripts].some(s=>s.src.includes('site.js?v=unified-coding-20261022'))
     }));
+    // Hamburger menu must not inherit the obsolete teal/green experience theme.
+    const palette=await page.evaluate(()=>{
+     const nav=document.querySelector('#navbar'),menu=document.querySelector('#navLinks');
+     return {
+      nav:getComputedStyle(nav).backgroundColor,
+      dropdown:getComputedStyle(menu).backgroundColor,
+      link:getComputedStyle(menu.querySelector('a')).color,
+      hamburger:getComputedStyle(document.querySelector('#menuBtn')).color,
+      label:getComputedStyle(menu.querySelector('.mg-menu-label')).color
+     };
+    });
+    assert.match(palette.nav,/rgba?\\(7,\\s*11,\\s*19[,)]/,path+' navbar palette mismatch');
+    assert.match(palette.dropdown,/rgba?\\(8,\\s*17,\\s*30[,)]/,path+' dropdown teal theme leaked');
+    assert.equal(palette.link,'rgb(184, 201, 222)',path+' links not matching homepage');
+    assert.equal(palette.label,'rgb(160, 174, 197)',path+' menu section labels differ');
     assert.ok(status.script,path+' uses outdated script');
     assert.ok(status.main>0,path+' has no queued page copy');
     assert.equal(status.nav,'nav',path+' does not queue header');
