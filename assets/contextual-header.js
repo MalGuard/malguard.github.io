@@ -9,7 +9,7 @@
   const pages = [
     ['Home', 'MalGuard overview', '/', 'home malguard'],
     ['Products', 'Products and current availability', '/products.html', 'gta guard threat radar scam guard'],
-    ['Game Scam Guard', 'In development — no public release', '/game-scam-guard.html', 'game gaming scam'],
+    ['Game Scam Guard', 'Online link inspector and signed Android app', '/game-scam-guard.html', 'game gaming scam'],
     ['iPhone Preview', 'Bounded local mobile inspection', '/ios-preview/', 'iphone ios'],
     ['GTA Guard', 'Clean-room Windows x64 static scanner', '/gta-guard.html', 'mods windows files'],
     ['Scan Mods', 'Supported and planned game-mod tools', '/scan-mods.html', 'gta minecraft roblox'],
@@ -38,7 +38,7 @@
   };
   const primary = document.createElement('nav');
   primary.className = 'mg-primary-links'; primary.setAttribute('aria-label', 'Primary');
-  [['Products','/products.html'],['Tools','/tools.html'],['Trust','/trust.html']].forEach(p => primary.append(link(...p)));
+  [['Products','/products.html'],['Tools','/tools.html'],['Docs','/docs.html'],['Trust','/trust.html'],['About','/about.html']].forEach(p => primary.append(link(...p)));
   navbar.querySelector('.nav-actions').before(primary);
   menu.replaceChildren(); menu.setAttribute('aria-label', 'All MalGuard pages');
   const label = text => { const e = document.createElement('span'); e.className = 'mg-menu-label'; e.textContent = text; menu.append(e); };
