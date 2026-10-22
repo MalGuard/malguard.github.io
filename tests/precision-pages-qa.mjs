@@ -27,7 +27,7 @@ try {
    });
    assert.equal(result.shared,true,'Design opt-in missing on '+route);
    assert.equal(result.bg,'rgb(8, 10, 14)','Palette differs on '+route);
-   assert.match(result.heading,/MGPrecisionSora/i,'Heading font differs on '+route);
+   assert.match(result.heading,/MGPrecisionMono|JetBrains/i,'Heading coding font differs on '+route);
    assert.equal(result.overflow,false,'Horizontal overflow on '+route+' @'+width);
    assert.equal(result.typed,0,'Reduced motion must show all text on '+route);
    assert.ok(await page.locator('main h1').count(),'Semantic heading missing on '+route);
