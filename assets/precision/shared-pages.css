@@ -161,3 +161,52 @@ body.mg-precision-shared .product-stack>.compare{grid-column:1/-1!important}
  body.mg-precision-shared .product-stack>.product-entry h2{font-size:23px!important}
  body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,button[type="submit"]){min-height:46px!important;padding-inline:16px!important}
 }
+
+/* Pixel-level surface, card and button geometry sourced from the approved homepage. */
+body.mg-unified.mg-precision-shared,body.mg-unified.mg-content-page.mg-precision-shared{
+ --precision-bg:#080a0e;--precision-surface:#11161d;--precision-text:#f5f5f5;
+ --precision-muted:#a1a1aa;--precision-line:#3a414c;
+ --precision-heading:Sora,MGPrecisionSora,Arial,sans-serif;
+ --precision-code:JetBrains,MGPrecisionMono,ui-monospace,monospace;
+ background:var(--precision-bg)!important;color:var(--precision-text)!important
+}
+body.mg-precision-shared main :is(h1,h2,h3,h4){
+ font-family:var(--precision-heading)!important;color:var(--precision-text)!important;font-weight:600!important
+}
+body.mg-precision-shared main :is(.eyebrow,.kicker,.badge,.meta,.status,.micro-label){
+ font-family:var(--precision-code)!important;color:#b7bdc8
+}
+body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare-card,.platform-card,.release-card,.feature-card,.radar-card,.secure-card){
+ border:1px solid var(--precision-line)!important;border-radius:7px!important;
+ background:var(--precision-surface)!important;box-shadow:none!important;
+ color:var(--precision-text)!important;transition:border-color .16s ease,background .16s ease!important
+}
+body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare-card,.platform-card,.release-card,.feature-card,.radar-card,.secure-card):hover{
+ border-color:#616b78!important
+}
+body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare-card,.platform-card,.release-card,.feature-card) h3{
+ font:600 22px/1.5 var(--precision-heading)!important;letter-spacing:-.045em!important
+}
+body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare-card,.platform-card,.release-card,.feature-card) p{
+ font:11px/1.95 var(--precision-code)!important;color:#c9cdd6!important
+}
+body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,a[role=button],button[type=submit]){
+ display:inline-flex!important;align-items:center;justify-content:center;gap:16px;
+ min-height:48px!important;padding:0 20px!important;border-radius:4px!important;
+ font:500 12px/1.5 Arial,sans-serif!important;letter-spacing:normal!important;
+ background:#11161d!important;border:1px solid #3a414c!important;color:#f5f5f5!important;
+ box-shadow:none!important;text-decoration:none!important
+}
+body.mg-precision-shared main :is(.btn.primary,.btn.p,.button.primary,.release-button.primary,.platform-button.primary,.download-button.primary,button[type=submit].primary){
+ background:#f5f5f5!important;border-color:#f5f5f5!important;color:#0e1117!important
+}
+body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button):hover{
+ border-color:#dce2eb!important
+}
+body.mg-precision-shared main :is(.notice,.result,.compare,.form-panel,.tool-panel){
+ background:#11161d!important;border-color:#3a414c!important;border-radius:7px!important
+}
+@media(max-width:640px){
+ body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare-card,.platform-card,.release-card,.feature-card){border-radius:7px!important}
+ body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,button[type=submit]){min-height:48px!important}
+}
