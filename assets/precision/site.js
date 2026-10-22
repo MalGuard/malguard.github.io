@@ -69,7 +69,14 @@
      const ink=document.createElement('span');ink.className='type-ink';ink.setAttribute('aria-hidden','true');
      const text=document.createTextNode(''),cursor=document.createElement('span');cursor.className='type-cursor vertical';ink.append(text,cursor);node.append(ink);
      node.dataset.typeRuns=String(Number(node.dataset.typeRuns||0)+1);
-     job={...job,kind:'text',pieces,text,cursor,duration:Math.max(180,pieces.length*(node.dataset.type==='button'?50:node.dataset.type==='title'?60:35)),blink:100};
+     // Keep visible code-style typing, but never block the queue with long copy.
+     const timing=node.dataset.type==='button'
+      ? {per:30,min:210,max:440}
+      : node.dataset.type==='title'
+       ? {per:40,min:320,max:900}
+       : {per:21,min:340,max:1350};
+     const duration=Math.min(timing.max,Math.max(timing.min,pieces.length*timing.per));
+     job={...job,kind:'text',pieces,text,cursor,duration,blink:65};
     }else if(node.hasAttribute('data-count-group')){
      const counters=[...node.querySelectorAll('.counter')].map(n=>{const ink=document.createElement('span');ink.className='count-ink';ink.setAttribute('aria-hidden','true');ink.textContent='0';n.append(ink);n.dataset.countRuns=String(Number(n.dataset.countRuns||0)+1);return {n,ink,value:Number(n.dataset.count)};});
      node.dataset.countRuns=String(Number(node.dataset.countRuns||0)+1);
