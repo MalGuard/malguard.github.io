@@ -1,0 +1,94 @@
+/* MalGuard GTA VI Security Center · 2026-10-22
+   Standalone page style scoped to .gta6-center; no homepage or platform animations changed. */
+.gta6-center{background:#080a0e;color:#eff3f8;font-family:Arial,Helvetica,sans-serif}
+.gta6-center .container{width:min(calc(100% - 40px),1120px);margin-inline:auto}
+.gta6-center a{color:inherit}
+.gta6-center a:focus-visible,.gta6-center button:focus-visible,.gta6-center input:focus-visible{outline:3px solid #9dc4ff;outline-offset:3px}
+.gta6-center .gta6-home-link{font:700 12px/1.4 Arial,sans-serif;color:#d8e6fa;text-decoration:none;border:1px solid #3d4b5e;padding:10px 14px;border-radius:8px}
+.gta6-center .gta6-home-link:hover{border-color:#b9cdea}
+.gta6-center .gta6-nav{display:flex!important;gap:21px;align-items:center}
+.gta6-center .gta6-nav a{text-decoration:none;color:#b7c1d0;font:700 12px Arial,sans-serif}
+.gta6-center .gta6-nav a:hover{color:#fff}
+.gta6-main{padding:22px 0 86px}
+.gta6-breadcrumb{display:flex;flex-wrap:wrap;gap:9px;align-items:center;color:#8693a6;font-size:12px;margin:12px 0 42px}
+.gta6-breadcrumb a{text-decoration:none}
+.gta6-main section{scroll-margin-top:40px}
+.gta6-hero{position:relative;display:grid;grid-template-columns:1.25fr .75fr;gap:40px;align-items:center;min-height:440px;padding:14px 0 70px;border-bottom:1px solid #263445}
+.gta6-eyebrow,.gta6-section-kicker{color:#97b5df;font:800 10px/1.5 Arial,sans-serif;letter-spacing:.18em;margin:0 0 20px}
+.gta6-pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#94bfff;margin-right:8px;box-shadow:0 0 0 4px rgba(148,191,255,.09)}
+.gta6-hero h1{font:bold clamp(48px,6.8vw,91px)/1.04 Arial,sans-serif;letter-spacing:-.064em;margin:0;color:#fff}
+.gta6-hero h1 span{color:#a4bbda}
+.gta6-lead{max-width:585px;font-size:16px;line-height:1.78;color:#abb8cc;margin:23px 0 0}
+.gta6-actions{display:flex;flex-wrap:wrap;gap:11px;margin-top:26px}
+.gta6-button{min-height:47px;border:1px solid #5b7598;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;text-align:center;padding:12px 18px;text-decoration:none!important;font:800 12px/1.5 Arial,sans-serif;gap:13px;transition:background .18s}
+.gta6-button.primary{background:#e7f0fd;color:#0d1b30;border-color:#e7f0fd}
+.gta6-button.primary:hover{background:#fff}
+.gta6-button.secondary{background:transparent;color:#dce9fa}
+.gta6-button.secondary:hover{background:#1d2a40}
+.gta6-hero-visual{min-height:350px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;isolation:isolate}
+.gta6-hero-visual:before{position:absolute;content:"";width:85%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(33,94,163,.22),transparent 70%);z-index:-1}
+.gta6-ring{width:min(82%,300px);aspect-ratio:1;border:1px solid #3e5d87;outline:1px solid #1d344e;outline-offset:23px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;box-shadow:inset 0 0 75px rgba(30,77,141,.21),0 0 55px rgba(49,103,176,.1);background:radial-gradient(circle at 40% 33%,rgba(115,165,232,.18),transparent 40%)}
+.gta6-ring:after{content:"";position:absolute;width:min(45%,169px);aspect-ratio:1;border:1px solid rgba(133,171,228,.22);border-radius:50%;pointer-events:none}
+.gta6-center-symbol{font:bold 88px/.9 Georgia,serif;letter-spacing:-.09em;color:#d5e5fe}
+.gta6-center-caption{font:800 10px Arial,sans-serif;letter-spacing:.23em;color:#82a6d7;margin-top:14px}
+.gta6-visual-foot{font:800 9px Arial,sans-serif;letter-spacing:.2em;color:#8da5c6;margin-top:55px}
+.gta6-visual-foot span{color:#aacfff;margin-inline:9px}
+.gta6-section-heading{max-width:755px;margin-bottom:28px}
+.gta6-section-heading h2,.gta6-release h2,.gta6-review h2,.gta6-research h2{font:bold clamp(28px,3.8vw,45px)/1.15 Arial,sans-serif;letter-spacing:-.042em;color:#f1f5fb;margin:0 0 12px}
+.gta6-section-heading>p:last-child,.gta6-release>div>p:last-child,.gta6-review-heading p:not(.gta6-section-kicker),.gta6-research p:not(.gta6-section-kicker){font-size:14px;line-height:1.75;color:#aebcd0;max-width:760px}
+.gta6-release,.gta6-incidents,.gta6-review,.gta6-checklist,.gta6-roadmap{margin-top:68px}
+.gta6-release{padding:27px 0 0}
+.gta6-release-facts{display:grid;grid-template-columns:1.1fr 1fr 1.2fr;gap:12px;margin-top:24px}
+.gta6-release-facts>div{display:flex;flex-direction:column;gap:14px;padding:25px 20px;min-height:122px;border:1px solid #35445b;border-radius:11px;background:linear-gradient(155deg,#15243a,#0c121c)}
+.gta6-release-facts span{font:700 11px/1.45 Arial,sans-serif;color:#95a6bb}
+.gta6-release-facts strong{font:800 clamp(16px,2vw,22px)/1.3 Arial,sans-serif;color:#f4f7ff}
+.gta6-inline-note{margin:15px 0 0;color:#9baabe;font-size:12px;line-height:1.7}
+.gta6-inline-note a{text-decoration:underline;color:#c9dfff}
+.gta6-two-up{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.gta6-case{border:1px solid #334154;border-radius:13px;padding:26px;background:#0e1520}
+.gta6-case-label{font:800 10px Arial,sans-serif;letter-spacing:.11em;color:#93b4dd}
+.gta6-case h3{font:800 24px/1.25 Arial,sans-serif;letter-spacing:-.028em;margin:17px 0 12px;color:#f1f6fe}
+.gta6-case p{font-size:14px;line-height:1.72;color:#adbad0;margin:0 0 19px}
+.gta6-case a,.gta6-roadmap-grid a{font:800 12px/1.5 Arial,sans-serif;color:#bad7ff;text-decoration:none}
+.gta6-case a:hover,.gta6-roadmap-grid a:hover{text-decoration:underline}
+.gta6-review{background:linear-gradient(150deg,#12223b,#0b1422 80%);padding:33px;border:1px solid #415d7e;border-radius:17px}
+.gta6-review-heading{display:flex;align-items:start;justify-content:space-between;gap:18px}
+.gta6-review-heading>div{max-width:720px}
+.gta6-tool-tag{flex-shrink:0;max-width:250px;font:800 10px/1.5 Arial,sans-serif;letter-spacing:.06em;border:1px solid #7192b9;border-radius:7px;padding:9px 11px;color:#bdd8fc;text-align:center}
+#gta6-url-form{margin-top:20px}
+#gta6-url-form label{display:block;color:#e1ebf9;font:800 12px Arial,sans-serif;margin-bottom:10px}
+.gta6-input-row{display:flex;gap:10px}
+.gta6-input-row input{min-width:0;flex:1;border:1px solid #6680a3;background:#fff;border-radius:8px;padding:13px 15px;min-height:50px;color:#16213b;font:14px/1.5 Arial,sans-serif}
+.gta6-input-row button{min-height:50px;border-radius:8px;border:0;background:#dceafd;color:#0d1e36;padding:12px 22px;cursor:pointer;font:800 13px Arial,sans-serif}
+.gta6-input-row button:hover{background:#fff}
+.gta6-field-hint{margin:9px 0 0;font:12px/1.65 Arial,sans-serif;color:#a7bdd7}
+.gta6-result{margin-top:20px;background:#101e31;border:1px solid #6280a4;border-radius:10px;padding:20px 22px}
+.gta6-result h3{margin:0 0 9px;color:#fff;font:800 20px/1.3 Arial,sans-serif}
+.gta6-result p{color:#bbcce1;font:13px/1.65 Arial,sans-serif;margin:8px 0}
+.gta6-result ul{margin:11px 0 12px;padding-left:20px;color:#e0eafb}
+.gta6-result li{font-size:13px;line-height:1.75;padding-bottom:5px}
+.gta6-result .gta6-result-host{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;color:#cfdef3}
+.gta6-tool-footer{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:20px;border-top:1px solid #334968;padding-top:16px}
+.gta6-tool-footer a{font:800 12px Arial,sans-serif;color:#dfedff}
+.gta6-tool-footer span{color:#95a8c3;font:12px/1.55 Arial,sans-serif}
+.gta6-steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.gta6-steps li{display:flex;align-items:flex-start;gap:16px;border:1px solid #2c394c;border-radius:10px;padding:22px 19px;background:#0e131c}
+.gta6-steps li>span{font:bold 17px Arial,sans-serif;color:#90b5eb}
+.gta6-steps strong{font:800 15px/1.4 Arial,sans-serif;color:#f1f5fc}
+.gta6-steps p{font:13px/1.7 Arial,sans-serif;color:#a6b3c8;margin:9px 0 0}
+.gta6-roadmap-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.gta6-roadmap-grid article{padding:25px;border-radius:11px;border:1px solid #314059;background:#0e1520}
+.gta6-status{font:800 9px/1.45 Arial,sans-serif;letter-spacing:.12em;display:inline-block;color:#bad0ed}
+.gta6-status.planned{color:#edca99}
+.gta6-roadmap-grid h3{font:800 20px/1.3 Arial,sans-serif;color:#eaf2ff;margin:13px 0 7px}
+.gta6-roadmap-grid p{font:13px/1.7 Arial,sans-serif;color:#adb9cb;margin:0 0 14px}
+.gta6-research{margin-top:72px;padding:42px;border:1px solid #52719a;background:linear-gradient(120deg,#153051,#0a1729);border-radius:15px}
+.gta6-research>div{max-width:770px}
+.gta6-closing-disclosure{font:11px/1.8 Arial,sans-serif;color:#7e8b9f;margin:30px 0 0}
+.gta6-footer{display:flex;justify-content:space-between;gap:18px;align-items:center;padding-block:30px;color:#96a6be;font:12px/1.6 Arial,sans-serif}
+.gta6-footer nav{display:flex;gap:17px;flex-wrap:wrap}
+.gta6-footer a{text-decoration:none}
+.gta6-footer a:hover{text-decoration:underline}
+@media(max-width:840px){.gta6-center .gta6-nav{display:none!important}.gta6-hero{grid-template-columns:1fr;gap:0;min-height:0}.gta6-hero-visual{min-height:280px}.gta6-ring{width:225px}.gta6-visual-foot{margin-top:40px}.gta6-release-facts{grid-template-columns:1fr 1fr}.gta6-release-facts>div:last-child{grid-column:1/-1}.gta6-review-heading{flex-direction:column}.gta6-tool-tag{max-width:none}.gta6-footer{flex-direction:column;align-items:flex-start}}
+@media(max-width:600px){.gta6-center .container{width:min(calc(100% - 28px),1120px)}.gta6-main{padding-bottom:50px}.gta6-breadcrumb{margin-bottom:30px}.gta6-hero{padding-bottom:35px}.gta6-hero h1{font-size:clamp(43px,12vw,64px)}.gta6-lead{font-size:14px}.gta6-hero-visual{min-height:250px}.gta6-release,.gta6-incidents,.gta6-review,.gta6-checklist,.gta6-roadmap{margin-top:44px}.gta6-release-facts,.gta6-two-up,.gta6-steps,.gta6-roadmap-grid{grid-template-columns:1fr}.gta6-release-facts>div:last-child{grid-column:auto}.gta6-release-facts>div{min-height:92px;padding:19px}.gta6-review{padding:20px}.gta6-input-row{flex-direction:column}.gta6-input-row button{width:100%}.gta6-research{margin-top:45px;padding:23px}.gta6-actions{flex-direction:column;align-items:stretch}.gta6-button{width:100%}.gta6-home-link{font-size:11px!important}}
+@media(prefers-reduced-motion:reduce){.gta6-center *{scroll-behavior:auto!important;transition:none!important}}
