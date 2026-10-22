@@ -17,8 +17,9 @@ for(const name of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chromiu
    assert.ok(d.scroll<=d.inner+1,'Horizontal overflow '+width);
    assert.equal(await p.locator('.flow-stage svg text').filter({hasText:'undefined'}).count(),0);
    assert.equal(await p.locator('.metric-clarification').count(),1);
-   if(width<=920){const nav=p.locator('.precision-nav-mobile');await nav.locator('summary').click();assert.equal(await nav.evaluate(el=>el.open),true);
-     await p.keyboard.press('Escape');assert.equal(await nav.evaluate(el=>el.open),false);}
+   await p.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true');
+   const button=p.locator('#menuBtn');await button.click();assert.equal(await button.getAttribute('aria-expanded'),'true');
+   await p.keyboard.press('Escape');assert.equal(await button.getAttribute('aria-expanded'),'false');
    assert.deepEqual(errors,[]);await c.close();console.log('PASS',name,width,'SVG fallback and responsive navigation');
   }
   const c=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:1280,height:850},reducedMotion:'no-preference'});

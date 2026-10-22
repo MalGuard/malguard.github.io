@@ -50,12 +50,16 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     });
     await check(`${name} ${width}px accessible Precision nav, four stages and no-WebGL view`,async()=>{
       await page.goto(base+'/');await publicEntry(page);
-      assert.equal(await page.locator('.precision-nav-links a').count(),5);
-      assert.equal(await page.locator('.precision-nav-scan').getAttribute('href'),'/game-scam-guard/');
-      if(width<=920){const nav=page.locator('.precision-nav-mobile');await nav.locator('summary').click();assert.equal(await nav.evaluate(e=>e.open),true);
-        const box=await nav.locator('nav').boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);
-        await page.keyboard.press('Escape');assert.equal(await nav.evaluate(e=>e.open),false);}
-      else assert.ok(await page.locator('.precision-nav-links').isVisible());
+      await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true');
+      assert.equal(await page.locator('#navbar .mg-primary-links a').count(),5);
+      assert.equal(await page.locator('#navbar .nav-download').getAttribute('href'),'/download.html');
+      const button=page.locator('#menuBtn'),menu=page.locator('#navLinks');
+      await button.click();assert.equal(await button.getAttribute('aria-expanded'),'true');
+      const box=await menu.boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);
+      await page.keyboard.press('Escape');assert.equal(await button.getAttribute('aria-expanded'),'false');
+      await page.locator('#searchButton').click();
+      assert.equal(await page.locator('#siteSearch').isVisible(),true);
+      await page.keyboard.press('Escape');assert.equal(await page.locator('#siteSearch').isVisible(),false);
       await page.waitForFunction(()=>document.querySelector('.flow-stage')?.dataset.renderer==='vector');
       assert.equal(await page.locator('.flow-stage svg text').filter({hasText:'undefined'}).count(),0);
       assert.equal(await page.locator('.flow-stage canvas').isVisible(),false);
@@ -132,7 +136,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     await page.locator('#siteAdminPassword').fill('benign-success-test-password');await page.locator('#siteAdminPasswordSubmit').click();
     await page.locator('#siteAdminName').fill('MalGuard Owner');await page.locator('#siteAdminPhone').fill('+1 202 555 0148');await page.locator('#siteAdminConsent').check();await page.locator('#siteAdminEnter').click();
     await page.waitForURL(base+'/');
-    assert.equal(await page.locator('.precision-nav').count(),1);
+    assert.equal(await page.locator('#navbar').count(),1);
      assert.equal(await page.locator('main').evaluate(el=>el.inert),false);
      assert.equal(await page.locator('#siteAdminPassword').count(),0);
      await page.goto(base+'/malware-ai-windows.html');await settle(page);
