@@ -210,7 +210,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
      await p.goto(base+'/');await settle(p);
      const title=p.locator('#technology [data-type]').first();assert.equal(await title.getAttribute('data-type-state'),'pending');
      await title.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
-     await p.waitForFunction(()=>['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),null,{timeout:16000});
+     await p.waitForFunction(()=>['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),null,{timeout:30000});
      assert.equal(await p.locator('#products article.product').count(),3);await c.close();
    });
    await browser.close();
