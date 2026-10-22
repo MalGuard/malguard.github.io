@@ -1,0 +1,79 @@
+/* GTA Guard lightweight static homepage. No WebGL, pinning, parallax or
+   three-dimensional intro. The original product-card illustration stays on the
+   hero background with the existing dark overlay and bottom fade. */
+body.gta-static .gta-hero{
+ height:auto!important;min-height:0!important;overflow:visible!important;
+ padding:0!important;display:block!important;
+}
+body.gta-static #gta-stage{
+ position:relative!important;top:auto!important;height:auto!important;
+ min-height:clamp(530px,75svh,820px)!important;
+ padding:142px max(6vw,calc((100vw - 1220px)/2)) 125px!important;
+ display:flex!important;align-items:center!important;
+ overflow:hidden!important;isolation:isolate;
+}
+body.gta-static #gta-stage::after{
+ content:"";position:absolute;inset:auto 0 0;height:32%;pointer-events:none;
+ background:linear-gradient(0deg,#020409,transparent);z-index:0;
+}
+body.gta-static .gta-static-copy{
+ position:relative;z-index:2;width:min(590px,100%);margin:0!important;
+ padding:0!important;transform:none!important;
+}
+body.gta-static .gta-static-copy .eyebrow{
+ margin:0 0 18px;color:#bcc9d8;
+ font:500 11px/1.6 MGPrecisionMono,JetBrains,ui-monospace,monospace;
+}
+body.gta-static .gta-static-copy h1{
+ margin:0 0 18px!important;font-size:clamp(45px,7vw,78px)!important;
+ line-height:1.17!important;letter-spacing:-.06em!important;
+ color:#f3f5f8!important;white-space:normal!important;
+}
+body.gta-static .gta-static-lead{
+ margin:0 0 16px!important;font-size:clamp(19px,2.8vw,29px);
+ font-weight:600;line-height:1.38;color:#ecf2f8;max-width:31ch;
+}
+body.gta-static .gta-static-description{
+ max-width:51ch;color:#c5d2df;line-height:1.8;font-size:14px;
+ margin:0 0 25px!important;
+}
+body.gta-static .gta-static-copy .hero-actions{
+ display:flex!important;flex-wrap:wrap!important;gap:10px!important;
+ margin:0 0 22px!important;padding:0!important;
+ position:relative!important;opacity:1!important;transform:none!important;
+}
+body.gta-static .gta-static-copy .hero-actions .button{
+ min-height:46px!important;border-radius:6px!important;
+}
+body.gta-static .gta-static-note{
+ margin:0;font:11px/1.7 MGPrecisionMono,JetBrains,ui-monospace,monospace;
+ color:#b4c1cd;max-width:60ch;
+}
+body.gta-static .reveal,body.gta-static .hero-reveal,
+body.gta-static .content-section,body.gta-static .section-heading{
+ visibility:visible!important;opacity:1!important;filter:none!important;
+ transform:none!important;animation:none!important;
+}
+body.gta-static #scanner{
+ position:relative!important;z-index:1!important;margin:0!important;
+ padding-top:90px!important;scroll-margin-top:85px;
+}
+body.gta-static .scanner-app{opacity:1!important;transform:none!important}
+body.gta-static .mg-motion-toggle,body.gta-static .journey-rail,
+body.gta-static .hero-art,body.gta-static #gta-scene{display:none!important}
+@media(max-width:800px){
+ body.gta-static #gta-stage{
+  min-height:650px!important;
+  padding:125px 7vw 92px!important;align-items:flex-end!important;
+ }
+ body.gta-static .gta-static-copy{width:100%!important}
+ body.gta-static .gta-static-copy h1{font-size:clamp(42px,10vw,60px)!important}
+}
+@media(max-width:520px){
+ body.gta-static #gta-stage{min-height:640px!important;padding:145px 7vw 76px!important}
+ body.gta-static .gta-static-copy .hero-actions{flex-direction:column}
+ body.gta-static .gta-static-copy .hero-actions .button{
+  width:100%!important;justify-content:center!important;
+ }
+ body.gta-static #scanner{padding-top:55px!important}
+}
