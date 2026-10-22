@@ -273,3 +273,72 @@ body.mg-precision-shared main .mg-home-product-extra{
 body.mg-precision-shared main :is(.mg-home-product-link,.mg-home-product-extra):focus-visible{
  outline:2px solid #b7c9e1;outline-offset:3px;
 }
+
+/* Match the approved homepage hamburger/dropdown palette on editorial pages.
+   Older experience.css used teal hover, green focus and a different menu surface.
+   Scope this override to public Precision pages, not scanners or app controls. */
+body.mg-unified.mg-precision-shared #navbar.nav{
+ color:#e5edf8!important;
+ background:#070b13e8!important;
+ border:1px solid #a6c9ee25!important;
+ box-shadow:0 8px 30px #0004!important;
+}
+body.mg-unified.mg-precision-shared #navbar :is(.nav-icon,.menu-btn,.nav-download){
+ background:#ffffff05!important;
+ border-color:#a6c9ee25!important;
+ color:#d6e5f7!important;
+}
+body.mg-unified.mg-precision-shared #navbar :is(.nav-icon,.menu-btn,.nav-download):hover,
+body.mg-unified.mg-precision-shared #navbar .menu-btn[aria-expanded=true]{
+ background:#c9deff0b!important;
+ border-color:#a6c9ee30!important;
+ color:#f0f6ff!important;
+}
+body.mg-unified.mg-precision-shared #navbar .menu-glyph{width:16px!important}
+body.mg-unified.mg-precision-shared #navbar .menu-glyph span,
+body.mg-unified.mg-precision-shared #navbar .menu-glyph span:last-child{
+ width:16px!important;
+ background:#c9def5!important;
+}
+body.mg-unified.mg-precision-shared #navbar #navLinks{
+ top:calc(100% + 10px)!important;
+ left:0!important;
+ right:0!important;
+ width:100%!important;
+ max-width:100%!important;
+ max-height:calc(100svh - 105px)!important;
+ grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ gap:2px!important;
+ border:1px solid #a6c9ee30!important;
+ border-radius:22px!important;
+ background:#08111ef5!important;
+ box-shadow:0 24px 80px #0007!important;
+}
+body.mg-unified.mg-precision-shared #navbar #navLinks :is(a,button){
+ min-height:40px!important;
+ font-size:12px!important;
+ font-weight:400!important;
+ line-height:1.6!important;
+ color:#b8c9de!important;
+ background:transparent!important;
+}
+body.mg-unified.mg-precision-shared #navbar #navLinks :is(a,button):is(:hover,:focus-visible){
+ color:#f0f6ff!important;
+ background:#c9deff0b!important;
+ outline-color:#b7c9e1!important;
+}
+body.mg-unified.mg-precision-shared #navbar .mg-menu-label{
+ color:#a0aec5!important;
+ border-bottom:0!important;
+ padding:0!important;
+ margin:8px 0!important;
+}
+body.mg-unified.mg-precision-shared #navbar .mg-primary-links a:is(:hover,[aria-current="page"]){
+ color:#f0f6ff!important;
+}
+@media(max-width:600px){
+ body.mg-unified.mg-precision-shared #navbar #navLinks{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  padding:16px!important;
+ }
+}
