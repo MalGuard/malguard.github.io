@@ -1,0 +1,66 @@
+/* GTA Guard: lightweight 3D identity core, no WebGL or canvas.
+   Visual language: same graphite, mist and Sora/JetBrains palette as the Precision homepage. */
+body.gta-precision-3d{background:#080a0e;color:#f5f5f5}
+body.gta-precision-3d .gta-hero{background:#080a0e}
+body.gta-precision-3d .gta-hero::before{
+ content:"";position:absolute;inset:0;pointer-events:none;
+ background:radial-gradient(ellipse at 73% 42%,rgba(97,132,169,.13),transparent 40%),
+ radial-gradient(ellipse at 60% 70%,rgba(43,60,84,.11),transparent 50%),
+ linear-gradient(115deg,#080a0e 10%,#101722 70%,#080a0e 100%);
+}
+body.gta-precision-3d #gta-scene,body.gta-precision-3d .gate-fallback,
+body.gta-precision-3d .art-coordinate{display:none!important}
+body.gta-precision-3d .hero-art{overflow:hidden;isolation:isolate;z-index:0}
+body.gta-precision-3d .hero-art::before{display:none}
+body.gta-precision-3d .gta-precision-atmosphere{position:absolute;inset:0;overflow:hidden;pointer-events:none;perspective:950px;perspective-origin:72% 48%}
+body.gta-precision-3d .gta-precision-halo{position:absolute;left:53%;top:15%;width:min(58vw,800px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(129,161,195,.12),rgba(57,75,100,.04) 34%,transparent 70%);filter:blur(18px)}
+body.gta-precision-3d .gta-precision-grid{position:absolute;inset:0;opacity:.29;background-image:linear-gradient(#64778b16 1px,transparent 1px),linear-gradient(90deg,#64778b16 1px,transparent 1px);background-size:55px 55px;mask-image:linear-gradient(90deg,transparent 33%,black 80%);transform:perspective(600px) rotateX(18deg) scale(1.2)}
+body.gta-precision-3d .gta-precision-assembly{position:absolute;left:72%;top:48%;width:370px;height:370px;transform:translate(-50%,-50%);transform-style:preserve-3d;animation:gta-core-float 8s ease-in-out infinite}
+body.gta-precision-3d .gta-precision-orbit{position:absolute;inset:10px;border:1px solid rgba(171,194,219,.28);border-radius:50%;transform-style:preserve-3d;box-shadow:0 0 30px #7b9bb012 inset}
+body.gta-precision-3d .orbit-a{transform:rotateX(73deg) rotateZ(15deg);animation:gta-orbit-a 24s linear infinite}
+body.gta-precision-3d .orbit-b{inset:26px;transform:rotateY(73deg) rotateZ(42deg);border-color:#99b6d25c;animation:gta-orbit-b 28s linear infinite reverse}
+body.gta-precision-3d .orbit-c{inset:54px;transform:rotateX(33deg) rotateY(66deg);border-style:dashed;border-color:#c3d5e23d;animation:gta-orbit-c 33s linear infinite}
+body.gta-precision-3d .gta-precision-core{position:absolute;left:50%;top:50%;width:146px;height:146px;margin:-73px;transform-style:preserve-3d;transform:rotateX(-17deg) rotateY(-26deg);animation:gta-core-spin 18s linear infinite}
+body.gta-precision-3d .gta-precision-face{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(189,207,226,.65);background:linear-gradient(140deg,rgba(28,42,60,.93),rgba(9,14,22,.98));box-shadow:inset 0 0 35px #b6cbe314,0 0 24px #92b1d018;backface-visibility:visible}
+body.gta-precision-3d .gta-precision-face.front{transform:translateZ(73px)}
+body.gta-precision-3d .gta-precision-face.back{transform:rotateY(180deg) translateZ(73px)}
+body.gta-precision-3d .gta-precision-face.left{transform:rotateY(-90deg) translateZ(73px)}
+body.gta-precision-3d .gta-precision-face.right{transform:rotateY(90deg) translateZ(73px)}
+body.gta-precision-3d .gta-precision-face.top{transform:rotateX(90deg) translateZ(73px)}
+body.gta-precision-3d .gta-precision-face.bottom{transform:rotateX(-90deg) translateZ(73px)}
+body.gta-precision-3d .gta-precision-face img{width:70px;height:70px;object-fit:contain}
+body.gta-precision-3d .gta-precision-face span{font:9px/1.5 'JetBrains Mono',MGPrecisionMono,monospace;letter-spacing:.18em;color:#c4d2e1}
+body.gta-precision-3d .gta-precision-face.back span{font:600 40px Sora,MGPrecisionSora,sans-serif;letter-spacing:-.08em}
+body.gta-precision-3d .gta-precision-satellite{position:absolute;width:7px;height:7px;border:1px solid #c3d8ee;background:#8faac6;border-radius:2px;box-shadow:0 0 22px #b2c9e9}
+body.gta-precision-3d .sat-one{top:17%;left:22%;animation:gta-satellite 5s ease-in-out infinite}
+body.gta-precision-3d .sat-two{right:11%;top:54%;animation:gta-satellite 6s ease-in-out -2s infinite}
+body.gta-precision-3d .sat-three{bottom:14%;left:36%;animation:gta-satellite 7s ease-in-out -4s infinite}
+body.gta-precision-3d .gta-precision-readout{position:absolute;right:6%;bottom:12%;display:grid;gap:8px;text-align:right;color:#aab9c9;font:9px/1.5 'JetBrains Mono',MGPrecisionMono,monospace;letter-spacing:.09em;opacity:.8}
+body.gta-precision-3d .hero-copy{z-index:3}
+body.gta-precision-3d .hero-copy h1{color:#f5f5f5}
+body.gta-precision-3d .hero-line{color:#e6ebf2}
+body.gta-precision-3d .hero-description{color:#a1a1aa}
+@keyframes gta-core-float{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-13px)}}
+@keyframes gta-core-spin{from{transform:rotateX(-17deg) rotateY(-26deg)}to{transform:rotateX(-17deg) rotateY(334deg)}}
+@keyframes gta-orbit-a{from{transform:rotateX(73deg) rotateZ(15deg)}to{transform:rotateX(73deg) rotateZ(375deg)}}
+@keyframes gta-orbit-b{from{transform:rotateY(73deg) rotateZ(42deg)}to{transform:rotateY(73deg) rotateZ(402deg)}}
+@keyframes gta-orbit-c{from{transform:rotateX(33deg) rotateY(66deg) rotateZ(0)}to{transform:rotateX(33deg) rotateY(66deg) rotateZ(360deg)}}
+@keyframes gta-satellite{0%,100%{opacity:.35;transform:translateY(0)}50%{opacity:1;transform:translateY(-9px)}}
+body.gta-precision-3d.motion-paused .gta-precision-atmosphere *,body.gta-precision-3d.motion-paused .gta-precision-atmosphere *::before{animation-play-state:paused!important}
+@media(max-width:900px){body.gta-precision-3d .gta-precision-assembly{left:72%;width:300px;height:300px}body.gta-precision-3d .gta-precision-core{transform:scale(.85);transform-origin:center}body.gta-precision-3d .gta-precision-readout{right:3%;bottom:15%}}
+@media(max-width:600px){
+ body.gta-precision-3d .gta-precision-atmosphere{perspective:850px}
+ body.gta-precision-3d .gta-precision-assembly{left:69%;top:32%;width:225px;height:225px;opacity:.54}
+ body.gta-precision-3d .gta-precision-core{width:116px;height:116px;margin:-58px}
+ body.gta-precision-3d .gta-precision-face.front{transform:translateZ(58px)}
+ body.gta-precision-3d .gta-precision-face.back{transform:rotateY(180deg) translateZ(58px)}
+ body.gta-precision-3d .gta-precision-face.left{transform:rotateY(-90deg) translateZ(58px)}
+ body.gta-precision-3d .gta-precision-face.right{transform:rotateY(90deg) translateZ(58px)}
+ body.gta-precision-3d .gta-precision-face.top{transform:rotateX(90deg) translateZ(58px)}
+ body.gta-precision-3d .gta-precision-face.bottom{transform:rotateX(-90deg) translateZ(58px)}
+ body.gta-precision-3d .gta-precision-face img{width:55px;height:55px}
+ body.gta-precision-3d .gta-precision-readout{display:none}
+ body.gta-precision-3d .gta-precision-grid{opacity:.16}
+ body.gta-precision-3d .hero-copy{position:relative;z-index:3}
+}
+@media(prefers-reduced-motion:reduce){body.gta-precision-3d .gta-precision-atmosphere *,body.gta-precision-3d .gta-precision-atmosphere *::before{animation:none!important;transition:none!important}}
