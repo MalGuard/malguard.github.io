@@ -111,3 +111,17 @@ body.mg-precision-shared .mg-card-hero--scam .scam-model-footnote{
   transition:none!important;animation:none!important;
  }
 }
+
+/* Bigger staggered marks, closer to the copy without shifting its start edge. */
+@media(min-width:941px){
+ body.mg-precision-shared .mg-card-hero--scam .scam-hero-layout{grid-template-columns:minmax(0,1.1fr) minmax(390px,.9fr);gap:clamp(12px,2vw,30px)}
+ body.mg-precision-shared .mg-card-hero--scam .scam-hero-copy{max-width:760px}
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-composition{height:405px}
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark{width:185px;height:185px;gap:13px;backdrop-filter:none;-webkit-backdrop-filter:none}
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark img{width:100px;height:100px}
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark--chatgpt{top:0;left:0}
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark--claude{top:26%;right:0}
+ body.mg-precision-shared .mg-card-hero--scam .scam-model-mark--grok{bottom:0;left:17%}
+}
+@media(min-width:531px) and (max-width:940px){body.mg-precision-shared .mg-card-hero--scam .scam-model-mark{width:168px;height:168px;backdrop-filter:none;-webkit-backdrop-filter:none}body.mg-precision-shared .mg-card-hero--scam .scam-model-mark img{width:88px;height:88px}}
+@media(max-width:530px){body.mg-precision-shared .mg-card-hero--scam .scam-model-mark{width:125px;height:125px;backdrop-filter:none;-webkit-backdrop-filter:none}body.mg-precision-shared .mg-card-hero--scam .scam-model-mark img{width:66px;height:66px}}
