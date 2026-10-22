@@ -26,11 +26,11 @@
    if(shared){
     // Public editorial text only, never forms, live verdicts or interactive results.
     const excluded='form,nav,footer,[aria-live],[role="status"],[role="alert"],.result,.verdict,.scan-result,.status,.badge,.counter,.actions,pre,code,[contenteditable],details:not([open]),.site-search,.gta-stage';
-    for(const el of document.querySelectorAll('main h1,main h2,main h3,main h4,main p,main .eyebrow,main .kicker')){
+    for(const el of document.querySelectorAll('main h1,main h2,main h3,main h4,main p,main .eyebrow,main .kicker,main .gta6-type-line')){
      if(el.closest(excluded)||el.isContentEditable||el.children.length||el.hasAttribute('data-type'))continue;
      const value=el.textContent.trim();
      if(value.length<3||value.length>350||!el.getClientRects().length)continue;
-     el.classList.add('type');el.dataset.type=el.matches('h1,h2,h3,h4')?'title':'body';el.dataset.typeState='pending';
+     el.classList.add('type');el.dataset.type=el.matches('h1,h2,h3,h4,.gta6-type-line')?'title':'body';el.dataset.typeState='pending';
      const source=document.createElement('span');source.className='type-source';
      while(el.firstChild)source.append(el.firstChild);el.append(source);
     }
@@ -51,7 +51,7 @@
      nav.querySelectorAll('.mg-brand,.mg-primary-links a,.nav-download').forEach(link=>{if(link.getClientRects().length)markLink(link);});
     }
     if(shared){
-     const actions='main a.btn,main a.button,main a.action-button,main a.release-button,main a.platform-button,main a.download-button,main a.mg-home-product-link,main a.mg-home-product-extra,main a[role="button"],main .actions>a,main .hero-actions>a,main .legacy-actions>a,main .action-group>a,main button.button:not([type="submit"]),main button.btn:not([type="submit"])';
+     const actions='main a.btn,main a.button,main a.action-button,main a.release-button,main a.platform-button,main a.download-button,main a.mg-home-product-link,main a.mg-home-product-extra,main a.gta6-button,main a[role="button"],main .actions>a,main .hero-actions>a,main .legacy-actions>a,main .action-group>a,main button.button:not([type="submit"]),main button.btn:not([type="submit"])';
      document.querySelectorAll(actions).forEach(link=>{
       if(!link.closest('form,[aria-live],[role="dialog"],.site-search,.result,.verdict,.scan-result')&&link.getClientRects().length&&!link.hasAttribute('disabled'))markLink(link);
      });
