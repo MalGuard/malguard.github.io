@@ -40,6 +40,9 @@ try {
  const page=await c.newPage();
  for(const route of ['/products.html','/docs.html','/research/gta-mod-security-fa.html']){
   await page.goto(base+route);
+  await page.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true',null,{timeout:8000});
+  await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navMotion==='complete',null,{timeout:16000});
+  assert.equal(await page.locator('#navbar .mg-brand.type-link[data-type-state="complete"]').count(),1,'Coding header brand missing on '+route);
   await page.waitForFunction(()=>document.querySelectorAll('main [data-type]').length>1,null,{timeout:6000});
   const title=page.locator('main h2').first();
   assert.ok(await title.count());
