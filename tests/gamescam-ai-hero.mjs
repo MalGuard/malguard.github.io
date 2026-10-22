@@ -19,6 +19,7 @@ try{
   page.on('pageerror',e=>errors.push(e.message));
   const r=await page.goto(root+'/game-scam-guard.html',{waitUntil:'domcontentloaded'});
   assert.equal(r?.status(),200,'missing Game Scam Guard page');
+  await page.waitForFunction(()=>[...document.querySelectorAll('.scam-model-mark img')].length===3&&[...document.querySelectorAll('.scam-model-mark img')].every(im=>im.complete&&im.naturalWidth>0),null,{timeout:12000});
   const assets=await page.locator('.scam-model-mark img').evaluateAll(imgs=>imgs.map(im=>({
    src:im.getAttribute('src'),loaded:im.complete&&im.naturalWidth>0
   })));
