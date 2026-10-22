@@ -91,9 +91,9 @@ jobs:
           TEST_BROWSER: ${{ matrix.browser }}
         run: |
           if [ "$TEST_BROWSER" = "webkit" ]; then
-            xvfb-run --auto-servernum node tests/particle-story.cjs
+            xvfb-run --auto-servernum node tests/precision-home-qa.mjs
           else
-            node tests/particle-story.cjs
+            node tests/precision-home-qa.mjs
           fi
       - name: Capture desktop and mobile visual review
         if: matrix.browser == 'chromium'

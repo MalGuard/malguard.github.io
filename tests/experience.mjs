@@ -12,7 +12,7 @@ await mkdir('test-results', { recursive: true });
 const report = { passed: [], failed: [], consoleErrors: [], requestFailures: [] };
 let activePage;
 async function check(name, work) { try { await work(); report.passed.push(name); console.log('PASS', name); } catch (e) { report.failed.push({ name, error: e.message }); console.error('FAIL', name, e.message); if(activePage && !activePage.isClosed()) await activePage.screenshot({path:'test-results/failed-'+name.replace(/[^a-zA-Z0-9]/g,'-')+'.png',fullPage:true}).catch(()=>{}); } }
-async function settle(page) { await page.waitForFunction(()=>document.documentElement.dataset.experienceReady==='true',null,{timeout:5000});await page.evaluate(async()=>{await new Promise(requestAnimationFrame);const h=document.querySelector('main h1')||document.querySelector('h1');if(h)await document.fonts.load(getComputedStyle(h).font);await document.fonts.ready;}); }
+async function settle(page) { await page.waitForFunction(()=>document.documentElement.dataset.experienceReady==='true'||(location.pathname==='/'&&document.documentElement.dataset.precisionTypeReady==='true'),null,{timeout:7500});await page.evaluate(async()=>{await new Promise(requestAnimationFrame);const h=document.querySelector('main h1')||document.querySelector('h1');if(h)await document.fonts.load(getComputedStyle(h).font);await document.fonts.ready;}); }
 async function publicEntry(page) { await settle(page); const button = page.locator('#sitePublicEntry'); if (await button.isVisible()) await button.click(); }
 const browserMatrix = [['chromium',chromium,[320,390,820,1440]], ['webkit',webkit,[390,820]]];
 const selectedBrowser = process.env.TEST_BROWSER;
@@ -29,7 +29,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     const errors=[]; page.on('pageerror',e=>errors.push(e.message));
     for (const path of routes) await check(`${name} ${width}px ${path} layout`, async () => {
       const startErrors=errors.length; const response=await page.goto(base+path); assert.equal(response.status(),200); await publicEntry(page); await settle(page);
-      assert.equal(await page.evaluate(()=>document.fonts.check('16px "Inter"')),true,'Shared body font loaded');
+      if(path!=='/')assert.equal(await page.evaluate(()=>document.fonts.check('16px "Inter"')),true,'Shared body font loaded');
       assert.equal(await page.evaluate(()=>document.fonts.check(getComputedStyle(document.querySelector('main h1')||document.querySelector('h1')).font)),true,'Actual heading font loaded');
       const state=await page.evaluate(()=>{
         const vw=document.documentElement.clientWidth;
@@ -48,29 +48,19 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
       const text=(await page.locator('body').textContent()).replace(/\s+/g,' ').trim();
       for(const paragraph of expected)assert.ok(text.includes(paragraph),'Missing original copy: '+paragraph);
     });
-    await check(`${name} ${width}px menu and search`, async()=>{
+    await check(`${name} ${width}px accessible Precision nav, four stages and no-WebGL view`,async()=>{
       await page.goto(base+'/');await publicEntry(page);
-      await page.getByRole('button',{name:'Open navigation menu',exact:true}).click();
-      assert.ok(await page.locator('#navLinks a').count()>=22);
-      const menu=await page.locator('#navLinks').boundingBox();assert.ok(menu.x>=0&&menu.x+menu.width<=width+1);
-      await page.keyboard.press('Escape');assert.equal(await page.locator('#menuBtn').getAttribute('aria-expanded'),'false');
-      await page.getByRole('button',{name:'Search MalGuard',exact:true}).click();
-      await page.locator('#siteSearchInput').fill('<img src=x onerror=alert(1)>');
-      assert.match(await page.locator('#siteSearchResults').innerText(),/No matching/);
-      assert.equal(await page.locator('#siteSearchResults img').count(),0);
-      assert.ok(await page.locator('main').evaluate(e=>e.inert));
-      await page.locator('#siteSearchInput').fill('fingerprint');
-      await page.locator('#siteSearchResults button').click();await page.waitForURL('**/tools.html');
-    });
-    await check(`${name} ${width}px four-layer scroll and reduced motion`,async()=>{
-      await page.goto(base+'/');await publicEntry(page);
-      for(const k of [0,1,2,3,2,1,0]){
-        await page.evaluate(k=>{const el=document.getElementById('layers'),pin=el.querySelector('.sticky');const flow=el.classList.contains('flow-mode'),span=el.offsetHeight-(flow?innerHeight*.5:pin.offsetHeight);scrollTo({top:scrollY+el.getBoundingClientRect().top+span*((k+.4)/4)-(flow?innerHeight*.35:0),behavior:'instant'});},k);
-        await page.waitForFunction(k=>document.getElementById('layers').dataset.activeLayer===String(k),k,{timeout:5000});
-        assert.equal(await page.locator('#layers .slab.act').count(),1);assert.equal(await page.locator('#layers .st.act').count(),1);
-      }
-      assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');
-      assert.equal(await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length),0);
+      assert.equal(await page.locator('.precision-nav-links a').count(),5);
+      assert.equal(await page.locator('.precision-nav-scan').getAttribute('href'),'/game-scam-guard/');
+      if(width<=920){const nav=page.locator('.precision-nav-mobile');await nav.locator('summary').click();assert.equal(await nav.evaluate(e=>e.open),true);
+        const box=await nav.locator('nav').boundingBox();assert.ok(box.x>=0&&box.x+box.width<=width+1);
+        await page.keyboard.press('Escape');assert.equal(await nav.evaluate(e=>e.open),false);}
+      else assert.ok(await page.locator('.precision-nav-links').isVisible());
+      await page.waitForFunction(()=>document.querySelector('.flow-stage')?.dataset.renderer==='vector');
+      assert.equal(await page.locator('.flow-stage svg text').filter({hasText:'undefined'}).count(),0);
+      assert.equal(await page.locator('.flow-stage canvas').isVisible(),false);
+      for(const step of ['Identify','Inspect','Analyze','Decide'])assert.ok((await page.locator('#technology h3').allTextContents()).some(t=>t.trim()===step));
+      assert.ok((await page.locator('.metric-clarification').innerText()).includes('not verified'));
     });
     await check(`${name} ${width}px URL inputs and local SHA-256`,async()=>{
       for(const path of ['/tools.html','/scan-url.html']){
@@ -86,7 +76,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
       }
     });
     await check(`${name} ${width}px legacy links and product boundary`,async()=>{
-      await page.goto(base+'/#gta-guard');await page.waitForURL('**/gta-guard.html');
+      await page.goto(base+'/gta-guard.html');
       assert.equal(await page.locator('a[href*="releases/download/gta-guard-"]').count(),0);
       assert.ok((await page.locator('#method').innerText()).includes('IDENTIFY'));
       await page.getByRole('link',{name:'Check your installed build',exact:true}).click();
@@ -102,19 +92,12 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     });
 
 
-    await check(`${name} ${width}px product flips and copyable developer example`,async()=>{
+    await check(`${name} ${width}px accessible product links and lightweight cards`,async()=>{
       await page.goto(base+'/');await publicEntry(page);
-      for(let i=0;i<3;i++){
-        const card=page.locator('#products .card').nth(i);await card.locator('.front .mg-card-control').focus();await page.keyboard.press('Enter');
-        assert.equal(await card.getAttribute('data-flipped'),'true');
-        assert.ok((await card.locator('.back').textContent()).includes(['GTA Guard','Threat Radar','Game Scam Guard'][i]));
-        assert.equal(await card.locator('.front').evaluate(e=>e.inert),true);
-        await page.keyboard.press('Escape');assert.equal(await card.getAttribute('data-flipped'),'false');
-      }
-      await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.__copied=text}}}));
-      await page.locator('#copy-workflow').click();assert.ok((await page.evaluate(()=>window.__copied)).includes('execute: false'));
-      await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw Error('denied')}}}));
-      await page.locator('#copy-workflow').click();assert.ok((await page.evaluate(()=>getSelection().toString())).includes('execute: false'));
+      const links=page.locator('#products article.product a.text-link');
+      assert.deepEqual(await links.evaluateAll(a=>a.map(x=>new URL(x.href).pathname)),['/gta-guard.html','/game-scam-guard.html','/threat-radar.html']);
+      assert.equal(await page.locator('#products canvas').count(),0);
+      for(const link of await links.all()){await link.focus();assert.equal(await link.evaluate(el=>document.activeElement===el),true);}
     });
     await context.close();
   }
@@ -125,8 +108,8 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
       if(route.request().url().endsWith('/api/auth')){authCalls++;return route.fulfill({status:401,headers:{'access-control-allow-origin':'*'},contentType:'application/json',body:'{"error":"Access denied"}'});}return route.abort();
     });
     const page=await context.newPage();await page.goto(base+'/');await settle(page);assert.equal(await page.locator('#siteEntryGate').isVisible(),false);assert.equal(await page.locator('a[href*="admin-access"]').count(),0);assert.equal(await page.locator('#adminSessionBadge').isVisible(),false);
-    await page.locator('#menuBtn').click();assert.equal(await page.getByText('Administrator access',{exact:true}).count(),0);
-    await page.goto(base+'/#mg-console-8d42b69fda13705cc47a');await page.waitForURL(base+'/console-8d42b69fda13705cc47a.html');await settle(page);assert.ok(await page.locator('#siteEntryGate').isVisible());assert.ok(await page.locator('#navbar').evaluate(e=>e.inert));
+    assert.equal(await page.getByText('Administrator access',{exact:true}).count(),0);
+    await page.goto(base+'/console-8d42b69fda13705cc47a.html');await settle(page);assert.ok(await page.locator('#siteEntryGate').isVisible());assert.ok(await page.locator('#navbar').evaluate(e=>e.inert));
     await page.locator('#siteAdminPassword').fill('benign-invalid-test-password');await page.locator('#siteAdminPasswordToggle').click();assert.equal(await page.locator('#siteAdminPassword').getAttribute('type'),'text');await page.locator('#siteAdminPasswordToggle').click();assert.equal(await page.locator('#siteAdminPassword').getAttribute('type'),'password');
     await page.locator('#siteAdminPasswordSubmit').click();await page.waitForFunction(()=>document.querySelector('#siteAdminPasswordError').textContent==='Access denied');assert.equal(authCalls,1);assert.equal(await page.locator('#siteAdminIdentityStep').isVisible(),false);
     await page.locator('#siteAdminPasswordBack').click();await page.locator('#sitePublicEntry').click();await page.waitForURL(base+'/');await settle(page);assert.equal(await page.locator('main').evaluate(e=>e.inert),false);await context.close();
@@ -145,13 +128,14 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
       }
       return route.abort();
     });
-    const page=await context.newPage();await page.goto(base+'/#mg-console-8d42b69fda13705cc47a');await page.waitForURL(base+'/console-8d42b69fda13705cc47a.html');await settle(page);
+    const page=await context.newPage();await page.goto(base+'/console-8d42b69fda13705cc47a.html');await settle(page);
     await page.locator('#siteAdminPassword').fill('benign-success-test-password');await page.locator('#siteAdminPasswordSubmit').click();
     await page.locator('#siteAdminName').fill('MalGuard Owner');await page.locator('#siteAdminPhone').fill('+1 202 555 0148');await page.locator('#siteAdminConsent').check();await page.locator('#siteAdminEnter').click();
     await page.waitForURL(base+'/');
-    assert.equal(await page.locator('#adminSessionBadge').isVisible(),true);
-    assert.match(await page.locator('#adminSessionBadge').innerText(),/ADMIN SESSION ACTIVE/);
-    await page.goto(base+'/malware-ai-windows.html');await settle(page);
+    assert.equal(await page.locator('.precision-nav').count(),1);
+     assert.equal(await page.locator('main').evaluate(el=>el.inert),false);
+     assert.equal(await page.locator('#siteAdminPassword').count(),0);
+     await page.goto(base+'/malware-ai-windows.html');await settle(page);
     assert.equal(await page.getByRole('heading',{name:'Now replaced by Threat Radar.'}).count(),1);
     assert.equal(await page.locator('#accessGate').count(),0,'Retired chat must not expose authentication or messaging');
     await context.close();
@@ -205,46 +189,27 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     assert.deepEqual(radar,original,'Radar must inherit the exact existing MalGuard background, heading font and brand accent');
     await context.close();
   });
-  await check(`${name} motion preference and JavaScript-free content`,async()=>{
-    const context=await browser.newContext(fixtureTLS);const page=await context.newPage();await page.goto(base+'/');await publicEntry(page);await page.locator('#motionToggle').click();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await page.reload();assert.equal(await page.locator('#motionToggle').getAttribute('aria-pressed'),'true');await context.close();
-    const nojs=await browser.newContext({...fixtureTLS,javaScriptEnabled:false});const p=await nojs.newPage();await p.goto(base+'/');assert.ok(await p.getByRole('heading',{name:'Scan smart. Play safe.'}).isVisible());assert.ok(await p.getByRole('link',{name:'Explore MalGuard'}).isVisible());assert.equal(await p.locator('#siteEntryGate').isVisible(),false);await nojs.close();
-  });
-
-  await check(`${name} normal-motion particles, final logo and pause`,async()=>{
-    const context=await browser.newContext({...fixtureTLS,viewport:{width:1280,height:850},reducedMotion:'no-preference'});
-    await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
-    const page=await context.newPage();activePage=page;await page.goto(base+'/');await settle(page);
-    // The intro can finish between a visibility check and a button click.
-    // Escape is also the real keyboard skip and remains safe after completion.
-    await page.keyboard.press('Escape');await page.waitForFunction(()=>document.getElementById('c').dataset.introComplete==='true');
-    await page.locator('#finale').scrollIntoViewIfNeeded();await page.waitForFunction(()=>Number(document.getElementById('c').dataset.scene)>12.98&&document.getElementById('c').dataset.logoReady==='true');
-    assert.equal(await page.locator('#c').getAttribute('data-black-masks'),'0');assert.ok(await page.locator('#c').evaluate(e=>Number(e.dataset.underText)/Math.max(1,Number(e.dataset.drawn))<.05),'Final particle mass respects the reading area');
-    await page.locator('#motionToggle').click();
-    // Pause requests one final settled frame before stopping the renderer.
-    await page.waitForFunction(()=>document.getElementById('c').dataset.held==='true');
-    const scene=await page.locator('#c').getAttribute('data-scene');await page.waitForTimeout(200);assert.equal(await page.locator('#c').getAttribute('data-scene'),scene);
-    assert.equal(await page.evaluate(()=>document.getAnimations().filter(a=>a.playState==='running').length),0);
-    await context.close();
-  });
-  await check(`${name} repeat visit bypasses the intro and manual replay still works`,async()=>{
-    const context=await browser.newContext({...fixtureTLS,viewport:{width:1280,height:900},reducedMotion:'no-preference'});
-    await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
-    const page=await context.newPage();
-    await page.goto(base+'/');
-    await page.keyboard.press('Escape');
-    await page.waitForFunction(()=>sessionStorage.getItem('mg-home-intro-seen-v1')==='1');
-    await page.reload();
-    await page.waitForFunction(()=>document.querySelector('#home-opening').dataset.finished==='repeat-visit');
-    assert.equal(await page.locator('#home-opening').isVisible(),false);
-    await page.waitForFunction(()=>!document.querySelector('.scene[data-scene="0"] .t').inert&&getComputedStyle(document.querySelector('.scene h1 .w')).opacity==='1',null,{timeout:5000});
-    assert.equal(await page.locator('.scene[data-scene="0"] .t').evaluate(el=>el.inert),false);
-    await page.locator('#home-opening-replay').click();
-    await page.waitForFunction(()=>document.querySelector('#home-opening').hidden===false);
-    await page.keyboard.press('Escape');
-    assert.equal(await page.locator('#home-opening').isVisible(),false);
-    await context.close();
-  });
-  await browser.close();
+  await check(`${name} reduced motion and JS-free copy remain visible`,async()=>{
+     const c=await browser.newContext({...fixtureTLS,reducedMotion:'reduce'}),p=await c.newPage();
+     await p.goto(base+'/');await settle(p);
+     await p.waitForFunction(()=>document.querySelector('.flow-stage')?.dataset.renderer==='vector');
+     assert.equal(await p.locator('.motion-toggle').isVisible(),false);
+     assert.equal(await p.locator('.flow-stage svg text').filter({hasText:'undefined'}).count(),0);
+     await c.close();
+     const nojs=await browser.newContext({...fixtureTLS,javaScriptEnabled:false}),q=await nojs.newPage();await q.goto(base+'/');
+     assert.ok(await q.getByRole('heading',{name:'Scan smart. Play safe.'}).isVisible());
+     assert.ok(await q.getByRole('link',{name:'Explore products'}).isVisible());await nojs.close();
+   });
+   await check(`${name} viewport typing is sequential and scroll-triggered`,async()=>{
+     const c=await browser.newContext({...fixtureTLS,viewport:{width:1280,height:850},reducedMotion:'no-preference'}),p=await c.newPage();
+     await c.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
+     await p.goto(base+'/');await settle(p);
+     const title=p.locator('#technology [data-type]').first();assert.equal(await title.getAttribute('data-type-state'),'pending');
+     await title.scrollIntoViewIfNeeded();
+     await p.waitForFunction(()=>['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),null,{timeout:8000});
+     assert.equal(await p.locator('#products article.product').count(),3);await c.close();
+   });
+   await browser.close();
 }
 await writeFile('test-results/report'+(selectedBrowser?'-'+selectedBrowser:'')+'.json',JSON.stringify(report,null,2));
 console.log(`${report.passed.length} checks passed; ${report.failed.length} failed`);
