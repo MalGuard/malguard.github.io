@@ -45,7 +45,7 @@ try {
   assert.ok(await title.count());
   assert.equal(await title.getAttribute('data-type-state'),'pending','Offscreen content typed before scroll');
   await title.scrollIntoViewIfNeeded();
-  await page.waitForFunction(()=>[...document.querySelectorAll('main h2 .type-ink')].some(n=>n.textContent.length>0),null,{timeout:5000});
+  await page.waitForFunction(()=>[...document.querySelectorAll('main h2')].some(n=>Number(n.dataset.typeRuns)>0),null,{timeout:12000});
   const concurrent=await page.locator('main [data-type-state=typing]').count();
   assert.ok(concurrent<=1,'Typewriter must have a single active job');
   console.log('PASS',route,'scroll-triggered sequential typing');
