@@ -1,0 +1,216 @@
+/* MalGuard Precision system for public editorial pages. Keep the original shared navbar. */
+@font-face{font-family:MGPrecisionSora;src:url('/assets/fusion/assets/font-8.ttf') format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:MGPrecisionMono;src:url('/assets/fusion/assets/font-3.ttf') format('truetype');font-weight:400;font-display:swap}
+body.mg-precision-shared,body.mg-unified.mg-precision-shared,body.mg-unified.mg-content-page.mg-precision-shared{
+ --mg-bg:#080a0e;--mg-surface:#10141b;--mg-text:#f4f5f7;--mg-muted:#aeb4bd;--mg-line:#343942;--mg-accent:#b8c9df;
+ --bg:#080a0e;--panel:#10141b;--panel2:#121923;--surface:#10141b;--text:#f4f5f7;--muted:#aeb4bd;--line:#343942;
+ --blue:#b8c9df;--blue2:#d1ddeb;--cyan:#b8c9df;--radius:10px;
+ --mg-sans:Arial,system-ui,sans-serif;--mg-serif:MGPrecisionSora,Sora,Arial,sans-serif;
+ --mg-reveal:700ms;--mg-ease:cubic-bezier(.2,.75,.3,1);
+ background:#080a0e!important;color:#f4f5f7!important;color-scheme:dark;
+}
+body.mg-precision-shared.mg-content-page{font-family:Arial,system-ui,sans-serif!important;font-size:14px!important;line-height:1.8!important}
+body.mg-precision-shared main{color:#f4f5f7}
+body.mg-precision-shared main :is(h1,h2,h3,h4){
+ font-family:MGPrecisionSora,Sora,Arial,sans-serif!important;color:#f4f5f7!important;font-weight:600!important;
+ text-shadow:none!important;text-wrap:balance;
+}
+body.mg-precision-shared main h1{font-size:clamp(34px,5.4vw,64px)!important;line-height:1.13!important;letter-spacing:-.048em!important}
+body.mg-precision-shared main h2{font-size:clamp(24px,3.15vw,35px)!important;line-height:1.29!important;letter-spacing:-.035em!important}
+body.mg-precision-shared main h3{font-size:clamp(17px,2vw,22px)!important;line-height:1.38!important;letter-spacing:-.016em!important}
+body.mg-precision-shared main :is(p,li){color:#b5bbc5;font-family:Arial,system-ui,sans-serif!important;line-height:1.83}
+body.mg-precision-shared main p{font-size:clamp(13px,1.25vw,15px)}
+body.mg-precision-shared main :is(.eyebrow,.kicker,.meta,.status,.badge,.tag,.micro-label){font-family:MGPrecisionMono,ui-monospace,monospace!important;letter-spacing:.065em}
+body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare,.compare-card,.notice,.platform-card,.release-card,.result-card,.timeline .step,.secure-card,.feature-card,.radar-card){
+ background:#10141b!important;border:1px solid #343942!important;border-radius:11px!important;box-shadow:none!important;color:#f4f5f7;
+}
+body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare-card,.platform-card,.release-card,.feature-card){transition:border-color .18s ease,background .18s ease!important}
+@media(hover:hover){body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare-card,.platform-card,.release-card,.feature-card):hover{border-color:#697587!important;background:#141a23!important}}
+body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,a[role="button"],button[type="submit"]){
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:43px;
+ padding:10px 16px!important;border:1px solid #5b6470!important;border-radius:8px!important;
+ background:#161c24!important;color:#f0f2f6!important;font-family:Arial,system-ui,sans-serif!important;
+ font-weight:600!important;font-size:12px!important;line-height:1.35!important;text-decoration:none!important;
+ box-shadow:none!important;transition:background .16s ease,border-color .16s ease!important;
+}
+body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,button[type="submit"]):is(.primary,.p,.btn-primary),body.mg-precision-shared main a[role="button"].primary{
+ background:#f2f4f7!important;border-color:#f2f4f7!important;color:#0b0e13!important;
+}
+body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,a[role="button"],button[type="submit"]):hover{border-color:#d1dbe8!important}
+body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,a[role="button"],button[type="submit"]):focus-visible{outline:2px solid #e3ecf7!important;outline-offset:3px!important}
+body.mg-precision-shared main :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select){
+ border:1px solid #535c69;border-radius:8px;color:#f3f5f8;background:#10141b;
+}
+body.mg-precision-shared main :is(.hero,.product-hero,.mg-page-hero,.platform-hero,.release-hero){background:transparent}
+body.mg-precision-shared :is(#navbar,.mg-site-footer){--mg-bg:#080a0e;--mg-surface:#10141b}
+/* Same character ink and cursor as the homepage. */
+body.mg-precision-shared main .type{position:relative}
+body.mg-precision-shared main .type-source{white-space:inherit}
+body.mg-precision-shared main .type-ink{position:absolute;inset:0;white-space:inherit;pointer-events:none;color:inherit}
+.type-system body.mg-precision-shared main .type:not([data-type-state=complete])>.type-source{color:transparent!important}
+body.mg-precision-shared main .type-cursor{display:inline-block;width:0;position:relative;pointer-events:none;vertical-align:baseline}
+body.mg-precision-shared main .type-cursor:after{content:'';position:absolute;left:.08em;background:currentColor}
+body.mg-precision-shared main .type-cursor.vertical{height:.72em}
+body.mg-precision-shared main .type-cursor.vertical:after{bottom:-.025em;width:clamp(3px,.065em,6px);height:100%}
+body.mg-precision-shared main .type-cursor.underscore:after{bottom:-.1em;width:.58em;height:max(2px,.07em)}
+@media(max-width:640px){
+ body.mg-precision-shared main h1{font-size:clamp(30px,9vw,44px)!important}
+ body.mg-precision-shared main h2{font-size:clamp(22px,6.7vw,30px)!important}
+ body.mg-precision-shared main h3{font-size:clamp(16px,5vw,20px)!important}
+ body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare,.platform-card,.release-card){border-radius:9px!important}
+ body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,button[type="submit"]){min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+ body.mg-precision-shared main .mg-precision-type-target{color:inherit!important}
+ body.mg-precision-shared main .mg-precision-type-target::after{display:none!important}
+ body.mg-precision-shared main *{transition-duration:0s!important;animation-duration:0s!important}
+}
+
+
+/* Exact homepage design tokens and card geometry. Source: assets/precision/site.css */
+body.mg-precision-shared{
+ --mg-precision-bg:#080a0e;--mg-precision-text:#f5f5f5;
+ --mg-precision-muted:#a1a1aa;--mg-precision-line:#272a30;
+ --mg-precision-accent:#a6bad5;--mg-precision-card:#11161d;
+ --mg-precision-heading:Sora,Arial,sans-serif;
+ --mg-precision-mono:JetBrains,ui-monospace,SFMono-Regular,Consolas,monospace;
+ --line:#272a30;--text:#f5f5f5;--muted:#a1a1aa;--blue:#a6bad5;
+}
+body.mg-precision-shared main :is(h1,h2,h3,h4){
+ font-family:var(--mg-precision-heading)!important;
+ color:#f5f5f5!important;font-weight:600!important;
+}
+body.mg-precision-shared main h1{letter-spacing:-.075em!important;line-height:1.18!important}
+body.mg-precision-shared main h2{letter-spacing:-.05em!important;line-height:1.4!important}
+body.mg-precision-shared main h3{letter-spacing:-.045em!important;line-height:1.5!important}
+body.mg-precision-shared main :is(p,li){
+ font-family:var(--mg-precision-mono)!important;
+ font-size:clamp(10px,1vw,12px)!important;
+ line-height:1.95!important;color:#a1a1aa!important;
+}
+body.mg-precision-shared main :is(.eyebrow,.kicker,.meta,.status,.badge,.tag,.micro-label){
+ font-family:var(--mg-precision-mono)!important;
+ font-size:9px!important;letter-spacing:.12em!important;
+ color:#b5bbc5!important;
+}
+body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare,.compare-card,.notice,.platform-card,.release-card,.result-card,.timeline .step,.secure-card,.feature-card,.radar-card){
+ background:#11161d!important;
+ border:1px solid #3a414c!important;
+ border-radius:7px!important;
+ box-shadow:none!important;
+}
+body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare-card,.platform-card,.release-card,.feature-card):hover{
+ border-color:#57616f!important;
+}
+body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,a[role="button"],button[type="submit"]){
+ min-height:48px!important;padding:0 20px!important;
+ border-radius:4px!important;
+ font-family:Arial,sans-serif!important;
+ font-size:12px!important;font-weight:400!important;
+ gap:24px!important;line-height:1.4!important;
+}
+body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,button[type="submit"]):is(.primary,.p,.btn-primary),
+body.mg-precision-shared main a[role="button"].primary{
+ background:#f5f5f5!important;border-color:#f5f5f5!important;color:#0e1117!important;
+}
+body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button):not(.primary):not(.p):not(.btn-primary){
+ background:transparent!important;border-color:#3a414c!important;color:#bcbfc7!important;
+}
+/* Product page: same three visual product cards as the homepage, without replacing destinations. */
+body.mg-precision-shared .product-stack{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:16px!important;align-items:stretch}
+body.mg-precision-shared .product-stack>.product-entry{
+ display:flex!important;position:relative;isolation:isolate;flex-direction:column!important;
+ align-items:flex-start!important;gap:0!important;min-width:0!important;
+ min-height:420px!important;padding:26px 24px 20px!important;overflow:hidden;
+}
+body.mg-precision-shared .product-stack>.product-entry::before{
+ content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+ background:linear-gradient(180deg,#080a0e12 0%,#080a0e25 20%,#080a0ed0 46%,#080a0edc 100%);
+}
+body.mg-precision-shared .product-stack>.product-entry>img{
+ width:40px!important;height:40px!important;object-fit:contain!important;margin:0 0 auto!important;
+}
+body.mg-precision-shared .product-stack>.product-entry>div:not(.actions){width:100%;min-width:0}
+body.mg-precision-shared .product-stack>.product-entry h2{
+ font-size:22px!important;line-height:1.5!important;margin:14px 0 12px!important;
+}
+body.mg-precision-shared .product-stack>.product-entry p{
+ font:11px/1.95 var(--mg-precision-mono)!important;color:#c9cdd6!important;
+ margin:0 0 14px!important;min-height:85px!important;
+}
+body.mg-precision-shared .product-stack>.product-entry .meta{margin:12px 0 18px!important}
+body.mg-precision-shared .product-stack>.product-entry .meta span{
+ border:0!important;border-radius:0!important;padding:0 10px 0 0!important;
+ font:8px/1.8 var(--mg-precision-mono)!important;color:#d2d7e0!important;
+}
+body.mg-precision-shared .product-stack>.product-entry .actions{
+ width:100%;display:flex!important;flex-wrap:wrap;gap:8px!important;margin-top:auto!important;
+ justify-content:flex-start!important;
+}
+body.mg-precision-shared .product-stack>.product-entry .actions a{
+ width:auto;min-height:44px!important;
+}
+body.mg-precision-shared .product-stack>.compare{grid-column:1/-1!important}
+@media(max-width:900px){
+ body.mg-precision-shared .product-stack{grid-template-columns:1fr!important}
+ body.mg-precision-shared .product-stack>.product-entry{min-height:350px!important}
+ body.mg-precision-shared .product-stack>.product-entry p{min-height:0!important}
+}
+@media(max-width:640px){
+ body.mg-precision-shared .product-stack>.product-entry{padding:24px 23px 18px!important}
+ body.mg-precision-shared .product-stack>.product-entry h2{font-size:23px!important}
+ body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,button[type="submit"]){min-height:46px!important;padding-inline:16px!important}
+}
+
+/* Pixel-level surface, card and button geometry sourced from the approved homepage. */
+body.mg-unified.mg-precision-shared,body.mg-unified.mg-content-page.mg-precision-shared{
+ --precision-bg:#080a0e;--precision-surface:#11161d;--precision-text:#f5f5f5;
+ --precision-muted:#a1a1aa;--precision-line:#3a414c;
+ --precision-heading:MGPrecisionSora,Sora,Arial,sans-serif;
+ --precision-code:MGPrecisionMono,JetBrains,ui-monospace,monospace;
+ background:var(--precision-bg)!important;color:var(--precision-text)!important
+}
+body.mg-precision-shared main :is(h1,h2,h3,h4){
+ font-family:var(--precision-heading)!important;color:var(--precision-text)!important;font-weight:600!important
+}
+body.mg-precision-shared main :is(.eyebrow,.kicker,.badge,.meta,.status,.micro-label){
+ font-family:var(--precision-code)!important;color:#b7bdc8
+}
+body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare-card,.platform-card,.release-card,.feature-card,.radar-card,.secure-card){
+ border:1px solid var(--precision-line)!important;border-radius:7px!important;
+ background:var(--precision-surface)!important;box-shadow:none!important;
+ color:var(--precision-text)!important;transition:border-color .16s ease,background .16s ease!important
+}
+body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare-card,.platform-card,.release-card,.feature-card,.radar-card,.secure-card):hover{
+ border-color:#616b78!important
+}
+body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare-card,.platform-card,.release-card,.feature-card) h3{
+ font:600 22px/1.5 var(--precision-heading)!important;letter-spacing:-.045em!important
+}
+body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare-card,.platform-card,.release-card,.feature-card) p{
+ font:11px/1.95 var(--precision-code)!important;color:#c9cdd6!important
+}
+body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,a[role=button],button[type=submit]){
+ display:inline-flex!important;align-items:center;justify-content:center;gap:16px;
+ min-height:48px!important;padding:0 20px!important;border-radius:4px!important;
+ font:500 12px/1.5 Arial,sans-serif!important;letter-spacing:normal!important;
+ background:#11161d!important;border:1px solid #3a414c!important;color:#f5f5f5!important;
+ box-shadow:none!important;text-decoration:none!important
+}
+body.mg-precision-shared main :is(.btn.primary,.btn.p,.button.primary,.release-button.primary,.platform-button.primary,.download-button.primary,button[type=submit].primary){
+ background:#f5f5f5!important;border-color:#f5f5f5!important;color:#0e1117!important
+}
+body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button):hover{
+ border-color:#dce2eb!important
+}
+body.mg-precision-shared main :is(.notice,.result,.compare,.form-panel,.tool-panel){
+ background:#11161d!important;border-color:#3a414c!important;border-radius:7px!important
+}
+@media(max-width:640px){
+ body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare-card,.platform-card,.release-card,.feature-card){border-radius:7px!important}
+ body.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,button[type=submit]){min-height:48px!important}
+}
+
+/* Force the source homepage 4px button silhouette above legacy !important pill rules. */
+body.mg-unified.mg-content-page.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,a[role=button],button[type=submit]){border-radius:4px!important;min-height:48px!important;padding:0 20px!important;font:500 12px/1.5 Arial,sans-serif!important}
+body.mg-unified.mg-content-page.mg-precision-shared main :is(.btn.primary,.button.primary,.release-button.primary,.platform-button.primary,.download-button.primary,button[type=submit].primary){background:#f5f5f5!important;border:1px solid #f5f5f5!important;color:#0e1117!important}

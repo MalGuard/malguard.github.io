@@ -1,0 +1,24 @@
+/* Cards use the approved homepage dimensions, assets, typographic hierarchy and image treatment. */
+body.mg-precision-shared main .mg-home-product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:34px}
+body.mg-precision-shared main .mg-home-product-grid .mg-home-product{
+ position:relative;isolation:isolate;min-width:0;display:flex!important;flex-direction:column;align-items:flex-start;
+ min-height:420px;padding:26px 24px 20px!important;border:1px solid #3a414c!important;border-radius:7px!important;
+ overflow:hidden;background:#11161d!important;box-shadow:none!important;transition:opacity .16s,transform .16s
+}
+body.mg-precision-shared main .mg-home-product-art{position:absolute;inset:0;z-index:-2;pointer-events:none}
+body.mg-precision-shared main .mg-home-product-art:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#080a0e12 0%,#080a0e25 20%,#080a0ed0 46%,#080a0edc 100%)}
+body.mg-precision-shared main .mg-home-product-art img{width:100%;height:100%;max-height:none;object-fit:cover;object-position:50% 20%;opacity:.9;border:0;position:static}
+body.mg-precision-shared main .mg-home-product-top{display:flex;justify-content:space-between;align-items:flex-start;width:100%;min-height:100px;margin-bottom:auto;color:#eef0f4}
+body.mg-precision-shared main .mg-home-product-symbol{width:24px;height:24px}
+body.mg-precision-shared main .mg-home-product-symbol svg{width:24px;height:24px}
+body.mg-precision-shared main .mg-home-product-number{font:10px JetBrains,MGPrecisionMono,monospace;color:#bcc2ce}
+body.mg-precision-shared main .mg-home-product-status{font:8px/1.8 JetBrains,MGPrecisionMono,monospace;letter-spacing:.06em;color:#d2d7e0;margin-top:17px}
+body.mg-precision-shared main .mg-home-product h2{font:600 22px/1.5 Sora,MGPrecisionSora,sans-serif!important;letter-spacing:-.045em!important;margin:8px 0 12px!important;max-width:100%}
+body.mg-precision-shared main .mg-home-product p{font:11px/1.95 JetBrains,MGPrecisionMono,monospace!important;color:#c9cdd6!important;margin:0 0 14px!important;min-height:85px;width:100%}
+body.mg-precision-shared main .mg-home-product-links{display:grid;gap:3px;width:100%;margin-top:auto}
+body.mg-precision-shared main .mg-home-product-link{display:inline-flex;align-items:center;justify-content:space-between;gap:25px;font:12px/1.5 Arial,sans-serif;min-height:44px;color:#f5f5f5;text-decoration:none}
+body.mg-precision-shared main .mg-home-product-extra{font:10px/1.5 JetBrains,MGPrecisionMono,monospace;color:#c9cdd6;min-height:25px;display:inline-flex;align-items:center}
+body.mg-precision-shared main .mg-home-product-link:hover,body.mg-precision-shared main .mg-home-product-extra:hover{color:#c3d3e9}
+@media(max-width:900px){body.mg-precision-shared main .mg-home-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){body.mg-precision-shared main .mg-home-product-grid{grid-template-columns:minmax(0,1fr)}body.mg-precision-shared main .mg-home-product-grid .mg-home-product{min-height:390px}}
+@media(prefers-reduced-motion:reduce){body.mg-precision-shared main .mg-home-product-grid .mg-home-product{transition:none!important}}

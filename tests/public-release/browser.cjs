@@ -64,7 +64,7 @@ const {createServer}=require('node:http');
   await page.locator('.mg-language select').selectOption('fa');check('persian-rtl',await page.locator('html').getAttribute('dir')==='rtl');check('persian-download-button',/دانلود/.test(await page.locator('#downloadButton').innerText()));check('persian-public-no-password-help',/به رمز.*نیاز ندارد/.test(await page.locator('#downloadHelp').innerText()));check('persian-current-build',/بیلد فعلی/.test(await page.locator('#buildCheckStatus').innerText()));
   await page.setViewportSize({width:320,height:1000});check('mobile-without-overflow',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.locator('#scanner').screenshot({path:'test-results/public-download-fa-mobile.png'});
   await page.reload();await page.waitForFunction(()=>!document.getElementById('downloadButton').disabled);check('language-persists',await page.locator('.mg-language select').inputValue()==='fa');
-  check('no-browser-errors',errors.length===0);
+  check('no-browser-errors: '+JSON.stringify(errors.slice(0,8)),errors.length===0);
   const result={passed:checks.length,checks,errors,synthetic_download_only:true};writeFileSync('test-results/public-download-browser.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify({passed:checks.length,errors,public_download_without_password:true}));
  }finally{await browser?.close();await new Promise(done=>server?server.close(done):done());staticServer.kill();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

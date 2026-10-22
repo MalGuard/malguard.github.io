@@ -171,3 +171,16 @@ html.motion-paused .mg-unified.mg-content-page [data-tilt]{transform:none!import
 @media(max-width:600px){.mg-fusion .home-opening-controls{top:76px;right:16px}}
 .mg-fusion[data-intro="ready"] .home-opening-controls{top:auto;left:auto}
 @media(max-width:360px){.mg-unified #navbar .mg-brand{font-size:0!important;gap:0}}
+
+/* Precision editorial alignment; keep source-level security actions and old product routes intact. */
+body.mg-unified.mg-content-page{background:#080a0e!important;color:#f5f5f5!important}
+.mg-unified.mg-content-page :is(h1,h2,h3){color:#f5f5f5!important}
+.mg-unified.mg-content-page :is(.card,.tool,.product-entry,.platform-card,.compare,.compare-card,.release-card,.ai-update-card){border:1px solid #30333b!important;border-radius:10px!important;background:#0e1218!important;box-shadow:none!important}
+.mg-unified.mg-content-page :is(.btn,.orbit-button,.release-button){border-radius:8px!important}
+.mg-unified.mg-content-page :is(.btn.primary,.orbit-button.primary,.release-button.primary){background:#f5f5f5!important;border-color:#f5f5f5!important;color:#080a0e!important}
+.mg-unified #navbar.nav{background:#0c0f14ec!important;border:1px solid #343941!important;box-shadow:0 12px 38px #0005!important}
+.mg-unified #navbar :is(.nav-icon,.menu-btn,.nav-download){border-color:#41454f!important;background:#12161c!important;color:#f0f0f2!important}
+.mg-unified.mg-content-page .mg-page-art{display:none!important}
+.mg-unified.mg-content-page .mg-page-hero{grid-template-columns:minmax(0,1fr)!important}
+@media(max-width:900px){.mg-unified #navbar .mg-primary-links{display:none!important}}
+@media(prefers-reduced-motion:reduce){.mg-unified #navbar *{transition:none!important}}

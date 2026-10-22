@@ -21,7 +21,9 @@ jobs:
           python3 tests/validate-site.py
           npm ci --ignore-scripts --no-audit --no-fund
           npm run build
+          node tests/public-release/browser.cjs
           npm run test:game-scam-guard
+          node --check assets/precision/shared-typing.js
           node --check assets/malguard-unified.js
           node --check assets/fusion/home-sections.js
           node --check assets/contextual-header.js
@@ -40,6 +42,7 @@ jobs:
           python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/secure-cinematic.mjs
           TEST_BROWSER=chromium node tests/secure-cinematic.mjs
+          node tests/precision-pages-qa.mjs
           npm run test:experience
           TEST_BROWSER=chromium node tests/game-scam-preview.mjs
           node tests/game-scam-extended-flow.mjs
@@ -47,7 +50,6 @@ jobs:
           node tests/game-scam-isolation.mjs
           # Use the same display compositor as cinematic WebKit checks.
           xvfb-run --auto-servernum node tests/secure-forms.mjs
-          node tests/public-release/browser.cjs
           node tests/public-release/locale-pages.mjs
       - name: Save screenshots and verification report
         if: always()
@@ -91,9 +93,9 @@ jobs:
           TEST_BROWSER: ${{ matrix.browser }}
         run: |
           if [ "$TEST_BROWSER" = "webkit" ]; then
-            xvfb-run --auto-servernum node tests/particle-story.cjs
+            xvfb-run --auto-servernum node tests/precision-home-qa.mjs
           else
-            node tests/particle-story.cjs
+            node tests/precision-home-qa.mjs
           fi
       - name: Capture desktop and mobile visual review
         if: matrix.browser == 'chromium'
