@@ -88,6 +88,30 @@
     advance();
    },{rootMargin:'0px 0px -6% 0px',threshold:[0,.18,.35,1]});
    nodes.forEach(n=>observer.observe(n));
+   // Some browsers do not dispatch a new threshold crossing when an element
+   // is scrolled into view programmatically. Reconcile viewport geometry too.
+   let viewportSyncQueued=false;
+   const syncViewport=()=>{
+    viewportSyncQueued=false;
+    for(const n of nodes){
+     if(done.has(n))continue;
+     const r=n.getBoundingClientRect();
+     if(r.height>0&&r.bottom>0&&r.top<innerHeight*.94){
+      visible.add(n);pending.add(n);
+     }else{
+      visible.delete(n);
+      if(active?.node===n)stopJob();
+     }
+    }
+    advance();
+   };
+   const queueViewportSync=()=>{
+    if(viewportSyncQueued)return;
+    viewportSyncQueued=true;requestAnimationFrame(syncViewport);
+   };
+   addEventListener('scroll',queueViewportSync,{passive:true});
+   addEventListener('resize',queueViewportSync,{passive:true});
+   queueViewportSync();
    document.addEventListener('visibilitychange',()=>{if(document.hidden)stopJob();else advance();});
    document.querySelectorAll('.product').forEach(card=>card.addEventListener('focusin',()=>{[card,...card.querySelectorAll('[data-type]')].forEach(n=>{if(active?.node===n){clearTimeout(timer);active=null;}complete(n);});advance();}));
   }catch{finish();}
