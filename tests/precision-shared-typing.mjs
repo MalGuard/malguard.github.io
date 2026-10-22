@@ -39,8 +39,8 @@ for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chrom
       label:getComputedStyle(menu.querySelector('.mg-menu-label')).color
      };
     });
-    assert.match(palette.nav,/rgba?\\(7,\\s*11,\\s*19[,)]/,path+' navbar palette mismatch');
-    assert.match(palette.dropdown,/rgba?\\(8,\\s*17,\\s*30[,)]/,path+' dropdown teal theme leaked');
+    assert.match(palette.nav,/rgba?\(7,\s*11,\s*19[,)]/,path+' navbar palette mismatch');
+    assert.match(palette.dropdown,/rgba?\(8,\s*17,\s*30[,)]/,path+' dropdown teal theme leaked');
     assert.equal(palette.link,'rgb(184, 201, 222)',path+' links not matching homepage');
     assert.equal(palette.label,'rgb(160, 174, 197)',path+' menu section labels differ');
     assert.ok(status.script,path+' uses outdated script');
