@@ -33,6 +33,8 @@ jobs:
           npm run build:game-scam-guard
           python3 tests/validate-site.py
           node --check assets/precision/site.js
+          node --check assets/gta6-url-review.js
+          test -f gta6-security.html
           test -f assets/precision/shared-pages.css
           rm -rf _site
           mkdir -p _site/.well-known
