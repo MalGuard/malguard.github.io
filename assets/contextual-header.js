@@ -12,6 +12,7 @@
     ['Game Scam Guard', 'Online link inspector and signed Android app', '/game-scam-guard.html', 'game gaming scam'],
     ['iPhone Preview', 'Bounded local mobile inspection', '/ios-preview/', 'iphone ios'],
     ['GTA Guard', 'Clean-room Windows x64 static scanner', '/gta-guard.html', 'mods windows files'],
+    ['GTA VI Security Center', 'Fake-download research and local URL warning-sign review', '/gta6-security.html', 'gta 6 gta vi security center fake download scam'],
     ['Scan Mods', 'Supported and planned game-mod tools', '/scan-mods.html', 'gta minecraft roblox'],
     ['Threat Radar', 'GitHub-reviewed public security advisories', '/threat-radar.html', 'threat radar vulnerability advisory github'],
     ['Scan URL', 'Local URL-text inspection', '/scan-url.html', 'url link address'],

@@ -342,3 +342,43 @@ body.mg-unified.mg-precision-shared #navbar .mg-primary-links a:is(:hover,[aria-
   padding:16px!important;
  }
 }
+
+
+/* Opaque, neutral navigation surface. The open menu must never expose hero text
+   or GPU animation beneath its links (including iOS Safari webviews). */
+#navbar.nav{z-index:400!important}
+#navbar #navLinks:not([hidden]){
+ position:absolute!important;z-index:20!important;isolation:isolate!important;
+ background:#0b0f15!important;background-color:#0b0f15!important;
+ background-image:none!important;opacity:1!important;
+ -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+ border:1px solid #353b46!important;
+ box-shadow:0 24px 72px rgba(0,0,0,.89)!important;
+}
+#navbar #navLinks:not([hidden]) :is(a,button){
+ background-color:transparent!important;color:#cbd3de!important;
+ text-shadow:none!important;
+}
+#navbar #navLinks:not([hidden]) :is(a,button):is(:hover,:focus-visible,[aria-current="page"]){
+ background-color:#1b222c!important;color:#fff!important;
+}
+#navbar #navLinks .mg-menu-label{color:#9ca7b5!important}
+#navbar .menu-btn[aria-expanded="true"]{
+ background:#252b33!important;border-color:#555d69!important;color:#f1f3f6!important;
+}
+
+/* Internal pages have more specific legacy navbar declarations; beat them
+   explicitly so the open menu is always fully opaque on iPad Safari. */
+body.mg-unified.mg-precision-shared #navbar #navLinks:not([hidden]){
+ background:#0b0f15!important;background-color:#0b0f15!important;
+ background-image:none!important;
+ -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+ border-color:#353b46!important;
+ opacity:1!important;isolation:isolate!important;
+}
+body.mg-unified.mg-precision-shared #navbar .menu-btn[aria-expanded="true"]{
+ background:#252b33!important;border-color:#555d69!important;color:#f1f3f6!important;
+}
+body.mg-unified.mg-precision-shared #navbar #navLinks:not([hidden]) :is(a,button):is(:hover,:focus-visible,[aria-current="page"]){
+ background-color:#1b222c!important;color:#fff!important;
+}
