@@ -76,6 +76,8 @@ jobs:
           python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
           TEST_BROWSER=chromium node tests/precision-motion-matrix.mjs
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/precision-motion-matrix.mjs
+          TEST_BROWSER=chromium node tests/precision-shared-typing.mjs
+          TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/precision-shared-typing.mjs
 
   cinematic:
     needs: responsive-and-functional

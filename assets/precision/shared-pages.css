@@ -214,3 +214,47 @@ body.mg-precision-shared main :is(.notice,.result,.compare,.form-panel,.tool-pan
 /* Force the source homepage 4px button silhouette above legacy !important pill rules. */
 body.mg-unified.mg-content-page.mg-precision-shared main :is(.btn,.button,.release-button,.platform-button,.download-button,a[role=button],button[type=submit]){border-radius:4px!important;min-height:48px!important;padding:0 20px!important;font:500 12px/1.5 Arial,sans-serif!important}
 body.mg-unified.mg-content-page.mg-precision-shared main :is(.btn.primary,.button.primary,.release-button.primary,.platform-button.primary,.download-button.primary,button[type=submit].primary){background:#f5f5f5!important;border:1px solid #f5f5f5!important;color:#0e1117!important}
+
+/* Site-wide coding typewriter: the same bundled mono face, caret and header order as home. */
+body.mg-unified.mg-precision-shared main :is(h1,h2,h3,h4),
+body.mg-precision-shared main [data-type]{
+ font-family:MGPrecisionMono,JetBrains,ui-monospace,Consolas,monospace!important;
+}
+body.mg-precision-shared #navbar :is(.mg-brand,.mg-primary-links a,.nav-links a,.nav-download,.mg-menu-label){
+ font-family:MGPrecisionMono,JetBrains,ui-monospace,Consolas,monospace!important;
+}
+body.mg-precision-shared main :is(.btn,.button,.action-button,.release-button,.platform-button,.download-button,a[role="button"],button[type="submit"]){
+ font-family:MGPrecisionMono,JetBrains,ui-monospace,Consolas,monospace!important;
+}
+body.mg-precision-shared .type-link{position:relative}
+body.mg-precision-shared .type-link>.type-ink{
+ position:absolute;inset:0;display:inline-flex;align-items:center;justify-content:center;
+ white-space:nowrap;overflow:visible;pointer-events:none;color:inherit;
+}
+body.mg-precision-shared #navbar .mg-brand.type-link>.type-ink{
+ left:36px;justify-content:flex-start;
+}
+body.mg-precision-shared #navbar .mg-primary-links .type-link>.type-ink,
+body.mg-precision-shared main .type-link.text-link>.type-ink{justify-content:flex-start}
+.type-system body.mg-precision-shared #navbar:not([data-reveal-state=active]):not([data-reveal-state=complete]){
+ opacity:0;pointer-events:none;
+}
+.type-system body.mg-precision-shared #navbar:not([data-nav-motion=complete]) :is(.nav-icon,.menu-btn){
+ visibility:hidden;pointer-events:none;
+}
+.type-system body.mg-precision-shared .type-link[data-type-state=pending]{
+ visibility:hidden;pointer-events:none;
+}
+.type-system body.mg-precision-shared #navbar .type-link:not([data-type-state=complete])>.type-source,
+.type-system body.mg-precision-shared main .type-link:not([data-type-state=complete])>.type-source{color:transparent!important}
+.type-system body.mg-precision-shared .type-link:not([data-type-state=complete])>svg,
+.type-system body.mg-precision-shared #navbar .mg-brand.type-link:not([data-type-state=complete])>img{visibility:hidden}
+body.mg-precision-shared .type-cursor.vertical{height:.9em}
+body.mg-precision-shared .type-cursor.vertical:after{
+ content:"";position:absolute;left:.1em;bottom:-.05em;width:3px;height:100%;
+ background:currentColor;animation:mg-shared-coding-caret .85s steps(1,end) infinite;
+}
+@keyframes mg-shared-coding-caret{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){
+ body.mg-precision-shared .type-cursor.vertical:after{animation:none!important}
+}
