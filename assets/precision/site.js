@@ -22,20 +22,21 @@
  if(eligible){root.classList.add('type-system');}
  function init(){
   try{
-   if(document.body.classList.contains('mg-precision-shared')){
-    const excluded='form,nav,footer,[aria-live],.result,.verdict,.scan-result,pre,code,.status,.badge,.actions,[contenteditable],details:not([open])';
-    for(const el of document.querySelectorAll('main h1,main h2,main h3,main p')){
+   const shared=document.body.classList.contains('mg-precision-shared');
+   if(shared){
+    // Public editorial text only, never forms, live verdicts or interactive results.
+    const excluded='form,nav,footer,[aria-live],[role="status"],[role="alert"],.result,.verdict,.scan-result,.status,.badge,.counter,.actions,pre,code,[contenteditable],details:not([open]),.site-search,.gta-stage';
+    for(const el of document.querySelectorAll('main h1,main h2,main h3,main h4,main p,main .eyebrow,main .kicker')){
      if(el.closest(excluded)||el.isContentEditable||el.children.length||el.hasAttribute('data-type'))continue;
      const value=el.textContent.trim();
-     if(value.length<5||value.length>310||!el.getClientRects().length)continue;
-     el.classList.add('type');el.dataset.type=el.matches('h1,h2,h3')?'title':'body';el.dataset.typeState='pending';
+     if(value.length<3||value.length>350||!el.getClientRects().length)continue;
+     el.classList.add('type');el.dataset.type=el.matches('h1,h2,h3,h4')?'title':'body';el.dataset.typeState='pending';
      const source=document.createElement('span');source.className='type-source';
      while(el.firstChild)source.append(el.firstChild);el.append(source);
     }
    }
-   // The navigation and every CTA join the SAME queue as headings and paragraphs.
-   // Keep original anchor text and destinations in the DOM for accessibility and SEO.
-   if(document.body.classList.contains('precision-home')){
+   // Header first, then page text and CTAs. Keep original accessible source text.
+   if(document.body.classList.contains('precision-home')||shared){
     const markLink=link=>{
      if(link.querySelector(':scope > .type-source'))return;
      const textNodes=[...link.childNodes].filter(n=>n.nodeType===3&&n.textContent.trim());
@@ -49,7 +50,14 @@
      nav.dataset.reveal='nav';nav.dataset.revealState='pending';nav.dataset.navMotion='pending';
      nav.querySelectorAll('.mg-brand,.mg-primary-links a,.nav-download').forEach(link=>{if(link.getClientRects().length)markLink(link);});
     }
-    document.querySelectorAll('.hero-actions>a.button,#products a.text-link,#technology a.text-link,.home-tools a.text-link').forEach(markLink);
+    if(shared){
+     const actions='main a.btn,main a.button,main a.action-button,main a.release-button,main a.platform-button,main a.download-button,main a[role="button"],main .actions>a,main .hero-actions>a,main .legacy-actions>a,main .action-group>a,main button.button:not([type="submit"]),main button.btn:not([type="submit"])';
+     document.querySelectorAll(actions).forEach(link=>{
+      if(!link.closest('form,[aria-live],[role="dialog"],.site-search,.result,.verdict,.scan-result')&&link.getClientRects().length&&!link.hasAttribute('disabled'))markLink(link);
+     });
+    }else{
+     document.querySelectorAll('.hero-actions>a.button,#products a.text-link,#technology a.text-link,.home-tools a.text-link').forEach(markLink);
+    }
    }
    nodes=[...document.querySelectorAll('[data-type],[data-reveal],[data-count-group]')].filter(n=>!n.hasAttribute('data-type')||!!n.querySelector(':scope > .type-source'));root.dataset.precisionTypeReady='true';
    if(!eligible||stopped){finish();return;}
