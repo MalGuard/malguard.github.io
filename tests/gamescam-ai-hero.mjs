@@ -1,63 +1,165 @@
-// Verify Game Scam Guard responsive brandmark illustration and site-wide typing speed.
-// Local HTTPS only. Branding is a visual illustration, never proof of vendor integration.
+// Regression: AI logo fusion belongs to the MalGuard intelligence artwork,
+// not to Game Scam Guard. Verify real local SVGs, one-shot motion and fallbacks.
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {mkdirSync,readFileSync} from 'node:fs';
 import {chromium,webkit,launchOptions} from './browser-runtime.mjs';
-const js=readFileSync('assets/precision/site.js','utf8');
-assert.match(js,/per:29,min:230,max:455/,'button timing should be slightly faster');
-assert.match(js,/per:39,min:335,max:900/,'title timing should be slightly faster');
-assert.match(js,/per:21,min:360,max:1320/,'body timing should be slightly faster');
-const root='https://127.0.0.1:8443',browserName=process.env.TEST_BROWSER||'chromium';
+
+const typing=readFileSync('assets/precision/site.js','utf8');
+assert.match(typing,/per:29,min:230,max:455/,'button timing must remain stable');
+assert.match(typing,/per:39,min:335,max:900/,'heading timing must remain stable');
+assert.match(typing,/per:21,min:360,max:1320/,'body timing must remain stable');
+
+assert.match(readFileSync('assets/precision/provider-claude.svg','utf8'),/fill="#D97757"/,'Claude mark must retain its terracotta brand color');
+const base='https://127.0.0.1:8443';
+const browserName=process.env.TEST_BROWSER||'chromium';
 const browser=await(browserName==='webkit'?webkit:chromium).launch(launchOptions(browserName));
-try{
- for(const width of [390,820,1280]){
-  const context=await browser.newContext({
-   ignoreHTTPSErrors:true,viewport:{width,height:900},reducedMotion:'reduce'
+const scenes=[
+  ['/','main .product-ai .mg-ai-fusion'],
+  ['/products.html','main .product-ai .mg-ai-fusion'],
+  ['/threat-radar.html','.radar-ai-illustration.mg-ai-fusion']
+];
+async function checkScene(page,selector,reduced){
+  const stage=page.locator(selector);
+  assert.equal(await stage.count(),1,'missing AI scene: '+selector);
+  // Other page copy types while the artwork plays. Do not wait for the moving
+  // hero's layout to settle before observing this short natural animation.
+  await stage.evaluate(el=>el.scrollIntoView({behavior:'instant',block:'center'}));
+  await page.waitForFunction(sel=>{
+    const el=document.querySelector(sel);
+    return !!el&&[...el.querySelectorAll('img')].length===4&&
+      [...el.querySelectorAll('img')].every(img=>img.complete&&img.naturalWidth>0);
+  },selector,{timeout:15000});
+  const scene=await stage.evaluate(el=>{
+    const marks=[...el.querySelectorAll('.mg-ai-fusion__mark')];
+    const brand=el.querySelector('.mg-ai-fusion__brand');
+    return{
+      marks:marks.length,
+      sources:marks.map(x=>x.querySelector('img')?.getAttribute('src')),
+      final:brand?.querySelector('img')?.getAttribute('src'),
+      active:el.dataset.fusionActive,
+      markAnimations:marks.map(x=>getComputedStyle(x).animationName),
+      brandAnimation:getComputedStyle(brand).animationName,
+      brandOpacity:getComputedStyle(brand).opacity,
+      markOpacity:marks.map(x=>getComputedStyle(x).opacity),
+      noBoxes:marks.every(x=>{
+        const s=getComputedStyle(x);
+        return s.borderTopStyle==='none'&&s.backgroundImage==='none'&&
+          (s.backgroundColor==='rgba(0, 0, 0, 0)'||s.backgroundColor==='transparent')&&s.boxShadow==='none';
+      })
+    };
   });
-  await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(root).origin?route.continue():route.abort());
-  const page=await context.newPage(),errors=[];
-  page.on('pageerror',e=>errors.push(e.message));
-  const r=await page.goto(root+'/game-scam-guard.html',{waitUntil:'domcontentloaded'});
-  assert.equal(r?.status(),200,'missing Game Scam Guard page');
-  await page.waitForFunction(()=>[...document.querySelectorAll('.scam-model-mark img')].length===3&&[...document.querySelectorAll('.scam-model-mark img')].every(im=>im.complete&&im.naturalWidth>0),null,{timeout:12000});
-  const assets=await page.locator('.scam-model-mark img').evaluateAll(imgs=>imgs.map(im=>({
-   src:im.getAttribute('src'),loaded:im.complete&&im.naturalWidth>0
-  })));
-  assert.equal(assets.length,3,'expected three illustrated provider marks');
-  for(const asset of assets){
-   assert.match(asset.src,/^\/assets\/precision\/provider-(openai|claude|grok)\.svg$/);
-   assert.ok(asset.loaded,'provider brandmark did not load locally '+asset.src);
+  assert.equal(scene.marks,3);
+  assert.deepEqual(scene.sources,
+    ['openai','claude','grok'].map(x=>'/assets/precision/provider-'+x+'.svg'));
+  assert.equal(scene.final,'/assets/fusion/assets/malguard-logo.svg');
+  assert.ok(scene.noBoxes,'brandmarks must not have card backgrounds');
+  if(reduced){
+    assert.equal(scene.brandAnimation,'none');
+    assert.equal(scene.brandOpacity,'1');
+    assert.ok(scene.markOpacity.every(x=>x==='0'),'reduced motion must not show incoming marks');
+  }else{
+    await page.waitForFunction(sel=>document.querySelector(sel)?.dataset.fusionActive==='true',
+      selector,{timeout:20000});
+    const a=await stage.locator('.mg-ai-fusion__mark').first().evaluate(x=>getComputedStyle(x).animationName);
+    assert.equal(a,'mg-ai-hop-and-fuse');
   }
-  const data=await page.evaluate(()=>{
-   const hero=document.querySelector('.mg-card-hero--scam');
-   const comp=hero.querySelector('.scam-model-composition');
-   const copy=hero.querySelector('.scam-hero-copy');
-   const logos=[...comp.querySelectorAll('.scam-model-mark')];
-   const rect=e=>{const r=e.getBoundingClientRect();return{x:r.left,y:r.top,right:r.right,bottom:r.bottom,w:r.width,h:r.height};};
-   return{
-    hero:rect(hero),copy:rect(copy),visual:rect(comp),marks:logos.map(rect),
-    heading:document.querySelectorAll('main h1').length,
-    bg:getComputedStyle(hero,'::before').backgroundImage,
-    viewport:document.documentElement.clientWidth,
-    scroll:document.documentElement.scrollWidth,
-    disclaim:comp.getAttribute('aria-label'),
-    faster:[...document.scripts].some(x=>x.src.includes('site.js?v=slightly-faster-typing-20261022'))
-   };
+}
+try{
+  for(const width of [360,390,768,1280]){
+    const ctx=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width,height:900},reducedMotion:'reduce'});
+    await ctx.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
+    const page=await ctx.newPage();
+    for(const [path,selector] of scenes){
+      const response=await page.goto(base+path,{waitUntil:'domcontentloaded'});
+      assert.equal(response?.status(),200,path);
+      await checkScene(page,selector,true);
+      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),path+' overflow @'+width);
+    }
+    await page.goto(base+'/game-scam-guard.html',{waitUntil:'domcontentloaded'});
+    assert.equal(await page.locator('.mg-card-hero--scam').count(),1);
+    assert.equal(await page.locator('.mg-card-hero--scam [src*="provider-"]').count(),0,
+      'Game Scam Guard must retain its own artwork, not AI provider logos');
+    console.log('PASS no-motion and Game Scam separation',browserName,width);
+    await ctx.close();
+  }
+  // Returning to normal motion must not replay a one-shot scene. Cover both
+  // an active scene and a below-fold scene waiting on IntersectionObserver.
+  for(const [path,selector] of [scenes[0],scenes[2]]){
+    const ctx=await browser.newContext({ignoreHTTPSErrors:true,reducedMotion:'no-preference'});
+    await ctx.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
+    const page=await ctx.newPage();
+    await page.goto(base+path,{waitUntil:'domcontentloaded'});
+    if(path!=='/')await checkScene(page,selector,false);
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await page.waitForFunction(sel=>!document.querySelector(sel).hasAttribute('data-fusion-ready'),selector);
+    await checkScene(page,selector,true);
+    await page.emulateMedia({reducedMotion:'no-preference'});
+    await checkScene(page,selector,true);
+    await page.waitForTimeout(200);
+    assert.equal(await page.locator(selector).evaluate(el=>el.getAnimations({subtree:true}).length),0,'motion preference update replayed the composition');
+    console.log('PASS live reduced-motion change without replay',browserName,path);
+    await ctx.close();
+  }
+  for(const width of [360,390,768,1280]){
+    const ctx=await browser.newContext({ignoreHTTPSErrors:true,javaScriptEnabled:false,viewport:{width,height:900}});
+    const page=await ctx.newPage();
+    for(const [path,selector] of scenes){
+      await page.goto(base+path,{waitUntil:'load'});
+      await checkScene(page,selector,true);
+    }
+    console.log('PASS no-JavaScript final brand',browserName,width);
+    await ctx.close();
+  }
+  mkdirSync('test-results',{recursive:true});
+  for(const width of [360,390,768,1280]){
+  const ctx=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width,height:900},reducedMotion:'no-preference'});
+  await ctx.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
+  const page=await ctx.newPage();
+  const errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  for(const [path,selector] of scenes){
+  await page.goto(base+path,{waitUntil:'domcontentloaded'});
+  await checkScene(page,selector,false);
+  const stage=page.locator(selector);
+  const bounds=await stage.evaluate(el=>({width:el.offsetWidth,height:el.offsetHeight}));
+  assert.equal(await stage.locator('.mg-ai-fusion__mark').first().evaluate(el=>getComputedStyle(el).animationDuration),'7.2s');
+  // WebKit does not consistently apply CSS animation fill state after
+  // Web Animations API .finish(); verify the real elapsed end state instead.
+  await page.waitForFunction(sel=>document.querySelector(sel).getAnimations({subtree:true}).every(a=>a.playState==='finished'),selector);
+  const final=await stage.evaluate(el=>{
+    const brand=el.querySelector('.mg-ai-fusion__brand');
+    return{
+      opacity:getComputedStyle(brand).opacity,
+      marks:[...el.querySelectorAll('.mg-ai-fusion__mark')].map(x=>getComputedStyle(x).opacity)
+    };
   });
-  assert.ok(data.faster,'missing fresh typewriter JS version');
-  assert.ok(data.bg.includes('scam-card-960.webp'),'previous card photo must remain');
-  assert.equal(data.heading,1,'hero title duplicated');
-  assert.ok(data.disclaim.includes('not a claim of integration'),'illustration must not claim integration');
-  assert.ok(data.scroll<=data.viewport+2,'horizontal scroll overflow at '+width);
-  assert.ok(data.marks.every(x=>x.w>=(width<530?108:142)),'logos not enlarged enough');
-  assert.ok(data.marks[0].y<data.marks[1].y&&data.marks[1].y<data.marks[2].y,
-   'logos should stagger downward ChatGPT to Claude to Grok');
-  if(width>=941){
-   assert.ok(data.copy.w>480,'copy should extend into previously unused hero width');
-   assert.ok(data.visual.x>=data.copy.right-10,'logos overlap hero text');
-  }else assert.ok(data.visual.y>=data.copy.bottom-3,'mobile/tablet logos should follow the copy');
-  assert.deepEqual(errors,[],'page errors');
-  console.log('PASS widened copy and staggered logo trio',browserName,width);
-  await context.close();
- }
+  assert.equal(final.opacity,'1','MalGuard must be visible at the end');
+  assert.ok(final.marks.every(x=>x==='0'),'the three provider marks must disappear');
+  assert.deepEqual(await stage.evaluate(el=>({width:el.offsetWidth,height:el.offsetHeight})),bounds,'animation changed artwork layout');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),path+' overflow @'+width);
+  await stage.evaluate(el=>el.scrollIntoView({block:'start'}));
+  assert.equal(await stage.locator('.mg-ai-fusion__brand').evaluate(el=>getComputedStyle(el).opacity),'1','scroll replayed fusion');
+  // After verifying the untouched natural end state, seek the completed
+  // animation to its rest pose for deterministic geometry and visual review.
+  // Driver/layout waits can otherwise miss that interval on these typed pages.
+  const rest=await stage.evaluate(async el=>{
+    for(const animation of el.getAnimations({subtree:true})){
+      animation.pause();animation.currentTime=3200;
+    }
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    const r=el.getBoundingClientRect();
+    let painted=true;
+    for(let p=el;p;p=p.parentElement)if(Number(getComputedStyle(p).opacity)<.9)painted=false;
+    return {painted,marks:[...el.querySelectorAll('.mg-ai-fusion__mark')].map(mark=>{
+      const m=mark.getBoundingClientRect();
+      return Number(getComputedStyle(mark).opacity)>.9&&m.left>=r.left&&m.right<=r.right&&m.top>=r.top&&m.bottom<=r.bottom;
+    })};
+  });
+  assert.ok(rest.painted&&rest.marks.every(Boolean),'settled provider marks must be painted and unclipped '+path+' @'+width+' '+JSON.stringify(rest));
+  await stage.screenshot({path:`test-results/fusion-${browserName}-${width}-${path==='/'?'home':path.slice(1,-5)}.png`});
+  console.log('PASS natural slow fusion, unclipped marks and stable layout',browserName,width,path);
+  }
+  assert.deepEqual(errors,[],'page exceptions');
+  await ctx.close();
+  }
 }finally{await browser.close()}

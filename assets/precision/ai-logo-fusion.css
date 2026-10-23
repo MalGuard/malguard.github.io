@@ -1,0 +1,142 @@
+/* MalGuard AI: transparent, authentic provider marks with a calm one-shot reveal.
+   No app-icon tiles, external assets, canvas, or continuously running animations. */
+.mg-ai-fusion{
+  --mg-mark-size:100px;
+  --mg-rest-a-x:-114px;--mg-rest-a-y:-66px;
+  --mg-rest-b-x:117px;--mg-rest-b-y:-47px;
+  --mg-rest-c-x:0px;--mg-rest-c-y:98px;
+  --mg-start-a-x:-215px;--mg-start-a-y:-140px;
+  --mg-start-b-x:220px;--mg-start-b-y:-120px;
+  --mg-start-c-x:-75px;--mg-start-c-y:200px;
+  position:relative;min-width:0;isolation:isolate;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 48%,rgba(8,11,18,.91) 0%,rgba(8,11,18,.54) 53%,transparent 84%);
+}
+.mg-ai-fusion__mark,.mg-ai-fusion__brand{
+  position:absolute;left:50%;top:50%;width:var(--mg-mark-size);height:var(--mg-mark-size);
+  display:grid;place-items:center;pointer-events:none;
+}
+.mg-ai-fusion__mark{
+  opacity:0;transform:translate(-50%,-50%) scale(.82);isolation:isolate;
+  border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;
+}
+.mg-ai-fusion__mark::before{
+  content:"";position:absolute;inset:-30%;z-index:-1;pointer-events:none;
+  border-radius:50%;
+  background:radial-gradient(circle,var(--mg-halo) 0%,transparent 67%);
+  opacity:.58;
+}
+.mg-ai-fusion__mark img{
+  display:block;width:100%;height:100%;object-fit:contain;
+  border:0;border-radius:0;background:transparent;box-shadow:none;
+}
+.mg-ai-fusion__mark--openai{
+  --mg-halo:rgba(16,163,127,.34);
+  --mg-rest-x:var(--mg-rest-a-x);--mg-rest-y:var(--mg-rest-a-y);
+  --mg-start-x:var(--mg-start-a-x);--mg-start-y:var(--mg-start-a-y);
+}
+.mg-ai-fusion__mark--claude{
+  --mg-halo:rgba(217,119,87,.37);
+  --mg-rest-x:var(--mg-rest-b-x);--mg-rest-y:var(--mg-rest-b-y);
+  --mg-start-x:var(--mg-start-b-x);--mg-start-y:var(--mg-start-b-y);
+}
+.mg-ai-fusion__mark--grok{
+  --mg-halo:rgba(101,151,238,.38);
+  --mg-rest-x:var(--mg-rest-c-x);--mg-rest-y:var(--mg-rest-c-y);
+  --mg-start-x:var(--mg-start-c-x);--mg-start-y:var(--mg-start-c-y);
+}
+.mg-ai-fusion__brand{
+  width:calc(var(--mg-mark-size) * 1.32);height:calc(var(--mg-mark-size) * 1.32);
+  transform:translate(-50%,-50%);opacity:1;
+}
+.mg-ai-fusion__brand img{display:block;width:100%;height:100%;object-fit:contain}
+/* The shared product-page enhancer adds an infinite icon breath to images.
+   This scene owns its motion, including a completely still final brand mark. */
+.mg-ai-fusion img{animation:none!important}
+@media(prefers-reduced-motion:no-preference){
+  /* Keep a static MalGuard mark if scripts are unavailable. */
+  .mg-ai-fusion[data-fusion-ready="true"] .mg-ai-fusion__brand{opacity:0}
+  .mg-ai-fusion[data-fusion-active="true"] .mg-ai-fusion__mark{
+    animation:mg-ai-hop-and-fuse 7.2s linear both;
+  }
+  .mg-ai-fusion[data-fusion-active="true"] .mg-ai-fusion__brand{
+    animation:mg-ai-brand-arrives 7.2s linear both;
+  }
+}
+/* The mark travels in slowly, settles almost imperceptibly, rests, then converges.
+   All three tracks end together, with no bouncy overshoot or abrupt angular jumps. */
+@keyframes mg-ai-hop-and-fuse{
+  0%{
+    opacity:0;
+    transform:translate(calc(-50% + var(--mg-start-x)),calc(-50% + var(--mg-start-y))) scale(.82);
+    animation-timing-function:cubic-bezier(.18,.62,.26,1);
+  }
+  10%{opacity:.94}
+  34%{
+    opacity:1;
+    transform:translate(calc(-50% + var(--mg-rest-x)),calc(-50% + var(--mg-rest-y) - 4px)) scale(1.015);
+    animation-timing-function:cubic-bezier(.28,0,.25,1);
+  }
+  43%{
+    transform:translate(calc(-50% + var(--mg-rest-x)),calc(-50% + var(--mg-rest-y))) scale(1);
+  }
+  60%{
+    opacity:1;
+    transform:translate(calc(-50% + var(--mg-rest-x)),calc(-50% + var(--mg-rest-y))) scale(1);
+    animation-timing-function:cubic-bezier(.45,0,.6,1);
+  }
+  77%{
+    opacity:.98;
+    transform:translate(-50%,-50%) scale(.66);
+    animation-timing-function:ease-out;
+  }
+  83%,100%{opacity:0;transform:translate(-50%,-50%) scale(.25)}
+}
+@keyframes mg-ai-brand-arrives{
+  0%,77%{opacity:0;transform:translate(-50%,-50%) scale(.78)}
+  88%{
+    opacity:1;transform:translate(-50%,-50%) scale(1.01);
+    animation-timing-function:ease-out;
+  }
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+/* Smaller artwork regions retain clear spacing and prevent top-edge clipping. */
+.product-ai .product-art .mg-ai-fusion,
+.product-ai .mg-home-product-art .mg-ai-fusion{
+  position:absolute;inset:0;width:100%;height:100%;
+  --mg-mark-size:60px;
+  --mg-rest-a-x:-110%;--mg-rest-a-y:-43.333%;
+  --mg-rest-b-x:113.333%;--mg-rest-b-y:-38.333%;
+  --mg-rest-c-x:0px;--mg-rest-c-y:86.667%;
+  --mg-start-a-x:-160px;--mg-start-a-y:-100px;
+  --mg-start-b-x:163px;--mg-start-b-y:-87px;
+  --mg-start-c-x:-85px;--mg-start-c-y:150px;
+  background:radial-gradient(ellipse at 50% 40%,#2d3540 0%,#111820 76%);
+}
+/* Existing editorial columns can make a desktop card narrower than a phone
+   card. Fit its artwork without changing the card or grid dimensions. */
+.product-ai :is(.product-art,.mg-home-product-art) .mg-ai-fusion__mark{
+  width:min(var(--mg-mark-size),24%);height:auto;aspect-ratio:1;
+}
+body.mg-precision-shared .radar-ai-illustration.mg-ai-fusion{height:420px}
+body.mg-precision-shared .radar-ai-illustration.mg-ai-fusion small{
+  position:absolute;bottom:6px;right:8px;left:8px;text-align:center;
+  color:#aebbc9;font:9px/1.5 ui-monospace,monospace;letter-spacing:.01em;
+}
+@media(max-width:520px){
+  body.mg-precision-shared .radar-ai-illustration.mg-ai-fusion{
+    --mg-mark-size:76px;
+    --mg-rest-a-x:-73px;--mg-rest-a-y:-46px;
+    --mg-rest-b-x:76px;--mg-rest-b-y:-38px;
+    --mg-rest-c-x:0px;--mg-rest-c-y:72px;
+    --mg-start-a-x:-176px;--mg-start-a-y:-105px;
+    --mg-start-b-x:180px;--mg-start-b-y:-100px;
+    --mg-start-c-x:-58px;--mg-start-c-y:151px;
+    height:290px;
+  }
+  .product-ai .product-art .mg-ai-fusion,
+  .product-ai .mg-home-product-art .mg-ai-fusion{--mg-mark-size:56px}
+}
+@media(prefers-reduced-motion:reduce){
+  .mg-ai-fusion__mark{animation:none!important;opacity:0!important}
+  .mg-ai-fusion__brand{animation:none!important;opacity:1!important;transform:translate(-50%,-50%)!important}
+}
