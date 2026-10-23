@@ -7,7 +7,7 @@
  background:#080a0e!important;
 }
 .mg-precision-shared .mg-card-hero--scam{
- --mg-card-image:url('https://images.stockcake.com/public/8/e/6/8e692cb2-f989-4230-97ea-5bce6df56140_large/digital-security-shield-stockcake.jpg');
+ --mg-card-image:url('/assets/precision/scam-card-960.webp');
  --mg-card-focus:64% 50%;
 }
 .mg-precision-shared .mg-card-hero--radar{
