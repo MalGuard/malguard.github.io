@@ -1,0 +1,66 @@
+import {apiUrl,readStream} from './client.mjs';
+const $=id=>document.getElementById(id);
+const names={gta_guard:'GTA Guard',game_scam_guard:'Game Scam Guard',ai_web:'AI Web',malwarebazaar:'MalwareBazaar',urlhaus:'URLhaus'};
+let locale='fa',service,busy=false;
+const history=[];
+const copy={
+ fa:{skip:'رفتن به گفت‌وگو',private:'حریم خصوصی، پیش‌فرض',workspace:'فضای بررسی',tools:'ابزارهای امنیتی',toolsHint:'هر بررسی، با منبع و محدودیت روشن.',scope:'تحلیل ایستا؛ بدون اجرای نمونه یا دانلود بدافزار.',privacy:'سیاست حریم خصوصی ↗',title:'از شواهد شروع کنیم.',subtitle:'فایل، هش یا لینک را بررسی کنید. نتیجهٔ هر ابزار، همراه با منبع، زمان و محدودیت‌های واقعی نمایش داده می‌شود.',modelNotice:'مدل زبانی متصل نیست. درخواست‌ها با قواعد مشخص به ابزارها هدایت می‌شوند؛ این رابط گفت‌وگوی مولد ندارد.',choose:'انتخاب ابزار',auto:'انتخاب خودکار',input:'لینک، هش یا درخواست شما',placeholder:'یک لینک عمومی یا هش SHA-256 وارد کنید…',attach:'＋ انتخاب فایل · حداکثر ۱ MiB',remove:'حذف',consent:'رضایت برای همین درخواست',fileConsent:'ارسال فایل به سرور MalGuard برای تحلیل ایستا در حافظه؛ بدون ذخیره یا ارسال به پایگاه‌های تهدید.',websiteConsent:'دریافت HTML از سایت عمومی و مسیر انتقال آن؛ آدرس برای DNS و مقصدهای مشاهده‌شده قابل مشاهده خواهد بود.',lookupConsent:'ارسال هش به MalwareBazaar، URL به URLhaus یا عبارت جست‌وجو به Tavily، متناسب با ابزار؛ بررسی OpenPhish در صورت فعال بودن سرور.',modelConsent:'ارسال متن همین پیام به Gemini یا Workers AI، فقط در صورت اتصال مدل. شواهد فایل و ابزار به مدل ارسال نمی‌شوند.',clear:'پاک‌کردن گفت‌وگو',send:'شروع بررسی ↗',retention:'تاریخچه فقط در حافظهٔ همین صفحه است؛ با بستن یا تازه‌کردن پاک می‌شود. نبود یافته تضمین امنیت نیست. اطلاعات محرمانه ارسال نکنید.',available:'آمادهٔ بررسی',configured:'تنظیم‌شده؛ اتصال تأیید نشده',disabled:'غیرفعال',offline:'ارتباط با بک‌اند برقرار نشد. بررسی انجام نشده است.',connected:'متصل به بک‌اند · آمادهٔ درخواست',serviceDisabled:'بک‌اند هنوز برای استفاده فعال نشده است.',working:'در حال بررسی',suspicious:'شواهد مخرب یا مشکوک شناسایی شد.',no_evidence:'شواهد مخرب در بررسی‌های انجام‌شده یافت نشد.',insufficient:'اطلاعات کافی برای نتیجه‌گیری وجود ندارد.',error:'بررسی به دلیل خطای سرویس تکمیل نشد.',evidence:'شواهد و مشاهدات',sources:'منابع',limits:'محدودیت‌ها',metadata:'جزئیات بررسی',fileTooLarge:'حجم فایل باید بین ۱ بایت و ۱ MiB باشد.',consentMissing:'پیش از ارسال، رضایت مربوط به فایل، سایت، پایگاه تهدید یا مدل را انتخاب کنید.',invalid:'درخواست پذیرفته نشد؛ ورودی و رضایت مربوط به ابزار را بررسی کنید.',rate:'تعداد درخواست‌ها زیاد است؛ یک دقیقه دیگر تلاش کنید.',generated:'پاسخ مدل · تحلیل امنیتی نیست',modelReady:'مدل تنظیم‌شده: Gemini؛ اتصال زنده هنوز تأیید نشده است.',modelOff:'مدل زبانی: غیرفعال',streamError:'پاسخ کامل دریافت نشد؛ نتیجه‌ای برای تأیید وجود ندارد.'},
+ en:{skip:'Skip to conversation',private:'Private by default',workspace:'INSPECTION WORKSPACE',tools:'Security tools',toolsHint:'Every check, with sources and clear limits.',scope:'Static analysis. No sample execution or malware downloads.',privacy:'Privacy policy ↗',title:'Start with the evidence.',subtitle:'Inspect a file, hash or link. Each tool reports its evidence, sources, check time and real limitations.',modelNotice:'A language model is not connected. Explicit rules route requests to tools; generative chat is unavailable.',choose:'Tool',auto:'Choose automatically',input:'Your URL, hash or request',placeholder:'Enter a public URL or SHA-256 hash…',attach:'＋ Choose file · up to 1 MiB',remove:'Remove',consent:'Consent for this request',fileConsent:'Send the file to MalGuard for static analysis in memory, without storage or submission to threat databases.',websiteConsent:'Retrieve public HTML and observed redirects; DNS resolvers and destinations will see the address.',lookupConsent:'Send the hash to MalwareBazaar, URL to URLhaus or search query to Tavily as appropriate; check OpenPhish if enabled on the server.',modelConsent:'Send this message to Gemini or Workers AI only if a model is connected. File/tool evidence is never sent to the model.',clear:'Clear conversation',send:'Start inspection ↗',retention:'History stays in this page’s memory and disappears on close or refresh. No findings do not guarantee safety. Do not submit secrets.',available:'Ready to check',configured:'Configured · unverified',disabled:'Disabled',offline:'Backend unavailable. No checks were performed.',connected:'Backend connected · ready',serviceDisabled:'The backend is not enabled for use yet.',working:'Checking',suspicious:'Malicious or suspicious evidence identified.',no_evidence:'No malicious evidence found in the checks performed.',insufficient:'Insufficient information to draw a conclusion.',error:'Inspection incomplete because of a service error.',evidence:'Evidence and observations',sources:'Sources',limits:'Limitations',metadata:'Inspection details',fileTooLarge:'File size must be between 1 byte and 1 MiB.',consentMissing:'Select the relevant file, website, lookup or model consent before submitting.',invalid:'Request rejected. Check the input and consent for the selected tool.',rate:'Too many requests. Try again in one minute.',generated:'Model response · not a security analysis',modelReady:'Gemini configured; live connection not yet verified.',modelOff:'Language model: disabled',streamError:'The full response was not received; no result can be confirmed.'}
+};
+const t=k=>copy[locale][k]||k;
+function el(tag,value,className){const node=document.createElement(tag);if(value!==undefined)node.textContent=value;if(className)node.className=className;return node;}
+function translate(){document.documentElement.lang=locale;document.documentElement.dir=locale==='fa'?'rtl':'ltr';$('language').textContent=locale==='fa'?'English':'فارسی';document.querySelectorAll('[data-i18n]').forEach(n=>n.textContent=t(n.dataset.i18n));$('message').placeholder=t('placeholder');$('conversation').ariaLabel=locale==='fa'?'گفت‌وگو':'Conversation';renderStatus();$('conversation').replaceChildren();for(const item of history){if(item.response)renderResponse(item.response,false);else if(item.error)showError(item.error,false);else $('conversation').append(el('div',item.bubble,'bubble'));}}
+function renderStatus(){
+ $('tools').replaceChildren();
+ for(const [id,name]of Object.entries(names)){
+  const state=service?.tools?.[id]?.state||'disabled',row=el('div',undefined,'tool-card');row.dataset.tool=id;row.append(el('strong',name),el('span',t(state),state==='available'?'available':''));$('tools').append(row);
+  const option=$('tool').querySelector(`[value="${id}"]`);option.disabled=state==='disabled';
+ }
+ const ready=service?.enabled===true;
+ $('send').disabled=!ready||busy;$('connection').textContent=t(!service?'offline':!ready?'serviceDisabled':'connected');
+ const modelLabel=service?.model?.provider==='workers_ai'?'Cloudflare Workers AI':'Gemini';
+ const modelNotice=t('modelReady').replace('Gemini',modelLabel);
+ $('model-status').textContent=service?.model?.state==='configured'?modelNotice:t('modelOff');
+ if(service?.model?.state==='configured')document.querySelector('[data-i18n="modelNotice"]').textContent=modelNotice;
+}
+function showError(key,remember=true){if(remember)history.push({error:key});const card=el('article',undefined,'result error');card.append(el('h3',t(key),'outcome'));$('conversation').append(card);}
+function renderResponse(response,remember=true){
+ if(remember)history.push({response});
+ if(response.error){showError('error',false);return;}
+ if(response.message){const n=el('article',undefined,'result');n.append(el('p',response.message));$('conversation').append(n);return;}
+ if(response.generated){const n=el('article',undefined,'result');n.append(el('h3',t('generated')),el('p',response.generated.text));$('conversation').append(n);return;}
+ const r=response.result;if(!r){showError('streamError',false);return;}
+ const card=el('article',undefined,`result ${r.outcome}`);card.append(el('div',names[r.tool],'eyebrow'),el('h3',t(r.outcome),'outcome'));
+ const time=el('time',new Date(r.checkedAt).toLocaleString(locale==='fa'?'fa-IR':'en-GB'));time.dateTime=r.checkedAt;card.append(time);
+ if(r.reason)card.append(el('p',locale==='fa'?'پیش‌نیاز ابزار فراهم نیست یا بررسی کامل نشده است؛ وضعیت سرویس و ورودی را کنترل کنید.':'A tool prerequisite is missing or the check is incomplete. Review the service status and input.'));
+ if(r.evidence.length){card.append(el('h4',t('evidence')));const list=el('ul');for(const item of r.evidence){const li=el('li',item.detail);if(item.observation)li.append(el('p',item.observation));if(item.location)li.append(el('code',item.location));list.append(li);}card.append(list);}
+ card.append(el('h4',t('sources')));const list=el('ul');for(const s of r.sources){const item=el('li');try{const u=new URL(s.url);if(!['http:','https:'].includes(u.protocol)||u.username||u.password)throw new Error();const a=el('a',s.name);a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';item.append(a);}catch{item.append(el('span',s.name));}item.append(el('p',`${s.status} · ${new Date(s.checkedAt).toLocaleString(locale==='fa'?'fa-IR':'en-GB')}`));list.append(item);}card.append(list);
+ if(Object.keys(r.metadata).length){const details=el('details');details.append(el('summary',t('metadata')),el('code',JSON.stringify(r.metadata,null,2)));card.append(details);}
+ card.append(el('h4',t('limits')));const limits=el('ul');for(const v of r.limitations)limits.append(el('li',v));card.append(limits);$('conversation').append(card);
+}
+async function fileData(file){const bytes=new Uint8Array(await file.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));return {name:file.name,base64:btoa(binary)};}
+$('language').onclick=()=>{locale=locale==='fa'?'en':'fa';translate();};
+$('clear').onclick=()=>{if(!busy){history.length=0;$('conversation').replaceChildren();}};
+$('remove-file').onclick=()=>{$('file').value='';$('filename').textContent='';$('remove-file').hidden=true;};
+$('file').onchange=()=>{const f=$('file').files[0];if(f&&(!f.size||f.size>1048576)){$('remove-file').click();showError('fileTooLarge');return;}$('filename').textContent=f?.name||'';$('remove-file').hidden=!f;if(f)$('tool').value='gta_guard';};
+$('composer').onsubmit=async event=>{
+ event.preventDefault();if(busy||!service?.enabled)return;
+ const message=$('message').value.trim(),file=$('file').files[0],tool=$('tool').value;
+ if(!message&&!file)return;
+ const consent={fileUpload:$('file-consent').checked,websiteFetch:$('website-consent').checked,remoteLookup:$('lookup-consent').checked,modelShare:$('model-consent').checked};
+ let input={};
+ if(file&&!consent.fileUpload){showError('consentMissing');return;}
+ if(tool==='ai_web')input.query=message.slice(0,500);
+ // URL/hash routing is validated again on the server before any tool starts.
+ const effective=tool==='auto'?(file?'gta_guard':/(?:^|\s)[a-f\d]{64}(?=$|\s)/i.test(message)?'malwarebazaar':/https?:\/\//i.test(message)?'game_scam_guard':'model'):tool;
+ if(effective==='game_scam_guard'&&!consent.websiteFetch||['malwarebazaar','urlhaus','ai_web'].includes(effective)&&!consent.remoteLookup||effective==='model'&&service.model.state==='configured'&&!consent.modelShare){showError('consentMissing');return;}
+ busy=true;$('send').disabled=true;$('clear').disabled=true;history.push({bubble:message||file.name});$('conversation').append(el('div',message||file.name,'bubble'));
+ try{
+  if(file)input={file:await fileData(file)};
+  const response=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({message,tool,locale,input,consent}),signal:AbortSignal.timeout(45000)});
+  if(!response.ok){showError(response.status===429?'rate':'invalid');return;}
+  await readStream(response,data=>{if(data.event){$('connection').textContent=`${t('working')} · ${names[data.event.tool]||''}`;const state=$('tools').querySelector(`[data-tool="${data.event.tool}"] span`);if(state){state.textContent=t(data.event.phase==='tool_started'?'working':service.tools[data.event.tool].state);state.classList.toggle('busy',data.event.phase==='tool_started');}}else if(data.result)renderResponse(data.result);else if(data.error)showError('error');});
+ }catch{showError('streamError');}finally{busy=false;$('clear').disabled=false;renderStatus();for(const id of ['file-consent','website-consent','lookup-consent','model-consent'])$(id).checked=false;$('remove-file').click();}
+};
+translate();
+try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}renderStatus();

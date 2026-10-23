@@ -3,6 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
+    "start:ai": "node services/malguard-ai/server/index.js",
+    "test:ai": "node --test services/malguard-ai/test/*.test.js",
+    "test:ai:browser": "node tests/malguard-ai-browser.mjs",
+    "check:ai": "node tools/check-malguard-ai.mjs",
     "build:opening": "node tools/build-home-opening.mjs",
     "build:forms": "node tools/build-secure-forms.mjs",
     "test:static": "python3 tests/validate-site.py",

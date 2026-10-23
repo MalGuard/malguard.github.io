@@ -7,12 +7,20 @@
     "api/game-scam-guard.js": {
       "maxDuration": 180,
       "includeFiles": "services/game-scam-guard/server/{preview-worker.mjs,preview-renderer.mjs,artifact-worker.mjs,artifact-engine.js,cloud-execution-worker.py,vendor/**}"
+    },
+    "api/malguard-ai.js": {
+      "maxDuration": 60,
+      "includeFiles": "services/game-scam-guard/server/{artifact-worker.mjs,artifact-engine.js,vendor/**}"
     }
   },
   "rewrites": [
     {
       "source": "/api/game-scam-guard/:endpoint*",
       "destination": "/api/game-scam-guard?endpoint=:endpoint*"
+    },
+    {
+      "source": "/api/malguard-ai/:endpoint",
+      "destination": "/api/malguard-ai?endpoint=:endpoint"
     }
   ],
   "headers": [
@@ -45,6 +53,32 @@
           "value": "no-cache"
         }
       ]
+    },
+    {
+      "source": "/ai/:path*",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://game-scam-guard-connected.vercel.app; img-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+        }
+      ]
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "feature/malguard-ai-evidence-first": false
+    }
+  }
 }

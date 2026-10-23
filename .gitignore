@@ -2,3 +2,7 @@ node_modules/
 _site/
 test-results/
 services/game-scam-guard/dist/
+.env
+.env.*
+!.env.example
+.vercel/
