@@ -17,31 +17,34 @@
   <a class="skip" href="#message" data-i18n="skip">Skip to conversation</a>
   <header class="site-header">
     <a class="brand" href="/" dir="ltr"><img class="mark" src="/assets/fusion/assets/malguard-logo.svg" width="29" height="31" alt=""> MalGuard <span>AI</span></a>
-    <div class="header-actions"><span class="private"><span class="dot" aria-hidden="true"></span><span data-i18n="private">Private by default</span></span><button id="language" type="button">فارسی</button><a class="home-link" href="/" data-i18n="home">Main site</a></div>
+    <div class="header-actions"><button id="clear" type="button"><span aria-hidden="true">＋</span><span class="sr-only" data-i18n="clear">New conversation</span></button><button id="language" type="button">فارسی</button></div>
   </header>
   <main>
     <section class="workspace" aria-labelledby="title">
-      <div class="intro">
-        <div class="intro-brand" dir="ltr"><img src="/assets/fusion/assets/malguard-logo.svg" width="38" height="40" alt=""><span>MalGuard <span>AI</span></span></div>
-        <h1 id="title" data-i18n="title">Hello. Where shall we start?</h1>
-        <p data-i18n="subtitle">Talk it through, explore the web or inspect a file or link.</p>
-      </div>
+      <div class="intro"><h1 id="title" data-i18n="title">What can I help with?</h1></div>
       <div class="conversation" id="conversation" role="log" aria-label="Conversation" aria-live="polite"></div>
       <div class="composer-area">
         <form id="composer">
           <div class="composer-shell">
-            <label class="file-button" for="file"><span aria-hidden="true">＋</span><span class="sr-only" data-i18n="attach">＋ Choose file · up to 1 MiB</span></label>
-          <label class="sr-only" for="message" data-i18n="input">Your URL, hash or request</label>
-          <textarea id="message" rows="1" maxlength="4000" dir="auto" data-placeholder="placeholder" placeholder="Ask anything…" aria-describedby="mode-hint"></textarea>
+            <label class="file-button" for="file"><span aria-hidden="true">＋</span><span class="sr-only" data-i18n="attach">Choose file · up to 1 MiB</span></label>
+            <label class="sr-only" for="message" data-i18n="input">Your message</label>
+            <textarea id="message" rows="1" maxlength="4000" dir="auto" placeholder="Ask anything…" aria-describedby="disclaimer"></textarea>
             <button type="submit" id="send" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sr-only" data-i18n="send">Send</span></button>
           </div>
           <div class="attachment"><input type="file" id="file"><span id="filename" dir="auto"></span><button type="button" id="remove-file" hidden data-i18n="remove">Remove</button></div>
-          <div class="composer-controls">
-              <label class="sr-only" for="mode" data-i18n="modeLabel">Mode</label>
+        </form>
+        <p id="connection" role="status"></p>
+        <details id="settings-panel" class="settings-panel">
+          <summary><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h8m4 0h4M4 17h4m4 0h8M12 4v6M8 14v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span data-i18n="settings">Settings</span></summary>
+          <div class="settings-content">
+            <div class="composer-controls">
+              <label for="mode" data-i18n="modeLabel">Mode</label>
               <select id="mode" aria-describedby="mode-hint"><option value="chat" data-i18n="chatMode">Chat</option><option value="worker" data-i18n="workerMode">Automatic inspection</option></select>
-              <label class="sr-only" for="model" data-i18n="modelLabel">Chat model</label>
+              <label for="model" data-i18n="modelLabel">Chat model</label>
               <select id="model" disabled><option value="llama70b">Llama 3.3 70B</option></select>
-          <details id="permissions"><summary data-i18n="permissionSettings">Permissions and privacy</summary>
+            </div>
+            <p id="mode-hint" class="muted"></p>
+            <details id="permissions"><summary data-i18n="permissionSettings">Permissions and privacy</summary>
             <fieldset><legend data-i18n="consent">Permissions are saved once and can be revoked at any time.</legend>
               <label><input type="checkbox" id="file-consent"><span data-i18n="fileConsent">Send the file to MalGuard for static analysis in memory, without storage or submission to threat databases.</span></label>
               <label><input type="checkbox" id="website-consent"><span data-i18n="websiteConsent">Retrieve public HTML and observed redirects; DNS resolvers and destinations will see the address.</span></label>
@@ -50,16 +53,7 @@
             </fieldset>
             <button type="button" id="revoke-permissions" data-i18n="revoke">Revoke all permissions</button>
           </details>
-          </div>
-        </form>
-        <div class="composer-status"><p id="mode-hint"></p><p id="connection" role="status"></p></div>
-        <div class="suggestions" aria-label="Shortcuts">
-          <button type="button" data-prompt="chat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6h14v10H9l-4 4V6Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span data-i18n="suggestChat">Let’s talk</span></button>
-          <button type="button" data-prompt="website"><span aria-hidden="true">◎</span><span data-i18n="suggestWebsite">Check a website</span></button>
-          <button type="button" data-prompt="file"><span aria-hidden="true">＋</span><span data-i18n="suggestFile">Inspect a file</span></button>
-        </div>
-      </div>
-      <details class="toolbox" id="toolbox">
+            <details class="toolbox" id="toolbox">
         <summary><span data-i18n="tools">Security tools</span><span class="toolbox-caption" dir="ltr">5 TOOLS <span aria-hidden="true">＋</span></span></summary>
         <aside aria-labelledby="tools-title">
           <div class="toolbox-heading"><h2 id="tools-title" data-i18n="tools">Security tools</h2><p class="muted" data-i18n="toolsHint">Every check, with sources and clear limits.</p></div>
@@ -68,11 +62,15 @@
           <p class="muted small" data-i18n="scope">Static analysis. No sample execution or malware downloads.</p>
         </aside>
       </details>
-      <div class="session-status"><p id="model-status"></p><button type="button" id="clear" data-i18n="clear">New conversation</button></div>
-      <p class="notice" data-i18n="modelNotice">Model and tool availability are reported by the server.</p>
-      <p class="footer-note" data-i18n="retention">History stays in this page’s memory and disappears on close or refresh. No findings do not guarantee safety. Do not submit secrets.</p>
+            <p id="model-status" class="muted"></p>
+            <p class="notice" data-i18n="modelNotice">Model and tool availability are reported by the server.</p>
+            <p class="footer-note" data-i18n="retention">History stays in this page’s memory and disappears on refresh. No findings guarantee safety.</p>
+            <a class="privacy-link" href="/privacy.html" data-i18n="privacy">Privacy policy</a>
+          </div>
+        </details>
+        <p id="disclaimer" class="footer-note" data-i18n="disclaimer">AI can make mistakes. Check important information.</p>
+      </div>
     </section>
   </main>
-  <footer><span dir="ltr">MalGuard AI</span><a href="/privacy.html" data-i18n="privacy">Privacy policy</a></footer>
 </body>
 </html>

@@ -18,6 +18,9 @@ try{
   await context.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
   await page.goto(base+'/ai/');await page.locator('#send').waitFor({state:'visible'});await page.waitForFunction(()=>!document.getElementById('send').disabled);
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
+  assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
+  assert.equal(await page.locator('#model').isVisible(),false);
+  if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/quiet-empty-${width}.png`,fullPage:true});}
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
   await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
@@ -40,6 +43,13 @@ try{
   if(width===1280){
    if(await page.locator('#permissions').getAttribute('open')===null)await page.locator('#permissions summary').click();await page.locator('#model-consent').check();
    await page.locator('#message').fill('Hello');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
+   assert.equal(await page.locator('.assistant-message h3').count(),0);
+   assert.equal(await page.getByText('fixture · benign-test-model',{exact:true}).isVisible(),false);
+   await page.locator('.response-details summary').first().click();assert.equal(await page.getByText('fixture · benign-test-model',{exact:true}).isVisible(),true);
+   await page.locator('.response-details summary').first().click();
+   await page.locator('#settings-panel > summary').click();
+   await page.screenshot({path:'test-results/malguard-ai/quiet-reply-1280.png',fullPage:true});
+   await page.locator('#settings-panel > summary').click();
    await page.locator('#message').fill('Continue');await page.locator('#send').click();await page.getByText('Benign test reply 2',{exact:true}).waitFor();
    await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('lang'),'en');
    await page.locator('#model').selectOption('llama8b');await page.locator('#message').fill('سلام');await page.locator('#send').click();await page.getByText('پاسخ فارسی آزمایشی',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
@@ -48,7 +58,7 @@ try{
    await page.locator('#clear').click();
    console.log('PASS Chat multi-turn context and inspection-only mode (injected benign model fixture).');
   }
-  await page.reload();assert.equal(await page.locator('#conversation').innerText(),'');assert.equal(await page.locator('#file-consent').isChecked(),true);await page.locator('#permissions summary').click();await page.locator('#revoke-permissions').click();assert.equal(await page.locator('#file-consent').isChecked(),false);
+  await page.reload();assert.equal(await page.locator('#conversation').innerText(),'');assert.equal(await page.locator('#file-consent').isChecked(),true);await page.locator('#settings-panel > summary').click();await page.locator('#permissions summary').click();await page.locator('#revoke-permissions').click();assert.equal(await page.locator('#file-consent').isChecked(),false);
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);await context.close();
   console.log(`PASS real AI frontend → backend → static worker, consent, RTL/LTR, no overflow/history at ${width}px`);
  }

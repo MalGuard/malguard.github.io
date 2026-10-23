@@ -14,6 +14,8 @@ Object.assign(copy.fa,{modeLabel:'حالت',chatMode:'چت',workerMode:'بررس
 Object.assign(copy.en,{modeLabel:'Mode',chatMode:'Chat',workerMode:'Automatic inspection',permissionSettings:'Permissions and privacy',revoke:'Revoke all permissions',consent:'Permissions are saved once and can be revoked at any time.',title:'Hello. Where shall we start?',subtitle:'Talk it through, explore the web or inspect a file or link.',placeholder:'Send a message, ask a question or paste a link…',send:'Send',modelNotice:'Chat supports conversation. Automatic inspection focuses on files and websites with security tools.',chatHint:'General and technical conversation, with automatic file and URL inspection.',workerHint:'File, hash and website inspection only. Use Chat for general questions.'});
 Object.assign(copy.fa,{modelLabel:'مدل گفت‌وگو',modelConsent:'ارسال متن گفت‌وگو به ارائه‌دهندهٔ مدل انتخاب‌شده؛ فایل و شواهد ابزارها ارسال نمی‌شوند.',placeholder:'هرچه می‌خواهی بپرس…',home:'سایت اصلی',suggestChat:'گفت‌وگو کنیم',suggestWebsite:'بررسی یک سایت',suggestFile:'بررسی یک فایل',websitePrompt:'این سایت را بررسی کن: ',chatPrompt:'سلام!',clear:'گفت‌وگوی تازه',modelNotice:'وضعیت واقعی اتصال مدل و ابزارها از سرور دریافت می‌شود.'});
 Object.assign(copy.en,{modelLabel:'Chat model',modelConsent:'Send conversation text to the selected model provider. Files and tool evidence are never sent to the model.',placeholder:'Ask anything…',home:'Main site',suggestChat:'Let’s talk',suggestWebsite:'Check a website',suggestFile:'Inspect a file',websitePrompt:'Check this website: ',chatPrompt:'Hello!',clear:'New conversation',modelNotice:'Model and tool availability are reported by the server.'});
+Object.assign(copy.fa,{title:'چطور می‌تونم کمکت کنم؟',settings:'تنظیمات',disclaimer:'هوش مصنوعی ممکن است اشتباه کند؛ اطلاعات مهم را بررسی کن.',responseDetails:'جزئیات پاسخ',copy:'کپی پاسخ',copied:'کپی شد',technical:'اطلاعات فنی'});
+Object.assign(copy.en,{title:'What can I help with?',settings:'Settings',disclaimer:'AI can make mistakes. Check important information.',responseDetails:'Response details',copy:'Copy response',copied:'Copied',technical:'Technical metadata'});
 const t=k=>copy[locale][k]||k;
 function el(tag,value,className){const node=document.createElement(tag);if(value!==undefined)node.textContent=value;if(className)node.className=className;return node;}
 function translate(){document.documentElement.lang=locale;document.documentElement.dir=locale==='fa'?'rtl':'ltr';$('language').textContent=locale==='fa'?'English':'فارسی';document.querySelectorAll('[data-i18n]').forEach(n=>n.textContent=t(n.dataset.i18n));$('message').placeholder=t('placeholder');$('conversation').ariaLabel=locale==='fa'?'گفت‌وگو':'Conversation';renderStatus();$('mode-hint').textContent=t($('mode').value==='chat'?'chatHint':'workerHint');$('conversation').replaceChildren();for(const item of history){if(item.response)renderResponse(item.response,false);else if(item.error)showError(item.error,false);else $('conversation').append(el('div',item.bubble,'bubble'));}}
@@ -24,7 +26,7 @@ function renderStatus(){
   const option=$('tool').querySelector(`[value="${id}"]`);option.disabled=state==='disabled';
  }
  const ready=service?.enabled===true;
- $('send').disabled=!ready||busy;$('connection').textContent=t(!service?'offline':!ready?'serviceDisabled':'connected');
+ $('send').disabled=!ready||busy;$('connection').textContent=!service?t('offline'):!ready?t('serviceDisabled'):'';
  const selectedId=$('model').value,models=service?.model?.models||[];
  if(models.length){
   $('model').replaceChildren();
@@ -44,15 +46,21 @@ function renderResponse(response,remember=true){
  if(response.error){showError('error',false);return;}
  if(response.results){for(const result of response.results)renderResponse({result},false);if(response.message){const n=el('article',undefined,'result');n.append(el('p',response.message));$('conversation').append(n);}return;}
  if(response.message){const n=el('article',undefined,'result');n.append(el('p',response.message));$('conversation').append(n);return;}
- if(response.generated){const n=el('article',undefined,'result'),answer=el('p',response.generated.text);answer.dir='auto';n.append(el('h3',t('generated')),answer,el('p',`${response.generated.provider} · ${response.generated.model}`));$('conversation').append(n);return;}
+ if(response.generated){
+  const n=el('article',undefined,'result assistant-message'),answer=el('p',response.generated.text,'answer');answer.dir='auto';n.ariaLabel='MalGuard AI';
+  const actions=el('div',undefined,'response-actions'),details=el('details',undefined,'response-details');details.append(el('summary',t('responseDetails')),el('p',t('generated')),el('p',`${response.generated.provider} · ${response.generated.model}`));
+  const copy=el('button',t('copy'),'copy-response');copy.type='button';copy.onclick=async()=>{try{await navigator.clipboard.writeText(response.generated.text);copy.textContent=t('copied');setTimeout(()=>copy.textContent=t('copy'),1800);}catch{copy.textContent=t('copy');}};
+  actions.append(copy,details);n.append(answer,actions);$('conversation').append(n);return;
+ }
  const r=response.result;if(!r){showError('streamError',false);return;}
  const card=el('article',undefined,`result ${r.outcome}`);card.append(el('div',names[r.tool],'eyebrow'),el('h3',t(r.outcome),'outcome'));
- const time=el('time',new Date(r.checkedAt).toLocaleString(locale==='fa'?'fa-IR':'en-GB'));time.dateTime=r.checkedAt;card.append(time);
- if(r.reason)card.append(el('p',locale==='fa'?'پیش‌نیاز ابزار فراهم نیست یا بررسی کامل نشده است؛ وضعیت سرویس و ورودی را کنترل کنید.':'A tool prerequisite is missing or the check is incomplete. Review the service status and input.'));
- if(r.evidence.length){card.append(el('h4',t('evidence')));const list=el('ul');for(const item of r.evidence){const li=el('li',item.detail);if(item.observation)li.append(el('p',item.observation));if(item.location)li.append(el('code',item.location));list.append(li);}card.append(list);}
- card.append(el('h4',t('sources')));const list=el('ul');for(const s of r.sources){const item=el('li');try{const u=new URL(s.url);if(!['http:','https:'].includes(u.protocol)||u.username||u.password)throw new Error();const a=el('a',s.name);a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';item.append(a);}catch{item.append(el('span',s.name));}item.append(el('p',`${s.status} · ${new Date(s.checkedAt).toLocaleString(locale==='fa'?'fa-IR':'en-GB')}`));list.append(item);}card.append(list);
- if(Object.keys(r.metadata).length){const details=el('details');details.append(el('summary',t('metadata')),el('code',JSON.stringify(r.metadata,null,2)));card.append(details);}
- card.append(el('h4',t('limits')));const limits=el('ul');for(const v of r.limitations)limits.append(el('li',v));card.append(limits);$('conversation').append(card);
+ const info=el('details',undefined,'inspection-details');info.append(el('summary',t('metadata')));
+ const time=el('time',new Date(r.checkedAt).toLocaleString(locale==='fa'?'fa-IR':'en-GB'));time.dateTime=r.checkedAt;info.append(time);
+ if(r.reason)info.append(el('p',locale==='fa'?'پیش‌نیاز ابزار فراهم نیست یا بررسی کامل نشده است؛ وضعیت سرویس و ورودی را کنترل کنید.':'A tool prerequisite is missing or the check is incomplete. Review the service status and input.'));
+ if(r.evidence.length){info.append(el('h4',t('evidence')));const list=el('ul');for(const item of r.evidence){const li=el('li',item.detail);if(item.observation)li.append(el('p',item.observation));if(item.location)li.append(el('code',item.location));list.append(li);}info.append(list);}
+ info.append(el('h4',t('sources')));const list=el('ul');for(const s of r.sources){const item=el('li');try{const u=new URL(s.url);if(!['http:','https:'].includes(u.protocol)||u.username||u.password)throw new Error();const a=el('a',s.name);a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';item.append(a);}catch{item.append(el('span',s.name));}item.append(el('p',`${s.status} · ${new Date(s.checkedAt).toLocaleString(locale==='fa'?'fa-IR':'en-GB')}`));list.append(item);}info.append(list);
+ if(Object.keys(r.metadata).length)info.append(el('h4',t('technical')),el('code',JSON.stringify(r.metadata,null,2)));
+ info.append(el('h4',t('limits')));const limits=el('ul');for(const v of r.limitations)limits.append(el('li',v));info.append(limits);card.append(info);$('conversation').append(card);
 }
 async function fileData(file){const bytes=new Uint8Array(await file.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));return {name:file.name,base64:btoa(binary)};}
 $('language').onclick=()=>{locale=locale==='fa'?'en':'fa';translate();};
@@ -65,11 +73,11 @@ $('composer').onsubmit=async event=>{
  if(!message&&!file)return;
  const consent={fileUpload:$('file-consent').checked,websiteFetch:$('website-consent').checked,remoteLookup:$('lookup-consent').checked,modelShare:$('model-consent').checked};
  let input={};
- if(file&&!consent.fileUpload){showError('consentMissing');$('permissions').open=true;return;}
+ if(file&&!consent.fileUpload){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  if(tool==='ai_web')input.query=message.slice(0,500);
  // URL/hash routing is validated again on the server before any tool starts.
  const effective=tool==='auto'?(file?'gta_guard':/(?:^|\s)[a-f\d]{64}(?=$|\s)/i.test(message)?'malwarebazaar':/https?:\/\//i.test(message)?'game_scam_guard':'model'):tool;
- if(effective==='game_scam_guard'&&!consent.websiteFetch||['malwarebazaar','urlhaus','ai_web'].includes(effective)&&!consent.remoteLookup||effective==='model'&&mode==='chat'&&service.model.state==='configured'&&!consent.modelShare){showError('consentMissing');$('permissions').open=true;return;}
+ if(effective==='game_scam_guard'&&!consent.websiteFetch||['malwarebazaar','urlhaus','ai_web'].includes(effective)&&!consent.remoteLookup||effective==='model'&&mode==='chat'&&service.model.state==='configured'&&!consent.modelShare){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  busy=true;$('send').disabled=true;$('clear').disabled=true;history.push({bubble:message||file.name});$('conversation').append(el('div',message||file.name,'bubble'));
  try{
   if(file)input={file:await fileData(file)};
