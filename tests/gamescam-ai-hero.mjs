@@ -82,9 +82,10 @@ try{
   const page=await ctx.newPage();
   await page.goto(base+'/threat-radar.html',{waitUntil:'domcontentloaded'});
   await checkScene(page,'.radar-ai-illustration.mg-ai-fusion',false);
-  // Advance animations instead of making CI wait for a full 4.5-second cycle.
+  // WebKit does not consistently apply CSS animation fill state after
+  // Web Animations API .finish(); verify the real elapsed end state instead.
+  await page.waitForTimeout(4800);
   const final=await page.locator('.radar-ai-illustration.mg-ai-fusion').evaluate(el=>{
-    for(const a of el.getAnimations()){a.finish()}
     const brand=el.querySelector('.mg-ai-fusion__brand');
     return{
       opacity:getComputedStyle(brand).opacity,
