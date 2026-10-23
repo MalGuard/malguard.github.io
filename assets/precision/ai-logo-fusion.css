@@ -49,6 +49,9 @@
   transform:translate(-50%,-50%);opacity:1;
 }
 .mg-ai-fusion__brand img{display:block;width:100%;height:100%;object-fit:contain}
+/* The shared product-page enhancer adds an infinite icon breath to images.
+   This scene owns its motion, including a completely still final brand mark. */
+.mg-ai-fusion img{animation:none!important}
 @media(prefers-reduced-motion:no-preference){
   /* Keep a static MalGuard mark if scripts are unavailable. */
   .mg-ai-fusion[data-fusion-ready="true"] .mg-ai-fusion__brand{opacity:0}
@@ -101,13 +104,18 @@
 .product-ai .mg-home-product-art .mg-ai-fusion{
   position:absolute;inset:0;width:100%;height:100%;
   --mg-mark-size:60px;
-  --mg-rest-a-x:-66px;--mg-rest-a-y:-26px;
-  --mg-rest-b-x:68px;--mg-rest-b-y:-23px;
-  --mg-rest-c-x:0px;--mg-rest-c-y:52px;
+  --mg-rest-a-x:-110%;--mg-rest-a-y:-43.333%;
+  --mg-rest-b-x:113.333%;--mg-rest-b-y:-38.333%;
+  --mg-rest-c-x:0px;--mg-rest-c-y:86.667%;
   --mg-start-a-x:-160px;--mg-start-a-y:-100px;
   --mg-start-b-x:163px;--mg-start-b-y:-87px;
   --mg-start-c-x:-85px;--mg-start-c-y:150px;
   background:radial-gradient(ellipse at 50% 40%,#2d3540 0%,#111820 76%);
+}
+/* Existing editorial columns can make a desktop card narrower than a phone
+   card. Fit its artwork without changing the card or grid dimensions. */
+.product-ai :is(.product-art,.mg-home-product-art) .mg-ai-fusion__mark{
+  width:min(var(--mg-mark-size),24%);height:auto;aspect-ratio:1;
 }
 body.mg-precision-shared .radar-ai-illustration.mg-ai-fusion{height:420px}
 body.mg-precision-shared .radar-ai-illustration.mg-ai-fusion small{
