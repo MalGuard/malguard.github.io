@@ -36,7 +36,7 @@
   });
   // Keep old shared homepage product links pointing to the supported pages.
   if (document.body.classList.contains('mg-home')) {
-    const legacy = {'#gta-guard':'/gta-guard.html','#malware-ai':'/threat-radar.html','#game-scam-guard':'/products.html#game-scam-guard','#download':'/download.html','#feedback':'/support.html'};
+    const legacy = {'#gta-guard':'/gta-guard.html','#malware-ai':'/ai/','#game-scam-guard':'/products.html#game-scam-guard','#download':'/download.html','#feedback':'/support.html'};
     function routeLegacy() { if (legacy[location.hash]) location.replace(legacy[location.hash]); }
     window.addEventListener('hashchange', routeLegacy); routeLegacy();
   }

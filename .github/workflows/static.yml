@@ -30,6 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           npm ci --ignore-scripts --no-audit --no-fund
+          npm run build:ai
           npm run build:game-scam-guard
           python3 tests/validate-site.py
           node --check assets/precision/site.js
@@ -53,12 +54,16 @@ jobs:
           cp -R ios-preview _site/ios-preview
           cp -R research _site/research
           cp -R services/game-scam-guard/dist _site/game-scam-guard
+          cp -R ai _site/ai
           cp .well-known/security.txt _site/.well-known/security.txt
 
           # Guardrail: development prototypes must never ship in the Pages artifact.
           test ! -e _site/agent-runtime-test-v1
           test ! -e _site/malware-ai-preview-v02
           test -f _site/.well-known/security.txt
+          test -f _site/ai/index.html
+          test -f _site/ai/app.js
+          test -f _site/assets/ai/local-worker.js
           test -f _site/game-scam-guard/index.html
           test -f _site/gamescam-guard-android.html
           test -f _site/tools.html

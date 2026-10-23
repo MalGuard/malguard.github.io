@@ -1,6 +1,13 @@
 import {
 persian} from './i18n-fa.mjs';
 export const translations = {
+"MalGuard AI":"هوش مصنوعی مالگارد",
+"Open MalGuard AI":"بازکردن هوش مصنوعی مالگارد",
+"CHAT & SECURITY TOOLS":"چت و ابزارهای امنیتی",
+"Chat in English or Persian, search the web and inspect files or links with evidence-based tools.":"به فارسی یا انگلیسی گفت‌وگو کنید، در وب جست‌وجو کنید و فایل‌ها یا لینک‌ها را با ابزارهای مبتنی بر شواهد بررسی کنید.",
+"Chat in English or Persian, search the web and inspect files or links with evidence-based tools. Model and tool availability are shown in the assistant.":"به فارسی یا انگلیسی گفت‌وگو کنید، در وب جست‌وجو کنید و فایل‌ها یا لینک‌ها را با ابزارهای مبتنی بر شواهد بررسی کنید. وضعیت دسترسی مدل و ابزارها در دستیار نمایش داده می‌شود.",
+"Bilingual chat and evidence-based security tools. Model and provider availability depend on the connected services.":"گفت‌وگوی دوزبانه و ابزارهای امنیتی مبتنی بر شواهد. دسترسی به مدل و ارائه‌دهنده به سرویس‌های متصل بستگی دارد.",
+
   "Open Game Scam Guard preview":"باز کردن نسخهٔ آزمایشی گیم‌اسکم گارد",
   "Inspect public website content and file evidence in the Persian web app. File analysis and cloud execution each require separate consent.":"محتوای سایت عمومی و شواهد فایل را در برنامهٔ فارسی بررسی کنید. تحلیل فایل و اجرای ابری هرکدام رضایت جداگانه می‌خواهند.",
   "Open the protected preview with your Vercel account. Unknown results and unavailable services do not confirm safety.":"با حساب ورسل خود وارد نسخهٔ آزمایشی محافظت‌شده شوید. نتیجهٔ نامشخص و در دسترس نبودن سرویس، امنیت را تأیید نمی‌کنند.",

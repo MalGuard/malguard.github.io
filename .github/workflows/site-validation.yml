@@ -55,6 +55,13 @@ jobs:
             test -s "$file" || { echo "Missing required file: $file"; exit 1; }
           done
 
+      - name: Validate MalGuard AI without live providers or deployment
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run test:ai
+          npm run check:ai
+          TEST_CHROMIUM_EXECUTABLE=/usr/bin/google-chrome npm run test:ai:browser
+
       - name: Validate trust and product claims
         shell: bash
         run: |

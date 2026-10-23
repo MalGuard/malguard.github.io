@@ -16,6 +16,9 @@ for name in ['assets','release','data','ios-preview','research']:
 (out/'.well-known').mkdir(exist_ok=True)
 shutil.copy2(root/'.well-known/security.txt',out/'.well-known/security.txt')
 shutil.copytree(root/'services/game-scam-guard/dist',out/'game-scam-guard')
+shutil.copytree(root/'ai',out/'ai')
+# Preserve the standalone preview added to main while this feature was developed.
+shutil.copy2(root/'malguard-ai-motion.html',out/'malguard-ai-motion.html')
 for forbidden in ['services','api','private-download-service','tests','tools','.git','node_modules','agent-runtime-test-v1','malware-ai-preview-v02']:
  assert not (out/forbidden).exists(),forbidden+' must never be a Pages artifact'
 release=json.loads((root/'release/malguard-current-release.json').read_text())
