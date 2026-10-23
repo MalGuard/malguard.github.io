@@ -58,7 +58,8 @@ for(const name of names){
    assert.match(layout.title,/JetBrains/i,'Homepage uses the bundled coding font');
    assert.ok(layout.heading,'Visible semantic homepage heading');
    assert.equal(layout.bodyBg,'rgb(8, 10, 14)','Homepage design background changed');
-   assert.equal(layout.urls.length,3);
+   assert.equal(layout.urls.length,2,'GTA Guard and Game Scam Guard retain their static card photographs');
+   assert.equal(await page.locator('#products .product-ai [data-ai-fusion]').count(),1,'MalGuard AI card uses its animated composition');
    assert.equal(await page.locator('.hero-actions>a[data-type="button"]').count(),2,
     'Homepage CTAs should be queued as typed actions');
    assert.equal(await page.locator('#navbar .mg-brand[data-type="button"]').count(),1,
