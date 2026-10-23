@@ -1,5 +1,9 @@
 # MalGuard AI validation — 23 October 2026
 
+Current revision: two modes, automatic multi-tool inspection, normal multi-turn chat and saved/revocable permission booleans. Owner requested live activation. Latest local runs: **35 assistant tests plus 5 private provider-gateway tests passed**, alongside the prior 142 existing and 10 artifact checks. Revised real-browser checks passed at all four widths, including Chat multi-turn context and inspection-only behavior (injected benign model). Live production tests and updated CI are recorded in the PR after release.
+
+The earlier defaults-off/per-request-consent and no-deployment statements below describe the initial draft and are superseded by the owner’s latest activation instruction. The root and private-download subproject now both exclude automatic deployment of the development branch; deliberate release uses reviewed commits into existing projects.
+
 Base: `9e621e2585f8a4638d64323cb474c8cd0738bbce`, branch `feature/malguard-ai-evidence-first`.
 
 ## Executed checks

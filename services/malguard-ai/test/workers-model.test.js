@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createModel} from '../server/model.js';
 const env={MALGUARD_AI_MODEL_PROVIDER:'workers_ai',MALGUARD_WORKER_PROXY_TOKEN:'fixture-server-token',MALGUARD_AI_WORKERS_MODE:'fast',MALGUARD_AI_WORKERS_FREE_CONFIRMED:'true',MALGUARD_AI_WORKERS_REVIEWED:'true'};
-test('existing Workers AI requires reviewed server access and confirmed free quota',async()=>{
- let calls=0;const m=createModel({env:{...env,MALGUARD_AI_WORKERS_REVIEWED:'false'},transport:async()=>{calls++;}});assert.equal(m.status().state,'disabled');assert.equal(await m.respond('Hello','en'),null);assert.equal(calls,0);
+test('existing Workers AI requires its server credential',async()=>{
+ let calls=0;const m=createModel({env:{...env,MALGUARD_WORKER_PROXY_TOKEN:''},transport:async()=>{calls++;}});assert.equal(m.status().state,'disabled');assert.equal(await m.respond('Hello','en'),null);assert.equal(calls,0);
 });
 test('Workers AI uses the authorized existing endpoint and explicit Llama mode without auto or search',async()=>{
  const m=createModel({env,transport:async(url,o)=>{assert.equal(url,'https://malware-ai.malguard-security.workers.dev/api/chat');assert.equal(o.headers['X-MalGuard-Proxy'],'fixture-server-token');assert.equal(o.noRedirect,true);const d=JSON.parse(o.body);assert.equal(d.model,'fast');assert.equal(d.webSearch,false);assert.equal(d.messages.length,1);return {status:200,bytes:Buffer.from('data: {"provider":"fast","model":"Meta Llama 3.2 3B Instruct"}\n\ndata: {"response":"Hello"}\n\n')};}});

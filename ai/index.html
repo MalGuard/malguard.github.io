@@ -29,17 +29,22 @@
       <div class="composer-area">
         <p id="connection" role="status"></p>
         <form id="composer">
+          <label for="mode" data-i18n="modeLabel">حالت</label>
+          <select id="mode"><option value="chat" data-i18n="chatMode">چت</option><option value="worker" data-i18n="workerMode">بررسی خودکار</option></select>
+          <p id="mode-hint" class="muted"></p>
           <label for="tool" data-i18n="choose">انتخاب ابزار</label>
           <select id="tool"><option value="auto" data-i18n="auto">انتخاب خودکار</option><option value="gta_guard">GTA Guard</option><option value="game_scam_guard">Game Scam Guard</option><option value="ai_web">AI Web</option><option value="malwarebazaar">MalwareBazaar</option><option value="urlhaus">URLhaus</option></select>
           <label class="sr-only" for="message" data-i18n="input">لینک، هش یا درخواست شما</label>
           <textarea id="message" rows="3" maxlength="4000" dir="auto" data-placeholder="placeholder" placeholder="یک لینک عمومی یا هش SHA-256 وارد کنید…"></textarea>
           <div class="attachment"><label class="file-button" for="file" data-i18n="attach">＋ انتخاب فایل · حداکثر ۱ MiB</label><input type="file" id="file"><span id="filename" dir="auto"></span><button type="button" id="remove-file" hidden data-i18n="remove">حذف</button></div>
-          <fieldset><legend data-i18n="consent">رضایت برای همین درخواست</legend>
+          <details id="permissions"><summary data-i18n="permissionSettings">دسترسی‌ها و حریم خصوصی</summary>
+          <fieldset><legend data-i18n="consent">مجوزهای ذخیره‌شده؛ قابل لغو در هر زمان</legend>
             <label><input type="checkbox" id="file-consent"><span data-i18n="fileConsent">ارسال فایل به سرور MalGuard برای تحلیل ایستا در حافظه؛ بدون ذخیره یا ارسال به پایگاه‌های تهدید.</span></label>
             <label><input type="checkbox" id="website-consent"><span data-i18n="websiteConsent">دریافت HTML از سایت عمومی و مسیر انتقال آن؛ آدرس برای DNS و مقصدهای مشاهده‌شده قابل مشاهده خواهد بود.</span></label>
             <label><input type="checkbox" id="lookup-consent"><span data-i18n="lookupConsent">ارسال داده به پایگاه تهدید یا ارائه‌دهندهٔ جست‌وجو، متناسب با ابزار.</span></label>
             <label><input type="checkbox" id="model-consent"><span data-i18n="modelConsent">ارسال متن همین پیام به Gemini یا Workers AI، فقط در صورت اتصال مدل.</span></label>
           </fieldset>
+          <button type="button" id="revoke-permissions" data-i18n="revoke">لغو همهٔ مجوزها</button></details>
           <div class="actions"><button type="button" id="clear" data-i18n="clear">پاک‌کردن گفت‌وگو</button><button type="submit" id="send" disabled data-i18n="send">شروع بررسی ↗</button></div>
         </form>
         <p class="footer-note" data-i18n="retention">تاریخچه فقط در حافظهٔ همین صفحه است؛ با بستن یا تازه‌کردن پاک می‌شود. نبود یافته تضمین امنیت نیست. اطلاعات محرمانه ارسال نکنید.</p>

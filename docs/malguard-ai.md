@@ -2,6 +2,18 @@
 
 This change adds an independent `/ai/` page, an opt-in Node/Express API and five tool adapters. It does not change the home page, Hero, existing product pages, installer, release manifests or existing scan APIs. No model, service, paid plan, merge or deployment is activated by this change.
 
+## Current two-mode behavior (owner clarification, 23 October)
+
+- **Chat**: normal Persian/English conversation with bounded multi-turn context, general and technical questions, and automatic security checks when a file, SHA-256 or URL is sent. Explicit search intent also invokes real web search.
+- **Automatic inspection**: files, hashes and public URLs only. Short greetings receive a small local greeting; general/technical questions are directed to Chat and never invoke a conversational model in this mode.
+- URL inspection runs Game Scam Guard, URLhaus and Tavily in parallel when permission is present. File inspection first runs the existing static Worker, then sends only its computed SHA-256 to MalwareBazaar and web search. File bytes and private filenames are not sent to those providers or the language model.
+- Sharing permissions are requested once, stored only as versioned booleans in browser preferences and automatically included on subsequent requests. All permissions can be revoked from the visible settings. Conversation content remains page-memory only.
+- Existing provider connections are used whenever configured; repetitive per-message and artificial owner-confirmation flags are removed. `MALGUARD_AI_ENABLED=false` is an explicit emergency off switch; otherwise the server route is enabled.
+- The default conversational provider is the existing Workers AI Llama fast mode. Gemini remains a separately selectable adapter; there is no OpenAI key requirement or implicit paid fallback.
+- Because Vercel sensitive values cannot be exported, a dedicated `/api/malguard-assistant` gateway is added in the existing private `malware-ai` project. Existing Worker/Tavily secrets remain there. The scanner backend calls that fixed gateway server-to-server; the browser sees no provider key. Legacy administrator chat/auth/report routes remain unchanged.
+
+The owner explicitly requested activation of these two modes. The reviewed branch commits can be deployed into the existing Vercel projects without merging GitHub main or changing the homepage/Hero. No new paid plan or resource is provisioned. Live provider verification is reported separately from synthetic tests.
+
 ## Repository inspection (22–23 October 2026)
 
 | Source | Inspected commit | Existing capability |
@@ -23,7 +35,7 @@ Vercel metadata confirms existing **names**, without reading secret values:
 
 Secrets remain in their existing projects. Vercel environment variables are project-scoped; a variable in `malware-ai` does not automatically exist in `game-scam-guard-connected`. No secrets were copied, no Vercel settings were changed, and the protected legacy administrator chat was not bypassed. A previously embedded legacy gateway credential and its pending rotation are already tracked by the private backend hardening PR; do not reuse it in this public application.
 
-## MVP architecture
+## Initial implementation record (superseded where the current behavior above differs)
 
 `/ai/` → `/api/malguard-ai/{status,chat}` → validation/consent/limits → deterministic orchestrator → independent adapters → existing static parser or guarded transport.
 
@@ -80,11 +92,11 @@ JSON responses wrap `{locale, model, result}`; general replies use `message` or 
 - Logs contain a random request ID, fixed event and outcome only. No IP, message, URL, file, hash, key, raw error or prompt is logged by this service. Hosting/provider logs and retention are outside this application’s control and must be covered by the operator’s privacy policy.
 - External text is rendered with `textContent`. Source URLs are HTTP(S)-validated. No external scripts, frontend credentials, dynamic HTML, analytics or remote fonts are required.
 
-## Environment variables (names only)
+## Environment variables (names only; current revision)
 
 | Variable | Purpose/default |
 | --- | --- |
-| `MALGUARD_AI_ENABLED` | Must equal `true` to permit requests; default off. Status remains readable. |
+| `MALGUARD_AI_ENABLED` | Enabled unless explicitly `false`; emergency off switch. Status remains readable. |
 | `MALGUARD_AI_PUBLIC_ORIGIN` | Optional exact first-party origin for protected review/testing. |
 | `MALWAREBAZAAR_AUTH_KEY` | Existing server metadata credential. |
 | `ABUSECH_AUTH_KEY` / `MALGUARD_ABUSECH_AUTH_KEY` | Existing abuse.ch credential/fallback. |
@@ -95,12 +107,12 @@ JSON responses wrap `{locale, model, result}`; general replies use `message` or 
 | `MALGUARD_AI_MODEL_PROVIDER` | Explicit `gemini` or `workers_ai`; no implicit fallback. |
 | `MALGUARD_WORKER_PROXY_TOKEN` | Existing server Worker credential; never copy an embedded legacy value. |
 | `MALGUARD_AI_WORKERS_MODE` | Explicit `fast`, `strong` or `fallback` Llama mode, matching current Worker health. |
-| `MALGUARD_AI_WORKERS_FREE_CONFIRMED` | Owner confirms provider-side free quota and no paid overage. |
-| `MALGUARD_AI_WORKERS_REVIEWED` | Owner completes the pending private gateway hardening/credential review before use. |
+| `MALGUARD_AI_WORKERS_FREE_CONFIRMED` | Obsolete: no repeated activation flag. |
+| `MALGUARD_AI_WORKERS_REVIEWED` | Obsolete: new gateway uses the existing runtime credential directly and does not copy the embedded legacy value. |
 | `MALGUARD_AI_GEMINI_MODEL` | Exact authorized model ID; no guessed default or fallback. |
-| `MALGUARD_AI_GEMINI_FREE_CONFIRMED` | Must equal `true` after the owner verifies provider-side free quota and billing controls. |
+| `MALGUARD_AI_GEMINI_FREE_CONFIRMED` | Obsolete: current owner-authorized reuse does not require this flag. |
 | `TAVILY_API_KEY` | Existing server search key. |
-| `MALGUARD_AI_TAVILY_FREE_CONFIRMED` | Same free-quota confirmation for Tavily. |
+| `MALGUARD_AI_TAVILY_FREE_CONFIRMED` | Obsolete: existing Tavily connection is used when configured. |
 
 Confirmation flags express operator approval; they cannot establish or enforce provider billing. Keep them off unless the provider account itself prevents paid overage. No live billable request was made during this work.
 

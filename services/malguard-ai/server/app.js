@@ -3,7 +3,7 @@ import {randomUUID} from 'node:crypto';
 import {createOrchestrator} from './orchestrator.js';
 import {InputError,MAX_BODY_BYTES} from './contracts.js';
 
-export function createApp({orchestrator=createOrchestrator(),enabled=process.env.MALGUARD_AI_ENABLED==='true',publicOrigin=process.env.MALGUARD_AI_PUBLIC_ORIGIN,now=Date.now,log=entry=>console.info(JSON.stringify(entry))}={}) {
+export function createApp({orchestrator=createOrchestrator(),enabled=process.env.MALGUARD_AI_ENABLED!=='false',publicOrigin=process.env.MALGUARD_AI_PUBLIC_ORIGIN,now=Date.now,log=entry=>console.info(JSON.stringify(entry))}={}) {
   const app=express(),rates=new Map();let active=0;
   app.disable('x-powered-by');
   const allowed=new Set(['https://malguard.site','https://malguard.github.io','https://game-scam-guard-connected.vercel.app']);
@@ -33,7 +33,8 @@ export function createApp({orchestrator=createOrchestrator(),enabled=process.env
     next();
   });
   app.use(express.json({limit:MAX_BODY_BYTES,strict:true}));
-  app.get('/status',(req,res)=>{
+  app.get('/status',async(req,res)=>{
+    await orchestrator.refresh?.();
     const status=orchestrator.status();
     if(!enabled)for(const tool of Object.values(status.tools))Object.assign(tool,{state:'disabled',reason:'service_disabled'});
     res.json({enabled,...status});

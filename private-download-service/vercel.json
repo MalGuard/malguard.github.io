@@ -12,12 +12,28 @@
       "maxDuration": 30
     }
   },
-  "headers": [{
-    "source": "/(.*)",
-    "headers": [
-      { "key": "Cache-Control", "value": "no-store" },
-      { "key": "X-Content-Type-Options", "value": "nosniff" },
-      { "key": "Referrer-Policy", "value": "no-referrer" }
-    ]
-  }]
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        }
+      ]
+    }
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "feature/malguard-ai-evidence-first": false
+    }
+  }
 }

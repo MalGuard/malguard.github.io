@@ -83,8 +83,8 @@ test('Game Scam Guard reuses scanner without preview or threat-content execution
  const a=createGameScamGuard(async(url,options)=>{assert.equal(options.allowCloudPreview,false);assert.equal(options.allowThreatContent,false);lookup=await options.lookup(url);return {signals:[],pageFetch:{status:'done'},status:'limited',limitations:[]};});
  const r=await a.run({url:'https://example.com/'},{signal:new AbortController().signal,consent:{remoteLookup:false}});assert.equal(lookup.status,'unconfigured');assert.equal(r.outcome,'no_evidence');assert.match(r.limitations.join(' '),/consent/);
 });
-test('Tavily is gated by existing credential AND explicit free quota confirmation',async()=>{
- let calls=0;const a=createAiWeb({env:{TAVILY_API_KEY:'fixture'},transport:async()=>{calls++;}});
+test('Tavily stays disabled when its existing credential is missing',async()=>{
+ let calls=0;const a=createAiWeb({env:{},transport:async()=>{calls++;}});
  assert.equal(a.status().state,'disabled');assert.equal((await a.run({query:'benign'},{})).outcome,'insufficient');assert.equal(calls,0);
 });
 test('real-search adapter bounds results, blocks unsafe source URLs, requests no generated answer',async()=>{
@@ -95,7 +95,7 @@ test('Gemini requires explicit model and free configuration; never falls back to
  let calls=0;const model=createModel({env:{GEMINI_API_KEY:'fixture',OPENAI_API_KEY:'fixture'},transport:async()=>{calls++;}});assert.equal(model.status().state,'disabled');assert.equal(await model.respond('hello','en'),null);assert.equal(calls,0);
 });
 test('Gemini receives only user text and fixed instructions, no file/tool evidence',async()=>{
- const model=createModel({env:{GEMINI_API_KEY:'fixture',MALGUARD_AI_GEMINI_MODEL:'fixture-model',MALGUARD_AI_GEMINI_FREE_CONFIRMED:'true'},transport:async(url,o)=>{assert.equal(url,'https://generativelanguage.googleapis.com/v1beta/models/fixture-model:generateContent');const d=JSON.parse(o.body);assert.deepEqual(d.contents,[{role:'user',parts:[{text:'hello'}]}]);return response({candidates:[{finishReason:'STOP',content:{parts:[{text:'Hello'}]}}]});}});
+ const model=createModel({env:{MALGUARD_AI_MODEL_PROVIDER:'gemini',GEMINI_API_KEY:'fixture',MALGUARD_AI_GEMINI_MODEL:'fixture-model',MALGUARD_AI_GEMINI_FREE_CONFIRMED:'true'},transport:async(url,o)=>{assert.equal(url,'https://generativelanguage.googleapis.com/v1beta/models/fixture-model:generateContent');const d=JSON.parse(o.body);assert.deepEqual(d.contents,[{role:'user',parts:[{text:'hello'}]}]);return response({candidates:[{finishReason:'STOP',content:{parts:[{text:'Hello'}]}}]});}});
  const orch=createOrchestrator({},model);await assert.rejects(orch.run({message:'hello'}),/model_consent_required/);
  const r=await orch.run({message:'hello',locale:'en',consent:{modelShare:true}});assert.equal(r.generated.text,'Hello');assert.equal(r.generated.securityAnalysis,false);
 });
