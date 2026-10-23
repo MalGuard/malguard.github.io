@@ -1,10 +1,11 @@
+import {publicFailure} from '../../../ai/service-errors.mjs';
 import {normalizeUrl, publicAddress} from '../../game-scam-guard/server/network.js';
 import {isIP} from 'node:net';
 
 export const MAX_FILE_BYTES = 1024 * 1024;
 export const MAX_BODY_BYTES = 1450000;
 export const TOOLS = ['gta_guard', 'game_scam_guard', 'ai_web', 'malwarebazaar', 'urlhaus'];
-export const MODELS = ['llama70b','llama8b','gemini_flash','groq_qwen','groq_gptoss'];
+export const MODELS = ['auto','llama70b','llama8b','gemini_flash','groq_qwen','groq_gptoss'];
 export class InputError extends Error {
   constructor(code, status = 400) { super(code); this.code = code; this.status = status; }
 }
@@ -50,8 +51,8 @@ export function parseRequest(body) {
 export const text = (v, max = 500) => typeof v === 'string' ? v.replace(/[\x00-\x08\x0b-\x1f\u202a-\u202e\u2066-\u2069]/g, '').slice(0,max) : '';
 export const LIMIT = 'Only the stated checks were performed. No finding or absent threat report guarantees safety. No sample was executed.';
 export const SOURCE_URLS={gta_guard:'https://github.com/MalGuard/malguard.github.io/tree/main/services/game-scam-guard/server',game_scam_guard:'https://github.com/MalGuard/malguard.github.io/tree/main/services/game-scam-guard/server',malwarebazaar:'https://bazaar.abuse.ch/api/',urlhaus:'https://urlhaus.abuse.ch/api/',ai_web:'https://docs.tavily.com/documentation/api-reference/endpoint/search'};
-export function report(tool, outcome, {evidence = [], sources = [], limitations = [], metadata = {}, reason} = {}) {
+export function report(tool, outcome, {evidence = [], sources = [], limitations = [], metadata = {}, reason, failure} = {}) {
   const checkedAt = new Date().toISOString();
   if(!sources.length)sources=[{name:tool,url:SOURCE_URLS[tool],status:outcome==='error'?'error':'not_checked'}];
-  return {tool, outcome, checkedAt, evidence, sources: sources.map(s => ({...s, checkedAt: s.checkedAt || checkedAt})), limitations: [...limitations, LIMIT], metadata, ...(reason ? {reason} : {})};
+  return {tool, outcome, checkedAt, evidence, sources: sources.map(s => ({...s, checkedAt: s.checkedAt || checkedAt})), limitations: [...limitations, LIMIT], metadata, ...(reason ? {reason} : {}),...(failure?{failure:publicFailure(failure)}:{})};
 }

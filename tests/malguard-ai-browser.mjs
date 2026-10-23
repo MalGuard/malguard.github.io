@@ -12,6 +12,32 @@ const testModel={status:()=>({state:'configured',provider:'fixture',model:'benig
 web.use('/api/malguard-ai',(req,res,next)=>{if(req.method==='POST')requests++;next();},createApp({orchestrator:createOrchestrator(undefined,testModel),enabled:true,publicOrigin:base,log:()=>{}}));web.use(express.static(root));
 const browser=await chromium.launch(launchOptions('chromium'));
 try{
+ // Public product links must open the actual assistant directly, without the radar landing page.
+ for(const width of [390,1280]){
+  const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),page=await context.newPage();
+  await context.addInitScript(()=>Object.defineProperty(navigator,'gpu',{value:undefined}));
+  await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
+  const before=requests;
+  for(const [path,selector] of [['/','#products .product-ai a.text-link'],['/products.html','.product-ai .mg-home-product-link']]){
+   await page.goto(base+path);
+   const link=page.locator(selector);assert.equal(await link.getAttribute('href'),'/ai/');assert.match(await link.innerText(),/MalGuard AI/);
+   const visited=[];const record=frame=>{if(frame===page.mainFrame())visited.push(new URL(frame.url()).pathname);};
+   page.on('framenavigated',record);await link.click();await page.waitForURL(base+'/ai/');
+   await page.waitForFunction(()=>!document.getElementById('send').disabled);page.off('framenavigated',record);
+   assert.deepEqual(visited,['/ai/'],'Product card must skip the radar and retired feature pages');
+   assert.equal(await page.locator('#composer').isVisible(),true);assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
+   assert.equal(await page.locator('.mg-card-hero--radar').count(),0);
+   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Assistant must fit after navigation');
+  }
+  for(const path of ['/ai-intelligence.html','/malware-ai.html']){
+   await page.goto(base+path);await page.waitForURL(base+'/ai/');await page.waitForFunction(()=>!document.getElementById('send').disabled);
+   assert.equal(await page.locator('#composer').isVisible(),true,'Legacy AI entry opens the current chat');
+  }
+  await page.goto(base+'/');await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true');
+  await page.locator('#menuBtn').click();await page.locator('#navLinks a[href="/ai/"]').click();await page.waitForURL(base+'/ai/');
+  assert.equal(requests,before,'Navigating into AI must not submit messages, files or consent');
+  await context.close();console.log(`PASS homepage/product cards, shared menu and legacy AI URLs open chat directly at ${width}px`);
+ }
  for(const width of [360,390,768,1280]){
   const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[],external=[];
   page.on('pageerror',e=>errors.push(e.message));
@@ -33,7 +59,7 @@ try{
   assert.equal(await page.locator('#file-consent').isChecked(),true);
   await page.getByText('Inspection details',{exact:true}).click();assert.match(await page.locator('.result code').last().innerText(),/sha256/);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`overflow ${width}`);
-  assert.equal(await page.evaluate(()=>localStorage.length),1);assert.ok(!JSON.stringify(await page.evaluate(()=>({...localStorage}))).includes('benign.txt'));
+  assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage).sort()),['malguard-ai-permissions-v1','malguard-language']);assert.equal(await page.evaluate(()=>localStorage.getItem('malguard-language')),'en');assert.ok(!JSON.stringify(await page.evaluate(()=>({...localStorage}))).includes('benign.txt'));
   assert.equal(await page.locator('#tool option[value="ai_web"]').isDisabled(),true);
   assert.equal(await page.locator('#tool option[value="malwarebazaar"]').isDisabled(),true);
   await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
@@ -63,4 +89,74 @@ try{
   console.log(`PASS real AI frontend → backend → static worker, consent, RTL/LTR, no overflow/history at ${width}px`);
  }
  const context=await browser.newContext(),page=await context.newPage();await context.route('**/api/malguard-ai/status',r=>r.abort());await page.goto(base+'/ai/');await page.getByRole('status').filter({hasText:'Backend unavailable'}).waitFor();assert.equal(await page.locator('#send').isDisabled(),true);await context.close();console.log('PASS backend failure shown; submission disabled.');
+ const errorContext=await browser.newContext({timezoneId:'Asia/Tehran'}),errorPage=await errorContext.newPage();
+ const retryAt=new Date(Date.now()+300000).toISOString();let errorCase=0;
+ await errorContext.route('**/api/malguard-ai/chat',route=>{
+  errorCase++;
+  if(errorCase===1)return route.fulfill({status:429,contentType:'application/json',body:JSON.stringify({error:'provider_rate_limited',retryAt,retryAfterSeconds:300})});
+  const result=errorCase===2?{error:'provider_quota_exhausted'}:{error:'provider_billing_required'};
+  return route.fulfill({contentType:'application/x-ndjson',body:JSON.stringify({event:{phase:'model_started',tool:'chat'}})+'\n'+JSON.stringify({result})+'\n'});
+ });
+ await errorPage.goto(base+'/ai/');await errorPage.waitForFunction(()=>!document.getElementById('send').disabled);
+ await errorPage.locator('#language').click();await errorPage.locator('#settings-panel > summary').click();await errorPage.locator('#permissions summary').click();await errorPage.locator('#model-consent').check();
+ await errorPage.locator('#message').fill('سلام');await errorPage.locator('#send').click();
+ await errorPage.getByRole('alert').filter({hasText:'لیمیت خورد'}).waitFor();
+ const expected=await errorPage.evaluate(stamp=>new Intl.DateTimeFormat('fa-IR',{dateStyle:'medium',timeStyle:'long'}).format(new Date(stamp)),retryAt);
+ assert.ok((await errorPage.getByRole('alert').innerText()).includes(expected));assert.equal(await errorPage.locator('#message').inputValue(),'سلام');
+ await errorPage.locator('#send').click();await errorPage.getByRole('alert').filter({hasText:'سهمیهٔ'}).waitFor();
+ assert.match(await errorPage.getByRole('alert').last().innerText(),/زمان رفع محدودیت.*اعلام نشده/);
+ await errorPage.locator('#language').click();assert.match(await errorPage.getByRole('alert').last().innerText(),/did not supply a reset time/);
+ await errorPage.locator('#send').click();await errorPage.getByRole('alert').filter({hasText:'credit or billing'}).waitFor();
+ await errorContext.close();console.log('PASS HTTP and streamed provider limit/quota/billing errors, real local retry time, language changes and preserved message (fixtures).');
+ // Device inference is a Worker fixture here: no model weights or GPU results
+ // are fabricated as live verification. Assert the privacy/consent boundaries.
+ const device=await browser.newContext({viewport:{width:390,height:844}}),localPage=await device.newPage();
+ await device.addInitScript(()=>{
+  Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});
+  window.localWorkerCalls=[];
+  window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{generated:{text:'پاسخ محلی آزمایشی',provider:'on_device',model:data.model,securityAnalysis:false}}}),5);}terminate(){}};
+ });
+ const beforeLocal=requests,localExternal=[];await device.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();localExternal.push(r.request().url());return r.abort();});
+ await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>!document.getElementById('send').disabled);assert.equal(await localPage.locator('#model').inputValue(),'auto');
+ await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
+ assert.equal(await localPage.locator('#local-offer').isVisible(),false,'The landing page must not open unsolicited download dialogs');
+ await localPage.locator('#settings-panel > summary').click();await localPage.locator('#download-models').click();
+ await localPage.locator('#local-offer').waitFor({state:'visible'});
+ assert.match(await localPage.locator('#offer-info').innerText(),/without a provider's daily message quota/);
+ assert.equal(await localPage.locator('#offer-model option').count(),2);
+ assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0,'entering the app must not download weights');
+ await localPage.locator('#local-offer button[value="later"]').click();
+ assert.equal(await localPage.locator('#model').inputValue(),'llama70b','Later keeps an available cloud model selected');
+ assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
+ await localPage.reload();await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
+ assert.equal(await localPage.locator('#local-offer').isVisible(),false,'do not repeat the offer in this tab');
+ await localPage.locator('#settings-panel > summary').click();await localPage.locator('#model').selectOption('auto');await localPage.locator('#settings-panel > summary').click();
+ await localPage.locator('#message').fill('سلام');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});
+ assert.match(await localPage.locator('#download-info').innerText(),/352 MB/);assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);assert.equal(requests,beforeLocal);
+ await localPage.locator('#local-download button[value="cancel"]').click();assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
+ await localPage.locator('#send').click();await localPage.locator('#local-download button[value="download"]').click();await localPage.getByText('پاسخ محلی آزمایشی',{exact:true}).waitFor();
+ assert.equal(requests,beforeLocal);assert.equal(await localPage.evaluate(()=>localWorkerCalls[0].model),'local_fast');assert.match(await localPage.evaluate(()=>localWorkerCalls[0].messages[0].content),/فارسی/);
+ await localPage.locator('#settings-panel > summary').click();await localPage.locator('#model').selectOption('local_medium');await localPage.locator('#settings-panel > summary').click();
+ await localPage.locator('#message').fill('Explain DNS');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});assert.match(await localPage.locator('#download-info').innerText(),/985 MB/);
+ await localPage.keyboard.press('Escape');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),1,'Escape must not reuse previous download approval');
+ assert.equal(requests,beforeLocal);assert.deepEqual(localExternal,[]);await device.close();console.log('PASS on-device download/cancel consent, local-only text, automatic greeting routing and separate model download approval (mock Worker).');
+ const downloadContext=await browser.newContext({viewport:{width:360,height:740}}),downloadPage=await downloadContext.newPage();
+ await downloadContext.addInitScript(()=>{
+  Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});
+  window.localWorkerCalls=[];
+  window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{prepared:true}}),5);}terminate(){}};
+ });
+ const downloadExternal=[];await downloadContext.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();downloadExternal.push(r.request().url());return r.abort();});
+ await downloadPage.goto(base+'/ai/');await downloadPage.waitForFunction(()=>!document.getElementById('send').disabled);
+ assert.equal(await downloadPage.locator('#local-offer').isVisible(),false);
+ await downloadPage.locator('#settings-panel > summary').click();await downloadPage.locator('#download-models').click();await downloadPage.locator('#local-offer').waitFor({state:'visible'});
+ await downloadPage.locator('#offer-model').selectOption('local_medium');assert.match(await downloadPage.locator('#offer-size').innerText(),/985 MB/);
+ assert.equal(await downloadPage.evaluate(()=>localWorkerCalls.length),0);
+ assert.ok(await downloadPage.evaluate(()=>document.querySelector('#local-offer').scrollWidth<=document.querySelector('#local-offer').clientWidth),'offer fits a narrow phone');
+ const beforePrepare=requests;await downloadPage.locator('#local-offer button[value="download"]').click();
+ await downloadPage.waitForFunction(()=>document.getElementById('model').value==='local_medium'&&!document.getElementById('send').disabled);
+ assert.deepEqual(await downloadPage.evaluate(()=>localWorkerCalls),[{operation:'prepare',model:'local_medium'}]);
+ assert.equal(requests,beforePrepare,'preparing a local model sends no conversation to the backend');
+ assert.equal(await downloadPage.locator('#conversation').innerText(),'');assert.deepEqual(downloadExternal,[]);
+ await downloadContext.close();console.log('PASS settings-only download prepares only the selected model, without sending a chat (mock Worker).');
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

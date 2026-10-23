@@ -29,7 +29,7 @@ for(const name of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chromiu
   assert.equal(await title.getAttribute('data-type-state'),'pending');
   await title.evaluate(node=>node.scrollIntoView({behavior:'instant',block:'center'}));
   await p.waitForFunction(()=>['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),null,{timeout:30000});
-  assert.deepEqual(await p.locator('#products .text-link').evaluateAll(a=>a.map(n=>new URL(n.href).pathname)),['/gta-guard.html','/game-scam-guard.html','/threat-radar.html']);
+  assert.deepEqual(await p.locator('#products .text-link').evaluateAll(a=>a.map(n=>new URL(n.href).pathname)),['/gta-guard.html','/game-scam-guard.html','/ai/']);
   await c.close();console.log('PASS',name,'viewport typing and product links');
  }finally{await browser.close();}
 }

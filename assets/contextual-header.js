@@ -14,7 +14,7 @@
     ['GTA Guard', 'Clean-room Windows x64 static scanner', '/gta-guard.html', 'mods windows files'],
     ['GTA VI Security Center', 'Fake-download research and local URL warning-sign review', '/gta6-security.html', 'gta 6 gta vi security center fake download scam'],
     ['Scan Mods', 'Supported and planned game-mod tools', '/scan-mods.html', 'gta minecraft roblox'],
-    ['Threat Radar', 'GitHub-reviewed public security advisories', '/threat-radar.html', 'threat radar vulnerability advisory github'],
+    ['MalGuard AI', 'Bilingual chat and evidence-based security tools', '/ai/', 'malguard ai malware ai chat assistant هوش مصنوعی چت'],
     ['Scan URL', 'Local URL-text inspection', '/scan-url.html', 'url link address'],
     ['Local Tools', 'SHA-256 fingerprinting and link inspection', '/tools.html', 'hash sha256 file fingerprint'],
     ['Trust Center', 'Security, limits and release integrity', '/trust.html', 'security vulnerability policy'],

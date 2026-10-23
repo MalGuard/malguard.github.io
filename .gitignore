@@ -6,3 +6,4 @@ services/game-scam-guard/dist/
 .env.*
 !.env.example
 .vercel/
+assets/ai/local-worker.js

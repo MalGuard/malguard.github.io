@@ -12,7 +12,7 @@ await mkdir('test-results', { recursive: true });
 const report = { passed: [], failed: [], consoleErrors: [], requestFailures: [] };
 let activePage;
 async function check(name, work) { try { await work(); report.passed.push(name); console.log('PASS', name); } catch (e) { report.failed.push({ name, error: e.message }); console.error('FAIL', name, e.message); if(activePage && !activePage.isClosed()) await activePage.screenshot({path:'test-results/failed-'+name.replace(/[^a-zA-Z0-9]/g,'-')+'.png',fullPage:true}).catch(()=>{}); } }
-async function settle(page) { await page.waitForFunction(()=>document.documentElement.dataset.experienceReady==='true'||(location.pathname==='/'&&document.documentElement.dataset.precisionTypeReady==='true'),null,{timeout:7500});await page.evaluate(async()=>{await new Promise(requestAnimationFrame);const h=document.querySelector('main h1')||document.querySelector('h1');if(h)await document.fonts.load(getComputedStyle(h).font);await document.fonts.ready;}); }
+async function settle(page) { await page.waitForFunction(()=>!!document.querySelector('#send')?.dataset.state||document.documentElement.dataset.experienceReady==='true'||(location.pathname==='/'&&document.documentElement.dataset.precisionTypeReady==='true'),null,{timeout:7500});await page.evaluate(async()=>{await new Promise(requestAnimationFrame);const h=document.querySelector('main h1')||document.querySelector('h1');if(h)await document.fonts.load(getComputedStyle(h).font);await document.fonts.ready;}); }
 async function publicEntry(page) { await settle(page); const button = page.locator('#sitePublicEntry'); if (await button.isVisible()) await button.click(); }
 const browserMatrix = [['chromium',chromium,[320,390,820,1440]], ['webkit',webkit,[390,820]]];
 const selectedBrowser = process.env.TEST_BROWSER;
@@ -29,7 +29,8 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     const errors=[]; page.on('pageerror',e=>errors.push(e.message));
     for (const path of routes) await check(`${name} ${width}px ${path} layout`, async () => {
       const startErrors=errors.length; const response=await page.goto(base+path); assert.equal(response.status(),200); await publicEntry(page); await settle(page);
-      if(path!=='/')assert.equal(await page.evaluate(()=>document.fonts.check('16px "Inter"')),true,'Shared body font loaded');
+      if(['/ai-intelligence.html','/malware-ai.html'].includes(path))assert.equal(new URL(page.url()).pathname,'/ai/','Legacy AI URL must open chat');
+      if(path!=='/'&&new URL(page.url()).pathname!=='/ai/')assert.equal(await page.evaluate(()=>document.fonts.check('16px "Inter"')),true,'Shared body font loaded');
       assert.equal(await page.evaluate(()=>document.fonts.check(getComputedStyle(document.querySelector('main h1')||document.querySelector('h1')).font)),true,'Actual heading font loaded');
       const state=await page.evaluate(()=>{
         const vw=document.documentElement.clientWidth;
@@ -99,7 +100,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     await check(`${name} ${width}px accessible product links and lightweight cards`,async()=>{
       await page.goto(base+'/');await publicEntry(page);
       const links=page.locator('#products article.product a.text-link');
-      assert.deepEqual(await links.evaluateAll(a=>a.map(x=>new URL(x.href).pathname)),['/gta-guard.html','/game-scam-guard.html','/threat-radar.html']);
+      assert.deepEqual(await links.evaluateAll(a=>a.map(x=>new URL(x.href).pathname)),['/gta-guard.html','/game-scam-guard.html','/ai/']);
       assert.equal(await page.locator('#products canvas').count(),0);
       for(const link of await links.all()){await link.focus();assert.equal(await link.evaluate(el=>document.activeElement===el),true);}
     });

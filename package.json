@@ -12,9 +12,10 @@
     "test:static": "python3 tests/validate-site.py",
     "test:experience": "node tests/experience.mjs",
     "test:motion": "node tests/motion-smoke.mjs",
-    "build": "npm run build:game-scam-guard && python3 tools/build-public-site.py",
+    "build": "npm run build:ai && npm run build:game-scam-guard && python3 tools/build-public-site.py",
     "build:game-scam-guard": "node tools/build-gamescam-guide.mjs && vite build --config services/game-scam-guard/vite.config.js",
-    "test:game-scam-guard": "node tests/game-scam-integration.test.mjs && npm --prefix services/game-scam-guard test"
+    "test:game-scam-guard": "node tests/game-scam-integration.test.mjs && npm --prefix services/game-scam-guard test",
+    "build:ai": "node tools/build-ai-local.mjs"
   },
   "devDependencies": {
     "@noble/hashes": "1.8.0",
@@ -28,7 +29,9 @@
     "vite": "^6.3.0"
   },
   "dependencies": {
+    "@babel/parser": "7.29.9",
     "@clerk/clerk-js": "6.39.0",
+    "@mlc-ai/web-llm": "0.2.86",
     "@vercel/sandbox": "3.6.1",
     "@zip.js/zip.js": "2.23.0",
     "busboy": "1.6.0",
@@ -39,7 +42,6 @@
     "ipaddr.js": "^2.2.0",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "@babel/parser": "7.29.9"
+    "react-dom": "^19.0.0"
   }
 }

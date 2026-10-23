@@ -1,0 +1,135 @@
+import assert from 'node:assert/strict';
+import express from 'express';
+import {fileURLToPath} from 'node:url';
+import {mkdir} from 'node:fs/promises';
+import {chromium,launchOptions} from './browser-runtime.mjs';
+
+// Controlled transport fixtures exercise presentation/cancellation, not live AI.
+const app=express(),jobs=[],root=fileURLToPath(new URL('../',import.meta.url));
+const generated=text=>({generated:{text,provider:'fixture',model:'test-model'}});
+app.use(express.json());
+app.get('/api/malguard-ai/status',(req,res)=>res.json({enabled:true,tools:Object.fromEntries(['gta_guard','game_scam_guard','ai_web','malwarebazaar','urlhaus'].map(id=>[id,{state:'configured'}])),model:{state:'configured',defaultModel:'llama70b',models:[{id:'llama70b',label:'Test model',state:'configured'}]}}));
+app.post('/api/malguard-ai/chat',(req,res)=>{
+ res.type('application/x-ndjson');res.flushHeaders();
+ jobs.push({body:req.body,res,emit:event=>res.write(JSON.stringify({event})+'\n'),finish:result=>res.end(JSON.stringify({result})+'\n')});
+ jobs.at(-1).emit({phase:'model_started',tool:'chat'});
+});
+app.use(express.static(root));
+const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));
+const base=`http://127.0.0.1:${server.address().port}`,browser=await chromium.launch(launchOptions('chromium'));
+try{
+ for(const width of [390,1280]){
+  const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'no-preference'}),page=await context.newPage(),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await context.addInitScript(()=>Object.defineProperty(navigator,'gpu',{value:undefined}));
+  await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
+  await page.goto(base+'/ai/');await page.waitForFunction(()=>!document.getElementById('send').disabled);
+  await page.locator('#settings-panel > summary').click();await page.locator('#permissions > summary').click();await page.locator('#model-consent').check();await page.locator('#settings-panel > summary').click();
+  const send=async text=>{
+   const count=jobs.length;await page.locator('#message').fill(text);await page.locator('#message').press('Enter');
+   await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking');assert.equal(jobs.length,count+1);return jobs.at(-1);
+  };
+  const job=await send('Hello'),jobIndex=jobs.length;await page.locator('#activity-label').filter({hasText:/^Thinking$/}).waitFor();
+  if(width===390){
+   await page.waitForFunction(()=>document.getElementById('activity-label').textContent!=='Thinking');
+   await page.waitForFunction(()=>document.getElementById('activity-label').textContent==='Thinking');
+  }
+  await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/reply-thinking-${width}.png`,fullPage:true});
+  assert.equal(await page.locator('#send-stop').isVisible(),true);assert.equal(await page.locator('#send-arrow').isVisible(),false);assert.equal(await page.locator('#send').getAttribute('aria-label'),'Stop response');
+  assert.match(await page.locator('#activity-label').evaluate(n=>getComputedStyle(n).fontFamily),/MalGuard/);
+  job.emit({phase:'tool_started',tool:'ai_web'});job.emit({phase:'tool_started',tool:'urlhaus'});
+  await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking · Searching the web · Checking · URLhaus');
+  job.emit({phase:'tool_finished',tool:'ai_web'});
+  await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking · Checking · URLhaus');
+  job.emit({phase:'tool_finished',tool:'urlhaus'});
+  job.emit({phase:'tool_started',tool:'game_scam_guard'});
+  await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking · Reading website');
+  // Changing UI language during a live request must retain the work and its partial DOM.
+  await page.locator('#language').click();
+  await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='در حال فکر کردن · در حال خواندن سایت');
+  assert.equal(await page.locator('#send').getAttribute('aria-label'),'توقف پاسخ');
+  assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
+  assert.equal(await page.locator('.bubble').innerText(),'Hello');
+  assert.equal(jobs.length,jobIndex,'A locale switch must not resend the request');
+  await page.screenshot({path:`test-results/malguard-ai/reply-reading-fa-${width}.png`,fullPage:true});
+  await page.locator('#language').click();
+  job.emit({phase:'tool_finished',tool:'game_scam_guard'});job.emit({phase:'model_started',tool:'chat'});
+  const text=('A clear, carefully paced reply. پاسخ فارسی 👩🏽‍💻. ').repeat(24);
+  job.finish(generated(text));
+  await page.waitForFunction(()=>document.querySelector('.answer')?.textContent.length>12);
+  assert.equal(await page.locator('#activity').getAttribute('data-label'),'Typing');
+  assert.ok((await page.locator('.answer').innerText()).length<text.length,'text appears progressively');
+  assert.equal(await page.locator('.response-actions').isVisible(),false);
+  await page.screenshot({path:`test-results/malguard-ai/reply-typing-${width}.png`,fullPage:true});
+  const typingText=await page.locator('.answer').innerText();
+  await page.locator('#language').click();
+  await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='در حال نوشتن');
+  assert.ok((await page.locator('.answer').innerText()).startsWith(typingText),'Locale switch must preserve text already presented');
+  assert.equal(await page.locator('.answer').count(),1);
+  await page.locator('#language').click();
+  await page.locator('#message').fill('Draft for the next turn');
+  await page.locator('#send').click();await page.waitForFunction(()=>document.getElementById('send').dataset.state==='send');
+  const partial=await page.locator('.answer').innerText();
+  assert.ok(partial.length>0&&partial.length<text.length);assert.equal(await page.locator('.reply-stopped').innerText(),'Response stopped');
+  assert.equal(await page.locator('#message').inputValue(),'Draft for the next turn');
+  // Advance frames without a wall-clock sleep: cancelled animation must stay frozen.
+  await page.evaluate(()=>new Promise(resolve=>{let frames=20;const next=()=>--frames?requestAnimationFrame(next):resolve();requestAnimationFrame(next);}));
+  assert.equal(await page.locator('.answer').innerText(),partial);
+  assert.equal(await page.locator('#activity').isVisible(),false);
+  assert.equal(await page.locator('#conversation').getAttribute('aria-busy'),'false');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/reply-stopped-${width}.png`,fullPage:true});
+  // Cancelling transport before any result suppresses stale replies and errors.
+  const waiting=await send('Wait for this response');
+  assert.deepEqual(waiting.body.history,[],'interrupted text is excluded from model history');
+  await page.locator('#send').click();await page.waitForFunction(()=>document.getElementById('send').dataset.state==='send');
+  await new Promise(resolve=>waiting.res.destroyed?resolve():waiting.res.once('close',resolve));
+  assert.equal(await page.getByRole('alert').count(),0);
+  assert.equal(await page.locator('.answer').count(),1);
+  // A subsequent successful turn works; reduced motion displays the full answer.
+  await page.emulateMedia({reducedMotion:'reduce'});
+  const success=await send('Try again');success.finish(generated('Complete reply. سلام 👩🏽‍💻'));
+  await page.getByText('Complete reply. سلام 👩🏽‍💻',{exact:true}).waitFor();await page.waitForFunction(()=>document.getElementById('send').dataset.state==='send');
+  assert.equal(await page.locator('#message').inputValue(),'');
+  const completed=page.locator('.assistant-message').last();
+  assert.equal(await completed.evaluate(n=>getComputedStyle(n).borderTopWidth),'0px');
+  assert.equal(await completed.locator('.response-details').getAttribute('open'),null);
+  assert.ok((await completed.locator('.copy-response').boundingBox()).width<=40,'Copy stays a compact icon control');
+  assert.ok((await completed.locator('.response-details>summary').boundingBox()).width<=40,'Details stays a compact icon control');
+  assert.equal(await completed.getByRole('button',{name:'Copy response'}).count(),1);
+  assert.equal(await completed.getByText('Response details',{exact:true}).count(),1);
+  await page.screenshot({path:`test-results/malguard-ai/reply-clean-${width}.png`,fullPage:true});
+  // Both status and stop controls are localized in RTL.
+  await page.locator('#language').click();const count=jobs.length;await page.locator('#message').fill('سلام');await page.locator('#send').click();
+  await page.locator('#activity-label').filter({hasText:/^در حال فکر کردن$/}).waitFor();assert.equal(jobs.length,count+1);
+  assert.equal(await page.locator('#send').getAttribute('aria-label'),'توقف پاسخ');assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
+  jobs.at(-1).finish(generated('پاسخ کامل فارسی'));await page.getByText('پاسخ کامل فارسی',{exact:true}).waitFor();await page.waitForFunction(()=>document.getElementById('send').dataset.state==='send');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  await page.reload();await page.waitForFunction(()=>document.documentElement.lang==='fa'&&!document.getElementById('send').disabled);
+  assert.equal(await page.locator('html').getAttribute('dir'),'rtl','The shared site language survives refresh');
+  assert.equal(await page.locator('#activity').isVisible(),false);
+  assert.equal(await page.locator('#local-offer').isVisible(),false);
+  assert.deepEqual(errors,[]);await context.close();
+  console.log(`PASS thinking/tool/typing stages, partial stop, transport abort, next turn, RTL and reduced motion at ${width}px (fixtures).`);
+ }
+ const local=await browser.newContext({viewport:{width:390,height:844}}),page=await local.newPage();
+ await local.addInitScript(()=>{
+  sessionStorage.setItem('malguard.ai.localOffer.v1','later');
+  Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});
+  window.workerCalls=[];window.workerStops=0;
+  window.Worker=class{constructor(){window.localWorker=this;}postMessage(data){window.workerCalls.push(data);}terminate(){window.workerStops++;}};
+ });
+ await local.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
+ await page.goto(base+'/ai/');await page.waitForFunction(()=>!document.getElementById('send').disabled);
+ await page.locator('#settings-panel > summary').click();await page.locator('#model').selectOption('local_fast');await page.locator('#settings-panel > summary').click();
+ const beforeLocal=jobs.length;await page.locator('#message').fill('Hello');await page.locator('#send').click();await page.locator('#local-download button[value="download"]').click();
+ await page.waitForFunction(()=>window.workerCalls.length===1);
+ await page.evaluate(()=>window.localWorker.onmessage({data:{progress:75}}));
+ await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Loading on-device model · 75%');
+ await page.evaluate(()=>window.localWorker.onmessage({data:{phase:'model_started'}}));
+ await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking');
+ await page.locator('#send').click();await page.waitForFunction(()=>document.getElementById('send').dataset.state==='send');
+ assert.equal(await page.evaluate(()=>workerStops),1);assert.equal(jobs.length,beforeLocal);assert.equal(await page.getByRole('alert').count(),0);
+ assert.equal(await page.locator('.reply-stopped').innerText(),'Response stopped');await local.close();
+ console.log('PASS square stop terminates on-device Worker without a cloud request or failure alert (fixture).');
+}finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

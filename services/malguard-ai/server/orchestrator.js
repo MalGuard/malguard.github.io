@@ -1,3 +1,4 @@
+import {publicFailure} from '../../../ai/service-errors.mjs';
 import {parseRequest,InputError,report} from './contracts.js';
 import {createGtaGuard} from './adapters/gta-guard.js';
 import {createGameScamGuard} from './adapters/game-scam-guard.js';
@@ -6,6 +7,7 @@ import {createUrlhaus} from './adapters/urlhaus.js';
 import {aiWeb} from './adapters/ai-web.js';
 import {modelAdapter} from './model.js';
 import {replyLanguage} from './language.js';
+import {planChat} from '../../../ai/routing.mjs';
 export function createOrchestrator(adapters = {gta_guard:createGtaGuard(),game_scam_guard:createGameScamGuard(),malwarebazaar:createMalwareBazaar(),urlhaus:createUrlhaus(),ai_web:aiWeb},model=modelAdapter) {
   const status = () => ({model:model.status(), tools:Object.fromEntries(Object.entries(adapters).map(([id,a])=>[id,a.status()])),modes:['chat','worker'],history:'client_memory',streaming:'ndjson_events',retention:'no_application_storage'});
   async function execute(tool,input,consent,onEvent){
@@ -17,14 +19,15 @@ export function createOrchestrator(adapters = {gta_guard:createGtaGuard(),game_s
       operation=adapter.run(input,{signal:controller.signal,consent});
       const result=await Promise.race([operation,new Promise((_,reject)=>{timer=setTimeout(()=>{controller.abort();reject(new Error('timeout'));},35000);})]);
       onEvent({phase:'tool_finished',tool,outcome:result.outcome});return result;
-    }catch{
-      onEvent({phase:'tool_finished',tool,outcome:'error'});return report(tool,'error',{reason:'service_failed',limitations:['The service failed; no safety conclusion is available.']});
+    }catch(error){
+      onEvent({phase:'tool_finished',tool,outcome:'error'});return report(tool,'error',{failure:publicFailure(error),reason:'service_failed',limitations:['The service failed; no safety conclusion is available.']});
     }finally{clearTimeout(timer);controller.abort();if(operation)await operation.catch(()=>{});}
   }
   async function run(body,onEvent=()=>{}){
     const request=parseRequest(body),{input,consent,locale,mode,history}=request;
     await refresh();
-    const searchIntent=mode==='chat'&&/جست.?جو|سرچ|\b(?:search|look up|latest)\b/iu.test(request.message);
+    const routed=['auto','gemini_flash','groq_gptoss'].includes(request.model);
+    const searchIntent=!routed&&mode==='chat'&&/جست.?جو|سرچ|\b(?:search|look up|latest)\b/iu.test(request.message);
     const tool=request.tool!=='auto'?request.tool:input.file?'gta_guard':input.sha256?'malwarebazaar':input.url?'game_scam_guard':searchIntent?'ai_web':null;
     const wrap=extra=>({locale,mode,model:model.status(),...extra});
     if(!tool){
@@ -34,8 +37,9 @@ export function createOrchestrator(adapters = {gta_guard:createGtaGuard(),game_s
       }
       if(model.status().state!=='disabled'&&request.message.trim()){
         if(!consent.modelShare)throw new InputError('model_consent_required',403);
+        if(routed&&planChat(request.message,history).needsWeb&&!consent.remoteLookup)throw new InputError('lookup_consent_required',403);
         onEvent({phase:'model_started',tool:'chat'});
-        try{return wrap({result:null,generated:await model.respond(request.message,replyLanguage(request.message,locale,history),history,request.model)});}catch{return wrap({result:null,error:'model_unavailable'});}
+        try{return wrap({result:null,generated:await model.respond(request.message,replyLanguage(request.message,locale,history),history,request.model,consent)});}catch(error){return wrap({result:null,...publicFailure(error,'model_unavailable')});}
       }
       return wrap({result:null,message:locale==='fa'?'اتصال مدل هنوز در سرور تنظیم نشده است؛ بررسی فایل و سایت در دسترس است.':'The server model connection is not configured yet. File and URL inspection remain available.'});
     }

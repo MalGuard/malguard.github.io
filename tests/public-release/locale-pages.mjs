@@ -19,6 +19,10 @@ try{
   await page.waitForURL('https://127.0.0.1:8443/');
   for(const path of paths){
    const start=errors.length;await page.goto('https://127.0.0.1:8443'+path);
+   if(['/ai-intelligence.html','/malware-ai.html'].includes(path)){
+    await page.waitForURL('**/ai/');await page.waitForFunction(()=>!!document.querySelector('#send')?.dataset.state);
+    if(await page.locator('html').getAttribute('lang')!=='fa')await page.locator('#language').click();
+   }
    await page.waitForFunction(()=>document.documentElement.lang==='fa');
    assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
    assert.ok(await page.locator('h1').count());
