@@ -49,3 +49,24 @@ provider identity, citations, security evidence and permissions remain available
 The landing page opens without a model-download popup. Optional on-device model
 downloads remain available in Settings, with explicit approval before downloading.
 The language choice is shared with the main site and retained on refresh.
+
+## Elapsed response time
+
+An independent seconds counter stays visible beside the activity text from
+submission through the end of reply presentation. Stage changes, parallel tools
+and language switches preserve the same start time. Timing uses the browser's
+monotonic clock; delayed background-tab ticks catch up to the actual elapsed time.
+The counter also works with reduced motion, without announcing every tick.
+
+Completed turns retain a compact `Responded in 3.2s` label, with minutes for longer
+requests and localized Persian digits and units. Stop freezes the measurement at
+the click and uses `Stopped after`; failures use `Time elapsed` instead of claiming
+a successful response. This measures the user's total wait, including file reads,
+network/tools and text presentation, rather than a model's private reasoning time.
+Durations stay in the page's conversation memory and are cleared with it. Preparing
+an optional model download displays a live timer without adding a chat-response
+duration to the conversation.
+
+The presentation browser suite checks ticking, continuity across stages and
+languages, reset on the next turn, frozen completed/stopped durations, Persian
+formatting, reduced motion and removal on refresh at mobile and desktop widths.

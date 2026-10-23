@@ -21,6 +21,7 @@ try{
  for(const width of [390,1280]){
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'no-preference'}),page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
+  await page.clock.install();
   await context.addInitScript(()=>Object.defineProperty(navigator,'gpu',{value:undefined}));
   await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
   await page.goto(base+'/ai/');await page.waitForFunction(()=>!document.getElementById('send').disabled);
@@ -34,11 +35,16 @@ try{
    await page.waitForFunction(()=>document.getElementById('activity-label').textContent!=='Thinking');
    await page.waitForFunction(()=>document.getElementById('activity-label').textContent==='Thinking');
   }
+  await page.clock.fastForward(2100);
+  const liveSeconds=Number.parseInt(await page.locator('#activity-elapsed').innerText(),10);
+  assert.ok(liveSeconds>=2,'Elapsed seconds advance while the server is still working');
+  assert.equal(await page.locator('#activity-elapsed').getAttribute('aria-hidden'),'true','Ticks do not repeatedly interrupt screen readers');
   await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/reply-thinking-${width}.png`,fullPage:true});
   assert.equal(await page.locator('#send-stop').isVisible(),true);assert.equal(await page.locator('#send-arrow').isVisible(),false);assert.equal(await page.locator('#send').getAttribute('aria-label'),'Stop response');
   assert.match(await page.locator('#activity-label').evaluate(n=>getComputedStyle(n).fontFamily),/MalGuard/);
   job.emit({phase:'tool_started',tool:'ai_web'});job.emit({phase:'tool_started',tool:'urlhaus'});
   await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking · Searching the web · Checking · URLhaus');
+  assert.ok(Number.parseInt(await page.locator('#activity-elapsed').innerText(),10)>=liveSeconds,'Starting a parallel tool does not reset elapsed time');
   job.emit({phase:'tool_finished',tool:'ai_web'});
   await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking · Checking · URLhaus');
   job.emit({phase:'tool_finished',tool:'urlhaus'});
@@ -49,6 +55,7 @@ try{
   await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='در حال فکر کردن · در حال خواندن سایت');
   assert.equal(await page.locator('#send').getAttribute('aria-label'),'توقف پاسخ');
   assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
+  assert.match(await page.locator('#activity-elapsed').innerText(),/[۰-۹]+ ثانیه/);
   assert.equal(await page.locator('.bubble').innerText(),'Hello');
   assert.equal(jobs.length,jobIndex,'A locale switch must not resend the request');
   await page.screenshot({path:`test-results/malguard-ai/reply-reading-fa-${width}.png`,fullPage:true});
@@ -77,10 +84,15 @@ try{
   assert.equal(await page.locator('.answer').innerText(),partial);
   assert.equal(await page.locator('#activity').isVisible(),false);
   assert.equal(await page.locator('#conversation').getAttribute('aria-busy'),'false');
+  const stoppedTiming=page.locator('.response-duration').last(),frozenTiming=await stoppedTiming.getAttribute('data-elapsed-ms');
+  assert.match(await stoppedTiming.innerText(),/^Stopped after \d+(?:\.\d+)?s$/);
+  await page.clock.fastForward(2100);
+  assert.equal(await stoppedTiming.getAttribute('data-elapsed-ms'),frozenTiming,'Stop freezes the final duration');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/reply-stopped-${width}.png`,fullPage:true});
   // Cancelling transport before any result suppresses stale replies and errors.
   const waiting=await send('Wait for this response');
+  assert.ok(Number.parseInt(await page.locator('#activity-elapsed').innerText(),10)<2,'A new request starts a new timer');
   assert.deepEqual(waiting.body.history,[],'interrupted text is excluded from model history');
   await page.locator('#send').click();await page.waitForFunction(()=>document.getElementById('send').dataset.state==='send');
   await new Promise(resolve=>waiting.res.destroyed?resolve():waiting.res.once('close',resolve));
@@ -98,9 +110,15 @@ try{
   assert.ok((await completed.locator('.response-details>summary').boundingBox()).width<=40,'Details stays a compact icon control');
   assert.equal(await completed.getByRole('button',{name:'Copy response'}).count(),1);
   assert.equal(await completed.getByText('Response details',{exact:true}).count(),1);
+  const completeTiming=page.locator('.response-duration').last(),completeMilliseconds=await completeTiming.getAttribute('data-elapsed-ms');
+  assert.match(await completeTiming.innerText(),/^Responded in \d+(?:\.\d+)?s$/);
+  await page.clock.fastForward(2100);
+  assert.equal(await completeTiming.getAttribute('data-elapsed-ms'),completeMilliseconds,'A completed duration stays fixed');
   await page.screenshot({path:`test-results/malguard-ai/reply-clean-${width}.png`,fullPage:true});
   // Both status and stop controls are localized in RTL.
   await page.locator('#language').click();const count=jobs.length;await page.locator('#message').fill('سلام');await page.locator('#send').click();
+  assert.equal(await page.locator('.response-duration').last().getAttribute('data-elapsed-ms'),completeMilliseconds,'Changing language preserves the measured duration');
+  assert.match(await page.locator('.response-duration').last().innerText(),/^پاسخ در [۰-۹٫]+ ثانیه$/);
   await page.locator('#activity-label').filter({hasText:/^در حال فکر کردن$/}).waitFor();assert.equal(jobs.length,count+1);
   assert.equal(await page.locator('#send').getAttribute('aria-label'),'توقف پاسخ');assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
   jobs.at(-1).finish(generated('پاسخ کامل فارسی'));await page.getByText('پاسخ کامل فارسی',{exact:true}).waitFor();await page.waitForFunction(()=>document.getElementById('send').dataset.state==='send');
@@ -108,6 +126,7 @@ try{
   await page.reload();await page.waitForFunction(()=>document.documentElement.lang==='fa'&&!document.getElementById('send').disabled);
   assert.equal(await page.locator('html').getAttribute('dir'),'rtl','The shared site language survives refresh');
   assert.equal(await page.locator('#activity').isVisible(),false);
+  assert.equal(await page.locator('.response-duration').count(),0,'Elapsed timings share the in-memory conversation lifetime');
   assert.equal(await page.locator('#local-offer').isVisible(),false);
   assert.deepEqual(errors,[]);await context.close();
   console.log(`PASS thinking/tool/typing stages, partial stop, transport abort, next turn, RTL and reduced motion at ${width}px (fixtures).`);

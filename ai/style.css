@@ -153,9 +153,12 @@ textarea{font-size:16px}
 /* Quiet conversation view; diagnostic and privacy controls stay available. */
 .conversation,textarea{font-family:Arial,system-ui,sans-serif}
 .reply-activity{font-family:MalGuard,Arial,system-ui,sans-serif}
-.reply-activity{display:flex;align-items:center;gap:10px;min-height:32px;margin:0 0 18px;color:#a1a1aa;font-size:13px;font-weight:600;letter-spacing:-.02em}
+.reply-activity{display:flex;align-items:center;flex-wrap:wrap;column-gap:10px;row-gap:2px;min-height:32px;margin:0 0 18px;color:#a1a1aa;font-size:13px;font-weight:600;letter-spacing:-.02em}
 .activity-orbit{width:13px;height:13px;flex:none;border:1px solid #ffffff20;border-top-color:currentColor;border-inline-end-color:currentColor;border-radius:50%;animation:activity-orbit 1.1s linear infinite}
-#activity-label{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}
+#activity-label{min-width:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}
+#activity-elapsed{flex:none;white-space:nowrap;font-variant-numeric:tabular-nums;unicode-bidi:isolate;color:#85858d}
+#activity-elapsed::before{content:'·';margin-inline-end:10px}
+.response-duration{font:12px MalGuard,Arial,system-ui,sans-serif;color:#929292;font-variant-numeric:tabular-nums;margin:-12px 0 0;unicode-bidi:plaintext}
 #activity-label::after{content:'';display:inline-block;width:3px;height:.8em;margin-inline-start:3px;background:currentColor;vertical-align:-.05em;animation:reply-caret .9s step-end infinite}
 .is-typing .answer::after{content:'';display:inline-block;width:5px;height:1em;background:#ddd;border-radius:1px;margin-inline-start:3px;vertical-align:-.1em;animation:reply-caret .9s ease-in-out infinite}
 .reply-stopped{font:12px Arial,sans-serif;color:var(--muted);margin:10px 0 0}

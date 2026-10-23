@@ -1,4 +1,11 @@
 // Presentation of received text, not token streaming or model reasoning.
+export function formatElapsed(milliseconds,locale='en',precise=false){
+ const seconds=precise?Math.round(milliseconds/100)/10:Math.floor(milliseconds/1000);
+ const minutes=Math.floor(seconds/60),remaining=seconds%60;
+ const number=new Intl.NumberFormat(locale==='fa'?'fa-IR':'en-US',{maximumFractionDigits:precise?1:0,useGrouping:false});
+ const tail=locale==='fa'?`${number.format(remaining)} ثانیه`:`${number.format(remaining)}s`;
+ return minutes?(locale==='fa'?`${number.format(minutes)} دقیقه و ${tail}`:`${number.format(minutes)}m ${tail}`):tail;
+}
 export function typeText(text,write,{signal,charactersPerSecond=180,reducedMotion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches,frame=globalThis.requestAnimationFrame,cancel=globalThis.cancelAnimationFrame}={}){
  const parts=typeof Intl.Segmenter==='function'?Array.from(new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(text),s=>s.segment):Array.from(text);
  return new Promise((resolve,reject)=>{

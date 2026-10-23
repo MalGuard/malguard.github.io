@@ -5,7 +5,7 @@ import {readPermissions,savePermissions,revokePermissions} from './permissions.m
 import {planChat} from './routing.mjs';
 import {localModels,localCapability,createLocalChat} from './local-models.mjs';
 import {replyLanguage} from './language.mjs';
-import {typeText,typeActivity} from './reply-motion.mjs';
+import {typeText,typeActivity,formatElapsed} from './reply-motion.mjs';
 const $=id=>document.getElementById(id);
 const names={gta_guard:'GTA Guard',game_scam_guard:'Game Scam Guard',ai_web:'AI Web',malwarebazaar:'MalwareBazaar',urlhaus:'URLhaus'};
 let locale='en',service,busy=false;
@@ -34,6 +34,22 @@ Object.assign(copy.fa,{offerTitle:'دو مدل اختیاری روی دستگا�
 const t=k=>copy[locale][k]||k;
 Object.assign(copy.en,{thinking:'Thinking',readingFile:'Reading file',readingWebsite:'Reading website',checkingFile:'Checking file',typing:'Typing',connecting:'Connecting',preparing:'Preparing results',searching:'Searching the web',checking:'Checking',stopped:'Response stopped',stop:'Stop response'});
 Object.assign(copy.fa,{thinking:'در حال فکر کردن',readingFile:'در حال خواندن فایل',readingWebsite:'در حال خواندن سایت',checkingFile:'در حال بررسی فایل',typing:'در حال نوشتن',connecting:'در حال اتصال',preparing:'در حال آماده‌سازی نتیجه',searching:'در حال جست‌وجوی وب',checking:'در حال بررسی',stopped:'پاسخ متوقف شد',stop:'توقف پاسخ'});
+Object.assign(copy.en,{respondedIn:'Responded in',stoppedAfter:'Stopped after',elapsedTime:'Time elapsed:'});
+Object.assign(copy.fa,{respondedIn:'پاسخ در',stoppedAfter:'توقف پس از',elapsedTime:'زمان سپری‌شده:'});
+function updateElapsed(turn){
+ const text=formatElapsed(turn.elapsedMs??performance.now()-turn.startedAt,locale);
+ if($('activity-elapsed').textContent!==text)$('activity-elapsed').textContent=text;
+}
+function freezeElapsed(turn){
+ clearInterval(turn.elapsedTimer);
+ turn.elapsedMs??=performance.now()-turn.startedAt;
+}
+function timingText(timing){return `${t(timing.label)} ${formatElapsed(timing.elapsedMs,locale,true)}`;}
+function renderTiming(timing){
+ const node=el('p',timingText(timing),'response-duration');
+ node.dataset.elapsedMs=timing.elapsedMs;node.dataset.label=timing.label;
+ $('conversation').append(node);
+}
 function activityLabel(key,detail){
  if(key==='running')return detail.map(id=>id==='chat'?t('thinking'):id==='ai_web'?t('searching'):id==='game_scam_guard'?t('readingWebsite'):id==='gta_guard'?t('checkingFile'):`${t('checking')} · ${names[id]}`).join(' · ');
  return detail?`${t(key)} · ${detail}`:t(key);
@@ -54,17 +70,21 @@ function showRunningActivity(turn){
  const work=[...(turn.modelStarted?['chat']:[]),...turn.tools];
  setActivity(work.length?'running':'preparing',work.length?work:'');
 }
-function beginTurn(stage){
- busy=true;const turn={controller:new AbortController(),tools:new Set(),partial:false};activeTurn=turn;
+function beginTurn(stage,{recordTiming=true}={}){
+ busy=true;const turn={controller:new AbortController(),tools:new Set(),partial:false,startedAt:performance.now(),recordTiming};activeTurn=turn;
+ updateElapsed(turn);turn.elapsedTimer=setInterval(()=>updateElapsed(turn),250);
  $('conversation').setAttribute('aria-busy','true');renderStatus();setActivity(stage);return turn;
 }
 function endTurn(turn){
+ freezeElapsed(turn);
  if(activeTurn!==turn)return;
+ if(turn.recordTiming){const timing={elapsedMs:turn.elapsedMs,label:turn.controller.signal.aborted?'stoppedAfter':turn.completed?'respondedIn':'elapsedTime'};history.push({timing});renderTiming(timing);}
  activityAnimation?.abort();$('activity').hidden=true;delete $('activity').dataset.label;
  activeTurn=undefined;busy=false;$('conversation').setAttribute('aria-busy','false');renderStatus();
 }
 function stopTurn(){
  if(!activeTurn||activeTurn.controller.signal.aborted)return;
+ freezeElapsed(activeTurn);
  activeTurn.controller.abort(new DOMException('Stopped by user','AbortError'));localChat.stop();activityAnimation?.abort();$('activity').hidden=true;renderStatus();
 }
 function stopped(turn){
@@ -77,11 +97,12 @@ function followReply(update){
 }
 async function presentResponse(response,turn){
  turn.controller.signal.throwIfAborted();
- if(!response.generated){renderResponse(response);return;}
+ if(!response.generated){renderResponse(response);turn.completed=!response.error;return;}
  const display={...response,generated:{...response.generated,text:''}},card=renderResponse(display,false),answer=card.querySelector('.answer'),actions=card.querySelector('.response-actions');
  card.classList.add('is-typing');actions.hidden=true;setActivity('typing');
  try{
   await typeText(response.generated.text,text=>followReply(()=>{display.generated.text=text;answer.textContent=text;}),{signal:turn.controller.signal});
+  turn.completed=true;
  }finally{
   card.classList.remove('is-typing');actions.hidden=false;
   if(display.generated.text){
@@ -99,7 +120,17 @@ function responseIcon(kind){
  path.setAttribute('d',kind==='copy'?'M9 9h11v11H9zM15 9V4H4v11h5':'M5 12h.01M12 12h.01M19 12h.01');
  path.setAttribute('stroke','currentColor');path.setAttribute('stroke-width',kind==='copy'?'1.5':'3');path.setAttribute('stroke-linecap','round');path.setAttribute('stroke-linejoin','round');svg.append(path);return svg;
 }
-function translate(){document.documentElement.lang=locale;document.documentElement.dir=locale==='fa'?'rtl':'ltr';$('language').textContent=locale==='fa'?'English':'فارسی';document.querySelectorAll('[data-i18n]').forEach(n=>n.textContent=t(n.dataset.i18n));$('message').placeholder=t('placeholder');$('conversation').ariaLabel=locale==='fa'?'گفت‌وگو':'Conversation';renderStatus();$('mode-hint').textContent=t($('mode').value==='chat'?'chatHint':'workerHint');if(activeTurn){const {key,detail}=activeTurn.stage;setActivity(key,detail);return;}$('conversation').replaceChildren();for(const item of history){if(item.response)renderResponse(item.response,false);else if(item.error)showError(item.error,false);else $('conversation').append(el('div',item.bubble,'bubble'));}}
+function translate(){
+ document.documentElement.lang=locale;document.documentElement.dir=locale==='fa'?'rtl':'ltr';$('language').textContent=locale==='fa'?'English':'فارسی';
+ document.querySelectorAll('[data-i18n]').forEach(n=>n.textContent=t(n.dataset.i18n));$('message').placeholder=t('placeholder');$('conversation').ariaLabel=locale==='fa'?'گفت‌وگو':'Conversation';renderStatus();$('mode-hint').textContent=t($('mode').value==='chat'?'chatHint':'workerHint');
+ if(activeTurn){
+  updateElapsed(activeTurn);const {key,detail}=activeTurn.stage;setActivity(key,detail);
+  for(const node of document.querySelectorAll('.response-duration'))node.textContent=timingText({elapsedMs:Number(node.dataset.elapsedMs),label:node.dataset.label});
+  return;
+ }
+ $('conversation').replaceChildren();
+ for(const item of history){if(item.response)renderResponse(item.response,false);else if(item.error)showError(item.error,false);else if(item.timing)renderTiming(item.timing);else $('conversation').append(el('div',item.bubble,'bubble'));}
+}
 function renderStatus(){
  $('tools').replaceChildren();
  for(const [id,name]of Object.entries(names)){
@@ -177,7 +208,7 @@ async function offerLocalModels(){
  localPreference=accepted?'local':'later';try{sessionStorage.setItem('malguard.ai.localOffer.v1',localPreference);}catch{}
  if(!accepted){$('model').value=service?.model?.defaultModel||'auto';renderStatus();return;}
  const model=$('offer-model').value;
- downloadPermissions.add(model);const turn=beginTurn('localLoading');
+ downloadPermissions.add(model);const turn=beginTurn('localLoading',{recordTiming:false});
  let completed=false;
  try{await localChat.prepare(model,percent=>setActivity('localLoading',`${percent}%`));turn.controller.signal.throwIfAborted();$('model').value=model;completed=true;}
  catch{downloadPermissions.delete(model);if(!turn.controller.signal.aborted)showError('localFailed');}
