@@ -16,4 +16,5 @@ test('arbitrary model names, endpoints and non-string selectors are rejected bef
  for(const model of ['https://attacker.example','paid_model',null,{},1])assert.throws(()=>parseRequest({message:'hello',model}));
  assert.equal(parseRequest({message:'hello'}).model,'llama70b');
  assert.equal(parseRequest({message:'hello',model:'gemini_flash'}).model,'gemini_flash');
+ assert.equal(parseRequest({message:'hello',model:'groq_gptoss'}).model,'groq_gptoss');
 });

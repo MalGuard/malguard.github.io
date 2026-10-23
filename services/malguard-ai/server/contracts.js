@@ -4,7 +4,7 @@ import {isIP} from 'node:net';
 export const MAX_FILE_BYTES = 1024 * 1024;
 export const MAX_BODY_BYTES = 1450000;
 export const TOOLS = ['gta_guard', 'game_scam_guard', 'ai_web', 'malwarebazaar', 'urlhaus'];
-export const MODELS = ['llama70b','llama8b','gemini_flash','groq_qwen'];
+export const MODELS = ['llama70b','llama8b','gemini_flash','groq_qwen','groq_gptoss'];
 export class InputError extends Error {
   constructor(code, status = 400) { super(code); this.code = code; this.status = status; }
 }
