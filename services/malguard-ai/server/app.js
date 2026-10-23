@@ -1,4 +1,5 @@
 import express from 'express';
+import {retryDetails} from '../../../ai/service-errors.mjs';
 import {randomUUID} from 'node:crypto';
 import {createOrchestrator} from './orchestrator.js';
 import {InputError,MAX_BODY_BYTES} from './contracts.js';
@@ -24,7 +25,7 @@ export function createApp({orchestrator=createOrchestrator(),enabled=process.env
     const time=now();for(const [key,entry]of rates)if(entry.until<=time)rates.delete(key);
     const key=req.socket.remoteAddress||'shared';let entry=rates.get(key);
     if(!entry){if(rates.size>=2000)return res.status(429).json({error:'rate_limited'});entry={count:0,posts:0,until:time+60000};rates.set(key,entry);}
-    if(++entry.count>60||(req.method==='POST'&&++entry.posts>10)){res.set('Retry-After','60');return res.status(429).json({error:'rate_limited'});}
+    if(++entry.count>60||(req.method==='POST'&&++entry.posts>10)){const timing=retryDetails(String(Math.ceil((entry.until-time)/1000)),time);res.set('Retry-After',String(timing.retryAfterSeconds));return res.status(429).json({error:'rate_limited',...timing});}
     if(req.method==='POST'&&!req.is('application/json'))return res.status(415).json({error:'json_required'});
     const length=Number(req.headers['content-length']);
     if(length>MAX_BODY_BYTES)return res.status(413).json({error:'request_too_large'});

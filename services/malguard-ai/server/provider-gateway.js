@@ -1,10 +1,17 @@
+import {ServiceError,httpFailure,publicFailure} from '../../../ai/service-errors.mjs';
 import {fetchPublic} from '../../game-scam-guard/server/network.js';
+import {planChat} from '../../../ai/routing.mjs';
 const ENDPOINT='https://malware-ai-gray.vercel.app/api/malguard-assistant';
 let cache,loading,until=0;
 export async function gatewayRequest(payload,{transport=fetchPublic,signal}={}){
  const body=JSON.stringify(payload);
- const response=await transport(ENDPOINT,{method:'POST',noRedirect:true,limit:256*1024,timeout:22000,totalTimeout:24000,signal,headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(body),Origin:'https://game-scam-guard-connected.vercel.app'},body});
- if(response.status!==200)throw new Error('provider_gateway_failed');
+ const response=await transport(ENDPOINT,{method:'POST',noRedirect:true,limit:256*1024,timeout:30000,totalTimeout:32000,signal,headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(body),Origin:'https://game-scam-guard-connected.vercel.app'},body});
+ if(response.status!==200){
+  let data;try{data=JSON.parse(response.bytes.toString('utf8'));}catch{}
+  const details=publicFailure(data);
+  if(details.error!=='provider_unavailable')throw new ServiceError(details.error,response.status,details);
+  throw httpFailure(response.status,response.headers,data);
+ }
  return JSON.parse(response.bytes.toString('utf8'));
 }
 export async function refreshGateway(){
@@ -19,11 +26,12 @@ export const gatewayStatus=()=>cache;
 export const remoteModel={
  refresh:refreshGateway,
  status:()=>({state:cache?.modelConfigured?'configured':'disabled',provider:cache?.modelConfigured?cache.provider:null,model:cache?.model||null,defaultModel:cache?.defaultModel||'llama70b',models:cache?.models||[],reason:cache?.modelConfigured?'gateway_connected':'provider_gateway_unavailable',liveVerified:false}),
- async respond(message,locale,history=[],model='llama70b'){
+ async respond(message,locale,history=[],model='llama70b',consent={}){
   const selected=cache?.models?.find(m=>m.id===model);
-  if(!selected||selected.state!=='configured')throw new Error('model_not_configured');
-  const data=await gatewayRequest({operation:'chat',message,locale,history,model,consent:{modelShare:true}});
-  if(typeof data.generated?.text!=='string'||data.generated.text.length>6000||data.generated.provider!==selected.provider||data.generated.selectedModel!==model)throw new Error('invalid_model_response');
+  if(!selected||selected.state!=='configured')throw new ServiceError('model_not_configured',503);
+  const data=await gatewayRequest({operation:'chat',message,locale,history,model,consent:{modelShare:true,remoteLookup:consent.remoteLookup===true}});
+  const expected=model==='auto'?cache.models.find(m=>m.id===planChat(message,history).model):selected;
+  if(!expected||typeof data.generated?.text!=='string'||data.generated.text.length>6000||data.generated.provider!==expected.provider||data.generated.selectedModel!==expected.id||model==='auto'&&data.generated.requestedModel!=='auto')throw new Error('invalid_model_response');
   return {...data.generated,securityAnalysis:false};
  }
 };

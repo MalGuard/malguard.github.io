@@ -14,6 +14,7 @@ The server-approved model identifiers are:
 | `llama8b` | Existing Workers AI Llama 3.1 8B | Explicit alternative; existing Worker credential |
 | `gemini_flash` | Gemini 3.8 Flash | Existing Gemini key plus confirmation that billing is disabled |
 | `groq_qwen` | Qwen 3.8 27B on Groq | Owner-provisioned Groq key plus nonbillable account confirmation |
+| `groq_gptoss` | GPT-OSS 120B on Groq | The same Groq credential/account confirmation |
 
 The browser chooses only an identifier, never a provider URL or credential.
 Disabled catalog entries are visible but cannot be selected. The gateway checks
@@ -39,7 +40,7 @@ Free APIs have quotas. Current official references checked 23 October 2026:
 No new provider account, API key or paid plan was created automatically. Credentials
 must never be pasted into chat or client source.
 
-Validation: 38 assistant tests, 12 gateway/model tests, browser checks at
+Validation: 38 assistant tests, 13 gateway/model tests, browser checks at
 360/390/768/1280 px, syntax/static checks, and the public build passed. The browser
 test keeps the UI English while submitting `سلام`, selects the alternative model,
 and verifies that the backend requests Persian from that selected model. Provider
@@ -48,6 +49,9 @@ inference is not claimed by those tests.
 
 Release order: deploy and verify the private gateway first, then publish this
 client/server branch. The new public backend expects the new gateway catalog and
-identity contract. Automatic approval review rejected the new production gateway
-deployment pending explicit approval for this subsequent release. The earlier
-3B release remains live until that approval and successful live verification.
+identity contract. Each production update requires the applicable publication authorization. Do not
+infer live availability from source review or injected tests. Current release
+identifiers and observed model-quality limitations are recorded in PR #258 and
+the companion gateway PR #40. Llama replies may still mix languages; the private
+gateway includes a further native-Persian instruction refinement whose release
+status must be checked separately.

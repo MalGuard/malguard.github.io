@@ -1,0 +1,50 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {localCapability,createLocalChat,localMessages} from '../../../ai/local-models.mjs';
+import {planChat} from '../../../ai/routing.mjs';
+import {createOrchestrator} from '../server/orchestrator.js';
+test('four tiers recognize Persian/English requests and preserve research follow-ups',()=>{
+ for(const message of ['سلام','سلام خوبی؟','Hello!','Thanks'])assert.equal(planChat(message).tier,'fast');
+ assert.equal(planChat('Explain how DNS works').tier,'medium');
+ assert.equal(planChat('آخرین اخبار فناوری را با منابع تحقیق کن').tier,'strong');
+ assert.equal(planChat('Prove this multi-step mathematical statement').tier,'expert');
+ const follow=planChat('ادامه',[{role:'user',content:'تحقیق درباره آخرین اخبار'}]);assert.equal(follow.needsWeb,true);assert.equal(follow.tier,'strong');
+ assert.equal(planChat('Prove this result using current sources').needsWeb,true);
+});
+test('unsupported devices fail capability checks without creating an engine or downloading weights',async()=>{
+ assert.equal(await localCapability(undefined),false);
+});
+test('explicit model preparation downloads only a validated model and carries no conversation',async()=>{
+ const calls=[];let worker;
+ const chat=createLocalChat({workerFactory:()=>worker={postMessage:payload=>calls.push(payload),terminate(){}}});
+ await assert.rejects(chat.prepare('untrusted-model'),/invalid_local_model/);assert.equal(calls.length,0);
+ const progress=[],ready=chat.prepare('local_medium',value=>progress.push(value));
+ assert.deepEqual(calls,[{operation:'prepare',model:'local_medium'}]);
+ worker.onmessage({data:{progress:40}});worker.onmessage({data:{prepared:true}});
+ assert.equal(await ready,true);assert.deepEqual(progress,[40]);chat.stop();
+});
+test('local work stays in a worker, allows cancellation and preserves response metadata',async()=>{
+ const workers=[],progress=[];
+ const chat=createLocalChat({workerFactory:()=>{const w={terminated:false,postMessage(payload){this.payload=payload;},terminate(){this.terminated=true;}};workers.push(w);return w;}});
+ await assert.rejects(chat.respond({model:'arbitrary',message:'hello'}),/invalid_local_model/);assert.equal(workers.length,0);
+ const first=chat.respond({model:'local_fast',message:'سلام',locale:'fa',history:[]},p=>progress.push(p));
+ assert.equal(workers[0].payload.model,'local_fast');assert.match(workers[0].payload.messages[0].content,/فارسی/);
+ workers[0].onmessage({data:{progress:25}});assert.deepEqual(progress,[25]);
+ workers[0].onmessage({data:{generated:{text:'سلام',provider:'on_device'}}});assert.equal((await first).provider,'on_device');
+ const second=chat.respond({model:'local_medium',message:'Explain DNS',locale:'en',history:[]},p=>progress.push(p*2));
+ workers[0].onmessage({data:{progress:30}});assert.deepEqual(progress,[25,60]);chat.stop();await assert.rejects(second,/local_cancelled/);assert.equal(workers[0].terminated,true);
+});
+test('local input is bounded and timeout releases worker resources without a cloud fallback',async()=>{
+ let terminated=0;
+ const chat=createLocalChat({timeout:5,workerFactory:()=>({postMessage(){},terminate(){terminated++;}})});
+ await assert.rejects(chat.respond({model:'local_fast',message:'a'.repeat(1201),history:[]}),/local_input_too_long/);
+ await assert.rejects(chat.respond({model:'local_fast',message:'Hello',locale:'en',history:[]}),/local_cancelled/);assert.equal(terminated,1);
+ const messages=localMessages('Hello','en',Array.from({length:8},()=>({role:'user',content:'a'.repeat(500)})));assert.equal(messages.length,4);assert.equal(messages[1].content.length,100);
+});
+test('automatic research checks lookup and model consent before emitting events or calling providers',async()=>{
+ let calls=0,events=0;
+ const o=createOrchestrator({},{status:()=>({state:'configured'}),respond:async()=>{calls++;return {text:'fixture'};}});
+ await assert.rejects(o.run({message:'Search current sources',model:'auto',consent:{modelShare:true}},()=>events++),/lookup_consent_required/);
+ assert.equal(calls,0);assert.equal(events,0);
+ const result=await o.run({message:'Search current sources',model:'auto',consent:{modelShare:true,remoteLookup:true}});assert.equal(result.generated.text,'fixture');assert.equal(calls,1);
+});

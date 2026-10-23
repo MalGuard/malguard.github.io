@@ -1,3 +1,4 @@
+import {httpFailure} from '../../../ai/service-errors.mjs';
 import {fetchPublic} from '../../game-scam-guard/server/network.js';
 // Contract discovered from the owner's existing Worker health/API, not a new
 // account or copied private implementation. Credentials come only from runtime.
@@ -14,7 +15,7 @@ export function createWorkersModel({env=process.env,transport=fetchPublic}={}){
     const mode=modelId==='llama70b'?'strong':modelId==='llama8b'?'fallback':selectedMode;
     const body=JSON.stringify({model:mode,webSearch:false,messages:[...history.slice(-8),{role:'user',content:`Reply naturally in ${locale==='fa'?'Persian':'English'}. Continue this conversation and help with ordinary or technical questions. File/URL security checks are performed separately by MalGuard tools. Do not invent scan results, web searches or safety guarantees. User message follows:\n${message}`} ]});
     const response=await transport('https://malware-ai.malguard-security.workers.dev/api/chat',{method:'POST',noRedirect:true,limit:128*1024,timeout:15000,totalTimeout:18000,headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(body),'Origin':'https://malguard.github.io','X-MalGuard-Proxy':env.MALGUARD_WORKER_PROXY_TOKEN},body});
-    if(response.status!==200)throw new Error('worker_http');
+    if(response.status!==200){let details;try{details=JSON.parse(response.bytes.toString('utf8'));}catch{}throw httpFailure(response.status,response.headers,details);}
     let provider,model,value='';
     for(const event of response.bytes.toString('utf8').split(/\r?\n\r?\n/)){
       if(!event.trim())continue;
