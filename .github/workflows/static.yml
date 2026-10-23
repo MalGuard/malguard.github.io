@@ -41,7 +41,7 @@ jobs:
 
           cp index.html 404.html founder.html game-scam-guard.html gamescam-guard-android.html _site/
           cp report.html console-8d42b69fda13705cc47a.html source.html security-policy.html privacy-policy.html code-signing.html contributing.html core-guide.html _site/
-          cp gta6-security.html _site/
+          cp gta6-security.html malguard-ai-motion.html _site/
           cp press.html security-evidence.html _site/
           cp tools.html trust.html privacy.html support.html about.html labs.html docs.html download.html scan-mods.html ai-intelligence.html malware-ai.html malware-ai-windows.html threat-radar.html scan-url.html products.html gta-guard.html sandbox-help.html app.html _site/
           cp robots.txt sitemap.xml llms.txt _site/
@@ -66,6 +66,7 @@ jobs:
           test -f _site/press.html
           test -f _site/security-evidence.html
           test -f _site/gta6-security.html
+          test -f _site/malguard-ai-motion.html
           test -f _site/assets/gta6-security.css
           test -f _site/assets/gta6-url-review.js
           test -f _site/docs.html
