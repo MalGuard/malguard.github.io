@@ -16,4 +16,14 @@ export async function refreshGateway(){
  await loading;
 }
 export const gatewayStatus=()=>cache;
-export const remoteModel={refresh:refreshGateway,status:()=>({state:cache?.modelConfigured?'configured':'disabled',provider:cache?.modelConfigured?'workers_ai':null,model:cache?.model||null,reason:cache?.modelConfigured?'gateway_connected':'provider_gateway_unavailable',liveVerified:false}),async respond(message,locale,history=[]){const data=await gatewayRequest({operation:'chat',message,locale,history,consent:{modelShare:true}});if(typeof data.generated?.text!=='string'||data.generated.text.length>6000||data.generated.provider!=='workers_ai')throw new Error('invalid_model_response');return {...data.generated,securityAnalysis:false};}};
+export const remoteModel={
+ refresh:refreshGateway,
+ status:()=>({state:cache?.modelConfigured?'configured':'disabled',provider:cache?.modelConfigured?cache.provider:null,model:cache?.model||null,defaultModel:cache?.defaultModel||'llama70b',models:cache?.models||[],reason:cache?.modelConfigured?'gateway_connected':'provider_gateway_unavailable',liveVerified:false}),
+ async respond(message,locale,history=[],model='llama70b'){
+  const selected=cache?.models?.find(m=>m.id===model);
+  if(!selected||selected.state!=='configured')throw new Error('model_not_configured');
+  const data=await gatewayRequest({operation:'chat',message,locale,history,model,consent:{modelShare:true}});
+  if(typeof data.generated?.text!=='string'||data.generated.text.length>6000||data.generated.provider!==selected.provider||data.generated.selectedModel!==model)throw new Error('invalid_model_response');
+  return {...data.generated,securityAnalysis:false};
+ }
+};

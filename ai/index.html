@@ -39,12 +39,14 @@
           <div class="composer-controls">
               <label class="sr-only" for="mode" data-i18n="modeLabel">Mode</label>
               <select id="mode" aria-describedby="mode-hint"><option value="chat" data-i18n="chatMode">Chat</option><option value="worker" data-i18n="workerMode">Automatic inspection</option></select>
+              <label class="sr-only" for="model" data-i18n="modelLabel">Chat model</label>
+              <select id="model" disabled><option value="llama70b">Llama 3.3 70B</option></select>
           <details id="permissions"><summary data-i18n="permissionSettings">Permissions and privacy</summary>
             <fieldset><legend data-i18n="consent">Permissions are saved once and can be revoked at any time.</legend>
               <label><input type="checkbox" id="file-consent"><span data-i18n="fileConsent">Send the file to MalGuard for static analysis in memory, without storage or submission to threat databases.</span></label>
               <label><input type="checkbox" id="website-consent"><span data-i18n="websiteConsent">Retrieve public HTML and observed redirects; DNS resolvers and destinations will see the address.</span></label>
               <label><input type="checkbox" id="lookup-consent"><span data-i18n="lookupConsent">Send the hash to MalwareBazaar, URL to URLhaus or search query to Tavily as appropriate; check OpenPhish if enabled on the server.</span></label>
-              <label><input type="checkbox" id="model-consent"><span data-i18n="modelConsent">Send this message to Gemini or Workers AI only if a model is connected. File/tool evidence is never sent to the model.</span></label>
+              <label><input type="checkbox" id="model-consent"><span data-i18n="modelConsent">Send conversation text to the selected model provider. Files and tool evidence are never sent to the model.</span></label>
             </fieldset>
             <button type="button" id="revoke-permissions" data-i18n="revoke">Revoke all permissions</button>
           </details>

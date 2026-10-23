@@ -5,6 +5,7 @@ import {createMalwareBazaar} from './adapters/malwarebazaar.js';
 import {createUrlhaus} from './adapters/urlhaus.js';
 import {aiWeb} from './adapters/ai-web.js';
 import {modelAdapter} from './model.js';
+import {replyLanguage} from './language.js';
 export function createOrchestrator(adapters = {gta_guard:createGtaGuard(),game_scam_guard:createGameScamGuard(),malwarebazaar:createMalwareBazaar(),urlhaus:createUrlhaus(),ai_web:aiWeb},model=modelAdapter) {
   const status = () => ({model:model.status(), tools:Object.fromEntries(Object.entries(adapters).map(([id,a])=>[id,a.status()])),modes:['chat','worker'],history:'client_memory',streaming:'ndjson_events',retention:'no_application_storage'});
   async function execute(tool,input,consent,onEvent){
@@ -34,7 +35,7 @@ export function createOrchestrator(adapters = {gta_guard:createGtaGuard(),game_s
       if(model.status().state!=='disabled'&&request.message.trim()){
         if(!consent.modelShare)throw new InputError('model_consent_required',403);
         onEvent({phase:'model_started',tool:'chat'});
-        try{return wrap({result:null,generated:await model.respond(request.message,locale,history)});}catch{return wrap({result:null,error:'model_unavailable'});}
+        try{return wrap({result:null,generated:await model.respond(request.message,replyLanguage(request.message,locale,history),history,request.model)});}catch{return wrap({result:null,error:'model_unavailable'});}
       }
       return wrap({result:null,message:locale==='fa'?'اتصال مدل هنوز در سرور تنظیم نشده است؛ بررسی فایل و سایت در دسترس است.':'The server model connection is not configured yet. File and URL inspection remain available.'});
     }

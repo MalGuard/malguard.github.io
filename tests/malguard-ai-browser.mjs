@@ -8,7 +8,7 @@ import {chromium,launchOptions} from './browser-runtime.mjs';
 const web=express(),root=fileURLToPath(new URL('../',import.meta.url));let requests=0;
 const server=web.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));
 const base=`http://127.0.0.1:${server.address().port}`;
-const testModel={status:()=>({state:'configured',provider:'fixture',model:'benign-test-model'}),respond:async(message,locale,history)=>({text:`Benign test reply ${history.length}`,provider:'fixture',model:'benign-test-model',securityAnalysis:false})};
+const testModel={status:()=>({state:'configured',provider:'fixture',model:'benign-test-model',defaultModel:'llama70b',models:[{id:'llama70b',label:'Llama 3.3 70B',state:'configured'},{id:'llama8b',label:'Llama 3.1 8B',state:'configured'},{id:'gemini_flash',label:'Gemini 3.8 Flash',state:'disabled'}]}),respond:async(message,locale,history,selectedModel)=>{if(message==='سلام')assert.equal(selectedModel,'llama8b');return {text:message==='سلام'&&locale==='fa'?'پاسخ فارسی آزمایشی':`Benign test reply ${history.length}`,provider:'fixture',model:'benign-test-model',securityAnalysis:false};}};
 web.use('/api/malguard-ai',(req,res,next)=>{if(req.method==='POST')requests++;next();},createApp({orchestrator:createOrchestrator(undefined,testModel),enabled:true,publicOrigin:base,log:()=>{}}));web.use(express.static(root));
 const browser=await chromium.launch(launchOptions('chromium'));
 try{
@@ -41,6 +41,9 @@ try{
    if(await page.locator('#permissions').getAttribute('open')===null)await page.locator('#permissions summary').click();await page.locator('#model-consent').check();
    await page.locator('#message').fill('Hello');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
    await page.locator('#message').fill('Continue');await page.locator('#send').click();await page.getByText('Benign test reply 2',{exact:true}).waitFor();
+   await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('lang'),'en');
+   await page.locator('#model').selectOption('llama8b');await page.locator('#message').fill('سلام');await page.locator('#send').click();await page.getByText('پاسخ فارسی آزمایشی',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
+   await page.locator('#language').click();
    await page.locator('#mode').selectOption('worker');await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('این حالت برای بررسی فایل، هش و سایت است. برای گفت‌وگوی عادی یا سؤال فنی، حالت چت را انتخاب کن.',{exact:true}).waitFor();
    await page.locator('#clear').click();
    console.log('PASS Chat multi-turn context and inspection-only mode (injected benign model fixture).');

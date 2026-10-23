@@ -12,8 +12,8 @@ const copy={
 };
 Object.assign(copy.fa,{modeLabel:'حالت',chatMode:'چت',workerMode:'بررسی خودکار',permissionSettings:'دسترسی‌ها و حریم خصوصی',revoke:'لغو همهٔ مجوزها',consent:'مجوزها یک‌بار ذخیره می‌شوند و هر زمان قابل لغو هستند.',title:'سلام، از کجا شروع کنیم؟',subtitle:'گفت‌وگو کنیم، جست‌وجو کنیم یا چیزی را بررسی کنیم.',placeholder:'پیام بده، سؤال بپرس یا لینک بفرست…',send:'ارسال',modelNotice:'در حالت چت با مدل گفت‌وگو می‌کنی؛ در حالت بررسی خودکار، فایل و سایت با ابزارها بررسی می‌شوند.',chatHint:'گفت‌وگوی عادی و فنی، همراه با بررسی خودکار فایل و سایت.',workerHint:'فقط بررسی فایل، هش و سایت؛ برای پرسش‌های عمومی از چت استفاده کن.'});
 Object.assign(copy.en,{modeLabel:'Mode',chatMode:'Chat',workerMode:'Automatic inspection',permissionSettings:'Permissions and privacy',revoke:'Revoke all permissions',consent:'Permissions are saved once and can be revoked at any time.',title:'Hello. Where shall we start?',subtitle:'Talk it through, explore the web or inspect a file or link.',placeholder:'Send a message, ask a question or paste a link…',send:'Send',modelNotice:'Chat supports conversation. Automatic inspection focuses on files and websites with security tools.',chatHint:'General and technical conversation, with automatic file and URL inspection.',workerHint:'File, hash and website inspection only. Use Chat for general questions.'});
-Object.assign(copy.fa,{placeholder:'هرچه می‌خواهی بپرس…',home:'سایت اصلی',suggestChat:'گفت‌وگو کنیم',suggestWebsite:'بررسی یک سایت',suggestFile:'بررسی یک فایل',websitePrompt:'این سایت را بررسی کن: ',chatPrompt:'سلام!',clear:'گفت‌وگوی تازه',modelNotice:'وضعیت واقعی اتصال مدل و ابزارها از سرور دریافت می‌شود.'});
-Object.assign(copy.en,{placeholder:'Ask anything…',home:'Main site',suggestChat:'Let’s talk',suggestWebsite:'Check a website',suggestFile:'Inspect a file',websitePrompt:'Check this website: ',chatPrompt:'Hello!',clear:'New conversation',modelNotice:'Model and tool availability are reported by the server.'});
+Object.assign(copy.fa,{modelLabel:'مدل گفت‌وگو',modelConsent:'ارسال متن گفت‌وگو به ارائه‌دهندهٔ مدل انتخاب‌شده؛ فایل و شواهد ابزارها ارسال نمی‌شوند.',placeholder:'هرچه می‌خواهی بپرس…',home:'سایت اصلی',suggestChat:'گفت‌وگو کنیم',suggestWebsite:'بررسی یک سایت',suggestFile:'بررسی یک فایل',websitePrompt:'این سایت را بررسی کن: ',chatPrompt:'سلام!',clear:'گفت‌وگوی تازه',modelNotice:'وضعیت واقعی اتصال مدل و ابزارها از سرور دریافت می‌شود.'});
+Object.assign(copy.en,{modelLabel:'Chat model',modelConsent:'Send conversation text to the selected model provider. Files and tool evidence are never sent to the model.',placeholder:'Ask anything…',home:'Main site',suggestChat:'Let’s talk',suggestWebsite:'Check a website',suggestFile:'Inspect a file',websitePrompt:'Check this website: ',chatPrompt:'Hello!',clear:'New conversation',modelNotice:'Model and tool availability are reported by the server.'});
 const t=k=>copy[locale][k]||k;
 function el(tag,value,className){const node=document.createElement(tag);if(value!==undefined)node.textContent=value;if(className)node.className=className;return node;}
 function translate(){document.documentElement.lang=locale;document.documentElement.dir=locale==='fa'?'rtl':'ltr';$('language').textContent=locale==='fa'?'English':'فارسی';document.querySelectorAll('[data-i18n]').forEach(n=>n.textContent=t(n.dataset.i18n));$('message').placeholder=t('placeholder');$('conversation').ariaLabel=locale==='fa'?'گفت‌وگو':'Conversation';renderStatus();$('mode-hint').textContent=t($('mode').value==='chat'?'chatHint':'workerHint');$('conversation').replaceChildren();for(const item of history){if(item.response)renderResponse(item.response,false);else if(item.error)showError(item.error,false);else $('conversation').append(el('div',item.bubble,'bubble'));}}
@@ -25,10 +25,18 @@ function renderStatus(){
  }
  const ready=service?.enabled===true;
  $('send').disabled=!ready||busy;$('connection').textContent=t(!service?'offline':!ready?'serviceDisabled':'connected');
- const modelLabel=service?.model?.provider==='workers_ai'?'Cloudflare Workers AI':'Gemini';
- const modelNotice=locale==='fa'?`اتصال سروری: ${modelLabel}`:`Server connection: ${modelLabel}`;
+ const selectedId=$('model').value,models=service?.model?.models||[];
+ if(models.length){
+  $('model').replaceChildren();
+  for(const m of models){const option=el('option',m.label+(m.state==='configured'?'':` · ${t('disabled')}`));option.value=m.id;option.disabled=m.state!=='configured';$('model').append(option);}
+  $('model').value=models.some(m=>m.id===selectedId&&m.state==='configured')?selectedId:service.model.defaultModel||'llama70b';
+ }
+ $('model').disabled=busy||service?.model?.state!=='configured'||$('mode').value!=='chat';
+ const selected=models.find(m=>m.id===$('model').value);
+ const modelLabel=selected?.label||service?.model?.model||'';
+ const modelNotice=locale==='fa'?`مدل تنظیم‌شده: ${modelLabel}`:`Configured model: ${modelLabel}`;
  $('model-status').textContent=service?.model?.state==='configured'?modelNotice:t('modelOff');
- if(service?.model?.state==='configured')document.querySelector('[data-i18n="modelNotice"]').textContent=modelNotice;
+ if(service?.model?.state==='configured')document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'زبان پاسخ از متن پیام تشخیص داده می‌شود؛ هر مدل محدودیت سهمیهٔ خودش را دارد.':'Replies follow your message language. Each model has its own usage limits.';
 }
 function showError(key,remember=true){if(remember)history.push({error:key});const card=el('article',undefined,'result error');card.append(el('h3',t(key),'outcome'));$('conversation').append(card);}
 function renderResponse(response,remember=true){
@@ -36,7 +44,7 @@ function renderResponse(response,remember=true){
  if(response.error){showError('error',false);return;}
  if(response.results){for(const result of response.results)renderResponse({result},false);if(response.message){const n=el('article',undefined,'result');n.append(el('p',response.message));$('conversation').append(n);}return;}
  if(response.message){const n=el('article',undefined,'result');n.append(el('p',response.message));$('conversation').append(n);return;}
- if(response.generated){const n=el('article',undefined,'result');n.append(el('h3',t('generated')),el('p',response.generated.text),el('p',`${response.generated.provider} · ${response.generated.model}`));$('conversation').append(n);return;}
+ if(response.generated){const n=el('article',undefined,'result'),answer=el('p',response.generated.text);answer.dir='auto';n.append(el('h3',t('generated')),answer,el('p',`${response.generated.provider} · ${response.generated.model}`));$('conversation').append(n);return;}
  const r=response.result;if(!r){showError('streamError',false);return;}
  const card=el('article',undefined,`result ${r.outcome}`);card.append(el('div',names[r.tool],'eyebrow'),el('h3',t(r.outcome),'outcome'));
  const time=el('time',new Date(r.checkedAt).toLocaleString(locale==='fa'?'fa-IR':'en-GB'));time.dateTime=r.checkedAt;card.append(time);
@@ -65,7 +73,7 @@ $('composer').onsubmit=async event=>{
  busy=true;$('send').disabled=true;$('clear').disabled=true;history.push({bubble:message||file.name});$('conversation').append(el('div',message||file.name,'bubble'));
  try{
   if(file)input={file:await fileData(file)};
-  const response=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({message,tool,locale,input,consent,mode,history:modelHistory.slice(-8)}),signal:AbortSignal.timeout(45000)});
+  const response=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({message,tool,locale,input,consent,mode,model:$('model').value,history:modelHistory.slice(-8)}),signal:AbortSignal.timeout(45000)});
   if(!response.ok){showError(response.status===429?'rate':'invalid');return;}
   await readStream(response,data=>{if(data.event){$('connection').textContent=`${t('working')} · ${names[data.event.tool]||''}`;const state=Object.hasOwn(names,data.event.tool)?$('tools').querySelector(`[data-tool="${data.event.tool}"] span`):null;if(state){state.textContent=t(data.event.phase==='tool_started'?'working':service.tools[data.event.tool]?.state||'configured');state.classList.toggle('busy',data.event.phase==='tool_started');}}else if(data.result){renderResponse(data.result);if(!data.result.error)$('message').value='';if(data.result.generated){modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:data.result.generated.text.slice(0,2000)});while(modelHistory.length>8||modelHistory.reduce((n,m)=>n+m.content.length,0)>10000)modelHistory.shift();}}else if(data.error)showError('error');});
  }catch{showError('streamError');}finally{busy=false;$('clear').disabled=false;renderStatus();$('remove-file').click();}
@@ -75,6 +83,7 @@ const saved=readPermissions(permissionStorage);
 for(const [name,id]of Object.entries(permissionInputs)){$(id).checked=saved[name];$(id).onchange=()=>savePermissions(permissionStorage,Object.fromEntries(Object.entries(permissionInputs).map(([k,v])=>[k,$(v).checked])));}
 $('revoke-permissions').onclick=()=>{revokePermissions(permissionStorage);for(const id of Object.values(permissionInputs))$(id).checked=false;};
 $('mode').onchange=()=>translate();
+$('model').onchange=()=>renderStatus();
 for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()=>{
  if(busy)return;
  $('tool').value='auto';

@@ -56,7 +56,7 @@ textarea:focus-visible{outline:none}
 textarea:placeholder-shown{field-sizing:fixed;height:28px;direction:inherit}
 textarea::placeholder{color:#949494}
 .composer-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;margin:8px 6px 0}
-.composer-controls #mode{font-size:11px;min-height:32px;padding:3px 11px;background:#10101099;border-color:#ffffff20}
+.composer-controls #mode,.composer-controls #model{font-size:11px;min-height:32px;padding:3px 11px;background:#10101099;border-color:#ffffff20;max-width:200px}
 select{max-width:100%;padding:7px 12px;font-size:12px;min-height:40px;background:#1b1b1b}
 option{background:#1b1b1b}
 .file-button{width:40px;height:40px;display:grid;place-items:center;flex:none;font-size:25px;line-height:1;border-color:transparent}
@@ -70,7 +70,7 @@ option{background:#1b1b1b}
 #send{display:grid;place-items:center;width:40px;height:40px;padding:0;flex:none;background:#eee;border:1px solid #eee;color:#101010}
 #send:hover:not(:disabled){background:#fff}
 #send:disabled:hover{background:#eee}
-#permissions{flex:1;color:var(--muted);min-width:0}
+#permissions{flex:1;color:var(--muted);min-width:160px}
 #permissions[open]{flex-basis:100%;order:1;padding:12px 16px;border:1px solid var(--line);border-radius:18px;background:#111111eb}
 summary{cursor:pointer;font-size:12px}
 #permissions summary{width:fit-content;min-height:32px;align-content:center;margin-inline-start:auto;font-size:11px}
