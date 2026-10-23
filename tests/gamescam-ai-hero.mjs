@@ -9,6 +9,7 @@ assert.match(typing,/per:29,min:230,max:455/,'button timing must remain stable')
 assert.match(typing,/per:39,min:335,max:900/,'heading timing must remain stable');
 assert.match(typing,/per:21,min:360,max:1320/,'body timing must remain stable');
 
+assert.match(readFileSync('assets/precision/provider-claude.svg','utf8'),/fill="#D97757"/,'Claude mark must retain its terracotta brand color');
 const base='https://127.0.0.1:8443';
 const browserName=process.env.TEST_BROWSER||'chromium';
 const browser=await(browserName==='webkit'?webkit:chromium).launch(launchOptions(browserName));
@@ -84,7 +85,7 @@ try{
   await checkScene(page,'.radar-ai-illustration.mg-ai-fusion',false);
   // WebKit does not consistently apply CSS animation fill state after
   // Web Animations API .finish(); verify the real elapsed end state instead.
-  await page.waitForTimeout(4800);
+  await page.waitForTimeout(7550);
   const final=await page.locator('.radar-ai-illustration.mg-ai-fusion').evaluate(el=>{
     const brand=el.querySelector('.mg-ai-fusion__brand');
     return{
