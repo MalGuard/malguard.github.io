@@ -45,7 +45,7 @@ try{
   await page.goto(base+'/ai/');await page.locator('#send').waitFor({state:'visible'});await page.waitForFunction(()=>!document.getElementById('send').disabled);
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
   assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
-  assert.equal(await page.locator('#model').isVisible(),false);
+  assert.equal(await page.locator('#model').isVisible(),true);
   if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/quiet-empty-${width}.png`,fullPage:true});}
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
@@ -117,28 +117,28 @@ try{
   window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{generated:{text:'پاسخ محلی آزمایشی',provider:'on_device',model:data.model,securityAnalysis:false}}}),5);}terminate(){}};
  });
  const beforeLocal=requests,localExternal=[];await device.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();localExternal.push(r.request().url());return r.abort();});
- await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>!document.getElementById('send').disabled);assert.equal(await localPage.locator('#model').inputValue(),'auto');
+ await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>!document.getElementById('send').disabled);assert.equal(await localPage.locator('#model').inputValue(),'local_fast');
  await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
- assert.equal(await localPage.locator('#local-offer').isVisible(),false,'The landing page must not open unsolicited download dialogs');
+ await localPage.locator('#local-welcome').waitFor({state:'visible'});assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);await localPage.locator('#local-welcome button[value="later"]').click();
  await localPage.locator('#settings-panel > summary').click();await localPage.locator('#download-models').click();
  await localPage.locator('#local-offer').waitFor({state:'visible'});
- assert.match(await localPage.locator('#offer-info').innerText(),/without a provider's daily message quota/);
+ assert.match(await localPage.locator('#offer-info').innerText(),/no provider daily message quota/);
  assert.equal(await localPage.locator('#offer-model option').count(),2);
  assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0,'entering the app must not download weights');
  await localPage.locator('#local-offer button[value="later"]').click();
- await localPage.waitForFunction(()=>!document.getElementById('local-offer').open&&document.getElementById('model').value==='llama70b');
- assert.equal(await localPage.locator('#model').inputValue(),'llama70b','Later keeps an available cloud model selected');
+ await localPage.waitForFunction(()=>!document.getElementById('local-offer').open&&document.getElementById('model').value==='local_fast');
+ assert.equal(await localPage.locator('#model').inputValue(),'local_fast','Later preserves the current selection without a download');
  assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.reload();await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
  assert.equal(await localPage.locator('#local-offer').isVisible(),false,'do not repeat the offer in this tab');
  await localPage.locator('#settings-panel > summary').click();await localPage.locator('#model').selectOption('auto');await localPage.locator('#settings-panel > summary').click();
  await localPage.locator('#message').fill('سلام');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});
- assert.match(await localPage.locator('#download-info').innerText(),/352 MB/);assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);assert.equal(requests,beforeLocal);
+ assert.match(await localPage.locator('#download-info').innerText(),/985 MB/);assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);assert.equal(requests,beforeLocal);
  await localPage.locator('#local-download button[value="cancel"]').click();assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.locator('#send').click();await localPage.locator('#local-download button[value="download"]').click();await localPage.getByText('پاسخ محلی آزمایشی',{exact:true}).waitFor();
  assert.equal(requests,beforeLocal);assert.equal(await localPage.evaluate(()=>localWorkerCalls[0].model),'local_fast');assert.match(await localPage.evaluate(()=>localWorkerCalls[0].messages[0].content),/فارسی/);
  await localPage.locator('#settings-panel > summary').click();await localPage.locator('#model').selectOption('local_medium');await localPage.locator('#settings-panel > summary').click();
- await localPage.locator('#message').fill('Explain DNS');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});assert.match(await localPage.locator('#download-info').innerText(),/985 MB/);
+ await localPage.locator('#message').fill('Explain DNS');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});assert.match(await localPage.locator('#download-info').innerText(),/2268 MB/);
  await localPage.keyboard.press('Escape');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),1,'Escape must not reuse previous download approval');
  assert.equal(requests,beforeLocal);assert.deepEqual(localExternal,[]);await device.close();console.log('PASS on-device download/cancel consent, local-only text, automatic greeting routing and separate model download approval (mock Worker).');
  const downloadContext=await browser.newContext({viewport:{width:360,height:740}}),downloadPage=await downloadContext.newPage();
@@ -149,9 +149,9 @@ try{
  });
  const downloadExternal=[];await downloadContext.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();downloadExternal.push(r.request().url());return r.abort();});
  await downloadPage.goto(base+'/ai/');await downloadPage.waitForFunction(()=>!document.getElementById('send').disabled);
- assert.equal(await downloadPage.locator('#local-offer').isVisible(),false);
- await downloadPage.locator('#settings-panel > summary').click();await downloadPage.locator('#download-models').click();await downloadPage.locator('#local-offer').waitFor({state:'visible'});
- await downloadPage.locator('#offer-model').selectOption('local_medium');assert.match(await downloadPage.locator('#offer-size').innerText(),/985 MB/);
+ await downloadPage.locator('#local-welcome').waitFor({state:'visible'});await downloadPage.locator('#local-welcome button[value="choose"]').click();
+ await downloadPage.locator('#local-offer').waitFor({state:'visible'});
+ await downloadPage.locator('#offer-model').selectOption('local_medium');assert.match(await downloadPage.locator('#offer-size').innerText(),/2268 MB/);
  assert.equal(await downloadPage.evaluate(()=>localWorkerCalls.length),0);
  assert.ok(await downloadPage.evaluate(()=>document.querySelector('#local-offer').scrollWidth<=document.querySelector('#local-offer').clientWidth),'offer fits a narrow phone');
  const beforePrepare=requests;await downloadPage.locator('#local-offer button[value="download"]').click();
@@ -159,5 +159,5 @@ try{
  assert.deepEqual(await downloadPage.evaluate(()=>localWorkerCalls),[{operation:'prepare',model:'local_medium'}]);
  assert.equal(requests,beforePrepare,'preparing a local model sends no conversation to the backend');
  assert.equal(await downloadPage.locator('#conversation').innerText(),'');assert.deepEqual(downloadExternal,[]);
- await downloadContext.close();console.log('PASS settings-only download prepares only the selected model, without sending a chat (mock Worker).');
+ await downloadContext.close();console.log('PASS optional download prepares only the selected model, without sending a chat (mock Worker).');
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

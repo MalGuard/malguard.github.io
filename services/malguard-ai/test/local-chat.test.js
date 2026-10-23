@@ -1,8 +1,28 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {localCapability,createLocalChat,localMessages} from '../../../ai/local-models.mjs';
+import {localCapability,createLocalChat,localMessages,localModels,localAppConfig,clearLocalModelCache} from '../../../ai/local-models.mjs';
 import {planChat} from '../../../ai/routing.mjs';
 import {createOrchestrator} from '../server/orchestrator.js';
+
+test('light and strong models have pinned assets and disclose download and GPU requirements',()=>{
+ assert.equal(localModels.local_fast.model,'Qwen3-1.7B-q4f16_1-MLC');
+ assert.equal(localModels.local_medium.model,'Qwen3-4B-q4f16_1-MLC');
+ assert.ok(localModels.local_medium.downloadMB>2000);
+ assert.ok(localModels.local_medium.gpuMB>localModels.local_fast.gpuMB);
+ for(const m of Object.values(localModels)){
+  assert.match(m.revision,/^[a-f0-9]{40}$/);
+  const config=localAppConfig.model_list.find(c=>c.model_id===m.model);
+  assert.ok(config.model.includes(m.revision));
+  assert.ok(config.model_lib.endsWith(`${m.model.replace('-MLC','')}_cs1k-webgpu.wasm`));
+ }
+});
+
+test('removing downloaded models also clears the retired 0.6B cache after upgrade',async()=>{
+ const removed=[];
+ await clearLocalModelCache(async(id,config)=>{assert.ok(config.model_list.some(m=>m.model_id===id));removed.push(id);});
+ assert.deepEqual(removed.sort(),['Qwen3-0.6B-q4f16_1-MLC','Qwen3-1.7B-q4f16_1-MLC','Qwen3-4B-q4f16_1-MLC']);
+ assert.equal(Object.keys(localModels).length,2,'Retired models must not become selectable');
+});
 test('four tiers recognize Persian/English requests and preserve research follow-ups',()=>{
  for(const message of ['سلام','سلام خوبی؟','Hello!','Thanks'])assert.equal(planChat(message).tier,'fast');
  assert.equal(planChat('Explain how DNS works').tier,'medium');

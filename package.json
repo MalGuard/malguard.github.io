@@ -6,6 +6,7 @@
     "start:ai": "node services/malguard-ai/server/index.js",
     "test:ai": "node --test services/malguard-ai/test/*.test.js",
     "test:ai:browser": "node tests/malguard-ai-browser.mjs",
+    "test:ai:local": "node tests/malguard-ai-local-onboarding.mjs",
     "check:ai": "node tools/check-malguard-ai.mjs",
     "build:opening": "node tools/build-home-opening.mjs",
     "build:forms": "node tools/build-secure-forms.mjs",
