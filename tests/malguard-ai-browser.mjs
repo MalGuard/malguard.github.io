@@ -126,6 +126,7 @@ try{
  assert.equal(await localPage.locator('#offer-model option').count(),2);
  assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0,'entering the app must not download weights');
  await localPage.locator('#local-offer button[value="later"]').click();
+ await localPage.waitForFunction(()=>!document.getElementById('local-offer').open&&document.getElementById('model').value==='llama70b');
  assert.equal(await localPage.locator('#model').inputValue(),'llama70b','Later keeps an available cloud model selected');
  assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.reload();await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
