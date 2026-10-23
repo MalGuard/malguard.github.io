@@ -48,6 +48,9 @@ inference is not claimed by those tests.
 
 Release order: deploy and verify the private gateway first, then publish this
 client/server branch. The new public backend expects the new gateway catalog and
-identity contract. Automatic approval review rejected the new production gateway
-deployment pending explicit approval for this subsequent release. The earlier
-3B release remains live until that approval and successful live verification.
+identity contract. Each production update requires the applicable publication authorization. Do not
+infer live availability from source review or injected tests. Current release
+identifiers and observed model-quality limitations are recorded in PR #258 and
+the companion gateway PR #40. Llama replies may still mix languages; the private
+gateway includes a further native-Persian instruction refinement whose release
+status must be checked separately.
