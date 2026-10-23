@@ -1,55 +1,76 @@
 <!doctype html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="MalGuard AI — evidence-based security tools for files, hashes and gaming links.">
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://game-scam-guard-connected.vercel.app; img-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
-  <title>MalGuard AI · Inspect before you trust</title>
+  <meta name="theme-color" content="#080808">
+  <title>MalGuard AI</title>
+  <link rel="icon" href="/assets/fusion/assets/malguard-logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./style.css">
   <script type="module" src="./app.js"></script>
 </head>
 <body>
-  <a class="skip" href="#composer" data-i18n="skip">رفتن به گفت‌وگو</a>
-  <header><a class="brand" href="/" dir="ltr"><img class="mark" src="/assets/fusion/assets/malguard-logo.svg" width="33" height="35" alt=""> MalGuard <span>AI</span></a><div><span class="private" data-i18n="private">حریم خصوصی، پیش‌فرض</span><button id="language" type="button">English</button></div></header>
+  <div class="atmosphere" aria-hidden="true"></div>
+  <a class="skip" href="#message" data-i18n="skip">Skip to conversation</a>
+  <header class="site-header">
+    <a class="brand" href="/" dir="ltr"><img class="mark" src="/assets/fusion/assets/malguard-logo.svg" width="29" height="31" alt=""> MalGuard <span>AI</span></a>
+    <div class="header-actions"><span class="private"><span class="dot" aria-hidden="true"></span><span data-i18n="private">Private by default</span></span><button id="language" type="button">فارسی</button><a class="home-link" href="/" data-i18n="home">Main site</a></div>
+  </header>
   <main>
-    <aside aria-labelledby="tools-title">
-      <div class="eyebrow" data-i18n="workspace">فضای بررسی</div>
-      <h2 id="tools-title" data-i18n="tools">ابزارهای امنیتی</h2>
-      <p class="muted" data-i18n="toolsHint">هر بررسی، با منبع و محدودیت روشن.</p>
-      <div id="tools" aria-live="polite"></div>
-      <div class="side-note"><span class="dot"></span><p id="model-status"></p></div>
-      <p class="muted small" data-i18n="scope">تحلیل ایستا؛ بدون اجرای نمونه یا دانلود بدافزار.</p>
-      <a href="/privacy.html" data-i18n="privacy">سیاست حریم خصوصی ↗</a>
-    </aside>
     <section class="workspace" aria-labelledby="title">
-      <div class="intro"><div class="eyebrow" dir="ltr">INSPECT BEFORE YOU TRUST</div><h1 id="title" data-i18n="title">از شواهد شروع کنیم.</h1><p data-i18n="subtitle">فایل، هش یا لینک را بررسی کنید. نتیجهٔ هر ابزار، همراه با منبع، زمان و محدودیت‌های واقعی نمایش داده می‌شود.</p><p class="notice" data-i18n="modelNotice">مدل زبانی متصل نیست. درخواست‌ها با قواعد مشخص به ابزارها هدایت می‌شوند؛ این رابط گفت‌وگوی مولد ندارد.</p></div>
+      <div class="intro">
+        <div class="intro-brand" dir="ltr"><img src="/assets/fusion/assets/malguard-logo.svg" width="38" height="40" alt=""><span>MalGuard <span>AI</span></span></div>
+        <h1 id="title" data-i18n="title">Hello. Where shall we start?</h1>
+        <p data-i18n="subtitle">Talk it through, explore the web or inspect a file or link.</p>
+      </div>
       <div class="conversation" id="conversation" role="log" aria-label="Conversation" aria-live="polite"></div>
       <div class="composer-area">
-        <p id="connection" role="status"></p>
         <form id="composer">
-          <label for="mode" data-i18n="modeLabel">حالت</label>
-          <select id="mode"><option value="chat" data-i18n="chatMode">چت</option><option value="worker" data-i18n="workerMode">بررسی خودکار</option></select>
-          <p id="mode-hint" class="muted"></p>
-          <label for="tool" data-i18n="choose">انتخاب ابزار</label>
-          <select id="tool"><option value="auto" data-i18n="auto">انتخاب خودکار</option><option value="gta_guard">GTA Guard</option><option value="game_scam_guard">Game Scam Guard</option><option value="ai_web">AI Web</option><option value="malwarebazaar">MalwareBazaar</option><option value="urlhaus">URLhaus</option></select>
-          <label class="sr-only" for="message" data-i18n="input">لینک، هش یا درخواست شما</label>
-          <textarea id="message" rows="3" maxlength="4000" dir="auto" data-placeholder="placeholder" placeholder="یک لینک عمومی یا هش SHA-256 وارد کنید…"></textarea>
-          <div class="attachment"><label class="file-button" for="file" data-i18n="attach">＋ انتخاب فایل · حداکثر ۱ MiB</label><input type="file" id="file"><span id="filename" dir="auto"></span><button type="button" id="remove-file" hidden data-i18n="remove">حذف</button></div>
-          <details id="permissions"><summary data-i18n="permissionSettings">دسترسی‌ها و حریم خصوصی</summary>
-          <fieldset><legend data-i18n="consent">مجوزهای ذخیره‌شده؛ قابل لغو در هر زمان</legend>
-            <label><input type="checkbox" id="file-consent"><span data-i18n="fileConsent">ارسال فایل به سرور MalGuard برای تحلیل ایستا در حافظه؛ بدون ذخیره یا ارسال به پایگاه‌های تهدید.</span></label>
-            <label><input type="checkbox" id="website-consent"><span data-i18n="websiteConsent">دریافت HTML از سایت عمومی و مسیر انتقال آن؛ آدرس برای DNS و مقصدهای مشاهده‌شده قابل مشاهده خواهد بود.</span></label>
-            <label><input type="checkbox" id="lookup-consent"><span data-i18n="lookupConsent">ارسال داده به پایگاه تهدید یا ارائه‌دهندهٔ جست‌وجو، متناسب با ابزار.</span></label>
-            <label><input type="checkbox" id="model-consent"><span data-i18n="modelConsent">ارسال متن همین پیام به Gemini یا Workers AI، فقط در صورت اتصال مدل.</span></label>
-          </fieldset>
-          <button type="button" id="revoke-permissions" data-i18n="revoke">لغو همهٔ مجوزها</button></details>
-          <div class="actions"><button type="button" id="clear" data-i18n="clear">پاک‌کردن گفت‌وگو</button><button type="submit" id="send" disabled data-i18n="send">شروع بررسی ↗</button></div>
+          <div class="composer-shell">
+            <label class="file-button" for="file"><span aria-hidden="true">＋</span><span class="sr-only" data-i18n="attach">＋ Choose file · up to 1 MiB</span></label>
+          <label class="sr-only" for="message" data-i18n="input">Your URL, hash or request</label>
+          <textarea id="message" rows="1" maxlength="4000" dir="auto" data-placeholder="placeholder" placeholder="Ask anything…" aria-describedby="mode-hint"></textarea>
+            <button type="submit" id="send" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sr-only" data-i18n="send">Send</span></button>
+          </div>
+          <div class="attachment"><input type="file" id="file"><span id="filename" dir="auto"></span><button type="button" id="remove-file" hidden data-i18n="remove">Remove</button></div>
+          <div class="composer-controls">
+              <label class="sr-only" for="mode" data-i18n="modeLabel">Mode</label>
+              <select id="mode" aria-describedby="mode-hint"><option value="chat" data-i18n="chatMode">Chat</option><option value="worker" data-i18n="workerMode">Automatic inspection</option></select>
+          <details id="permissions"><summary data-i18n="permissionSettings">Permissions and privacy</summary>
+            <fieldset><legend data-i18n="consent">Permissions are saved once and can be revoked at any time.</legend>
+              <label><input type="checkbox" id="file-consent"><span data-i18n="fileConsent">Send the file to MalGuard for static analysis in memory, without storage or submission to threat databases.</span></label>
+              <label><input type="checkbox" id="website-consent"><span data-i18n="websiteConsent">Retrieve public HTML and observed redirects; DNS resolvers and destinations will see the address.</span></label>
+              <label><input type="checkbox" id="lookup-consent"><span data-i18n="lookupConsent">Send the hash to MalwareBazaar, URL to URLhaus or search query to Tavily as appropriate; check OpenPhish if enabled on the server.</span></label>
+              <label><input type="checkbox" id="model-consent"><span data-i18n="modelConsent">Send this message to Gemini or Workers AI only if a model is connected. File/tool evidence is never sent to the model.</span></label>
+            </fieldset>
+            <button type="button" id="revoke-permissions" data-i18n="revoke">Revoke all permissions</button>
+          </details>
+          </div>
         </form>
-        <p class="footer-note" data-i18n="retention">تاریخچه فقط در حافظهٔ همین صفحه است؛ با بستن یا تازه‌کردن پاک می‌شود. نبود یافته تضمین امنیت نیست. اطلاعات محرمانه ارسال نکنید.</p>
+        <div class="composer-status"><p id="mode-hint"></p><p id="connection" role="status"></p></div>
+        <div class="suggestions" aria-label="Shortcuts">
+          <button type="button" data-prompt="chat"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6h14v10H9l-4 4V6Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span data-i18n="suggestChat">Let’s talk</span></button>
+          <button type="button" data-prompt="website"><span aria-hidden="true">◎</span><span data-i18n="suggestWebsite">Check a website</span></button>
+          <button type="button" data-prompt="file"><span aria-hidden="true">＋</span><span data-i18n="suggestFile">Inspect a file</span></button>
+        </div>
       </div>
+      <details class="toolbox" id="toolbox">
+        <summary><span data-i18n="tools">Security tools</span><span class="toolbox-caption" dir="ltr">5 TOOLS <span aria-hidden="true">＋</span></span></summary>
+        <aside aria-labelledby="tools-title">
+          <div class="toolbox-heading"><h2 id="tools-title" data-i18n="tools">Security tools</h2><p class="muted" data-i18n="toolsHint">Every check, with sources and clear limits.</p></div>
+          <div id="tools" aria-live="polite"></div>
+          <div class="tool-choice"><label for="tool" data-i18n="choose">Tool</label><select id="tool"><option value="auto" data-i18n="auto">Choose automatically</option><option value="gta_guard">GTA Guard</option><option value="game_scam_guard">Game Scam Guard</option><option value="ai_web">AI Web</option><option value="malwarebazaar">MalwareBazaar</option><option value="urlhaus">URLhaus</option></select></div>
+          <p class="muted small" data-i18n="scope">Static analysis. No sample execution or malware downloads.</p>
+        </aside>
+      </details>
+      <div class="session-status"><p id="model-status"></p><button type="button" id="clear" data-i18n="clear">New conversation</button></div>
+      <p class="notice" data-i18n="modelNotice">Model and tool availability are reported by the server.</p>
+      <p class="footer-note" data-i18n="retention">History stays in this page’s memory and disappears on close or refresh. No findings do not guarantee safety. Do not submit secrets.</p>
     </section>
   </main>
+  <footer><span dir="ltr">MalGuard AI</span><a href="/privacy.html" data-i18n="privacy">Privacy policy</a></footer>
 </body>
 </html>

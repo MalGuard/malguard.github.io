@@ -17,7 +17,9 @@ try{
   page.on('pageerror',e=>errors.push(e.message));
   await context.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
   await page.goto(base+'/ai/');await page.locator('#send').waitFor({state:'visible'});await page.waitForFunction(()=>!document.getElementById('send').disabled);
-  assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
+  assert.equal(await page.locator('html').getAttribute('lang'),'en');
+  assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
+  await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
   await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   await page.locator('#file').setInputFiles({name:'benign.txt',mimeType:'text/plain',buffer:Buffer.from('Hello, harmless browser fixture.')});
   const before=requests;await page.locator('#send').click();assert.equal(requests,before,'no upload without consent');
@@ -47,5 +49,5 @@ try{
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);await context.close();
   console.log(`PASS real AI frontend → backend → static worker, consent, RTL/LTR, no overflow/history at ${width}px`);
  }
- const context=await browser.newContext(),page=await context.newPage();await context.route('**/api/malguard-ai/status',r=>r.abort());await page.goto(base+'/ai/');await page.getByRole('status').filter({hasText:'ارتباط با بک‌اند برقرار نشد'}).waitFor();assert.equal(await page.locator('#send').isDisabled(),true);await context.close();console.log('PASS backend failure shown; submission disabled.');
+ const context=await browser.newContext(),page=await context.newPage();await context.route('**/api/malguard-ai/status',r=>r.abort());await page.goto(base+'/ai/');await page.getByRole('status').filter({hasText:'Backend unavailable'}).waitFor();assert.equal(await page.locator('#send').isDisabled(),true);await context.close();console.log('PASS backend failure shown; submission disabled.');
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
