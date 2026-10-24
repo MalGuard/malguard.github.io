@@ -3,7 +3,7 @@ import {publicFailure,retryDetails} from './service-errors.mjs';
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
 import {planChat} from './routing.mjs';
-import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=quiet-entry-20261024';
+import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=glass-entry-20261024';
 import {replyLanguage} from './language.mjs';
 import {typeText,typeActivity,formatElapsed} from './reply-motion.mjs';
 const $=id=>document.getElementById(id);
