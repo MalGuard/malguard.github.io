@@ -11,11 +11,12 @@ const base=`http://127.0.0.1:${server.address().port}`;
 const testModel={status:()=>({state:'configured',provider:'fixture',model:'benign-test-model',defaultModel:'llama70b',models:[{id:'llama70b',label:'Llama 3.3 70B',state:'configured'},{id:'llama8b',label:'Llama 3.1 8B',state:'configured'},{id:'gemini_flash',label:'Gemini 3.8 Flash',state:'disabled'}]}),respond:async(message,locale,history,selectedModel)=>{if(message==='سلام')assert.equal(selectedModel,'llama8b');return {text:message==='سلام'&&locale==='fa'?'پاسخ فارسی آزمایشی':`Benign test reply ${history.length}`,provider:'fixture',model:'benign-test-model',securityAnalysis:false};}};
 web.use('/api/malguard-ai',(req,res,next)=>{if(req.method==='POST')requests++;next();},createApp({orchestrator:createOrchestrator(undefined,testModel),enabled:true,publicOrigin:base,log:()=>{}}));web.use(express.static(root));
 const browser=await chromium.launch(launchOptions('chromium'));
+const skipWelcome=context=>context.addInitScript(()=>localStorage.setItem('malguard.ai.welcome.v3','seen'));
 try{
  // Public product links must open the actual assistant directly, without the radar landing page.
  for(const width of [390,1280]){
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),page=await context.newPage();
-  await context.addInitScript(()=>Object.defineProperty(navigator,'gpu',{value:undefined}));
+  await skipWelcome(context);await context.addInitScript(()=>Object.defineProperty(navigator,'gpu',{value:undefined}));
   await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
   const before=requests;
   for(const [path,selector] of [['/','#products .product-ai a.text-link'],['/products.html','.product-ai .mg-home-product-link']]){
@@ -40,26 +41,26 @@ try{
  }
  for(const width of [360,390,768,1280]){
   const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[],external=[];
-  page.on('pageerror',e=>errors.push(e.message));
+  await skipWelcome(context);page.on('pageerror',e=>errors.push(e.message));
   await context.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
   await page.goto(base+'/ai/');await page.locator('#send').waitFor({state:'visible'});await page.waitForFunction(()=>!document.getElementById('send').disabled);
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
   assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
-  assert.equal(await page.locator('#model').isVisible(),true);
+  assert.equal(await page.locator('#model').isVisible(),true);assert.equal(await page.locator('#composer #model').count(),1);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);
   if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/quiet-empty-${width}.png`,fullPage:true});}
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
   await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   await page.locator('#file').setInputFiles({name:'benign.txt',mimeType:'text/plain',buffer:Buffer.from('Hello, harmless browser fixture.')});
   const before=requests;await page.locator('#send').click();assert.equal(requests,before,'no upload without consent');
-  await page.locator('#file-consent').check();
+  await page.locator('#file-consent').check();await page.locator('#settings-panel > summary').click();
   await page.locator('#send').click();
   try{await page.getByRole('heading',{name:'No malicious evidence found in the checks performed.'}).waitFor({timeout:15000});}
   catch(error){console.error('Browser failure:',await page.locator('#conversation').innerText(),errors);throw error;}
   assert.equal(await page.locator('#file-consent').isChecked(),true);
   await page.getByText('Inspection details',{exact:true}).click();assert.match(await page.locator('.result code').last().innerText(),/sha256/);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`overflow ${width}`);
-  assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage).sort()),['malguard-ai-permissions-v1','malguard-language']);assert.equal(await page.evaluate(()=>localStorage.getItem('malguard-language')),'en');assert.ok(!JSON.stringify(await page.evaluate(()=>({...localStorage}))).includes('benign.txt'));
+  assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage).sort()),['malguard-ai-permissions-v1','malguard-language','malguard.ai.welcome.v3']);assert.equal(await page.evaluate(()=>localStorage.getItem('malguard-language')),'en');assert.ok(!JSON.stringify(await page.evaluate(()=>({...localStorage}))).includes('benign.txt'));
   assert.equal(await page.locator('#tool option[value="ai_web"]').isDisabled(),true);
   assert.equal(await page.locator('#tool option[value="malwarebazaar"]').isDisabled(),true);
   await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
@@ -67,20 +68,18 @@ try{
   if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/${width}.png`,fullPage:true});}
   await page.locator('#clear').click();assert.equal(await page.locator('#conversation').innerText(),'');
   if(width===1280){
-   if(await page.locator('#permissions').getAttribute('open')===null)await page.locator('#permissions summary').click();await page.locator('#model-consent').check();
+   await page.locator('#settings-panel > summary').click();if(await page.locator('#permissions').getAttribute('open')===null)await page.locator('#permissions summary').click();await page.locator('#model-consent').check();await page.locator('#settings-panel > summary').click();
    await page.locator('#message').fill('Hello');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
    assert.equal(await page.locator('.assistant-message h3').count(),0);
    assert.equal(await page.getByText('fixture · benign-test-model',{exact:true}).isVisible(),false);
    await page.locator('.response-details summary').first().click();assert.equal(await page.getByText('fixture · benign-test-model',{exact:true}).isVisible(),true);
    await page.locator('.response-details summary').first().click();
-   await page.locator('#settings-panel > summary').click();
    await page.screenshot({path:'test-results/malguard-ai/quiet-reply-1280.png',fullPage:true});
-   await page.locator('#settings-panel > summary').click();
    await page.locator('#message').fill('Continue');await page.locator('#send').click();await page.getByText('Benign test reply 2',{exact:true}).waitFor();
    await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('lang'),'en');
    await page.locator('#model').selectOption('llama8b');await page.locator('#message').fill('سلام');await page.locator('#send').click();await page.getByText('پاسخ فارسی آزمایشی',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
    await page.locator('#language').click();
-   await page.locator('#mode').selectOption('worker');await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('این حالت برای بررسی فایل، هش و سایت است. برای گفت‌وگوی عادی یا سؤال فنی، حالت چت را انتخاب کن.',{exact:true}).waitFor();
+   await page.locator('#settings-panel > summary').click();await page.locator('#mode').selectOption('worker');await page.locator('#settings-panel > summary').click();await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('این حالت برای بررسی فایل، هش و سایت است. برای گفت‌وگوی عادی یا سؤال فنی، حالت چت را انتخاب کن.',{exact:true}).waitFor();
    await page.locator('#clear').click();
    console.log('PASS Chat multi-turn context and inspection-only mode (injected benign model fixture).');
   }
@@ -88,8 +87,9 @@ try{
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);await context.close();
   console.log(`PASS real AI frontend → backend → static worker, consent, RTL/LTR, no overflow/history at ${width}px`);
  }
- const context=await browser.newContext(),page=await context.newPage();await context.route('**/api/malguard-ai/status',r=>r.abort());await page.goto(base+'/ai/');await page.getByRole('status').filter({hasText:'Backend unavailable'}).waitFor();assert.equal(await page.locator('#send').isDisabled(),true);await context.close();console.log('PASS backend failure shown; submission disabled.');
+ const context=await browser.newContext(),page=await context.newPage();await skipWelcome(context);await context.route('**/api/malguard-ai/status',r=>r.abort());await page.goto(base+'/ai/');await page.locator('#settings-panel > summary').click();await page.getByRole('status').filter({hasText:'Backend unavailable'}).waitFor();assert.equal(await page.locator('#send').isDisabled(),true);await context.close();console.log('PASS backend failure shown; submission disabled.');
  const errorContext=await browser.newContext({timezoneId:'Asia/Tehran'}),errorPage=await errorContext.newPage();
+ await skipWelcome(errorContext);
  const retryAt=new Date(Date.now()+300000).toISOString();let errorCase=0;
  await errorContext.route('**/api/malguard-ai/chat',route=>{
   errorCase++;
@@ -98,7 +98,7 @@ try{
   return route.fulfill({contentType:'application/x-ndjson',body:JSON.stringify({event:{phase:'model_started',tool:'chat'}})+'\n'+JSON.stringify({result})+'\n'});
  });
  await errorPage.goto(base+'/ai/');await errorPage.waitForFunction(()=>!document.getElementById('send').disabled);
- await errorPage.locator('#language').click();await errorPage.locator('#settings-panel > summary').click();await errorPage.locator('#permissions summary').click();await errorPage.locator('#model-consent').check();
+ await errorPage.locator('#language').click();await errorPage.locator('#settings-panel > summary').click();await errorPage.locator('#permissions summary').click();await errorPage.locator('#model-consent').check();await errorPage.locator('#settings-panel > summary').click();
  await errorPage.locator('#message').fill('سلام');await errorPage.locator('#send').click();
  await errorPage.getByRole('alert').filter({hasText:'لیمیت خورد'}).waitFor();
  const expected=await errorPage.evaluate(stamp=>new Intl.DateTimeFormat('fa-IR',{dateStyle:'medium',timeStyle:'long'}).format(new Date(stamp)),retryAt);
@@ -120,7 +120,7 @@ try{
  await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>!document.getElementById('send').disabled);assert.equal(await localPage.locator('#model').inputValue(),'local_fast');
  await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
  await localPage.locator('#local-welcome').waitFor({state:'visible'});assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);await localPage.locator('#local-welcome button[value="later"]').click();
- await localPage.locator('#settings-panel > summary').click();await localPage.locator('#download-models').click();
+ await localPage.locator('#model').selectOption('__downloads');
  await localPage.locator('#local-offer').waitFor({state:'visible'});
  assert.match(await localPage.locator('#offer-info').innerText(),/no provider daily message quota/);
  assert.equal(await localPage.locator('#offer-model option').count(),2);
@@ -131,13 +131,13 @@ try{
  assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.reload();await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
  assert.equal(await localPage.locator('#local-offer').isVisible(),false,'do not repeat the offer in this tab');
- await localPage.locator('#settings-panel > summary').click();await localPage.locator('#model').selectOption('auto');await localPage.locator('#settings-panel > summary').click();
+ await localPage.locator('#model').selectOption('auto');
  await localPage.locator('#message').fill('سلام');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});
  assert.match(await localPage.locator('#download-info').innerText(),/985 MB/);assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);assert.equal(requests,beforeLocal);
  await localPage.locator('#local-download button[value="cancel"]').click();assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.locator('#send').click();await localPage.locator('#local-download button[value="download"]').click();await localPage.getByText('پاسخ محلی آزمایشی',{exact:true}).waitFor();
  assert.equal(requests,beforeLocal);assert.equal(await localPage.evaluate(()=>localWorkerCalls[0].model),'local_fast');assert.match(await localPage.evaluate(()=>localWorkerCalls[0].messages[0].content),/فارسی/);
- await localPage.locator('#settings-panel > summary').click();await localPage.locator('#model').selectOption('local_medium');await localPage.locator('#settings-panel > summary').click();
+ await localPage.locator('#model').selectOption('local_medium');
  await localPage.locator('#message').fill('Explain DNS');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});assert.match(await localPage.locator('#download-info').innerText(),/2268 MB/);
  await localPage.keyboard.press('Escape');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),1,'Escape must not reuse previous download approval');
  assert.equal(requests,beforeLocal);assert.deepEqual(localExternal,[]);await device.close();console.log('PASS on-device download/cancel consent, local-only text, automatic greeting routing and separate model download approval (mock Worker).');

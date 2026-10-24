@@ -3,7 +3,7 @@ import {publicFailure,retryDetails} from './service-errors.mjs';
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
 import {planChat} from './routing.mjs';
-import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=local-models-20261024';
+import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=quiet-entry-20261024';
 import {replyLanguage} from './language.mjs';
 import {typeText,typeActivity,formatElapsed} from './reply-motion.mjs';
 const $=id=>document.getElementById(id);
@@ -12,11 +12,13 @@ let locale='en',service,busy=false;
 try{if(localStorage.getItem('malguard-language')==='fa')locale='fa';}catch{}
 let activeTurn,activityAnimation;
 let localReady=false,modelsInitialized=false;
+let lastSelectedModel='';
+let localOfferPending=false;
 let preferredLocal;try{preferredLocal=localStorage.getItem('malguard.ai.localModel.v1');}catch{}
 const localChat=createLocalChat(),downloadPermissions=new Set();
 const preparedModels=new Set();
 let preparingModel;
-let welcomeSeen=false;try{welcomeSeen=localStorage.getItem('malguard.ai.welcome.v2')==='seen';}catch{}
+let welcomeSeen=false;try{welcomeSeen=localStorage.getItem('malguard.ai.welcome.v3')==='seen';}catch{}
 const history=[];
 const modelHistory=[];
 const permissionInputs={fileUpload:'file-consent',websiteFetch:'website-consent',remoteLookup:'lookup-consent',modelShare:'model-consent'};
@@ -28,8 +30,6 @@ Object.assign(copy.fa,{modeLabel:'حالت',chatMode:'چت',workerMode:'بررس
 Object.assign(copy.en,{modeLabel:'Mode',chatMode:'Chat',workerMode:'Automatic inspection',permissionSettings:'Permissions and privacy',revoke:'Revoke all permissions',consent:'Permissions are saved once and can be revoked at any time.',title:'Hello. Where shall we start?',subtitle:'Talk it through, explore the web or inspect a file or link.',placeholder:'Send a message, ask a question or paste a link…',send:'Send',modelNotice:'Chat supports conversation. Automatic inspection focuses on files and websites with security tools.',chatHint:'General and technical conversation, with automatic file and URL inspection.',workerHint:'File, hash and website inspection only. Use Chat for general questions.'});
 Object.assign(copy.fa,{modelLabel:'مدل گفت‌وگو',modelConsent:'ارسال متن گفت‌وگو به ارائه‌دهندهٔ مدل انتخاب‌شده؛ فایل و شواهد ابزارها ارسال نمی‌شوند.',placeholder:'هرچه می‌خواهی بپرس…',home:'سایت اصلی',suggestChat:'گفت‌وگو کنیم',suggestWebsite:'بررسی یک سایت',suggestFile:'بررسی یک فایل',websitePrompt:'این سایت را بررسی کن: ',chatPrompt:'سلام!',clear:'گفت‌وگوی تازه',modelNotice:'وضعیت واقعی اتصال مدل و ابزارها از سرور دریافت می‌شود.'});
 Object.assign(copy.en,{modelLabel:'Chat model',modelConsent:'Send conversation text to the selected model provider. Files and tool evidence are never sent to the model.',placeholder:'Ask anything…',home:'Main site',suggestChat:'Let’s talk',suggestWebsite:'Check a website',suggestFile:'Inspect a file',websitePrompt:'Check this website: ',chatPrompt:'Hello!',clear:'New conversation',modelNotice:'Model and tool availability are reported by the server.'});
-Object.assign(copy.fa,{title:'چطور می‌تونم کمکت کنم؟',settings:'تنظیمات',disclaimer:'هوش مصنوعی ممکن است اشتباه کند؛ اطلاعات مهم را بررسی کن.',responseDetails:'جزئیات پاسخ',copy:'کپی پاسخ',copied:'کپی شد',technical:'اطلاعات فنی'});
-Object.assign(copy.en,{title:'What can I help with?',settings:'Settings',disclaimer:'AI can make mistakes. Check important information.',responseDetails:'Response details',copy:'Copy response',copied:'Copied',technical:'Technical metadata'});
 Object.assign(copy.en,{localTooLong:'This device model accepts short requests (up to 600 characters). Choose a cloud model for longer text.',localDownload:'Download on-device model',download:'Download',cancel:'Cancel',stop:'Stop',chooseLocal:'On-device models',clearModels:'Remove downloaded models',localOff:'On-device models require compatible WebGPU and sufficient GPU memory.',localFailed:'On-device response could not finish. Check device support, memory and network. No cloud fallback was used.',localLoading:'Loading on-device model',localWorking:'Generating on your device',localRemoved:'Downloaded models removed.',researchLimit:'Search excerpts are not independently verified source pages.'});
 Object.assign(copy.fa,{localTooLong:'مدل روی دستگاه درخواست کوتاه، حداکثر ۶۰۰ نویسه، می‌پذیرد. برای متن طولانی مدل ابری را انتخاب کن.',localDownload:'دانلود مدل روی دستگاه',download:'دانلود',cancel:'انصراف',stop:'توقف',chooseLocal:'مدل‌های روی دستگاه',clearModels:'حذف مدل‌های دانلودشده',localOff:'مدل‌های روی دستگاه به WebGPU سازگار و حافظهٔ گرافیکی کافی نیاز دارند.',localFailed:'پاسخ روی دستگاه کامل نشد؛ پشتیبانی مرورگر، حافظه و اینترنت را بررسی کن. به مدل ابری منتقل نشد.',localLoading:'در حال بارگذاری مدل روی دستگاه',localWorking:'در حال پاسخ‌گویی روی دستگاه شما',localRemoved:'مدل‌های دانلودشده حذف شدند.',researchLimit:'صفحهٔ منابع جست‌وجو مستقلاً تأیید نشده است.'});
 Object.assign(copy.en,{offerTitle:'Two optional on-device models',offerInfo:"Download a model to chat without a provider's daily message quota. Speed and capacity depend on your device. You can keep using available cloud models without downloading.",offerChoose:'Choose a model',later:'Later',localPrepared:'Selected model is ready on this device.'});
@@ -37,6 +37,10 @@ Object.assign(copy.fa,{offerTitle:'دو مدل اختیاری روی دستگا�
 const t=k=>copy[locale][k]||k;
 Object.assign(copy.en,{onDevice:'ON YOUR DEVICE',welcomeTitle:'Your device. Your conversation.',welcomeInfo:"Choose a light or stronger model and chat without a provider's daily message quota. A one-time download is required; speed and capacity depend on your device.",welcomePrivacy:'Downloads are optional. Local replies run on this device; online search and security tools need a connection and separate permission.',chooseDownload:'Choose a model',cacheNote:'Model files are cached in this browser. Clearing browser data may require another download. Device support does not guarantee enough free memory.',offerInfo:'Choose one model to download. Local chat has no provider daily message quota. Speed, context and capacity depend on your device.',localAvailable:'Local chat is available. Online security tools are unavailable.',downloadNeeded:'Download required before local chat',readyDevice:'Ready on this device',lightModel:'Light · Qwen3 1.7B',strongModel:'Strong · Qwen3 4B',deviceUnsupported:'Local chat needs a WebGPU browser with shader-f16 support. Try an updated compatible browser; downloading is unavailable on this device.',downloadCancelled:'Download stopped. You can retry from On-device models.'});
 Object.assign(copy.fa,{onDevice:'روی دستگاه شما',welcomeTitle:'دستگاه شما؛ گفت‌وگوی شما.',welcomeInfo:'یک مدل سبک‌تر یا قوی‌تر انتخاب کنید و بدون سقف پیام روزانهٔ سرویس‌دهنده گفت‌وگو کنید. دریافت اولیهٔ مدل لازم است؛ سرعت و ظرفیت به دستگاه شما بستگی دارد.',welcomePrivacy:'دانلود اختیاری است. پاسخ محلی روی همین دستگاه تولید می‌شود؛ جست‌وجوی آنلاین و ابزارهای امنیتی به اینترنت و مجوز جداگانه نیاز دارند.',chooseDownload:'انتخاب و دانلود مدل',cacheNote:'فایل‌های مدل در این مرورگر ذخیره می‌شوند. پاک کردن داده‌های مرورگر ممکن است به دانلود دوباره نیاز داشته باشد. سازگاری دستگاه، کافی بودن حافظهٔ آزاد را تضمین نمی‌کند.',offerInfo:'یکی از دو مدل را برای دانلود انتخاب کنید. چت محلی سقف پیام روزانهٔ سرویس‌دهنده ندارد؛ سرعت، طول متن و ظرفیت به دستگاه شما بستگی دارد.',localAvailable:'چت محلی در دسترس است؛ ابزارهای امنیتی آنلاین در دسترس نیستند.',downloadNeeded:'برای چت محلی ابتدا مدل را دانلود کنید',readyDevice:'آماده روی این دستگاه',lightModel:'سبک‌تر · Qwen3 1.7B',strongModel:'قوی‌تر · Qwen3 4B',deviceUnsupported:'چت محلی به مرورگر سازگار با WebGPU و shader-f16 نیاز دارد. مرورگر سازگار و به‌روز را امتحان کنید؛ دانلود در این دستگاه در دسترس نیست.',downloadCancelled:'دانلود متوقف شد؛ از بخش مدل‌های روی دستگاه دوباره تلاش کنید.'});
+Object.assign(copy.fa,{title:'چطور می‌تونم کمکت کنم؟',settings:'تنظیمات',disclaimer:'هوش مصنوعی ممکن است اشتباه کند؛ اطلاعات مهم را بررسی کن.',responseDetails:'جزئیات پاسخ',copy:'کپی پاسخ',copied:'کپی شد',technical:'اطلاعات فنی'});
+Object.assign(copy.en,{title:'What can I help with?',settings:'Settings',disclaimer:'AI can make mistakes. Check important information.',responseDetails:'Response details',copy:'Copy response',copied:'Copied',technical:'Technical metadata'});
+Object.assign(copy.en,{title:'What should we explore?',welcomeTitle:'More freedom. On your device.',welcomeInfo:"Download a model to chat without a provider's daily message quota. Choose a light or stronger model for your device, or continue without downloading.",chooseDownload:'Download',chooseModel:'Model',modelDownloads:'Download models…',localCompatibility:'Local downloads need a compatible browser and GPU. Try an updated browser with WebGPU support.'});
+Object.assign(copy.fa,{title:'چه چیزی را کشف کنیم؟',welcomeTitle:'آزادانه‌تر، روی دستگاه خودت.',welcomeInfo:'برای گفت‌وگو بدون سقف پیام روزانهٔ سرویس‌دهنده، یک مدل سبک‌تر یا قوی‌تر دانلود کن؛ یا فعلاً بدون دانلود ادامه بده.',chooseDownload:'دانلود',chooseModel:'مدل',modelDownloads:'دانلود مدل‌ها…',localCompatibility:'دانلود محلی به مرورگر و پردازندهٔ گرافیکی سازگار نیاز دارد. مرورگر به‌روز با پشتیبانی WebGPU را امتحان کن.'});
 Object.assign(copy.en,{thinking:'Thinking',readingFile:'Reading file',readingWebsite:'Reading website',checkingFile:'Checking file',typing:'Typing',connecting:'Connecting',preparing:'Preparing results',searching:'Searching the web',checking:'Checking',stopped:'Response stopped',stop:'Stop response'});
 Object.assign(copy.fa,{thinking:'در حال فکر کردن',readingFile:'در حال خواندن فایل',readingWebsite:'در حال خواندن سایت',checkingFile:'در حال بررسی فایل',typing:'در حال نوشتن',connecting:'در حال اتصال',preparing:'در حال آماده‌سازی نتیجه',searching:'در حال جست‌وجوی وب',checking:'در حال بررسی',stopped:'پاسخ متوقف شد',stop:'توقف پاسخ'});
 Object.assign(copy.en,{respondedIn:'Responded in',stoppedAfter:'Stopped after',elapsedTime:'Time elapsed:'});
@@ -151,18 +155,23 @@ function renderStatus(){
  const selectedId=$('model').value,remote=service?.model?.models||[],models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار · چهار سطح':'Automatic · four tiers',state:localReady||remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remote.filter(m=>m.id!=='auto')];
  if(models.length){
   $('model').replaceChildren();
-  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.label;const option=el('option',label+(m.state==='configured'?'':` · ${t('disabled')}`));option.value=m.id;option.disabled=m.state!=='configured';$('model').append(option);}
-  $('model').value=!modelsInitialized&&localReady?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured')?selectedId:service?.model?.defaultModel||(localReady?'local_fast':'auto');
+  const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
+  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t('auto'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured';$('model').append(option);}
+  const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);
+  const defaultId=service?.model?.defaultModel||(localReady?'local_fast':'');
+  $('model').value=!modelsInitialized&&localReady?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured')?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
+  lastSelectedModel=$('model').value;
   if(service||localReady)modelsInitialized=true;
  }
- $('model').disabled=busy||!localReady&&service?.model?.state!=='configured'||$('mode').value!=='chat';
+ $('model').disabled=busy||$('mode').value!=='chat';
  const selected=models.find(m=>m.id===$('model').value);
  const modelLabel=selected?.label||service?.model?.model||'';
  const modelNotice=locale==='fa'?`مدل تنظیم‌شده: ${modelLabel}`:`Configured model: ${modelLabel}`;
  $('model-status').textContent=service?.model?.state==='configured'?modelNotice:t('modelOff');
  if(service?.model?.state==='configured')document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'زبان پاسخ از متن پیام تشخیص داده می‌شود؛ هر مدل محدودیت سهمیهٔ خودش را دارد.':'Replies follow your message language. Each model has its own usage limits.';
- $('download-models').disabled=busy||!localReady;
- $('manage-models').disabled=busy||!localReady;
+ $('manage-models').disabled=busy||localOfferPending;
+ $('offer-download-button').disabled=busy||!localReady;
+ $('offer-compatibility').textContent=localReady?'':t('localCompatibility');
  $('device-note').textContent=!localReady?t('deviceUnsupported'):$('model').value.startsWith('local_')?t(preparedModels.has($('model').value)?'readyDevice':'downloadNeeded'):'';
  for(const option of $('offer-model').options){const m=localModels[option.value];option.textContent=`${t(option.value==='local_fast'?'lightModel':'strongModel')} · ~${m.downloadMB} MB`;}
  $('local-status').textContent=localReady?(locale==='fa'?'اجرای روی دستگاه ممکن است؛ سرعت و حافظه باید هنگام بارگذاری بررسی شوند.':'On-device inference may be supported; loading still depends on memory and device capabilities.'):t('localOff');
@@ -208,13 +217,16 @@ async function allowDownload(model){
  if(accepted)downloadPermissions.add(model);return accepted;
 }
 async function offerLocalModels(){
- if(!localReady||busy)return;
+ if(busy||localOfferPending)return;
+ localOfferPending=true;renderStatus();
  $('offer-model').value=Object.hasOwn(localModels,$('model').value)?$('model').value:'local_fast';
  const dialog=$('local-offer');
  $('offer-model').onchange=()=>{$('offer-size').textContent=downloadInfo($('offer-model').value);};
- $('offer-model').onchange();dialog.returnValue='later';dialog.showModal();
- const accepted=await new Promise(resolve=>dialog.addEventListener('close',()=>resolve(dialog.returnValue==='download'),{once:true}));
- if(!accepted){renderStatus();return;}
+ $('offer-model').onchange();
+ let accepted;
+ try{dialog.returnValue='later';dialog.showModal();accepted=await new Promise(resolve=>dialog.addEventListener('close',()=>resolve(dialog.returnValue==='download'),{once:true}));}
+ finally{localOfferPending=false;renderStatus();}
+ if(!accepted||!localReady){renderStatus();return;}
  const model=$('offer-model').value;
  downloadPermissions.add(model);preparingModel=model;const turn=beginTurn('localLoading',{recordTiming:false});
  $('model-progress').hidden=false;$('download-progress').value=0;$('progress-label').textContent=`${t('localLoading')} · 0%`;
@@ -224,9 +236,9 @@ async function offerLocalModels(){
  finally{preparingModel=undefined;$('model-progress').hidden=true;endTurn(turn);if(completed){rememberLocalModel();$('local-status').textContent=t('localPrepared');}else if(turn.controller.signal.aborted)$('local-status').textContent=t('downloadCancelled');}
 }
 async function welcomeLocalModels(){
- if(!localReady||welcomeSeen)return;
+ if(welcomeSeen)return;
  welcomeSeen=true;
- try{localStorage.setItem('malguard.ai.welcome.v2','seen');}catch{}
+ try{localStorage.setItem('malguard.ai.welcome.v3','seen');}catch{}
  const dialog=$('local-welcome');dialog.returnValue='later';dialog.showModal();
  await new Promise(resolve=>dialog.addEventListener('close',resolve,{once:true}));
  if(dialog.returnValue==='choose')await offerLocalModels();
@@ -257,8 +269,9 @@ async function runLocal(model,message,consent){
  }catch{if(turn.controller.signal.aborted)stopped(turn);else showError('localFailed');}finally{endTurn(turn);}
 }
 $('stop-local').onclick=stopTurn;
-$('download-models').onclick=offerLocalModels;
 $('manage-models').onclick=offerLocalModels;
+document.addEventListener('pointerdown',event=>{const panel=$('settings-panel');if(panel.open&&!panel.contains(event.target))panel.open=false;});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')$('settings-panel').open=false;});
 $('cancel-download').onclick=()=>{if(preparingModel){downloadPermissions.delete(preparingModel);stopTurn();}};
 $('remove-models').onclick=async()=>{if(busy)return;busy=true;renderStatus();try{await localChat.clear();downloadPermissions.clear();preparedModels.clear();$('local-status').textContent=t('localRemoved');}catch{$('local-status').textContent=t('localFailed');}finally{busy=false;renderStatus();}};
 addEventListener('pagehide',()=>{stopTurn();localChat.stop();});
@@ -313,7 +326,7 @@ for(const [name,id]of Object.entries(permissionInputs)){$(id).checked=saved[name
 $('revoke-permissions').onclick=()=>{revokePermissions(permissionStorage);for(const id of Object.values(permissionInputs))$(id).checked=false;};
 $('mode').onchange=()=>translate();
 function rememberLocalModel(){const model=$('model').value;if(Object.hasOwn(localModels,model))try{localStorage.setItem('malguard.ai.localModel.v1',model);}catch{}}
-$('model').onchange=()=>{rememberLocalModel();renderStatus();};
+$('model').onchange=()=>{if($('model').value==='__downloads'){$('model').value=lastSelectedModel;void offerLocalModels();return;}rememberLocalModel();renderStatus();};
 for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()=>{
  if(busy)return;
  $('tool').value='auto';
@@ -323,4 +336,5 @@ for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()
  translate();$('message').focus();
 };
 translate();
-await Promise.all([localCapability().then(ready=>{localReady=ready;renderStatus();void welcomeLocalModels();}),(async()=>{try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}})()]);renderStatus();
+void welcomeLocalModels();
+await Promise.all([localCapability().then(ready=>{localReady=ready;renderStatus();}),(async()=>{try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}})()]);renderStatus();
