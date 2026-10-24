@@ -77,6 +77,15 @@ try{
   assert.equal(await page.evaluate(()=>workerCalls.length),0);
   await context.close();console.log(`PASS welcome, skip, explicit download, cancel, failure/retry, active model and RTL/LTR at ${width}px (mock worker)`);
  }
+ const startup=await browser.newContext(),startupPage=await startup.newPage();
+ await startup.addInitScript(()=>{
+  localStorage.setItem('malguard.ai.welcome.v2','seen');localStorage.setItem('malguard.ai.localModel.v1','local_medium');
+  Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>{await new Promise(r=>setTimeout(r,250));return {features:new Set(['shader-f16'])};}}});
+ });
+ await startup.route('**/api/malguard-ai/status',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({enabled:true,tools:{},model:{state:'configured',defaultModel:'cloud',models:[{id:'cloud',label:'Cloud fixture',state:'configured'}]}})}));
+ await startupPage.goto(base+'/ai/');await startupPage.waitForFunction(()=>!document.getElementById('manage-models').disabled);
+ assert.equal(await startupPage.locator('#model').inputValue(),'local_medium','A faster cloud status response must not discard the saved local model');
+ await startup.close();console.log('PASS saved local selection survives startup timing differences');
  const context=await browser.newContext(),page=await context.newPage();
  await context.addInitScript(()=>Object.defineProperty(navigator,'gpu',{value:undefined}));
  await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
