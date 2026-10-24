@@ -22,7 +22,7 @@ try{
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'no-preference'}),page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.clock.install();
-  await context.addInitScript(()=>Object.defineProperty(navigator,'gpu',{value:undefined}));
+  await context.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');Object.defineProperty(navigator,'gpu',{value:undefined});});
   await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
   await page.goto(base+'/ai/');await page.waitForFunction(()=>!document.getElementById('send').disabled);
   await page.locator('#settings-panel > summary').click();await page.locator('#permissions > summary').click();await page.locator('#model-consent').check();await page.locator('#settings-panel > summary').click();
@@ -133,14 +133,14 @@ try{
  }
  const local=await browser.newContext({viewport:{width:390,height:844}}),page=await local.newPage();
  await local.addInitScript(()=>{
-  localStorage.setItem('malguard.ai.welcome.v2','seen');
+  localStorage.setItem('malguard.ai.welcome.v3','seen');
   Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});
   window.workerCalls=[];window.workerStops=0;
   window.Worker=class{constructor(){window.localWorker=this;}postMessage(data){window.workerCalls.push(data);}terminate(){window.workerStops++;}};
  });
  await local.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
  await page.goto(base+'/ai/');await page.waitForFunction(()=>!document.getElementById('send').disabled);
- await page.locator('#settings-panel > summary').click();await page.locator('#model').selectOption('local_fast');await page.locator('#settings-panel > summary').click();
+ await page.locator('#model').selectOption('local_fast');
  const beforeLocal=jobs.length;await page.locator('#message').fill('Hello');await page.locator('#send').click();await page.locator('#local-download button[value="download"]').click();
  await page.waitForFunction(()=>window.workerCalls.length===1);
  await page.evaluate(()=>window.localWorker.onmessage({data:{progress:75}}));

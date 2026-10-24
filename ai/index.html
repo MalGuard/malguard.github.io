@@ -6,45 +6,21 @@
   <meta name="description" content="MalGuard AI — evidence-based security tools for files, hashes and gaming links.">
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self'; connect-src 'self' https://game-scam-guard-connected.vercel.app https://huggingface.co https://*.hf.co https://raw.githubusercontent.com; img-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
-  <meta name="theme-color" content="#080808">
+  <meta name="theme-color" content="#141412">
   <title>MalGuard AI</title>
   <link rel="icon" href="/assets/fusion/assets/malguard-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=local-models-20261024">
-  <script type="module" src="./app.js?v=local-models-20261024"></script>
+  <link rel="stylesheet" href="./style.css?v=quiet-entry-20261024">
+  <script type="module" src="./app.js?v=quiet-entry-20261024"></script>
 </head>
 <body>
-  <div class="atmosphere" aria-hidden="true"></div>
   <a class="skip" href="#message" data-i18n="skip">Skip to conversation</a>
   <header class="site-header">
     <a class="brand" href="/" dir="ltr"><img class="mark" src="/assets/fusion/assets/malguard-logo.svg" width="29" height="31" alt=""> MalGuard <span>AI</span></a>
-    <div class="header-actions"><button id="clear" type="button"><span aria-hidden="true">＋</span><span class="sr-only" data-i18n="clear">New conversation</span></button><button id="language" type="button">فارسی</button></div>
-  </header>
-  <main>
-    <section class="workspace" aria-labelledby="title">
-      <div class="intro"><h1 id="title" data-i18n="title">What can I help with?</h1></div>
-      <div class="conversation" id="conversation" role="log" aria-label="Conversation" aria-live="polite"></div>
-      <div id="activity" class="reply-activity" role="status" aria-live="polite" aria-atomic="false" hidden><span class="activity-orbit" aria-hidden="true"></span><span id="activity-label" aria-hidden="true"></span><span id="activity-elapsed" aria-hidden="true"></span><span id="activity-announcement" class="sr-only"></span></div>
-      <div class="composer-area">
-        <div class="model-toolbar">
-          <label class="sr-only" for="model" data-i18n="modelLabel">Chat model</label>
-          <select id="model" disabled aria-describedby="device-note"><option value="local_fast">Qwen3 1.7B</option></select>
-          <button id="manage-models" type="button" data-i18n="chooseLocal">On-device models</button>
-        </div>
-        <p id="device-note" class="device-note" role="status"></p>
-        <div id="model-progress" class="model-progress" hidden><label for="download-progress" id="progress-label"></label><progress id="download-progress" max="100" value="0"></progress><button type="button" id="cancel-download" data-i18n="cancel">Cancel</button></div>
-        <form id="composer">
-          <div class="composer-shell">
-            <label class="file-button" for="file"><span aria-hidden="true">＋</span><span class="sr-only" data-i18n="attach">Choose file · up to 1 MiB</span></label>
-            <label class="sr-only" for="message" data-i18n="input">Your message</label>
-            <textarea id="message" rows="1" maxlength="4000" dir="auto" placeholder="Ask anything…" aria-describedby="disclaimer"></textarea>
-            <button type="submit" id="send" disabled aria-label="Send"><svg id="send-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><svg id="send-stop" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" hidden><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg><span id="send-label" class="sr-only">Send</span></button>
-          </div>
-          <div class="attachment"><input type="file" id="file"><span id="filename" dir="auto"></span><button type="button" id="remove-file" hidden data-i18n="remove">Remove</button></div>
-        </form>
-        <p id="connection" role="status"></p>
-        <details id="settings-panel" class="settings-panel">
-          <summary><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h8m4 0h4M4 17h4m4 0h8M12 4v6M8 14v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span data-i18n="settings">Settings</span></summary>
+    <div class="header-actions"><button id="clear" type="button"><span aria-hidden="true">＋</span><span class="sr-only" data-i18n="clear">New conversation</span></button>        <details id="settings-panel" class="settings-panel">
+          <summary><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h8m4 0h4M4 17h4m4 0h8M12 4v6M8 14v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="sr-only" data-i18n="settings">Settings</span></summary>
           <div class="settings-content">
+            <p id="device-note" class="device-note" role="status"></p>
+            <p id="connection" role="status"></p>
             <div class="composer-controls">
               <label for="mode" data-i18n="modeLabel">Mode</label>
               <select id="mode" aria-describedby="mode-hint"><option value="chat" data-i18n="chatMode">Chat</option><option value="worker" data-i18n="workerMode">Automatic inspection</option></select>
@@ -70,13 +46,37 @@
       </details>
             <p id="model-status" class="muted"></p>
             <p id="local-status" class="muted"></p>
-            <button type="button" id="download-models" data-i18n="chooseLocal">On-device models</button>
+            <button type="button" id="manage-models" data-i18n="chooseLocal">On-device models</button>
             <button type="button" id="remove-models" data-i18n="clearModels">Remove downloaded models</button>
             <p class="notice" data-i18n="modelNotice">Model and tool availability are reported by the server.</p>
             <p class="footer-note" data-i18n="retention">History stays in this page’s memory and disappears on refresh. No findings guarantee safety.</p>
             <a class="privacy-link" href="/privacy.html" data-i18n="privacy">Privacy policy</a>
           </div>
         </details>
+<button id="language" type="button">فارسی</button></div>
+  </header>
+  <main>
+    <section class="workspace" aria-labelledby="title">
+      <div class="intro"><h1 id="title" data-i18n="title">What can I help with?</h1></div>
+      <div class="conversation" id="conversation" role="log" aria-label="Conversation" aria-live="polite"></div>
+      <div id="activity" class="reply-activity" role="status" aria-live="polite" aria-atomic="false" hidden><span class="activity-orbit" aria-hidden="true"></span><span id="activity-label" aria-hidden="true"></span><span id="activity-elapsed" aria-hidden="true"></span><span id="activity-announcement" class="sr-only"></span></div>
+      <div class="composer-area">
+        <div id="model-progress" class="model-progress" hidden><label for="download-progress" id="progress-label"></label><progress id="download-progress" max="100" value="0"></progress><button type="button" id="cancel-download" data-i18n="cancel">Cancel</button></div>
+        <form id="composer">
+          <div class="composer-shell">
+            <label class="sr-only" for="message" data-i18n="input">Your message</label>
+            <textarea id="message" rows="1" maxlength="4000" dir="auto" placeholder="Ask anything…" aria-describedby="disclaimer"></textarea>
+            <div class="composer-footer">
+              <label class="file-button" for="file"><span aria-hidden="true">＋</span><span class="sr-only" data-i18n="attach">Choose file · up to 1 MiB</span></label>
+              <div class="composer-actions">
+                <label class="sr-only" for="model" data-i18n="modelLabel">Chat model</label>
+                <select id="model" disabled aria-describedby="device-note"><option value="local_fast">Qwen3 1.7B</option></select>
+                <button type="submit" id="send" disabled aria-label="Send"><svg id="send-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><svg id="send-stop" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" hidden><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg><span id="send-label" class="sr-only">Send</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="attachment"><input type="file" id="file"><span id="filename" dir="auto"></span><button type="button" id="remove-file" hidden data-i18n="remove">Remove</button></div>
+        </form>
         <p id="disclaimer" class="footer-note" data-i18n="disclaimer">AI can make mistakes. Check important information.</p>
         <button id="stop-local" type="button" hidden data-i18n="stop">Stop</button>
       </div>
@@ -84,11 +84,9 @@
   </main>
   <dialog id="local-welcome" aria-labelledby="welcome-title" aria-describedby="welcome-info">
     <form method="dialog">
-      <span class="dialog-eyebrow" data-i18n="onDevice">ON YOUR DEVICE</span>
       <h2 id="welcome-title" data-i18n="welcomeTitle">Your device. Your conversation.</h2>
-      <p id="welcome-info" data-i18n="welcomeInfo">Choose a light or stronger model and chat without a provider's daily message quota. A one-time download is required; speed and capacity depend on your device.</p>
-      <p class="muted" data-i18n="welcomePrivacy">Downloads are optional. Local replies run on this device; online search and security tools need a connection and separate permission.</p>
-      <div class="download-actions"><button value="later" autofocus data-i18n="later">Later</button><button class="primary-action" value="choose" data-i18n="chooseDownload">Choose a model</button></div>
+      <p id="welcome-info" data-i18n="welcomeInfo">Download an optional model to chat on your device.</p>
+      <div class="download-actions"><button value="later" autofocus data-i18n="later">Later</button><button class="primary-action" value="choose" data-i18n="download">Download</button></div>
     </form>
   </dialog>
   <dialog id="local-offer" aria-labelledby="offer-title" aria-describedby="offer-info">
@@ -98,8 +96,9 @@
       <label for="offer-model" data-i18n="offerChoose">Choose a model</label>
       <select id="offer-model" aria-describedby="offer-size"><option value="local_fast">Qwen3 1.7B · ~985 MB</option><option value="local_medium">Qwen3 4B · ~2268 MB</option></select>
       <p id="offer-size" aria-live="polite" aria-atomic="true"></p>
+      <p id="offer-compatibility" role="status"></p>
       <p class="muted" data-i18n="cacheNote">Model files are cached in this browser. Clearing browser data may require another download. Device support does not guarantee enough free memory.</p>
-      <div class="download-actions"><button value="later" autofocus data-i18n="later">Later</button><button class="primary-action" value="download" data-i18n="download">Download</button></div>
+      <div class="download-actions"><button value="later" autofocus data-i18n="later">Later</button><button id="offer-download-button" class="primary-action" value="download" data-i18n="download">Download</button></div>
     </form>
   </dialog>
   <dialog id="local-download" aria-labelledby="download-title" aria-describedby="download-info">
