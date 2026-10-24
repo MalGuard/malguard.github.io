@@ -4,6 +4,7 @@ html[lang=fa] body,html[lang=fa] textarea,html[lang=fa] .conversation,html[lang=
 :root{color-scheme:dark;--bg:#141412;--panel:#20201e;--line:#343432;--muted:#a3a3a3;--ink:#f5f5f5;--accent:#e5e5e5;font-family:Arial,system-ui,sans-serif;font-size:15px;background:var(--bg);color:var(--ink)}
 *{box-sizing:border-box}
 body{margin:0;min-height:100svh;line-height:1.8;-webkit-font-smoothing:antialiased;isolation:isolate}
+.atmosphere{position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#08080880,#080808a6 70%,#080808c9),url('/assets/precision/particle-atmosphere.webp') center/cover no-repeat;filter:grayscale(1)}
 a{color:inherit;text-decoration:none}
 a:hover{text-decoration:underline;text-underline-offset:4px}
 button,input,textarea,select{font:inherit}
@@ -50,15 +51,16 @@ html[lang=en] h1{font-family:Arial,system-ui,sans-serif;font-size:24px;letter-sp
 .result a{text-decoration:underline;text-underline-offset:3px}
 .eyebrow{font-size:11px;color:var(--muted);letter-spacing:1px}
 #composer{margin:0}
-.composer-shell{display:flex;flex-direction:column;gap:10px;min-height:116px;background:var(--panel);border:1px solid #30302e;border-radius:20px;padding:14px;transition:border-color .15s}
-.composer-shell:focus-within{border-color:#666663}
-textarea{display:block;min-width:0;width:100%;field-sizing:content;resize:none;min-height:28px;max-height:168px;border:0;background:transparent;color:var(--ink);padding:0 4px;margin:0;font-size:16px;line-height:28px;outline-offset:1px}
-.composer-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-top:auto;direction:ltr}
-.composer-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0;max-width:calc(100% - 52px)}
+.composer-shell{display:flex;align-items:center;gap:8px;min-height:64px;background:#20202070;border:1px solid #ffffff30;border-radius:32px;padding:10px;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 8px 32px #0003,inset 0 1px 0 #ffffff08;transition:border-color .15s;direction:ltr}
+.composer-shell:focus-within{border-color:#ffffff70}
+textarea{display:block;flex:1;min-width:0;width:auto;field-sizing:content;resize:none;min-height:28px;max-height:168px;border:0;background:transparent;color:var(--ink);padding:0 4px;margin:0;font-size:16px;line-height:28px;outline-offset:1px}
+.composer-footer,.composer-actions{display:contents}
+.composer-footer .file-button{order:-1}
 .composer-actions #model{min-width:0;width:fit-content;field-sizing:content;max-width:180px;min-height:40px;padding:6px 10px;border-color:transparent;background:transparent;font-size:12px;text-overflow:ellipsis;direction:inherit}
 html[dir=rtl] .composer-actions #model{direction:rtl}
 textarea:focus-visible{outline:none}
 textarea:placeholder-shown{field-sizing:fixed;height:28px;direction:inherit}
+html[dir=rtl] textarea:placeholder-shown{direction:rtl}
 textarea::placeholder{color:#949494}
 .composer-controls{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:12px;margin:0;font-size:12px}
 .composer-controls #mode,.composer-controls #model{font-size:12px;min-height:36px;padding:4px 11px;background:#10101099;border-color:#ffffff20;width:100%}
@@ -148,8 +150,11 @@ footer{padding-top:12px}
 @media(max-width:440px){#tools{grid-template-columns:1fr}
 .suggestions{gap:7px;margin:22px 0 28px}
 .suggestions button{font-size:11px;padding:6px 10px;gap:6px}
-.composer-shell{gap:10px;padding:12px;min-height:112px;border-radius:18px}
-.composer-actions{gap:4px}.composer-actions #model{max-width:210px;padding-inline:6px}
+.composer-shell{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;gap:6px;padding:10px 12px;min-height:98px;border-radius:26px}
+.composer-shell textarea{grid-column:1/-1;grid-row:1;width:100%;padding:0 6px}
+.composer-footer .file-button{grid-column:1;grid-row:2}
+.composer-actions #model{grid-column:2;grid-row:2;justify-self:end;max-width:100%;padding-inline:6px}
+.composer-actions #send{grid-column:3;grid-row:2}
 textarea{font-size:16px}
 .session-status{align-items:baseline}
 .tool-choice{align-items:flex-start;flex-direction:column;gap:6px}
