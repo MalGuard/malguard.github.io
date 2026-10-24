@@ -1,5 +1,5 @@
 import {CreateMLCEngine,deleteModelAllInfoInCache} from '@mlc-ai/web-llm';
-import {localModels,localAppConfig} from '../ai/local-models.mjs';
+import {localModels,localAppConfig,clearLocalModelCache} from '../ai/local-models.mjs';
 let engine,loaded,busy=false;
 self.onmessage=async({data})=>{
  if(busy)return;
@@ -7,7 +7,7 @@ self.onmessage=async({data})=>{
  try{
   if(data.operation==='clear'){
    await engine?.unload();engine=undefined;loaded=undefined;
-   for(const m of Object.values(localModels))await deleteModelAllInfoInCache(m.model,localAppConfig);
+   await clearLocalModelCache(deleteModelAllInfoInCache);
    self.postMessage({cleared:true});return;
   }
   const m=localModels[data.model];

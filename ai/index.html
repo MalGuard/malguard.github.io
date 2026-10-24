@@ -25,6 +25,13 @@
       <div class="conversation" id="conversation" role="log" aria-label="Conversation" aria-live="polite"></div>
       <div id="activity" class="reply-activity" role="status" aria-live="polite" aria-atomic="false" hidden><span class="activity-orbit" aria-hidden="true"></span><span id="activity-label" aria-hidden="true"></span><span id="activity-elapsed" aria-hidden="true"></span><span id="activity-announcement" class="sr-only"></span></div>
       <div class="composer-area">
+        <div class="model-toolbar">
+          <label class="sr-only" for="model" data-i18n="modelLabel">Chat model</label>
+          <select id="model" disabled aria-describedby="device-note"><option value="local_fast">Qwen3 1.7B</option></select>
+          <button id="manage-models" type="button" data-i18n="chooseLocal">On-device models</button>
+        </div>
+        <p id="device-note" class="device-note" role="status"></p>
+        <div id="model-progress" class="model-progress" hidden><label for="download-progress" id="progress-label"></label><progress id="download-progress" max="100" value="0"></progress><button type="button" id="cancel-download" data-i18n="cancel">Cancel</button></div>
         <form id="composer">
           <div class="composer-shell">
             <label class="file-button" for="file"><span aria-hidden="true">＋</span><span class="sr-only" data-i18n="attach">Choose file · up to 1 MiB</span></label>
@@ -41,8 +48,6 @@
             <div class="composer-controls">
               <label for="mode" data-i18n="modeLabel">Mode</label>
               <select id="mode" aria-describedby="mode-hint"><option value="chat" data-i18n="chatMode">Chat</option><option value="worker" data-i18n="workerMode">Automatic inspection</option></select>
-              <label for="model" data-i18n="modelLabel">Chat model</label>
-              <select id="model" disabled><option value="llama70b">Llama 3.3 70B</option></select>
             </div>
             <p id="mode-hint" class="muted"></p>
             <details id="permissions"><summary data-i18n="permissionSettings">Permissions and privacy</summary>
@@ -77,14 +82,24 @@
       </div>
     </section>
   </main>
+  <dialog id="local-welcome" aria-labelledby="welcome-title" aria-describedby="welcome-info">
+    <form method="dialog">
+      <span class="dialog-eyebrow" data-i18n="onDevice">ON YOUR DEVICE</span>
+      <h2 id="welcome-title" data-i18n="welcomeTitle">Your device. Your conversation.</h2>
+      <p id="welcome-info" data-i18n="welcomeInfo">Choose a light or stronger model and chat without a provider's daily message quota. A one-time download is required; speed and capacity depend on your device.</p>
+      <p class="muted" data-i18n="welcomePrivacy">Downloads are optional. Local replies run on this device; online search and security tools need a connection and separate permission.</p>
+      <div class="download-actions"><button value="later" autofocus data-i18n="later">Later</button><button class="primary-action" value="choose" data-i18n="chooseDownload">Choose a model</button></div>
+    </form>
+  </dialog>
   <dialog id="local-offer" aria-labelledby="offer-title" aria-describedby="offer-info">
     <form method="dialog">
       <h2 id="offer-title" data-i18n="offerTitle">Two optional on-device models</h2>
       <p id="offer-info" data-i18n="offerInfo">Download a model to chat without a provider's daily message quota. Speed and capacity depend on your device. You can keep using available cloud models without downloading.</p>
       <label for="offer-model" data-i18n="offerChoose">Choose a model</label>
-      <select id="offer-model"><option value="local_fast">Qwen3 0.6B · ~352 MB</option><option value="local_medium">Qwen3 1.7B · ~985 MB</option></select>
-      <p id="offer-size"></p>
-      <div class="download-actions"><button value="later" autofocus data-i18n="later">Later</button><button value="download" data-i18n="download">Download</button></div>
+      <select id="offer-model" aria-describedby="offer-size"><option value="local_fast">Qwen3 1.7B · ~985 MB</option><option value="local_medium">Qwen3 4B · ~2268 MB</option></select>
+      <p id="offer-size" aria-live="polite" aria-atomic="true"></p>
+      <p class="muted" data-i18n="cacheNote">Model files are cached in this browser. Clearing browser data may require another download. Device support does not guarantee enough free memory.</p>
+      <div class="download-actions"><button value="later" autofocus data-i18n="later">Later</button><button class="primary-action" value="download" data-i18n="download">Download</button></div>
     </form>
   </dialog>
   <dialog id="local-download" aria-labelledby="download-title" aria-describedby="download-info">

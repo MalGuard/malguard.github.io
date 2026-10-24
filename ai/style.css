@@ -194,3 +194,18 @@ dialog::backdrop{background:#000b}dialog p{font-size:13px;color:var(--muted)}.do
 .inspection-details time{display:block;margin-top:12px}
 body:has(.conversation:not(:empty)) .composer-area{position:sticky;bottom:0;margin-top:auto;padding:20px 0 10px;background:linear-gradient(0deg,#080808 82%,#08080800)}
 @media(max-width:440px){.settings-content{padding:16px}.response-actions{gap:4px}.assistant-message .answer{font-size:15px}}
+.model-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;min-width:0}
+.model-toolbar select{max-width:65%;min-width:0;padding:8px 26px 8px 12px;border-color:transparent;font-size:13px;text-overflow:ellipsis}
+.model-toolbar button{font-size:12px;min-height:40px;white-space:nowrap}
+.device-note{margin:0 8px 12px;font-size:11px;color:var(--muted);line-height:1.7}
+.device-note:empty{display:none}
+dialog{width:min(480px,calc(100% - 32px));max-height:calc(100svh - 32px);overflow:auto;padding:28px;box-shadow:0 24px 90px #0009}
+dialog h2{font-size:25px;line-height:1.5;letter-spacing:-.5px;margin:10px 0 14px}
+.dialog-eyebrow{font-size:10px;letter-spacing:.12em;color:var(--muted)}
+dialog p{line-height:1.9}.download-actions{margin-top:24px;flex-wrap:wrap}
+.primary-action{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:600}
+.primary-action:hover{background:#ddd;color:#080808}
+.model-progress{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:12px 0;font-size:12px;color:var(--muted)}
+.model-progress label{flex:1;min-width:150px}.model-progress progress{width:100%;height:4px;accent-color:var(--ink);order:3}
+.model-progress button{min-height:36px;font-size:12px}
+@media(max-width:440px){.model-toolbar{gap:6px}.model-toolbar select{max-width:59%;font-size:12px;padding-inline-start:4px}.model-toolbar button{padding:6px 10px;font-size:11px}dialog{padding:22px}dialog h2{font-size:22px}}

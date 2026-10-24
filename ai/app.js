@@ -12,8 +12,11 @@ let locale='en',service,busy=false;
 try{if(localStorage.getItem('malguard-language')==='fa')locale='fa';}catch{}
 let activeTurn,activityAnimation;
 let localReady=false,modelsInitialized=false;
-let localPreference;try{localPreference=sessionStorage.getItem('malguard.ai.localOffer.v1');}catch{}
+let preferredLocal;try{preferredLocal=localStorage.getItem('malguard.ai.localModel.v1');}catch{}
 const localChat=createLocalChat(),downloadPermissions=new Set();
+const preparedModels=new Set();
+let preparingModel;
+let welcomeSeen=false;try{welcomeSeen=localStorage.getItem('malguard.ai.welcome.v2')==='seen';}catch{}
 const history=[];
 const modelHistory=[];
 const permissionInputs={fileUpload:'file-consent',websiteFetch:'website-consent',remoteLookup:'lookup-consent',modelShare:'model-consent'};
@@ -32,6 +35,8 @@ Object.assign(copy.fa,{localTooLong:'مدل روی دستگاه درخواست �
 Object.assign(copy.en,{offerTitle:'Two optional on-device models',offerInfo:"Download a model to chat without a provider's daily message quota. Speed and capacity depend on your device. You can keep using available cloud models without downloading.",offerChoose:'Choose a model',later:'Later',localPrepared:'Selected model is ready on this device.'});
 Object.assign(copy.fa,{offerTitle:'دو مدل اختیاری روی دستگاه شما',offerInfo:'با دانلود مدل، بدون سقف پیام روزانهٔ سرویس‌دهنده گفت‌وگو کنید. سرعت و ظرفیت به دستگاه شما بستگی دارد. بدون دانلود هم می‌توانید از مدل‌های ابریِ در دسترس استفاده کنید.',offerChoose:'انتخاب مدل',later:'بعداً',localPrepared:'مدل انتخاب‌شده روی این دستگاه آماده است.'});
 const t=k=>copy[locale][k]||k;
+Object.assign(copy.en,{onDevice:'ON YOUR DEVICE',welcomeTitle:'Your device. Your conversation.',welcomeInfo:"Choose a light or stronger model and chat without a provider's daily message quota. A one-time download is required; speed and capacity depend on your device.",welcomePrivacy:'Downloads are optional. Local replies run on this device; online search and security tools need a connection and separate permission.',chooseDownload:'Choose a model',cacheNote:'Model files are cached in this browser. Clearing browser data may require another download. Device support does not guarantee enough free memory.',offerInfo:'Choose one model to download. Local chat has no provider daily message quota. Speed, context and capacity depend on your device.',localAvailable:'Local chat is available. Online security tools are unavailable.',downloadNeeded:'Download required before local chat',readyDevice:'Ready on this device',lightModel:'Light · Qwen3 1.7B',strongModel:'Strong · Qwen3 4B',deviceUnsupported:'Local chat needs a WebGPU browser with shader-f16 support. Try an updated compatible browser; downloading is unavailable on this device.',downloadCancelled:'Download stopped. You can retry from On-device models.'});
+Object.assign(copy.fa,{onDevice:'روی دستگاه شما',welcomeTitle:'دستگاه شما؛ گفت‌وگوی شما.',welcomeInfo:'یک مدل سبک‌تر یا قوی‌تر انتخاب کنید و بدون سقف پیام روزانهٔ سرویس‌دهنده گفت‌وگو کنید. دریافت اولیهٔ مدل لازم است؛ سرعت و ظرفیت به دستگاه شما بستگی دارد.',welcomePrivacy:'دانلود اختیاری است. پاسخ محلی روی همین دستگاه تولید می‌شود؛ جست‌وجوی آنلاین و ابزارهای امنیتی به اینترنت و مجوز جداگانه نیاز دارند.',chooseDownload:'انتخاب و دانلود مدل',cacheNote:'فایل‌های مدل در این مرورگر ذخیره می‌شوند. پاک کردن داده‌های مرورگر ممکن است به دانلود دوباره نیاز داشته باشد. سازگاری دستگاه، کافی بودن حافظهٔ آزاد را تضمین نمی‌کند.',offerInfo:'یکی از دو مدل را برای دانلود انتخاب کنید. چت محلی سقف پیام روزانهٔ سرویس‌دهنده ندارد؛ سرعت، طول متن و ظرفیت به دستگاه شما بستگی دارد.',localAvailable:'چت محلی در دسترس است؛ ابزارهای امنیتی آنلاین در دسترس نیستند.',downloadNeeded:'برای چت محلی ابتدا مدل را دانلود کنید',readyDevice:'آماده روی این دستگاه',lightModel:'سبک‌تر · Qwen3 1.7B',strongModel:'قوی‌تر · Qwen3 4B',deviceUnsupported:'چت محلی به مرورگر سازگار با WebGPU و shader-f16 نیاز دارد. مرورگر سازگار و به‌روز را امتحان کنید؛ دانلود در این دستگاه در دسترس نیست.',downloadCancelled:'دانلود متوقف شد؛ از بخش مدل‌های روی دستگاه دوباره تلاش کنید.'});
 Object.assign(copy.en,{thinking:'Thinking',readingFile:'Reading file',readingWebsite:'Reading website',checkingFile:'Checking file',typing:'Typing',connecting:'Connecting',preparing:'Preparing results',searching:'Searching the web',checking:'Checking',stopped:'Response stopped',stop:'Stop response'});
 Object.assign(copy.fa,{thinking:'در حال فکر کردن',readingFile:'در حال خواندن فایل',readingWebsite:'در حال خواندن سایت',checkingFile:'در حال بررسی فایل',typing:'در حال نوشتن',connecting:'در حال اتصال',preparing:'در حال آماده‌سازی نتیجه',searching:'در حال جست‌وجوی وب',checking:'در حال بررسی',stopped:'پاسخ متوقف شد',stop:'توقف پاسخ'});
 Object.assign(copy.en,{respondedIn:'Responded in',stoppedAfter:'Stopped after',elapsedTime:'Time elapsed:'});
@@ -142,12 +147,12 @@ function renderStatus(){
  $('send').dataset.state=activeTurn?'stop':'send';$('send-arrow').toggleAttribute('hidden',!!activeTurn);$('send-stop').toggleAttribute('hidden',!activeTurn);
  $('send').ariaLabel=t(activeTurn?'stop':'send');$('send').title=t(activeTurn?'stop':'send');$('send-label').textContent=t(activeTurn?'stop':'send');
  for(const id of ['clear','mode','tool','file','remove-file','remove-models'])$(id).disabled=busy;
- $('connection').textContent=!service?t('offline'):!ready?t('serviceDisabled'):'';
+ $('connection').textContent=!service?(localReady?t('localAvailable'):t('offline')):!ready?t('serviceDisabled'):'';
  const selectedId=$('model').value,remote=service?.model?.models||[],models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار · چهار سطح':'Automatic · four tiers',state:localReady||remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remote.filter(m=>m.id!=='auto')];
  if(models.length){
   $('model').replaceChildren();
-  for(const m of models){const option=el('option',m.label+(m.state==='configured'?'':` · ${t('disabled')}`));option.value=m.id;option.disabled=m.state!=='configured';$('model').append(option);}
-  $('model').value=!modelsInitialized&&localReady&&localPreference!=='later'?'auto':models.some(m=>m.id===selectedId&&m.state==='configured')?selectedId:service?.model?.defaultModel||'auto';
+  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.label;const option=el('option',label+(m.state==='configured'?'':` · ${t('disabled')}`));option.value=m.id;option.disabled=m.state!=='configured';$('model').append(option);}
+  $('model').value=!modelsInitialized&&localReady?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured')?selectedId:service?.model?.defaultModel||(localReady?'local_fast':'auto');
   if(service||localReady)modelsInitialized=true;
  }
  $('model').disabled=busy||!localReady&&service?.model?.state!=='configured'||$('mode').value!=='chat';
@@ -157,6 +162,9 @@ function renderStatus(){
  $('model-status').textContent=service?.model?.state==='configured'?modelNotice:t('modelOff');
  if(service?.model?.state==='configured')document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'زبان پاسخ از متن پیام تشخیص داده می‌شود؛ هر مدل محدودیت سهمیهٔ خودش را دارد.':'Replies follow your message language. Each model has its own usage limits.';
  $('download-models').disabled=busy||!localReady;
+ $('manage-models').disabled=busy||!localReady;
+ $('device-note').textContent=!localReady?t('deviceUnsupported'):$('model').value.startsWith('local_')?t(preparedModels.has($('model').value)?'readyDevice':'downloadNeeded'):'';
+ for(const option of $('offer-model').options){const m=localModels[option.value];option.textContent=`${t(option.value==='local_fast'?'lightModel':'strongModel')} · ~${m.downloadMB} MB`;}
  $('local-status').textContent=localReady?(locale==='fa'?'اجرای روی دستگاه ممکن است؛ سرعت و حافظه باید هنگام بارگذاری بررسی شوند.':'On-device inference may be supported; loading still depends on memory and device capabilities.'):t('localOff');
 }
 function showError(key,remember=true){if(remember)history.push({error:key});const card=el('article',undefined,'result error');card.append(el('h3',typeof key==='object'?errorMessage(key,locale):t(key),'outcome'));card.setAttribute('role','alert');$('conversation').append(card);}
@@ -201,18 +209,27 @@ async function allowDownload(model){
 }
 async function offerLocalModels(){
  if(!localReady||busy)return;
+ $('offer-model').value=Object.hasOwn(localModels,$('model').value)?$('model').value:'local_fast';
  const dialog=$('local-offer');
  $('offer-model').onchange=()=>{$('offer-size').textContent=downloadInfo($('offer-model').value);};
  $('offer-model').onchange();dialog.returnValue='later';dialog.showModal();
  const accepted=await new Promise(resolve=>dialog.addEventListener('close',()=>resolve(dialog.returnValue==='download'),{once:true}));
- localPreference=accepted?'local':'later';try{sessionStorage.setItem('malguard.ai.localOffer.v1',localPreference);}catch{}
- if(!accepted){$('model').value=service?.model?.defaultModel||'auto';renderStatus();return;}
+ if(!accepted){renderStatus();return;}
  const model=$('offer-model').value;
- downloadPermissions.add(model);const turn=beginTurn('localLoading',{recordTiming:false});
+ downloadPermissions.add(model);preparingModel=model;const turn=beginTurn('localLoading',{recordTiming:false});
+ $('model-progress').hidden=false;$('download-progress').value=0;$('progress-label').textContent=`${t('localLoading')} · 0%`;
  let completed=false;
- try{await localChat.prepare(model,percent=>setActivity('localLoading',`${percent}%`));turn.controller.signal.throwIfAborted();$('model').value=model;completed=true;}
+ try{await localChat.prepare(model,percent=>{setActivity('localLoading',`${percent}%`);$('download-progress').value=percent;$('progress-label').textContent=`${t('localLoading')} · ${percent}%`;});turn.controller.signal.throwIfAborted();$('model').value=model;preparedModels.add(model);completed=true;}
  catch{downloadPermissions.delete(model);if(!turn.controller.signal.aborted)showError('localFailed');}
- finally{endTurn(turn);if(completed)$('local-status').textContent=t('localPrepared');}
+ finally{preparingModel=undefined;$('model-progress').hidden=true;endTurn(turn);if(completed){rememberLocalModel();$('local-status').textContent=t('localPrepared');}else if(turn.controller.signal.aborted)$('local-status').textContent=t('downloadCancelled');}
+}
+async function welcomeLocalModels(){
+ if(!localReady||welcomeSeen)return;
+ welcomeSeen=true;
+ try{localStorage.setItem('malguard.ai.welcome.v2','seen');}catch{}
+ const dialog=$('local-welcome');dialog.returnValue='later';dialog.showModal();
+ await new Promise(resolve=>dialog.addEventListener('close',resolve,{once:true}));
+ if(dialog.returnValue==='choose')await offerLocalModels();
 }
 async function runLocal(model,message,consent){
  if(!localReady){showError('localFailed');return;}
@@ -234,13 +251,16 @@ async function runLocal(model,message,consent){
   turn.controller.signal.throwIfAborted();setActivity('thinking');
   const language=replyLanguage(message,locale,modelHistory);
   const generated=await localChat.respond({model,message:prompt,locale:language,history:modelHistory},percent=>setActivity('localLoading',`${percent}%`),()=>setActivity('thinking'));
+  preparedModels.add(model);
   if(sources.length)generated.webSearch={state:'completed',provider:'tavily',sources};
   await presentResponse({generated},turn);modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-8));if($('message').value.trim()===message)$('message').value='';
  }catch{if(turn.controller.signal.aborted)stopped(turn);else showError('localFailed');}finally{endTurn(turn);}
 }
 $('stop-local').onclick=stopTurn;
 $('download-models').onclick=offerLocalModels;
-$('remove-models').onclick=async()=>{if(busy)return;busy=true;renderStatus();try{await localChat.clear();downloadPermissions.clear();$('local-status').textContent=t('localRemoved');}catch{$('local-status').textContent=t('localFailed');}finally{busy=false;renderStatus();}};
+$('manage-models').onclick=offerLocalModels;
+$('cancel-download').onclick=()=>{if(preparingModel){downloadPermissions.delete(preparingModel);stopTurn();}};
+$('remove-models').onclick=async()=>{if(busy)return;busy=true;renderStatus();try{await localChat.clear();downloadPermissions.clear();preparedModels.clear();$('local-status').textContent=t('localRemoved');}catch{$('local-status').textContent=t('localFailed');}finally{busy=false;renderStatus();}};
 addEventListener('pagehide',()=>{stopTurn();localChat.stop();});
 $('message').addEventListener('keydown',event=>{
  if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();if(!busy)$('composer').requestSubmit();}
@@ -292,7 +312,8 @@ const saved=readPermissions(permissionStorage);
 for(const [name,id]of Object.entries(permissionInputs)){$(id).checked=saved[name];$(id).onchange=()=>savePermissions(permissionStorage,Object.fromEntries(Object.entries(permissionInputs).map(([k,v])=>[k,$(v).checked])));}
 $('revoke-permissions').onclick=()=>{revokePermissions(permissionStorage);for(const id of Object.values(permissionInputs))$(id).checked=false;};
 $('mode').onchange=()=>translate();
-$('model').onchange=()=>renderStatus();
+function rememberLocalModel(){const model=$('model').value;if(Object.hasOwn(localModels,model))try{localStorage.setItem('malguard.ai.localModel.v1',model);}catch{}}
+$('model').onchange=()=>{rememberLocalModel();renderStatus();};
 for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()=>{
  if(busy)return;
  $('tool').value='auto';
@@ -302,4 +323,4 @@ for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()
  translate();$('message').focus();
 };
 translate();
-await Promise.all([localCapability().then(ready=>{localReady=ready;}),(async()=>{try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}})()]);renderStatus();
+await Promise.all([localCapability().then(ready=>{localReady=ready;renderStatus();void welcomeLocalModels();}),(async()=>{try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}})()]);renderStatus();

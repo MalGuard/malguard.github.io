@@ -1,6 +1,6 @@
 export const localModels={
- local_fast:{id:'local_fast',label:'Fast · Qwen3 0.6B · on device',model:'Qwen3-0.6B-q4f16_1-MLC',revision:'8c14ce481d4c692769976ad52afea453a102df19',downloadMB:352,gpuMB:1404},
- local_medium:{id:'local_medium',label:'Medium · Qwen3 1.7B · on device',model:'Qwen3-1.7B-q4f16_1-MLC',revision:'80b3abcec6c3b3f5355dc0cc99cc4fb578f192bc',downloadMB:985,gpuMB:2037}
+ local_fast:{id:'local_fast',label:'Light · Qwen3 1.7B · on device',model:'Qwen3-1.7B-q4f16_1-MLC',revision:'80b3abcec6c3b3f5355dc0cc99cc4fb578f192bc',downloadMB:985,gpuMB:2037},
+ local_medium:{id:'local_medium',label:'Strong · Qwen3 4B · on device',model:'Qwen3-4B-q4f16_1-MLC',revision:'a5c9fab855e3ccbdfed2e7e69683d75f30332161',downloadMB:2268,gpuMB:3432}
 };
 const binaryRevision='00fe7a40e57e5e8eb9fef87526a4bf28ad5846c0';
 export const localAppConfig={useIndexedDBCache:true,model_list:Object.values(localModels).map(m=>({
@@ -8,6 +8,16 @@ export const localAppConfig={useIndexedDBCache:true,model_list:Object.values(loc
  model_lib:`https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/${binaryRevision}/web-llm-models/v0_2_86/base/${m.model.replace('-MLC','')}_cs1k-webgpu.wasm`,
  vram_required_MB:m.gpuMB,low_resource_required:true,required_features:['shader-f16'],overrides:{context_window_size:1024}
 }))};
+// Keep the retired model reachable for deletion, without exposing it for chat.
+const cacheConfig={...localAppConfig,model_list:[...localAppConfig.model_list,{
+ model_id:'Qwen3-0.6B-q4f16_1-MLC',
+ model:'https://huggingface.co/mlc-ai/Qwen3-0.6B-q4f16_1-MLC/resolve/8c14ce481d4c692769976ad52afea453a102df19/',
+ model_lib:`https://raw.githubusercontent.com/mlc-ai/binary-mlc-llm-libs/${binaryRevision}/web-llm-models/v0_2_86/base/Qwen3-0.6B-q4f16_1_cs1k-webgpu.wasm`
+}]};
+export async function clearLocalModelCache(remove){
+ const results=await Promise.allSettled(cacheConfig.model_list.map(m=>remove(m.model_id,cacheConfig)));
+ if(results.some(r=>r.status==='rejected'))throw new Error('local_cache_clear_failed');
+}
 export async function localCapability(gpu=globalThis.navigator?.gpu){
  if(!globalThis.isSecureContext||!gpu)return false;
  try{const adapter=await gpu.requestAdapter();return !!adapter?.features.has('shader-f16');}catch{return false;}
@@ -17,7 +27,7 @@ export function localMessages(message,locale,history=[]){
  // A short context keeps GPU memory bounded. Conversation remains page memory.
  return [{role:'system',content:instruction},...history.slice(-2).map(m=>({role:m.role,content:m.content.slice(0,100)})),{role:'user',content:message}];
 }
-export function createLocalChat({workerFactory=()=>new Worker('/assets/ai/local-worker.js',{type:'module'}),timeout=300000}={}){
+export function createLocalChat({workerFactory=()=>new Worker('/assets/ai/local-worker.js',{type:'module'}),timeout=900000}={}){
  let worker,pending;
  function stop(){worker?.terminate();worker=undefined;if(pending){clearTimeout(pending.timer);pending.reject(new Error('local_cancelled'));pending=undefined;}}
  function request(payload,onProgress=()=>{},onPhase=()=>{}){

@@ -133,7 +133,7 @@ try{
  }
  const local=await browser.newContext({viewport:{width:390,height:844}}),page=await local.newPage();
  await local.addInitScript(()=>{
-  sessionStorage.setItem('malguard.ai.localOffer.v1','later');
+  localStorage.setItem('malguard.ai.welcome.v2','seen');
   Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});
   window.workerCalls=[];window.workerStops=0;
   window.Worker=class{constructor(){window.localWorker=this;}postMessage(data){window.workerCalls.push(data);}terminate(){window.workerStops++;}};

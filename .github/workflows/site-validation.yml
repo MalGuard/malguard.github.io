@@ -61,6 +61,7 @@ jobs:
           npm run test:ai
           npm run check:ai
           TEST_CHROMIUM_EXECUTABLE=/usr/bin/google-chrome npm run test:ai:browser
+          TEST_CHROMIUM_EXECUTABLE=/usr/bin/google-chrome npm run test:ai:local
 
       - name: Validate trust and product claims
         shell: bash
