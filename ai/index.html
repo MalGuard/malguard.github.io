@@ -9,8 +9,8 @@
   <meta name="theme-color" content="#141412">
   <title>MalGuard AI</title>
   <link rel="icon" href="/assets/fusion/assets/malguard-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=workspace-20261025">
-  <script type="module" src="./app.js?v=workspace-20261025"></script>
+  <link rel="stylesheet" href="./style.css?v=downloads-guide-20261025">
+  <script type="module" src="./app.js?v=downloads-guide-20261025"></script>
 </head>
 <body>
   <a class="skip" href="#message" data-i18n="skip">Skip to conversation</a>
@@ -75,6 +75,7 @@
           <p class="muted" data-i18n="workspacePrivacy">Only conversation text is shared with the model; files and tool evidence are not.</p>
           <label class="isolation-permission"><input id="isolation-consent" type="checkbox"><span data-i18n="isolationConsent">I separately allow the selected file to run in an isolated sandbox or the selected link to receive a passive preview. These checks do not guarantee safety.</span></label>
         </section>
+        <button id="open-downloads" class="download-entry" type="button" data-i18n="downloadEntry">↓ Download models · choose for your device</button>
         <div id="model-progress" class="model-progress" hidden><label for="download-progress" id="progress-label"></label><progress id="download-progress" max="100" value="0"></progress><button type="button" id="cancel-download" data-i18n="cancel">Cancel</button></div>
         <form id="composer">
           <div class="composer-shell">
@@ -126,15 +127,25 @@
   <dialog id="local-download" aria-labelledby="download-title" aria-describedby="download-info">
     <form method="dialog"><h2 id="download-title" data-i18n="localDownload">Download on-device model</h2><p id="download-info"></p><div class="download-actions"><button value="cancel" autofocus data-i18n="cancel">Cancel</button><button value="download" data-i18n="download">Download</button></div></form>
   </dialog>
+  <dialog id="download-hub" aria-labelledby="download-hub-title">
+    <form method="dialog"><h2 id="download-hub-title" data-i18n="downloadEntry">Download models</h2><p data-i18n="downloadHubInfo">Choose where the model should run. Nothing downloads until you choose.</p>
+      <button id="hub-browser" class="download-route" type="button"><strong data-i18n="browserRoute">In this browser</strong><span data-i18n="browserRouteInfo">Two small models · ~985 MB or ~2.3 GB · compatible WebGPU required</span></button>
+      <button id="hub-desktop" class="download-route" type="button"><strong data-i18n="desktopRoute">On your computer with Ollama</strong><span data-i18n="desktopRouteInfo">Six larger models · ~5.2–404 GB · installation guide and commands</span></button>
+      <div class="download-actions"><button value="close" data-i18n="close">Close</button></div>
+    </form>
+  </dialog>
   <dialog id="desktop-models" aria-labelledby="desktop-title" aria-describedby="desktop-model-info">
     <form method="dialog">
       <h2 id="desktop-title" data-i18n="desktopModels">Desktop models</h2>
       <label for="desktop-model" data-i18n="desktopChoose">Choose an Ollama model</label>
       <select id="desktop-model" aria-describedby="desktop-model-info"></select>
+      <p id="desktop-use-case" class="model-use-case"></p>
+      <p id="desktop-memory"></p>
       <p id="desktop-model-info" aria-live="polite" aria-atomic="true"></p>
-      <pre id="desktop-command" dir="ltr" tabindex="0"></pre>
+      <p data-i18n="desktopSteps">1. Install Ollama. 2. Run the model download command below. 3. Allow this site and restart Ollama. 4. Press Connect, then choose the installed model in Chat.</p>
+      <pre id="desktop-command" dir="ltr" tabindex="0"></pre><button id="copy-desktop-command" type="button" data-i18n="copyCommand">Copy download command</button>
       <a id="desktop-guide" href="https://ollama.com/download" target="_blank" rel="noopener noreferrer" data-i18n="desktopGuide">Install Ollama</a>
-      <p id="desktop-origin"></p><a id="desktop-source" href="https://ollama.com/library/qwen3:8b" target="_blank" rel="noopener noreferrer">Official model page and requirements</a><p id="desktop-status" role="status"></p>
+      <details class="desktop-setup"><summary data-i18n="desktopSetup">Site connection settings</summary><p id="desktop-origin"></p></details><a id="desktop-source" href="https://ollama.com/library/qwen3:8b" target="_blank" rel="noopener noreferrer">Official model page and requirements</a><p id="desktop-status" role="status"></p>
       <div class="download-actions"><button value="close" autofocus data-i18n="close">Close</button><button id="desktop-connect" class="primary-action" type="button" data-i18n="desktopConnect">Connect</button></div>
     </form>
   </dialog>

@@ -1,12 +1,12 @@
-import {errorMessage} from './error-message.mjs?v=workspace-20261025';
-import {publicFailure,retryDetails} from './service-errors.mjs?v=workspace-20261025';
+import {errorMessage} from './error-message.mjs?v=downloads-guide-20261025';
+import {publicFailure,retryDetails} from './service-errors.mjs?v=downloads-guide-20261025';
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
-import {planChat,planCloudChat} from './routing.mjs?v=workspace-20261025';
-import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=workspace-20261025';
+import {planChat,planCloudChat} from './routing.mjs?v=downloads-guide-20261025';
+import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=downloads-guide-20261025';
 import {replyLanguage} from './language.mjs';
 import {typeText,formatElapsed} from './reply-motion.mjs';
-import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=workspace-20261025';
+import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=downloads-guide-20261025';
 const $=id=>document.getElementById(id);
 const names={gta_guard:'GTA Guard',game_scam_guard:'Game Scam Guard',ai_web:'AI Web',malwarebazaar:'MalwareBazaar',urlhaus:'URLhaus',file_sandbox:'File sandbox',url_sandbox:'Link sandbox'};
 let locale='en',service,busy=false;
@@ -65,9 +65,20 @@ function switchMode(next,{carryDraft=false}={}){
  else $('tool').value=$('workspace-tool').value;
  $('isolation-consent').checked=false;closeAttach();translate();
 }
+Object.assign(copy.en,{downloadEntry:'↓ Download models · choose for your device',downloadHubInfo:'Choose where the model should run. Opening this guide does not download anything.',browserRoute:'In this browser',browserRouteInfo:'Two small models · ~985 MB or ~2.3 GB · compatible WebGPU required',desktopRoute:'On your computer with Ollama',desktopRouteInfo:'Six larger models · ~5.2–404 GB · installation guide and commands',desktopSteps:'1. Install Ollama. 2. Run the download command below in your terminal. 3. Allow this site and restart Ollama, as explained below. 4. Press Connect, close this window and choose the installed model in Chat.',desktopSetup:'Site connection settings',copyCommand:'Copy download command',commandCopied:'Download command copied'});
+Object.assign(copy.fa,{downloadEntry:'↓ دانلود مدل‌ها · انتخاب مناسب دستگاهت',downloadHubInfo:'انتخاب کن مدل کجا اجرا شود. باز کردن این راهنما چیزی دانلود نمی‌کند.',browserRoute:'داخل همین مرورگر',browserRouteInfo:'دو مدل کم‌حجم · حدود ۹۸۵ مگابایت یا ۲٫۳ گیگابایت · نیازمند WebGPU سازگار',desktopRoute:'روی کامپیوتر با Ollama',desktopRouteInfo:'شش مدل بزرگ‌تر · حدود ۵٫۲ تا ۴۰۴ گیگابایت · همراه راهنما و دستور نصب',desktopSteps:'۱. Ollama را نصب کن. ۲. دستور دانلود زیر را در ترمینال اجرا کن. ۳. طبق توضیح پایین، دسترسی سایت را تنظیم و Ollama را دوباره اجرا کن. ۴. «اتصال» را بزن، این پنجره را ببند و مدل نصب‌شده را در چت انتخاب کن.',desktopSetup:'تنظیم دسترسی سایت',copyCommand:'کپی دستور دانلود',commandCopied:'دستور دانلود کپی شد'});
+const desktopDescriptions={
+ native_qwen8:{fa:['برای گفت‌وگوی روزمره، نوشتن و کمک به کدنویسی؛ کم‌حجم‌ترین گزینهٔ دسکتاپ این فهرست.','۵٫۲ گیگابایت فقط وزن مدل است؛ برای اجرا و متن، RAM/VRAM آزاد بیشتری لازم است. از این گزینه برای شروع مدل‌های دسکتاپ استفاده کن.'],en:['Everyday chat, writing and coding help; the smallest desktop option in this list.','The 5.2 GB weights need additional free RAM/VRAM for runtime and context. A starting point for desktop models.']},
+ native_qwen32:{fa:['برای نوشتن، تحلیل متن و کمک به برنامه‌نویسی با مدل بزرگ‌تر از Qwen3 8B.','حدود ۲۰ گیگابایت وزن مدل، به‌علاوهٔ حافظهٔ اجرا و متن؛ مناسب دستگاه‌های پرحافظه.'],en:['Writing, text analysis and programming help with a larger model than Qwen3 8B.','About 20 GB of weights plus runtime/context memory; intended for high-memory devices.']},
+ native_gpt20:{fa:['برای استدلال، برنامه‌نویسی و پاسخ‌های ساختارمند؛ گزینهٔ کم‌حجم‌تر خانوادهٔ GPT‑OSS.','طبق راهنمای سازنده، در بعضی پیکربندی‌ها با ۱۶ گیگابایت حافظه اجرا می‌شود؛ حافظهٔ آزاد، متن و سرعت دستگاه همچنان مهم‌اند.'],en:['Reasoning, programming and structured answers; the smaller GPT-OSS option.','The official guide reports operation with as little as 16 GB memory in some setups; free memory, context and speed still matter.']},
+ native_gpt120:{fa:['برای مسائل پیچیده‌تر، استدلال و کدنویسی؛ مناسب سخت‌افزار حرفه‌ای.','حدود ۶۵ گیگابایت دانلود؛ راهنمای رسمی نمونهٔ اجرای آن روی GPU با ۸۰ گیگابایت حافظه را ذکر می‌کند. لپ‌تاپ معمولی گزینهٔ مناسبی نیست.'],en:['Complex questions, reasoning and programming on professional hardware.','About 65 GB to download; the official guide describes fitting it on an 80 GB GPU. Ordinary laptops are a poor fit.']},
+ native_qwen235:{fa:['مدل بزرگ خانوادهٔ Qwen3 برای نوشتن، استدلال، ریاضی و برنامه‌نویسی.','حدود ۱۴۲ گیگابایت وزن، به‌علاوهٔ حافظهٔ اجرا؛ مناسب ورک‌استیشن یا سرور پرحافظه. MoE بودن، نیاز به نگهداری وزن‌ها را حذف نمی‌کند.'],en:['A large Qwen3 model for writing, reasoning, mathematics and programming.','About 142 GB of weights plus runtime memory; intended for high-memory workstations or servers. MoE does not remove weight-storage requirements.']},
+ native_deepseek671:{fa:['مدل بسیار بزرگ با تمرکز بر استدلال، ریاضی و حل مسائل برنامه‌نویسی؛ انتخاب تخصصی برای دستگاه‌های بسیار پرقدرت.','حدود ۴۰۴ گیگابایت وزن، به‌علاوهٔ حافظهٔ اجرا و متن؛ به زیرساخت بسیار پرحافظه نیاز دارد و برای کامپیوتر معمولی پیشنهاد نمی‌شود.'],en:['A very large reasoning model for mathematics and programming problems; a specialist option for powerful systems.','About 404 GB of weights plus runtime/context memory; requires very high-memory infrastructure and is unsuitable for ordinary computers.']}
+};
 function updateDesktopInfo(){
- const model=desktopModels[$('desktop-model').value];if(!model)return;
- $('desktop-model-info').textContent=`${model.label} · ~${model.downloadGB} GB. ${t('desktopHardware')} ${t('desktopLocal')}`;
+ const model=desktopModels[$('desktop-model').value];if(!model)return;const description=desktopDescriptions[model.id][locale];$('desktop-use-case').textContent=description[0];$('desktop-memory').textContent=description[1];
+ $('desktop-model-info').textContent=`~${model.downloadGB} GB · `+(locale==='fa'?'دانلود دستی است؛ این صفحه مدل یا برنامه‌ای را خودکار نصب نمی‌کند.':'Downloads are manual. This page never installs models or applications automatically.');
+ $('copy-desktop-command').textContent=t('copyCommand');
  $('desktop-command').textContent=model.command;
  $('desktop-origin').textContent=locale==='fa'?'پس از نصب Ollama، متغیر OLLAMA_ORIGINS را برابر https://malguard.site قرار دهید و Ollama را دوباره اجرا کنید. اتصال فقط به 127.0.0.1:11434 است. مدل محلی سقف روزانهٔ سرویس‌دهنده ندارد؛ سرعت و ظرفیت به دستگاه بستگی دارد.':'After installing Ollama, set OLLAMA_ORIGINS=https://malguard.site and restart Ollama. Keep it bound to 127.0.0.1:11434. Local chat has no provider daily quota; speed and capacity depend on the device.';
  const source=$('desktop-source');source.href=model.source;source.textContent=locale==='fa'?'صفحهٔ رسمی مدل و نیازهای اجرا':'Official model page and requirements';
@@ -187,7 +198,7 @@ function renderStatus(){
  $('send').disabled=activeTurn?activeTurn.controller.signal.aborted:!ready||busy;
  $('send').dataset.state=activeTurn?'stop':'send';$('send-arrow').toggleAttribute('hidden',!!activeTurn);$('send-stop').toggleAttribute('hidden',!activeTurn);
  $('send').ariaLabel=t(activeTurn?'stop':'send');$('send').title=t(activeTurn?'stop':'send');$('send-label').textContent=t(activeTurn?'stop':'send');
- for(const id of ['clear','mode','tool','file','remove-file','remove-models','attach-toggle','attach-file','attach-chat','attach-inspect','attach-web','chat-tab','workspace-tab','workspace-tool','workspace-model','isolation-consent'])$(id).disabled=busy;
+ for(const id of ['clear','mode','tool','file','remove-file','remove-models','attach-toggle','attach-file','attach-chat','attach-inspect','attach-web','chat-tab','workspace-tab','workspace-tool','workspace-model','isolation-consent','open-downloads'])$(id).disabled=busy;
  $('connection').textContent=!service?(localReady?t('localAvailable'):t('offline')):!ready?t('serviceDisabled'):'';
  const selectedId=$('model').value,remote=service?.model?.models||[],models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار · چهار سطح':'Automatic · four tiers',state:localReady||remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remote.filter(m=>m.id!=='auto'),...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))];
  const cloudAutoReady=remote.some(m=>m.id==='auto'&&m.state==='configured');
@@ -255,7 +266,8 @@ $('remove-file').onclick=()=>{$('file').value='';$('filename').textContent='';$(
 $('file').onchange=()=>{const f=$('file').files[0];if(f&&(!f.size||f.size>1048576)){$('remove-file').click();showError('fileTooLarge');return;}$('filename').textContent=f?.name||'';$('remove-file').hidden=!f;if(f){$('isolation-consent').checked=false;switchMode('worker',{carryDraft:true});if(!['gta_guard','file_sandbox'].includes($('workspace-tool').value))$('workspace-tool').value='auto';$('tool').value=$('workspace-tool').value;renderStatus();}};
 function downloadInfo(model){
  const m=localModels[model];
- return locale==='fa'?`این مدل حدود ${m.downloadMB} مگابایت دانلود و حدود ${m.gpuMB} مگابایت حافظهٔ گرافیکی نیاز دارد. فایل‌ها از Hugging Face و GitHub دریافت و روی همین دستگاه ذخیره می‌شوند؛ متن گفت‌وگو برای اجرای محلی ارسال نمی‌شود. ممکن است اینترنت، باتری و فضای ذخیره‌سازی زیادی مصرف شود.`:`This model downloads about ${m.downloadMB} MB and needs roughly ${m.gpuMB} MB GPU memory. Files come from Hugging Face and GitHub and are cached on this device. Local inference does not upload conversation text. Data, battery and storage usage can be substantial.`;
+ const use=locale==='fa'?(model==='local_fast'?'سبک‌تر؛ برای سلام‌واحوال‌پرسی، پرسش کوتاه و نوشتن ساده. ':'قوی‌تر از مدل ۱٫۷B این فهرست؛ برای توضیح، نوشتن و کمک به کدنویسی کوتاه، با نیاز حافظهٔ بیشتر. '):(model==='local_fast'?'Light; for short everyday questions and simple writing. ':'Larger than this list’s 1.7B model; for explanations, writing and short coding help, with higher memory needs. ');
+ return use+(locale==='fa'?`این مدل حدود ${m.downloadMB} مگابایت دانلود و حدود ${m.gpuMB} مگابایت حافظهٔ گرافیکی نیاز دارد. فایل‌ها از Hugging Face و GitHub دریافت و روی همین دستگاه ذخیره می‌شوند؛ متن گفت‌وگو برای اجرای محلی ارسال نمی‌شود. ممکن است اینترنت، باتری و فضای ذخیره‌سازی زیادی مصرف شود.`:`This model downloads about ${m.downloadMB} MB and needs roughly ${m.gpuMB} MB GPU memory. Files come from Hugging Face and GitHub and are cached on this device. Local inference does not upload conversation text. Data, battery and storage usage can be substantial.`);
 }
 async function allowDownload(model){
  if(downloadPermissions.has(model))return true;
@@ -398,6 +410,7 @@ for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()
  translate();$('message').focus();
 };
 for(const m of Object.values(desktopModels)){const option=el('option',`${m.label} · ~${m.downloadGB} GB`);option.value=m.id;$('desktop-model').append(option);}
+$('open-downloads').onclick=()=>{if(!busy)$('download-hub').showModal();};$('hub-browser').onclick=()=>{$('download-hub').close();void offerLocalModels();};$('hub-desktop').onclick=()=>{$('download-hub').close();openDesktopModels();};$('copy-desktop-command').onclick=async()=>{try{await navigator.clipboard.writeText(desktopModels[$('desktop-model').value].command);$('copy-desktop-command').textContent=t('commandCopied');}catch{$('desktop-command').focus();}};
 $('desktop-model').onchange=updateDesktopInfo;$('manage-desktop-models').onclick=openDesktopModels;$('desktop-connect').onclick=connectDesktop;
 translate();
 void welcomeLocalModels();
