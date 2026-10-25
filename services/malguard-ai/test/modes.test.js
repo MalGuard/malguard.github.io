@@ -14,7 +14,7 @@ test('URL auto mode searches and checks existing tools concurrently without trus
  const started=[];let release;const ready=new Promise(r=>release=r);
  const adapter=id=>({status:()=>({state:'configured'}),run:async()=>{started.push(id);if(started.length===3)release();await ready;return report(id,'insufficient');}});
  const o=createOrchestrator({game_scam_guard:adapter('game_scam_guard'),urlhaus:adapter('urlhaus'),ai_web:adapter('ai_web')},{status:()=>({state:'disabled'}),respond:()=>{throw new Error('External content must not reach the model');}});
- const r=await o.run({mode:'chat',message:'https://example.com/',consent:{websiteFetch:true,remoteLookup:true}});assert.equal(r.results.length,3);assert.deepEqual(started,['game_scam_guard','urlhaus','ai_web']);
+ const r=await o.run({mode:'worker',message:'https://example.com/',consent:{websiteFetch:true,remoteLookup:true}});assert.equal(r.results.length,3);assert.deepEqual(started,['game_scam_guard','urlhaus','ai_web']);
 });
 test('file auto mode computes static evidence before looking up only the resulting hash',async()=>{
  const hash='a'.repeat(64),inputs=[];

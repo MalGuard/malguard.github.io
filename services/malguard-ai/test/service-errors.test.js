@@ -27,7 +27,7 @@ test('gateway -> orchestrator -> HTTP stream preserves the exact safe reset meta
 });
 test('search failures retain safe provider timing on the security result without a safety conclusion',async()=>{
  const o=createOrchestrator({ai_web:{status:()=>({state:'configured'}),run:async()=>{throw new ServiceError('provider_rate_limited',429,{retryAt:reset,retryAfterSeconds:90});}}},{status:()=>({state:'disabled'})});
- const r=await o.run({tool:'ai_web',message:'benign',consent:{remoteLookup:true}});assert.equal(r.result.outcome,'error');assert.equal(r.result.failure.retryAt,reset);
+ const r=await o.run({mode:'worker',tool:'ai_web',message:'benign',consent:{remoteLookup:true}});assert.equal(r.result.outcome,'error');assert.equal(r.result.failure.retryAt,reset);
 });
 test('local rate window reports its actual remaining time, independent of browser timezone',async t=>{
  let clock=now;const server=createApp({now:()=>clock,log:()=>{},orchestrator:{run:async()=>({message:'fixture'})}}).listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>{server.closeAllConnections();return new Promise(r=>server.close(r));});

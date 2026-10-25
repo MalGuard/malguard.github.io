@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="MalGuard AI — evidence-based security tools for files, hashes and gaming links.">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self'; connect-src 'self' https://game-scam-guard-connected.vercel.app https://huggingface.co https://*.hf.co https://raw.githubusercontent.com; img-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self'; connect-src 'self' http://127.0.0.1:11434 https://game-scam-guard-connected.vercel.app https://huggingface.co https://*.hf.co https://raw.githubusercontent.com; img-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#141412">
   <title>MalGuard AI</title>
   <link rel="icon" href="/assets/fusion/assets/malguard-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=auto-controls-20261025">
-  <script type="module" src="./app.js?v=auto-controls-20261025"></script>
+  <link rel="stylesheet" href="./style.css?v=workspace-20261025">
+  <script type="module" src="./app.js?v=workspace-20261025"></script>
 </head>
 <body>
   <a class="skip" href="#message" data-i18n="skip">Skip to conversation</a>
@@ -36,17 +36,18 @@
             <button type="button" id="revoke-permissions" data-i18n="revoke">Revoke all permissions</button>
           </details>
             <details class="toolbox" id="toolbox">
-        <summary><span data-i18n="tools">Security tools</span><span class="toolbox-caption" dir="ltr">5 TOOLS <span aria-hidden="true">＋</span></span></summary>
+        <summary><span data-i18n="tools">Security tools</span><span class="toolbox-caption" dir="ltr">7 TOOLS <span aria-hidden="true">＋</span></span></summary>
         <aside aria-labelledby="tools-title">
           <div class="toolbox-heading"><h2 id="tools-title" data-i18n="tools">Security tools</h2><p class="muted" data-i18n="toolsHint">Every check, with sources and clear limits.</p></div>
           <div id="tools" aria-live="polite"></div>
-          <div class="tool-choice"><label for="tool" data-i18n="choose">Tool</label><select id="tool"><option value="auto" data-i18n="auto">Choose automatically</option><option value="gta_guard">GTA Guard</option><option value="game_scam_guard">Game Scam Guard</option><option value="ai_web">AI Web</option><option value="malwarebazaar">MalwareBazaar</option><option value="urlhaus">URLhaus</option></select></div>
-          <p class="muted small" data-i18n="scope">Static analysis. No sample execution or malware downloads.</p>
+          <div class="tool-choice"><label for="tool" data-i18n="choose">Tool</label><select id="tool"><option value="auto" data-i18n="auto">Choose automatically</option><option value="gta_guard">GTA Guard</option><option value="game_scam_guard">Game Scam Guard</option><option value="ai_web">AI Web</option><option value="malwarebazaar">MalwareBazaar</option><option value="urlhaus">URLhaus</option><option value="file_sandbox" data-i18n="fileSandbox">File sandbox</option><option value="url_sandbox" data-i18n="urlSandbox">Link sandbox</option></select></div>
+          <p class="muted small" data-i18n="scope">Only the selected checks run. Isolated execution needs a separate permission.</p>
         </aside>
       </details>
             <p id="model-status" class="muted"></p>
             <p id="local-status" class="muted"></p>
             <button type="button" id="manage-models" data-i18n="chooseLocal">On-device models</button>
+            <button type="button" id="manage-desktop-models" data-i18n="desktopModels">Desktop models</button>
             <button type="button" id="remove-models" data-i18n="clearModels">Remove downloaded models</button>
             <p class="notice" data-i18n="modelNotice">Model and tool availability are reported by the server.</p>
             <p class="footer-note" data-i18n="retention">History stays in this page’s memory and disappears on refresh. No findings guarantee safety.</p>
@@ -61,6 +62,19 @@
       <div class="conversation" id="conversation" role="log" aria-label="Conversation" aria-live="polite"></div>
       <div id="activity" class="reply-activity" role="status" aria-live="polite" aria-atomic="false" hidden><span class="activity-orbit" aria-hidden="true"><span></span><span></span><span></span></span><span id="activity-label" aria-hidden="true"></span><span id="activity-elapsed" aria-hidden="true"></span><span id="activity-announcement" class="sr-only"></span></div>
       <div class="composer-area">
+        <div class="workspace-switch" role="group" aria-label="Conversation mode">
+          <button id="chat-tab" type="button" aria-pressed="true" data-i18n="chatTab">Chat</button>
+          <button id="workspace-tab" type="button" aria-pressed="false" aria-controls="workspace-panel" data-i18n="workspaceTab">Workspace</button>
+        </div>
+        <section id="workspace-panel" class="workspace-panel" aria-label="Security workspace" hidden>
+          <div class="workspace-options">
+            <div><label for="workspace-tool" data-i18n="workspaceTool">Tool</label><select id="workspace-tool"><option value="auto" data-i18n="auto">Choose automatically</option><option value="gta_guard">GTA Guard</option><option value="game_scam_guard">Game Scam Guard</option><option value="ai_web">AI Web</option><option value="malwarebazaar">MalwareBazaar</option><option value="urlhaus">URLhaus</option><option value="file_sandbox" data-i18n="fileSandbox">File sandbox</option><option value="url_sandbox" data-i18n="urlSandbox">Link sandbox</option></select></div>
+            <div><label for="workspace-model" data-i18n="workspaceModel">Model</label><select id="workspace-model"><option value="cf_qwen3" data-i18n="workspaceLight">Light</option><option value="cf_gptoss120" data-i18n="workspaceStrong">Strong</option></select></div>
+          </div>
+          <p id="workspace-status" role="status"></p>
+          <p class="muted" data-i18n="workspacePrivacy">Only conversation text is shared with the model; files and tool evidence are not.</p>
+          <label class="isolation-permission"><input id="isolation-consent" type="checkbox"><span data-i18n="isolationConsent">I separately allow the selected file to run in an isolated sandbox or the selected link to receive a passive preview. These checks do not guarantee safety.</span></label>
+        </section>
         <div id="model-progress" class="model-progress" hidden><label for="download-progress" id="progress-label"></label><progress id="download-progress" max="100" value="0"></progress><button type="button" id="cancel-download" data-i18n="cancel">Cancel</button></div>
         <form id="composer">
           <div class="composer-shell">
@@ -111,6 +125,18 @@
   </dialog>
   <dialog id="local-download" aria-labelledby="download-title" aria-describedby="download-info">
     <form method="dialog"><h2 id="download-title" data-i18n="localDownload">Download on-device model</h2><p id="download-info"></p><div class="download-actions"><button value="cancel" autofocus data-i18n="cancel">Cancel</button><button value="download" data-i18n="download">Download</button></div></form>
+  </dialog>
+  <dialog id="desktop-models" aria-labelledby="desktop-title" aria-describedby="desktop-model-info">
+    <form method="dialog">
+      <h2 id="desktop-title" data-i18n="desktopModels">Desktop models</h2>
+      <label for="desktop-model" data-i18n="desktopChoose">Choose an Ollama model</label>
+      <select id="desktop-model" aria-describedby="desktop-model-info"></select>
+      <p id="desktop-model-info" aria-live="polite" aria-atomic="true"></p>
+      <pre id="desktop-command" dir="ltr" tabindex="0"></pre>
+      <a id="desktop-guide" href="https://ollama.com/download" target="_blank" rel="noopener noreferrer" data-i18n="desktopGuide">Install Ollama</a>
+      <p id="desktop-origin"></p><a id="desktop-source" href="https://ollama.com/library/qwen3:8b" target="_blank" rel="noopener noreferrer">Official model page and requirements</a><p id="desktop-status" role="status"></p>
+      <div class="download-actions"><button value="close" autofocus data-i18n="close">Close</button><button id="desktop-connect" class="primary-action" type="button" data-i18n="desktopConnect">Connect</button></div>
+    </form>
   </dialog>
 </body>
 </html>
