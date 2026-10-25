@@ -45,13 +45,12 @@ for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chrom
     assert.equal(palette.label,'rgb(156, 167, 181)',path+' menu section labels differ');
     assert.ok(status.script,path+' uses outdated script');
     assert.ok(status.main>0,path+' has no queued page copy');
-    assert.equal(status.nav,'nav',path+' does not queue header');
-    assert.equal(status.brand,'button',path+' does not type brand');
+    assert.notEqual(status.nav,'nav',path+' header must not enter the typing queue');
+    assert.notEqual(status.brand,'button',path+' brand link must be immediately readable');
     assert.match(status.titleFont,/MGPrecisionMono|JetBrains/,path+' title not in coding font');
     assert.match(status.navFont,/MGPrecisionMono|JetBrains/,path+' navbar font not in coding font');
     assert.ok(status.scroll<=status.width+2,path+' horizontal overflow at '+(reduced?390:1280));
-    if(['/products.html','/gta-guard.html'].includes(path))
-     assert.ok(status.ctas>0,path+' does not type action buttons');
+    assert.equal(status.ctas,0,path+' must not type interactive action links');
     if(reduced){
      assert.equal(await page.locator('.type-ink').count(),0,path+' ignores reduce-motion');
      assert.equal(await page.locator('.type-system').count(),0,path+' hides text with reduce-motion');
