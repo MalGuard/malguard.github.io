@@ -8,7 +8,7 @@
   if (!navbar || !menuButton || !menu || !searchButton) return;
   const pages = [
     ['Home', 'MalGuard overview', '/', 'home malguard'],
-    ['Products', 'Products and current availability', '/products.html', 'gta guard threat radar scam guard'],
+    ['Products', 'Products and current availability', '/products.html', 'gta guard malguard ai scam guard'],
     ['Game Scam Guard', 'Online link inspector and signed Android app', '/game-scam-guard.html', 'game gaming scam'],
     ['iPhone Preview', 'Bounded local mobile inspection', '/ios-preview/', 'iphone ios'],
     ['GTA Guard', 'Clean-room Windows x64 static scanner', '/gta-guard.html', 'mods windows files'],
@@ -22,7 +22,7 @@
     ['Documentation', 'Product guides and security concepts', '/docs.html', 'docs help guide'],
     ['Labs', 'Defensive gaming-security research', '/labs.html', 'research'],
     ['About', 'The mission behind MalGuard', '/about.html', 'about project'],
-    ['Founder', 'Mohammadreza Azardarkhash', '/founder.html', 'founder creator'],
+    ['Founder', 'Mohammadreza Azarderakhsh · محمدرضا آذردرخش', '/founder.html', 'founder creator محمدرضا آذردرخش محمدرضا اذردرخش azarderakhsh'],
     ['Support', 'Bug reports, false positives and feedback', '/support.html', 'support bug help'],
     ['Report a concern', 'Send a private report to MalGuard Security', '/report.html', 'bug security report feedback'],
     ['Project resources', 'Code guides and project policies', '/source.html', 'source policy contribute'],
