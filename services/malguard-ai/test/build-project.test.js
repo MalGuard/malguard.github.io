@@ -16,3 +16,11 @@ test('export is a real ZIP readable by an independent ZIP implementation',async(
  const files=validateFiles({...starterFiles,'src/hello.py':'print("سلام")\n'}),bytes=new Uint8Array(await projectZip(files).arrayBuffer());
  const reader=new ZipReader(new Uint8ArrayReader(bytes));try{const entries=await reader.getEntries();assert.equal(entries.length,4);for(const entry of entries)assert.equal(await entry.getData(new TextWriter()),files[entry.filename]);}finally{await reader.close();}
 });
+test('literal file proposals preserve quotes, regexes and newlines without repairing malformed JSON',()=>{
+ const code='document.querySelector("button").onclick=()=>console.log(/\\D/g, "hello");\n// next line';
+ const output='<summary>A proposed file</summary>\n<file path="app.js">\n'+code+'\n</file>';
+ assert.equal(parseProposal(output).files['app.js'],code);
+ assert.equal(parseProposal(output+'\n<file path="app.js">\nx\n</file>'),null);
+ assert.equal(parseProposal(output.replace('app.js','../escape.js')),null);
+ assert.equal(parseProposal('{"summary":"x",\\"files\\":{}}'),null);
+});
