@@ -1,6 +1,6 @@
 import {ServiceError,httpFailure,publicFailure} from '../../../ai/service-errors.mjs';
 import {fetchPublic} from '../../game-scam-guard/server/network.js';
-import {planChat} from '../../../ai/routing.mjs';
+import {planCloudChat} from '../../../ai/routing.mjs';
 const ENDPOINT='https://malware-ai-gray.vercel.app/api/malguard-assistant';
 let cache,loading,until=0;
 export async function gatewayRequest(payload,{transport=fetchPublic,signal}={}){
@@ -30,7 +30,7 @@ export const remoteModel={
   const selected=cache?.models?.find(m=>m.id===model);
   if(!selected||selected.state!=='configured')throw new ServiceError('model_not_configured',503);
   const data=await gatewayRequest({operation:'chat',message,locale,history,model,consent:{modelShare:true,remoteLookup:consent.remoteLookup===true}});
-  const expected=model==='auto'?cache.models.find(m=>m.id===planChat(message,history).model):selected;
+  const expected=model==='auto'?cache.models.find(m=>m.id===planCloudChat(message,history).model):selected;
   if(!expected||typeof data.generated?.text!=='string'||data.generated.text.length>6000||data.generated.provider!==expected.provider||data.generated.selectedModel!==expected.id||model==='auto'&&data.generated.requestedModel!=='auto')throw new Error('invalid_model_response');
   return {...data.generated,securityAnalysis:false};
  }

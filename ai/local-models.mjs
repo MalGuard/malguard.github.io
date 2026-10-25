@@ -27,7 +27,7 @@ export function localMessages(message,locale,history=[]){
  // A short context keeps GPU memory bounded. Conversation remains page memory.
  return [{role:'system',content:instruction},...history.slice(-2).map(m=>({role:m.role,content:m.content.slice(0,100)})),{role:'user',content:message}];
 }
-export function createLocalChat({workerFactory=()=>new Worker('/assets/ai/local-worker.js?v=grok-solid-20261025',{type:'module'}),timeout=900000}={}){
+export function createLocalChat({workerFactory=()=>new Worker('/assets/ai/local-worker.js?v=auto-controls-20261025',{type:'module'}),timeout=900000}={}){
  let worker,pending;
  function stop(){worker?.terminate();worker=undefined;if(pending){clearTimeout(pending.timer);pending.reject(new Error('local_cancelled'));pending=undefined;}}
  function request(payload,onProgress=()=>{},onPhase=()=>{}){

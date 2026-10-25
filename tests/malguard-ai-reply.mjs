@@ -25,17 +25,23 @@ try{
   await context.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');Object.defineProperty(navigator,'gpu',{value:undefined});});
   await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
   await page.goto(base+'/ai/');await page.waitForFunction(()=>!document.getElementById('send').disabled);
+  const beforeActions=jobs.length;
+  await page.locator('#attach-toggle').click();await page.locator('#attach-web').click();
+  assert.equal(await page.locator('#mode').inputValue(),'chat');assert.equal(await page.locator('#tool').inputValue(),'ai_web');
+  assert.equal(await page.locator('#attach-options').isVisible(),false);assert.equal(jobs.length,beforeActions,'Selecting web search does not submit a request');
+  await page.locator('#attach-toggle').click();await page.locator('#attach-chat').click();
+  assert.equal(await page.locator('#tool').inputValue(),'auto');assert.equal(jobs.length,beforeActions);
   await page.locator('#settings-panel > summary').click();await page.locator('#permissions > summary').click();await page.locator('#model-consent').check();await page.locator('#settings-panel > summary').click();
   const send=async text=>{
    const count=jobs.length;await page.locator('#message').fill(text);await page.locator('#message').press('Enter');
    await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking');assert.equal(jobs.length,count+1);return jobs.at(-1);
   };
   const job=await send('Hello'),jobIndex=jobs.length;await page.locator('#activity-label').filter({hasText:/^Thinking$/}).waitFor();
-  if(width===390){
-   await page.waitForFunction(()=>document.getElementById('activity-label').textContent!=='Thinking');
-   await page.waitForFunction(()=>document.getElementById('activity-label').textContent==='Thinking');
-  }
+  const labelChanges=await page.evaluate(()=>{window.activityLabelChanges=[];window.activityLabelObserver=new MutationObserver(()=>window.activityLabelChanges.push(document.getElementById('activity-label').textContent));window.activityLabelObserver.observe(document.getElementById('activity-label'),{childList:true,characterData:true,subtree:true});return document.getElementById('activity-label').textContent;});
+  assert.equal(labelChanges,'Thinking');
   await page.clock.fastForward(2100);
+  assert.equal(await page.locator('#activity-label').textContent(),'Thinking','Activity label stays fully readable while time advances');
+  assert.deepEqual(await page.evaluate(()=>{window.activityLabelObserver.disconnect();return window.activityLabelChanges.filter(text=>text!=='Thinking');}),[],'Thinking must not erase or type its activity label');
   const liveSeconds=Number.parseInt(await page.locator('#activity-elapsed').innerText(),10);
   assert.ok(liveSeconds>=2,'Elapsed seconds advance while the server is still working');
   assert.equal(await page.locator('#activity-elapsed').getAttribute('aria-hidden'),'true','Ticks do not repeatedly interrupt screen readers');
@@ -120,6 +126,7 @@ try{
   assert.equal(await page.locator('.response-duration').last().getAttribute('data-elapsed-ms'),completeMilliseconds,'Changing language preserves the measured duration');
   assert.match(await page.locator('.response-duration').last().innerText(),/^پاسخ در [۰-۹٫]+ ثانیه$/);
   await page.locator('#activity-label').filter({hasText:/^در حال فکر کردن$/}).waitFor();assert.equal(jobs.length,count+1);
+  assert.equal(await page.locator('#activity').evaluate(n=>n.getAnimations({subtree:true}).filter(a=>a.playState==='running').length),0,'Reduced motion disables thinking shimmer and elapsed digit animation');
   assert.equal(await page.locator('#send').getAttribute('aria-label'),'توقف پاسخ');assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
   jobs.at(-1).finish(generated('پاسخ کامل فارسی'));await page.getByText('پاسخ کامل فارسی',{exact:true}).waitFor();await page.waitForFunction(()=>document.getElementById('send').dataset.state==='send');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
