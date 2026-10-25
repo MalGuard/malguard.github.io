@@ -47,10 +47,10 @@ export function answerIdentityQuestion(message, history = []) {
   if (/مدل پایه|مدل اصلی|underlying model|base model|foundation model/iu.test(q)) return null;
   const brand = /مالگارد|malguard/iu.test(q);
   const aiProduct = /(?:malguard\s*ai|مالگارد\s*(?:ای\s*آی|ai)|هوش مصنوعی مالگارد)/iu.test(q);
-  const creator = /سازنده|ساخته|ساخت|خالق|بنیان گذار|تاسیس|تأسیس|توسعه دهنده|created|creator|built|made|founded|founder|developed|who started/iu.test(q);
+  const creator = /سازنده|سازندت|ساخته|ساخت|خالق|بنیان گذار|تاسیس|تأسیس|توسعه دهنده|created|creator|built|made|founded|founder|developed|who started/iu.test(q);
   if (brand && !aiProduct && creator) return {kind:'founder',text:ANSWERS[lang].founder};
 
-  const self = /(?:تو|شما|خودت|خودتون|بنده|دستیار|هوش مصنوعی|you|your|assistant)/iu.test(q);
+  const self = /(?:تو|شما|خودت|خودتون|بنده|دستیار|هوش مصنوعی|you|your|assistant)/iu.test(q) || /(?:سازنده|خالق)\s*(?:ات|ت|تون)|ساختت|سازندت/iu.test(q);
   if ((aiProduct || self) && creator) return {kind:'product',text:ANSWERS[lang].product};
   return null;
 }

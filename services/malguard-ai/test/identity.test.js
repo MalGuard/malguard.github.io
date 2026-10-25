@@ -5,7 +5,7 @@ import {answerIdentityQuestion,PRODUCT_IDENTITY_POLICY} from '../../../ai/identi
 const assertIdentity=(query,kind)=>assert.equal(answerIdentityQuestion(query)?.kind,kind,query);
 
 test('the same assistant identity works with Persian and English prompts',()=>{
-  for(const q of ['سازنده شما کیست؟','چه کسی تو را ساخته؟','Who made you?','Who created this assistant?'])assertIdentity(q,'product');
+  for(const q of ['سازنده شما کیست؟','سازنده‌ات کیه؟','سازنده ات کیه؟','سازندت کیه؟','کی ساختت؟','چه کسی تو را ساخته؟','Who made you?','Who created this assistant?'])assertIdentity(q,'product');
   for(const q of ['چه کسی مالگارد را ساخته؟','شرکت MalGuard را کی ساخته است؟','Who founded MalGuard?'])assertIdentity(q,'founder');
   for(const q of ['محمدرضا آذردرخش کیست؟','محمدرضا آذردرخش کیه؟','Who is Mohammadreza Azardarkhsh?'])assertIdentity(q,'person');
 });
