@@ -4,8 +4,8 @@ import {ZipReader,Uint8ArrayReader,TextWriter} from '@zip.js/zip.js';
 import {starterFiles,validateFiles,parseProposal,codingPrompt,projectZip} from '../../../ai/build-project.mjs';
 test('coding proposals require a bounded complete-file object and never accept unsafe paths',()=>{
  assert.equal(parseProposal('A text answer'),null);assert.equal(parseProposal('{"summary":"hi","files":{"../../x.js":"bad"}}'),null);
- for(const files of [{'/tmp/x.py':''},{'x.exe':''},{'x.js':'a'.repeat(16001)},{'x.js':'ع'.repeat(9000)}])assert.throws(()=>validateFiles(files));
- assert.throws(()=>validateFiles(Object.fromEntries(Array.from({length:13},(_,i)=>[`f${i}.js`,'']))));
+ for(const files of [{'/tmp/x.py':''},{'x.exe':''},{'x.js':'a'.repeat(262145)},{'x.js':'ع'.repeat(131073)}])assert.throws(()=>validateFiles(files));
+ assert.throws(()=>validateFiles(Object.fromEntries(Array.from({length:33},(_,i)=>[`f${i}.js`,'']))));
  const p=parseProposal('```json\n'+JSON.stringify({summary:'A small change',files:{'app.js':'alert(1)'}})+'\n```');assert.equal(p.files['app.js'],'alert(1)');assert.equal(globalThis.alert,undefined);
 });
 test('coding prompt includes only explicitly supplied code and refuses silent truncation',()=>{

@@ -5,9 +5,9 @@ addEventListener('message',event=>{
   parent.postMessage({type:'malguard-preview-output',text:event.data.text.slice(0,1000),level:event.data.level==='error'?'error':'log'},'*');return;
  }
  if(event.source!==parent||event.data?.type!=='malguard-project-preview')return;
- const files=event.data.files;if(!files||typeof files!=='object'||Array.isArray(files)||Object.keys(files).length>12)return;
- let size=0;for(const [name,content]of Object.entries(files)){if(!/^(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.(html|css|js|json|md|txt|py|ts|tsx|jsx)$/.test(name)||typeof content!=='string'||new TextEncoder().encode(content).length>16000)return;size+=new TextEncoder().encode(content).length;}
- if(size>48000||typeof files['index.html']!=='string')return;
+ const files=event.data.files;if(!files||typeof files!=='object'||Array.isArray(files)||Object.keys(files).length>32)return;
+ let size=0;for(const [name,content]of Object.entries(files)){if(!/^(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.(html|css|js|json|md|txt|py|ts|tsx|jsx)$/.test(name)||typeof content!=='string'||new TextEncoder().encode(content).length>262144)return;size+=new TextEncoder().encode(content).length;}
+ if(size>2097152||typeof files['index.html']!=='string')return;
  const path=value=>value.replace(/^\.\//,'');
  let html=files['index.html'];
  html=html.replace(/<link\b[^>]*\bhref\s*=\s*(["'])([^"']+)\1[^>]*>/gi,(tag,quote,href)=>{const file=path(href);return file.endsWith('.css')&&Object.hasOwn(files,file)?'<style>'+files[file].replace(/</g,'\\3c ')+'</style>':tag;});

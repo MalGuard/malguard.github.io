@@ -1,4 +1,5 @@
 const encoder=new TextEncoder();
+export const MAX_FILES=32,MAX_FILE_BYTES=262144,MAX_PROJECT_BYTES=2097152;
 export const starterFiles={
  'index.html':'<!doctype html>\n<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My project</title><link rel="stylesheet" href="style.css"></head><body><main><h1>Build something useful.</h1><p>Edit these files or ask the coding model to propose a change.</p><button id="counter">Clicks: 0</button></main><script src="app.js"></script></body></html>',
  'style.css':'body{margin:0;background:#141412;color:#f5f5f5;font:16px system-ui;min-height:100vh;display:grid;place-items:center}main{max-width:560px;padding:32px}button{padding:12px 20px;border:1px solid #777;border-radius:24px;background:#eee;color:#111;cursor:pointer}',
@@ -6,11 +7,11 @@ export const starterFiles={
 };
 export function validateFiles(value){
  if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('invalid_project');
- const entries=Object.entries(value);if(!entries.length||entries.length>12)throw new Error('project_limit');
+ const entries=Object.entries(value);if(!entries.length||entries.length>MAX_FILES)throw new Error('project_limit');
  const result=Object.create(null);let total=0;
  for(const [path,content]of entries){
-  if(path.length>100||! /^(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.(?:html|css|js|json|md|txt|py|ts|tsx|jsx)$/.test(path)||typeof content!=='string'||encoder.encode(content).length>16000)throw new Error('invalid_project_file');
-  total+=encoder.encode(content).length;if(total>48000)throw new Error('project_limit');result[path]=content;
+  if(path.length>100||! /^(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.(?:html|css|js|json|md|txt|py|ts|tsx|jsx)$/.test(path)||typeof content!=='string'||encoder.encode(content).length>MAX_FILE_BYTES)throw new Error('invalid_project_file');
+  total+=encoder.encode(content).length;if(total>MAX_PROJECT_BYTES)throw new Error('project_limit');result[path]=content;
  }
  return result;
 }
