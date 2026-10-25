@@ -1,14 +1,14 @@
-import {errorMessage} from './error-message.mjs?v=builder-20261025';
-import {publicFailure,retryDetails} from './service-errors.mjs?v=builder-20261025';
+import {errorMessage} from './error-message.mjs?v=builder-ready-20261025';
+import {publicFailure,retryDetails} from './service-errors.mjs?v=builder-ready-20261025';
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
-import {planChat,planCloudChat} from './routing.mjs?v=builder-20261025';
-import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=builder-20261025';
+import {planChat,planCloudChat} from './routing.mjs?v=builder-ready-20261025';
+import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=builder-ready-20261025';
 import {replyLanguage} from './language.mjs';
 import {typeText,formatElapsed} from './reply-motion.mjs';
-import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=builder-20261025';
-import {createBuilder} from './builder.mjs?v=builder-20261025';
-import {parseProposal} from './build-project.mjs?v=builder-20261025';
+import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=builder-ready-20261025';
+import {createBuilder} from './builder.mjs?v=builder-ready-20261025';
+import {parseProposal} from './build-project.mjs?v=builder-ready-20261025';
 const $=id=>document.getElementById(id);
 const names={gta_guard:'GTA Guard',game_scam_guard:'Game Scam Guard',ai_web:'AI Web',malwarebazaar:'MalwareBazaar',urlhaus:'URLhaus',file_sandbox:'File sandbox',url_sandbox:'Link sandbox'};
 let locale='en',service,busy=false;
@@ -23,7 +23,7 @@ const localChat=createLocalChat(),downloadPermissions=new Set();
 const preparedModels=new Set();
 let preparingModel;
 let welcomeSeen=false;try{welcomeSeen=localStorage.getItem('malguard.ai.welcome.v3')==='seen';}catch{}
-const conversations={chat:{history:[],modelHistory:[],draft:'',model:''},worker:{history:[],modelHistory:[],draft:'',model:'cf_qwen3'},build:{history:[],modelHistory:[],draft:'',model:'cf_qwen_coder'}};
+const conversations={chat:{history:[],modelHistory:[],draft:'',model:''},worker:{history:[],modelHistory:[],draft:'',model:'cf_qwen3'},build:{history:[],modelHistory:[],draft:'',model:'cf_gptoss120'}};
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
 const builder=createBuilder({locale:()=>locale});
@@ -65,7 +65,7 @@ function switchMode(next,{carryDraft=false}={}){
  if(activeMode==='build')builder.stop();
  activeMode=next;history=conversations[next].history;modelHistory=conversations[next].modelHistory;
  $('mode').value=next;$('message').value=carryDraft?previous.draft:conversations[next].draft;
- if(next!=='worker'){$('tool').value='auto';$('remove-file').click();$('model').value=conversations[next].model||(next==='build'?'cf_qwen_coder':'auto');}
+ if(next!=='worker'){$('tool').value='auto';$('remove-file').click();$('model').value=conversations[next].model||(next==='build'?'cf_gptoss120':'auto');}
  else $('tool').value=$('workspace-tool').value;
  $('isolation-consent').checked=false;$('mode-picker').open=false;closeAttach();translate();
 }
@@ -212,12 +212,12 @@ function renderStatus(){
  if(models.length){
   $('model').replaceChildren();
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
-  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t(cloudAutoReady?'autoCloud':'autoLocal'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured'||activeMode==='build'&&(m.id==='auto'||m.id.startsWith('local_'));$('model').append(option);}
+  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t(cloudAutoReady?'autoCloud':'autoLocal'):m.label;const option=el('option',label);option.value=m.id;if(activeMode==='build'&&m.id==='cf_qwen_coder')option.textContent+=locale==='fa'?' · فعلاً در دسترس نیست':' · currently unavailable';option.disabled=m.state!=='configured'||activeMode==='build'&&(m.id==='auto'||m.id==='cf_qwen_coder'||m.id.startsWith('local_'));$('model').append(option);}
   const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);const desktop=el('option',t('desktopModels')+'…');desktop.value='__desktop';$('model').append(desktop);
-  const defaultId=activeMode==='build'?(['cf_qwen_coder','cf_gptoss120'].find(id=>remote.some(m=>m.id===id&&m.state==='configured'))||desktopChat.availability.installedIDs[0]||''):cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':service?.model?.defaultModel||(localReady?'local_fast':'');
+  const defaultId=activeMode==='build'?(['cf_gptoss120','cf_gptoss20','cf_qwen3'].find(id=>remote.some(m=>m.id===id&&m.state==='configured'))||desktopChat.availability.installedIDs[0]||''):cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':service?.model?.defaultModel||(localReady?'local_fast':'');
   const strongCloudReady=cloudAutoReady||remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured');
   const applyCloudDefault=activeMode!=='build'&&strongCloudReady&&!cloudDefaultApplied&&!modelChosen&&!Object.hasOwn(localModels,preferredLocal);
-  $('model').value=applyCloudDefault?defaultId:!modelsInitialized&&localReady&&activeMode!=='build'?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured'&&(activeMode!=='build'||m.id!=='auto'&&!m.id.startsWith('local_')))?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
+  $('model').value=applyCloudDefault?defaultId:!modelsInitialized&&localReady&&activeMode!=='build'?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured'&&(activeMode!=='build'||m.id!=='auto'&&m.id!=='cf_qwen_coder'&&!m.id.startsWith('local_')))?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
   if(strongCloudReady)cloudDefaultApplied=true;
   lastSelectedModel=$('model').value;
   if(service||localReady)modelsInitialized=true;

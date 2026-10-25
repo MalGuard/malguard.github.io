@@ -14,5 +14,7 @@ addEventListener('message',event=>{
  html=html.replace(/<script\b[^>]*\bsrc\s*=\s*(["'])([^"']+)\1[^>]*>\s*<\/script\s*>/gi,(tag,quote,src)=>{const file=path(src);return file.endsWith('.js')&&Object.hasOwn(files,file)?'<script>'+files[file].replace(/<\/script/gi,'<\\/script')+'</script>':tag;});
  const policy="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; worker-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
  const logger='<script>(()=>{let sent=0;const emit=(level,values)=>{if(++sent>40)return;const text=values.map(value=>{try{return typeof value==="string"?value:JSON.stringify(value)}catch{return "[unprintable]"}}).join(" ").slice(0,1000);parent.postMessage({type:"malguard-preview-log",level,text},"*")};for(const key of ["log","warn","error"]){const original=console[key];console[key]=(...values)=>{emit(key==="error"?"error":"log",values);original.apply(console,values)}}addEventListener("error",event=>{emit("error",[event.message]);event.preventDefault()});addEventListener("unhandledrejection",event=>{emit("error",[String(event.reason)]);event.preventDefault()})})();</script>';
- document.getElementById('result').srcdoc='<!doctype html><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="'+policy+'">'+logger+html;
+ const result=document.getElementById('result');
+ result.onload=()=>parent.postMessage({type:'malguard-preview-ready'},'*');
+ result.srcdoc='<!doctype html><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="'+policy+'">'+logger+html;
 });
