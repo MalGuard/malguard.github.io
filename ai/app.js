@@ -2,15 +2,15 @@ import {errorMessage} from './error-message.mjs';
 import {publicFailure,retryDetails} from './service-errors.mjs';
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
-import {planChat} from './routing.mjs';
-import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=grok-solid-20261025';
+import {planChat,planCloudChat} from './routing.mjs?v=auto-controls-20261025';
+import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=auto-controls-20261025';
 import {replyLanguage} from './language.mjs';
-import {typeText,typeActivity,formatElapsed} from './reply-motion.mjs';
+import {typeText,formatElapsed} from './reply-motion.mjs';
 const $=id=>document.getElementById(id);
 const names={gta_guard:'GTA Guard',game_scam_guard:'Game Scam Guard',ai_web:'AI Web',malwarebazaar:'MalwareBazaar',urlhaus:'URLhaus'};
 let locale='en',service,busy=false;
 try{if(localStorage.getItem('malguard-language')==='fa')locale='fa';}catch{}
-let activeTurn,activityAnimation;
+let activeTurn;
 let localReady=false,modelsInitialized=false;
 let lastSelectedModel='';
 let cloudDefaultApplied=false,modelChosen=false;
@@ -44,11 +44,13 @@ Object.assign(copy.en,{title:'What should we explore?',welcomeTitle:'More freedo
 Object.assign(copy.fa,{title:'چه چیزی را کشف کنیم؟',welcomeTitle:'آزادانه‌تر، روی دستگاه خودت.',welcomeInfo:'برای گفت‌وگو بدون سقف پیام روزانهٔ سرویس‌دهنده، یک مدل سبک‌تر یا قوی‌تر دانلود کن؛ یا فعلاً بدون دانلود ادامه بده.',chooseDownload:'دانلود',chooseModel:'مدل',modelDownloads:'دانلود مدل‌ها…',localCompatibility:'دانلود محلی به مرورگر و پردازندهٔ گرافیکی سازگار نیاز دارد. مرورگر به‌روز با پشتیبانی WebGPU را امتحان کن.'});
 Object.assign(copy.en,{thinking:'Thinking',readingFile:'Reading file',readingWebsite:'Reading website',checkingFile:'Checking file',typing:'Typing',connecting:'Connecting',preparing:'Preparing results',searching:'Searching the web',checking:'Checking',stopped:'Response stopped',stop:'Stop response'});
 Object.assign(copy.fa,{thinking:'در حال فکر کردن',readingFile:'در حال خواندن فایل',readingWebsite:'در حال خواندن سایت',checkingFile:'در حال بررسی فایل',typing:'در حال نوشتن',connecting:'در حال اتصال',preparing:'در حال آماده‌سازی نتیجه',searching:'در حال جست‌وجوی وب',checking:'در حال بررسی',stopped:'پاسخ متوقف شد',stop:'توقف پاسخ'});
+Object.assign(copy.en,{attachMenu:'Add files or tools',attachFile:'Upload a file',actionChat:'Chat',actionInspect:'Inspect file or link',actionWeb:'Search the web',inspectionPlaceholder:'Add a file, URL or hash to inspect…',webPlaceholder:'What would you like to search for?',autoCloud:'Auto',autoLocal:'Auto · on device'});
+Object.assign(copy.fa,{attachMenu:'افزودن فایل یا ابزار',attachFile:'بارگذاری فایل',actionChat:'گفت‌وگو',actionInspect:'بررسی فایل یا لینک',actionWeb:'جست‌وجوی وب',inspectionPlaceholder:'فایل، لینک یا هش برای بررسی…',webPlaceholder:'چه چیزی را در وب جست‌وجو کنیم؟',autoCloud:'خودکار',autoLocal:'خودکار · روی دستگاه'});
 Object.assign(copy.en,{respondedIn:'Responded in',stoppedAfter:'Stopped after',elapsedTime:'Time elapsed:'});
 Object.assign(copy.fa,{respondedIn:'پاسخ در',stoppedAfter:'توقف پس از',elapsedTime:'زمان سپری‌شده:'});
 function updateElapsed(turn){
  const text=formatElapsed(turn.elapsedMs??performance.now()-turn.startedAt,locale);
- if($('activity-elapsed').textContent!==text)$('activity-elapsed').textContent=text;
+ if($('activity-elapsed').textContent!==text){const node=$('activity-elapsed'),previous=node.textContent;node.textContent=text;if(previous&&!matchMedia('(prefers-reduced-motion: reduce)').matches)node.animate([{opacity:.45,transform:'translateY(2px)'},{opacity:1,transform:'translateY(0)'}],{duration:160,easing:'ease-out'});}
 }
 function freezeElapsed(turn){
  clearInterval(turn.elapsedTimer);
@@ -69,19 +71,17 @@ function setActivity(key,detail=''){
  if(activeTurn)activeTurn.stage={key,detail};
  const label=activityLabel(key,detail);
  if($('activity').dataset.label===label)return;
- activityAnimation?.abort();activityAnimation=new AbortController();
  $('activity').dataset.label=label;$('activity').hidden=false;
  // Keep a visible character across stage changes; announce each stage only once.
- $('activity-label').textContent=Array.from(label)[0]||'';
+ $('activity-label').textContent=label;
  $('activity-announcement').textContent=label;
- typeActivity(label,text=>$('activity-label').textContent=text,{signal:activityAnimation.signal}).catch(()=>{});
 }
 function showRunningActivity(turn){
  const work=[...(turn.modelStarted?['chat']:[]),...turn.tools];
  setActivity(work.length?'running':'preparing',work.length?work:'');
 }
 function beginTurn(stage,{recordTiming=true}={}){
- busy=true;const turn={controller:new AbortController(),tools:new Set(),partial:false,startedAt:performance.now(),recordTiming};activeTurn=turn;
+ busy=true;closeAttach();const turn={controller:new AbortController(),tools:new Set(),partial:false,startedAt:performance.now(),recordTiming};activeTurn=turn;
  updateElapsed(turn);turn.elapsedTimer=setInterval(()=>updateElapsed(turn),250);
  $('conversation').setAttribute('aria-busy','true');renderStatus();setActivity(stage);return turn;
 }
@@ -89,13 +89,13 @@ function endTurn(turn){
  freezeElapsed(turn);
  if(activeTurn!==turn)return;
  if(turn.recordTiming){const timing={elapsedMs:turn.elapsedMs,label:turn.controller.signal.aborted?'stoppedAfter':turn.completed?'respondedIn':'elapsedTime'};history.push({timing});renderTiming(timing);}
- activityAnimation?.abort();$('activity').hidden=true;delete $('activity').dataset.label;
+ $('activity').hidden=true;delete $('activity').dataset.label;
  activeTurn=undefined;busy=false;$('conversation').setAttribute('aria-busy','false');renderStatus();
 }
 function stopTurn(){
  if(!activeTurn||activeTurn.controller.signal.aborted)return;
  freezeElapsed(activeTurn);
- activeTurn.controller.abort(new DOMException('Stopped by user','AbortError'));localChat.stop();activityAnimation?.abort();$('activity').hidden=true;renderStatus();
+ activeTurn.controller.abort(new DOMException('Stopped by user','AbortError'));localChat.stop();$('activity').hidden=true;renderStatus();
 }
 function stopped(turn){
  if(turn.partial)return;
@@ -132,7 +132,7 @@ function responseIcon(kind){
 }
 function translate(){
  document.documentElement.lang=locale;document.documentElement.dir=locale==='fa'?'rtl':'ltr';$('language').textContent=locale==='fa'?'English':'فارسی';
- document.querySelectorAll('[data-i18n]').forEach(n=>n.textContent=t(n.dataset.i18n));$('message').placeholder=t('placeholder');$('conversation').ariaLabel=locale==='fa'?'گفت‌وگو':'Conversation';renderStatus();$('mode-hint').textContent=t($('mode').value==='chat'?'chatHint':'workerHint');
+ document.querySelectorAll('[data-i18n]').forEach(n=>n.textContent=t(n.dataset.i18n));$('message').placeholder=t($('tool').value==='ai_web'?'webPlaceholder':$('mode').value==='worker'?'inspectionPlaceholder':'placeholder');$('conversation').ariaLabel=locale==='fa'?'گفت‌وگو':'Conversation';renderStatus();$('mode-hint').textContent=t($('mode').value==='chat'?'chatHint':'workerHint');
  if(activeTurn){
   updateElapsed(activeTurn);const {key,detail}=activeTurn.stage;setActivity(key,detail);
   for(const node of document.querySelectorAll('.response-duration'))node.textContent=timingText({elapsedMs:Number(node.dataset.elapsedMs),label:node.dataset.label});
@@ -151,18 +151,19 @@ function renderStatus(){
  $('send').disabled=activeTurn?activeTurn.controller.signal.aborted:!ready||busy;
  $('send').dataset.state=activeTurn?'stop':'send';$('send-arrow').toggleAttribute('hidden',!!activeTurn);$('send-stop').toggleAttribute('hidden',!activeTurn);
  $('send').ariaLabel=t(activeTurn?'stop':'send');$('send').title=t(activeTurn?'stop':'send');$('send-label').textContent=t(activeTurn?'stop':'send');
- for(const id of ['clear','mode','tool','file','remove-file','remove-models'])$(id).disabled=busy;
+ for(const id of ['clear','mode','tool','file','remove-file','remove-models','attach-toggle','attach-file','attach-chat','attach-inspect','attach-web'])$(id).disabled=busy;
  $('connection').textContent=!service?(localReady?t('localAvailable'):t('offline')):!ready?t('serviceDisabled'):'';
  const selectedId=$('model').value,remote=service?.model?.models||[],models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار · چهار سطح':'Automatic · four tiers',state:localReady||remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remote.filter(m=>m.id!=='auto')];
+ const cloudAutoReady=remote.some(m=>m.id==='auto'&&m.state==='configured');
  if(models.length){
   $('model').replaceChildren();
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
-  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t('auto'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured';$('model').append(option);}
+  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t(cloudAutoReady?'autoCloud':'autoLocal'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured';$('model').append(option);}
   const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);
-  const defaultId=remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':service?.model?.defaultModel||(localReady?'local_fast':'');
-  const strongCloudReady=remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured');
+  const defaultId=cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':service?.model?.defaultModel||(localReady?'local_fast':'');
+  const strongCloudReady=cloudAutoReady||remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured');
   const applyCloudDefault=strongCloudReady&&!cloudDefaultApplied&&!modelChosen&&!Object.hasOwn(localModels,preferredLocal);
-  $('model').value=applyCloudDefault?'cf_gptoss120':!modelsInitialized&&localReady?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured')?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
+  $('model').value=applyCloudDefault?defaultId:!modelsInitialized&&localReady?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured')?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
   if(strongCloudReady)cloudDefaultApplied=true;
   lastSelectedModel=$('model').value;
   if(service||localReady)modelsInitialized=true;
@@ -274,6 +275,15 @@ async function runLocal(model,message,consent){
 }
 $('stop-local').onclick=stopTurn;
 $('manage-models').onclick=offerLocalModels;
+function closeAttach(focus=false){$('attach-options').hidden=true;$('attach-toggle').setAttribute('aria-expanded','false');if(focus)$('attach-toggle').focus();}
+$('attach-toggle').onclick=()=>{if(busy)return;const opening=$('attach-options').hidden;$('attach-options').hidden=!opening;$('attach-toggle').setAttribute('aria-expanded',String(opening));};
+$('attach-file').onclick=()=>{closeAttach();$('file').click();};
+function chooseAction(mode,tool){if(busy)return;$('mode').value=mode;$('tool').value=tool;closeAttach();translate();$('message').placeholder=t(tool==='ai_web'?'webPlaceholder':mode==='worker'?'inspectionPlaceholder':'placeholder');$('message').focus();}
+$('attach-chat').onclick=()=>chooseAction('chat','auto');
+$('attach-inspect').onclick=()=>chooseAction('worker','auto');
+$('attach-web').onclick=()=>chooseAction('chat','ai_web');
+document.addEventListener('pointerdown',event=>{if(!event.target.closest('.attach-menu'))closeAttach();});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('attach-options').hidden){closeAttach(true);event.preventDefault();}});
 document.addEventListener('pointerdown',event=>{const panel=$('settings-panel');if(panel.open&&!panel.contains(event.target))panel.open=false;});
 document.addEventListener('keydown',event=>{if(event.key==='Escape')$('settings-panel').open=false;});
 $('cancel-download').onclick=()=>{if(preparingModel){downloadPermissions.delete(preparingModel);stopTurn();}};
@@ -292,8 +302,8 @@ $('composer').onsubmit=async event=>{
  if(tool==='ai_web')input.query=message.slice(0,500);
  // URL/hash routing is validated again on the server before any tool starts.
  const effective=tool==='auto'?(file?'gta_guard':/(?:^|\s)[a-f\d]{64}(?=$|\s)/i.test(message)?'malwarebazaar':/https?:\/\//i.test(message)?'game_scam_guard':'model'):tool;
- const selected=$('model').value,plan=selected==='auto'?planChat(message,modelHistory):null;
- if(effective==='model'&&mode==='chat'&&(selected.startsWith('local_')||plan?.model.startsWith('local_'))){await runLocal(plan?.model||selected,message,consent);return;}
+ const selected=$('model').value,cloudAuto=selected==='auto'&&service?.model?.models?.some(m=>m.id==='auto'&&m.state==='configured'),plan=selected==='auto'?(cloudAuto?planCloudChat(message,modelHistory):planChat(message,modelHistory)):null;
+ if(effective==='model'&&mode==='chat'&&(selected.startsWith('local_')||!cloudAuto&&plan?.model.startsWith('local_'))){await runLocal(plan?.model||selected,message,consent);return;}
  if(!service?.enabled){showError('offline');return;}
  if(effective==='model'&&(plan?.needsWeb||['gemini_flash','groq_gptoss'].includes(selected)&&planChat(message,modelHistory).needsWeb)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  if(effective==='game_scam_guard'&&!consent.websiteFetch||['malwarebazaar','urlhaus','ai_web'].includes(effective)&&!consent.remoteLookup||effective==='model'&&mode==='chat'&&service.model.state==='configured'&&!consent.modelShare){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}

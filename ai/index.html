@@ -9,8 +9,8 @@
   <meta name="theme-color" content="#141412">
   <title>MalGuard AI</title>
   <link rel="icon" href="/assets/fusion/assets/malguard-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=grok-solid-20261025">
-  <script type="module" src="./app.js?v=grok-solid-20261025"></script>
+  <link rel="stylesheet" href="./style.css?v=auto-controls-20261025">
+  <script type="module" src="./app.js?v=auto-controls-20261025"></script>
 </head>
 <body>
   <a class="skip" href="#message" data-i18n="skip">Skip to conversation</a>
@@ -59,7 +59,7 @@
     <section class="workspace" aria-labelledby="title">
       <div class="intro"><h1 id="title" data-i18n="title">What can I help with?</h1></div>
       <div class="conversation" id="conversation" role="log" aria-label="Conversation" aria-live="polite"></div>
-      <div id="activity" class="reply-activity" role="status" aria-live="polite" aria-atomic="false" hidden><span class="activity-orbit" aria-hidden="true"></span><span id="activity-label" aria-hidden="true"></span><span id="activity-elapsed" aria-hidden="true"></span><span id="activity-announcement" class="sr-only"></span></div>
+      <div id="activity" class="reply-activity" role="status" aria-live="polite" aria-atomic="false" hidden><span class="activity-orbit" aria-hidden="true"><span></span><span></span><span></span></span><span id="activity-label" aria-hidden="true"></span><span id="activity-elapsed" aria-hidden="true"></span><span id="activity-announcement" class="sr-only"></span></div>
       <div class="composer-area">
         <div id="model-progress" class="model-progress" hidden><label for="download-progress" id="progress-label"></label><progress id="download-progress" max="100" value="0"></progress><button type="button" id="cancel-download" data-i18n="cancel">Cancel</button></div>
         <form id="composer">
@@ -67,7 +67,15 @@
             <label class="sr-only" for="message" data-i18n="input">Your message</label>
             <textarea id="message" rows="1" maxlength="4000" dir="auto" placeholder="Ask anything…" aria-describedby="disclaimer"></textarea>
             <div class="composer-footer">
-              <label class="file-button" for="file"><span aria-hidden="true">＋</span><span class="sr-only" data-i18n="attach">Choose file · up to 1 MiB</span></label>
+              <div class="attach-menu">
+                <button id="attach-toggle" type="button" aria-expanded="false" aria-controls="attach-options"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="sr-only" data-i18n="attachMenu">Add to conversation</span></button>
+                <div id="attach-options" role="group" aria-labelledby="attach-toggle" hidden>
+                  <button id="attach-file" type="button" data-i18n="attachFile">Attach a file</button>
+                  <button id="attach-chat" type="button" data-i18n="actionChat">Chat</button>
+                  <button id="attach-inspect" type="button" data-i18n="actionInspect">Security inspection</button>
+                  <button id="attach-web" type="button" data-i18n="actionWeb">Search the web</button>
+                </div>
+              </div>
               <div class="composer-actions">
                 <label class="sr-only" for="model" data-i18n="modelLabel">Chat model</label>
                 <select id="model" disabled aria-describedby="device-note"><option value="local_fast">Qwen3 1.7B</option></select>
@@ -75,7 +83,7 @@
               </div>
             </div>
           </div>
-          <div class="attachment"><input type="file" id="file"><span id="filename" dir="auto"></span><button type="button" id="remove-file" hidden data-i18n="remove">Remove</button></div>
+          <div class="attachment"><label class="file-button sr-only" for="file" data-i18n="attach">Choose file · up to 1 MiB</label><input type="file" id="file" tabindex="-1"><span id="filename" dir="auto"></span><button type="button" id="remove-file" hidden data-i18n="remove">Remove</button></div>
         </form>
         <p id="disclaimer" class="footer-note" data-i18n="disclaimer">AI can make mistakes. Check important information.</p>
         <button id="stop-local" type="button" hidden data-i18n="stop">Stop</button>

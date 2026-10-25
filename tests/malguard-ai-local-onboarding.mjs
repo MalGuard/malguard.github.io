@@ -102,6 +102,15 @@ try{
   await cloud.close();
  }
  console.log('PASS strongest configured cloud default survives capability/status ordering and preserves explicit choice');
+ const autoContext=await browser.newContext({reducedMotion:'reduce'}),autoPage=await autoContext.newPage(),autoPosts=[];
+ await autoContext.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');localStorage.setItem('malguard.ai.permissions.v1',JSON.stringify({}));window.autoWorkerCalls=[];window.Worker=class{postMessage(value){window.autoWorkerCalls.push(value);}terminate(){}};Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});});
+ await autoContext.route('**/api/malguard-ai/status',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({enabled:true,tools:{},model:{state:'configured',defaultModel:'auto',models:[{id:'auto',label:'Auto',state:'configured'},{id:'cf_gptoss120',label:'GPT-OSS',state:'configured'}]}})}));
+ await autoContext.route('**/api/malguard-ai/chat',r=>{autoPosts.push(r.request().postDataJSON());return r.fulfill({contentType:'application/x-ndjson',body:JSON.stringify({result:{generated:{text:'سلام! آماده‌ام.',provider:'workers_ai_rest',selectedModel:'cf_qwen3',requestedModel:'auto',model:'Qwen3'}}})+'\n'});});
+ await autoPage.goto(base+'/ai/');await autoPage.waitForFunction(()=>document.getElementById('model').value==='auto');
+ await autoPage.locator('#settings-panel > summary').click();await autoPage.locator('#permissions > summary').click();await autoPage.locator('#model-consent').check();await autoPage.locator('#settings-panel > summary').click();
+ await autoPage.locator('#message').fill('سلام');await autoPage.locator('#send').click();await autoPage.locator('.answer').filter({hasText:'سلام! آماده‌ام.'}).waitFor();
+ assert.equal(autoPosts.length,1);assert.equal(autoPosts[0].model,'auto');assert.equal(await autoPage.evaluate(()=>autoWorkerCalls.length),0,'Cloud Auto must not download or execute a local model');assert.equal(await autoPage.locator('#local-download').isVisible(),false);
+ await autoContext.close();console.log('PASS cloud Auto short greetings reach the server without local downloads');
  const context=await browser.newContext(),page=await context.newPage();
  await context.addInitScript(()=>{Object.defineProperty(navigator,'gpu',{value:undefined});window.workerCalls=[];window.Worker=class{postMessage(data){window.workerCalls.push(data);}terminate(){}};});
  await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());

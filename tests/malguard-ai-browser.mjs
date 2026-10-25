@@ -50,8 +50,25 @@ try{
   if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/quiet-empty-${width}.png`,fullPage:true});}
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
+  const beforeMenu=requests;
+  await page.locator('#attach-toggle').focus();await page.locator('#attach-toggle').press('Enter');
+  assert.equal(await page.locator('#attach-toggle').getAttribute('aria-expanded'),'true');
+  assert.equal(await page.locator('#attach-options').isVisible(),true);
+  assert.ok(await page.locator('#attach-options').evaluate(n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight;}),'RTL attachment actions fit the viewport');
+  await page.keyboard.press('Escape');assert.equal(await page.locator('#attach-options').isVisible(),false);
+  assert.equal(await page.locator('#attach-toggle').evaluate(n=>n===document.activeElement),true,'Escape returns focus to the attachment trigger');
+  await page.locator('#attach-toggle').click();await page.mouse.click(4,4);assert.equal(await page.locator('#attach-options').isVisible(),false,'Outside click closes attachment actions');
+  await page.locator('#attach-toggle').click();await page.locator('#attach-inspect').click();
+  assert.equal(await page.locator('#mode').inputValue(),'worker');assert.equal(await page.locator('#tool').inputValue(),'auto');
+  assert.equal(await page.locator('#attach-options').isVisible(),false);
+  await page.locator('#attach-toggle').click();await page.locator('#attach-chat').click();
+  assert.equal(await page.locator('#mode').inputValue(),'chat');assert.equal(await page.locator('#tool').inputValue(),'auto');
+  assert.equal(requests,beforeMenu,'Attachment actions must not submit requests');
+  assert.equal(await page.locator('#local-download').isVisible(),false);assert.equal(await page.locator('#local-offer').isVisible(),false,'Attachment actions must not start model downloads');
   await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
-  await page.locator('#file').setInputFiles({name:'benign.txt',mimeType:'text/plain',buffer:Buffer.from('Hello, harmless browser fixture.')});
+  await page.locator('#attach-toggle').click();const choosingFile=page.waitForEvent('filechooser');await page.locator('#attach-file').click();
+  await (await choosingFile).setFiles({name:'benign.txt',mimeType:'text/plain',buffer:Buffer.from('Hello, harmless browser fixture.')});
+  assert.equal(await page.locator('#attach-options').isVisible(),false);assert.equal(requests,beforeMenu,'Choosing a file does not upload it');
   const before=requests;await page.locator('#send').click();assert.equal(requests,before,'no upload without consent');
   await page.locator('#file-consent').check();await page.locator('#settings-panel > summary').click();
   await page.locator('#send').click();
