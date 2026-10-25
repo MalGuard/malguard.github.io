@@ -263,3 +263,5 @@ body[data-mode=build] main{width:min(100% - 40px,1160px)}body[data-mode=build] .
 body[data-mode=build]:has(.conversation:not(:empty)) .workspace{padding-top:48px}
 
 div#build-preview{display:grid;place-items:center;background:#171715;color:var(--muted);padding:24px;font-size:12px;text-align:center}
+
+@media(min-width:901px){body[data-mode=build] .composer-shell{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;gap:6px;min-height:98px;padding:10px 12px}body[data-mode=build] .composer-shell textarea{grid-column:1/-1;grid-row:1;width:100%;padding:0 6px}body[data-mode=build] .attach-menu{grid-column:1;grid-row:2}body[data-mode=build] .composer-actions #model{grid-column:2;grid-row:2;justify-self:end;max-width:100%}body[data-mode=build] .composer-actions #send{grid-column:3;grid-row:2}}
