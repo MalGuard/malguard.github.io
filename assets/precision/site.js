@@ -35,30 +35,8 @@
      while(el.firstChild)source.append(el.firstChild);el.append(source);
     }
    }
-   // Header first, then page text and CTAs. Keep original accessible source text.
-   if(document.body.classList.contains('precision-home')||shared){
-    const markLink=link=>{
-     if(link.querySelector(':scope > .type-source'))return;
-     const textNodes=[...link.childNodes].filter(n=>n.nodeType===3&&n.textContent.trim());
-     if(!textNodes.length)return;
-     const source=document.createElement('span');source.className='type-source';
-     textNodes[0].before(source);textNodes.forEach(n=>source.append(n));
-     link.classList.add('type','type-link');link.dataset.type='button';link.dataset.typeState='pending';
-    };
-    const nav=document.getElementById('navbar');
-    if(nav){
-     nav.dataset.reveal='nav';nav.dataset.revealState='pending';nav.dataset.navMotion='pending';
-     nav.querySelectorAll('.mg-brand,.mg-primary-links a,.nav-download').forEach(link=>{if(link.getClientRects().length)markLink(link);});
-    }
-    if(shared){
-     const actions='main a.btn,main a.button,main a.action-button,main a.release-button,main a.platform-button,main a.download-button,main a.mg-home-product-link,main a.mg-home-product-extra,main a.gta6-button,main a[role="button"],main .actions>a,main .hero-actions>a,main .legacy-actions>a,main .action-group>a,main button.button:not([type="submit"]),main button.btn:not([type="submit"])';
-     document.querySelectorAll(actions).forEach(link=>{
-      if(!link.closest('form,[aria-live],[role="dialog"],.site-search,.result,.verdict,.scan-result')&&link.getClientRects().length&&!link.hasAttribute('disabled'))markLink(link);
-     });
-    }else{
-     document.querySelectorAll('.hero-actions>a.button,#products a.text-link,#technology a.text-link,.home-tools a.text-link').forEach(markLink);
-    }
-   }
+   // Editorial copy may type progressively; navigation must not. Native links,
+   // buttons and the header stay readable and interactive from first paint.
    nodes=[...document.querySelectorAll('[data-type],[data-reveal],[data-count-group]')].filter(n=>!n.hasAttribute('data-type')||!!n.querySelector(':scope > .type-source'));root.dataset.precisionTypeReady='true';
    if(!eligible||stopped){finish();return;}
    const segmenter=Intl.Segmenter?new Intl.Segmenter('en',{granularity:'grapheme'}):null;
