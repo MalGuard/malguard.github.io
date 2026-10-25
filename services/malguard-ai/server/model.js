@@ -2,6 +2,7 @@ import {httpFailure} from '../../../ai/service-errors.mjs';
 import {fetchPublic} from '../../game-scam-guard/server/network.js';
 import {createWorkersModel} from './workers-model.js';
 import {remoteModel} from './provider-gateway.js';
+import {PRODUCT_IDENTITY_POLICY} from '../../../ai/identity.mjs';
 // Reuses the existing Vercel variable name. Never enable OpenAI or paid fallback.
 export function createModel({env=process.env,transport=fetchPublic}={}) {
   if(env.VERCEL&&!env.MALGUARD_WORKER_PROXY_TOKEN&&(!env.MALGUARD_AI_MODEL_PROVIDER||env.MALGUARD_AI_MODEL_PROVIDER==='workers_ai'))return remoteModel;
@@ -12,7 +13,7 @@ export function createModel({env=process.env,transport=fetchPublic}={}) {
   };
   return {status,async respond(message,locale,history=[]){
     if(status().state==='disabled')return null;
-    const body=JSON.stringify({systemInstruction:{parts:[{text:`You are MalGuard AI. Reply naturally in ${locale==='fa'?'Persian':'English'} and help with general and technical questions. Default to concise natural paragraphs, with headings or lists only when they help the user. Security tools run separately. Never invent checks, security verdicts, safety guarantees, engine counts or confidence scores. Never request secrets.`}]},contents:[...history.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]})),{role:'user',parts:[{text:message}]}],generationConfig:{maxOutputTokens:600}});
+    const body=JSON.stringify({systemInstruction:{parts:[{text:`You are MalGuard AI. Reply naturally in ${locale==='fa'?'Persian':'English'} and help with general and technical questions. Default to concise natural paragraphs, with headings or lists only when they help the user. Security tools run separately. Never invent checks, security verdicts, safety guarantees, engine counts or confidence scores. Never request secrets. ${PRODUCT_IDENTITY_POLICY}`}]},contents:[...history.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]})),{role:'user',parts:[{text:message}]}],generationConfig:{maxOutputTokens:600}});
     const response=await transport(`https://generativelanguage.googleapis.com/v1beta/models/${env.MALGUARD_AI_GEMINI_MODEL}:generateContent`,{method:'POST',noRedirect:true,limit:128*1024,totalTimeout:18000,timeout:15000,headers:{'Content-Type':'application/json','x-goog-api-key':env.GEMINI_API_KEY,'Content-Length':Buffer.byteLength(body)},body});
     if(response.status!==200){let details;try{details=JSON.parse(response.bytes.toString('utf8'));}catch{}throw httpFailure(response.status,response.headers,details);}
     const data=JSON.parse(response.bytes.toString('utf8'));
