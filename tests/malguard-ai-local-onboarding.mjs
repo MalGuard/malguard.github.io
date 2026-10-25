@@ -93,6 +93,15 @@ try{
  await startupPage.goto(base+'/ai/');await startupPage.waitForFunction(()=>document.querySelector('#model option[value="local_medium"]')?.disabled===false);
  assert.equal(await startupPage.locator('#model').inputValue(),'local_medium','A faster cloud status response must not discard the saved local model');
  await startup.close();console.log('PASS saved local selection survives startup timing differences');
+ for(const statusDelay of [0,400]){
+  const cloud=await browser.newContext(),cloudPage=await cloud.newPage();
+  await cloud.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});});
+  await cloud.route('**/api/malguard-ai/status',async r=>{await new Promise(resolve=>setTimeout(resolve,statusDelay));await r.fulfill({contentType:'application/json',body:JSON.stringify({enabled:true,tools:{},model:{state:'configured',defaultModel:'llama70b',models:[{id:'llama70b',label:'Llama',state:'configured'},{id:'cf_gptoss120',label:'GPT-OSS 120B',state:'configured'}]}})});});
+  await cloudPage.goto(base+'/ai/');await cloudPage.waitForFunction(()=>document.getElementById('model').value==='cf_gptoss120');
+  await cloudPage.locator('#model').selectOption('local_medium');await cloudPage.locator('#language').click();assert.equal(await cloudPage.locator('#model').inputValue(),'local_medium','Explicit local choice survives rerender');
+  await cloud.close();
+ }
+ console.log('PASS strongest configured cloud default survives capability/status ordering and preserves explicit choice');
  const context=await browser.newContext(),page=await context.newPage();
  await context.addInitScript(()=>{Object.defineProperty(navigator,'gpu',{value:undefined});window.workerCalls=[];window.Worker=class{postMessage(data){window.workerCalls.push(data);}terminate(){}};});
  await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());

@@ -3,7 +3,7 @@ import {publicFailure,retryDetails} from './service-errors.mjs';
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
 import {planChat} from './routing.mjs';
-import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=bottom-chat-20261024';
+import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=grok-solid-20261025';
 import {replyLanguage} from './language.mjs';
 import {typeText,typeActivity,formatElapsed} from './reply-motion.mjs';
 const $=id=>document.getElementById(id);
@@ -13,6 +13,7 @@ try{if(localStorage.getItem('malguard-language')==='fa')locale='fa';}catch{}
 let activeTurn,activityAnimation;
 let localReady=false,modelsInitialized=false;
 let lastSelectedModel='';
+let cloudDefaultApplied=false,modelChosen=false;
 let localOfferPending=false;
 let preferredLocal;try{preferredLocal=localStorage.getItem('malguard.ai.localModel.v1');}catch{}
 const localChat=createLocalChat(),downloadPermissions=new Set();
@@ -158,8 +159,11 @@ function renderStatus(){
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
   for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t('auto'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured';$('model').append(option);}
   const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);
-  const defaultId=service?.model?.defaultModel||(localReady?'local_fast':'');
-  $('model').value=!modelsInitialized&&localReady?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured')?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
+  const defaultId=remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':service?.model?.defaultModel||(localReady?'local_fast':'');
+  const strongCloudReady=remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured');
+  const applyCloudDefault=strongCloudReady&&!cloudDefaultApplied&&!modelChosen&&!Object.hasOwn(localModels,preferredLocal);
+  $('model').value=applyCloudDefault?'cf_gptoss120':!modelsInitialized&&localReady?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured')?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
+  if(strongCloudReady)cloudDefaultApplied=true;
   lastSelectedModel=$('model').value;
   if(service||localReady)modelsInitialized=true;
  }
@@ -168,7 +172,7 @@ function renderStatus(){
  const modelLabel=selected?.label||service?.model?.model||'';
  const modelNotice=locale==='fa'?`مدل تنظیم‌شده: ${modelLabel}`:`Configured model: ${modelLabel}`;
  $('model-status').textContent=service?.model?.state==='configured'?modelNotice:t('modelOff');
- if(service?.model?.state==='configured')document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'زبان پاسخ از متن پیام تشخیص داده می‌شود؛ هر مدل محدودیت سهمیهٔ خودش را دارد.':'Replies follow your message language. Each model has its own usage limits.';
+ if(service?.model?.state==='configured')document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌های کلادفلر سهمیهٔ مشترک روزانه دارند. GPT-OSS 120B برای کارهای سنگین و Qwen3 30B برای مصرف کمتر سهمیه؛ اجرای محلی سقف روزانهٔ سرویس‌دهنده ندارد.':'Cloudflare models share a daily account quota. Use GPT-OSS 120B for demanding tasks or Qwen3 30B for lower quota use. On-device chat has no provider daily quota.';
  $('manage-models').disabled=busy||localOfferPending;
  $('offer-download-button').disabled=busy||!localReady;
  $('offer-compatibility').textContent=localReady?'':t('localCompatibility');
@@ -326,7 +330,7 @@ for(const [name,id]of Object.entries(permissionInputs)){$(id).checked=saved[name
 $('revoke-permissions').onclick=()=>{revokePermissions(permissionStorage);for(const id of Object.values(permissionInputs))$(id).checked=false;};
 $('mode').onchange=()=>translate();
 function rememberLocalModel(){const model=$('model').value;if(Object.hasOwn(localModels,model))try{localStorage.setItem('malguard.ai.localModel.v1',model);}catch{}}
-$('model').onchange=()=>{if($('model').value==='__downloads'){$('model').value=lastSelectedModel;void offerLocalModels();return;}rememberLocalModel();renderStatus();};
+$('model').onchange=()=>{if($('model').value==='__downloads'){$('model').value=lastSelectedModel;void offerLocalModels();return;}modelChosen=true;rememberLocalModel();renderStatus();};
 for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()=>{
  if(busy)return;
  $('tool').value='auto';
