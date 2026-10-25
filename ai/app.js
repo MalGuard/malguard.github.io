@@ -5,6 +5,7 @@ import {readPermissions,savePermissions,revokePermissions} from './permissions.m
 import {planChat,planCloudChat} from './routing.mjs?v=builder-file-blocks-20261025';
 import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=builder-file-blocks-20261025';
 import {replyLanguage} from './language.mjs';
+import {answerIdentityQuestion} from './identity.mjs';
 import {typeText,formatElapsed} from './reply-motion.mjs';
 import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=builder-file-blocks-20261025';
 import {createBuilder} from './builder.mjs?v=builder-file-blocks-20261025';
@@ -372,6 +373,22 @@ $('composer').onsubmit=async event=>{
  const message=$('message').value.trim(),mode=activeMode,file=mode==='worker'?$('file').files[0]:undefined,tool=mode==='worker'?$('workspace-tool').value:'auto';
  if(!message&&!file)return;
  if(mode==='build'){await runBuild(message);return;}
+  if(mode==='chat'){
+    const identity=answerIdentityQuestion(message,modelHistory);
+    if(identity){
+      const turn=beginTurn('thinking');
+      history.push({bubble:message});
+      followReply(()=>$('conversation').append(el('div',message,'bubble')));
+      try{
+        const generated={text:identity.text,provider:'malguard',model:'product_identity',securityAnalysis:false};
+        await presentResponse({generated},turn);
+        modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text});
+        modelHistory.splice(0,Math.max(0,modelHistory.length-8));
+        if($('message').value.trim()===message)$('message').value='';
+      }finally{endTurn(turn);}
+      return;
+    }
+  }
  const consent={fileUpload:$('file-consent').checked,websiteFetch:$('website-consent').checked,remoteLookup:$('lookup-consent').checked,modelShare:$('model-consent').checked,...(mode==='worker'?{isolatedExecution:$('isolation-consent').checked}:{})};
  let input={};
  if(file&&!consent.fileUpload){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
