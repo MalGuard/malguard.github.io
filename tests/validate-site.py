@@ -168,7 +168,8 @@ assert indexed_urls and len(indexed_urls) == len(set(indexed_urls))
 assert all(url.startswith(canonical_base) for url in indexed_urls), 'Sitemap includes a noncanonical host'
 for indexed_url in indexed_urls:
     relpath = indexed_url[len(canonical_base):]
-    published_page = ROOT / (relpath or 'index.html')
+    # Canonical directory URLs (for example /ai/) resolve to their index.html.
+    published_page = ROOT / (relpath + 'index.html' if relpath.endswith('/') else relpath or 'index.html')
     assert published_page.is_file(), f'Sitemap points to a missing page: {indexed_url}'
     expected_canonical = f'<link rel="canonical" href="{indexed_url}">'
     assert expected_canonical in published_page.read_text(), f'Wrong canonical: {relpath}'

@@ -19,6 +19,8 @@ Language: English; a Persian (فارسی) GTA mod security guide is also availab
 - [Trust Center](https://malguard.site/trust.html): Privacy, security boundaries and limitations.
 - [Documentation](https://malguard.site/docs.html): Product documentation.
 - [About MalGuard](https://malguard.site/about.html): Project purpose and scope.
+- [Official founder profile — محمدرضا آذردرخش / Mohammadreza Azarderakhsh](https://malguard.site/founder.html): Factual bilingual profile and portrait of the MalGuard founder.
+- [MalGuard AI](https://malguard.site/ai/): Bilingual chat, coding workspace and permission-based file/hash/link inspection; model and tool availability varies.
 - [MalGuard Core source code](https://github.com/MalGuard/malguard-core): Public defensive security code.
 
 ## October 2026 defensive guides
@@ -29,7 +31,8 @@ Language: English; a Persian (فارسی) GTA mod security guide is also availab
 - [راهنمای فارسی امضای دیجیتال و SHA-256](https://malguard.site/research/windows-file-signatures-fa.html): تفاوت هش فایل، اعتبار امضا و هشدارهای ویندوز.
 
 ## Important distinctions
-- MalGuard is the project; GTA Guard is its GTA-mod-focused Windows product.
+- MalGuard is the project; GTA Guard is its GTA-mod-focused Windows product; MalGuard AI is its bilingual assistant and optional security-tools interface.
+- Threat Radar is a separate historical advisory viewer, not the assistant, and must never be described as an AI chat.
 - Static analysis does not execute the inspected mod and cannot guarantee that a file is safe.
 - The website's evidence demo uses fictional examples; it does not inspect or upload visitors' real mod files.
 - Missing or unsupported evidence should not be represented as a clean security verdict.

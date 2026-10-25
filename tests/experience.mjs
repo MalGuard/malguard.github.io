@@ -141,7 +141,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
      assert.equal(await page.locator('main').evaluate(el=>el.inert),false);
      assert.equal(await page.locator('#siteAdminPassword').count(),0);
      await page.goto(base+'/malware-ai-windows.html');await settle(page);
-    assert.equal(await page.getByRole('heading',{name:'Now replaced by Threat Radar.'}).count(),1);
+    assert.equal(await page.getByRole('heading',{name:'Continue with MalGuard AI.'}).count(),1);
     assert.equal(await page.locator('#accessGate').count(),0,'Retired chat must not expose authentication or messaging');
     await context.close();
   });

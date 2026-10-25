@@ -42,8 +42,8 @@ for(const name of names){
    assert.equal(await page.locator('#products article.product').count(),3,'Three product cards retained');
    assert.deepEqual(await page.locator('#products article.product a.text-link').evaluateAll(nodes=>
     nodes.map(n=>new URL(n.href).pathname)),[
-    '/gta-guard.html','/game-scam-guard.html','/threat-radar.html'
-   ],'Product destinations unchanged');
+    '/gta-guard.html','/game-scam-guard.html','/ai/'
+   ],'Current public product destinations');
    assert.equal(await page.locator('#products canvas').count(),0,'No heavyweight product renderer');
    assert.ok(['vector','webgl'].includes(await page.locator('.flow-stage').getAttribute('data-renderer')),'Renderer must be initialized');
    const layout=await page.evaluate(()=>({
