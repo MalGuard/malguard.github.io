@@ -1,3 +1,5 @@
+import {PRODUCT_IDENTITY_POLICY} from './identity.mjs';
+
 export const desktopModels=Object.fromEntries([
  ['native_qwen8','Qwen3 8B','qwen3:8b',5.2],
  ['native_qwen32','Qwen3 32B','qwen3:32b',20],
@@ -46,7 +48,7 @@ export function createDesktopChat({fetchImpl=globalThis.fetch,connectTimeout=500
    if(typeof message!=='string'||!message.trim()||message.length>5000||!['en','fa'].includes(locale)||!Array.isArray(history)||history.length>8||history.some(row=>!row||!['user','assistant'].includes(row.role)||typeof row.content!=='string'||row.content.length>2000))throw fail('desktop_invalid_input');
    const policy=locale==='fa'?'فقط به فارسی روان و طبیعی پاسخ بده. نتیجهٔ بررسی امنیتی یا جست‌وجوی وب جعل نکن. اطلاعات محرمانه نخواه.':'Reply in concise natural English. Never invent security checks, scan results or web searches. Never request secrets.';
    const selected=desktopModels[model];
-   const data=await request('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:selected.model,stream:false,think:false,keep_alive:'5m',messages:[{role:'system',content:policy},...history.map(({role,content})=>({role,content})),{role:'user',content:message}],options:{num_predict:2048,num_ctx:8192}})},signal,responseTimeout);
+   const data=await request('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:selected.model,stream:false,think:false,keep_alive:'5m',messages:[{role:'system',content:policy+' '+PRODUCT_IDENTITY_POLICY},...history.map(({role,content})=>({role,content})),{role:'user',content:message}],options:{num_predict:2048,num_ctx:8192}})},signal,responseTimeout);
    if(data.model!==selected.model||data.done!==true||data.done_reason&&data.done_reason!=='stop'||data.message?.role!=='assistant'||typeof data.message.content!=='string'||!data.message.content.trim()||data.message.content.length>16000||/<\/?think>/i.test(data.message.content))throw fail('desktop_incomplete_response');
    return {text:data.message.content,model:selected.model,selectedModel:model,provider:'ollama',securityAnalysis:false};
   }

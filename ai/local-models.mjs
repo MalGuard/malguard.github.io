@@ -1,3 +1,5 @@
+import {PRODUCT_IDENTITY_POLICY} from './identity.mjs';
+
 export const localModels={
  local_fast:{id:'local_fast',label:'Light · Qwen3 1.7B · on device',model:'Qwen3-1.7B-q4f16_1-MLC',revision:'80b3abcec6c3b3f5355dc0cc99cc4fb578f192bc',downloadMB:985,gpuMB:2037},
  local_medium:{id:'local_medium',label:'Strong · Qwen3 4B · on device',model:'Qwen3-4B-q4f16_1-MLC',revision:'a5c9fab855e3ccbdfed2e7e69683d75f30332161',downloadMB:2268,gpuMB:3432}
@@ -25,7 +27,7 @@ export async function localCapability(gpu=globalThis.navigator?.gpu){
 export function localMessages(message,locale,history=[]){
  const instruction=locale==='fa'?'پاسخ را کوتاه، طبیعی و فقط به فارسی روان بنویس؛ عنوان و فهرست را فقط وقتی لازم است اضافه کن. برای سلام دوستانه جواب بده. هیچ نتیجهٔ بررسی امنیتی یا جست‌وجوی وب جعل نکن.':'Reply concisely in natural English paragraphs; add headings or lists only when useful. Never invent security checks or web searches.';
  // A short context keeps GPU memory bounded. Conversation remains page memory.
- return [{role:'system',content:instruction},...history.slice(-2).map(m=>({role:m.role,content:m.content.slice(0,100)})),{role:'user',content:message}];
+ return [{role:'system',content:instruction+' '+PRODUCT_IDENTITY_POLICY},...history.slice(-2).map(m=>({role:m.role,content:m.content.slice(0,100)})),{role:'user',content:message}];
 }
 export function createLocalChat({workerFactory=()=>new Worker('/assets/ai/local-worker.js?v=workspace-20261025',{type:'module'}),timeout=900000}={}){
  let worker,pending;

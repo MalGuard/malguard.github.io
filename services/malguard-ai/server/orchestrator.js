@@ -9,6 +9,7 @@ import {createFileSandbox} from './adapters/file-sandbox.js';
 import {createUrlSandbox} from './adapters/url-sandbox.js';
 import {modelAdapter} from './model.js';
 import {replyLanguage} from './language.js';
+import {answerIdentityQuestion} from '../../../ai/identity.mjs';
 import {planChat} from '../../../ai/routing.mjs';
 export function createOrchestrator(adapters = {gta_guard:createGtaGuard(),game_scam_guard:createGameScamGuard(),malwarebazaar:createMalwareBazaar(),urlhaus:createUrlhaus(),ai_web:aiWeb,file_sandbox:createFileSandbox(),url_sandbox:createUrlSandbox()},model=modelAdapter) {
   const status = () => ({model:model.status(), tools:Object.fromEntries(Object.entries(adapters).map(([id,a])=>[id,a.status()])),modes:['chat','worker'],history:'client_memory',streaming:'ndjson_events',retention:'no_application_storage'});
@@ -31,6 +32,10 @@ export function createOrchestrator(adapters = {gta_guard:createGtaGuard(),game_s
     const routed=['auto','gemini_flash','groq_gptoss'].includes(request.model);
     const tool=mode==='chat'?null:request.tool!=='auto'?request.tool:input.file?'gta_guard':input.sha256?'malwarebazaar':input.url?'game_scam_guard':null;
     const wrap=extra=>({locale,mode,model:model.status(),...extra});
+    if(mode==='chat'){
+      const identity=answerIdentityQuestion(request.message,history);
+      if(identity)return wrap({result:null,generated:{text:identity.text,provider:'malguard',model:'product_identity',securityAnalysis:false}});
+    }
     if(!tool){
       await refresh();
       if(mode==='worker'){
