@@ -1,12 +1,14 @@
-import {errorMessage} from './error-message.mjs?v=downloads-guide-20261025';
-import {publicFailure,retryDetails} from './service-errors.mjs?v=downloads-guide-20261025';
+import {errorMessage} from './error-message.mjs?v=builder-20261025';
+import {publicFailure,retryDetails} from './service-errors.mjs?v=builder-20261025';
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
-import {planChat,planCloudChat} from './routing.mjs?v=downloads-guide-20261025';
-import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=downloads-guide-20261025';
+import {planChat,planCloudChat} from './routing.mjs?v=builder-20261025';
+import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=builder-20261025';
 import {replyLanguage} from './language.mjs';
 import {typeText,formatElapsed} from './reply-motion.mjs';
-import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=downloads-guide-20261025';
+import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=builder-20261025';
+import {createBuilder} from './builder.mjs?v=builder-20261025';
+import {parseProposal} from './build-project.mjs?v=builder-20261025';
 const $=id=>document.getElementById(id);
 const names={gta_guard:'GTA Guard',game_scam_guard:'Game Scam Guard',ai_web:'AI Web',malwarebazaar:'MalwareBazaar',urlhaus:'URLhaus',file_sandbox:'File sandbox',url_sandbox:'Link sandbox'};
 let locale='en',service,busy=false;
@@ -21,9 +23,10 @@ const localChat=createLocalChat(),downloadPermissions=new Set();
 const preparedModels=new Set();
 let preparingModel;
 let welcomeSeen=false;try{welcomeSeen=localStorage.getItem('malguard.ai.welcome.v3')==='seen';}catch{}
-const conversations={chat:{history:[],modelHistory:[],draft:'',model:''},worker:{history:[],modelHistory:[],draft:'',model:'cf_qwen3'}};
+const conversations={chat:{history:[],modelHistory:[],draft:'',model:''},worker:{history:[],modelHistory:[],draft:'',model:'cf_qwen3'},build:{history:[],modelHistory:[],draft:'',model:'cf_qwen_coder'}};
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
+const builder=createBuilder({locale:()=>locale});
 let desktopConnecting=false;
 const permissionInputs={fileUpload:'file-consent',websiteFetch:'website-consent',remoteLookup:'lookup-consent',modelShare:'model-consent'};
 const copy={
@@ -56,14 +59,15 @@ Object.assign(copy.fa,{desktopModels:'مدل‌های دسکتاپ',chatTab:'گ�
 Object.assign(copy.en,{scope:'Only selected checks run. Isolated execution requires separate permission.',fileConsent:'Send the file to MalGuard for in-memory static analysis, or isolated execution only with its separate permission. Files are not stored or submitted to threat databases.',workspaceLight:'Light · Qwen3 30B',workspaceStrong:'Strong · GPT-OSS 120B'});
 Object.assign(copy.fa,{scope:'فقط بررسی انتخاب‌شده انجام می‌شود. اجرای ایزوله مجوز جداگانه می‌خواهد.',fileConsent:'ارسال فایل به MalGuard برای تحلیل ایستا در حافظه؛ اجرای ایزوله فقط با مجوز جداگانه. فایل ذخیره یا به پایگاه تهدید ارسال نمی‌شود.',workspaceLight:'سبک · Qwen3 30B',workspaceStrong:'قوی · GPT-OSS 120B'});
 function switchMode(next,{carryDraft=false}={}){
- if(busy||!['chat','worker'].includes(next)){$('mode').value=activeMode;return;}
- if(next===activeMode){$('mode').value=next;renderStatus();return;}
+ if(busy||!['chat','worker','build'].includes(next)){$('mode').value=activeMode;return;}
+ if(next===activeMode){$('mode-picker').open=false;$('mode').value=next;renderStatus();return;}
  const previous=conversations[activeMode];previous.draft=$('message').value;previous.model=$('model').value;
+ if(activeMode==='build')builder.stop();
  activeMode=next;history=conversations[next].history;modelHistory=conversations[next].modelHistory;
  $('mode').value=next;$('message').value=carryDraft?previous.draft:conversations[next].draft;
- if(next==='chat'){$('tool').value='auto';$('remove-file').click();if(conversations.chat.model)$('model').value=conversations.chat.model;}
+ if(next!=='worker'){$('tool').value='auto';$('remove-file').click();$('model').value=conversations[next].model||(next==='build'?'cf_qwen_coder':'auto');}
  else $('tool').value=$('workspace-tool').value;
- $('isolation-consent').checked=false;closeAttach();translate();
+ $('isolation-consent').checked=false;$('mode-picker').open=false;closeAttach();translate();
 }
 Object.assign(copy.en,{downloadEntry:'↓ Download models · choose for your device',downloadHubInfo:'Choose where the model should run. Opening this guide does not download anything.',browserRoute:'In this browser',browserRouteInfo:'Two small models · ~985 MB or ~2.3 GB · compatible WebGPU required',desktopRoute:'On your computer with Ollama',desktopRouteInfo:'Six larger models · ~5.2–404 GB · installation guide and commands',desktopSteps:'1. Install Ollama. 2. Run the download command below in your terminal. 3. Allow this site and restart Ollama, as explained below. 4. Press Connect, close this window and choose the installed model in Chat.',desktopSetup:'Site connection settings',copyCommand:'Copy download command',commandCopied:'Download command copied'});
 Object.assign(copy.fa,{downloadEntry:'↓ دانلود مدل‌ها · انتخاب مناسب دستگاهت',downloadHubInfo:'انتخاب کن مدل کجا اجرا شود. باز کردن این راهنما چیزی دانلود نمی‌کند.',browserRoute:'داخل همین مرورگر',browserRouteInfo:'دو مدل کم‌حجم · حدود ۹۸۵ مگابایت یا ۲٫۳ گیگابایت · نیازمند WebGPU سازگار',desktopRoute:'روی کامپیوتر با Ollama',desktopRouteInfo:'شش مدل بزرگ‌تر · حدود ۵٫۲ تا ۴۰۴ گیگابایت · همراه راهنما و دستور نصب',desktopSteps:'۱. Ollama را نصب کن. ۲. دستور دانلود زیر را در ترمینال اجرا کن. ۳. طبق توضیح پایین، دسترسی سایت را تنظیم و Ollama را دوباره اجرا کن. ۴. «اتصال» را بزن، این پنجره را ببند و مدل نصب‌شده را در چت انتخاب کن.',desktopSetup:'تنظیم دسترسی سایت',copyCommand:'کپی دستور دانلود',commandCopied:'دستور دانلود کپی شد'});
@@ -95,6 +99,8 @@ async function runDesktop(model,message){
  try{const generated=await desktopChat.respond({model,message,locale:replyLanguage(message,locale,modelHistory),history:modelHistory.slice(-8),signal:turn.controller.signal});await presentResponse({generated},turn);modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-8));if($('message').value.trim()===message)$('message').value='';}
  catch{if(turn.controller.signal.aborted)stopped(turn);else showError('desktopFailed');}finally{endTurn(turn);}
 }
+Object.assign(copy.en,{buildTab:'Build and code',projectTitle:'My project',chatChoice:'Questions and conversation',workChoice:'File, link and web tools',buildChoice:'Edit files, preview and export',buildHint:'Describe what to build in the conversation. Review the proposed code, apply it to files, then run the preview.',exportProject:'Download ZIP',projectFile:'Project file',newFile:'New file',addFile:'Add file',importCode:'Import files',undoProject:'Undo apply',codeEditor:'Code editor',projectPreview:'Project preview',runPreview:'Run preview',stopPreview:'Stop preview',previewOutput:'Preview output',previewEmpty:'Run preview to see your project.',shareCode:'Include the currently selected file in my next model request.',buildLimit:'Files stay in page memory; export before leaving. Local HTML/CSS/JS preview has no network access. Run backend code and packages in your own development environment after export.',buildPlaceholder:'Describe what to build or change…',buildTooLarge:'This request and shared file exceed the coding model input budget. Shorten the request or share a smaller file.',buildNoModel:'Choose an enabled coding model or connect an installed desktop model.',buildUnstructured:'The model returned a text answer. No project files were changed; ask for a smaller, complete file proposal.'});
+Object.assign(copy.fa,{buildTab:'ساخت و کدنویسی',projectTitle:'پروژهٔ من',chatChoice:'پرسش و گفت‌وگوی روزمره',workChoice:'ابزارهای فایل، لینک و سرچ وب',buildChoice:'ویرایش فایل، پیش‌نمایش و خروجی پروژه',buildHint:'در گفت‌وگو بگو چه بسازیم؛ کد پیشنهادی را بررسی کن، در فایل‌ها اعمال کن و پیش‌نمایش را اجرا کن.',exportProject:'دانلود ZIP پروژه',projectFile:'فایل پروژه',newFile:'فایل جدید',addFile:'افزودن فایل',importCode:'وارد کردن فایل',undoProject:'برگرداندن',codeEditor:'ویرایشگر کد',projectPreview:'پیش‌نمایش پروژه',runPreview:'اجرای پیش‌نمایش',stopPreview:'توقف',previewOutput:'خروجی پیش‌نمایش',previewEmpty:'برای دیدن نتیجه، پیش‌نمایش را اجرا کن.',shareCode:'برای اصلاح دقیق، فایل انتخاب‌شده را به درخواست بعدی پیوست کن.',buildLimit:'فایل‌ها در حافظهٔ صفحه‌اند؛ قبل از خروج دانلود کن. پیش‌نمایش HTML/CSS/JS بدون دسترسی شبکه اجرا می‌شود. کد بک‌اند و بسته‌ها را پس از دانلود در محیط توسعهٔ خودت اجرا کن.',buildPlaceholder:'بگو چه بسازیم یا کدام بخش را تغییر بدهیم…',buildTooLarge:'درخواست و کد پیوست از ظرفیت ورودی این مسیر مدل بیشتر است؛ متن درخواست یا فایل را کوتاه‌تر کن.',buildNoModel:'یک مدل کدنویسی فعال انتخاب کن یا مدل نصب‌شدهٔ دسکتاپ را متصل کن.',buildUnstructured:'مدل پاسخ متنی داده است؛ فایل‌های پروژه تغییر نکردند. یک پیشنهاد کوچک‌تر با فایل کامل بخواه.'});
 function updateElapsed(turn){
  const text=formatElapsed(turn.elapsedMs??performance.now()-turn.startedAt,locale);
  if($('activity-elapsed').textContent!==text){const node=$('activity-elapsed'),previous=node.textContent;node.textContent=text;if(previous&&!matchMedia('(prefers-reduced-motion: reduce)').matches)node.animate([{opacity:.45,transform:'translateY(2px)'},{opacity:1,transform:'translateY(0)'}],{duration:160,easing:'ease-out'});}
@@ -149,12 +155,13 @@ function stopped(turn){
  const response={message:t('stopped'),interrupted:true};history.push({response});renderResponse(response,false);
 }
 function followReply(update){
+ if(activeMode==='build'&&matchMedia('(min-width:901px)').matches){const log=$('conversation'),follow=log.scrollTop+log.clientHeight>=log.scrollHeight-120;update();if(follow)log.scrollTop=log.scrollHeight;return;}
  const follow=innerHeight+scrollY>=document.documentElement.scrollHeight-160;
  update();if(follow)scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'});
 }
 async function presentResponse(response,turn){
  turn.controller.signal.throwIfAborted();
- if(!response.generated){renderResponse(response);turn.completed=!response.error;return;}
+ if(response.buildProposal||!response.generated){if(response.buildProposal)followReply(()=>renderResponse(response));else renderResponse(response);turn.completed=!response.error;return;}
  const display={...response,generated:{...response.generated,text:''}},card=renderResponse(display,false),answer=card.querySelector('.answer'),actions=card.querySelector('.response-actions');
  card.classList.add('is-typing');actions.hidden=true;setActivity('typing');
  try{
@@ -198,24 +205,25 @@ function renderStatus(){
  $('send').disabled=activeTurn?activeTurn.controller.signal.aborted:!ready||busy;
  $('send').dataset.state=activeTurn?'stop':'send';$('send-arrow').toggleAttribute('hidden',!!activeTurn);$('send-stop').toggleAttribute('hidden',!activeTurn);
  $('send').ariaLabel=t(activeTurn?'stop':'send');$('send').title=t(activeTurn?'stop':'send');$('send-label').textContent=t(activeTurn?'stop':'send');
- for(const id of ['clear','mode','tool','file','remove-file','remove-models','attach-toggle','attach-file','attach-chat','attach-inspect','attach-web','chat-tab','workspace-tab','workspace-tool','workspace-model','isolation-consent','open-downloads'])$(id).disabled=busy;
+ for(const id of ['clear','mode','tool','file','remove-file','remove-models','attach-toggle','attach-file','attach-chat','attach-inspect','attach-web','chat-tab','workspace-tab','build-tab','workspace-tool','workspace-model','isolation-consent','open-downloads'])$(id).disabled=busy;
  $('connection').textContent=!service?(localReady?t('localAvailable'):t('offline')):!ready?t('serviceDisabled'):'';
  const selectedId=$('model').value,remote=service?.model?.models||[],models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار · چهار سطح':'Automatic · four tiers',state:localReady||remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remote.filter(m=>m.id!=='auto'),...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))];
  const cloudAutoReady=remote.some(m=>m.id==='auto'&&m.state==='configured');
  if(models.length){
   $('model').replaceChildren();
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
-  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t(cloudAutoReady?'autoCloud':'autoLocal'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured';$('model').append(option);}
+  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t(cloudAutoReady?'autoCloud':'autoLocal'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured'||activeMode==='build'&&(m.id==='auto'||m.id.startsWith('local_'));$('model').append(option);}
   const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);const desktop=el('option',t('desktopModels')+'…');desktop.value='__desktop';$('model').append(desktop);
-  const defaultId=cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':service?.model?.defaultModel||(localReady?'local_fast':'');
+  const defaultId=activeMode==='build'?(['cf_qwen_coder','cf_gptoss120'].find(id=>remote.some(m=>m.id===id&&m.state==='configured'))||desktopChat.availability.installedIDs[0]||''):cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':service?.model?.defaultModel||(localReady?'local_fast':'');
   const strongCloudReady=cloudAutoReady||remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured');
-  const applyCloudDefault=strongCloudReady&&!cloudDefaultApplied&&!modelChosen&&!Object.hasOwn(localModels,preferredLocal);
-  $('model').value=applyCloudDefault?defaultId:!modelsInitialized&&localReady?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured')?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
+  const applyCloudDefault=activeMode!=='build'&&strongCloudReady&&!cloudDefaultApplied&&!modelChosen&&!Object.hasOwn(localModels,preferredLocal);
+  $('model').value=applyCloudDefault?defaultId:!modelsInitialized&&localReady&&activeMode!=='build'?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured'&&(activeMode!=='build'||m.id!=='auto'&&!m.id.startsWith('local_')))?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
   if(strongCloudReady)cloudDefaultApplied=true;
   lastSelectedModel=$('model').value;
   if(service||localReady)modelsInitialized=true;
  }
- $('model').disabled=busy||activeMode!=='chat';$('model').hidden=activeMode!=='chat';
+ $('model').disabled=busy||activeMode==='worker';$('model').hidden=activeMode==='worker';
+ $('build-tab').setAttribute('aria-pressed',String(activeMode==='build'));$('build-panel').hidden=activeMode!=='build';document.body.dataset.mode=activeMode;document.querySelector('section.workspace').setAttribute('aria-labelledby',activeMode==='build'?'build-title':'title');$('mode-current').textContent=t(activeMode==='build'?'buildTab':activeMode==='worker'?'workspaceTab':'chatTab');$('message').placeholder=t(activeMode==='build'?'buildPlaceholder':$('tool').value==='ai_web'?'webPlaceholder':activeMode==='worker'?'inspectionPlaceholder':'placeholder');builder.refresh();
  $('chat-tab').setAttribute('aria-pressed',String(activeMode==='chat'));$('workspace-tab').setAttribute('aria-pressed',String(activeMode==='worker'));$('workspace-panel').hidden=activeMode!=='worker';$('toolbox').hidden=activeMode!=='worker';$('workspace-panel').ariaLabel=t('workspaceLabel');document.querySelector('.workspace-switch').ariaLabel=t('modeGroup');
  const sandbox=['file_sandbox','url_sandbox'].includes($('workspace-tool').value);$('isolation-consent').closest('label').hidden=!sandbox;
  const toolState=service?.tools?.[$('workspace-tool').value];$('workspace-status').textContent=toolState?`${t(toolState.state)}${toolState.reason?' · '+toolState.reason:''}`:t('workspaceStatus');
@@ -238,6 +246,7 @@ function showError(key,remember=true){if(remember)history.push({error:key});cons
 function renderResponse(response,remember=true){
  if(remember)history.push({response});
  if(response.error){showError(publicFailure(response),false);return;}
+ if(response.buildProposal){const card=builder.proposal(response.buildProposal,response.generated);$('conversation').append(card);return card;}
  if(response.workPlan){const plan=el('article',undefined,'result workspace-plan');plan.append(el('div',t('workPlan'),'eyebrow'),el('p',response.workPlan.text,'answer'),el('p',`${response.workPlan.provider} · ${response.workPlan.model}`,'muted'));$('conversation').append(plan);}else if(response.workPlanError){$('conversation').append(el('p',t('workPlanUnavailable')+' '+errorMessage(response.workPlanError,locale),'muted'));}
  if(response.results){for(const result of response.results)renderResponse({result},false);if(response.message){const n=el('article',undefined,'result');n.append(el('p',response.message));$('conversation').append(n);}return;}
  if(response.message){const n=el('article',undefined,response.interrupted?'reply-stopped':'result');n.append(el('p',response.interrupted?t('stopped'):response.message));$('conversation').append(n);return;}
@@ -328,11 +337,22 @@ async function runLocal(model,message,consent){
   await presentResponse({generated},turn);modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-8));if($('message').value.trim()===message)$('message').value='';
  }catch{if(turn.controller.signal.aborted)stopped(turn);else showError('localFailed');}finally{endTurn(turn);}
 }
+async function runBuild(message){
+ let prompt;try{prompt=builder.prompt(message);}catch{showError('buildTooLarge');return;}
+ const selected=$('model').value,native=Object.hasOwn(desktopModels,selected);
+ if(!selected){showError('buildNoModel');return;}
+ if(!native&&!$('model-consent').checked){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
+ const contextHistory=modelHistory.slice(-6);builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
+ try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
+ else{const r=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:prompt,locale,mode:'chat',tool:'auto',model:selected,history:contextHistory,consent:{modelShare:true,remoteLookup:false}}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(45000)])});const data=await r.json();if(!r.ok||data.error){showError(publicFailure(data));return;}generated=data.generated;}
+ if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn);if(!proposal)$('build-status').textContent=t('buildUnstructured');modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
+ }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error.name==='TimeoutError'?'provider_timeout':'model_unavailable'});}finally{endTurn(turn);}
+}
 $('stop-local').onclick=stopTurn;
 $('manage-models').onclick=offerLocalModels;
 function closeAttach(focus=false){$('attach-options').hidden=true;$('attach-toggle').setAttribute('aria-expanded','false');if(focus)$('attach-toggle').focus();}
 $('attach-toggle').onclick=()=>{if(busy)return;const opening=$('attach-options').hidden;$('attach-options').hidden=!opening;$('attach-toggle').setAttribute('aria-expanded',String(opening));};
-$('attach-file').onclick=()=>{closeAttach();$('file').click();};
+$('attach-file').onclick=()=>{closeAttach();$(activeMode==='build'?'build-import':'file').click();};
 function chooseAction(mode,tool){if(busy)return;switchMode(mode,{carryDraft:true});$('tool').value=tool;$('workspace-tool').value=tool;closeAttach();translate();$('message').placeholder=t(tool==='ai_web'?'webPlaceholder':mode==='worker'?'inspectionPlaceholder':'placeholder');$('message').focus();}
 $('attach-chat').onclick=()=>chooseAction('chat','auto');
 $('attach-inspect').onclick=()=>chooseAction('worker','auto');
@@ -343,7 +363,7 @@ document.addEventListener('pointerdown',event=>{const panel=$('settings-panel');
 document.addEventListener('keydown',event=>{if(event.key==='Escape')$('settings-panel').open=false;});
 $('cancel-download').onclick=()=>{if(preparingModel){downloadPermissions.delete(preparingModel);stopTurn();}};
 $('remove-models').onclick=async()=>{if(busy)return;busy=true;renderStatus();try{await localChat.clear();downloadPermissions.clear();preparedModels.clear();$('local-status').textContent=t('localRemoved');}catch{$('local-status').textContent=t('localFailed');}finally{busy=false;renderStatus();}};
-addEventListener('pagehide',()=>{stopTurn();localChat.stop();desktopChat.stop();});
+addEventListener('pagehide',()=>{builder.stop();stopTurn();localChat.stop();desktopChat.stop();});
 $('message').addEventListener('keydown',event=>{
  if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();if(!busy)$('composer').requestSubmit();}
 });
@@ -351,6 +371,7 @@ $('composer').onsubmit=async event=>{
  event.preventDefault();if(busy){stopTurn();return;}
  const message=$('message').value.trim(),mode=activeMode,file=mode==='worker'?$('file').files[0]:undefined,tool=mode==='worker'?$('workspace-tool').value:'auto';
  if(!message&&!file)return;
+ if(mode==='build'){await runBuild(message);return;}
  const consent={fileUpload:$('file-consent').checked,websiteFetch:$('website-consent').checked,remoteLookup:$('lookup-consent').checked,modelShare:$('model-consent').checked,...(mode==='worker'?{isolatedExecution:$('isolation-consent').checked}:{})};
  let input={};
  if(file&&!consent.fileUpload){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
@@ -394,9 +415,12 @@ $('composer').onsubmit=async event=>{
 let permissionStorage;try{permissionStorage=globalThis.localStorage;}catch{}
 const saved=readPermissions(permissionStorage);
 for(const [name,id]of Object.entries(permissionInputs)){$(id).checked=saved[name];$(id).onchange=()=>savePermissions(permissionStorage,Object.fromEntries(Object.entries(permissionInputs).map(([k,v])=>[k,$(v).checked])));}
-$('revoke-permissions').onclick=()=>{$('isolation-consent').checked=false;revokePermissions(permissionStorage);for(const id of Object.values(permissionInputs))$(id).checked=false;};
+$('revoke-permissions').onclick=()=>{$('build-share-code').checked=false;$('isolation-consent').checked=false;revokePermissions(permissionStorage);for(const id of Object.values(permissionInputs))$(id).checked=false;};
 $('mode').onchange=()=>switchMode($('mode').value);
-$('chat-tab').onclick=()=>switchMode('chat');$('workspace-tab').onclick=()=>switchMode('worker');
+$('mode-toggle').addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();$('mode-picker').open=true;$(activeMode==='build'?'build-tab':activeMode==='worker'?'workspace-tab':'chat-tab').focus();}});
+for(const [index,id]of ['chat-tab','workspace-tab','build-tab'].entries())$(id).addEventListener('keydown',event=>{if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();const ids=['chat-tab','workspace-tab','build-tab'];$(ids[event.key==='Home'?0:event.key==='End'?2:(index+(event.key==='ArrowDown'?1:2))%3]).focus();}});
+$('chat-tab').onclick=()=>switchMode('chat');$('workspace-tab').onclick=()=>switchMode('worker');$('build-tab').onclick=()=>switchMode('build');
+document.addEventListener('pointerdown',event=>{if(!$('mode-picker').contains(event.target))$('mode-picker').open=false;});document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('mode-picker').open){$('mode-picker').open=false;$('mode-toggle').focus();}});
 $('workspace-tool').onchange=()=>{$('tool').value=$('workspace-tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
 $('tool').onchange=()=>{$('workspace-tool').value=$('tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
 function rememberLocalModel(){const model=$('model').value;if(Object.hasOwn(localModels,model))try{localStorage.setItem('malguard.ai.localModel.v1',model);}catch{}}

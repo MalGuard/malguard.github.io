@@ -55,6 +55,7 @@ jobs:
           cp -R research _site/research
           cp -R services/game-scam-guard/dist _site/game-scam-guard
           cp -R ai _site/ai
+          cp -R code-preview _site/code-preview
           cp .well-known/security.txt _site/.well-known/security.txt
 
           # Guardrail: development prototypes must never ship in the Pages artifact.
