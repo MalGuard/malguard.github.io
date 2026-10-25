@@ -3,7 +3,7 @@ import {publicFailure,retryDetails} from './service-errors.mjs';
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
 import {planChat} from './routing.mjs';
-import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=bottom-chat-20261024';
+import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=grok-solid-20261025';
 import {replyLanguage} from './language.mjs';
 import {typeText,typeActivity,formatElapsed} from './reply-motion.mjs';
 const $=id=>document.getElementById(id);
@@ -158,7 +158,7 @@ function renderStatus(){
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
   for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t('auto'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured';$('model').append(option);}
   const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);
-  const defaultId=service?.model?.defaultModel||(localReady?'local_fast':'');
+  const defaultId=remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':service?.model?.defaultModel||(localReady?'local_fast':'');
   $('model').value=!modelsInitialized&&localReady?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured')?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
   lastSelectedModel=$('model').value;
   if(service||localReady)modelsInitialized=true;
@@ -168,7 +168,7 @@ function renderStatus(){
  const modelLabel=selected?.label||service?.model?.model||'';
  const modelNotice=locale==='fa'?`مدل تنظیم‌شده: ${modelLabel}`:`Configured model: ${modelLabel}`;
  $('model-status').textContent=service?.model?.state==='configured'?modelNotice:t('modelOff');
- if(service?.model?.state==='configured')document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'زبان پاسخ از متن پیام تشخیص داده می‌شود؛ هر مدل محدودیت سهمیهٔ خودش را دارد.':'Replies follow your message language. Each model has its own usage limits.';
+ if(service?.model?.state==='configured')document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌های کلادفلر سهمیهٔ مشترک روزانه دارند. GPT-OSS 120B برای کارهای سنگین و Qwen3 30B برای مصرف کمتر سهمیه؛ اجرای محلی سقف روزانهٔ سرویس‌دهنده ندارد.':'Cloudflare models share a daily account quota. Use GPT-OSS 120B for demanding tasks or Qwen3 30B for lower quota use. On-device chat has no provider daily quota.';
  $('manage-models').disabled=busy||localOfferPending;
  $('offer-download-button').disabled=busy||!localReady;
  $('offer-compatibility').textContent=localReady?'':t('localCompatibility');
