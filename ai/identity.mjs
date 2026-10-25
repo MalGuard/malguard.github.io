@@ -50,7 +50,7 @@ export function answerIdentityQuestion(message, history = []) {
   const creator = /سازنده|ساخته|ساخت|خالق|بنیان گذار|تاسیس|تأسیس|توسعه دهنده|created|creator|built|made|founded|founder|developed|who started/iu.test(q);
   if (brand && !aiProduct && creator) return {kind:'founder',text:ANSWERS[lang].founder};
 
-  const self = /(?:تو|شما|خودت|خودتون|بنده|دستیار|هوش مصنوعی|you|your|assistant)/iu.test(q);
+  const self = /(?:تو|شما|خودت|خودتون|بنده|دستیار|هوش مصنوعی|you|your|assistant)/iu.test(q) || /(?:سازنده|خالق)\s*(?:ات|ت|تون)|ساختت/iu.test(q);
   if ((aiProduct || self) && creator) return {kind:'product',text:ANSWERS[lang].product};
   return null;
 }
