@@ -19,7 +19,7 @@ for path,text in [
  ('malware-ai-windows.html','noindex,follow'),('threat-radar.html','No invented attack locations.'),
  ('assets/threat-radar.js','document.createElement'),('assets/threat-radar.js','Public advisory data is unavailable'),
  ('assets/experience.css','unicode-bidi:plaintext'),('assets/experience.js',"'#malware-ai':'/ai/'"),
- ('index.html','/threat-radar.html'),('scan-url.html','Scan URL'),('products.html','CHAT &amp; SECURITY TOOLS'),
+ ('index.html','/ai/'),('scan-url.html','Scan URL'),('products.html','CHAT &amp; SECURITY TOOLS'),
  ('download.html','Download Windows EXE'),('download.html','More info'),('download.html','Run anyway'),
  ('download.html','Do not disable protection'),('gta-guard.html','No scanned code is executed'),
  ('gta-guard.html','Check your installed build'),('sandbox-help.html','does not upload scanned files'),

@@ -71,11 +71,11 @@ for(const engine of engines){
   const authCallsBeforeRetirement=authBodies.length;
   await page.goto(base+'/malware-ai-windows.html');
   await page.waitForFunction(()=>document.documentElement.dataset.experienceReady==='true');
-  assert.equal(await page.getByRole('heading',{name:'Now replaced by Threat Radar.'}).count(),1);
+  assert.equal(await page.getByRole('heading',{name:'Continue with MalGuard AI.'}).count(),1);
   assert.equal(await page.locator('#accessGate,#accessPassword,#accessPhone,#aiApp').count(),0,'Retired chat must not expose its old access flow');
   assert.equal(authBodies.length,authCallsBeforeRetirement,'Retired page must not contact authentication API');
   assert.equal(await page.locator('meta[name="robots"]').getAttribute('content'),'noindex,follow');
-  assert.ok(await page.locator('a[href="/threat-radar.html"]').count()>0);
+  assert.ok(await page.locator('a[href="/ai/"]').count()>0);
   assert.deepEqual(errors,[]);reports.push({engine,width,layouts:8,samePageReport:true,shortPersianMessage:true,retryPreserved:true,maskedPassword:true,phoneCountries:['US','IR','AF'],privateAccess:true,retiredAIChatDoesNotAuthenticate:true,errors});await context.close();console.log(`PASS secure forms ${engine} ${width}px`);
  }
  const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:390,height:844},reducedMotion:'no-preference'}),page=await context.newPage();await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
