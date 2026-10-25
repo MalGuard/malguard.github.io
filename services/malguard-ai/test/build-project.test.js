@@ -20,6 +20,9 @@ test('literal file proposals preserve quotes, regexes and newlines without repai
  const code='document.querySelector("button").onclick=()=>console.log(/\\D/g, "hello");\n// next line';
  const output='<summary>A proposed file</summary>\n<file path="app.js">\n'+code+'\n</file>';
  assert.equal(parseProposal(output).files['app.js'],code);
+ assert.equal(parseProposal(output.replace('app.js">\n','app.js">')).files['app.js'],code);
+ assert.equal(parseProposal(output.replace('\n</file>','</file>')).files['app.js'],code);
+ assert.equal(parseProposal(output.replace('path="app.js"',"path='app.js'")).files['app.js'],code);
  assert.equal(parseProposal(output+'\n<file path="app.js">\nx\n</file>'),null);
  assert.equal(parseProposal(output.replace('app.js','../escape.js')),null);
  assert.equal(parseProposal('{"summary":"x",\\"files\\":{}}'),null);
