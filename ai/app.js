@@ -382,7 +382,7 @@ $('composer').onsubmit=async event=>{
 let permissionStorage;try{permissionStorage=globalThis.localStorage;}catch{}
 const saved=readPermissions(permissionStorage);
 for(const [name,id]of Object.entries(permissionInputs)){$(id).checked=saved[name];$(id).onchange=()=>savePermissions(permissionStorage,Object.fromEntries(Object.entries(permissionInputs).map(([k,v])=>[k,$(v).checked])));}
-$('revoke-permissions').onclick=()=>{revokePermissions(permissionStorage);for(const id of Object.values(permissionInputs))$(id).checked=false;};
+$('revoke-permissions').onclick=()=>{$('isolation-consent').checked=false;revokePermissions(permissionStorage);for(const id of Object.values(permissionInputs))$(id).checked=false;};
 $('mode').onchange=()=>switchMode($('mode').value);
 $('chat-tab').onclick=()=>switchMode('chat');$('workspace-tab').onclick=()=>switchMode('worker');
 $('workspace-tool').onchange=()=>{$('tool').value=$('workspace-tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
