@@ -42,7 +42,7 @@ for(const name of names){
    assert.equal(await page.locator('#products article.product').count(),3,'Three product cards retained');
    assert.deepEqual(await page.locator('#products article.product a.text-link').evaluateAll(nodes=>
     nodes.map(n=>new URL(n.href).pathname)),[
-    '/gta-guard.html','/game-scam-guard.html','/threat-radar.html'
+    '/gta-guard.html','/game-scam-guard.html','/ai/'
    ],'Product destinations unchanged');
    assert.equal(await page.locator('#products canvas').count(),0,'No heavyweight product renderer');
    assert.ok(['vector','webgl'].includes(await page.locator('.flow-stage').getAttribute('data-renderer')),'Renderer must be initialized');
@@ -59,10 +59,12 @@ for(const name of names){
    assert.ok(layout.heading,'Visible semantic homepage heading');
    assert.equal(layout.bodyBg,'rgb(8, 10, 14)','Homepage design background changed');
    assert.equal(layout.urls.length,3);
-   assert.equal(await page.locator('.hero-actions>a[data-type="button"]').count(),2,
-    'Homepage CTAs should be queued as typed actions');
-   assert.equal(await page.locator('#navbar .mg-brand[data-type="button"]').count(),1,
-    'Header brand should participate in the single typing queue');
+   assert.equal(await page.locator('.hero-actions>a[data-type="button"]').count(),0,
+    'Homepage CTAs must remain native, immediately readable links');
+   assert.equal(await page.locator('#navbar .mg-brand[data-type="button"]').count(),0,
+    'Header brand must not wait for decorative typing');
+   assert.equal(await page.locator('#navbar .mg-brand').isVisible(),true,'Header brand must appear immediately');
+   assert.equal(await page.locator('.hero-actions>a').first().isVisible(),true,'Primary CTA must appear immediately');
    const menu=page.locator('#menuBtn');
    if(!profile.reduced)await page.waitForFunction(()=>
     document.querySelector('#navbar')?.dataset.navMotion==='complete',
@@ -71,6 +73,27 @@ for(const name of names){
    assert.equal(await menu.getAttribute('aria-expanded'),'true','Mobile menu does not open');
    await page.keyboard.press('Escape');
    assert.equal(await menu.getAttribute('aria-expanded'),'false','Escape does not close menu');
+   // A click on the card artwork (not just its footer link) must navigate
+   // normally, without waiting for the text or reveal queue.
+   if(profile.width===390){
+    const probe=await context.newPage();
+    try{
+     const home=await probe.goto(base+'/',{waitUntil:'domcontentloaded'});
+     assert.equal(home.status(),200);
+     const card=probe.locator('#products article.product').first();
+     await card.scrollIntoViewIfNeeded();
+     const interactive=await card.evaluate(el=>({
+      pointerEvents:getComputedStyle(el).pointerEvents,
+      opacity:Number(getComputedStyle(el).opacity),
+     }));
+     assert.notEqual(interactive.pointerEvents,'none','Pending card blocks clicks');
+     assert.ok(interactive.opacity>.9,'Pending card disappeared');
+     const started=Date.now();
+     await card.click({position:{x:14,y:14},timeout:4500,noWaitAfter:true});
+     await probe.waitForURL('**/gta-guard.html',{timeout:8000});
+     assert.ok(Date.now()-started<6000,'Card navigation waited on animations');
+    }finally{await probe.close();}
+   }
    if(profile.reduced){
     assert.equal(await page.locator('.type-ink').count(),0,'Reduced motion still typed text');
     assert.equal(await page.locator('.type-system').count(),0,'Reduced motion still conceals content');

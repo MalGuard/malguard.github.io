@@ -22,7 +22,7 @@ for(const engineName of [process.env.TEST_BROWSER||'chromium']){
      menuHidden:document.querySelector('#navLinks')?.hidden,
      script:[...document.scripts].some(s=>s.src.includes('site.js?v=slightly-faster-typing-20261022')),
      titleLines:document.querySelectorAll('#gta6-heading .gta6-type-line[data-type="title"]').length,
-     buttons:document.querySelectorAll('.gta6-actions a[data-type="button"]').length,
+     buttons:document.querySelectorAll('.gta6-actions a[href]').length,
      width:document.documentElement.clientWidth,
      scroll:document.documentElement.scrollWidth
     }));
@@ -30,7 +30,7 @@ for(const engineName of [process.env.TEST_BROWSER||'chromium']){
     assert.equal(initial.menuHidden,true,'dropdown is always open');
     assert.ok(initial.script,'missing shared typewriter');
     assert.equal(initial.titleLines,3,'hero headline must type three lines');
-    assert.ok(initial.buttons>=2,'GTA VI actions not registered for typing');
+    assert.ok(initial.buttons>=2,'GTA VI actions must remain immediate native links');
     assert.ok(initial.scroll<=initial.width+2,'horizontal overflow');
     const menu=page.locator('#menuBtn');
     if(!reduced){
