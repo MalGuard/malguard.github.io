@@ -37,6 +37,8 @@
    }
    // Editorial copy may type progressively; navigation must not. Native links,
    // buttons and the header stay readable and interactive from first paint.
+   const nav=document.getElementById('navbar');
+   if(nav){nav.dataset.revealState='complete';nav.dataset.navMotion='complete';}
    nodes=[...document.querySelectorAll('[data-type],[data-reveal],[data-count-group]')].filter(n=>!n.hasAttribute('data-type')||!!n.querySelector(':scope > .type-source'));root.dataset.precisionTypeReady='true';
    if(!eligible||stopped){finish();return;}
    const segmenter=Intl.Segmenter?new Intl.Segmenter('en',{granularity:'grapheme'}):null;
