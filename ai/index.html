@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="MalGuard AI — evidence-based security tools for files, hashes and gaming links.">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self'; connect-src 'self' http://127.0.0.1:11434 https://game-scam-guard-connected.vercel.app https://huggingface.co https://*.hf.co https://raw.githubusercontent.com; img-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; frame-src 'self'; style-src 'self'; connect-src 'self' http://127.0.0.1:11434 https://game-scam-guard-connected.vercel.app https://huggingface.co https://*.hf.co https://raw.githubusercontent.com; img-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#141412">
   <title>MalGuard AI</title>
   <link rel="icon" href="/assets/fusion/assets/malguard-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=downloads-guide-20261025">
-  <script type="module" src="./app.js?v=downloads-guide-20261025"></script>
+  <link rel="stylesheet" href="./style.css?v=builder-20261025">
+  <script type="module" src="./app.js?v=builder-20261025"></script>
 </head>
 <body>
   <a class="skip" href="#message" data-i18n="skip">Skip to conversation</a>
@@ -23,7 +23,7 @@
             <p id="connection" role="status"></p>
             <div class="composer-controls">
               <label for="mode" data-i18n="modeLabel">Mode</label>
-              <select id="mode" aria-describedby="mode-hint"><option value="chat" data-i18n="chatMode">Chat</option><option value="worker" data-i18n="workerMode">Automatic inspection</option></select>
+              <select id="mode" aria-describedby="mode-hint"><option value="chat" data-i18n="chatMode">Chat</option><option value="worker" data-i18n="workerMode">Automatic inspection</option><option value="build" data-i18n="buildTab">Build and code</option></select>
             </div>
             <p id="mode-hint" class="muted"></p>
             <details id="permissions"><summary data-i18n="permissionSettings">Permissions and privacy</summary>
@@ -58,14 +58,26 @@
   </header>
   <main>
     <section class="workspace" aria-labelledby="title">
+      <details id="mode-picker" class="mode-picker">
+        <summary id="mode-toggle"><span id="mode-current">Chat</span><span aria-hidden="true">⌄</span></summary>
+        <div class="mode-options workspace-switch" role="group" aria-label="Conversation mode">
+          <button id="chat-tab" type="button" aria-pressed="true"><strong data-i18n="chatTab">Chat</strong><span data-i18n="chatChoice">Questions and conversation</span></button>
+          <button id="workspace-tab" type="button" aria-pressed="false" aria-controls="workspace-panel"><strong data-i18n="workspaceTab">Workspace</strong><span data-i18n="workChoice">File, link and web tools</span></button>
+          <button id="build-tab" type="button" aria-pressed="false" aria-controls="build-panel"><strong data-i18n="buildTab">Build and code</strong><span data-i18n="buildChoice">Edit files, preview and export</span></button>
+        </div>
+      </details>
       <div class="intro"><h1 id="title" data-i18n="title">What can I help with?</h1></div>
+      <section id="build-panel" class="build-panel" hidden aria-labelledby="build-title">
+        <div class="build-heading"><div><h2 id="build-title" data-i18n="projectTitle">Build and code</h2><p class="muted" data-i18n="buildHint">Describe what to build below, review the proposed files, then apply and preview.</p></div><button id="build-export" type="button" data-i18n="exportProject">Download ZIP</button></div>
+        <div class="build-toolbar"><label class="sr-only" for="build-file" data-i18n="projectFile">Project file</label><select id="build-file" dir="ltr"></select><label class="sr-only" for="build-name" data-i18n="newFile">New file</label><input id="build-name" dir="ltr" maxlength="100" placeholder="src/helper.js"><button id="build-add" type="button" data-i18n="addFile">Add file</button><input id="build-import" type="file" accept=".html,.css,.js,.json,.md,.txt,.py,.ts,.tsx,.jsx" multiple hidden><button id="build-import-button" type="button" data-i18n="importCode">Import files</button><button id="build-undo" type="button" data-i18n="undoProject" disabled>Undo apply</button><span id="build-size" class="muted" dir="ltr"></span></div>
+        <div class="build-view-bar"><div class="build-view-tabs"><button id="build-code-view" type="button" aria-pressed="true" data-i18n="codeEditor">Code</button><button id="build-preview-view" type="button" aria-pressed="false" data-i18n="projectPreview">Preview</button></div><button id="build-run" type="button" data-i18n="runPreview">Run preview</button><button id="build-stop" type="button" data-i18n="stopPreview" disabled>Stop</button></div><div id="build-columns" class="build-columns" data-view="code"><div class="editor-pane"><label for="build-editor" data-i18n="codeEditor">Code editor</label><textarea id="build-editor" spellcheck="false" autocomplete="off" autocapitalize="off" dir="ltr" maxlength="16000"></textarea></div><div class="preview-pane"><div><span data-i18n="projectPreview">Project preview</span></div><div id="build-preview" data-i18n="previewEmpty">Run preview to see your project.</div></div></div>
+        <label class="build-share"><input id="build-share-code" type="checkbox"><span data-i18n="shareCode">Include the currently selected file in my next model request.</span></label>
+        <p id="build-status" role="status"></p><details class="build-console"><summary data-i18n="previewOutput">Preview output</summary><pre id="build-console" dir="ltr" aria-live="polite"></pre></details><p class="muted build-limit" data-i18n="buildLimit">Files stay in page memory; export before leaving. Web preview supports local HTML/CSS/JS without network access. Backend code and packages run after export in your own development environment.</p>
+      </section>
       <div class="conversation" id="conversation" role="log" aria-label="Conversation" aria-live="polite"></div>
       <div id="activity" class="reply-activity" role="status" aria-live="polite" aria-atomic="false" hidden><span class="activity-orbit" aria-hidden="true"><span></span><span></span><span></span></span><span id="activity-label" aria-hidden="true"></span><span id="activity-elapsed" aria-hidden="true"></span><span id="activity-announcement" class="sr-only"></span></div>
       <div class="composer-area">
-        <div class="workspace-switch" role="group" aria-label="Conversation mode">
-          <button id="chat-tab" type="button" aria-pressed="true" data-i18n="chatTab">Chat</button>
-          <button id="workspace-tab" type="button" aria-pressed="false" aria-controls="workspace-panel" data-i18n="workspaceTab">Workspace</button>
-        </div>
+
         <section id="workspace-panel" class="workspace-panel" aria-label="Security workspace" hidden>
           <div class="workspace-options">
             <div><label for="workspace-tool" data-i18n="workspaceTool">Tool</label><select id="workspace-tool"><option value="auto" data-i18n="auto">Choose automatically</option><option value="gta_guard">GTA Guard</option><option value="game_scam_guard">Game Scam Guard</option><option value="ai_web">AI Web</option><option value="malwarebazaar">MalwareBazaar</option><option value="urlhaus">URLhaus</option><option value="file_sandbox" data-i18n="fileSandbox">File sandbox</option><option value="url_sandbox" data-i18n="urlSandbox">Link sandbox</option></select></div>

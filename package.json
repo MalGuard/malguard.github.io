@@ -16,7 +16,8 @@
     "build": "npm run build:ai && npm run build:game-scam-guard && python3 tools/build-public-site.py",
     "build:game-scam-guard": "node tools/build-gamescam-guide.mjs && vite build --config services/game-scam-guard/vite.config.js",
     "test:game-scam-guard": "node tests/game-scam-integration.test.mjs && npm --prefix services/game-scam-guard test",
-    "build:ai": "node tools/build-ai-local.mjs"
+    "build:ai": "node tools/build-ai-local.mjs",
+    "test:ai:builder": "node tests/malguard-ai-builder.mjs"
   },
   "devDependencies": {
     "@noble/hashes": "1.8.0",
