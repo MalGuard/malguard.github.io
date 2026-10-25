@@ -1,4 +1,4 @@
-import {starterFiles,validateFiles,codingPrompt,projectZip,MAX_FILES,MAX_FILE_BYTES} from './build-project.mjs?v=builder-files-20261025';
+import {starterFiles,validateFiles,codingPrompt,projectZip,MAX_FILES,MAX_FILE_BYTES} from './build-project.mjs?v=builder-file-blocks-20261025';
 export function createBuilder({locale=()=> 'en'}={}){
  const $=id=>document.getElementById(id),text=(fa,en)=>locale()==='fa'?fa:en;
  let files=validateFiles(starterFiles),selected='index.html',previous,invalid=false,run=0,outputCount=0;

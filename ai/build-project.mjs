@@ -21,8 +21,8 @@ export function parseProposal(text){
  try{
   const raw=text.trim().replace(/^```(?:xml|text)?[ \t]*\r?\n/,'').replace(/\r?\n```$/,''),heading=raw.match(/^<summary>([\s\S]*?)<\/summary>/);
   if(!heading||!heading[1].trim()||heading[1].length>1000)return null;
-  const body=raw.slice(heading[0].length),pattern=/<file path="([^"\r\n]+)">\r?\n([\s\S]*?)\r?\n[ \t]*<\/file>/g,files=Object.create(null);let count=0;
-  for(const match of body.matchAll(pattern)){if(Object.hasOwn(files,match[1]))return null;files[match[1]]=match[2];count++;}
+  const body=raw.slice(heading[0].length),pattern=/<file[ \t]+path=(['"])([^'"\r\n]+)\1[ \t]*>([\s\S]*?)<\/file[ \t]*>/g,files=Object.create(null);let count=0;
+  for(const match of body.matchAll(pattern)){if(Object.hasOwn(files,match[2]))return null;files[match[2]]=match[3].replace(/^\r?\n/,'').replace(/\r?\n[ \t]*$/,'');count++;}
   if(!count||body.replace(pattern,'').trim())return null;
   return {summary:heading[1].trim(),files:validateFiles(files)};
  }catch{return null;}
