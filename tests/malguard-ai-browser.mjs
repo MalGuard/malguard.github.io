@@ -85,6 +85,7 @@ try{
   if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/${width}.png`,fullPage:true});}
   await page.locator('#clear').click();assert.equal(await page.locator('#conversation').innerText(),'');
   if(width===1280){
+   await page.locator('#chat-tab').click();assert.equal(await page.locator('#workspace-panel').isVisible(),false);
    await page.locator('#settings-panel > summary').click();if(await page.locator('#permissions').getAttribute('open')===null)await page.locator('#permissions summary').click();await page.locator('#model-consent').check();await page.locator('#settings-panel > summary').click();
    await page.locator('#message').fill('Hello');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
    assert.equal(await page.locator('.assistant-message h3').count(),0);
@@ -177,4 +178,31 @@ try{
  assert.equal(requests,beforePrepare,'preparing a local model sends no conversation to the backend');
  assert.equal(await downloadPage.locator('#conversation').innerText(),'');assert.deepEqual(downloadExternal,[]);
  await downloadContext.close();console.log('PASS optional download prepares only the selected model, without sending a chat (mock Worker).');
+ const workContext=await browser.newContext({viewport:{width:390,height:900},reducedMotion:'reduce'}),workPage=await workContext.newPage();await skipWelcome(workContext);
+ await workContext.addInitScript(()=>Object.defineProperty(navigator,'gpu',{value:undefined}));
+ const desktopRequests=[];
+ await workContext.route('**/*',r=>{
+  const url=new URL(r.request().url());
+  if(url.origin===base)return r.continue();
+  if(url.origin==='http://127.0.0.1:11434'){
+   desktopRequests.push({path:url.pathname,body:r.request().postDataJSON()});
+   return r.fulfill({contentType:'application/json',body:JSON.stringify(url.pathname==='/api/tags'?{models:[{name:'qwen3:8b'},{name:'arbitrary:latest'}]}:{model:'qwen3:8b',done:true,message:{role:'assistant',content:'Private desktop reply'}})});
+  }
+  return r.abort();
+ });
+ await workPage.goto(base+'/ai/');await workPage.waitForFunction(()=>!document.querySelector('#send').disabled);
+ assert.equal(desktopRequests.length,0,'Opening the site must not probe local services');
+ await workPage.locator('#message').fill('Chat draft');await workPage.locator('#workspace-tab').click();
+ assert.equal(await workPage.locator('#workspace-tab').getAttribute('aria-pressed'),'true');assert.equal(await workPage.locator('#workspace-panel').isVisible(),true);assert.equal(await workPage.locator('#model').isVisible(),false);assert.equal(await workPage.locator('#message').inputValue(),'');
+ await workPage.locator('#message').fill('Work draft');await workPage.locator('#chat-tab').click();assert.equal(await workPage.locator('#message').inputValue(),'Chat draft');assert.equal(await workPage.locator('#workspace-panel').isVisible(),false);assert.equal(await workPage.locator('#toolbox').isVisible(),false);
+ await workPage.locator('#workspace-tab').click();assert.equal(await workPage.locator('#message').inputValue(),'Work draft');await workPage.locator('#chat-tab').click();
+ await workPage.locator('#model').selectOption('__desktop');await workPage.locator('#desktop-models').waitFor({state:'visible'});
+ assert.equal(await workPage.locator('#desktop-model option').count(),6);assert.match(await workPage.locator('#desktop-origin').innerText(),/OLLAMA_ORIGINS=https:\/\/malguard.site/);assert.equal(desktopRequests.length,0,'Opening catalog must not connect or download');
+ await workPage.locator('#desktop-model').selectOption('native_deepseek671');assert.match(await workPage.locator('#desktop-command').innerText(),/ollama pull deepseek-r1:671b/);assert.match(await workPage.locator('#desktop-model-info').innerText(),/404 GB/);
+ await workPage.locator('#desktop-model').selectOption('native_qwen8');await workPage.locator('#desktop-connect').click();await workPage.getByText('Connected. Installed models are available in the chat model picker.',{exact:true}).waitFor();
+ assert.deepEqual(desktopRequests.map(r=>r.path),['/api/tags']);await workPage.locator('#desktop-models button[value="close"]').click();assert.equal(await workPage.locator('#model').inputValue(),'native_qwen8');
+ const beforeNative=requests;await workPage.locator('#message').fill('A private desktop question');await workPage.locator('#send').click();await workPage.getByText('Private desktop reply',{exact:true}).waitFor();assert.equal(requests,beforeNative);assert.deepEqual(desktopRequests.map(r=>r.path),['/api/tags','/api/chat']);assert.equal(desktopRequests[1].body.model,'qwen3:8b');
+ await workPage.locator('#workspace-tab').click();assert.equal(await workPage.getByText('Private desktop reply',{exact:true}).count(),0,'Workspace has its own conversation');await workPage.locator('#chat-tab').click();assert.equal(await workPage.getByText('Private desktop reply',{exact:true}).count(),1);
+ assert.ok(await workPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await workContext.close();console.log('PASS dedicated Workspace, independent drafts/history, six desktop models and explicit local-only connection/chat');
+
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

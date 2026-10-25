@@ -27,7 +27,7 @@ try{
   await page.goto(base+'/ai/');await page.waitForFunction(()=>!document.getElementById('send').disabled);
   const beforeActions=jobs.length;
   await page.locator('#attach-toggle').click();await page.locator('#attach-web').click();
-  assert.equal(await page.locator('#mode').inputValue(),'chat');assert.equal(await page.locator('#tool').inputValue(),'ai_web');
+  assert.equal(await page.locator('#mode').inputValue(),'worker');assert.equal(await page.locator('#tool').inputValue(),'ai_web');assert.equal(await page.locator('#workspace-panel').isVisible(),true);
   assert.equal(await page.locator('#attach-options').isVisible(),false);assert.equal(jobs.length,beforeActions,'Selecting web search does not submit a request');
   await page.locator('#attach-toggle').click();await page.locator('#attach-chat').click();
   assert.equal(await page.locator('#tool').inputValue(),'auto');assert.equal(jobs.length,beforeActions);

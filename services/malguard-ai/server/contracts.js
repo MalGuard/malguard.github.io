@@ -4,7 +4,7 @@ import {isIP} from 'node:net';
 
 export const MAX_FILE_BYTES = 1024 * 1024;
 export const MAX_BODY_BYTES = 1450000;
-export const TOOLS = ['gta_guard', 'game_scam_guard', 'ai_web', 'malwarebazaar', 'urlhaus'];
+export const TOOLS = ['gta_guard', 'game_scam_guard', 'ai_web', 'malwarebazaar', 'urlhaus', 'file_sandbox', 'url_sandbox'];
 export const MODELS = ['auto','llama70b','llama8b','gemini_flash','groq_qwen','groq_gptoss','cf_gptoss120','cf_gptoss20','cf_qwen3','cf_qwen_coder','cf_scout','cf_mistral','cf_nemotron','cf_glm','cf_gemma4','cf_granite','cf_llama3b'];
 export class InputError extends Error {
   constructor(code, status = 400) { super(code); this.code = code; this.status = status; }
@@ -23,7 +23,7 @@ export function parseRequest(body) {
   if(!MODELS.includes(model))throw new InputError('invalid_model');
   if(!['chat','worker'].includes(mode)||!Array.isArray(history)||history.length>12||history.some(m=>!object(m)||!['user','assistant'].includes(m.role)||typeof m.content!=='string'||m.content.length>2000||Object.keys(m).some(k=>!['role','content'].includes(k)))||history.reduce((n,m)=>n+m.content.length,0)>12000)throw new InputError('invalid_history_or_mode');
   if (typeof message !== 'string' || message.length > 4000 || !['fa','en'].includes(locale) || !['auto',...TOOLS].includes(tool) || !object(input) || !object(consent)) throw new InputError('invalid_request');
-  if (Object.keys(input).some(k => !['url','sha256','file','query'].includes(k)) || Object.keys(consent).some(k => !['fileUpload','websiteFetch','remoteLookup','modelShare'].includes(k)) || Object.values(consent).some(v => typeof v !== 'boolean')) throw new InputError('invalid_request');
+  if (Object.keys(input).some(k => !['url','sha256','file','query'].includes(k)) || Object.keys(consent).some(k => !['fileUpload','websiteFetch','remoteLookup','modelShare','isolatedExecution'].includes(k)) || Object.values(consent).some(v => typeof v !== 'boolean')) throw new InputError('invalid_request');
   if (Object.keys(input).length > 1) throw new InputError('one_input_only');
   const clean = {};
   if(input.query!==undefined){if(typeof input.query!=='string'||!input.query.trim()||input.query.length>500)throw new InputError('invalid_query');clean.query=input.query.trim();}
@@ -40,7 +40,7 @@ export function parseRequest(body) {
     clean.file = {name: file.name, bytes};
   }
   // Only exact, bounded URL/hash tokens are recognized; user prose is never code.
-  if (!Object.keys(clean).length) {
+  if (mode==='worker'&&!Object.keys(clean).length) {
     const hash = message.match(/(?:^|\s)([a-f\d]{64})(?=$|\s)/i)?.[1];
     const url = message.match(/https?:\/\/[^\s<>"']+/i)?.[0];
     if (hash) clean.sha256 = hash.toLowerCase();
@@ -50,9 +50,10 @@ export function parseRequest(body) {
 }
 export const text = (v, max = 500) => typeof v === 'string' ? v.replace(/[\x00-\x08\x0b-\x1f\u202a-\u202e\u2066-\u2069]/g, '').slice(0,max) : '';
 export const LIMIT = 'Only the stated checks were performed. No finding or absent threat report guarantees safety. No sample was executed.';
-export const SOURCE_URLS={gta_guard:'https://github.com/MalGuard/malguard.github.io/tree/main/services/game-scam-guard/server',game_scam_guard:'https://github.com/MalGuard/malguard.github.io/tree/main/services/game-scam-guard/server',malwarebazaar:'https://bazaar.abuse.ch/api/',urlhaus:'https://urlhaus.abuse.ch/api/',ai_web:'https://docs.tavily.com/documentation/api-reference/endpoint/search'};
+export const SOURCE_URLS={gta_guard:'https://github.com/MalGuard/malguard.github.io/tree/main/services/game-scam-guard/server',game_scam_guard:'https://github.com/MalGuard/malguard.github.io/tree/main/services/game-scam-guard/server',file_sandbox:'https://github.com/MalGuard/malguard.github.io/tree/main/services/game-scam-guard/server',url_sandbox:'https://github.com/MalGuard/malguard.github.io/tree/main/services/game-scam-guard/server',malwarebazaar:'https://bazaar.abuse.ch/api/',urlhaus:'https://urlhaus.abuse.ch/api/',ai_web:'https://docs.tavily.com/documentation/api-reference/endpoint/search'};
 export function report(tool, outcome, {evidence = [], sources = [], limitations = [], metadata = {}, reason, failure} = {}) {
   const checkedAt = new Date().toISOString();
   if(!sources.length)sources=[{name:tool,url:SOURCE_URLS[tool],status:outcome==='error'?'error':'not_checked'}];
-  return {tool, outcome, checkedAt, evidence, sources: sources.map(s => ({...s, checkedAt: s.checkedAt || checkedAt})), limitations: [...limitations, LIMIT], metadata, ...(reason ? {reason} : {}),...(failure?{failure:publicFailure(failure)}:{})};
+  const limit=['file_sandbox','url_sandbox'].includes(tool)?'Only explicitly reported observations are available. Isolation and absent findings do not guarantee safety.':LIMIT;
+  return {tool, outcome, checkedAt, evidence, sources: sources.map(s => ({...s, checkedAt: s.checkedAt || checkedAt})), limitations: [...limitations, limit], metadata, ...(reason ? {reason} : {}),...(failure?{failure:publicFailure(failure)}:{})};
 }
