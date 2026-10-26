@@ -1,4 +1,4 @@
-import {createCipheriv,createDecipheriv,createHash,randomBytes,scrypt,timingSafeEqual} from 'node:crypto';
+import {createCipheriv,createDecipheriv,createHash,randomBytes,randomInt,scrypt,timingSafeEqual} from 'node:crypto';
 import {promisify} from 'node:util';
 import {createAccountStore} from './account-store.js';
 
@@ -27,7 +27,8 @@ export function createEmailAuth({apiKey=process.env.BREVO_API_KEY,fromEmail=proc
     let pendingProfile=null;if(profile!==undefined){if(!accountStore.enabled)throw error(503,'ثبت‌نام با گذرواژه هنوز آماده نشده است.');const firstName=person(profile?.firstName),lastName=person(profile?.lastName),user=username(profile?.username),date=birthDate(profile?.birthDate),pass=password(profile?.password);if(!firstName||!lastName||!user||!date||!pass)throw error(400,'اطلاعات ثبت‌نام یا گذرواژه معتبر نیست.');if(await accountStore.findByEmail(address))throw error(409,'This email is already registered. Sign in instead.');if(await accountStore.findByUsername(user))throw error(409,'This username is already taken. Choose another username.');const salt=randomBytes(16);const hash=Buffer.from(await derive(pass,salt,64)).toString('base64url');pendingProfile={email:address,username:user,firstName,lastName,birthDate:date,passwordHash:`scrypt$${salt.toString('base64url')}$${hash}`};}
     const rateKey=`${ip}|${address}`,entry=attempts.get(rateKey),time=now();if(entry&&entry.until>time&&entry.count>=3)throw error(429,'تعداد درخواست کد زیاد است؛ چند دقیقه دیگر تلاش کنید.');
     attempts.set(rateKey,{count:(entry?.until>time?entry.count:0)+1,until:time+15*60*1000});for(const [key,item]of attempts)if(item.until<time)attempts.delete(key);
-    const code=String(Math.floor(100000+Math.random()*900000));
+    // Authentication codes require the cryptographic RNG, not Math.random.
+    const code=String(randomInt(100000,1000000));
     const response=await fetchImpl('https://api.brevo.com/v3/smtp/email',{method:'POST',headers:{'api-key':apiKey,'content-type':'application/json','accept':'application/json'},body:JSON.stringify({sender:{name:'GameScam Guard',email:fromEmail},to:[{email:address}],subject:'Your GameScam Guard verification code',htmlContent:`<p>Your GameScam Guard verification code is:</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${code}</p><p>This code expires in 10 minutes.</p>`})});
     if(!response.ok)throw error(502,'ارسال کد ایمیل ممکن نشد؛ کمی بعد دوباره تلاش کنید.');
     return {verificationToken:seal({type:'code',email:address,name:legacyName,profile:pendingProfile,code:encode(code),expiresAt:time+CODE_TTL_MS})};

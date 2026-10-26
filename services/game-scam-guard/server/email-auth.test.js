@@ -2,6 +2,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createEmailAuth} from './email-auth.js';
 
+test('email verification codes do not depend on the non-cryptographic Math.random generator',async()=>{
+  const original=Math.random;let body;
+  Math.random=()=>{throw new Error('non_crypto_rng_called');};
+  try{
+    const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',accountStore:{enabled:false,status:{}},fetchImpl:async(_url,options)=>{body=JSON.parse(options.body);return {ok:true};}});
+    const started=await auth.start({emailAddress:'player@example.com'});
+    const code=body.htmlContent.match(/>(\d{6})</)?.[1];
+    assert.match(code,/^[1-9]\d{5}$/);
+    assert.ok((await auth.verify({...started,code})).sessionToken);
+  }finally{Math.random=original;}
+});
+
 test('first-party email auth sends a code through Brevo and issues an expiring opaque session',async()=>{
   let body;const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',now:()=>1000,fetchImpl:async(_url,options)=>{body=JSON.parse(options.body);return {ok:true};}});
   const started=await auth.start({emailAddress:'Player@Example.com',name:'player_guard',ip:'198.51.100.7'});
