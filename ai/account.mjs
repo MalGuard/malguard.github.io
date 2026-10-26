@@ -1,6 +1,6 @@
 // Reuse the existing first-party account API. No provider keys or credentials in storage.
 export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
- let profile=null,dialog,controller,pendingSignup,resendTimer,expiryTimer;
+ let sessionToken=null,profile=null,dialog,controller,pendingSignup,resendTimer,expiryTimer;
  const text=(en,fa)=>locale()==='fa'?fa:en;
  const node=(tag,value,cls)=>{const n=document.createElement(tag);if(value)n.textContent=value;if(cls)n.className=cls;return n;};
  const refresh=()=>{button.textContent=profile?.username||text('Sign in','ورود');button.ariaLabel=profile?text('Your MalGuard account','حساب مالگارد شما'):text('Sign in or create account','ورود یا ساخت حساب');};
@@ -18,7 +18,7 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
   const heading=node('h2',title);heading.id='account-title';const exit=node('button',text('Close','بستن'),'account-close');exit.type='button';exit.onclick=close;
   dialog.append(exit,heading);dialog.addEventListener('cancel',e=>{e.preventDefault();close();});document.body.append(dialog);dialog.showModal();return dialog;
  }
- function note(container){container.append(node('p',text('Uses your existing Game Scam Guard account. Sign-in lasts on this page only; conversations and project files are not synchronized to your account. Signing out clears this page’s conversations and files; export your project first.','همان حساب Game Scam Guard است. ورود فقط در همین صفحه حفظ می‌شود؛ مکالمه و فایل پروژه هنوز در حساب همگام نمی‌شوند. خروج، مکالمه و فایل‌های همین صفحه را پاک می‌کند؛ ابتدا پروژه را دانلود کن.'),'account-note'));}
+ function note(container){container.append(node('p',text('Uses your existing Game Scam Guard account. Sign-in lasts on this page only; text chats and notes can be saved to your account when storage is connected. Attachments and project files are not synchronized. Signing out clears this page’s conversations and files; export your project first.','همان حساب Game Scam Guard است. ورود فقط در همین صفحه حفظ می‌شود؛ مکالمه و فایل پروژه هنوز در حساب همگام نمی‌شوند. خروج، مکالمه و فایل‌های همین صفحه را پاک می‌کند؛ ابتدا پروژه را دانلود کن.'),'account-note'));}
  function field(form,fields,key,en,fa,type='text',autocomplete){const label=node('label',text(en,fa)),input=node('input');input.type=type;input.setAttribute('aria-label',text(en,fa));input.required=true;input.name=key;input.id='account-'+key;input.placeholder=({firstName:text('Alex','محمد'),lastName:text('Morgan','آذر درخش'),username:'Player_Guard',email:'you@example.com',password:text('At least 10 characters','حداقل ۱۰ کاراکتر'),confirm:text('Type the password again','رمز را دوباره وارد کن')})[key]||'';input.maxLength=key==='email'?254:key==='password'||key==='confirm'?128:80;if(autocomplete)input.autocomplete=autocomplete;if(['email','password'].includes(type))input.dir='ltr';if(type==='password')input.minLength=10;if(key==='birthDate'){input.min='1900-01-01';const d=new Date();d.setFullYear(d.getFullYear()-12);input.max=d.toISOString().slice(0,10);}label.append(input);form.append(label);fields[key]=input;return input;}
  function action(container,en,fa,handler){const b=node('button',text(en,fa));b.type='button';b.onclick=handler;container.append(b);return b;}
  function feedback(container){const error=node('p');error.setAttribute('role','alert');error.hidden=true;container.append(error);return error;}
@@ -28,7 +28,7 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
   if(typeof result.sessionToken!=='string'||result.sessionToken.length>16000)throw Error('invalid_session');
   const p=await request('session',{sessionToken:result.sessionToken});
   if(typeof p.email!=='string'||p.email.length>254||typeof p.username!=='string'||p.username.length>80||!Number.isFinite(p.expiresAt)||p.expiresAt<=Date.now())throw Error('invalid_profile');
-  if(dialog!==expected)return;profile={email:p.email,username:p.username};close();refresh();onChange({...profile});
+  if(dialog!==expected)return;sessionToken=result.sessionToken;profile={email:p.email,username:p.username};close();refresh();onChange({...profile});
  }
  function authForm(signup=false){
   discardSignup();
@@ -64,7 +64,7 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
  }
  button.onclick=async()=>{
   if(dialog)return;controller=new AbortController();
-  if(profile){const pane=shell(text('Your MalGuard account','حساب مالگارد شما'));pane.append(node('p',profile.username),node('p',profile.email));note(pane);action(pane,'Sign out on this page','خروج از همین صفحه',()=>{profile=null;close();refresh();onChange(null);});return;}
+  if(profile){const pane=shell(text('Your MalGuard account','حساب مالگارد شما'));pane.append(node('p',profile.username),node('p',profile.email));note(pane);action(pane,'Sign out on this page','خروج از همین صفحه',()=>{sessionToken=null;profile=null;close();refresh();onChange(null);});return;}
   const pane=shell(text('Preparing sign-in…','در حال آماده‌سازی ورود…'));try{const status=await request('status');if(status.configured!==true||status.persistentAccounts!==true)throw Error('unavailable');if(controller)authForm();}catch(e){if(controller&&!controller.signal.aborted){const err=feedback(pane);failure(e,err);action(pane,'Retry','تلاش دوباره',()=>{close();button.click();});}}
- };refresh();return {refresh};
+ };refresh();return {refresh,getToken:()=>sessionToken,open(signup=false){if(dialog)return;controller=new AbortController();if(signup)authForm(true);else button.click();}};
 }
