@@ -1,23 +1,24 @@
 export function createChatLibrary({account,restore,snapshot}){
  const $=id=>document.getElementById(id),make=(tag,text)=>{const n=document.createElement(tag);if(text)n.textContent=text;return n;};
- let data={chats:[],notes:[]},generation=0,connected=false,ids={chat:crypto.randomUUID(),worker:crypto.randomUUID(),build:crypto.randomUUID()},activeId=ids.chat,queue=Promise.resolve();
+ let data={chats:[],notes:[]},generation=0,connected=false,showArchived=false,ids={chat:crypto.randomUUID(),worker:crypto.randomUUID(),build:crypto.randomUUID()},activeId=ids.chat,queue=Promise.resolve();
  const saveState=make('p');saveState.id='save-state';saveState.className='muted small';saveState.setAttribute('role','status');document.querySelector('.composer-area').append(saveState);
  const status=text=>{$('history-status').textContent=text;saveState.textContent=text;};
  async function request(value){
   const token=account.getToken();if(!token)throw Error('sign_in_required');
   const base=['malguard.site','malguard.github.io'].includes(location.hostname)?'https://game-scam-guard-connected.vercel.app':'';
   const response=await fetch(`${base}/api/malguard-library`,{method:value?'POST':'GET',credentials:'omit',headers:{Authorization:`Bearer ${token}`,...(value?{'Content-Type':'application/json'}:{})},body:value?JSON.stringify(value):undefined,signal:AbortSignal.timeout(20000)});
-  const raw=await response.text();if(!response.ok||raw.length>262144)throw Error('library_failed');return JSON.parse(raw);
+  const raw=await response.text();if(!response.ok||raw.length>262144)throw Error('library_failed');const result=JSON.parse(raw);if(value&&result.saved!==true)throw Error('library_failed');return result;
  }
  function render(){
   const list=$('saved-chats');list.replaceChildren();const query=$('chat-search').value.toLowerCase();
-  for(const chat of data.chats.filter(c=>!c.archived&&c.title.toLowerCase().includes(query)).sort((a,b)=>b.updatedAt-a.updatedAt)){
+  for(const chat of data.chats.filter(c=>c.archived===showArchived&&c.title.toLowerCase().includes(query)).sort((a,b)=>b.updatedAt-a.updatedAt)){
    const row=make('div');row.className='history-row';const button=make('button',chat.title||'New chat');button.type='button';button.title=chat.title;button.setAttribute('aria-current',String(chat.id===activeId));button.onclick=()=>{if(document.querySelector('#conversation').getAttribute('aria-busy')==='true')return;activeId=chat.id;ids[chat.mode]=chat.id;restore(chat);render();};
-   const archive=make('button','×');archive.type='button';archive.setAttribute('aria-label',`Archive ${chat.title}`);archive.onclick=()=>{chat.archived=true;save();render();};row.append(button,archive);list.append(row);
+   const archive=make('button',showArchived?'↶':'×');archive.type='button';archive.setAttribute('aria-label',`${showArchived?'Restore':'Archive'} ${chat.title}`);archive.onclick=()=>{chat.archived=!chat.archived;save();render();};row.append(button,archive);list.append(row);
   }
  }
  function save(){if(!connected)return;const version=generation,body=JSON.stringify(data);status('Saving…');queue=queue.catch(()=>{}).then(async()=>{if(version!==generation)return;try{await request(JSON.parse(body));if(version===generation)status('Saved to your account');}catch{if(version===generation)status('Not saved. Check your connection and sign in again if needed.');}});}
  const memory=make('button','Memory');memory.type='button';memory.id='manage-memory';document.querySelector('.navigation-footer').prepend(memory);
+ const archived=make('button','Archived chats');archived.type='button';archived.id='archived-chats';archived.onclick=()=>{showArchived=!showArchived;archived.textContent=showArchived?'Back to recent chats':'Archived chats';render();};memory.after(archived);
  memory.onclick=()=>{
   const dialog=make('dialog');dialog.className='ai-account';const title=make('h2','Saved memory'),description=make('p','Notes are private to your account. They are not automatically sent to AI models.');const list=make('div');const input=make('textarea');input.maxLength=1000;input.setAttribute('aria-label','New memory');const add=make('button','Save memory');add.type='button';add.disabled=!connected;const close=make('button','Close');close.type='button';close.onclick=()=>dialog.close();
   function notes(){list.replaceChildren();data.notes.forEach((text,index)=>{const item=make('p',text),remove=make('button','Remove');remove.type='button';remove.onclick=()=>{data.notes.splice(index,1);save();notes();};item.append(remove);list.append(item);});}

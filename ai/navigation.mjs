@@ -5,6 +5,9 @@ export function createNavigation({account,onLanguage}){
  const head=make('div');head.className='navigation-heading';head.append($('mode-picker'));
  const collapse=make('button','☰');collapse.type='button';collapse.id='navigation-toggle';collapse.setAttribute('aria-label','Toggle sidebar');collapse.setAttribute('aria-expanded','true');
  const toggle=()=>{const closed=document.body.classList.toggle('navigation-closed');collapse.setAttribute('aria-expanded',String(!closed));};collapse.onclick=toggle;
+ const hide=()=>{document.body.classList.add('navigation-closed');collapse.setAttribute('aria-expanded','false');collapse.focus();};
+ const dismiss=make('button','×');dismiss.type='button';dismiss.className='navigation-dismiss';dismiss.setAttribute('aria-label','Close sidebar');dismiss.onclick=hide;head.append(dismiss);
+ const backdrop=make('button');backdrop.type='button';backdrop.id='navigation-backdrop';backdrop.setAttribute('aria-label','Close navigation');backdrop.tabIndex=-1;backdrop.onclick=hide;document.body.prepend(backdrop);
  document.querySelector('.site-header').prepend(collapse);
  const fresh=$('clear');fresh.replaceChildren(make('span','＋'),make('span','New chat'));fresh.className='navigation-new';
  fresh.addEventListener('click',()=>{if(innerWidth<=760){document.body.classList.add('navigation-closed');collapse.setAttribute('aria-expanded','false');}});
@@ -13,9 +16,9 @@ export function createNavigation({account,onLanguage}){
  const empty=make('p','Sign in to save and revisit your chats.');empty.id='history-status';empty.className='navigation-note';
  const footer=make('div');footer.className='navigation-footer';
  const settings=$('settings-panel');settings.querySelector('summary').append(make('span','Settings'));
- settings.addEventListener('toggle',()=>{if(settings.open){document.body.classList.remove('navigation-closed');collapse.setAttribute('aria-expanded','true');}else if(innerWidth<=760){document.body.classList.add('navigation-closed');collapse.setAttribute('aria-expanded','false');}});
+ settings.addEventListener('toggle',()=>{if(settings.open){document.body.classList.remove('navigation-closed');collapse.setAttribute('aria-expanded','true');}});
  const general=make('section');general.className='settings-general';general.append(make('h2','Settings'));
- const settingsClose=make('button','Close settings');settingsClose.type='button';settingsClose.id='settings-close';settingsClose.onclick=()=>{settings.open=false;collapse.focus();};general.prepend(settingsClose);
+ const settingsClose=make('button','Close settings');settingsClose.type='button';settingsClose.id='settings-close';settingsClose.onclick=()=>{settings.open=false;if(innerWidth<=760)hide();else collapse.focus();};general.prepend(settingsClose);
  const settingsContent=settings.querySelector('.settings-content');settingsContent.setAttribute('role','dialog');settingsContent.setAttribute('aria-modal','true');settingsContent.setAttribute('aria-label','Settings');
  settings.addEventListener('toggle',()=>{if(settings.open)settingsClose.focus();});
  settingsContent.addEventListener('keydown',event=>{if(event.key!=='Tab')return;const focusable=[...settingsContent.querySelectorAll('button,input,select,summary,a[href]')].filter(n=>!n.disabled&&n.getClientRects().length);const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}});
