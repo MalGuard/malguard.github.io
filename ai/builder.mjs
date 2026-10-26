@@ -27,6 +27,7 @@ export function createBuilder({locale=()=> 'en'}={}){
  $('build-export').onclick=()=>{try{const url=URL.createObjectURL(projectZip(files)),a=document.createElement('a');a.href=url;a.download='malguard-project.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);status(text('خروجی ZIP آماده شد.','ZIP export prepared.'));}catch{status(text('خروجی ساخته نشد؛ حجم و فایل‌ها را بررسی کن.','Export failed. Check project files and size.'));}};
  draw();
  return {
+  reset(){halt();files=validateFiles(starterFiles);selected='index.html';previous=undefined;revision++;draw();$('build-console').textContent='';$('build-status').textContent='';$('build-share-code').checked=false;},
   get revision(){return revision;},
   apply(value){if(invalid)return false;try{replace({...files,...value.files});selected=Object.keys(value.files)[0];draw();status(text('فایل‌های پروژه ساخته شدند؛ نسخهٔ قبل قابل برگرداندن است.','Project files created. Undo restores the previous version.'));return true;}catch{return false;}},
   run(){$('build-run').click();},
