@@ -17,13 +17,21 @@
   <meta name="theme-color" content="#141412">
   <title>MalGuard AI</title>
   <link rel="icon" href="/assets/fusion/assets/malguard-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=builder-composer-20261025">
-  <script type="module" src="./app.js?v=builder-file-blocks-20261025"></script>
+  <link rel="stylesheet" href="./style.css?v=codex-chat-20261025">
+  <script type="module" src="./app.js?v=codex-chat-20261025"></script>
 </head>
 <body>
   <a class="skip" href="#message" data-i18n="skip">Skip to conversation</a>
   <header class="site-header">
-    <a class="brand" href="/" dir="ltr"><img class="mark" src="/assets/fusion/assets/malguard-logo.svg" width="29" height="31" alt=""> MalGuard <span>AI</span></a>
+      <details id="mode-picker" class="mode-picker">
+        <summary id="mode-toggle" dir="ltr"><img class="mark" src="/assets/fusion/assets/malguard-logo.svg" width="27" height="29" alt=""><strong>MalGuard</strong><span id="mode-current" class="mode-current">Chat</span><span aria-hidden="true">⌄</span></summary>
+        <div class="mode-options workspace-switch" role="group" aria-label="Conversation mode">
+          <button id="chat-tab" type="button" aria-pressed="true"><strong data-i18n="chatTab">Chat</strong><span data-i18n="chatChoice">Questions and conversation</span></button>
+          <button id="workspace-tab" type="button" aria-pressed="false" aria-controls="workspace-panel"><strong data-i18n="workspaceTab">Workspace</strong><span data-i18n="workChoice">File, link and web tools</span></button>
+          <button id="build-tab" type="button" aria-pressed="false" aria-controls="build-panel"><strong data-i18n="buildTab">Build and code</strong><span data-i18n="buildChoice">Edit files, preview and export</span></button>
+          <a class="mode-home" href="/" data-i18n="home">Main site</a>
+        </div>
+      </details>
     <div class="header-actions"><button id="clear" type="button"><span aria-hidden="true">＋</span><span class="sr-only" data-i18n="clear">New conversation</span></button>        <details id="settings-panel" class="settings-panel">
           <summary><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h8m4 0h4M4 17h4m4 0h8M12 4v6M8 14v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="sr-only" data-i18n="settings">Settings</span></summary>
           <div class="settings-content">
@@ -66,20 +74,13 @@
   </header>
   <main>
     <section class="workspace" aria-labelledby="title">
-      <details id="mode-picker" class="mode-picker">
-        <summary id="mode-toggle"><span id="mode-current">Chat</span><span aria-hidden="true">⌄</span></summary>
-        <div class="mode-options workspace-switch" role="group" aria-label="Conversation mode">
-          <button id="chat-tab" type="button" aria-pressed="true"><strong data-i18n="chatTab">Chat</strong><span data-i18n="chatChoice">Questions and conversation</span></button>
-          <button id="workspace-tab" type="button" aria-pressed="false" aria-controls="workspace-panel"><strong data-i18n="workspaceTab">Workspace</strong><span data-i18n="workChoice">File, link and web tools</span></button>
-          <button id="build-tab" type="button" aria-pressed="false" aria-controls="build-panel"><strong data-i18n="buildTab">Build and code</strong><span data-i18n="buildChoice">Edit files, preview and export</span></button>
-        </div>
-      </details>
-      <div class="intro"><h1 id="title" data-i18n="title">What can I help with?</h1></div>
+
+      <div class="intro"><h1 id="title" data-i18n="title">What can I help with?</h1><p id="build-start-hint" hidden data-i18n="buildStartHint">Talk through an idea, then ask me to build it.</p></div>
       <section id="build-panel" class="build-panel" hidden aria-labelledby="build-title">
         <div class="build-heading"><div><h2 id="build-title" data-i18n="projectTitle">Build and code</h2><p class="muted" data-i18n="buildHint">Describe what to build below, review the proposed files, then apply and preview.</p></div><button id="build-export" type="button" data-i18n="exportProject">Download ZIP</button></div>
         <div class="build-toolbar"><label class="sr-only" for="build-file" data-i18n="projectFile">Project file</label><select id="build-file" dir="ltr"></select><label class="sr-only" for="build-name" data-i18n="newFile">New file</label><input id="build-name" dir="ltr" maxlength="100" placeholder="src/helper.js"><button id="build-add" type="button" data-i18n="addFile">Add file</button><input id="build-import" type="file" accept=".html,.css,.js,.json,.md,.txt,.py,.ts,.tsx,.jsx" multiple hidden><button id="build-import-button" type="button" data-i18n="importCode">Import files</button><button id="build-undo" type="button" data-i18n="undoProject" disabled>Undo apply</button><span id="build-size" class="muted" dir="ltr"></span></div>
         <div class="build-view-bar"><div class="build-view-tabs"><button id="build-code-view" type="button" aria-pressed="true" data-i18n="codeEditor">Code</button><button id="build-preview-view" type="button" aria-pressed="false" data-i18n="projectPreview">Preview</button></div><button id="build-run" type="button" data-i18n="runPreview">Run preview</button><button id="build-stop" type="button" data-i18n="stopPreview" disabled>Stop</button></div><div id="build-columns" class="build-columns" data-view="code"><div class="editor-pane"><label for="build-editor" data-i18n="codeEditor">Code editor</label><textarea id="build-editor" spellcheck="false" autocomplete="off" autocapitalize="off" dir="ltr" maxlength="262144"></textarea></div><div class="preview-pane"><div><span data-i18n="projectPreview">Project preview</span></div><div id="build-preview" data-i18n="previewEmpty">Run preview to see your project.</div></div></div>
-        <label class="build-share"><input id="build-share-code" type="checkbox"><span data-i18n="shareCode">Include the currently selected file in my next model request.</span></label>
+        <label class="build-share"><input id="build-auto-run" type="checkbox" checked><span data-i18n="autoBuild">Apply and preview explicit build requests automatically, with Undo.</span></label><label class="build-share"><input id="build-share-code" type="checkbox"><span data-i18n="shareCode">Include the currently selected file in my next model request.</span></label>
         <p id="build-status" role="status"></p><details class="build-console"><summary data-i18n="previewOutput">Preview output</summary><pre id="build-console" dir="ltr" aria-live="polite"></pre></details><p class="muted build-limit" data-i18n="buildLimit">Files stay in page memory; export before leaving. Web preview supports local HTML/CSS/JS without network access. Backend code and packages run after export in your own development environment.</p>
       </section>
       <div class="conversation" id="conversation" role="log" aria-label="Conversation" aria-live="polite"></div>
@@ -95,6 +96,7 @@
           <p class="muted" data-i18n="workspacePrivacy">Only conversation text is shared with the model; files and tool evidence are not.</p>
           <label class="isolation-permission"><input id="isolation-consent" type="checkbox"><span data-i18n="isolationConsent">I separately allow the selected file to run in an isolated sandbox or the selected link to receive a passive preview. These checks do not guarantee safety.</span></label>
         </section>
+        <button id="build-files-toggle" class="build-files-toggle" type="button" aria-expanded="false" aria-controls="build-panel" data-i18n="showProject" hidden>Files and preview</button>
         <button id="open-downloads" class="download-entry" type="button" data-i18n="downloadEntry">↓ Download models · choose for your device</button>
         <div id="model-progress" class="model-progress" hidden><label for="download-progress" id="progress-label"></label><progress id="download-progress" max="100" value="0"></progress><button type="button" id="cancel-download" data-i18n="cancel">Cancel</button></div>
         <form id="composer">
