@@ -64,6 +64,9 @@ jobs:
           TEST_CHROMIUM_EXECUTABLE=/usr/bin/google-chrome npm run test:ai:local
           TEST_CHROMIUM_EXECUTABLE=/usr/bin/google-chrome npm run test:ai:builder
 
+      - name: Validate download cancellation and integrity using synthetic bytes
+        run: node --test tests/public-release/cancellation.test.mjs tests/public-release/model.test.mjs
+
       - name: Validate trust and product claims
         shell: bash
         run: |
