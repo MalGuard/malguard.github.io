@@ -2,13 +2,10 @@
    fallback. The final logo is sampled from the original MalGuard SVG. */
 (() => {
   'use strict';
-  // Timing copied from the supplied Cinematic HTML. 0.06 at 60 Hz,
-  // delay in [0, .5), cubic smoothstep over .5 of each scroll interval.
-  const particleSpeed=.92; // Subtle 8% reduction; shapes and scroll destinations stay unchanged.
-  const referenceTiming={follow60:.06,particleDelay:.5,particleDuration:.5,
-    revealThreshold:.35,wordStagger:.07,
-    follow:(p,target,ms)=>p+(target-p)*(1-Math.pow(.94,ms*particleSpeed/(1000/60))),
-    mix:(t,delay)=>{const q=Math.max(0,Math.min(1,(t-delay)/.5));return q*q*(3-2*q);}};
+  // Native scroll directly drives shape changes without waiting thresholds.
+  const particleSpeed=.92;
+  const referenceTiming={particleDelay:.5,particleDuration:1,revealThreshold:.35,wordStagger:.07,
+    mix:(t,delay)=>{const q=Math.max(0,Math.min(1,t));return q+(delay-.25)*.12*Math.sin(Math.PI*q);}};
   let introElapsed=0,introComplete=false;
   const introDuration=3000;
   const tryGPU=!!window.createMalGuardFieldRenderer&&!matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -83,7 +80,10 @@
     // In normal operation, shape and type share each measured reading hold.
     const narrativeEnd=Math.max(1,top(document.querySelector('.after'))-H*.9);
     const story=window.MalGuardParticleStory;
-    anchors=story?story.records.slice(0,5).flatMap(r=>[{y:r.start,v:r.index},{y:r.start+r.height*.54,v:r.index}]):Array.from({length:5},(_,v)=>({y:narrativeEnd*v/4,v}));
+    // The text holds the matching shape during the readable 54% of each scene.
+    // Shape transitions follow scroll as soon as the reading interval ends;
+    // arrival takes until 12% of the next chapter, giving a longer, slower flight.
+    anchors=story?story.records.slice(0,5).flatMap(r=>[{y:r.start+r.height*.12,v:r.index},{y:r.start+r.height*.54,v:r.index}]):Array.from({length:5},(_,v)=>({y:narrativeEnd*v/4,v}));
     if(story)anchors.push({y:top(document.querySelector('.after')),v:5});
     // Continue the same gradual timeline through our additional Lab / stack / logo.
     // Each additional module retains its existing native scroll range.
@@ -93,14 +93,14 @@
     const product=Math.max(stack+H,top(products)-H*.35);
     const work=Math.max(product+H,top(document.getElementById('inside-analysis'))-H*.25),tools=Math.max(work+H,top(document.getElementById('local-tools'))-H*.25),trust=Math.max(tools+H,top(document.getElementById('trust'))-H*.25);
     const finale=Math.max(trust+H,top(scenes[5])-H*.35);
-    anchors.push({y:lab,v:5},{y:graph,v:6},{y:stack,v:7},{y:Math.max(stack,product-H*.8),v:7},{y:product,v:8},{y:Math.max(product,work-H*.7),v:8},{y:work,v:9},{y:Math.max(work,tools-H*.8),v:9},{y:tools,v:10},{y:tools+H*.6,v:11},{y:trust,v:12},{y:Math.max(trust,finale-H*1.175),v:12},{y:finale,v:13});
+    anchors.push({y:lab,v:5},{y:graph,v:6},{y:stack,v:7},{y:product,v:8},{y:work,v:9},{y:tools,v:10},{y:tools+H*.6,v:11},{y:trust,v:12},{y:finale,v:13});
     window.MalGuardParticles.timeline=anchors.map(h=>({...h}));
     window.MalGuardParticles.narrativeEnd=narrativeEnd;
   }
   function shapeAt(y){
     for(let i=0;i<anchors.length-1;i++){
       const a=anchors[i],b=anchors[i+1];
-      if(y<=b.y){const p=Math.max(0,Math.min(1,(y-a.y)/Math.max(1,b.y-a.y)));return a.v+(b.v-a.v)*p;}
+      if(y<=b.y){if(Math.abs(y-a.y)<1)return a.v;if(Math.abs(y-b.y)<1)return b.v;const p=Math.max(0,Math.min(1,(y-a.y)/Math.max(1,b.y-a.y)));return a.v+(b.v-a.v)*p;}
     }
     return 13;
   }
@@ -108,7 +108,8 @@
     const y=scrollY;target=shapeAt(y);
 
     const max=document.documentElement.scrollHeight-H;bar.style.width=`${Math.max(0,Math.min(100,y/Math.max(1,max)*100))}%`;
-    if(reduced.matches||paused)requestStill();
+    // A scroll event always requests a frame, even after the idle loop stops.
+    requestStill();
   }
   function requestStill(){if(!raf&&visible)raf=requestAnimationFrame(draw);}
   function ease(t){return t*t*t*(t*(t*6-15)+10);}
@@ -118,11 +119,13 @@
     if(canvas.clientWidth!==W||canvas.clientHeight!==H)resize();
     ctx?.setTransform(D,0,0,D,0,0);
     const elapsed=last?Math.min(250,ts-last):16,dt=Math.min(50,elapsed);last=ts;
-    if(!staticMotion)time+=dt*particleSpeed;
+    // Autonomous glow/time updates end with the opening. From then on the
+    // field is deterministic for a given scroll position, even after redraws.
+    if(!staticMotion&&!introComplete)time+=dt*particleSpeed;
     const start=performance.now();
     if(ts-zonesAt>160){zonesAt=ts;textZones=[...document.querySelectorAll('.after h2,.after h3,.after p,.after a,.after button,.after .tag,.after .section-top,#layers .steps,#demo .lab-copy')].map(el=>el.getBoundingClientRect()).filter(r=>r.width>0&&r.height>0&&r.bottom>0&&r.top<H);}
-    scrollPosition=staticMotion?scrollY:referenceTiming.follow(scrollPosition,scrollY,elapsed);
-    if(Math.abs(scrollPosition-scrollY)<.05)scrollPosition=scrollY;
+    // Rendering is synchronized to the actual scrollY, no late catch-up.
+    scrollPosition=scrollY;
     P=shapeAt(scrollPosition);
     let openingTime=null,openingState=null;
     if(!introComplete){
@@ -144,22 +147,43 @@
     const finalWeight=smooth(12.35,13,P);
     const chamberRect=document.getElementById('sc3').getBoundingClientRect();
     const layerRect=document.getElementById('layers').getBoundingClientRect(),rightCopy=wide&&layerRect.top<H*.3&&layerRect.bottom>H*.7;
-    const readingRecord=window.MalGuardParticleStory?.records[Math.min(4,Math.round(P))];
-    const readingTop=readingRecord?parseFloat(readingRecord.copy.style.getPropertyValue('--reading-top')):H*.52;
-    const readingOnRight=readingRecord&&readingRecord.copy.getBoundingClientRect().left>W*.35;
+    const readingRecords=window.MalGuardParticleStory?.records||[];
+    const readingIndex=Math.min(4,Math.floor(P));
+    const nextReadingIndex=Math.min(4,readingIndex+1);
+    const readingBlend=smooth(0,1,P-readingIndex);
+    const readingAt=index=>{
+      const value=parseFloat(readingRecords[index]?.copy.style.getPropertyValue('--reading-top'));
+      return Number.isFinite(value)?value:H*.52;
+    };
+    // Do not swap reading geometry abruptly when the next chapter approaches.
+    const readingTop=readingAt(readingIndex)+(readingAt(nextReadingIndex)-readingAt(readingIndex))*readingBlend;
     const skyTop=(document.querySelector('nav')?.getBoundingClientRect().bottom||70)+24;
     const skyBottom=Math.max(skyTop+90,readingTop-28);
     const shortTouch=W<=900&&H<=700;
-    const narrative=P<4.01,beat=Math.min(4,Math.round(P)),portal=narrative&&beat===0,lowWide=wide&&H<750;
-    const goalX=shortTouch?W*(readingOnRight?.18:.82):W*(wide?(narrative?(portal?.5:beat===2||beat===4?(lowWide?.82:.53):beat===3?.80:.76):(rightCopy||readingOnRight?.27:.70+finalWeight*.03)):.5);
-    const goalY=shortTouch?H*.36:wide?(narrative?(beat===2||beat===4?(lowWide?H*.5:H*(beat===4?.90:.83)):H*.5):H*.5):(skyTop+skyBottom)*.5;
-    const immersiveScale=shortTouch?Math.min(W*.07,H*.12):wide?(narrative?(portal?Math.min(W*.25,H*.31):beat===2||beat===4?(lowWide?Math.min(W*.10,H*.12):Math.min(W*.18,H*(beat===4?.24:.29))):beat===3?Math.min(W*.20,H*.21):Math.min(W*.26,H*.25)):Math.min(W*.31,H*.27)):Math.min(W*(portal?.24:.26),(skyBottom-skyTop)/(beat===1?4.3:3.8));
+    // Interpolate camera placement between forms. Rounded beat selection used
+    // to jump suddenly across a chapter midpoint during otherwise smooth morphs.
+    const narrative=P<4.01,lowWide=wide&&H<750;
+    const firstBeat=Math.min(4,Math.floor(P)),nextBeat=Math.min(4,firstBeat+1);
+    const blend=smooth(0,1,P-firstBeat);
+    function composition(beat){
+      const portal=narrative&&beat===0;
+      const beatReading=readingRecords[Math.min(4,beat)];
+      const textOnRight=!!beatReading&&beatReading.copy.getBoundingClientRect().left>W*.35;
+      const x=shortTouch?W*(textOnRight?.18:.82):W*(wide?(narrative?(portal?.5:beat===2||beat===4?(lowWide?.82:.53):beat===3?.84:.76):(rightCopy||textOnRight?.27:.70+finalWeight*.03)):.5);
+      const y=shortTouch?H*.36:wide?(narrative?(beat===2||beat===4?(lowWide?H*.5:H*(beat===4?.90:.83)):H*.5):H*.5):(skyTop+skyBottom)*.5;
+      const scale=shortTouch?Math.min(W*.07,H*.12):wide?(narrative?(portal?Math.min(W*.25,H*.31):beat===2||beat===4?(lowWide?Math.min(W*.10,H*.12):Math.min(W*.18,H*(beat===4?.24:.29))):beat===3?Math.min(W*.20,H*.21):Math.min(W*.26,H*.25)):Math.min(W*.31,H*.27)):Math.min(W*(portal?.24:.26),(skyBottom-skyTop)/(beat===1?4.3:3.8));
+      return[x,y,scale];
+    }
+    const from=composition(firstBeat),to=composition(nextBeat);
+    const goalX=from[0]+(to[0]-from[0])*blend;
+    const goalY=from[1]+(to[1]-from[1])*blend;
+    const immersiveScale=from[2]+(to[2]-from[2])*blend;
     const finalScale=wide?Math.min(W*.22,H*.28):Math.min(W*.33,H*.26);
     const goalScale=immersiveScale+(finalScale-immersiveScale)*finalWeight;
-    const settle=staticMotion?1:1-Math.exp(-elapsed/100);
-    compositionX=compositionX?compositionX+(goalX-compositionX)*settle:goalX;
-    compositionY=compositionY?compositionY+(goalY-compositionY)*settle:goalY;
-    compositionScale=compositionScale?compositionScale+(goalScale-compositionScale)*settle:goalScale;
+    // No delayed camera catch-up when the user stops scrolling.
+    compositionX=goalX;
+    compositionY=goalY;
+    compositionScale=goalScale;
     const cx=compositionX,cy=compositionY,scale=compositionScale;
     const cameraTravel=staticMotion?0:Math.sin((P-Math.floor(P))*PI)**2;
 
@@ -169,8 +193,10 @@
     const k=Math.min(12,Math.floor(P)),t=P-k,A=shapes[k],B=shapes[k+1],HA=hues[k],HB=hues[k+1];
     const logoWeight=k===12?ease(Math.max(0,(t-.45)/.55)):0;
     pointerX+=(wantedX-pointerX)*.05;pointerY+=(wantedY-pointerY)*.05;
-    const ang=(staticMotion?0:Math.sin(time*.00013)*.17+pointerX*.22)*(1-logoWeight),ca=Math.cos(ang),sa=Math.sin(ang);
-    const tilt=staticMotion?0:pointerY*.18,ct=Math.cos(tilt),st=Math.sin(tilt);
+    // DNA remains vertical from the beginning of its formation.
+    const freeRotation=1-smooth(0,.15,P)*(1-smooth(1.08,1.35,P));
+    const ang=(staticMotion||narrative?0:Math.sin(time*.00013)*.17+pointerX*.22)*(1-logoWeight)*freeRotation,ca=Math.cos(ang),sa=Math.sin(ang);
+    const tilt=(staticMotion||narrative?0:pointerY*.18)*freeRotation,ct=Math.cos(tilt),st=Math.sin(tilt);
     let drawn=0,underText=0,readingHits=0,quadrants=0,minX=W,maxX=0,minY=H,maxY=0;
     const reading=storyCopy();function storyCopy(){const rec=window.MalGuardParticleStory?.records.find(r=>r.opacity>.8&&r.scene.getBoundingClientRect().top<H&&r.scene.getBoundingClientRect().bottom>0);return rec?.copy.getBoundingClientRect();}
     // During the opening's opaque geometry shot, particles have no exposure.
@@ -232,14 +258,12 @@
       // A camera-like passage through the shared field happens only between
       // readable holds. Forward and reverse scroll use identical trajectories.
       X*=1+cameraTravel*.48;Y*=1+cameraTravel*.35;Z-=cameraTravel*1.5;
-      const breathing=staticMotion?1:1+Math.sin(time*.0009+(k<5?0:phases[i]))*.008;
-      X*=breathing;Y*=breathing;
+      // Particle positions are functions of scroll progress, not elapsed time.
       if(!staticMotion&&k>=5){X+=Math.sin(time*.0007+phases[i])*.018*(1-logoWeight);Y+=Math.cos(time*.0009+phases[i])*.018*(1-logoWeight);}
-      if(k===0){const ripple=staticMotion?1:1+Math.sin(Math.atan2(Y,X)*7+time*.00045)*.018+Math.sin(Math.atan2(Y,X)*17-time*.0007)*.01;X*=ripple;Y*=ripple;}
-      if(k===0&&wide){const a=staticMotion?0:time*.000065,c=Math.cos(a),s=Math.sin(a),q=X;X=q*c-Y*s;Y=q*s+Y*c;}
+      if(k===0){const ripple=1+Math.sin(Math.atan2(Y,X)*7)*.018+Math.sin(Math.atan2(Y,X)*17)*.01;X*=ripple;Y*=ripple;}
       if(k===0&&!wide)X/=1.38;
-      if(k===1){const a=staticMotion?0:time*.00018,c=Math.cos(a),s=Math.sin(a),q=X;X=q*c+Z*s;Z=-q*s+Z*c;}
-      if(k===2&&!staticMotion)Y+=Math.sin(X*2+Z+time*.0006)*.065;
+      // No independent DNA rotation: only the scroll-controlled morph moves it.
+      if(k===2)Y+=Math.sin(X*2+Z)*.065;
       const X2=X*ca+Z*sa,Z2=-X*sa+Z*ca,Y2=Y*ct-Z2*st,Z3=Y*st+Z2*ct;
       const f=4.8/(Z3+4.8);
       const spread=i%17===0?1+arc*1.5:1;
@@ -291,7 +315,11 @@
     if(frames>=90){if(measure/frames>12){active=Math.max(Math.floor(gpu?N*.65:Math.min(N*.55,mobile?2200:3500)),Math.floor(active*.9));}frames=0;measure=0;}
     canvas.dataset.phase=Number.isInteger(target)?'hold':'morph';canvas.dataset.held=String(Number.isInteger(target)&&P===target);
     canvas.dataset.renderer='volumetric-light-field';canvas.dataset.form=names[Math.round(P)];canvas.dataset.formCount='14';canvas.dataset.blackMasks='0';canvas.dataset.filaments=String(narrative?1:0);canvas.dataset.scene=P.toFixed(3);canvas.dataset.target=target.toFixed(3);canvas.dataset.particles=String(active);canvas.dataset.drawn=String(drawn);canvas.dataset.masked='0';canvas.dataset.underText=String(underText);canvas.dataset.frameMs=cost.toFixed(2);canvas.dataset.logoReady=String(logoReady);
-    drawing=false;if(!staticMotion)raf=requestAnimationFrame(draw);
+    // Opening and text arrival can advance automatically; chapter morphs cannot.
+    // After these finish, only input/layout changes trigger another particle frame.
+    const introPending=!introComplete||!!(openingState&&!openingState.complete);
+    const textPending=!!(story&&story.snapshot().age<1400);
+    drawing=false;if(!staticMotion&&(introPending||textPending))raf=requestAnimationFrame(draw);
   }
   let logoReady=false;
   const logo=new Image();

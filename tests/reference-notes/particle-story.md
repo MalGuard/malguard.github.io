@@ -42,11 +42,14 @@ implementation guidance was checked against:
 
 ## Implementation contract
 
-One native scroll position is smoothed, then used by both shape interpolation and
-the DOM/glyph controller. Each narrative chapter reserves 54% of its scroll range
-for the formed security silhouette. Copy assembles, holds, dissolves into sampled
-glyph particles, and leaves a particle-only passage before the next reading state.
-Scrolling back reverses the same paths; no wheel/touch event is cancelled.
+Native scroll directly drives the particle field and readable DOM text. The
+original security forms, including the upright DNA-like evidence strands and wave,
+are unchanged. Every chapter reaches its final shape by 12% scroll progress and
+holds it through 54%, giving users time to read without automatic transitions.
+Between chapters, stable particle identities disperse and reassemble along a
+reversible trajectory that spans 58% of a chapter. The camera and the particles
+freeze when the user stops scrolling; no delayed easing or idle movement remains.
+The separately controlled opening and reduced-motion fallback remain intact.
 
 Mobile artwork fits the space between the navigation and the measured reading
 block. Text has no opaque backing surface. Reduced Motion renders readable DOM
