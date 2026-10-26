@@ -67,6 +67,9 @@ jobs:
       - name: Validate email authentication with synthetic accounts
         run: node --test services/game-scam-guard/server/email-auth.test.js services/game-scam-guard/src/email-account.test.js
 
+      - name: Validate download cancellation and integrity using synthetic bytes
+        run: node --test tests/public-release/cancellation.test.mjs tests/public-release/model.test.mjs
+
       - name: Validate trust and product claims
         shell: bash
         run: |
