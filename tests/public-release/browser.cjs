@@ -14,7 +14,8 @@ const {createServer}=require('node:http');
   bytes.write('Harmless synthetic browser fixture, never a real installer.');
   const hash=data=>createHash('sha256').update(data).digest('hex');
   const latest={schemaVersion:'1.0.0',platform:'windows-x64',status:'public-download-ready',serviceUrl:'/release/MalGuard-Setup-x64.exe',filename:'MalGuard-Setup-x64.exe',version:'1.3.2',engineVersion:'1.2.2',build,sourceCommit:'a'.repeat(40),sha256:hash(bytes),size:bytes.length,partBytes:3*1024*1024,partCount:2,passwordRequired:false,deviceLicenseRequired:false,installerPasswordRequired:false,changes:{en:['Synthetic change'],fa:['تغییر مصنوعی']}};
-  let mode='valid',requests=0;
+  let mode='valid',requests=0,releaseDelayed;
+  let announceDelayed;const delayedStarted=new Promise(resolve=>{announceDelayed=resolve;});
   server=createServer((req,res)=>{
    check('anonymous-get-'+requests,req.method==='GET'&&!req.headers.authorization&&!req.headers.cookie);requests++;
    if(mode==='error'){res.writeHead(503);res.end('Synthetic unavailable');return;}
@@ -37,10 +38,11 @@ const {createServer}=require('node:http');
   const old='MG-1.3.1-WIN64-bbbbbbbbbbbb';
   await page.route('**/release/malguard-release-history.json',r=>r.fulfill({json:[{build:old,supersededBy:build}]}));
   await page.route('**/release/MalGuard-Setup-x64.exe',async route=>{
+   const delayed=mode==='delay';
    check('browser-does-not-submit-password',route.request().method()==='GET'&&route.request().postData()===null);
-   if(mode==='delay')await new Promise(done=>setTimeout(done,300));
+   if(delayed){announceDelayed();await new Promise(done=>{releaseDelayed=done;});}
    const response=await fetch('http://127.0.0.1:8770');
-   try{await route.fulfill({status:response.status,headers:Object.fromEntries(response.headers),body:Buffer.from(await response.arrayBuffer())});}catch{if(mode!=='delay')throw new Error('Transfer route failed');}
+   try{await route.fulfill({status:response.status,headers:Object.fromEntries(response.headers),body:Buffer.from(await response.arrayBuffer())});}catch{if(!delayed)throw new Error('Transfer route failed');}
   });
   await page.reload();await page.waitForFunction(()=>!document.getElementById('downloadButton').disabled);
   check('english-default',await page.locator('html').getAttribute('lang')==='en');
@@ -55,7 +57,8 @@ const {createServer}=require('node:http');
    mode=bad;await page.locator('#downloadButton').click();await page.waitForFunction(()=>document.getElementById('downloadStatus').textContent.includes('Download stopped'));
    check(bad+'-does-not-save-installer',downloads===1);
   }
-  mode='delay';await page.locator('#downloadButton').click();await page.locator('#cancelDownload').click();await page.waitForFunction(()=>document.getElementById('downloadStatus').textContent.includes('cancelled'));check('cancel-does-not-save-partial-file',downloads===1);
+  mode='delay';await page.locator('#downloadButton').click();await delayedStarted;
+  try{await page.locator('#cancelDownload').click();await page.waitForFunction(()=>document.getElementById('downloadStatus').textContent.includes('cancelled'));check('cancel-does-not-save-partial-file',downloads===1);}finally{releaseDelayed();}
   await page.waitForTimeout(350);mode='valid';
   await page.locator('#buildInput').fill(old);await page.locator('#buildCheckForm button').click();check('older-build-explained',/newer release/.test(await page.locator('#buildCheckStatus').innerText()));
   await page.locator('#buildInput').fill(build);await page.locator('#buildCheckForm button').click();check('current-build-confirmed',/current build/.test(await page.locator('#buildCheckStatus').innerText()));
