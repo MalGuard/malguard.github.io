@@ -10,3 +10,7 @@ export async function toggleLanguage(page){
 export async function newConversation(page){
  if(!(await page.locator('#clear').isVisible()))await page.locator('#navigation-toggle').click();await page.locator('#clear').click();
 }
+export async function openModePicker(page){
+ if(!(await page.locator('#mode-toggle').isVisible()))await page.locator('#navigation-toggle').click();
+ await page.locator('#mode-toggle').click();
+}
