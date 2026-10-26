@@ -1,3 +1,4 @@
+import {toggleSettings,toggleLanguage,newConversation} from './ai-navigation-helpers.mjs';
 import assert from 'node:assert/strict';
 import express from 'express';
 import {fileURLToPath} from 'node:url';
@@ -31,7 +32,7 @@ try{
   assert.equal(await page.locator('#attach-options').isVisible(),false);assert.equal(jobs.length,beforeActions,'Selecting web search does not submit a request');
   await page.locator('#attach-toggle').click();await page.locator('#attach-chat').click();
   assert.equal(await page.locator('#tool').inputValue(),'auto');assert.equal(jobs.length,beforeActions);
-  await page.locator('#settings-panel > summary').click();await page.locator('#permissions > summary').click();await page.locator('#model-consent').check();await page.locator('#settings-panel > summary').click();
+  if(await page.locator('#settings-panel').getAttribute('open')!==null)await page.locator('#settings-close').click();else await toggleSettings(page);await page.locator('#permissions > summary').click();await page.locator('#model-consent').check();if(await page.locator('#settings-panel').getAttribute('open')!==null)await page.locator('#settings-close').click();else await toggleSettings(page);
   const send=async text=>{
    const count=jobs.length;await page.locator('#message').fill(text);await page.locator('#message').press('Enter');
    await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking');assert.equal(jobs.length,count+1);return jobs.at(-1);
@@ -57,7 +58,7 @@ try{
   job.emit({phase:'tool_started',tool:'game_scam_guard'});
   await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking · Reading website');
   // Changing UI language during a live request must retain the work and its partial DOM.
-  await page.locator('#language').click();
+  await toggleLanguage(page);
   await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='در حال فکر کردن · در حال خواندن سایت');
   assert.equal(await page.locator('#send').getAttribute('aria-label'),'توقف پاسخ');
   assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
@@ -65,7 +66,7 @@ try{
   assert.equal(await page.locator('.bubble').innerText(),'Hello');
   assert.equal(jobs.length,jobIndex,'A locale switch must not resend the request');
   await page.screenshot({path:`test-results/malguard-ai/reply-reading-fa-${width}.png`,fullPage:true});
-  await page.locator('#language').click();
+  await toggleLanguage(page);
   job.emit({phase:'tool_finished',tool:'game_scam_guard'});job.emit({phase:'model_started',tool:'chat'});
   const text=('A clear, carefully paced reply. پاسخ فارسی 👩🏽‍💻. ').repeat(24);
   job.finish(generated(text));
@@ -75,11 +76,11 @@ try{
   assert.equal(await page.locator('.response-actions').isVisible(),false);
   await page.screenshot({path:`test-results/malguard-ai/reply-typing-${width}.png`,fullPage:true});
   const typingText=await page.locator('.answer').innerText();
-  await page.locator('#language').click();
+  await toggleLanguage(page);
   await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='در حال نوشتن');
   assert.ok((await page.locator('.answer').innerText()).startsWith(typingText),'Locale switch must preserve text already presented');
   assert.equal(await page.locator('.answer').count(),1);
-  await page.locator('#language').click();
+  await toggleLanguage(page);
   await page.locator('#message').fill('Draft for the next turn');
   await page.locator('#send').click();await page.waitForFunction(()=>document.getElementById('send').dataset.state==='send');
   const partial=await page.locator('.answer').innerText();
@@ -122,7 +123,7 @@ try{
   assert.equal(await completeTiming.getAttribute('data-elapsed-ms'),completeMilliseconds,'A completed duration stays fixed');
   await page.screenshot({path:`test-results/malguard-ai/reply-clean-${width}.png`,fullPage:true});
   // Both status and stop controls are localized in RTL.
-  await page.locator('#language').click();const count=jobs.length;await page.locator('#message').fill('سلام');await page.locator('#send').click();
+  await toggleLanguage(page);const count=jobs.length;await page.locator('#message').fill('سلام');await page.locator('#send').click();
   assert.equal(await page.locator('.response-duration').last().getAttribute('data-elapsed-ms'),completeMilliseconds,'Changing language preserves the measured duration');
   assert.match(await page.locator('.response-duration').last().innerText(),/^پاسخ در [۰-۹٫]+ ثانیه$/);
   await page.locator('#activity-label').filter({hasText:/^در حال فکر کردن$/}).waitFor();assert.equal(jobs.length,count+1);

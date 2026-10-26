@@ -1,3 +1,5 @@
+import {createChatLibrary} from './library.mjs?v=sidebar-20261026';
+import {createNavigation} from './navigation.mjs?v=sidebar-20261026';
 import {errorMessage} from './error-message.mjs?v=codex-chat-20261025';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=codex-chat-20261025';
 import {apiUrl,readStream} from './client.mjs';
@@ -15,7 +17,7 @@ import {parseProposal} from './build-project.mjs?v=codex-chat-20261025';
 const $=id=>document.getElementById(id);
 const names={gta_guard:'GTA Guard',game_scam_guard:'Game Scam Guard',ai_web:'AI Web',malwarebazaar:'MalwareBazaar',urlhaus:'URLhaus',file_sandbox:'File sandbox',url_sandbox:'Link sandbox'};
 let locale='en',service,busy=false;
-try{if(localStorage.getItem('malguard-language')==='fa')locale='fa';}catch{}
+try{if(localStorage.getItem('malguard.ai.language.v1')==='fa')locale='fa';}catch{}
 let activeTurn;
 let localReady=false,modelsInitialized=false;
 let lastSelectedModel='';
@@ -31,7 +33,9 @@ let projectOpen=false;
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
 const builder=createBuilder({locale:()=>locale});
-const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{if(profile)return;for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
+const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{navigation.profile(profile);library.profile(profile);if(profile)return;for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
+const navigation=createNavigation({account,onLanguage:value=>{locale=value;try{localStorage.setItem('malguard.ai.language.v1',locale);}catch{}translate();}});
+const library=createChatLibrary({account,snapshot:()=>({mode:activeMode,title:(history.find(item=>item.bubble)?.bubble||'New chat').slice(0,100),messages:history.flatMap(item=>item.bubble?[{role:'user',text:String(item.bubble).slice(0,12000)}]:item.response?.generated?.text?[{role:'assistant',text:item.response.generated.text.slice(0,12000)}]:[]).slice(-64)}),restore:chat=>{switchMode(chat.mode);history.length=0;modelHistory.length=0;for(const message of chat.messages){if(message.role==='user')history.push({bubble:message.text});else history.push({response:{generated:{text:message.text,provider:'Saved chat',model:'History'}}});modelHistory.push({role:message.role,content:message.text.slice(0,2000)});}modelHistory.splice(0,Math.max(0,modelHistory.length-8));$('message').value='';translate();}});
 let desktopConnecting=false;
 const permissionInputs={fileUpload:'file-consent',websiteFetch:'website-consent',remoteLookup:'lookup-consent',modelShare:'model-consent'};
 const copy={
@@ -64,6 +68,8 @@ Object.assign(copy.fa,{desktopModels:'مدل‌های دسکتاپ',chatTab:'گ�
 Object.assign(copy.en,{scope:'Only selected checks run. Isolated execution requires separate permission.',fileConsent:'Send the file to MalGuard for in-memory static analysis, or isolated execution only with its separate permission. Files are not stored or submitted to threat databases.',workspaceLight:'Light · Qwen3 30B',workspaceStrong:'Strong · GPT-OSS 120B'});
 Object.assign(copy.fa,{scope:'فقط بررسی انتخاب‌شده انجام می‌شود. اجرای ایزوله مجوز جداگانه می‌خواهد.',fileConsent:'ارسال فایل به MalGuard برای تحلیل ایستا در حافظه؛ اجرای ایزوله فقط با مجوز جداگانه. فایل ذخیره یا به پایگاه تهدید ارسال نمی‌شود.',workspaceLight:'سبک · Qwen3 30B',workspaceStrong:'قوی · GPT-OSS 120B'});
 function setProjectOpen(value){if(!value)builder.stop();projectOpen=value;renderStatus();}
+Object.assign(copy.en,{retention:'Guests: chats stay on this page. Signed-in chats are saved only when account storage is connected. Files and project files are not synchronized. No finding guarantees safety.'});
+Object.assign(copy.fa,{retention:'گفت‌وگوی مهمان فقط در همین صفحه است. گفت‌وگوی حساب فقط پس از اتصال ذخیره می‌شود. فایل‌ها و پروژه همگام نمی‌شوند؛ نتیجه تضمین امنیت نیست.'});
 function switchMode(next,{carryDraft=false}={}){
  if(busy||!['chat','worker','build'].includes(next)){$('mode').value=activeMode;return;}
  if(next===activeMode){$('mode-picker').open=false;$('mode').value=next;renderStatus();return;}
@@ -149,7 +155,7 @@ function endTurn(turn){
  if(activeTurn!==turn)return;
  if(turn.recordTiming){const timing={elapsedMs:turn.elapsedMs,label:turn.controller.signal.aborted?'stoppedAfter':turn.completed?'respondedIn':'elapsedTime'};history.push({timing});renderTiming(timing);}
  $('activity').hidden=true;delete $('activity').dataset.label;
- activeTurn=undefined;busy=false;$('conversation').setAttribute('aria-busy','false');renderStatus();
+ activeTurn=undefined;busy=false;library.capture();$('conversation').setAttribute('aria-busy','false');renderStatus();
 }
 function stopTurn(){
  if(!activeTurn||activeTurn.controller.signal.aborted)return;
@@ -192,6 +198,7 @@ function responseIcon(kind){
  path.setAttribute('stroke','currentColor');path.setAttribute('stroke-width',kind==='copy'?'1.5':'3');path.setAttribute('stroke-linecap','round');path.setAttribute('stroke-linejoin','round');svg.append(path);return svg;
 }
 function translate(){
+ navigation.language(locale);
  account.refresh();
  document.documentElement.lang=locale;document.documentElement.dir=locale==='fa'?'rtl':'ltr';$('language').textContent=locale==='fa'?'English':'فارسی';
  document.querySelectorAll('[data-i18n]').forEach(n=>n.textContent=t(n.dataset.i18n));$('message').placeholder=t($('tool').value==='ai_web'?'webPlaceholder':$('mode').value==='worker'?'inspectionPlaceholder':'placeholder');$('conversation').ariaLabel=locale==='fa'?'گفت‌وگو':'Conversation';renderStatus();$('mode-hint').textContent=t($('mode').value==='chat'?'chatHint':'workerHint');
@@ -278,8 +285,8 @@ function renderResponse(response,remember=true){
  info.append(el('h4',t('limits')));const limits=el('ul');for(const v of r.limitations)limits.append(el('li',v));info.append(limits);card.append(info);$('conversation').append(card);
 }
 async function fileData(file){const bytes=new Uint8Array(await file.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));return {name:file.name,base64:btoa(binary)};}
-$('language').onclick=()=>{locale=locale==='fa'?'en':'fa';try{localStorage.setItem('malguard-language',locale);}catch{}translate();};
-$('clear').onclick=()=>{if(!busy){history.length=0;modelHistory.length=0;$('conversation').replaceChildren();}};
+$('language').onclick=()=>{locale=locale==='fa'?'en':'fa';try{localStorage.setItem('malguard.ai.language.v1',locale);}catch{}translate();};
+$('clear').onclick=()=>{if(!busy){library.capture();library.fresh();history.length=0;modelHistory.length=0;$('conversation').replaceChildren();}};
 $('remove-file').onclick=()=>{$('file').value='';$('filename').textContent='';$('remove-file').hidden=true;};
 $('file').onchange=()=>{const f=$('file').files[0];if(f&&(!f.size||f.size>1048576)){$('remove-file').click();showError('fileTooLarge');return;}$('filename').textContent=f?.name||'';$('remove-file').hidden=!f;if(f){$('isolation-consent').checked=false;switchMode('worker',{carryDraft:true});if(!['gta_guard','file_sandbox'].includes($('workspace-tool').value))$('workspace-tool').value='auto';$('tool').value=$('workspace-tool').value;renderStatus();}};
 function downloadInfo(model){

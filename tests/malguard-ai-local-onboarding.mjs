@@ -1,3 +1,4 @@
+import {toggleSettings,toggleLanguage,newConversation} from './ai-navigation-helpers.mjs';
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile,mkdir} from 'node:fs/promises';
@@ -23,7 +24,7 @@ try{
   page.on('pageerror',e=>errors.push(e.message));
   await context.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
   await context.addInitScript(()=>{
-   localStorage.setItem('malguard-language','fa');
+   localStorage.setItem('malguard.ai.language.v1','fa');
    Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});
    window.workerCalls=[];window.workerMode='success';window.terminated=0;
    window.Worker=class{
@@ -71,7 +72,7 @@ try{
   assert.match(await page.locator('#device-note').textContent(),/آماده/);
   assert.deepEqual(await page.evaluate(()=>workerCalls.map(c=>c.operation)),['prepare','prepare','prepare']);
   assert.equal(posts.length,0,'Preparing and selecting models must not submit conversation');
-  await page.locator('#language').click();assert.equal(await page.locator('html').getAttribute('dir'),'ltr');assert.match(await page.locator('#device-note').textContent(),/Ready/);
+  await toggleLanguage(page);assert.equal(await page.locator('html').getAttribute('dir'),'ltr');assert.match(await page.locator('#device-note').textContent(),/Ready/);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.deepEqual(errors,[]);
   await page.reload();await page.waitForFunction(()=>!document.getElementById('manage-models').disabled);
   assert.equal(await page.locator('#model').inputValue(),'local_medium','The chosen local model persists without downloading on reload');
@@ -98,7 +99,7 @@ try{
   await cloud.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});});
   await cloud.route('**/api/malguard-ai/status',async r=>{await new Promise(resolve=>setTimeout(resolve,statusDelay));await r.fulfill({contentType:'application/json',body:JSON.stringify({enabled:true,tools:{},model:{state:'configured',defaultModel:'llama70b',models:[{id:'llama70b',label:'Llama',state:'configured'},{id:'cf_gptoss120',label:'GPT-OSS 120B',state:'configured'}]}})});});
   await cloudPage.goto(base+'/ai/');await cloudPage.waitForFunction(()=>document.getElementById('model').value==='cf_gptoss120');
-  await cloudPage.locator('#model').selectOption('local_medium');await cloudPage.locator('#language').click();assert.equal(await cloudPage.locator('#model').inputValue(),'local_medium','Explicit local choice survives rerender');
+  await cloudPage.locator('#model').selectOption('local_medium');await toggleLanguage(cloudPage);assert.equal(await cloudPage.locator('#model').inputValue(),'local_medium','Explicit local choice survives rerender');
   await cloud.close();
  }
  console.log('PASS strongest configured cloud default survives capability/status ordering and preserves explicit choice');
