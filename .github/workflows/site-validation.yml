@@ -67,7 +67,7 @@ jobs:
           TEST_CHROMIUM_EXECUTABLE=/usr/bin/google-chrome node tests/malguard-ai-library.mjs
 
       - name: Validate email authentication with synthetic accounts
-        run: node --test services/game-scam-guard/server/ai-library.test.js services/game-scam-guard/server/email-auth.test.js services/game-scam-guard/src/email-account.test.js
+        run: node --test services/game-scam-guard/server/app.test.js services/game-scam-guard/server/email-challenge-security.test.js services/game-scam-guard/server/email-challenge-sql.test.js services/game-scam-guard/server/challenge-store.test.js services/game-scam-guard/server/ai-library.test.js services/game-scam-guard/server/email-auth.test.js services/game-scam-guard/src/email-account.test.js
 
       - name: Validate download cancellation and integrity using synthetic bytes
         run: node --test tests/public-release/cancellation.test.mjs tests/public-release/model.test.mjs
