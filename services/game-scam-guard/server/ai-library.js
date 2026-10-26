@@ -2,7 +2,7 @@ import {createHash} from 'node:crypto';
 import {createEmailAuth} from './email-auth.js';
 const BUCKET='malguard-ai-library-v1';
 const MAX=262144;
-const fail=status=>Object.assign(new Error('library_unavailable'),{status});
+const fail=(status,stage='validation',upstreamStatus)=>Object.assign(new Error('library_unavailable'),{status,stage,upstreamStatus});
 export function validateLibrary(value){
  if(!value||typeof value!=='object'||Object.keys(value).some(k=>!['chats','notes'].includes(k)))throw fail(400);
  if(!Array.isArray(value.chats)||value.chats.length>30||!Array.isArray(value.notes)||value.notes.length>20)throw fail(400);
@@ -16,19 +16,20 @@ export function validateLibrary(value){
  const clean={chats,notes};if(Buffer.byteLength(JSON.stringify(clean))>MAX)throw fail(413);return clean;
 }
 export function createLibrary({auth=createEmailAuth(),url=process.env.SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY,fetchImpl=fetch}={}){
+ let origin;try{const parsed=new URL(String(url||'').trim());if(parsed.protocol==='https:'&&/^[a-z0-9-]+\.supabase\.co$/.test(parsed.hostname)&&!parsed.username&&!parsed.password)origin=parsed.origin;}catch{}
  async function storage(path,options={}){
-  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(url||'')||!key)throw fail(503);
-  const response=await fetchImpl(`${url.replace(/\/$/,'')}/storage/v1/${path}`,{...options,headers:{apikey:key,Authorization:`Bearer ${key}`,'Content-Type':'application/json',...options.headers},signal:AbortSignal.timeout(12000)});
+  if(!origin||!key)throw fail(503,'configuration');
+  const response=await fetchImpl(`${origin}/storage/v1/${path}`,{...options,headers:{apikey:key,Authorization:`Bearer ${key}`,'Content-Type':'application/json',...options.headers},signal:AbortSignal.timeout(12000)});
   if(response.headers.get('content-length')>MAX)throw fail(502);const raw=await response.text();if(Buffer.byteLength(raw)>MAX)throw fail(502);
   let data;try{data=JSON.parse(raw);}catch{throw fail(502);}return {ok:response.ok,status:response.status,data};
  }
  async function privateBucket(){
   let r=await storage(`bucket/${BUCKET}`);
-  if(r.status===404||r.data?.statusCode==='404'){
+  if(r.status===404||String(r.data?.statusCode)==='404'||r.data?.code==='NoSuchBucket'){
    const made=await storage('bucket',{method:'POST',body:JSON.stringify({id:BUCKET,name:BUCKET,public:false,file_size_limit:MAX,allowed_mime_types:['application/json']})});
-   if(!made.ok&&made.status!==409)throw fail(503);r=await storage(`bucket/${BUCKET}`);
+   if(!made.ok&&made.status!==409)throw fail(503,'bucket_create',made.status);r=await storage(`bucket/${BUCKET}`);
   }
-  if(!r.ok||r.data.public!==false)throw fail(503);
+  if(!r.ok)throw fail(503,'bucket_lookup',r.status);if(r.data.public!==false)throw fail(503,'private_bucket_required');
  }
  return async function run(token,value){
   if(typeof token!=='string'||token.length>16000)throw fail(401);
@@ -38,7 +39,7 @@ export function createLibrary({auth=createEmailAuth(),url=process.env.SUPABASE_U
   // Ownership comes exclusively from the authenticated session, never a caller path.
   const owner=createHash('sha256').update(`malguard-ai-account-v1\0${p.email.trim().toLowerCase()}`).digest('hex');
   const path=`object/${BUCKET}/${owner}/library.json`;
-  if(clean){const r=await storage(path,{method:'POST',headers:{'x-upsert':'true'},body:JSON.stringify(clean)});if(!r.ok)throw fail(503);return {saved:true};}
-  const r=await storage(path);if(r.status===404||r.data?.statusCode==='404')return {chats:[],notes:[]};if(!r.ok)throw fail(503);return validateLibrary(r.data);
+  if(clean){const r=await storage(path,{method:'POST',headers:{'x-upsert':'true'},body:JSON.stringify(clean)});if(!r.ok)throw fail(503,'object_write',r.status);return {saved:true};}
+  const r=await storage(path);if(r.status===404||String(r.data?.statusCode)==='404'||r.data?.code==='NoSuchKey')return {chats:[],notes:[]};if(!r.ok)throw fail(503,'object_read',r.status);return validateLibrary(r.data);
  };
 }

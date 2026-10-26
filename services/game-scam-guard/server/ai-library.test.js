@@ -22,3 +22,7 @@ test('bounded schema excludes executable reports, attachments and excessive note
  const value=sample();value.chats[0].messages[0].file='private';assert.equal(validateLibrary(value).chats[0].messages[0].file,undefined);
  assert.throws(()=>validateLibrary({...sample(),notes:['x'.repeat(1001)]}),{status:400});
 });
+test('Supabase URL is normalized consistently with existing account storage',async()=>{
+ const urls=[];const library=createLibrary({auth:{session:()=>({email:'test@example.com',expiresAt:Date.now()+60000})},url:' https://synthetic.supabase.co/rest/v1 ',key:'test',fetchImpl:async url=>{urls.push(url);return url.includes('/bucket/')?Response.json({public:false}):Response.json({code:'NoSuchKey'},{status:400});}});
+ assert.deepEqual(await library('A'),{chats:[],notes:[]});assert.ok(urls.every(url=>url.startsWith('https://synthetic.supabase.co/storage/v1/')));
+});
