@@ -17,18 +17,18 @@
   <meta name="theme-color" content="#141412">
   <title>MalGuard AI</title>
   <link rel="icon" href="/assets/fusion/assets/malguard-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=sidebar-20261026">
-  <script type="module" src="./app.js?v=sidebar-20261026"></script>
+  <link rel="stylesheet" href="./style.css?v=compact-switcher-20261026">
+  <script type="module" src="./app.js?v=compact-switcher-20261026"></script>
 </head>
 <body>
   <a class="skip" href="#message" data-i18n="skip">Skip to conversation</a>
   <header class="site-header">
       <details id="mode-picker" class="mode-picker">
-        <summary id="mode-toggle" dir="ltr"><img class="mark" src="/assets/fusion/assets/malguard-logo.svg" width="27" height="29" alt=""><strong>MalGuard</strong><span id="mode-current" class="mode-current">Chat</span><span aria-hidden="true">⌄</span></summary>
+        <summary id="mode-toggle" dir="ltr"><strong>MalGuard</strong><span id="mode-current" class="sr-only">Chat</span><svg class="mode-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
         <div class="mode-options workspace-switch" role="group" aria-label="Conversation mode">
-          <button id="chat-tab" type="button" aria-pressed="true"><strong data-i18n="chatTab">Chat</strong><span data-i18n="chatChoice">Questions and conversation</span></button>
-          <button id="workspace-tab" type="button" aria-pressed="false" aria-controls="workspace-panel"><strong data-i18n="workspaceTab">Workspace</strong><span data-i18n="workChoice">File, link and web tools</span></button>
-          <button id="build-tab" type="button" aria-pressed="false" aria-controls="build-panel"><strong data-i18n="buildTab">Build and code</strong><span data-i18n="buildChoice">Edit files, preview and export</span></button>
+          <button id="chat-tab" type="button" aria-pressed="true"><strong data-i18n="navChat">Chat</strong><span data-i18n="navChatHint">Ask, write, and explore</span></button>
+          <button id="build-tab" type="button" aria-pressed="false" aria-controls="build-panel"><strong data-i18n="navCode">Code</strong><span data-i18n="navCodeHint">Build, debug, and preview</span></button>
+          <button id="workspace-tab" type="button" aria-pressed="false" aria-controls="workspace-panel"><strong data-i18n="navWork">Work</strong><span data-i18n="navWorkHint">Inspect files, links, and threats</span></button>
           <a class="mode-home" href="/" data-i18n="home">Main site</a>
         </div>
       </details>

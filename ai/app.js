@@ -70,6 +70,8 @@ Object.assign(copy.fa,{scope:'فقط بررسی انتخاب‌شده انجام
 function setProjectOpen(value){if(!value)builder.stop();projectOpen=value;renderStatus();}
 Object.assign(copy.en,{retention:'Guests: chats stay on this page. Signed-in chats are saved only when account storage is connected. Files and project files are not synchronized. No finding guarantees safety.'});
 Object.assign(copy.fa,{retention:'گفت‌وگوی مهمان فقط در همین صفحه است. گفت‌وگوی حساب فقط پس از اتصال ذخیره می‌شود. فایل‌ها و پروژه همگام نمی‌شوند؛ نتیجه تضمین امنیت نیست.'});
+Object.assign(copy.en,{navChat:'Chat',navCode:'Code',navWork:'Work',navChatHint:'Ask, write, and explore',navCodeHint:'Build, debug, and preview',navWorkHint:'Inspect files, links, and threats'});
+Object.assign(copy.fa,{navChat:'گفت‌وگو',navCode:'کد',navWork:'کار',navChatHint:'بپرس، بنویس و کشف کن',navCodeHint:'بساز، رفع اشکال کن و پیش‌نمایش بگیر',navWorkHint:'بررسی فایل، لینک و تهدیدها'});
 function switchMode(next,{carryDraft=false}={}){
  if(busy||!['chat','worker','build'].includes(next)){$('mode').value=activeMode;return;}
  if(next===activeMode){$('mode-picker').open=false;$('mode').value=next;renderStatus();return;}
@@ -451,7 +453,7 @@ for(const [name,id]of Object.entries(permissionInputs)){$(id).checked=saved[name
 $('revoke-permissions').onclick=()=>{$('build-share-code').checked=false;$('isolation-consent').checked=false;revokePermissions(permissionStorage);for(const id of Object.values(permissionInputs))$(id).checked=false;};
 $('mode').onchange=()=>switchMode($('mode').value);
 $('mode-toggle').addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();$('mode-picker').open=true;$(activeMode==='build'?'build-tab':activeMode==='worker'?'workspace-tab':'chat-tab').focus();}});
-for(const [index,id]of ['chat-tab','workspace-tab','build-tab'].entries())$(id).addEventListener('keydown',event=>{if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();const ids=['chat-tab','workspace-tab','build-tab'];$(ids[event.key==='Home'?0:event.key==='End'?2:(index+(event.key==='ArrowDown'?1:2))%3]).focus();}});
+for(const [index,id]of ['chat-tab','build-tab','workspace-tab'].entries())$(id).addEventListener('keydown',event=>{if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();const ids=['chat-tab','build-tab','workspace-tab'];$(ids[event.key==='Home'?0:event.key==='End'?2:(index+(event.key==='ArrowDown'?1:2))%3]).focus();}});
 $('chat-tab').onclick=()=>switchMode('chat');$('workspace-tab').onclick=()=>switchMode('worker');$('build-tab').onclick=()=>switchMode('build');
 document.addEventListener('pointerdown',event=>{if(!$('mode-picker').contains(event.target))$('mode-picker').open=false;});document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('mode-picker').open){$('mode-picker').open=false;$('mode-toggle').focus();}});
 $('workspace-tool').onchange=()=>{$('tool').value=$('workspace-tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
