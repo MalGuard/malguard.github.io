@@ -63,6 +63,7 @@ jobs:
           TEST_CHROMIUM_EXECUTABLE=/usr/bin/google-chrome npm run test:ai:browser
           TEST_CHROMIUM_EXECUTABLE=/usr/bin/google-chrome npm run test:ai:local
           TEST_CHROMIUM_EXECUTABLE=/usr/bin/google-chrome npm run test:ai:builder
+          TEST_CHROMIUM_EXECUTABLE=/usr/bin/google-chrome node tests/malguard-ai-account.mjs
 
       - name: Validate email authentication with synthetic accounts
         run: node --test services/game-scam-guard/server/email-auth.test.js services/game-scam-guard/src/email-account.test.js
