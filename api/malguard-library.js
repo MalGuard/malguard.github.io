@@ -13,5 +13,5 @@ module.exports=async(req,res)=>{
  try{
   let value;if(req.method==='POST'){if(!String(req.headers['content-type']||'').startsWith('application/json'))return res.status(415).json({error:'json_required'});if(Number(req.headers['content-length'])>262144)return res.status(413).json({error:'too_large'});value=typeof req.body==='string'?JSON.parse(req.body):req.body;if(!value)return res.status(400).json({error:'invalid_library'});}
   library??=(await import('../services/game-scam-guard/server/ai-library.js')).createLibrary();return res.status(200).json(await library(token,value));
- }catch(error){const status=[400,401,413,429].includes(error.status)?error.status:503;return res.status(status).json({error:status===401?'sign_in_required':'library_unavailable'});}
+ }catch(error){const status=[400,401,413,429].includes(error.status)?error.status:503;if(status===503){const stage=['configuration','bucket_create','bucket_lookup','private_bucket_required','object_read','object_write','validation'].includes(error.stage)?error.stage:'transport';console.warn(JSON.stringify({event:'ai_library_unavailable',stage,...(Number.isInteger(error.upstreamStatus)?{upstreamStatus:error.upstreamStatus}:{})}));}return res.status(status).json({error:status===401?'sign_in_required':'library_unavailable'});}
 };
