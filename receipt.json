@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "runId": "40536241417",
+  "sourceCommit": "f75690d79fb0093f7b7860009bd2867fa0f0c638",
+  "build": "MG-1.3.2-WIN64-c9a9d39f2395",
+  "sha256": "9f843bd23ad267bdbf96111a219be75ee5ed68e7b85304ef36d710fb4582621d",
+  "size": 34295808,
+  "status": "verified",
+  "checks": [
+    {
+      "name": "published-current-build",
+      "ok": true,
+      "detail": "MG-1.3.2-WIN64-c9a9d39f2395"
+    },
+    {
+      "name": "unrestricted-download-install-and-launch",
+      "ok": true,
+      "detail": "No password or device binding"
+    },
+    {
+      "name": "public-download-control",
+      "ok": true,
+      "detail": "Visible Windows download without password field"
+    },
+    {
+      "name": "anonymous-installer-get",
+      "ok": true,
+      "detail": "HTTP 200 without password, cookie or authorization"
+    },
+    {
+      "name": "native-pe-installer",
+      "ok": true,
+      "detail": "Windows executable"
+    },
+    {
+      "name": "complete-public-installer-sha256",
+      "ok": true,
+      "detail": "34295808 bytes; exact reviewed SHA-256"
+    },
+    {
+      "name": "published-checksum",
+      "ok": true,
+      "detail": "Published SHA-256 matches reviewed release"
+    }
+  ],
+  "failure": null
+}
