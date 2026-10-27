@@ -70,7 +70,7 @@ jobs:
         run: node --test services/game-scam-guard/server/app.test.js services/game-scam-guard/server/email-challenge-security.test.js services/game-scam-guard/server/email-challenge-sql.test.js services/game-scam-guard/server/challenge-store.test.js services/game-scam-guard/server/ai-library.test.js services/game-scam-guard/server/email-auth.test.js services/game-scam-guard/src/email-account.test.js
 
       - name: Verify isolated engineering staging
-        run: node --test tests/engineering-repair.test.mjs tests/engineering-staging.test.mjs tests/engineering-staging-http.test.mjs
+        run: node --test tests/engineering-support.test.mjs tests/engineering-repair.test.mjs tests/engineering-staging.test.mjs tests/engineering-staging-http.test.mjs
 
       - name: Validate download cancellation and integrity using synthetic bytes
         run: node --test tests/public-release/cancellation.test.mjs tests/public-release/model.test.mjs

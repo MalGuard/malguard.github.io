@@ -1,4 +1,5 @@
 import express from 'express';
+import {createSupportResponder} from './support.mjs';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {randomBytes,timingSafeEqual,randomUUID} from 'node:crypto';
@@ -6,16 +7,17 @@ import {createLocalLab} from './lab.mjs';
 import {createRepairAnalyzer,safeDebugReport} from './repair.mjs';
 import {createTelemetry} from '../../services/malguard-ai/server/telemetry.js';
 
-export async function startLocalStaging({port=8788,lab,analyzer,connectModel=false}={}){
+export async function startLocalStaging({port=8788,lab,analyzer,support,connectModel=false}={}){
  if(!Number.isInteger(port)||port<0||port>65535)throw Error('invalid_local_port');
+ support??=createSupportResponder({enabled:connectModel});
  lab??=await createLocalLab();analyzer??=createRepairAnalyzer({enabled:connectModel});
- const app=express(),session=randomBytes(32).toString('hex'),telemetry=createTelemetry({capacity:100,sink:()=>{},env:{NODE_ENV:'test'}});let origin,rateStart=Date.now(),rate=0;
+ const app=express(),session=randomBytes(32).toString('hex'),reportSession=randomBytes(32).toString('hex'),telemetry=createTelemetry({capacity:100,sink:()=>{},env:{NODE_ENV:'test'}});let origin,rateStart=Date.now(),rate=0;
  app.disable('x-powered-by');
  app.use((req,res,next)=>{
   res.set({'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"});
   if(!origin||req.headers.host!==new URL(origin).host||req.headers.origin&&req.headers.origin!==origin)return res.status(403).json({error:'local_origin_required'});
   if(req.path.startsWith('/api/')){
-   const token=req.headers['x-staging-session'];if(typeof token!=='string'||token.length!==session.length||!timingSafeEqual(Buffer.from(token),Buffer.from(session)))return res.status(401).json({error:'staging_session_required'});
+   const expected=req.path==='/api/support'?reportSession:session,token=req.headers['x-staging-session'];if(typeof token!=='string'||!/^[a-f0-9]{64}$/.test(token)||!timingSafeEqual(Buffer.from(token),Buffer.from(expected)))return res.status(401).json({error:'staging_session_required'});
    if(req.method==='POST'&&(req.headers.origin!==origin||!req.is('application/json')))return res.status(403).json({error:'local_json_required'});
    if(Date.now()-rateStart>=60000){rateStart=Date.now();rate=0;}if(++rate>60)return res.set('Retry-After','60').status(429).json({error:'rate_limited'});
    const id=randomUUID(),started=Date.now();res.set('X-Request-ID',id);res.once('finish',()=>telemetry.record({requestId:id,endpoint:req.path==='/api/status'?'/status':req.path==='/api/sample'?'/chat':'unmatched',statusCode:res.statusCode,errorCode:res.locals.errorCode,durationMs:Date.now()-started}));
@@ -24,6 +26,8 @@ export async function startLocalStaging({port=8788,lab,analyzer,connectModel=fal
  });
  app.use(express.json({limit:'16kb',strict:true}));
  app.get('/',async(req,res,next)=>{try{const html=await readFile(new URL('./ui/index.html',import.meta.url),'utf8');res.type('html').send(html.replace('__STAGING_SESSION__',session));}catch(error){next(error);}});
+ app.get('/report',async(req,res,next)=>{try{const html=await readFile(new URL('./ui/report.html',import.meta.url),'utf8');res.type('html').send(html.replace('__REPORT_SESSION__',reportSession));}catch(error){next(error);}});
+ app.post('/api/support',async(req,res,next)=>{try{res.json(await support.submit(req.body));}catch(error){next(error);}});
  app.use(express.static(fileURLToPath(new URL('./ui/',import.meta.url)),{index:false,dotfiles:'deny'}));
  app.get('/api/status',(_req,res)=>res.json({mode:'synthetic_local_staging',database:'embedded_postgresql',storage:'simulated_supabase_storage',telemetry:telemetry.health(),repair:analyzer.status()}));
  app.get('/api/events',(req,res)=>res.json({events:telemetry.snapshot(typeof req.query.requestId==='string'?req.query.requestId:undefined)}));

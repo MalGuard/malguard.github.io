@@ -7,6 +7,11 @@ test('loopback center requires exact Host/Origin and an ephemeral session for AP
  try{
   const root=await fetch(service.url);assert.equal(root.status,200);assert.match(root.headers.get('content-security-policy'),/frame-ancestors 'none'/);const html=await root.text();const token=html.match(/name="staging-session" content="([a-f0-9]+)"/)[1];
   assert.equal((await fetch(service.url+'/api/events')).status,401);
+  const reportPage=await fetch(service.url+'/report');const reportToken=(await reportPage.text()).match(/name="staging-session" content="([a-f0-9]+)"/)[1];assert.notEqual(reportToken,token);
+  const reportHeaders={'X-Staging-Session':reportToken,'Content-Type':'application/json',Origin:service.url};
+  assert.equal((await fetch(service.url+'/api/events',{headers:reportHeaders})).status,401);
+  assert.equal((await fetch(service.url+'/api/support',{method:'POST',headers:reportHeaders,body:JSON.stringify({description:'A synthetic bug description',steps:'',consent:true})})).status,200);
+  assert.equal((await fetch(service.url+'/api/support',{method:'POST',headers:reportHeaders,body:JSON.stringify({description:'A synthetic bug description',steps:'',consent:false})})).status,400);
   const headers={'X-Staging-Session':token,'Content-Type':'application/json',Origin:service.url};
   assert.equal((await fetch(service.url+'/api/events',{headers})).status,200);
   assert.equal((await fetch(service.url+'/api/lab',{method:'POST',headers:{...headers,Origin:'https://attacker.example'},body:'{}'})).status,403);
