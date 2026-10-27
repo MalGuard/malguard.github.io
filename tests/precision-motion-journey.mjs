@@ -4,9 +4,10 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {chromium,webkit,launchOptions} from './browser-runtime.mjs';
 
-const base='https://127.0.0.1:8443';
+const base=process.env.TEST_BASE_URL||'https://127.0.0.1:8443';
+assert.ok(['https://127.0.0.1:8443','http://127.0.0.1:8790'].includes(base),'Use only the isolated loopback fixture');
 const names=process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chromium','webkit'];
-const products=['/gta-guard.html','/game-scam-guard.html','/threat-radar.html'];
+const products=['/gta-guard.html','/game-scam-guard.html','/ai/'];
 const stages=['Identify','Inspect','Analyze','Decide'];
 const reports=[];
 await mkdir('test-results/precision-motion',{recursive:true});
