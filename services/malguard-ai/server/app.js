@@ -3,10 +3,18 @@ import {retryDetails} from '../../../ai/service-errors.mjs';
 import {randomUUID} from 'node:crypto';
 import {createOrchestrator} from './orchestrator.js';
 import {InputError,MAX_BODY_BYTES} from './contracts.js';
+import {createTelemetry} from './telemetry.js';
 
 export function createApp({orchestrator=createOrchestrator(),enabled=process.env.MALGUARD_AI_ENABLED!=='false',publicOrigin=process.env.MALGUARD_AI_PUBLIC_ORIGIN,now=Date.now,log=entry=>console.info(JSON.stringify(entry))}={}) {
   const app=express(),rates=new Map();let active=0;
+  const telemetry=createTelemetry({now,sink:log});app.locals.telemetry=telemetry;
   app.disable('x-powered-by');
+  app.use((req,res,next)=>{
+    const requestId=randomUUID(),startedAt=now();let recorded=false;
+    res.locals.requestId=requestId;res.set({'X-Request-ID':requestId,'Access-Control-Expose-Headers':'X-Request-ID'});
+    const completed=statusCode=>{if(recorded)return;recorded=true;const errors={400:'invalid_request',403:'origin_denied',404:'not_found',413:'request_too_large',415:'json_required',429:'rate_limited',503:'service_busy'};telemetry.record({requestId,endpoint:req.path,statusCode,errorCode:res.locals.errorCode||(statusCode>=400?(errors[statusCode]||'request_failed'):undefined),model:req.body?.model,provider:res.locals.provider,durationMs:now()-startedAt});};
+    res.once('finish',()=>completed(res.statusCode));res.once('close',()=>{if(!res.writableFinished)completed(499);});next();
+  });
   const allowed=new Set(['https://malguard.site','https://malguard.github.io','https://game-scam-guard-connected.vercel.app','https://api.malguard.site']);
   if(publicOrigin)allowed.add(new URL(publicOrigin).origin);
   if(process.env.NODE_ENV!=='production'){allowed.add('http://127.0.0.1:8787');allowed.add('http://localhost:8787');}
@@ -41,21 +49,23 @@ export function createApp({orchestrator=createOrchestrator(),enabled=process.env
     res.json({enabled,...status});
   });
   app.post('/chat',async(req,res,next)=>{
-    if(!enabled)return res.status(503).json({error:'service_disabled'});
+    if(!enabled){res.locals.errorCode='service_disabled';return res.status(503).json({error:'service_disabled'});}
     if(active>=2)return res.status(503).json({error:'service_busy'});
-    active++;const id=randomUUID();let started=false;
+    active++;let started=false;
     // Validation and consent complete before the first stream event.
     const stream=req.headers.accept==='application/x-ndjson';
     const emit=event=>{if(!stream||res.destroyed)return;if(!started){res.type('application/x-ndjson');res.flushHeaders();started=true;}res.write(JSON.stringify({event})+'\n');};
     try {
       const result=await orchestrator.run(req.body,emit);
+      res.locals.provider=result.generated?.provider;
+      if(result.error)res.locals.errorCode=result.error;else if(result.result?.outcome==='error')res.locals.errorCode='request_failed';
       if(!res.destroyed){if(stream){if(!started)res.type('application/x-ndjson');res.end(JSON.stringify({result})+'\n');}else res.json(result);}
-      log({event:'ai_request',id,outcome:result.result?.outcome||'guidance'});
     } catch(error){next(error);} finally{active--;}
   });
   app.use((error,req,res,next)=>{
     const code=error instanceof InputError?error.code:error.type==='entity.too.large'?'request_too_large':error.type==='entity.parse.failed'?'invalid_json':'request_failed';
     const status=error instanceof InputError?error.status:error.type==='entity.too.large'?413:error.type==='entity.parse.failed'?400:500;
+    res.locals.errorCode=code;
     if(res.headersSent){if(!res.destroyed)res.end(JSON.stringify({error:code})+'\n');return;}
     res.status(status).json({error:code});
   });
