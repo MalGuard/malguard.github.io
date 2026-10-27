@@ -1,7 +1,7 @@
 import {chromium,launchOptions} from './browser-runtime.mjs';
 import {mkdir,writeFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
-const base='https://127.0.0.1:8443';
+const base=process.env.MALGUARD_VISUAL_BASE || 'https://127.0.0.1:8443';
 await mkdir('test-results',{recursive:true});
 const browser=await chromium.launch(launchOptions('chromium')),metrics=[];
 try{
@@ -10,7 +10,7 @@ try{
   await c.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
   const p=await c.newPage();
   for(const path of ['products','tools','gta-guard','trust','malware-ai','game-scam-guard','about']){
-   await p.goto(base+'/'+path+'.html');await p.evaluate(()=>document.fonts.ready);await p.waitForTimeout(1300);
+   await p.goto(base+(path==='malware-ai'?'/ai/':'/'+path+'.html'));await p.evaluate(()=>document.fonts.ready);await p.waitForTimeout(1300);
    await p.screenshot({path:`test-results/visual-${width}-${path}.png`});
    const state=await p.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth,header:document.getElementById('navbar')?.getBoundingClientRect().toJSON(),fonts:document.fonts.status,transfer:performance.getEntriesByType('resource').reduce((a,b)=>a+b.transferSize,0)}));
    assert.equal(state.overflow,false);if(state.header)assert(state.header.left>=0&&state.header.right<=width+1);

@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -68,6 +72,9 @@ jobs:
 
       - name: Validate email authentication with synthetic accounts
         run: node --test services/game-scam-guard/server/ai-library.test.js services/game-scam-guard/server/email-auth.test.js services/game-scam-guard/src/email-account.test.js
+
+      - name: Validate optional MalGuard AI report guidance
+        run: node --test tests/site-report-ai.test.mjs
 
       - name: Validate download cancellation and integrity using synthetic bytes
         run: node --test tests/public-release/cancellation.test.mjs tests/public-release/model.test.mjs

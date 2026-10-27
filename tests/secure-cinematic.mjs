@@ -40,7 +40,7 @@ for(const engine of engines){
    });
    const page=await context.newPage();activePage=page;activeProfile={engine,width,height};page.on('pageerror',e=>errors.push(e.message));
    for(const path of ['/report.html','/console-8d42b69fda13705cc47a.html']){
-    await page.goto(base+path);await page.waitForFunction(()=>window.MalGuardSecureMotion);await page.waitForTimeout(1100);
+    await page.goto(base+path);if(path==='/report.html'){await page.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true');assert.equal(await page.locator('#secure-scene,#secure-field,#secure-volume').count(),0);assert(await page.locator('#reportSubmit').isEnabled());assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));continue;}await page.waitForFunction(()=>window.MalGuardSecureMotion);await page.waitForTimeout(1100);
     assert.equal(await page.locator('#secure-field,#secure-volume,canvas').count(),0);
     assert(await page.evaluate(()=>MalGuardSecureMotion.snapshot().activeAnimations>0));
     assert(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth<=1));

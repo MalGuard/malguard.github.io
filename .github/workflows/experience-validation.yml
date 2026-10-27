@@ -6,6 +6,10 @@ on:
     branches: [main]
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   responsive-and-functional:
     runs-on: ubuntu-latest
@@ -75,6 +79,8 @@ jobs:
           openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
           python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
           TEST_BROWSER=chromium node tests/gamescam-ai-hero.mjs
+          TEST_BASE_URL=https://127.0.0.1:8443 node tests/site-consistency.mjs
+          MALGUARD_FORM_QA_URL=https://127.0.0.1:8443 node tests/site-report-ai-browser.mjs
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/gamescam-ai-hero.mjs
           TEST_BROWSER=chromium node tests/opaque-menu-static-gta.mjs
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/opaque-menu-static-gta.mjs

@@ -21,6 +21,7 @@
  motion.addEventListener('change',e=>{if(e.matches)finish();});
  if(eligible){root.classList.add('type-system');}
  function init(){
+  if(document.body.classList.contains('mg-precision-shared'))root.dataset.experienceReady='true';
   try{
    const shared=document.body.classList.contains('mg-precision-shared');
    if(shared){
@@ -51,7 +52,7 @@
      nav.querySelectorAll('.mg-brand,.mg-primary-links a,.nav-download').forEach(link=>{if(link.getClientRects().length)markLink(link);});
     }
     if(shared){
-     const actions='main a.btn,main a.button,main a.action-button,main a.release-button,main a.platform-button,main a.download-button,main a.mg-home-product-link,main a.mg-home-product-extra,main a.gta6-button,main a[role="button"],main .actions>a,main .hero-actions>a,main .legacy-actions>a,main .action-group>a,main button.button:not([type="submit"]),main button.btn:not([type="submit"])';
+     const actions='main a.btn,main a.button,main a.action-button,main a.release-button,main a.platform-button,main a.download-button,main a.mg-home-product-link,main a.mg-home-product-extra,main a.gta6-button,main a[role="button"],main .actions>a,main .hero-actions>a,main .legacy-actions>a,main .action-group>a';
      document.querySelectorAll(actions).forEach(link=>{
       if(!link.closest('form,[aria-live],[role="dialog"],.site-search,.result,.verdict,.scan-result')&&link.getClientRects().length&&!link.hasAttribute('disabled'))markLink(link);
      });
