@@ -1,4 +1,4 @@
-import {toggleSettings,toggleLanguage,newConversation,openModePicker} from './ai-navigation-helpers.mjs';
+import {toggleSettings,newConversation,openModePicker} from './ai-navigation-helpers.mjs';
 import assert from 'node:assert/strict';
 import express from 'express';
 import {fileURLToPath} from 'node:url';
@@ -50,12 +50,12 @@ try{
   assert.equal(await page.locator('#model').isVisible(),true);assert.equal(await page.locator('#composer #model').count(),1);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);
   if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/quiet-empty-${width}.png`,fullPage:true});}
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
-  await toggleLanguage(page);assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
+  assert.equal(await page.locator('#language-select').count(),0);assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   const beforeMenu=requests;
   await page.locator('#attach-toggle').focus();await page.locator('#attach-toggle').press('Enter');
   assert.equal(await page.locator('#attach-toggle').getAttribute('aria-expanded'),'true');
   assert.equal(await page.locator('#attach-options').isVisible(),true);
-  assert.ok(await page.locator('#attach-options').evaluate(n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight;}),'RTL attachment actions fit the viewport');
+  assert.ok(await page.locator('#attach-options').evaluate(n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight;}),'Attachment actions fit the viewport');
   await page.keyboard.press('Escape');assert.equal(await page.locator('#attach-options').isVisible(),false);
   assert.equal(await page.locator('#attach-toggle').evaluate(n=>n===document.activeElement),true,'Escape returns focus to the attachment trigger');
   await page.locator('#attach-toggle').click();await page.mouse.click(4,4);assert.equal(await page.locator('#attach-options').isVisible(),false,'Outside click closes attachment actions');
@@ -66,7 +66,7 @@ try{
   assert.equal(await page.locator('#mode').inputValue(),'chat');assert.equal(await page.locator('#tool').inputValue(),'auto');
   assert.equal(requests,beforeMenu,'Attachment actions must not submit requests');
   assert.equal(await page.locator('#local-download').isVisible(),false);assert.equal(await page.locator('#local-offer').isVisible(),false,'Attachment actions must not start model downloads');
-  await toggleLanguage(page);assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
+  assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   await page.locator('#attach-toggle').click();const choosingFile=page.waitForEvent('filechooser');await page.locator('#attach-file').click();
   await (await choosingFile).setFiles({name:'benign.txt',mimeType:'text/plain',buffer:Buffer.from('Hello, harmless browser fixture.')});
   assert.equal(await page.locator('#attach-options').isVisible(),false);assert.equal(requests,beforeMenu,'Choosing a file does not upload it');
@@ -78,11 +78,11 @@ try{
   assert.equal(await page.locator('#file-consent').isChecked(),true);
   await page.getByText('Inspection details',{exact:true}).click();assert.match(await page.locator('.result code').last().innerText(),/sha256/);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`overflow ${width}`);
-  assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage).sort()),['malguard-ai-permissions-v1','malguard.ai.language.v1','malguard.ai.welcome.v3']);assert.equal(await page.evaluate(()=>localStorage.getItem('malguard.ai.language.v1')),'en');assert.ok(!JSON.stringify(await page.evaluate(()=>({...localStorage}))).includes('benign.txt'));
+  assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage).sort()),['malguard-ai-permissions-v1','malguard.ai.welcome.v3']);assert.ok(!JSON.stringify(await page.evaluate(()=>({...localStorage}))).includes('benign.txt'));
   assert.equal(await page.locator('#tool option[value="ai_web"]').isDisabled(),true);
   assert.equal(await page.locator('#tool option[value="malwarebazaar"]').isDisabled(),true);
-  await toggleLanguage(page);assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
-  await page.getByRole('heading',{name:'شواهد مخرب در بررسی‌های انجام‌شده یافت نشد.'}).waitFor();
+  assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
+  await page.getByRole('heading',{name:'No malicious evidence found in the checks performed.'}).waitFor();
   if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/${width}.png`,fullPage:true});}
   await newConversation(page);assert.equal(await page.locator('#conversation').innerText(),'');
   if(width===1280){
@@ -95,16 +95,15 @@ try{
    await page.locator('.response-details summary').first().click();
    await page.screenshot({path:'test-results/malguard-ai/quiet-reply-1280.png',fullPage:true});
    await page.locator('#message').fill('Continue');await page.locator('#send').click();await page.getByText('Benign test reply 2',{exact:true}).waitFor();
-   await toggleLanguage(page);assert.equal(await page.locator('html').getAttribute('lang'),'en');
+   assert.equal(await page.locator('html').getAttribute('lang'),'en');
    await page.locator('#model').selectOption('llama8b');await page.locator('#message').fill('سلام');await page.locator('#send').click();await page.getByText('پاسخ فارسی آزمایشی',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
-   await toggleLanguage(page);
-   await toggleSettings(page);await page.locator('#mode').selectOption('worker');await toggleSettings(page);await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('این حالت برای بررسی فایل، هش و سایت است. برای گفت‌وگوی عادی یا سؤال فنی، حالت چت را انتخاب کن.',{exact:true}).waitFor();
+   await toggleSettings(page);await page.locator('#mode').selectOption('worker');await toggleSettings(page);await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('This mode inspects files, hashes and websites. Switch to Chat for general or technical questions.',{exact:true}).waitFor();
    await newConversation(page);
    console.log('PASS Chat multi-turn context and inspection-only mode (injected benign model fixture).');
   }
   await page.reload();assert.equal(await page.locator('#conversation').innerText(),'');assert.equal(await page.locator('#file-consent').isChecked(),true);await toggleSettings(page);await page.locator('#permissions summary').click();await page.locator('#revoke-permissions').click();assert.equal(await page.locator('#file-consent').isChecked(),false);
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);await context.close();
-  console.log(`PASS real AI frontend → backend → static worker, consent, RTL/LTR, no overflow/history at ${width}px`);
+  console.log(`PASS real AI frontend → backend → static worker, consent, English interface, no overflow/history at ${width}px`);
  }
  const context=await browser.newContext(),page=await context.newPage();await skipWelcome(context);await context.route('**/api/malguard-ai/status',r=>r.abort());await page.goto(base+'/ai/');await toggleSettings(page);await page.getByRole('status').filter({hasText:'Backend unavailable'}).waitFor();assert.equal(await page.locator('#send').isDisabled(),true);await context.close();console.log('PASS backend failure shown; submission disabled.');
  const errorContext=await browser.newContext({timezoneId:'Asia/Tehran'}),errorPage=await errorContext.newPage();
@@ -117,16 +116,16 @@ try{
   return route.fulfill({contentType:'application/x-ndjson',body:JSON.stringify({event:{phase:'model_started',tool:'chat'}})+'\n'+JSON.stringify({result})+'\n'});
  });
  await errorPage.goto(base+'/ai/');await errorPage.waitForFunction(()=>!document.getElementById('send').disabled);
- await toggleLanguage(errorPage);await toggleSettings(errorPage);await errorPage.locator('#permissions summary').click();await errorPage.locator('#model-consent').check();await toggleSettings(errorPage);
+ await toggleSettings(errorPage);await errorPage.locator('#permissions summary').click();await errorPage.locator('#model-consent').check();await toggleSettings(errorPage);
  await errorPage.locator('#message').fill('سلام');await errorPage.locator('#send').click();
- await errorPage.getByRole('alert').filter({hasText:'لیمیت خورد'}).waitFor();
- const expected=await errorPage.evaluate(stamp=>new Intl.DateTimeFormat('fa-IR',{dateStyle:'medium',timeStyle:'long'}).format(new Date(stamp)),retryAt);
+ await errorPage.getByRole('alert').filter({hasText:'request or token limit'}).waitFor();
+ const expected=await errorPage.evaluate(stamp=>new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'long'}).format(new Date(stamp)),retryAt);
  await errorPage.waitForFunction(expected=>document.querySelector('[role=alert]')?.innerText.includes(expected),expected);assert.ok((await errorPage.getByRole('alert').innerText()).includes(expected));assert.equal(await errorPage.locator('#message').inputValue(),'سلام');
- await errorPage.locator('#send').click();await errorPage.getByRole('alert').filter({hasText:/زمان رفع محدودیت.*اعلام نشده/}).waitFor();
- assert.match(await errorPage.getByRole('alert').last().innerText(),/زمان رفع محدودیت.*اعلام نشده/);
- await toggleLanguage(errorPage);assert.match(await errorPage.getByRole('alert').last().innerText(),/did not supply a reset time/);
+ await errorPage.locator('#send').click();await errorPage.getByRole('alert').filter({hasText:'did not supply a reset time'}).waitFor();
+ assert.match(await errorPage.getByRole('alert').last().innerText(),/did not supply a reset time/);
+ assert.match(await errorPage.getByRole('alert').last().innerText(),/did not supply a reset time/);
  await errorPage.locator('#send').click();await errorPage.getByRole('alert').filter({hasText:'credit or billing'}).waitFor();
- await errorContext.close();console.log('PASS HTTP and streamed provider limit/quota/billing errors, real local retry time, language changes and preserved message (fixtures).');
+ await errorContext.close();console.log('PASS HTTP and streamed provider limit/quota/billing errors, real local retry time and preserved message (fixtures).');
  // Device inference is a Worker fixture here: no model weights or GPU results
  // are fabricated as live verification. Assert the privacy/consent boundaries.
  const device=await browser.newContext({viewport:{width:390,height:844}}),localPage=await device.newPage();
