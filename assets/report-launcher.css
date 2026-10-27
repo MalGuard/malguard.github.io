@@ -6,3 +6,5 @@ body:has(#settings-panel[open]) #mg-report-launcher,body:has(dialog[open]) #mg-r
 
 body:has(#conversation) #mg-report-launcher{inset-inline-end:auto;inset-inline-start:auto;right:14px;left:auto}
 @media(max-width:760px){body:has(#conversation):not(.navigation-closed) #mg-report-launcher{display:none}}
+
+body:has(.g-app [role="dialog"][aria-modal="true"]) #mg-report-launcher{display:none}

@@ -1,6 +1,8 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ShieldCheck,ScanLine,History,Settings2,Stethoscope,Globe2,UserRound,Link2,Clipboard,ArrowLeft,LoaderCircle,Check,Info,TriangleAlert,Download,X,ChevronDown,Search,Trash2} from 'lucide-react';
+import '../../../assets/report-launcher.js';
+import '../../../assets/report-launcher.css';
 import './styles.css';
 import './compact.css';
 import {apiUrl} from './api.js';
