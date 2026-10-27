@@ -121,8 +121,8 @@ try{
  await errorPage.locator('#message').fill('سلام');await errorPage.locator('#send').click();
  await errorPage.getByRole('alert').filter({hasText:'لیمیت خورد'}).waitFor();
  const expected=await errorPage.evaluate(stamp=>new Intl.DateTimeFormat('fa-IR',{dateStyle:'medium',timeStyle:'long'}).format(new Date(stamp)),retryAt);
- assert.ok((await errorPage.getByRole('alert').innerText()).includes(expected));assert.equal(await errorPage.locator('#message').inputValue(),'سلام');
- await errorPage.locator('#send').click();await errorPage.getByRole('alert').filter({hasText:'سهمیهٔ'}).waitFor();
+ await errorPage.waitForFunction(expected=>document.querySelector('[role=alert]')?.innerText.includes(expected),expected);assert.ok((await errorPage.getByRole('alert').innerText()).includes(expected));assert.equal(await errorPage.locator('#message').inputValue(),'سلام');
+ await errorPage.locator('#send').click();await errorPage.getByRole('alert').filter({hasText:/زمان رفع محدودیت.*اعلام نشده/}).waitFor();
  assert.match(await errorPage.getByRole('alert').last().innerText(),/زمان رفع محدودیت.*اعلام نشده/);
  await toggleLanguage(errorPage);assert.match(await errorPage.getByRole('alert').last().innerText(),/did not supply a reset time/);
  await errorPage.locator('#send').click();await errorPage.getByRole('alert').filter({hasText:'credit or billing'}).waitFor();
