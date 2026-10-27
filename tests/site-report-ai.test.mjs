@@ -11,3 +11,5 @@ test('failure or unsafe model claims cannot undo email acceptance or promise a f
  assert.equal((await replyToBugReport({...input,fetchImpl:async()=>Response.json({error:'quota'},{status:429})})).status,'unavailable');
  assert.equal((await replyToBugReport({...input,fetchImpl:async()=>Response.json({generated:{selectedModel:'cf_qwen3',provider:'workers_ai_rest',text:'The bug is fixed'}})})).status,'unavailable');
 });
+
+test('a maximum-size accepted report stays within the chat gateway input budget',async()=>{let length=0;const result=await replyToBugReport({accepted:true,consent:true,kind:'bug',message:'x'.repeat(6000),fetchImpl:async(_url,o)=>{length=JSON.parse(o.body).message.length;return Response.json({generated:{selectedModel:'cf_qwen3',provider:'workers_ai_rest',text:'Please describe the reproduction steps.'}});}});assert.ok(length<=5000);assert.equal(result.status,'replied');});
