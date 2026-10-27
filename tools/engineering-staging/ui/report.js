@@ -1,0 +1,8 @@
+const $=id=>document.getElementById(id),session=document.querySelector('meta[name="staging-session"]').content;
+const reasons={unsafe_model_response:'پاسخ مدل ادعای تأییدنشده داشت و نمایش داده نشد؛ مشکل هنوز نیازمند بررسی است.',connection_disabled:'پاسخ هوش مصنوعی فعلاً فعال نیست.',busy:'یک درخواست در حال پردازش است؛ کمی بعد دوباره امتحان کن.',budget_exhausted:'سهمیهٔ این محیط آزمایشی تمام شده است.',model_unavailable:'سرویس پاسخ نداد؛ مشکل رفع‌شده محسوب نمی‌شود.'};
+$('report-form').onsubmit=async event=>{
+ event.preventDefault();if($('submit-report').disabled)return;$('submit-report').disabled=true;$('reply-panel').hidden=true;$('report-status').textContent='در حال دریافت راهنمایی…';
+ try{const response=await fetch('/api/support',{method:'POST',headers:{'Content-Type':'application/json','X-Staging-Session':session},body:JSON.stringify({description:$('description').value,steps:$('steps').value,consent:$('consent').checked}),signal:AbortSignal.timeout(35000)});if(!response.ok)throw Error('request');const result=await response.json();$('receipt').textContent='شناسهٔ پاسخ: '+result.reportId;$('support-reply').textContent=result.state==='REPLIED'?result.reply:reasons[result.reason]||'پاسخ معتبر دریافت نشد.';$('reply-panel').hidden=false;$('report-status').textContent=result.state==='REPLIED'?'راهنمایی اولیه دریافت شد؛ مشکل هنوز رفع‌شده نیست.':'پاسخ خودکار دریافت نشد؛ گزارشی به تیم ارسال نشده است.';}
+ catch{$('report-status').textContent='درخواست کامل نشد؛ اتصال یا محدودیت درخواست را بررسی و بعداً دوباره امتحان کن. گزارشی به تیم ارسال نشده است.';}
+ finally{$('submit-report').disabled=false;}
+};
