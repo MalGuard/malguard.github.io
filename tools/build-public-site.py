@@ -2,6 +2,11 @@
 from pathlib import Path
 import json,shutil,subprocess,sys
 root=Path(__file__).resolve().parents[1]
+# Pages providers may invoke this script directly; produce both app bundles first.
+npm=shutil.which('npm.cmd' if sys.platform == 'win32' else 'npm')
+if not npm: raise RuntimeError('npm is required to build the public applications')
+for target in ('build:ai','build:game-scam-guard'):
+ subprocess.run([npm,'run',target],cwd=root,check=True)
 subprocess.run([sys.executable,str(root/'tests/validate-site.py')],check=True)
 out=root/'_site'
 if out.exists():shutil.rmtree(out)

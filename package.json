@@ -13,11 +13,12 @@
     "test:static": "python3 tests/validate-site.py",
     "test:experience": "node tests/experience.mjs",
     "test:motion": "node tests/motion-smoke.mjs",
-    "build": "npm run build:ai && npm run build:game-scam-guard && python3 tools/build-public-site.py",
+    "build": "python3 tools/build-public-site.py",
     "build:game-scam-guard": "node tools/build-gamescam-guide.mjs && vite build --config services/game-scam-guard/vite.config.js",
     "test:game-scam-guard": "node tests/game-scam-integration.test.mjs && npm --prefix services/game-scam-guard test",
     "build:ai": "node tools/build-ai-local.mjs",
-    "test:ai:builder": "node tests/malguard-ai-builder.mjs"
+    "test:ai:builder": "node tests/malguard-ai-builder.mjs",
+    "test:auth-ledger": "node --test services/game-scam-guard/server/email-challenge-security.test.js services/game-scam-guard/server/email-challenge-sql.test.js"
   },
   "devDependencies": {
     "@noble/hashes": "1.8.0",
@@ -28,7 +29,8 @@
     "libphonenumber-js": "1.13.15",
     "playwright": "1.62.1",
     "three": "0.180.0",
-    "vite": "^6.3.0"
+    "vite": "^6.3.0",
+    "@electric-sql/pglite": "0.5.10"
   },
   "dependencies": {
     "@babel/parser": "7.29.9",
