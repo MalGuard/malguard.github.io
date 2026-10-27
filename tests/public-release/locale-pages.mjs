@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {toggleLanguage} from '../ai-navigation-helpers.mjs';
 import {chromium}from '../browser-runtime.mjs';
 import {readFile,writeFile}from 'node:fs/promises';
 const paths=['/','/products.html','/tools.html','/scan-url.html','/gta-guard.html','/ai-intelligence.html','/malware-ai.html','/malware-ai-windows.html','/threat-radar.html','/scan-mods.html','/download.html','/app.html','/trust.html','/privacy.html','/about.html','/founder.html','/docs.html','/labs.html','/support.html','/sandbox-help.html','/ios-preview/','/research/repackaged-mod.html','/404.html','/game-scam-guard.html','/research/security-motion.html','/release/sandbox-help-historical.html'];
@@ -7,7 +8,7 @@ const results=[];
 try{
  for(const width of [320,1280]){
   const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width,height:900},reducedMotion:'reduce'});
-  await context.route('**/*',r=>new URL(r.request().url()).origin==='https://127.0.0.1:8443'?r.continue():r.abort());
+  await context.addInitScript(()=>localStorage.setItem('malguard.ai.welcome.v3','seen'));await context.route('**/*',r=>new URL(r.request().url()).origin==='https://127.0.0.1:8443'?r.continue():r.abort());
   const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('https://127.0.0.1:8443/#mg-console-8d42b69fda13705cc47a');
   await page.waitForURL('https://127.0.0.1:8443/console-8d42b69fda13705cc47a.html');
@@ -21,7 +22,7 @@ try{
    const start=errors.length;await page.goto('https://127.0.0.1:8443'+path);
    if(['/ai-intelligence.html','/malware-ai.html'].includes(path)){
     await page.waitForURL('**/ai/');await page.waitForFunction(()=>!!document.querySelector('#send')?.dataset.state);
-    if(await page.locator('html').getAttribute('lang')!=='fa')await page.locator('#language').click();
+    if(await page.locator('html').getAttribute('lang')!=='fa')await toggleLanguage(page);
    }
    await page.waitForFunction(()=>document.documentElement.lang==='fa');
    assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
