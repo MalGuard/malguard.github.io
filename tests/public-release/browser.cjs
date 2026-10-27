@@ -58,7 +58,7 @@ const {createServer}=require('node:http');
    check(bad+'-does-not-save-installer',downloads===1);
   }
   mode='delay';await page.locator('#downloadButton').click();await delayedStarted;
-  try{await page.locator('#cancelDownload').click();await page.waitForFunction(()=>document.getElementById('downloadStatus').textContent.includes('cancelled'));check('cancel-does-not-save-partial-file',downloads===1);}finally{releaseDelayed();}
+  try{await page.addScriptTag({url:origin+'/assets/precision/site.js?late-controls-test'});check('active-cancel-control-never-enters-typing-queue',await page.locator('#cancelDownload').getAttribute('data-type')===null);await page.locator('#cancelDownload').click();await page.waitForFunction(()=>document.getElementById('downloadStatus').textContent.includes('cancelled'));check('cancel-does-not-save-partial-file',downloads===1);}finally{releaseDelayed();}
   await page.waitForTimeout(350);mode='valid';
   await page.locator('#buildInput').fill(old);await page.locator('#buildCheckForm button').click();check('older-build-explained',/newer release/.test(await page.locator('#buildCheckStatus').innerText()));
   await page.locator('#buildInput').fill(build);await page.locator('#buildCheckForm button').click();check('current-build-confirmed',/current build/.test(await page.locator('#buildCheckStatus').innerText()));
