@@ -79,9 +79,8 @@ for(const engine of engines){
   assert.deepEqual(errors,[]);reports.push({engine,width,layouts:8,samePageReport:true,shortPersianMessage:true,retryPreserved:true,maskedPassword:true,phoneCountries:['US','IR','AF'],privateAccess:true,retiredAIChatDoesNotAuthenticate:true,errors});await context.close();console.log(`PASS secure forms ${engine} ${width}px`);
  }
  const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:390,height:844},reducedMotion:'no-preference'}),page=await context.newPage();await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
- await page.goto(base+'/report.html');await page.waitForFunction(()=>window.MalGuardSecureMotion?.snapshot().activeAnimations>0);assert.equal(await page.locator('#secure-field,#secure-volume').count(),0);assert.equal(await page.locator('script[src*="home-opening-projection"]').count(),0);
- await page.locator('#reportMessage').fill('Harmless animation test');assert(await page.evaluate(()=>document.body.classList.contains('is-typing')));
- await page.locator('#motionToggle').click();assert(await page.evaluate(()=>MalGuardSecureMotion.snapshot().paused));assert.equal(await page.evaluate(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).filter(a=>a.playState==='running').length),0);await context.close();
+ await page.goto(base+'/report.html');await page.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true');assert.equal(await page.locator('#secure-scene,#secure-field,#secure-volume').count(),0);assert.equal(await page.locator('script[src*="home-opening-projection"]').count(),0);
+ await page.locator('#reportMessage').fill('Harmless animation test');assert.equal(await page.locator('#reportMessage').inputValue(),'Harmless animation test');assert.equal(await page.locator('#reportSubmit').isEnabled(),true);await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await page.locator('html.type-system').count(),0);await context.close();
  await browser.close();
 }
 await writeFile('test-results/secure-forms/report.json',JSON.stringify({status:'PASS',profiles:reports},null,2));

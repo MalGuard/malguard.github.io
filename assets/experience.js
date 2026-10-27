@@ -24,7 +24,7 @@
   document.querySelectorAll('[data-tilt]').forEach(card => {
     let frame = 0;
     card.addEventListener('pointermove', e => {
-      if (!pointer.matches || motion.matches || userPaused) return;
+      if (document.body.classList.contains('mg-precision-shared') || !pointer.matches || motion.matches || userPaused) return;
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const r = card.getBoundingClientRect();

@@ -3,7 +3,7 @@ import {chromium,launchOptions} from './browser-runtime.mjs';
 const base=process.env.MALGUARD_FORM_QA_URL||'http://127.0.0.1:8790';
 const browser=await chromium.launch(launchOptions('chromium'));
 try{for(const width of [390,1280]){
- const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce'});let reports=0,models=0,unavailable=false;
+ const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce',ignoreHTTPSErrors:base==='https://127.0.0.1:8443'});let reports=0,models=0,unavailable=false;
  await context.route('https://malware-ai-gray.vercel.app/**',async route=>{const request=route.request(),headers={'access-control-allow-origin':base,'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'content-type'};
   if(request.method()==='OPTIONS')return route.fulfill({status:204,headers});
   if(new URL(request.url()).pathname==='/api/report'){if(request.method()==='GET')return route.fulfill({headers,json:{challenge:'synthetic-challenge',difficulty:15,expiresIn:300}});reports++;return route.fulfill({headers,json:{ok:true,status:'accepted',reference:'MG-SYNTHETIC'}});}

@@ -382,3 +382,11 @@ body.mg-unified.mg-precision-shared #navbar .menu-btn[aria-expanded="true"]{
 body.mg-unified.mg-precision-shared #navbar #navLinks:not([hidden]) :is(a,button):is(:hover,:focus-visible,[aria-current="page"]){
  background-color:#1b222c!important;color:#fff!important;
 }
+
+/* Shared editorial motion: the once-only text system owns reveals. */
+body.mg-precision-shared :is([data-tilt],.secure-story,.secure-story>p,.secure-page h1,.secure-panel,.signal-status){animation:none!important;transform:none!important}
+body.mg-precision-shared [data-reveal]:not([data-type]){opacity:1!important;transform:none!important;transition:none!important}
+body.mg-precision-shared :is(.secure-scene,.secure-vault-stage,#secure-scene){display:none!important}
+#reportAiChoice input{width:18px!important;height:18px!important;min-height:18px!important;display:inline-block!important;margin:0 8px 0 0;vertical-align:middle}#reportAiReply{white-space:pre-wrap;overflow-wrap:anywhere}
+
+body.mg-precision-shared .secure-eyebrow::before{animation:none!important}

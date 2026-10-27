@@ -21,6 +21,7 @@
  motion.addEventListener('change',e=>{if(e.matches)finish();});
  if(eligible){root.classList.add('type-system');}
  function init(){
+  if(document.body.classList.contains('mg-precision-shared'))root.dataset.experienceReady='true';
   try{
    const shared=document.body.classList.contains('mg-precision-shared');
    if(shared){

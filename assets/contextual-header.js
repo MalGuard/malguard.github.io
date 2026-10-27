@@ -43,7 +43,7 @@
   navbar.querySelector('.nav-actions').before(primary);
   menu.replaceChildren(); menu.setAttribute('aria-label', 'All MalGuard pages');
   const label = text => { const e = document.createElement('span'); e.className = 'mg-menu-label'; e.textContent = text; menu.append(e); };
-  label('EXPLORE MALGUARD'); pages.forEach(p => menu.append(link(p[0], p[2])));
+  label('EXPLORE MALGUARD'); const mainRoutes=new Set(['/','/products.html','/ai/','/gta-guard.html','/game-scam-guard.html','/tools.html','/docs.html','/labs.html','/trust.html','/about.html','/support.html','/report.html']);pages.filter(p=>mainRoutes.has(p[2])).forEach(p => menu.append(link(p[0], p[2])));
   if (sections.length) { label('ON THIS PAGE'); sections.forEach(p => menu.append(link(...p))); }
   function setMenu(open, focus = false) {
     menu.classList.toggle('active', open); menu.hidden = !open;
