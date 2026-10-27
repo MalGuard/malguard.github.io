@@ -17,7 +17,7 @@ import {parseProposal} from './build-project.mjs?v=codex-chat-20261025';
 const $=id=>document.getElementById(id);
 const names={gta_guard:'GTA Guard',game_scam_guard:'Game Scam Guard',ai_web:'AI Web',malwarebazaar:'MalwareBazaar',urlhaus:'URLhaus',file_sandbox:'File sandbox',url_sandbox:'Link sandbox'};
 let locale='en',service,busy=false;
-try{if(localStorage.getItem('malguard.ai.language.v1')==='fa')locale='fa';}catch{}
+
 let activeTurn;
 let localReady=false,modelsInitialized=false;
 let lastSelectedModel='';
@@ -34,7 +34,7 @@ let activeMode='chat',history=conversations.chat.history,modelHistory=conversati
 const desktopChat=createDesktopChat();
 const builder=createBuilder({locale:()=>locale});
 const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{navigation.profile(profile);library.profile(profile);if(profile)return;for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
-const navigation=createNavigation({account,onLanguage:value=>{locale=value;try{localStorage.setItem('malguard.ai.language.v1',locale);}catch{}translate();}});
+const navigation=createNavigation({account,onLanguage:()=>{locale='en';translate();}});
 const library=createChatLibrary({account,snapshot:()=>({mode:activeMode,title:(history.find(item=>item.bubble)?.bubble||'New chat').slice(0,100),messages:history.flatMap(item=>item.bubble?[{role:'user',text:String(item.bubble).slice(0,12000)}]:item.response?.generated?.text?[{role:'assistant',text:item.response.generated.text.slice(0,12000)}]:[]).slice(-64)}),restore:chat=>{switchMode(chat.mode);history.length=0;modelHistory.length=0;for(const message of chat.messages){if(message.role==='user')history.push({bubble:message.text});else history.push({response:{generated:{text:message.text,provider:'Saved chat',model:'History'}}});modelHistory.push({role:message.role,content:message.text.slice(0,2000)});}modelHistory.splice(0,Math.max(0,modelHistory.length-8));$('message').value='';translate();}});
 let desktopConnecting=false;
 const permissionInputs={fileUpload:'file-consent',websiteFetch:'website-consent',remoteLookup:'lookup-consent',modelShare:'model-consent'};
@@ -287,7 +287,7 @@ function renderResponse(response,remember=true){
  info.append(el('h4',t('limits')));const limits=el('ul');for(const v of r.limitations)limits.append(el('li',v));info.append(limits);card.append(info);$('conversation').append(card);
 }
 async function fileData(file){const bytes=new Uint8Array(await file.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));return {name:file.name,base64:btoa(binary)};}
-$('language').onclick=()=>{locale=locale==='fa'?'en':'fa';try{localStorage.setItem('malguard.ai.language.v1',locale);}catch{}translate();};
+$('language').onclick=()=>{};
 $('clear').onclick=()=>{if(!busy){library.capture();library.fresh();history.length=0;modelHistory.length=0;$('conversation').replaceChildren();}};
 $('remove-file').onclick=()=>{$('file').value='';$('filename').textContent='';$('remove-file').hidden=true;};
 $('file').onchange=()=>{const f=$('file').files[0];if(f&&(!f.size||f.size>1048576)){$('remove-file').click();showError('fileTooLarge');return;}$('filename').textContent=f?.name||'';$('remove-file').hidden=!f;if(f){$('isolation-consent').checked=false;switchMode('worker',{carryDraft:true});if(!['gta_guard','file_sandbox'].includes($('workspace-tool').value))$('workspace-tool').value='auto';$('tool').value=$('workspace-tool').value;renderStatus();}};

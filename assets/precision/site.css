@@ -67,3 +67,7 @@ main,.site-footer{position:relative}.hero{position:relative;isolation:isolate;mi
 .precision-home .type-cursor.vertical:after{width:3px;height:100%;bottom:-.05em;left:.1em;animation:mg-coding-caret .85s steps(1,end) infinite}
 @keyframes mg-coding-caret{50%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.precision-home .type-cursor.vertical:after{animation:none!important}}
+
+/* Subtle space atmosphere without delaying interactive content. */
+body.precision-home{background-color:#080a12;background-image:radial-gradient(ellipse at 70% 0%,#26345266,transparent 45%),radial-gradient(circle at 18% 22%,#dbe7ff88 0 1px,transparent 1.5px),radial-gradient(circle at 79% 37%,#c7dcff66 0 1px,transparent 1.5px);background-size:auto,137px 137px,211px 211px;background-attachment:fixed}
+@media(prefers-reduced-motion:reduce){body.precision-home{background-attachment:scroll}}

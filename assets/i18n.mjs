@@ -1,7 +1,7 @@
 import {translations} from './i18n-catalog.mjs?v=20261014-public';
 
 let locale='en';
-try {if(localStorage.getItem('malguard-language')==='fa')locale='fa';} catch {}
+
 export const language=()=>locale;
 const originals=new WeakMap();
 const attributes=new WeakMap();
@@ -32,17 +32,6 @@ function translate() {
     }
   }
   for(const control of document.querySelectorAll('.mg-language select'))control.value=locale;
-}
-const wrapper=document.createElement('label');wrapper.className='mg-language';wrapper.setAttribute('aria-label','Language / زبان');
-const selector=document.createElement('select');selector.setAttribute('aria-label','Language / زبان');
-for(const [value,text]of [['en','English'],['fa','فارسی']]){const option=document.createElement('option');option.value=value;option.textContent=text;selector.append(option);}
-selector.value=locale;wrapper.append(selector);(document.querySelector('.nav-actions')||document.body).append(wrapper);
-function changeLanguage(value){locale=value==='fa'?'fa':'en';try{localStorage.setItem('malguard-language',locale);}catch{}translate();window.dispatchEvent(new Event('malguard-language'));}
-selector.addEventListener('change',()=>changeLanguage(selector.value));
-const gate=document.querySelector('.site-entry-shell');
-if(gate){
-  const alternative=wrapper.cloneNode(true);gate.prepend(alternative);
-  alternative.querySelector('select').addEventListener('change',event=>changeLanguage(event.target.value));
 }
 translate();
 let scheduled=false;
