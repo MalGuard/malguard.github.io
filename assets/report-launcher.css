@@ -2,4 +2,4 @@
 
 body:has(#conversation) #mg-report-launcher{top:78px;bottom:auto}
 
-body:has(#settings-panel[open]) #mg-report-launcher,body:has(dialog[open]) #mg-report-launcher,body:has([role="dialog"]:not([hidden])) #mg-report-launcher,body:has(#navLinks:not([hidden])) #mg-report-launcher{display:none}
+body:has(#settings-panel[open]) #mg-report-launcher,body:has(dialog[open]) #mg-report-launcher,body:has(#navLinks:not([hidden])) #mg-report-launcher{display:none}
