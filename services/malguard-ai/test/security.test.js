@@ -122,8 +122,16 @@ test('consent failure stays HTTP 403 before streaming starts',async t=>{
 test('rate limiter cannot be bypassed with forged forwarding headers',async t=>{
  const base=await serve(t);for(let i=0;i<10;i++)assert.equal((await post(base,{}, {'X-Forwarded-For':`198.51.100.${i}`})).status,200);const r=await post(base,{}, {'X-Forwarded-For':'198.51.100.200'});assert.equal(r.status,429);assert.equal(r.headers.get('retry-after'),'60');
 });
-test('logs contain only random request id, fixed event and outcome; no submitted data',async t=>{
- const logs=[];const base=await serve(t,{log:e=>logs.push(e)});await post(base,{message:'private-benign-example'});assert.equal(logs.length,1);assert.deepEqual(Object.keys(logs[0]),['event','id','outcome']);assert.ok(!JSON.stringify(logs).includes('private-benign-example'));
+test('logs contain only bounded structured metadata and the response tracking id; no submitted data',async t=>{
+ const logs=[];const base=await serve(t,{log:e=>logs.push(e)});const response=await post(base,{message:'private-benign-example'});assert.equal(logs.length,1);assert.deepEqual(Object.keys(logs[0]),['eventId','requestId','correlationId','timestamp','severity','service','environment','applicationVersion','endpoint','statusCode','errorCode','provider','model','durationMs','retryCount','repairStatus']);assert.equal(logs[0].requestId,response.headers.get('x-request-id'));assert.ok(!JSON.stringify(logs).includes('private-benign-example'));
+});
+test('tracking and sanitized logging cover denied requests and parser failures',async t=>{
+ const logs=[],base=await serve(t,{log:e=>logs.push(e)});
+ const denied=await post(base,{message:'PRIVATE_BODY'},{Origin:'https://PRIVATE_ORIGIN.example'});assert.equal(denied.status,403);assert.match(denied.headers.get('x-request-id'),/^[a-f0-9-]{36}$/);
+ const malformed=await fetch(base+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:'{'});assert.equal(malformed.status,400);assert.equal(logs.length,2);assert.notEqual(logs[0].requestId,logs[1].requestId);assert.ok(!JSON.stringify(logs).includes('PRIVATE'));assert.equal(logs[1].errorCode,'invalid_json');
+});
+test('throwing logger does not add a second streaming result or bypass request controls',async t=>{
+ const base=await serve(t,{log:()=>{throw Error('PRIVATE_SINK');}});const result=await post(base,{},{Accept:'application/x-ndjson'});assert.equal(result.status,200);const lines=(await result.text()).trim().split('\n').map(JSON.parse);assert.equal(lines.length,1);assert.ok(lines[0].result);const denied=await post(base,{},{Origin:'https://attacker.example'});assert.equal(denied.status,403);
 });
 test('concurrency slots remain occupied until running operations settle',async t=>{
  const releases=[];let signalStarted;const started=new Promise(r=>signalStarted=r);
