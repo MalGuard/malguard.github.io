@@ -16,15 +16,15 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; frame-src 'self'; style-src 'self'; connect-src 'self' http://127.0.0.1:11434 https://game-scam-guard-connected.vercel.app https://huggingface.co https://*.hf.co https://raw.githubusercontent.com; img-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#141412">
   <title>MalGuard AI</title>
-  <link rel="icon" href="/assets/fusion/assets/malguard-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=compact-switcher-20261026">
+  <link rel="icon" href="./malguard-ai-orbit.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css?v=neutral-space-20261028">
   <script type="module" src="./app.js?v=compact-switcher-20261026"></script>
 <link rel="stylesheet" href="/assets/report-launcher.css?v=20261027"><script defer src="/assets/report-launcher.js?v=20261027"></script></head>
 <body>
   <a class="skip" href="#message" data-i18n="skip">Skip to conversation</a>
   <header class="site-header">
       <details id="mode-picker" class="mode-picker">
-        <summary id="mode-toggle" dir="ltr"><strong>MalGuard</strong><span id="mode-current" class="sr-only">Chat</span><svg class="mode-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <summary id="mode-toggle" dir="ltr"><img class="ai-product-mark" src="./malguard-ai-orbit.svg" width="26" height="26" alt=""><strong>MalGuard</strong><span id="mode-current" class="sr-only">Chat</span><svg class="mode-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
         <div class="mode-options workspace-switch" role="group" aria-label="Conversation mode">
           <button id="chat-tab" type="button" aria-pressed="true"><strong data-i18n="navChat">Chat</strong><span data-i18n="navChatHint">Ask, write, and explore</span></button>
           <button id="build-tab" type="button" aria-pressed="false" aria-controls="build-panel"><strong data-i18n="navCode">Code</strong><span data-i18n="navCodeHint">Build, debug, and preview</span></button>
@@ -70,7 +70,7 @@
             <a class="privacy-link" href="/privacy.html" data-i18n="privacy">Privacy policy</a>
           </div>
         </details>
-<button id="language" type="button">فارسی</button></div>
+<button id="language" type="button" hidden>English</button></div>
   </header>
   <main>
     <section class="workspace" aria-labelledby="title">
@@ -127,6 +127,9 @@
       </div>
     </section>
   </main>
+  <dialog id="model-share-dialog" aria-labelledby="model-share-title" aria-describedby="model-share-description">
+    <form method="dialog"><h2 id="model-share-title">Share this conversation?</h2><p id="model-share-description">Your message and recent conversation are sent to the selected AI provider. You can change this permission in Settings.</p><div class="download-actions"><button value="cancel" autofocus>Cancel</button><button class="primary-action" value="allow">Allow and send</button></div></form>
+  </dialog>
   <dialog id="local-welcome" aria-labelledby="welcome-title" aria-describedby="welcome-info">
     <form method="dialog">
       <h2 id="welcome-title" data-i18n="welcomeTitle">Your device. Your conversation.</h2>
@@ -141,7 +144,7 @@
       <label for="offer-model" data-i18n="offerChoose">Choose a model</label>
       <select id="offer-model" aria-describedby="offer-size"><option value="local_fast">Qwen3 1.7B · ~985 MB</option><option value="local_medium">Qwen3 4B · ~2268 MB</option></select>
       <p id="offer-size" aria-live="polite" aria-atomic="true"></p>
-      <p id="offer-compatibility" role="status"></p>
+      <p id="offer-compatibility" role="status"></p><button id="retry-local-capability" type="button" hidden data-i18n="retryLocal">Check device again</button>
       <p class="muted" data-i18n="cacheNote">Model files are cached in this browser. Clearing browser data may require another download. Device support does not guarantee enough free memory.</p>
       <div class="download-actions"><button value="later" autofocus data-i18n="later">Later</button><button id="offer-download-button" class="primary-action" value="download" data-i18n="download">Download</button></div>
     </form>
@@ -173,3 +176,4 @@
   </dialog>
 </body>
 </html>
+

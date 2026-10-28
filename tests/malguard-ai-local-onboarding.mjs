@@ -1,4 +1,4 @@
-import {toggleSettings,toggleLanguage,newConversation} from './ai-navigation-helpers.mjs';
+import {toggleSettings,newConversation} from './ai-navigation-helpers.mjs';
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile,mkdir} from 'node:fs/promises';
@@ -38,8 +38,8 @@ try{
   });
   await page.goto(base+'/ai/');await page.locator('#local-welcome').waitFor({state:'visible'});
   assert.equal(await page.evaluate(()=>workerCalls.length),0,'First visit must not fetch model weights');
-  assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
-  assert.match(await page.locator('#welcome-info').innerText(),/بدون سقف پیام روزانه/);
+  assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
+  assert.match(await page.locator('#welcome-info').innerText(),/daily message quota/);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   if([390,1280].includes(width))await page.screenshot({path:path.join(output,`welcome-${width}.png`)});
   await page.locator('#local-welcome button[value="later"]').click();
@@ -69,15 +69,15 @@ try{
   await page.locator('#model').selectOption('__downloads');await page.locator('#offer-model').selectOption('local_medium');await page.evaluate(()=>window.workerMode='success');
   await page.locator('#local-offer button[value="download"]').click();
   await page.waitForFunction(()=>document.getElementById('model').value==='local_medium'&&!document.getElementById('manage-models').disabled);
-  assert.match(await page.locator('#device-note').textContent(),/آماده/);
+  assert.match(await page.locator('#device-note').textContent(),/Ready/);
   assert.deepEqual(await page.evaluate(()=>workerCalls.map(c=>c.operation)),['prepare','prepare','prepare']);
   assert.equal(posts.length,0,'Preparing and selecting models must not submit conversation');
-  await toggleLanguage(page);assert.equal(await page.locator('html').getAttribute('dir'),'ltr');assert.match(await page.locator('#device-note').textContent(),/Ready/);
+  assert.equal(await page.locator('html').getAttribute('dir'),'ltr');assert.match(await page.locator('#device-note').textContent(),/Ready/);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.deepEqual(errors,[]);
   await page.reload();await page.waitForFunction(()=>!document.getElementById('manage-models').disabled);
   assert.equal(await page.locator('#model').inputValue(),'local_medium','The chosen local model persists without downloading on reload');
   assert.equal(await page.evaluate(()=>workerCalls.length),0);
-  await context.close();console.log(`PASS welcome, skip, explicit download, cancel, failure/retry, active model and RTL/LTR at ${width}px (mock worker)`);
+  await context.close();console.log(`PASS welcome, skip, explicit download, cancel, failure/retry, active model and English interface at ${width}px (mock worker)`);
  }
  const delayed=await browser.newContext(),delayedPage=await delayed.newPage();
  await delayed.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v2','seen');Object.defineProperty(navigator,'gpu',{value:{requestAdapter:()=>new Promise(resolve=>{window.resolveAdapter=()=>resolve({features:new Set(['shader-f16'])});})}});});
@@ -99,7 +99,7 @@ try{
   await cloud.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});});
   await cloud.route('**/api/malguard-ai/status',async r=>{await new Promise(resolve=>setTimeout(resolve,statusDelay));await r.fulfill({contentType:'application/json',body:JSON.stringify({enabled:true,tools:{},model:{state:'configured',defaultModel:'llama70b',models:[{id:'llama70b',label:'Llama',state:'configured'},{id:'cf_gptoss120',label:'GPT-OSS 120B',state:'configured'}]}})});});
   await cloudPage.goto(base+'/ai/');await cloudPage.waitForFunction(()=>document.getElementById('model').value==='cf_gptoss120');
-  await cloudPage.locator('#model').selectOption('local_medium');await toggleLanguage(cloudPage);assert.equal(await cloudPage.locator('#model').inputValue(),'local_medium','Explicit local choice survives rerender');
+  await cloudPage.locator('#model').selectOption('local_medium');await toggleSettings(cloudPage);await toggleSettings(cloudPage);assert.equal(await cloudPage.locator('#model').inputValue(),'local_medium','Explicit local choice survives rerender');
   await cloud.close();
  }
  console.log('PASS strongest configured cloud default survives capability/status ordering and preserves explicit choice');

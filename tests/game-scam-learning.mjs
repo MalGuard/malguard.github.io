@@ -14,9 +14,11 @@ try{
  const base=`http://127.0.0.1:${server.address().port}`;
  for(const locale of ['en','fa']){
   await page.goto(base+'/game-scam-guard/');
-  if(await page.locator('html').getAttribute('lang')!==locale)await page.getByRole('button',{name:'Change language',exact:true}).click();
-  await page.getByRole('button',{name:locale==='en'?'Help':'راهنما',exact:true}).click();
-  await page.getByRole('link',{name:locale==='en'?'Guide, training video and technical articles':'راهنما، فیلم آموزشی و مقاله‌های فنی',exact:true}).click();
+  assert.equal(await page.locator('html').getAttribute('lang'),'en');
+  if(locale==='en'){
+   await page.getByRole('button',{name:'Help',exact:true}).click();
+   await page.getByRole('link',{name:'Guide, training video and technical articles',exact:true}).click();
+  }else await page.goto(base+'/game-scam-guard/learn/fa.html');
   assert.equal(await page.locator('html').getAttribute('lang'),locale);
   assert.equal(await page.locator('#articles article').count(),2);assert.equal(await page.locator('.checks>li').count(),20);
   const wrong=await page.evaluate(locale=>{
@@ -45,15 +47,15 @@ try{
   const languageMenu=page.getByRole('navigation',{name:locale==='en'?'Video language':'زبان فیلم',exact:true});
   assert.equal(await languageMenu.locator('[aria-current="page"]').getAttribute('lang'),locale);
   await page.locator('video').evaluate(video=>video.play());
-  await languageMenu.getByRole('link',{name:other==='fa'?'فارسی':'English',exact:true}).click();
+  if(locale==='en'){assert.equal(await languageMenu.getByRole('link',{name:'فارسی',exact:true}).count(),0);await page.goto(base+'/game-scam-guard/learn/fa.html#movie');}else await languageMenu.getByRole('link',{name:'English',exact:true}).click();
   assert.equal(await page.locator('html').getAttribute('lang'),other);
   assert.equal(new URL(page.url()).hash,'#movie','Changing video language must keep the player in view');
   assert.match(await page.locator('video source[type="video/mp4"]').getAttribute('src'),new RegExp(`training-${other}\\.mp4`));
   assert.equal(await page.locator('video').evaluate(video=>video.paused&&!video.muted&&video.volume===1),true,'The new language is ready to play with sound; the previous player must not keep playing');
   await page.getByRole('link',{name:other==='fa'?'بازگشت به برنامه':'Back to the app',exact:true}).click();
-  await page.locator('.g-brand-logo').waitFor();assert.equal(await page.locator('html').getAttribute('lang'),other,'The selected training language must also persist in the app');
+  await page.locator('.g-brand-logo').waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en','The app stays English after visiting a guide');
   await page.goto(base+'/game-scam-guard/learn/'+(locale==='fa'?'fa.html':'index.html'));
-  await page.getByRole('link',{name:locale==='en'?'Back to the app':'بازگشت به برنامه',exact:true}).click();await page.locator('.g-brand-logo').waitFor();assert.equal(await page.locator('html').getAttribute('lang'),locale);
+  await page.getByRole('link',{name:locale==='en'?'Back to the app':'بازگشت به برنامه',exact:true}).click();await page.locator('.g-brand-logo').waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
  }
  await page.goto(base+'/game-scam-guard/');
  await page.evaluate(()=>Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>setTimeout(()=>reject(new Error('App service worker did not become ready')),10000))]));
@@ -65,9 +67,10 @@ try{
  try{
   await page.reload();assert.equal(await page.locator('html').getAttribute('lang'),'fa','The Persian guide must retain its own offline document');
   await page.getByRole('link',{name:'بازگشت به برنامه',exact:true}).click();await page.locator('.g-brand-logo').waitFor();
-  assert.equal(await page.locator('html').getAttribute('lang'),'fa','Returning from the offline guide must open the app in the chosen language');
+  assert.equal(await page.locator('html').getAttribute('lang'),'en','Returning from an offline guide opens the English app');
  }finally{await context.setOffline(false);}
  evidence.offlineGuideAndAppShell='passed';
  assert.deepEqual(errors,[]);evidence.status='passed';console.log('PASS: both guides, two localized articles, 20 check descriptions, local report downloads, MP4 decoding/playback/range requests, both help links, player-language switching in both directions, persisted app language, offline guide/app separation and four viewport sizes.');
 }catch(error){evidence.status='failed';evidence.error=error.message;process.exitCode=1;console.error(error.stack);}
 finally{await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await writeFile('test-results/game-scam-learning.json',JSON.stringify(evidence,null,2));}
+

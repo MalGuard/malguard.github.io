@@ -22,7 +22,7 @@ export function createNavigation({account,onLanguage}){
  const settingsContent=settings.querySelector('.settings-content');settingsContent.setAttribute('role','dialog');settingsContent.setAttribute('aria-modal','true');settingsContent.setAttribute('aria-label','Settings');
  settings.addEventListener('toggle',()=>{if(settings.open)settingsClose.focus();});
  settingsContent.addEventListener('keydown',event=>{if(event.key!=='Tab')return;const focusable=[...settingsContent.querySelectorAll('button,input,select,summary,a[href]')].filter(n=>!n.disabled&&n.getClientRects().length);const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}});
- const language=make('label','Language');const select=make('select');select.id='language-select';select.setAttribute('aria-label','Language');for(const [value,text]of [['en','English'],['fa','فارسی']]){const o=make('option',text);o.value=value;select.append(o);}select.onchange=()=>onLanguage(select.value);language.append(select);general.append(language);
+ const select=make('select'); select.value='en';
  // Retain the existing accessible language action for compatibility, inside settings.
  $('language').hidden=true;general.append($('language'));settings.querySelector('.settings-content').prepend(general);
  const plugins=make('details');plugins.className='plugins-panel';plugins.append(make('summary','Plugins & connections'));plugins.append(make('p','Security tools are available in MalGuard Work. Each tool shows its actual connection status.'));

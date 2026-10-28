@@ -1,4 +1,4 @@
-import {toggleSettings,toggleLanguage,newConversation} from './ai-navigation-helpers.mjs';
+import {toggleSettings,newConversation} from './ai-navigation-helpers.mjs';
 import assert from 'node:assert/strict';
 import express from 'express';
 import {fileURLToPath} from 'node:url';
@@ -57,16 +57,14 @@ try{
   job.emit({phase:'tool_finished',tool:'urlhaus'});
   job.emit({phase:'tool_started',tool:'game_scam_guard'});
   await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking · Reading website');
-  // Changing UI language during a live request must retain the work and its partial DOM.
-  await toggleLanguage(page);
-  await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='در حال فکر کردن · در حال خواندن سایت');
-  assert.equal(await page.locator('#send').getAttribute('aria-label'),'توقف پاسخ');
-  assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
-  assert.match(await page.locator('#activity-elapsed').innerText(),/[۰-۹]+ ثانیه/);
+  // English status stays stable during a live request.
+  await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking · Reading website');
+  assert.equal(await page.locator('#send').getAttribute('aria-label'),'Stop response');
+  assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
+  assert.match(await page.locator('#activity-elapsed').innerText(),/[0-9]+s/);
   assert.equal(await page.locator('.bubble').innerText(),'Hello');
   assert.equal(jobs.length,jobIndex,'A locale switch must not resend the request');
   await page.screenshot({path:`test-results/malguard-ai/reply-reading-fa-${width}.png`,fullPage:true});
-  await toggleLanguage(page);
   job.emit({phase:'tool_finished',tool:'game_scam_guard'});job.emit({phase:'model_started',tool:'chat'});
   const text=('A clear, carefully paced reply. پاسخ فارسی 👩🏽‍💻. ').repeat(24);
   job.finish(generated(text));
@@ -76,11 +74,9 @@ try{
   assert.equal(await page.locator('.response-actions').isVisible(),false);
   await page.screenshot({path:`test-results/malguard-ai/reply-typing-${width}.png`,fullPage:true});
   const typingText=await page.locator('.answer').innerText();
-  await toggleLanguage(page);
-  await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='در حال نوشتن');
+  await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Typing');
   assert.ok((await page.locator('.answer').innerText()).startsWith(typingText),'Locale switch must preserve text already presented');
   assert.equal(await page.locator('.answer').count(),1);
-  await toggleLanguage(page);
   await page.locator('#message').fill('Draft for the next turn');
   await page.locator('#send').click();await page.waitForFunction(()=>document.getElementById('send').dataset.state==='send');
   const partial=await page.locator('.answer').innerText();
@@ -122,22 +118,22 @@ try{
   await page.clock.fastForward(2100);
   assert.equal(await completeTiming.getAttribute('data-elapsed-ms'),completeMilliseconds,'A completed duration stays fixed');
   await page.screenshot({path:`test-results/malguard-ai/reply-clean-${width}.png`,fullPage:true});
-  // Both status and stop controls are localized in RTL.
-  await toggleLanguage(page);const count=jobs.length;await page.locator('#message').fill('سلام');await page.locator('#send').click();
+  // Persian messages remain supported in the English interface.
+  const count=jobs.length;await page.locator('#message').fill('سلام');await page.locator('#send').click();
   assert.equal(await page.locator('.response-duration').last().getAttribute('data-elapsed-ms'),completeMilliseconds,'Changing language preserves the measured duration');
-  assert.match(await page.locator('.response-duration').last().innerText(),/^پاسخ در [۰-۹٫]+ ثانیه$/);
-  await page.locator('#activity-label').filter({hasText:/^در حال فکر کردن$/}).waitFor();assert.equal(jobs.length,count+1);
+  assert.match(await page.locator('.response-duration').last().innerText(),/^Responded in \d+(?:\.\d+)?s$/);
+  await page.locator('#activity-label').filter({hasText:/^Thinking$/}).waitFor();assert.equal(jobs.length,count+1);
   assert.equal(await page.locator('#activity').evaluate(n=>n.getAnimations({subtree:true}).filter(a=>a.playState==='running').length),0,'Reduced motion disables thinking shimmer and elapsed digit animation');
-  assert.equal(await page.locator('#send').getAttribute('aria-label'),'توقف پاسخ');assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
+  assert.equal(await page.locator('#send').getAttribute('aria-label'),'Stop response');assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   jobs.at(-1).finish(generated('پاسخ کامل فارسی'));await page.getByText('پاسخ کامل فارسی',{exact:true}).waitFor();await page.waitForFunction(()=>document.getElementById('send').dataset.state==='send');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-  await page.reload();await page.waitForFunction(()=>document.documentElement.lang==='fa'&&!document.getElementById('send').disabled);
-  assert.equal(await page.locator('html').getAttribute('dir'),'rtl','The shared site language survives refresh');
+  await page.reload();await page.waitForFunction(()=>document.documentElement.lang==='en'&&!document.getElementById('send').disabled);
+  assert.equal(await page.locator('html').getAttribute('dir'),'ltr','The English interface survives refresh');
   assert.equal(await page.locator('#activity').isVisible(),false);
   assert.equal(await page.locator('.response-duration').count(),0,'Elapsed timings share the in-memory conversation lifetime');
   assert.equal(await page.locator('#local-offer').isVisible(),false);
   assert.deepEqual(errors,[]);await context.close();
-  console.log(`PASS thinking/tool/typing stages, partial stop, transport abort, next turn, RTL and reduced motion at ${width}px (fixtures).`);
+  console.log(`PASS thinking/tool/typing stages, partial stop, transport abort, next turn, Persian content and reduced motion at ${width}px (fixtures).`);
  }
  const local=await browser.newContext({viewport:{width:390,height:844}}),page=await local.newPage();
  await local.addInitScript(()=>{

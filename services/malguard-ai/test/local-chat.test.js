@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {localCapability,createLocalChat,localMessages,localModels,localAppConfig,clearLocalModelCache} from '../../../ai/local-models.mjs';
+import {localCapability,localCapabilityDetails,createLocalChat,localMessages,localModels,localAppConfig,clearLocalModelCache} from '../../../ai/local-models.mjs';
 import {planChat} from '../../../ai/routing.mjs';
 import {createOrchestrator} from '../server/orchestrator.js';
 
@@ -30,6 +30,14 @@ test('four tiers recognize Persian/English requests and preserve research follow
  assert.equal(planChat('Prove this multi-step mathematical statement').tier,'expert');
  const follow=planChat('ادامه',[{role:'user',content:'تحقیق درباره آخرین اخبار'}]);assert.equal(follow.needsWeb,true);assert.equal(follow.tier,'strong');
  assert.equal(planChat('Prove this result using current sources').needsWeb,true);
+});
+test('device capability explains missing WebGPU, GPU and required feature without downloading',async()=>{
+ const gpu=features=>({requestAdapter:async()=>({features:new Set(features)})});
+ assert.deepEqual(await localCapabilityDetails({secure:false,gpu:gpu(['shader-f16'])}),{ready:false,reason:'insecure_context'});
+ assert.deepEqual(await localCapabilityDetails({secure:true,gpu:null}),{ready:false,reason:'webgpu_unavailable'});
+ assert.deepEqual(await localCapabilityDetails({secure:true,gpu:{requestAdapter:async()=>null}}),{ready:false,reason:'adapter_unavailable'});
+ assert.deepEqual(await localCapabilityDetails({secure:true,gpu:gpu([])}),{ready:false,reason:'shader_f16_unavailable'});
+ assert.deepEqual(await localCapabilityDetails({secure:true,gpu:gpu(['shader-f16'])}),{ready:true,reason:'ready'});
 });
 test('unsupported devices fail capability checks without creating an engine or downloading weights',async()=>{
  assert.equal(await localCapability(undefined),false);
