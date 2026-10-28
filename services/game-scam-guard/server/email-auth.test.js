@@ -48,3 +48,15 @@ test('profile signup identifies an existing email and username before it sends a
   assert.deepEqual(await auth.availability({emailAddress:'used@example.com',username:'taken_name'}),{email:'taken',username:'taken'});
   assert.deepEqual(await auth.availability({emailAddress:'new@example.com',username:'fresh_name'}),{email:'available',username:'available'});
 });
+
+test('verification email includes a readable code, expiry and plain-text alternative',async()=>{
+  let sent;const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',accountStore:{enabled:false,status:{}},fetchImpl:async(_,options)=>{sent=JSON.parse(options.body);return {ok:true};}});
+  await auth.start({emailAddress:'player@example.com'});
+  const code=sent.htmlContent.match(/>(\d{6})</)?.[1];assert.match(code,/^[0-9]{6}$/);assert.ok(sent.textContent.includes(code));assert.match(sent.htmlContent,/expires in 10 minutes/);assert.match(sent.textContent,/Never share/);
+});
+
+test('welcome template contains useful links and no account data',async()=>{
+  const {welcomeEmail}=await import('./auth-email-template.js');const message=welcomeEmail();
+  assert.equal(message.subject,'Welcome to MalGuard');assert.match(message.htmlContent,/https:\/\/malguard\.site\/ai\//);assert.match(message.textContent,/privacy/);assert.doesNotMatch(JSON.stringify(message),/sessionToken|verificationToken/);
+});
+
