@@ -1,4 +1,8 @@
-import {translations} from './i18n-catalog.mjs?v=20261014-public';
+// Publish English before the catalog arrives. A stale `fa` preference must not
+// leave `lang` unset while a large module or canvas frame is still loading.
+document.documentElement.lang='en';
+document.documentElement.dir='ltr';
+const {translations}=await import('./i18n-catalog.mjs?v=20261014-public');
 
 let locale='en';
 
