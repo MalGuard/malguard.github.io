@@ -23,7 +23,7 @@ export async function clearLocalModelCache(remove){
 export async function localCapabilityDetails({secure=globalThis.isSecureContext,gpu=globalThis.navigator?.gpu}={}){
  if(!secure)return {ready:false,reason:'insecure_context'};
  if(!gpu)return {ready:false,reason:'webgpu_unavailable'};
- try{const adapter=await gpu.requestAdapter();if(!adapter)return {ready:false,reason:'adapter_unavailable'};if(!adapter.features.has('shader-f16'))return {ready:false,reason:'shader_f16_unavailable'};return {ready:true,reason:'ready'};}
+ try{const adapter=await Promise.race([gpu.requestAdapter(),new Promise(resolve=>setTimeout(()=>resolve(null),800))]);if(!adapter)return {ready:false,reason:'adapter_unavailable'};if(!adapter.features.has('shader-f16'))return {ready:false,reason:'shader_f16_unavailable'};return {ready:true,reason:'ready'};}
  catch{return {ready:false,reason:'adapter_unavailable'};}
 }
 export async function localCapability(gpu=globalThis.navigator?.gpu){return (await localCapabilityDetails({gpu})).ready;}
