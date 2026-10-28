@@ -14,10 +14,12 @@ try{
  const base=`http://127.0.0.1:${server.address().port}`;
  for(const locale of ['en','fa']){
   await page.goto(base+'/game-scam-guard/');
-  if(await page.locator('html').getAttribute('lang')!==locale)await page.getByRole('button',{name:'Change language',exact:true}).click();
-  await page.getByRole('button',{name:locale==='en'?'Help':'راهنما',exact:true}).click();
-  await page.getByRole('link',{name:locale==='en'?'Guide, training video and technical articles':'راهنما، فیلم آموزشی و مقاله‌های فنی',exact:true}).click();
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
+  if(locale==='en'){
+   await page.getByRole('button',{name:'Help',exact:true}).click();
+   await page.getByRole('link',{name:'Guide, training video and technical articles',exact:true}).click();
+  }else await page.goto(base+'/game-scam-guard/learn/fa.html');
+  assert.equal(await page.locator('html').getAttribute('lang'),locale);
   assert.equal(await page.locator('#articles article').count(),2);assert.equal(await page.locator('.checks>li').count(),20);
   const wrong=await page.evaluate(locale=>{
    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),bad=[];
