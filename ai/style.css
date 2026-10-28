@@ -301,7 +301,7 @@ body{background-color:#0b0d13;background-image:radial-gradient(ellipse at 70% 0%
 body[data-mode="chat"] .workspace:has(.conversation:empty) .composer-area{margin-top:20px;padding-top:0}
 
 /* Solar-system artwork stays behind the conversation and controls. */
-body{background-color:#080b13;background-image:linear-gradient(90deg,rgba(4,7,14,.38),rgba(4,7,14,.08)),url('./malguard-space-neutral.webp');background-repeat:no-repeat;background-size:cover;background-position:center;background-attachment:fixed}
+body{background-color:#080b13;background-image:linear-gradient(90deg,rgba(4,7,14,.38),rgba(4,7,14,.08)),url('./milky-way-background.webp');background-repeat:no-repeat;background-size:cover;background-position:center;background-attachment:fixed}
 @media(max-width:760px){body{background-position:72% center}}
 @media(prefers-reduced-motion:reduce){body{background-attachment:scroll}}
 
@@ -316,7 +316,7 @@ body:has(.conversation:not(:empty)) .composer-area{background:transparent}
 /* A separate stellar identity for MalGuard AI and a readable galaxy account surface. */
 .ai-product-mark{width:26px;height:26px;object-fit:contain;flex:none}
 .account-product-mark{display:block;width:40px;height:40px;object-fit:contain;margin:0 0 14px}
-.ai-account,#local-welcome{background:linear-gradient(rgba(8,12,23,.91),rgba(8,12,23,.94)),url('./malguard-space-neutral.webp') center/cover;border-color:rgba(213,225,255,.25);box-shadow:0 24px 100px #000b}
+.ai-account,#local-welcome{background:linear-gradient(rgba(8,12,23,.91),rgba(8,12,23,.94)),url('./milky-way-background.webp') center/cover;border-color:rgba(213,225,255,.25);box-shadow:0 24px 100px #000b}
 .ai-account input{background:rgba(12,18,31,.75);border-color:rgba(220,230,255,.32)}
 .ai-account::backdrop{background:rgba(3,6,13,.55);backdrop-filter:blur(4px)}
 
@@ -329,6 +329,6 @@ body.auth-required>.site-header,body.auth-required>main:not(#entry-gate),body.au
 .entry-mark{width:74px;height:74px;object-fit:contain}.entry-brand{font-size:14px;font-weight:600;letter-spacing:.08em;color:#e5e8ee;text-transform:uppercase;margin:8px 0 24px}
 .entry-content h1{font-size:clamp(30px,5vw,44px);line-height:1.15;letter-spacing:-.04em;margin:0}.entry-description{color:#c6c8d6;line-height:1.6;margin:16px 0 28px}.entry-content>a{display:inline-block;margin-top:24px;color:#c5c7d6;font-size:13px}
 .entry-actions{display:grid;gap:10px}.entry-actions button{min-height:52px;border:1px solid rgba(228,235,245,.35);background:rgba(200,215,235,.10);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;font-weight:600}.entry-actions button:hover{background:rgba(200,215,235,.18)}
-body.auth-required .ai-account{position:fixed;inset:0;margin:0;width:100%;max-width:none;height:100dvh;max-height:none;border:0;border-radius:0;padding:28px 20px;background:linear-gradient(rgba(6,9,18,.76),rgba(6,9,18,.86)),url('./malguard-space-neutral.webp') center/cover;box-shadow:none}
+body.auth-required .ai-account{position:fixed;inset:0;margin:0;width:100%;max-width:none;height:100dvh;max-height:none;border:0;border-radius:0;padding:28px 20px;background:linear-gradient(rgba(6,9,18,.76),rgba(6,9,18,.86)),url('./milky-way-background.webp') center/cover;box-shadow:none}
 body.auth-required .ai-account>*{width:min(100%,440px);margin-inline:auto}body.auth-required .ai-account .account-close{display:block;text-align:right;margin-bottom:20px}
 

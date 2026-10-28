@@ -60,3 +60,25 @@ test('welcome template contains useful links and no account data',async()=>{
   assert.equal(message.subject,'Welcome to MalGuard');assert.match(message.htmlContent,/https:\/\/malguard\.site\/ai\//);assert.match(message.textContent,/privacy/);assert.doesNotMatch(JSON.stringify(message),/sessionToken|verificationToken/);
 });
 
+test('a new MalGuard account receives a welcome email and a code-only sign-in does not',async()=>{
+  const sent=[];const store={enabled:true,status:{hasUrl:true,hasServiceKey:true},findByEmail:async()=>null,findByUsername:async()=>null,create:async profile=>({...profile,id:'account-1'})};
+  const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',accountStore:store,fetchImpl:async(_url,options)=>{sent.push(JSON.parse(options.body));return {ok:true};}});
+  const profile={firstName:'Alex',lastName:'Morgan',birthDate:'2000-01-01',username:'alex_guard',password:'StrongPass1'};
+  const started=await auth.start({emailAddress:'player@example.com',profile});
+  assert.equal(sent[0].sender.name,'MalGuard');assert.equal(sent[0].subject,'Your MalGuard verification code');assert.doesNotMatch(JSON.stringify(sent[0]),/GameScam Guard/);
+  const code=sent[0].htmlContent.match(/>(\d{6})</)[1];
+  await auth.verify({verificationToken:started.verificationToken,code});
+  assert.equal(sent.length,2);assert.equal(sent[1].subject,'Welcome to MalGuard');assert.equal(sent[1].sender.name,'MalGuard');assert.match(sent[1].htmlContent,/https:\/\/malguard\.site\/ai\//);assert.doesNotMatch(JSON.stringify(sent[1]),/StrongPass1|sessionToken|verificationToken|scrypt/);
+  const codeStart=await auth.start({emailAddress:'player@example.com'});const signinCode=sent.at(-1).htmlContent.match(/>(\d{6})</)[1];
+  await auth.verify({verificationToken:codeStart.verificationToken,code:signinCode});
+  assert.equal(sent.filter(message=>message.subject==='Welcome to MalGuard').length,1);
+});
+
+test('welcome mail failure still returns a session after the account is created',async()=>{
+  let calls=0,code;const store={enabled:true,status:{},findByEmail:async()=>null,findByUsername:async()=>null,create:async profile=>({...profile,id:'account-2'})};
+  const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',accountStore:store,fetchImpl:async(_url,options)=>{calls++;const body=JSON.parse(options.body);code=body.htmlContent?.match(/>(\d{6})</)?.[1]||code;return {ok:calls===1};}});
+  const started=await auth.start({emailAddress:'player@example.com',profile:{firstName:'Alex',lastName:'Morgan',birthDate:'2000-01-01',username:'alex_guard',password:'StrongPass1'}});
+  const verified=await auth.verify({verificationToken:started.verificationToken,code});
+  assert.match(verified.sessionToken,/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);assert.equal(calls,2);
+});
+

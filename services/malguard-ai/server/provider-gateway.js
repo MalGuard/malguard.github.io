@@ -1,6 +1,6 @@
 import {ServiceError,httpFailure,publicFailure} from '../../../ai/service-errors.mjs';
 import {fetchPublic} from '../../game-scam-guard/server/network.js';
-import {planCloudChat} from '../../../ai/routing.mjs';
+import {planCloudChat,cloudModelOffered} from '../../../ai/routing.mjs';
 const ENDPOINT='https://malware-ai-gray.vercel.app/api/malguard-assistant';
 let cache,loading,until=0;
 export async function gatewayRequest(payload,{transport=fetchPublic,signal}={}){
@@ -30,10 +30,10 @@ export const remoteModel={
   const selected=cache?.models?.find(m=>m.id===model);
   const fallbackByModel={gemini_flash:'cf_qwen3',groq_qwen:'cf_qwen3',groq_gptoss:'cf_gptoss120'};
   const alternate=selected?.reason==='missing_credential'&&cache.models.find(m=>m.id===fallbackByModel[model]&&m.state==='configured');
-  if(!selected||selected.state!=='configured'&&!alternate)throw new ServiceError('model_not_configured',503);
+  if(!selected||!cloudModelOffered(selected)&&!alternate)throw new ServiceError('model_not_configured',503);
   const data=await gatewayRequest({operation:'chat',message,locale,history:history.slice(-8),model,...(consent.routingMode==='build'?{routingMode:'build',...(consent.routingText?{routingText:consent.routingText}:{})}:{}),consent:{modelShare:true,remoteLookup:consent.remoteLookup===true}});
   const planned=model==='auto'?planCloudChat(consent.routingText??message,history.slice(-8),{models:cache.models,mode:consent.routingMode}).model:model;
-  const actual=cache.models.find(m=>m.id===data.generated?.selectedModel&&m.state==='configured');
+  const actual=cache.models.find(m=>m.id===data.generated?.selectedModel&&cloudModelOffered(m));
   const allowed=model==='auto'&&(data.generated?.selectedModel===planned||data.generated?.routing?.fallbackFrom===planned&&['cf_granite','groq_gptoss','gemini_flash'].includes(data.generated?.selectedModel))||model!=='auto'&&(data.generated?.selectedModel===model||alternate&&data.generated?.selectedModel===alternate.id&&data.generated?.fallbackFrom===model);
   if(!actual||!allowed||typeof data.generated?.text!=='string'||data.generated.text.length>6000||data.generated.provider!==actual.provider||model==='auto'&&data.generated.requestedModel!=='auto')throw new Error('invalid_model_response');
   return {...data.generated,securityAnalysis:false};

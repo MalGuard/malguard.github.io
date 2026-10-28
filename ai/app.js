@@ -4,14 +4,14 @@ import {errorMessage} from './error-message.mjs?v=codex-chat-20261025';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=codex-chat-20261025';
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
-import {planChat,planCloudChat} from './routing.mjs?v=smart-router-20261028';
+import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=codex-chat-20261025';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs';
 import {typeText,formatElapsed} from './reply-motion.mjs';
 import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=codex-chat-20261025';
 import {renderRichText} from './code-view.mjs?v=codex-chat-20261025';
-import {createAccount} from './account.mjs?v=account-entry-20261028';
+import {createAccount} from './account.mjs?v=account-entry-unified-20261028';
 import {createBuilder} from './builder.mjs?v=qwen-coder-restored-20261026';
 import {parseProposal} from './build-project.mjs?v=codex-chat-20261025';
 const $=id=>document.getElementById(id);
@@ -227,7 +227,7 @@ function renderStatus(){
  for(const id of ['clear','mode','tool','file','remove-file','remove-models','attach-toggle','attach-file','attach-chat','attach-inspect','attach-web','chat-tab','workspace-tab','build-tab','workspace-tool','workspace-model','isolation-consent','open-downloads'])$(id).disabled=busy;
  $('connection').textContent=!service?(localReady?t('localAvailable'):t('offline')):!ready?t('serviceDisabled'):'';
  const selectedId=$('model').value,remote=service?.model?.models||[],fallbacks={gemini_flash:'cf_qwen3',groq_qwen:'cf_qwen3',groq_gptoss:'cf_gptoss120'};
- const remoteOptions=remote.filter(m=>m.id!=='auto').map(m=>{const fallback=remote.find(candidate=>candidate.id===fallbacks[m.id]&&candidate.state==='configured');return m.reason==='missing_credential'&&fallback?{...m,state:'configured',label:`${m.label} → Cloudflare: ${fallback.label} (fallback)`}:m;});
+ const remoteOptions=remote.filter(m=>m.id!=='auto').map(m=>{const fallback=remote.find(candidate=>candidate.id===fallbacks[m.id]&&candidate.state==='configured');if(m.reason==='missing_credential'&&fallback)return {...m,state:'configured',label:`${m.label} → Cloudflare: ${fallback.label} (fallback)`};if(cloudModelOffered(m))return {...m,state:'configured'};return m;});
  const models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار':'Automatic',state:localReady||remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remoteOptions,...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))];
  const cloudAutoReady=remote.some(m=>m.id==='auto'&&m.state==='configured');
  if(models.length){
@@ -248,7 +248,7 @@ function renderStatus(){
  $('chat-tab').setAttribute('aria-pressed',String(activeMode==='chat'));$('workspace-tab').setAttribute('aria-pressed',String(activeMode==='worker'));$('workspace-panel').hidden=activeMode!=='worker';$('toolbox').hidden=activeMode!=='worker';$('workspace-panel').ariaLabel=t('workspaceLabel');document.querySelector('.workspace-switch').ariaLabel=t('modeGroup');
  const sandbox=['file_sandbox','url_sandbox'].includes($('workspace-tool').value);$('isolation-consent').closest('label').hidden=!sandbox;
  const toolState=service?.tools?.[$('workspace-tool').value];$('workspace-status').textContent=toolState?`${t(toolState.state)}${toolState.reason?' · '+toolState.reason:''}`:t('workspaceStatus');
- for(const option of $('workspace-model').options)option.disabled=!remote.some(m=>m.id===option.value&&m.state==='configured');
+ for(const option of $('workspace-model').options)option.disabled=!remoteOptions.some(m=>m.id===option.value&&m.state==='configured');
  $('manage-desktop-models').disabled=busy||desktopConnecting;$('desktop-connect').disabled=busy||desktopConnecting;
  updateDesktopInfo();
  const selected=models.find(m=>m.id===$('model').value);
@@ -492,5 +492,12 @@ $('retry-local-capability').onclick=()=>{void checkLocalDevice();};
 $('open-downloads').onclick=()=>{if(!busy)$('download-hub').showModal();};$('hub-browser').onclick=()=>{$('download-hub').close();void offerLocalModels();};$('hub-desktop').onclick=()=>{$('download-hub').close();openDesktopModels();};$('copy-desktop-command').onclick=async()=>{try{await navigator.clipboard.writeText(desktopModels[$('desktop-model').value].command);$('copy-desktop-command').textContent=t('commandCopied');}catch{$('desktop-command').focus();}};
 $('desktop-model').onchange=updateDesktopInfo;$('manage-desktop-models').onclick=openDesktopModels;$('desktop-connect').onclick=connectDesktop;
 translate();
+await resolveAccountEntry();
 await Promise.all([checkLocalDevice(),(async()=>{try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}})()]);renderStatus();
+async function resolveAccountEntry(){
+ if(account.usesProductionAuth())return;
+ try{const status=await account.authStatus();if(status?.configured===true&&status?.persistentAccounts===true)return;}catch{}
+ document.body.classList.remove('auth-required');const gate=$('entry-gate');if(gate)gate.hidden=true;
+ void welcomeLocalModels();
+}
 

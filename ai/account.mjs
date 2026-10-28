@@ -1,4 +1,8 @@
 // Reuse the existing first-party account API. No provider keys or credentials in storage.
+const PRODUCTION_HOSTS=['malguard.site','www.malguard.site','malguard.github.io'];
+export function accountApiBase(hostname=globalThis.location?.hostname||''){
+ return PRODUCTION_HOSTS.includes(hostname)?'https://game-scam-guard-connected.vercel.app':'';
+}
 export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
  let sessionToken=null,profile=null,dialog,controller,pendingSignup,resendTimer,expiryTimer;
  const text=(en,fa)=>locale()==='fa'?fa:en;
@@ -8,8 +12,7 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
  const close=()=>{controller?.abort();controller=undefined;clearInterval(resendTimer);discardSignup();if(dialog){const old=dialog;dialog=undefined;old.close();old.remove();}button.focus();};
  async function request(endpoint,body){
   if(!['status','start','verify','password','session','availability'].includes(endpoint))throw Error('invalid_endpoint');
-  const base=['malguard.site','malguard.github.io'].includes(location.hostname)?'https://game-scam-guard-connected.vercel.app':'';
-  const response=await fetch(`${base}/api/game-scam-guard/auth/${endpoint}`,{method:body?'POST':'GET',credentials:'omit',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined,signal:AbortSignal.any([controller.signal,AbortSignal.timeout(20000)])});
+  const response=await fetch(`${accountApiBase()}/api/game-scam-guard/auth/${endpoint}`,{method:body?'POST':'GET',credentials:'omit',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined,signal:AbortSignal.any([controller.signal,AbortSignal.timeout(20000)])});
   const raw=await response.text();if(raw.length>65536)throw Error('invalid_response');let data;try{data=JSON.parse(raw);}catch{throw Error('invalid_response');}
   if(!response.ok)throw Object.assign(Error('account_failed'),{status:response.status});return data;
  }
@@ -18,7 +21,7 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
   const heading=node('h2',title);heading.id='account-title';const exit=node('button',text('Close','بستن'),'account-close');exit.type='button';exit.onclick=close;
   const mark=node('img',null,'account-product-mark');mark.src='/ai/malguard-ai-orbit.svg';mark.alt='';mark.width=40;mark.height=40;dialog.append(exit,mark,heading);dialog.addEventListener('cancel',e=>{e.preventDefault();close();});document.body.append(dialog);dialog.showModal();return dialog;
  }
- function note(container){container.append(node('p',text('Uses your existing Game Scam Guard account. Sign-in lasts on this page only; text chats and notes can be saved to your account when storage is connected. Attachments and project files are not synchronized. Signing out clears this page’s conversations and files; export your project first.','همان حساب Game Scam Guard است. ورود فقط در همین صفحه حفظ می‌شود؛ مکالمه و فایل پروژه هنوز در حساب همگام نمی‌شوند. خروج، مکالمه و فایل‌های همین صفحه را پاک می‌کند؛ ابتدا پروژه را دانلود کن.'),'account-note'));}
+ function note(container){container.append(node('p',text('Uses your MalGuard account. Sign-in lasts on this page only; text chats and notes can be saved to your account when storage is connected. Attachments and project files are not synchronized. Signing out clears this page’s conversations and files; export your project first.','این همان حساب MalGuard است. ورود فقط در همین صفحه حفظ می‌شود؛ گفت‌وگو و یادداشت‌ها وقتی ذخیره‌سازی وصل باشد در حساب می‌مانند. پیوست‌ها و فایل پروژه همگام نمی‌شوند. خروج، گفت‌وگو و فایل‌های همین صفحه را پاک می‌کند؛ ابتدا پروژه را دانلود کن.'),'account-note'));}
  function field(form,fields,key,en,fa,type='text',autocomplete){const label=node('label',text(en,fa)),input=node('input');input.type=type;input.setAttribute('aria-label',text(en,fa));input.required=true;input.name=key;input.id='account-'+key;input.placeholder=({firstName:text('Alex','محمد'),lastName:text('Morgan','آذر درخش'),username:'Player_Guard',email:'you@example.com',password:text('At least 10 characters','حداقل ۱۰ کاراکتر'),confirm:text('Type the password again','رمز را دوباره وارد کن')})[key]||'';input.maxLength=key==='email'?254:key==='password'||key==='confirm'?128:80;if(autocomplete)input.autocomplete=autocomplete;if(['email','password'].includes(type))input.dir='ltr';if(type==='password')input.minLength=10;if(key==='birthDate'){input.min='1900-01-01';const d=new Date();d.setFullYear(d.getFullYear()-12);input.max=d.toISOString().slice(0,10);}label.append(input);form.append(label);fields[key]=input;return input;}
  function action(container,en,fa,handler){const b=node('button',text(en,fa));b.type='button';b.onclick=handler;container.append(b);return b;}
  function feedback(container){const error=node('p');error.setAttribute('role','alert');error.hidden=true;container.append(error);return error;}
@@ -66,6 +69,8 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
   if(dialog)return;controller=new AbortController();
   if(profile){const pane=shell(text('Your MalGuard account','حساب مالگارد شما'));pane.append(node('p',profile.username),node('p',profile.email));note(pane);action(pane,'Sign out on this page','خروج از همین صفحه',()=>{sessionToken=null;profile=null;close();refresh();onChange(null);});return;}
   const pane=shell(text('Preparing sign-in…','در حال آماده‌سازی ورود…'));try{const status=await request('status');if(status.configured!==true||status.persistentAccounts!==true)throw Error('unavailable');if(controller)authForm();}catch(e){if(controller&&!controller.signal.aborted){const err=feedback(pane);failure(e,err);action(pane,'Retry','تلاش دوباره',()=>{close();button.click();});}}
- };refresh();return {refresh,getToken:()=>sessionToken,open(signup=false){if(dialog)return;controller=new AbortController();if(signup)authForm(true);else button.click();}};
+ };refresh();
+ async function authStatus(){const response=await fetch(`${accountApiBase()}/api/game-scam-guard/auth/status`,{credentials:'omit',signal:AbortSignal.timeout(4000)});const raw=await response.text();if(!response.ok||raw.length>65536)throw Error('unavailable');let data;try{data=JSON.parse(raw);}catch{throw Error('unavailable');}return data;}
+ return {refresh,getToken:()=>sessionToken,authStatus,usesProductionAuth:()=>PRODUCTION_HOSTS.includes(location.hostname),open(signup=false){if(dialog)return;controller=new AbortController();if(signup)authForm(true);else button.click();}};
 }
 
