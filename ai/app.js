@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 21794)
-Total output lines: 494
-
 import {createChatLibrary} from './library.mjs?v=sidebar-20261026';
 import {createNavigation} from './navigation.mjs?v=sidebar-20261026';
 import {errorMessage} from './error-message.mjs?v=codex-chat-20261025';
@@ -116,7 +113,63 @@ async function runDesktop(model,message){
  try{const generated=await desktopChat.respond({model,message,locale:replyLanguage(message,locale,modelHistory),history:modelHistory.slice(-8),signal:turn.controller.signal});await presentResponse({generated},turn);modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-8));if($('message').value.trim()===message)$('message').value='';}
  catch{if(turn.controller.signal.aborted)stopped(turn);else showError('desktopFailed');}finally{endTurn(turn);}
 }
-Object.assign(copy.en,{hideProject:'Back to conversation',buildIntroTitle:'What shall we build?',showProject:'Files and preview',buildStartHint:'Talk through an idea, then say “build it”. I will create project fi…1794 tokens truncated…'conversation'),follow=log.scrollTop+log.clientHeight>=log.scrollHeight-120;update();if(follow)log.scrollTop=log.scrollHeight;return;}
+Object.assign(copy.en,{hideProject:'Back to conversation',buildIntroTitle:'What shall we build?',showProject:'Files and preview',buildStartHint:'Talk through an idea, then say “build it”. I will create project files and run the web preview.',autoBuild:'Apply and preview explicit build requests automatically, with Undo.',buildTab:'Build and code',projectTitle:'My project',chatChoice:'Questions and conversation',workChoice:'File, link and web tools',buildChoice:'Edit files, preview and export',buildHint:'Talk or plan here, then ask me to build. Review the proposed code, apply it to files, then run the preview.',exportProject:'Download ZIP',projectFile:'Project file',newFile:'New file',addFile:'Add file',importCode:'Import files',undoProject:'Undo apply',codeEditor:'Code editor',projectPreview:'Project preview',runPreview:'Run preview',stopPreview:'Stop preview',previewOutput:'Preview output',previewEmpty:'Run preview to see your project.',shareCode:'Include the currently selected file in my next model request.',buildLimit:'Files stay in page memory; export before leaving. Local HTML/CSS/JS preview has no network access. Run backend code and packages in your own development environment after export.',buildPlaceholder:'Describe what to build or change…',buildTooLarge:'This request and shared file exceed the coding model input budget. Shorten the request or share a smaller file.',buildNoModel:'Choose an enabled coding model or connect an installed desktop model.',buildUnstructured:'The model returned a text answer. No project files were changed; ask for a smaller, complete file proposal.'});
+Object.assign(copy.fa,{hideProject:'برگشت به گفت‌وگو',buildIntroTitle:'چه چیزی بسازیم؟',showProject:'فایل‌ها و پیش‌نمایش',buildStartHint:'ایده‌ات را بگو، درباره‌اش گفت‌وگو کن و بعد بگو «حالا بسازش». فایل‌های پروژه و پیش‌نمایش همین‌جا ساخته می‌شوند.',autoBuild:'درخواست صریح ساخت را خودکار در فایل‌ها اعمال و پیش‌نمایش را اجرا کن؛ قابل برگرداندن.',buildTab:'ساخت و کدنویسی',projectTitle:'پروژهٔ من',chatChoice:'پرسش و گفت‌وگوی روزمره',workChoice:'ابزارهای فایل، لینک و سرچ وب',buildChoice:'ویرایش فایل، پیش‌نمایش و خروجی پروژه',buildHint:'در گفت‌وگو بگو چه بسازیم؛ کد پیشنهادی را بررسی کن، در فایل‌ها اعمال کن و پیش‌نمایش را اجرا کن.',exportProject:'دانلود ZIP پروژه',projectFile:'فایل پروژه',newFile:'فایل جدید',addFile:'افزودن فایل',importCode:'وارد کردن فایل',undoProject:'برگرداندن',codeEditor:'ویرایشگر کد',projectPreview:'پیش‌نمایش پروژه',runPreview:'اجرای پیش‌نمایش',stopPreview:'توقف',previewOutput:'خروجی پیش‌نمایش',previewEmpty:'برای دیدن نتیجه، پیش‌نمایش را اجرا کن.',shareCode:'برای اصلاح دقیق، فایل انتخاب‌شده را به درخواست بعدی پیوست کن.',buildLimit:'فایل‌ها در حافظهٔ صفحه‌اند؛ قبل از خروج دانلود کن. پیش‌نمایش HTML/CSS/JS بدون دسترسی شبکه اجرا می‌شود. کد بک‌اند و بسته‌ها را پس از دانلود در محیط توسعهٔ خودت اجرا کن.',buildPlaceholder:'بگو چه بسازیم یا کدام بخش را تغییر بدهیم…',buildTooLarge:'درخواست و کد پیوست از ظرفیت ورودی این مسیر مدل بیشتر است؛ متن درخواست یا فایل را کوتاه‌تر کن.',buildNoModel:'یک مدل کدنویسی فعال انتخاب کن یا مدل نصب‌شدهٔ دسکتاپ را متصل کن.',buildUnstructured:'مدل پاسخ متنی داده است؛ فایل‌های پروژه تغییر نکردند. یک پیشنهاد کوچک‌تر با فایل کامل بخواه.'});
+function updateElapsed(turn){
+ const text=formatElapsed(turn.elapsedMs??performance.now()-turn.startedAt,locale);
+ if($('activity-elapsed').textContent!==text){const node=$('activity-elapsed'),previous=node.textContent;node.textContent=text;if(previous&&!matchMedia('(prefers-reduced-motion: reduce)').matches)node.animate([{opacity:.45,transform:'translateY(2px)'},{opacity:1,transform:'translateY(0)'}],{duration:160,easing:'ease-out'});}
+}
+function freezeElapsed(turn){
+ clearInterval(turn.elapsedTimer);
+ turn.elapsedMs??=performance.now()-turn.startedAt;
+}
+function timingText(timing){return `${t(timing.label)} ${formatElapsed(timing.elapsedMs,locale,true)}`;}
+function renderTiming(timing){
+ const node=el('p',timingText(timing),'response-duration');
+ node.dataset.elapsedMs=timing.elapsedMs;node.dataset.label=timing.label;
+ $('conversation').append(node);
+}
+function activityLabel(key,detail){
+ if(key==='running')return detail.map(id=>id==='chat'?t('thinking'):id==='ai_web'?t('searching'):id==='game_scam_guard'?t('readingWebsite'):id==='gta_guard'?t('checkingFile'):`${t('checking')} · ${names[id]}`).join(' · ');
+ return detail?`${t(key)} · ${detail}`:t(key);
+}
+function setActivity(key,detail=''){
+ if(activeTurn?.controller.signal.aborted)return;
+ if(activeTurn)activeTurn.stage={key,detail};
+ const label=activityLabel(key,detail);
+ if($('activity').dataset.label===label)return;
+ $('activity').dataset.label=label;$('activity').hidden=false;
+ // Keep a visible character across stage changes; announce each stage only once.
+ $('activity-label').textContent=label;
+ $('activity-announcement').textContent=label;
+}
+function showRunningActivity(turn){
+ const work=[...(turn.modelStarted?['chat']:[]),...turn.tools];
+ setActivity(work.length?'running':'preparing',work.length?work:'');
+}
+function beginTurn(stage,{recordTiming=true}={}){
+ busy=true;closeAttach();const turn={controller:new AbortController(),tools:new Set(),partial:false,startedAt:performance.now(),recordTiming};activeTurn=turn;
+ updateElapsed(turn);turn.elapsedTimer=setInterval(()=>updateElapsed(turn),250);
+ $('conversation').setAttribute('aria-busy','true');renderStatus();setActivity(stage);return turn;
+}
+function endTurn(turn){
+ freezeElapsed(turn);
+ if(activeTurn!==turn)return;
+ if(turn.recordTiming){const timing={elapsedMs:turn.elapsedMs,label:turn.controller.signal.aborted?'stoppedAfter':turn.completed?'respondedIn':'elapsedTime'};history.push({timing});renderTiming(timing);}
+ $('activity').hidden=true;delete $('activity').dataset.label;
+ activeTurn=undefined;busy=false;library.capture();$('conversation').setAttribute('aria-busy','false');renderStatus();
+}
+function stopTurn(){
+ if(!activeTurn||activeTurn.controller.signal.aborted)return;
+ freezeElapsed(activeTurn);
+ activeTurn.controller.abort(new DOMException('Stopped by user','AbortError'));localChat.stop();desktopChat.stop();$('activity').hidden=true;renderStatus();
+}
+function stopped(turn){
+ if(turn.partial)return;
+ const response={message:t('stopped'),interrupted:true};history.push({response});renderResponse(response,false);
+}
+function followReply(update){
+ if(activeMode==='build'&&projectOpen&&matchMedia('(min-width:901px)').matches){const log=$('conversation'),follow=log.scrollTop+log.clientHeight>=log.scrollHeight-120;update();if(follow)log.scrollTop=log.scrollHeight;return;}
  const follow=innerHeight+scrollY>=document.documentElement.scrollHeight-160;
  update();if(follow)scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'});
 }
@@ -172,17 +225,19 @@ function renderStatus(){
  $('send').ariaLabel=t(activeTurn?'stop':'send');$('send').title=t(activeTurn?'stop':'send');$('send-label').textContent=t(activeTurn?'stop':'send');
  for(const id of ['clear','mode','tool','file','remove-file','remove-models','attach-toggle','attach-file','attach-chat','attach-inspect','attach-web','chat-tab','workspace-tab','build-tab','workspace-tool','workspace-model','isolation-consent','open-downloads'])$(id).disabled=busy;
  $('connection').textContent=!service?(localReady?t('localAvailable'):t('offline')):!ready?t('serviceDisabled'):'';
- const selectedId=$('model').value,remote=service?.model?.models||[],models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار · چهار سطح':'Automatic · four tiers',state:localReady||remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remote.filter(m=>m.id!=='auto'),...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))];
+ const selectedId=$('model').value,remote=service?.model?.models||[],fallbacks={gemini_flash:'cf_qwen3',groq_qwen:'cf_qwen3',groq_gptoss:'cf_gptoss120'};
+ const remoteOptions=remote.filter(m=>m.id!=='auto').map(m=>{const fallback=remote.find(candidate=>candidate.id===fallbacks[m.id]&&candidate.state==='configured');return m.reason==='missing_credential'&&fallback?{...m,state:'configured',label:`${m.label} → Cloudflare: ${fallback.label} (fallback)`}:m;});
+ const models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار':'Automatic',state:localReady||remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remoteOptions,...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))];
  const cloudAutoReady=remote.some(m=>m.id==='auto'&&m.state==='configured');
  if(models.length){
   $('model').replaceChildren();
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
-  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t(cloudAutoReady?'autoCloud':'autoLocal'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured'||activeMode==='build'&&(m.id==='auto'||m.id.startsWith('local_'));$('model').append(option);}
+  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t(cloudAutoReady?'autoCloud':'autoLocal'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured'||activeMode==='build'&&(m.id==='auto'&&!cloudAutoReady||m.id.startsWith('local_'));$('model').append(option);}
   const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);const desktop=el('option',t('desktopModels')+'…');desktop.value='__desktop';$('model').append(desktop);
-  const defaultId=activeMode==='build'?(['cf_gptoss120','cf_gptoss20','cf_qwen3'].find(id=>remote.some(m=>m.id===id&&m.state==='configured'))||desktopChat.availability.installedIDs[0]||''):cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':service?.model?.defaultModel||(localReady?'local_fast':'');
+  const defaultId=activeMode==='build'?(cloudAutoReady?'auto':['cf_gptoss120','cf_gptoss20','cf_qwen3'].find(id=>remote.some(m=>m.id===id&&m.state==='configured'))||desktopChat.availability.installedIDs[0]||''):cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':service?.model?.defaultModel||(localReady?'local_fast':'');
   const strongCloudReady=cloudAutoReady||remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured');
   const applyCloudDefault=activeMode!=='build'&&strongCloudReady&&!cloudDefaultApplied&&!modelChosen&&!Object.hasOwn(localModels,preferredLocal);
-  $('model').value=applyCloudDefault?defaultId:!modelsInitialized&&localReady&&activeMode!=='build'?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured'&&(activeMode!=='build'||m.id!=='auto'&&!m.id.startsWith('local_')))?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
+  $('model').value=applyCloudDefault?defaultId:!modelsInitialized&&localReady&&activeMode!=='build'?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured'&&(activeMode!=='build'||(m.id!=='auto'||cloudAutoReady)&&!m.id.startsWith('local_')))?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
   if(strongCloudReady)cloudDefaultApplied=true;
   lastSelectedModel=$('model').value;
   if(service||localReady)modelsInitialized=true;
