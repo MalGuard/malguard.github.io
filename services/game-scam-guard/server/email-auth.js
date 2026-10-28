@@ -1,6 +1,7 @@
 import {createCipheriv,createDecipheriv,createHash,randomBytes,randomInt,scrypt,timingSafeEqual} from 'node:crypto';
 import {promisify} from 'node:util';
 import {createAccountStore} from './account-store.js';
+import {verificationEmail} from './auth-email-template.js';
 
 const CODE_TTL_MS=10*60*1000,SESSION_TTL_MS=30*24*60*60*1000;
 const email=value=>{const normalized=typeof value==='string'?value.trim():'';return normalized.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)?normalized.toLowerCase():null;};
@@ -29,7 +30,7 @@ export function createEmailAuth({apiKey=process.env.BREVO_API_KEY,fromEmail=proc
     attempts.set(rateKey,{count:(entry?.until>time?entry.count:0)+1,until:time+15*60*1000});for(const [key,item]of attempts)if(item.until<time)attempts.delete(key);
     // Authentication codes require the cryptographic RNG, not Math.random.
     const code=String(randomInt(100000,1000000));
-    const response=await fetchImpl('https://api.brevo.com/v3/smtp/email',{method:'POST',headers:{'api-key':apiKey,'content-type':'application/json','accept':'application/json'},body:JSON.stringify({sender:{name:'GameScam Guard',email:fromEmail},to:[{email:address}],subject:'Your GameScam Guard verification code',htmlContent:`<p>Your GameScam Guard verification code is:</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${code}</p><p>This code expires in 10 minutes.</p>`})});
+    const response=await fetchImpl('https://api.brevo.com/v3/smtp/email',{method:'POST',headers:{'api-key':apiKey,'content-type':'application/json','accept':'application/json'},body:JSON.stringify({sender:{name:'MalGuard',email:fromEmail},to:[{email:address}],...verificationEmail(code)})});
     if(!response.ok)throw error(502,'ارسال کد ایمیل ممکن نشد؛ کمی بعد دوباره تلاش کنید.');
     return {verificationToken:seal({type:'code',email:address,name:legacyName,profile:pendingProfile,code:encode(code),expiresAt:time+CODE_TTL_MS})};
   }
@@ -39,3 +40,4 @@ export function createEmailAuth({apiKey=process.env.BREVO_API_KEY,fromEmail=proc
   function readSession({sessionToken}) {if(!enabled)throw error(503,'سرویس حساب هنوز آماده نشده است.');const payload=open(sessionToken);if(!payload||payload.type!=='session'||payload.expiresAt<now())throw error(401,'نشست حساب معتبر نیست.');return {email:payload.email,username:payload.name,firstName:payload.firstName||null,lastName:payload.lastName||null,birthDate:payload.birthDate||null,expiresAt:payload.expiresAt};}
   return {enabled:!!enabled,status:{hasApiKey,hasFromEmail,persistentAccounts:accountStore.enabled,...accountStore.status},start,availability,verify,passwordSignIn,session:readSession};
 }
+

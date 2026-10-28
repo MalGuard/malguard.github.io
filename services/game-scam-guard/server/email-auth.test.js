@@ -17,6 +17,7 @@ test('email verification codes do not depend on the non-cryptographic Math.rando
 test('first-party email auth sends a code through Brevo and issues an expiring opaque session',async()=>{
   let body;const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',now:()=>1000,fetchImpl:async(_url,options)=>{body=JSON.parse(options.body);return {ok:true};}});
   const started=await auth.start({emailAddress:'Player@Example.com',name:'player_guard',ip:'198.51.100.7'});
+  assert.equal(body.sender.name,'MalGuard');assert.equal(body.subject,'Your MalGuard verification code');assert.match(body.htmlContent,/Your MalGuard verification code/);
   assert.equal(auth.enabled,true);assert.equal(auth.status.hasApiKey,true);assert.equal(auth.status.hasFromEmail,true);assert.match(started.verificationToken,/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);assert.equal(body.to[0].email,'player@example.com');
   const code=body.htmlContent.match(/>(\d{6})</)[1];const verified=await auth.verify({verificationToken:started.verificationToken,code});const session=auth.session(verified);
   assert.deepEqual(session,{email:'player@example.com',username:'player_guard',firstName:null,lastName:null,birthDate:null,expiresAt:1000+30*24*60*60*1000});
@@ -47,3 +48,15 @@ test('profile signup identifies an existing email and username before it sends a
   assert.deepEqual(await auth.availability({emailAddress:'used@example.com',username:'taken_name'}),{email:'taken',username:'taken'});
   assert.deepEqual(await auth.availability({emailAddress:'new@example.com',username:'fresh_name'}),{email:'available',username:'available'});
 });
+
+test('verification email includes a readable code, expiry and plain-text alternative',async()=>{
+  let sent;const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',accountStore:{enabled:false,status:{}},fetchImpl:async(_,options)=>{sent=JSON.parse(options.body);return {ok:true};}});
+  await auth.start({emailAddress:'player@example.com'});
+  const code=sent.htmlContent.match(/>(\d{6})</)?.[1];assert.match(code,/^[0-9]{6}$/);assert.ok(sent.textContent.includes(code));assert.match(sent.htmlContent,/expires in 10 minutes/);assert.match(sent.textContent,/Never share/);
+});
+
+test('welcome template contains useful links and no account data',async()=>{
+  const {welcomeEmail}=await import('./auth-email-template.js');const message=welcomeEmail();
+  assert.equal(message.subject,'Welcome to MalGuard');assert.match(message.htmlContent,/https:\/\/malguard\.site\/ai\//);assert.match(message.textContent,/privacy/);assert.doesNotMatch(JSON.stringify(message),/sessionToken|verificationToken/);
+});
+
