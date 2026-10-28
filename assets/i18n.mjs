@@ -2,7 +2,23 @@
 // leave `lang` unset while a large module or canvas frame is still loading.
 document.documentElement.lang='en';
 document.documentElement.dir='ltr';
-const {translations}=await import('./i18n-catalog.mjs?v=20261014-public');
+// Do not suspend this module on a network request: navigation can tear down
+// WebKit pages before a dynamically imported module finishes downloading.
+// English is fully functional without the optional Persian catalog.
+let translations=Object.create(null);
+const catalogReady=import('./i18n-catalog.mjs?v=20261014-public')
+  .then(module=>{
+    translations=module.translations;
+    if(document.body?.isConnected)translate();
+    return true;
+  })
+  .catch(error=>{
+    // Keep default English and avoid an unhandled rejection during navigation.
+    if(document.visibilityState!=='hidden')
+      console.warn('[MalGuard i18n] Persian catalog unavailable; English remains active.',error);
+    return false;
+  });
+export {catalogReady};
 
 let locale='en';
 
