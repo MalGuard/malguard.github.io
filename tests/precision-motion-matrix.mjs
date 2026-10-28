@@ -58,7 +58,7 @@ for(const name of names){
    assert.ok(layout.scroll<=layout.width+1,'Horizontal overflow at '+profile.width);
    assert.match(layout.title,/JetBrains/i,'Homepage uses the bundled coding font');
    assert.ok(layout.heading,'Visible semantic homepage heading');
-   assert.equal(layout.bodyBg,'rgb(8, 10, 18)','Homepage space background color');
+   assert.equal(layout.bodyBg,'rgb(5, 5, 7)','Homepage obsidian background');
    assert.match(layout.bodyImage,/radial-gradient/,'Homepage keeps its star field');
    assert.equal(layout.urls.length,3);
    assert.equal(await page.locator('.hero-actions>a[data-type="button"]').count(),2,

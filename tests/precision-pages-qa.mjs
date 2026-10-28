@@ -27,7 +27,7 @@ try {
     };
    });
    assert.equal(result.shared,true,'Design opt-in missing on '+route);
-   assert.equal(result.bg,'rgb(8, 10, 18)','Palette differs on '+route);
+   assert.equal(result.bg,'rgb(5, 5, 7)','Palette differs on '+route);
    assert.match(result.background,/radial-gradient/,'Space background missing on '+route);
    assert.match(result.heading,/MGPrecisionMono|JetBrains/i,'Heading coding font differs on '+route);
    assert.equal(result.overflow,false,'Horizontal overflow on '+route+' @'+width);

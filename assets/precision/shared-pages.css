@@ -391,12 +391,11 @@ body.mg-precision-shared :is(.secure-scene,.secure-vault-stage,#secure-scene){di
 
 body.mg-precision-shared .secure-eyebrow::before{animation:none!important}
 
-/* Shared cosmic backdrop for product and content pages. Cards stay translucent glass. */
+/* Shared obsidian field. Gradients only, so product pages do not wait on a photograph. */
 body.mg-precision-shared,body.mg-unified.mg-precision-shared,body.mg-unified.mg-content-page.mg-precision-shared{
- background-color:#080a12!important;
- background-image:radial-gradient(ellipse at 72% 0%,#29325255,transparent 42%),radial-gradient(ellipse at 12% 55%,#202c4940,transparent 40%),radial-gradient(circle at 18% 22%,#e1eaff88 0 1px,transparent 1.5px),radial-gradient(circle at 79% 37%,#cfddff66 0 1px,transparent 1.5px),linear-gradient(180deg,rgba(8,10,18,.55),rgba(8,10,18,.72)),url('/ai/milky-way-background.webp')!important;
- background-size:auto,auto,137px 137px,211px 211px,auto,cover!important;background-repeat:repeat,repeat,repeat,repeat,no-repeat,no-repeat!important;background-position:center!important;background-attachment:fixed!important;
+ background-color:#050507!important;
+ background-image:radial-gradient(ellipse at 50% 0%,#ffffff10,transparent 42%),radial-gradient(ellipse at 12% 55%,#ffffff08,transparent 40%),radial-gradient(circle at 18% 22%,#ffffff66 0 1px,transparent 1.5px),radial-gradient(circle at 79% 37%,#ffffff44 0 1px,transparent 1.5px)!important;
+ background-size:auto,auto,137px 137px,211px 211px!important;background-attachment:scroll!important;
 }
-body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare,.compare-card,.notice,.platform-card,.release-card,.result-card,.timeline .step,.secure-card,.feature-card,.radar-card){background:linear-gradient(145deg,#171d2bd9,#0e131ddd)!important;border-color:#9cb1d32c!important;box-shadow:inset 0 1px #ffffff0c,0 14px 40px #0003!important;backdrop-filter:blur(16px)}
-body.secure-page .secure-panel{background:linear-gradient(145deg,#202a3bd9,#0c111ce8);border-color:#a9c8f343;box-shadow:inset 0 1px #ffffff15,0 24px 70px #0005}
-@media(prefers-reduced-motion:reduce){body.mg-precision-shared{background-attachment:scroll!important}}
+body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare,.compare-card,.notice,.platform-card,.release-card,.result-card,.timeline .step,.secure-card,.feature-card,.radar-card){background:linear-gradient(145deg,#141416d9,#050507ee)!important;border-color:#ffffff16!important;box-shadow:inset 0 1px #ffffff14,0 14px 40px #0006!important;backdrop-filter:blur(16px)}
+body.secure-page .secure-panel{background:linear-gradient(145deg,#161618e0,#050507f2);border-color:#ffffff1a;box-shadow:inset 0 1px #ffffff14,0 24px 70px #0008}
