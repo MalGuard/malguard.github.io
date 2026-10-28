@@ -5,13 +5,13 @@ import {publicFailure,retryDetails} from './service-errors.mjs?v=codex-chat-2026
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
-import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=codex-chat-20261025';
+import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs';
 import {typeText,formatElapsed} from './reply-motion.mjs';
 import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=codex-chat-20261025';
 import {renderRichText} from './code-view.mjs?v=codex-chat-20261025';
-import {createAccount} from './account.mjs?v=account-entry-unified-20261028';
+import {createAccount} from './account.mjs?v=mono-mark-20261028';
 import {createBuilder} from './builder.mjs?v=qwen-coder-restored-20261026';
 import {parseProposal} from './build-project.mjs?v=codex-chat-20261025';
 const $=id=>document.getElementById(id);
@@ -492,11 +492,18 @@ $('retry-local-capability').onclick=()=>{void checkLocalDevice();};
 $('open-downloads').onclick=()=>{if(!busy)$('download-hub').showModal();};$('hub-browser').onclick=()=>{$('download-hub').close();void offerLocalModels();};$('hub-desktop').onclick=()=>{$('download-hub').close();openDesktopModels();};$('copy-desktop-command').onclick=async()=>{try{await navigator.clipboard.writeText(desktopModels[$('desktop-model').value].command);$('copy-desktop-command').textContent=t('commandCopied');}catch{$('desktop-command').focus();}};
 $('desktop-model').onchange=updateDesktopInfo;$('manage-desktop-models').onclick=openDesktopModels;$('desktop-connect').onclick=connectDesktop;
 translate();
-await resolveAccountEntry();
-await Promise.all([checkLocalDevice(),(async()=>{try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}})()]);renderStatus();
+renderStatus();
+void bootAssistant();
+async function bootAssistant(){
+ const entry=resolveAccountEntry();
+ const device=checkLocalDevice();
+ const serviceLoad=(async()=>{try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(1500)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}})();
+ await Promise.all([entry,device,serviceLoad]);
+ renderStatus();
+}
 async function resolveAccountEntry(){
  if(account.usesProductionAuth())return;
- try{const status=await account.authStatus();if(status?.configured===true&&status?.persistentAccounts===true)return;}catch{}
+ try{const status=await Promise.race([account.authStatus(),new Promise((_,reject)=>setTimeout(()=>reject(Error('timeout')),1200))]);if(status?.configured===true&&status?.persistentAccounts===true)return;}catch{}
  document.body.classList.remove('auth-required');const gate=$('entry-gate');if(gate)gate.hidden=true;
  void welcomeLocalModels();
 }
