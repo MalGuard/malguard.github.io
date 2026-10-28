@@ -301,8 +301,15 @@ body{background-color:#0b0d13;background-image:radial-gradient(ellipse at 70% 0%
 body[data-mode="chat"] .workspace:has(.conversation:empty) .composer-area{margin-top:20px;padding-top:0}
 
 /* Solar-system artwork stays behind the conversation and controls. */
-body{background-color:#080b13;background-image:linear-gradient(90deg,rgba(4,7,14,.38),rgba(4,7,14,.08)),url('./solar-system-background.webp');background-repeat:no-repeat;background-size:cover;background-position:center;background-attachment:fixed}
-body:has(.conversation:not(:empty)){background-image:linear-gradient(rgba(5,8,15,.72),rgba(5,8,15,.72)),url('./solar-system-background.webp')}
+body{background-color:#080b13;background-image:linear-gradient(90deg,rgba(4,7,14,.38),rgba(4,7,14,.08)),url('./milky-way-background.webp');background-repeat:no-repeat;background-size:cover;background-position:center;background-attachment:fixed}
 @media(max-width:760px){body{background-position:72% center}}
 @media(prefers-reduced-motion:reduce){body{background-attachment:scroll}}
+
+/* Keep the artwork visible through the composer, including after sending. */
+.composer-shell,.composer-shell:focus-within{background:rgba(16,22,34,.27);border:1px solid rgba(225,237,255,.26);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);box-shadow:0 8px 32px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.15)}
+body:has(.conversation:not(:empty)) .composer-area{background:transparent}
+.composer-shell textarea,.composer-actions #model,#attach-toggle{background:transparent;color:#f6f8ff}
+#send,#send:disabled,#send:disabled:hover,#send[data-state=stop]{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff}
+#send:hover:not(:disabled){background:rgba(255,255,255,.24)}
+#send:disabled{opacity:.5}
 
