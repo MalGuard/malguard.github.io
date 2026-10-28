@@ -59,15 +59,19 @@ input,select,textarea,button{max-width:100%}
 }
 html{background:#030303}
 body{
-  background:
-    radial-gradient(circle at 50% -14%,rgba(255,255,255,.07),transparent 31%),
-    linear-gradient(180deg,#020202 0%,#070708 45%,#020202 100%)!important;
+  background-color:#050507!important;
+  background-image:
+    radial-gradient(ellipse at 50% 112%,rgba(255,255,255,.14),transparent 40%),
+    linear-gradient(180deg,rgba(5,5,7,.2),rgba(5,5,7,.62)),
+    url('/assets/precision/obsidian-space.webp')!important;
+  background-size:auto,auto,cover!important;
+  background-repeat:no-repeat!important;
+  background-position:center!important;
+  background-attachment:scroll!important;
   color:var(--text)!important;
 }
 body:before{
-  background:
-    linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px)!important;
+  background:none!important;
 }
 .topbar{
   background:rgba(3,3,3,.9)!important;

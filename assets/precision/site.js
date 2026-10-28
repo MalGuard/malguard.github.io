@@ -2,6 +2,7 @@
 (() => {
  'use strict';
  const root=document.documentElement,motion=matchMedia('(prefers-reduced-motion: reduce)'),formatter=new Intl.NumberFormat('en-US');
+ if(document.body?.classList.contains('mg-precision-shared'))root.dataset.experienceReady='true';
  const eligible=!motion.matches&&'IntersectionObserver'in window;
  let nodes=[],observer,timer=0,active=null,stopped=false;
  const done=new WeakSet(),visible=new Set(),pending=new Set(),jobs=new WeakMap();

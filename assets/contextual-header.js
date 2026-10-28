@@ -6,6 +6,13 @@
   const menu = document.getElementById('navLinks');
   const searchButton = document.getElementById('searchButton');
   if (!navbar || !menuButton || !menu || !searchButton) return;
+  for(const href of ['/products.html','/gta-guard.html','/game-scam-guard.html','/ai/','/tools.html','/trust.html','/docs.html','/download.html']){
+    if(href===location.pathname)continue;
+    const hint=document.createElement('link');hint.rel='prefetch';hint.href=href;document.head.append(hint);
+  }
+  if(!document.querySelector('link[rel="preload"][href="/assets/precision/obsidian-space.webp"]')){
+    const plate=document.createElement('link');plate.rel='preload';plate.as='image';plate.href='/assets/precision/obsidian-space.webp';document.head.append(plate);
+  }
   const pages = [
     ['Home', 'MalGuard overview', '/', 'home malguard'],
     ['Products', 'Products and current availability', '/products.html', 'gta guard malguard ai scam guard'],
