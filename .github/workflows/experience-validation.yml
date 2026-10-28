@@ -88,6 +88,8 @@ jobs:
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/precision-motion-matrix.mjs
           TEST_BROWSER=chromium node tests/precision-shared-typing.mjs
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/precision-shared-typing.mjs
+          TEST_BROWSER=chromium node tests/i18n-import-regression.mjs
+          TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/i18n-import-regression.mjs
           TEST_BROWSER=chromium node tests/gta6-shared-experience.mjs
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/gta6-shared-experience.mjs
           TEST_BROWSER=chromium node tests/product-card-hero-backdrops.mjs
