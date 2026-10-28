@@ -301,7 +301,7 @@ body{background-color:#0b0d13;background-image:radial-gradient(ellipse at 70% 0%
 body[data-mode="chat"] .workspace:has(.conversation:empty) .composer-area{margin-top:20px;padding-top:0}
 
 /* Solar-system artwork stays behind the conversation and controls. */
-body{background-color:#080b13;background-image:linear-gradient(90deg,rgba(4,7,14,.38),rgba(4,7,14,.08)),url('./milky-way-background.webp');background-repeat:no-repeat;background-size:cover;background-position:center;background-attachment:fixed}
+body{background-color:#080b13;background-image:linear-gradient(90deg,rgba(4,7,14,.38),rgba(4,7,14,.08)),url('./malguard-space-neutral.webp');background-repeat:no-repeat;background-size:cover;background-position:center;background-attachment:fixed}
 @media(max-width:760px){body{background-position:72% center}}
 @media(prefers-reduced-motion:reduce){body{background-attachment:scroll}}
 
@@ -313,3 +313,5 @@ body:has(.conversation:not(:empty)) .composer-area{background:transparent}
 #send:hover:not(:disabled){background:rgba(255,255,255,.24)}
 #send:disabled{opacity:.5}
 
+
+.ai-product-mark{width:26px;height:26px;object-fit:contain;flex:none}
