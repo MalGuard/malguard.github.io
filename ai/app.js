@@ -5,7 +5,7 @@ import {publicFailure,retryDetails} from './service-errors.mjs?v=codex-chat-2026
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
 import {planChat,planCloudChat} from './routing.mjs?v=codex-chat-20261025';
-import {localModels,localCapability,createLocalChat} from './local-models.mjs?v=codex-chat-20261025';
+import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=codex-chat-20261025';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs';
 import {typeText,formatElapsed} from './reply-motion.mjs';
@@ -19,7 +19,7 @@ const names={gta_guard:'GTA Guard',game_scam_guard:'Game Scam Guard',ai_web:'AI 
 let locale='en',service,busy=false;
 
 let activeTurn;
-let localReady=false,modelsInitialized=false;
+let localReady=false,localCapabilityReason='checking',modelsInitialized=false;
 let lastSelectedModel='';
 let cloudDefaultApplied=false,modelChosen=false;
 let localOfferPending=false;
@@ -46,8 +46,8 @@ Object.assign(copy.fa,{modeLabel:'حالت',chatMode:'چت',workerMode:'بررس
 Object.assign(copy.en,{modeLabel:'Mode',chatMode:'Chat',workerMode:'Automatic inspection',permissionSettings:'Permissions and privacy',revoke:'Revoke all permissions',consent:'Permissions are saved once and can be revoked at any time.',title:'Hello. Where shall we start?',subtitle:'Talk it through, explore the web or inspect a file or link.',placeholder:'Send a message, ask a question or paste a link…',send:'Send',modelNotice:'Chat supports conversation. Automatic inspection focuses on files and websites with security tools.',chatHint:'General and technical conversation, with automatic file and URL inspection.',workerHint:'File, hash and website inspection only. Use Chat for general questions.'});
 Object.assign(copy.fa,{modelLabel:'مدل گفت‌وگو',modelConsent:'ارسال متن گفت‌وگو به ارائه‌دهندهٔ مدل انتخاب‌شده؛ فایل و شواهد ابزارها ارسال نمی‌شوند.',placeholder:'هرچه می‌خواهی بپرس…',home:'سایت اصلی',suggestChat:'گفت‌وگو کنیم',suggestWebsite:'بررسی یک سایت',suggestFile:'بررسی یک فایل',websitePrompt:'این سایت را بررسی کن: ',chatPrompt:'سلام!',clear:'گفت‌وگوی تازه',modelNotice:'وضعیت واقعی اتصال مدل و ابزارها از سرور دریافت می‌شود.'});
 Object.assign(copy.en,{modelLabel:'Chat model',modelConsent:'Send conversation text to the selected model provider. Files and tool evidence are never sent to the model.',placeholder:'Ask anything…',home:'Main site',suggestChat:'Let’s talk',suggestWebsite:'Check a website',suggestFile:'Inspect a file',websitePrompt:'Check this website: ',chatPrompt:'Hello!',clear:'New conversation',modelNotice:'Model and tool availability are reported by the server.'});
-Object.assign(copy.en,{localTooLong:'This device model accepts short requests (up to 600 characters). Choose a cloud model for longer text.',localDownload:'Download on-device model',download:'Download',cancel:'Cancel',stop:'Stop',chooseLocal:'On-device models',clearModels:'Remove downloaded models',localOff:'On-device models require compatible WebGPU and sufficient GPU memory.',localFailed:'On-device response could not finish. Check device support, memory and network. No cloud fallback was used.',localLoading:'Loading on-device model',localWorking:'Generating on your device',localRemoved:'Downloaded models removed.',researchLimit:'Search excerpts are not independently verified source pages.'});
-Object.assign(copy.fa,{localTooLong:'مدل روی دستگاه درخواست کوتاه، حداکثر ۶۰۰ نویسه، می‌پذیرد. برای متن طولانی مدل ابری را انتخاب کن.',localDownload:'دانلود مدل روی دستگاه',download:'دانلود',cancel:'انصراف',stop:'توقف',chooseLocal:'مدل‌های روی دستگاه',clearModels:'حذف مدل‌های دانلودشده',localOff:'مدل‌های روی دستگاه به WebGPU سازگار و حافظهٔ گرافیکی کافی نیاز دارند.',localFailed:'پاسخ روی دستگاه کامل نشد؛ پشتیبانی مرورگر، حافظه و اینترنت را بررسی کن. به مدل ابری منتقل نشد.',localLoading:'در حال بارگذاری مدل روی دستگاه',localWorking:'در حال پاسخ‌گویی روی دستگاه شما',localRemoved:'مدل‌های دانلودشده حذف شدند.',researchLimit:'صفحهٔ منابع جست‌وجو مستقلاً تأیید نشده است.'});
+Object.assign(copy.en,{localChecking:'Checking this device…',localSecure:'Open MalGuard over HTTPS to use local models.',localNoWebGPU:'This browser does not expose WebGPU. Try an up-to-date supported browser on a compatible device.',localNoAdapter:'A compatible GPU could not be started. Close other apps or try a supported browser and device.',localNoF16:'This device does not support the GPU feature required by these models. Use an available cloud model or a different device.',retryLocal:'Check device again',localTooLong:'This device model accepts short requests (up to 600 characters). Choose a cloud model for longer text.',localDownload:'Download on-device model',download:'Download',cancel:'Cancel',stop:'Stop',chooseLocal:'On-device models',clearModels:'Remove downloaded models',localOff:'On-device models require compatible WebGPU and sufficient GPU memory.',localFailed:'On-device response could not finish. Check device support, memory and network. No cloud fallback was used.',localLoading:'Loading on-device model',localWorking:'Generating on your device',localRemoved:'Downloaded models removed.',researchLimit:'Search excerpts are not independently verified source pages.'});
+Object.assign(copy.fa,{localChecking:'در حال بررسی دستگاه…',localSecure:'برای اجرای مدل محلی سایت را با HTTPS باز کنید.',localNoWebGPU:'این مرورگر WebGPU را ارائه نمی‌کند؛ مرورگر به‌روز و دستگاه سازگار را امتحان کنید.',localNoAdapter:'پردازندهٔ گرافیکی سازگار در دسترس نیست؛ برنامه‌های دیگر را ببندید یا دستگاه دیگری را امتحان کنید.',localNoF16:'دستگاه قابلیت گرافیکی موردنیاز این مدل‌ها را ندارد؛ مدل ابری یا دستگاه دیگری را انتخاب کنید.',retryLocal:'بررسی دوبارهٔ دستگاه',localTooLong:'مدل روی دستگاه درخواست کوتاه، حداکثر ۶۰۰ نویسه، می‌پذیرد. برای متن طولانی مدل ابری را انتخاب کن.',localDownload:'دانلود مدل روی دستگاه',download:'دانلود',cancel:'انصراف',stop:'توقف',chooseLocal:'مدل‌های روی دستگاه',clearModels:'حذف مدل‌های دانلودشده',localOff:'مدل‌های روی دستگاه به WebGPU سازگار و حافظهٔ گرافیکی کافی نیاز دارند.',localFailed:'پاسخ روی دستگاه کامل نشد؛ پشتیبانی مرورگر، حافظه و اینترنت را بررسی کن. به مدل ابری منتقل نشد.',localLoading:'در حال بارگذاری مدل روی دستگاه',localWorking:'در حال پاسخ‌گویی روی دستگاه شما',localRemoved:'مدل‌های دانلودشده حذف شدند.',researchLimit:'صفحهٔ منابع جست‌وجو مستقلاً تأیید نشده است.'});
 Object.assign(copy.en,{offerTitle:'Two optional on-device models',offerInfo:"Download a model to chat without a provider's daily message quota. Speed and capacity depend on your device. You can keep using available cloud models without downloading.",offerChoose:'Choose a model',later:'Later',localPrepared:'Selected model is ready on this device.'});
 Object.assign(copy.fa,{offerTitle:'دو مدل اختیاری روی دستگاه شما',offerInfo:'با دانلود مدل، بدون سقف پیام روزانهٔ سرویس‌دهنده گفت‌وگو کنید. سرعت و ظرفیت به دستگاه شما بستگی دارد. بدون دانلود هم می‌توانید از مدل‌های ابریِ در دسترس استفاده کنید.',offerChoose:'انتخاب مدل',later:'بعداً',localPrepared:'مدل انتخاب‌شده روی این دستگاه آماده است.'});
 const t=k=>copy[locale][k]||k;
@@ -255,7 +255,8 @@ function renderStatus(){
  if(service?.model?.state==='configured')document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌های کلادفلر سهمیهٔ مشترک روزانه دارند. GPT-OSS 120B برای کارهای سنگین و Qwen3 30B برای مصرف کمتر سهمیه؛ اجرای محلی سقف روزانهٔ سرویس‌دهنده ندارد.':'Cloudflare models share a daily account quota. Use GPT-OSS 120B for demanding tasks or Qwen3 30B for lower quota use. On-device chat has no provider daily quota.';
  $('manage-models').disabled=busy||localOfferPending;
  $('offer-download-button').disabled=busy||!localReady;
- $('offer-compatibility').textContent=localReady?'':t('localCompatibility');
+ $('offer-compatibility').textContent=localReady?'':t({checking:'localChecking',insecure_context:'localSecure',webgpu_unavailable:'localNoWebGPU',adapter_unavailable:'localNoAdapter',shader_f16_unavailable:'localNoF16'}[localCapabilityReason]||'localCompatibility');
+ $('retry-local-capability').hidden=localReady||localCapabilityReason==='checking';
  $('device-note').textContent=!localReady?t('deviceUnsupported'):$('model').value.startsWith('local_')?t(preparedModels.has($('model').value)?'readyDevice':'downloadNeeded'):'';
  for(const option of $('offer-model').options){const m=localModels[option.value];option.textContent=`${t(option.value==='local_fast'?'lightModel':'strongModel')} · ~${m.downloadMB} MB`;}
  $('local-status').textContent=localReady?(locale==='fa'?'اجرای روی دستگاه ممکن است؛ سرعت و حافظه باید هنگام بارگذاری بررسی شوند.':'On-device inference may be supported; loading still depends on memory and device capabilities.'):t('localOff');
@@ -355,11 +356,22 @@ async function runLocal(model,message,consent){
   await presentResponse({generated},turn);modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-8));if($('message').value.trim()===message)$('message').value='';
  }catch{if(turn.controller.signal.aborted)stopped(turn);else showError('localFailed');}finally{endTurn(turn);}
 }
+let modelSharePromptPending=false;
+async function requestModelShare(){
+ if($('model-consent').checked)return true;
+ if(modelSharePromptPending)return false;
+ modelSharePromptPending=true;
+ const dialog=$('model-share-dialog');let allowed=false;
+ try{dialog.returnValue='cancel';dialog.showModal();allowed=await new Promise(resolve=>dialog.addEventListener('close',()=>resolve(dialog.returnValue==='allow'),{once:true}));}
+ finally{modelSharePromptPending=false;}
+ if(allowed){$('model-consent').checked=true;$('model-consent').dispatchEvent(new Event('change'));}
+ return allowed;
+}
 async function runBuild(message){
  let prompt;try{prompt=builder.prompt(message);}catch{showError('buildTooLarge');return;}
  const selected=$('model').value,native=Object.hasOwn(desktopModels,selected);
  if(!selected){showError('buildNoModel');return;}
- if(!native&&!$('model-consent').checked){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
+ if(!native&&!$('model-consent').checked){if(!await requestModelShare()||activeMode!=='build'||$('message').value.trim()!==message||$('model').value!==selected)return;}
  const contextHistory=modelHistory.slice(-6),revision=builder.revision;builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
  else{const r=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:prompt,locale,mode:'chat',tool:'auto',model:selected,history:contextHistory,consent:{modelShare:true,remoteLookup:false}}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(45000)])});const data=await r.json();if(!r.ok||data.error){showError(publicFailure(data));return;}generated=data.generated;}
@@ -419,7 +431,8 @@ $('composer').onsubmit=async event=>{
  if(['file_sandbox','url_sandbox'].includes(tool)&&!consent.isolatedExecution){showError('isolationMissing');$('isolation-consent').focus();return;}
  if(!service?.enabled){showError('offline');return;}
  if(effective==='model'&&(plan?.needsWeb||['gemini_flash','groq_gptoss'].includes(selected)&&planChat(message,modelHistory).needsWeb)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
- if(['game_scam_guard','url_sandbox'].includes(effective)&&!consent.websiteFetch||['malwarebazaar','urlhaus','ai_web'].includes(effective)&&!consent.remoteLookup||effective==='model'&&mode==='chat'&&service.model.state==='configured'&&!consent.modelShare){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
+ if(['game_scam_guard','url_sandbox'].includes(effective)&&!consent.websiteFetch||['malwarebazaar','urlhaus','ai_web'].includes(effective)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
+ if(effective==='model'&&mode==='chat'&&service.model.state==='configured'&&!consent.modelShare){if(!await requestModelShare()||activeMode!==mode||$('message').value.trim()!==message||$('model').value!==selected)return;consent.modelShare=true;}
  const turn=beginTurn('connecting');history.push({bubble:message||file.name});followReply(()=>$('conversation').append(el('div',message||file.name,'bubble')));
  try{
   if(file){setActivity('readingFile');input={file:await fileData(file)};setActivity('connecting');}
@@ -469,8 +482,10 @@ for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()
  translate();$('message').focus();
 };
 for(const m of Object.values(desktopModels)){const option=el('option',`${m.label} · ~${m.downloadGB} GB`);option.value=m.id;$('desktop-model').append(option);}
+async function checkLocalDevice(){localCapabilityReason='checking';localReady=false;renderStatus();const result=await localCapabilityDetails();localReady=result.ready;localCapabilityReason=result.reason;renderStatus();}
+$('retry-local-capability').onclick=()=>{void checkLocalDevice();};
 $('open-downloads').onclick=()=>{if(!busy)$('download-hub').showModal();};$('hub-browser').onclick=()=>{$('download-hub').close();void offerLocalModels();};$('hub-desktop').onclick=()=>{$('download-hub').close();openDesktopModels();};$('copy-desktop-command').onclick=async()=>{try{await navigator.clipboard.writeText(desktopModels[$('desktop-model').value].command);$('copy-desktop-command').textContent=t('commandCopied');}catch{$('desktop-command').focus();}};
 $('desktop-model').onchange=updateDesktopInfo;$('manage-desktop-models').onclick=openDesktopModels;$('desktop-connect').onclick=connectDesktop;
 translate();
 void welcomeLocalModels();
-await Promise.all([localCapability().then(ready=>{localReady=ready;renderStatus();}),(async()=>{try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}})()]);renderStatus();
+await Promise.all([checkLocalDevice(),(async()=>{try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}})()]);renderStatus();
