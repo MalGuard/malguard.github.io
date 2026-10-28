@@ -17,6 +17,7 @@ test('email verification codes do not depend on the non-cryptographic Math.rando
 test('first-party email auth sends a code through Brevo and issues an expiring opaque session',async()=>{
   let body;const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',now:()=>1000,fetchImpl:async(_url,options)=>{body=JSON.parse(options.body);return {ok:true};}});
   const started=await auth.start({emailAddress:'Player@Example.com',name:'player_guard',ip:'198.51.100.7'});
+  assert.equal(body.sender.name,'MalGuard');assert.equal(body.subject,'Your MalGuard verification code');assert.match(body.htmlContent,/Your MalGuard verification code/);
   assert.equal(auth.enabled,true);assert.equal(auth.status.hasApiKey,true);assert.equal(auth.status.hasFromEmail,true);assert.match(started.verificationToken,/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);assert.equal(body.to[0].email,'player@example.com');
   const code=body.htmlContent.match(/>(\d{6})</)[1];const verified=await auth.verify({verificationToken:started.verificationToken,code});const session=auth.session(verified);
   assert.deepEqual(session,{email:'player@example.com',username:'player_guard',firstName:null,lastName:null,birthDate:null,expiresAt:1000+30*24*60*60*1000});

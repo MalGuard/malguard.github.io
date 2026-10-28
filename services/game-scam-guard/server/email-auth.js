@@ -29,7 +29,7 @@ export function createEmailAuth({apiKey=process.env.BREVO_API_KEY,fromEmail=proc
     attempts.set(rateKey,{count:(entry?.until>time?entry.count:0)+1,until:time+15*60*1000});for(const [key,item]of attempts)if(item.until<time)attempts.delete(key);
     // Authentication codes require the cryptographic RNG, not Math.random.
     const code=String(randomInt(100000,1000000));
-    const response=await fetchImpl('https://api.brevo.com/v3/smtp/email',{method:'POST',headers:{'api-key':apiKey,'content-type':'application/json','accept':'application/json'},body:JSON.stringify({sender:{name:'GameScam Guard',email:fromEmail},to:[{email:address}],subject:'Your GameScam Guard verification code',htmlContent:`<p>Your GameScam Guard verification code is:</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${code}</p><p>This code expires in 10 minutes.</p>`})});
+    const response=await fetchImpl('https://api.brevo.com/v3/smtp/email',{method:'POST',headers:{'api-key':apiKey,'content-type':'application/json','accept':'application/json'},body:JSON.stringify({sender:{name:'MalGuard',email:fromEmail},to:[{email:address}],subject:'Your MalGuard verification code',htmlContent:`<p>Your MalGuard verification code is:</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${code}</p><p>This code expires in 10 minutes.</p>`})});
     if(!response.ok)throw error(502,'ارسال کد ایمیل ممکن نشد؛ کمی بعد دوباره تلاش کنید.');
     return {verificationToken:seal({type:'code',email:address,name:legacyName,profile:pendingProfile,code:encode(code),expiresAt:time+CODE_TTL_MS})};
   }
