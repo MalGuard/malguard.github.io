@@ -18,8 +18,9 @@ export function publicUrl(value) {
   return url.href;
 }
 export function parseRequest(body) {
-  if (!object(body) || Object.keys(body).some(k => !['message','locale','tool','input','consent','mode','history','model'].includes(k))) throw new InputError('invalid_request');
-  const {message = '', locale = 'fa', tool = 'auto', input = {}, consent = {},mode='chat',history=[],model='llama70b'} = body;
+  if (!object(body) || Object.keys(body).some(k => !['message','locale','tool','input','consent','mode','history','model','routingMode'].includes(k))) throw new InputError('invalid_request');
+  const {message = '', locale = 'fa', tool = 'auto', input = {}, consent = {},mode='chat',history=[],model='llama70b',routingMode} = body;
+  if(routingMode!==undefined&&(routingMode!=='build'||mode!=='chat'))throw new InputError('invalid_request');
   if(!MODELS.includes(model))throw new InputError('invalid_model');
   if(!['chat','worker'].includes(mode)||!Array.isArray(history)||history.length>12||history.some(m=>!object(m)||!['user','assistant'].includes(m.role)||typeof m.content!=='string'||m.content.length>2000||Object.keys(m).some(k=>!['role','content'].includes(k)))||history.reduce((n,m)=>n+m.content.length,0)>12000)throw new InputError('invalid_history_or_mode');
   if (typeof message !== 'string' || message.length > 4000 || !['fa','en'].includes(locale) || !['auto',...TOOLS].includes(tool) || !object(input) || !object(consent)) throw new InputError('invalid_request');
@@ -46,7 +47,7 @@ export function parseRequest(body) {
     if (hash) clean.sha256 = hash.toLowerCase();
     else if (url) clean.url = publicUrl(url);
   }
-  return {message, locale, tool, input: clean, consent,mode,history,model};
+  return {message, locale, tool, input: clean, consent,mode,history,model,routingMode};
 }
 export const text = (v, max = 500) => typeof v === 'string' ? v.replace(/[\x00-\x08\x0b-\x1f\u202a-\u202e\u2066-\u2069]/g, '').slice(0,max) : '';
 export const LIMIT = 'Only the stated checks were performed. No finding or absent threat report guarantees safety. No sample was executed.';
@@ -57,3 +58,4 @@ export function report(tool, outcome, {evidence = [], sources = [], limitations 
   const limit=['file_sandbox','url_sandbox'].includes(tool)?'Only explicitly reported observations are available. Isolation and absent findings do not guarantee safety.':LIMIT;
   return {tool, outcome, checkedAt, evidence, sources: sources.map(s => ({...s, checkedAt: s.checkedAt || checkedAt})), limitations: [...limitations, limit], metadata, ...(reason ? {reason} : {}),...(failure?{failure:publicFailure(failure)}:{})};
 }
+

@@ -1,10 +1,13 @@
+Warning: truncated output (original token count: 21794)
+Total output lines: 494
+
 import {createChatLibrary} from './library.mjs?v=sidebar-20261026';
 import {createNavigation} from './navigation.mjs?v=sidebar-20261026';
 import {errorMessage} from './error-message.mjs?v=codex-chat-20261025';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=codex-chat-20261025';
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
-import {planChat,planCloudChat} from './routing.mjs?v=codex-chat-20261025';
+import {planChat,planCloudChat} from './routing.mjs?v=smart-router-20261028';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=codex-chat-20261025';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs';
@@ -113,63 +116,7 @@ async function runDesktop(model,message){
  try{const generated=await desktopChat.respond({model,message,locale:replyLanguage(message,locale,modelHistory),history:modelHistory.slice(-8),signal:turn.controller.signal});await presentResponse({generated},turn);modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-8));if($('message').value.trim()===message)$('message').value='';}
  catch{if(turn.controller.signal.aborted)stopped(turn);else showError('desktopFailed');}finally{endTurn(turn);}
 }
-Object.assign(copy.en,{hideProject:'Back to conversation',buildIntroTitle:'What shall we build?',showProject:'Files and preview',buildStartHint:'Talk through an idea, then say “build it”. I will create project files and run the web preview.',autoBuild:'Apply and preview explicit build requests automatically, with Undo.',buildTab:'Build and code',projectTitle:'My project',chatChoice:'Questions and conversation',workChoice:'File, link and web tools',buildChoice:'Edit files, preview and export',buildHint:'Talk or plan here, then ask me to build. Review the proposed code, apply it to files, then run the preview.',exportProject:'Download ZIP',projectFile:'Project file',newFile:'New file',addFile:'Add file',importCode:'Import files',undoProject:'Undo apply',codeEditor:'Code editor',projectPreview:'Project preview',runPreview:'Run preview',stopPreview:'Stop preview',previewOutput:'Preview output',previewEmpty:'Run preview to see your project.',shareCode:'Include the currently selected file in my next model request.',buildLimit:'Files stay in page memory; export before leaving. Local HTML/CSS/JS preview has no network access. Run backend code and packages in your own development environment after export.',buildPlaceholder:'Describe what to build or change…',buildTooLarge:'This request and shared file exceed the coding model input budget. Shorten the request or share a smaller file.',buildNoModel:'Choose an enabled coding model or connect an installed desktop model.',buildUnstructured:'The model returned a text answer. No project files were changed; ask for a smaller, complete file proposal.'});
-Object.assign(copy.fa,{hideProject:'برگشت به گفت‌وگو',buildIntroTitle:'چه چیزی بسازیم؟',showProject:'فایل‌ها و پیش‌نمایش',buildStartHint:'ایده‌ات را بگو، درباره‌اش گفت‌وگو کن و بعد بگو «حالا بسازش». فایل‌های پروژه و پیش‌نمایش همین‌جا ساخته می‌شوند.',autoBuild:'درخواست صریح ساخت را خودکار در فایل‌ها اعمال و پیش‌نمایش را اجرا کن؛ قابل برگرداندن.',buildTab:'ساخت و کدنویسی',projectTitle:'پروژهٔ من',chatChoice:'پرسش و گفت‌وگوی روزمره',workChoice:'ابزارهای فایل، لینک و سرچ وب',buildChoice:'ویرایش فایل، پیش‌نمایش و خروجی پروژه',buildHint:'در گفت‌وگو بگو چه بسازیم؛ کد پیشنهادی را بررسی کن، در فایل‌ها اعمال کن و پیش‌نمایش را اجرا کن.',exportProject:'دانلود ZIP پروژه',projectFile:'فایل پروژه',newFile:'فایل جدید',addFile:'افزودن فایل',importCode:'وارد کردن فایل',undoProject:'برگرداندن',codeEditor:'ویرایشگر کد',projectPreview:'پیش‌نمایش پروژه',runPreview:'اجرای پیش‌نمایش',stopPreview:'توقف',previewOutput:'خروجی پیش‌نمایش',previewEmpty:'برای دیدن نتیجه، پیش‌نمایش را اجرا کن.',shareCode:'برای اصلاح دقیق، فایل انتخاب‌شده را به درخواست بعدی پیوست کن.',buildLimit:'فایل‌ها در حافظهٔ صفحه‌اند؛ قبل از خروج دانلود کن. پیش‌نمایش HTML/CSS/JS بدون دسترسی شبکه اجرا می‌شود. کد بک‌اند و بسته‌ها را پس از دانلود در محیط توسعهٔ خودت اجرا کن.',buildPlaceholder:'بگو چه بسازیم یا کدام بخش را تغییر بدهیم…',buildTooLarge:'درخواست و کد پیوست از ظرفیت ورودی این مسیر مدل بیشتر است؛ متن درخواست یا فایل را کوتاه‌تر کن.',buildNoModel:'یک مدل کدنویسی فعال انتخاب کن یا مدل نصب‌شدهٔ دسکتاپ را متصل کن.',buildUnstructured:'مدل پاسخ متنی داده است؛ فایل‌های پروژه تغییر نکردند. یک پیشنهاد کوچک‌تر با فایل کامل بخواه.'});
-function updateElapsed(turn){
- const text=formatElapsed(turn.elapsedMs??performance.now()-turn.startedAt,locale);
- if($('activity-elapsed').textContent!==text){const node=$('activity-elapsed'),previous=node.textContent;node.textContent=text;if(previous&&!matchMedia('(prefers-reduced-motion: reduce)').matches)node.animate([{opacity:.45,transform:'translateY(2px)'},{opacity:1,transform:'translateY(0)'}],{duration:160,easing:'ease-out'});}
-}
-function freezeElapsed(turn){
- clearInterval(turn.elapsedTimer);
- turn.elapsedMs??=performance.now()-turn.startedAt;
-}
-function timingText(timing){return `${t(timing.label)} ${formatElapsed(timing.elapsedMs,locale,true)}`;}
-function renderTiming(timing){
- const node=el('p',timingText(timing),'response-duration');
- node.dataset.elapsedMs=timing.elapsedMs;node.dataset.label=timing.label;
- $('conversation').append(node);
-}
-function activityLabel(key,detail){
- if(key==='running')return detail.map(id=>id==='chat'?t('thinking'):id==='ai_web'?t('searching'):id==='game_scam_guard'?t('readingWebsite'):id==='gta_guard'?t('checkingFile'):`${t('checking')} · ${names[id]}`).join(' · ');
- return detail?`${t(key)} · ${detail}`:t(key);
-}
-function setActivity(key,detail=''){
- if(activeTurn?.controller.signal.aborted)return;
- if(activeTurn)activeTurn.stage={key,detail};
- const label=activityLabel(key,detail);
- if($('activity').dataset.label===label)return;
- $('activity').dataset.label=label;$('activity').hidden=false;
- // Keep a visible character across stage changes; announce each stage only once.
- $('activity-label').textContent=label;
- $('activity-announcement').textContent=label;
-}
-function showRunningActivity(turn){
- const work=[...(turn.modelStarted?['chat']:[]),...turn.tools];
- setActivity(work.length?'running':'preparing',work.length?work:'');
-}
-function beginTurn(stage,{recordTiming=true}={}){
- busy=true;closeAttach();const turn={controller:new AbortController(),tools:new Set(),partial:false,startedAt:performance.now(),recordTiming};activeTurn=turn;
- updateElapsed(turn);turn.elapsedTimer=setInterval(()=>updateElapsed(turn),250);
- $('conversation').setAttribute('aria-busy','true');renderStatus();setActivity(stage);return turn;
-}
-function endTurn(turn){
- freezeElapsed(turn);
- if(activeTurn!==turn)return;
- if(turn.recordTiming){const timing={elapsedMs:turn.elapsedMs,label:turn.controller.signal.aborted?'stoppedAfter':turn.completed?'respondedIn':'elapsedTime'};history.push({timing});renderTiming(timing);}
- $('activity').hidden=true;delete $('activity').dataset.label;
- activeTurn=undefined;busy=false;library.capture();$('conversation').setAttribute('aria-busy','false');renderStatus();
-}
-function stopTurn(){
- if(!activeTurn||activeTurn.controller.signal.aborted)return;
- freezeElapsed(activeTurn);
- activeTurn.controller.abort(new DOMException('Stopped by user','AbortError'));localChat.stop();desktopChat.stop();$('activity').hidden=true;renderStatus();
-}
-function stopped(turn){
- if(turn.partial)return;
- const response={message:t('stopped'),interrupted:true};history.push({response});renderResponse(response,false);
-}
-function followReply(update){
- if(activeMode==='build'&&projectOpen&&matchMedia('(min-width:901px)').matches){const log=$('conversation'),follow=log.scrollTop+log.clientHeight>=log.scrollHeight-120;update();if(follow)log.scrollTop=log.scrollHeight;return;}
+Object.assign(copy.en,{hideProject:'Back to conversation',buildIntroTitle:'What shall we build?',showProject:'Files and preview',buildStartHint:'Talk through an idea, then say “build it”. I will create project fi…1794 tokens truncated…'conversation'),follow=log.scrollTop+log.clientHeight>=log.scrollHeight-120;update();if(follow)log.scrollTop=log.scrollHeight;return;}
  const follow=innerHeight+scrollY>=document.documentElement.scrollHeight-160;
  update();if(follow)scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'});
 }
@@ -372,9 +319,11 @@ async function runBuild(message){
  const selected=$('model').value,native=Object.hasOwn(desktopModels,selected);
  if(!selected){showError('buildNoModel');return;}
  if(!native&&!$('model-consent').checked){if(!await requestModelShare()||activeMode!=='build'||$('message').value.trim()!==message||$('model').value!==selected)return;}
- const contextHistory=modelHistory.slice(-6),revision=builder.revision;builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
+ const contextHistory=modelHistory.slice(-6),revision=builder.revision;
+ if(!native&&planChat(prompt,contextHistory).needsWeb&&!$('lookup-consent').checked){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
+ builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
- else{const r=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:prompt,locale,mode:'chat',tool:'auto',model:selected,history:contextHistory,consent:{modelShare:true,remoteLookup:false}}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(45000)])});const data=await r.json();if(!r.ok||data.error){showError(publicFailure(data));return;}generated=data.generated;}
+ else{const r=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:prompt,locale,mode:'chat',routingMode:'build',tool:'auto',model:selected,history:contextHistory,consent:{modelShare:true,remoteLookup:$('lookup-consent').checked}}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(60000)])});const data=await r.json();if(!r.ok||data.error){showError(publicFailure(data));return;}generated=data.generated;}
  if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn);if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
  }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error.name==='TimeoutError'?'provider_timeout':'model_unavailable'});}finally{endTurn(turn);}
 }
@@ -425,19 +374,19 @@ $('composer').onsubmit=async event=>{
  if(tool==='ai_web')input.query=message.slice(0,500);
  // URL/hash routing is validated again on the server before any tool starts.
  const effective=mode==='chat'?'model':tool==='auto'?(file?'gta_guard':/(?:^|\s)[a-f\d]{64}(?=$|\s)/i.test(message)?'malwarebazaar':/https?:\/\//i.test(message)?'game_scam_guard':'model'):tool;
- const selected=mode==='worker'?$('workspace-model').value:$('model').value,cloudAuto=selected==='auto'&&service?.model?.models?.some(m=>m.id==='auto'&&m.state==='configured'),plan=selected==='auto'?(cloudAuto?planCloudChat(message,modelHistory):planChat(message,modelHistory)):null;
- if(effective==='model'&&mode==='chat'&&(selected.startsWith('local_')||!cloudAuto&&plan?.model.startsWith('local_'))){await runLocal(plan?.model||selected,message,consent);return;}
+ const selected=mode==='worker'?$('workspace-model').value:$('model').value,cloudAuto=selected==='auto'&&service?.model?.models?.some(m=>m.id==='auto'&&m.state==='configured'),plan=selected==='auto'?(cloudAuto?planCloudChat(message,modelHistory,{models:service.model.models,mode:activeMode}):planChat(message,modelHistory)):null;
+ if(effective==='model'&&mode==='chat'&&(selected.startsWith('local_')||!cloudAuto&&plan?.model?.startsWith('local_'))){await runLocal(plan?.model||selected,message,consent);return;}
  if(mode==='chat'&&Object.hasOwn(desktopModels,selected)){await runDesktop(selected,message);return;}
  if(['file_sandbox','url_sandbox'].includes(tool)&&!consent.isolatedExecution){showError('isolationMissing');$('isolation-consent').focus();return;}
  if(!service?.enabled){showError('offline');return;}
- if(effective==='model'&&(plan?.needsWeb||['gemini_flash','groq_gptoss'].includes(selected)&&planChat(message,modelHistory).needsWeb)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
+ if(effective==='model'&&(plan?.needsWeb||['gemini_flash','groq_qwen','groq_gptoss'].includes(selected)&&planChat(message,modelHistory).needsWeb)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  if(['game_scam_guard','url_sandbox'].includes(effective)&&!consent.websiteFetch||['malwarebazaar','urlhaus','ai_web'].includes(effective)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  if(effective==='model'&&mode==='chat'&&service.model.state==='configured'&&!consent.modelShare){if(!await requestModelShare()||activeMode!==mode||$('message').value.trim()!==message||$('model').value!==selected)return;consent.modelShare=true;}
  const turn=beginTurn('connecting');history.push({bubble:message||file.name});followReply(()=>$('conversation').append(el('div',message||file.name,'bubble')));
  try{
   if(file){setActivity('readingFile');input={file:await fileData(file)};setActivity('connecting');}
   turn.controller.signal.throwIfAborted();
-  const response=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({message,tool,locale,input,consent,mode,model:selected,history:mode==='worker'?[]:modelHistory.slice(-8)}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(mode==='worker'?110000:45000)])});
+  const response=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({message,tool,locale,input,consent,mode,model:selected,history:mode==='worker'?[]:modelHistory.slice(-8)}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(mode==='worker'?110000:60000)])});
   if(!response.ok){let failure;try{failure=await response.json();}catch{}const details=publicFailure(failure,response.status===429?'rate_limited':response.status===503?'service_busy':response.status>=500?'provider_unavailable':'invalid_request');if(!details.retryAt)Object.assign(details,retryDetails(response.headers.get('retry-after')));showError(details);return;}
   let result;
   await readStream(response,data=>{
@@ -489,3 +438,4 @@ $('desktop-model').onchange=updateDesktopInfo;$('manage-desktop-models').onclick
 translate();
 void welcomeLocalModels();
 await Promise.all([checkLocalDevice(),(async()=>{try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}})()]);renderStatus();
+
