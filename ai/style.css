@@ -292,3 +292,43 @@ body{padding-left:256px;padding-right:0}.navigation-closed{padding-left:0;paddin
 /* Compact product-name switcher, matching the supplied two-line menu reference. */
 .navigation #mode-toggle{display:inline-flex;width:auto;min-height:38px;gap:8px;padding:4px 8px;border-radius:9px;font-size:20px;line-height:1.4;letter-spacing:-.35px;font-weight:600}
 .navigation #mode-toggle strong{font-size:20px;font-weight:600}.navigation #mode-toggle:hover,.navigation .mode-picker[open] #mode-toggle{background:#2c2c2c;color:#f3f3f3}.mode-chevron{flex:none;color:#a3a3a3}.navigation .mode-options{top:45px;width:286px;border-color:#3b3b3b;border-radius:16px;background:#252525;padding:5px;gap:3px;box-shadow:0 10px 30px #0005}.navigation .mode-options button{min-height:66px;padding:9px 36px 9px 12px;gap:1px;line-height:1.5;border-radius:11px}.navigation .mode-options button strong{font-size:15px;font-weight:600}.navigation .mode-options button span{font-size:12px;line-height:1.5;color:#a6a6a6}.navigation .mode-options button[aria-pressed=true]{background:#393939}.navigation .mode-options button:hover{background:#333}.navigation .mode-options button[aria-pressed=true]:after{top:18px;font-size:17px;font-weight:400;color:#ddd}.navigation .mode-options button:focus-visible{outline:2px solid #bbb;outline-offset:-2px}
+
+/* A quiet space backdrop keeps the conversation and controls readable. */
+body{background-color:#0b0d13;background-image:radial-gradient(ellipse at 70% 0%,#26324a55,transparent 42%),radial-gradient(circle at 14% 24%,#d7e4ff55 0 1px,transparent 1.5px),radial-gradient(circle at 83% 46%,#d7e4ff44 0 1px,transparent 1.5px);background-size:auto,180px 180px,259px 259px;background-attachment:fixed}
+@media(prefers-reduced-motion:reduce){body{background-attachment:scroll}}
+
+/* Empty chat keeps the prompt close to the title; conversations retain the bottom composer. */
+body[data-mode="chat"] .workspace:has(.conversation:empty) .composer-area{margin-top:20px;padding-top:0}
+
+/* Solar-system artwork stays behind the conversation and controls. */
+body{background-color:#080b13;background-image:linear-gradient(90deg,rgba(4,7,14,.38),rgba(4,7,14,.08)),url('./milky-way-background.webp');background-repeat:no-repeat;background-size:cover;background-position:center;background-attachment:fixed}
+@media(max-width:760px){body{background-position:72% center}}
+@media(prefers-reduced-motion:reduce){body{background-attachment:scroll}}
+
+/* Keep the artwork visible through the composer, including after sending. */
+.composer-shell,.composer-shell:focus-within{background:rgba(16,22,34,.27);border:1px solid rgba(225,237,255,.26);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);box-shadow:0 8px 32px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.15)}
+body:has(.conversation:not(:empty)) .composer-area{background:transparent}
+.composer-shell textarea,.composer-actions #model,#attach-toggle{background:transparent;color:#f6f8ff}
+#send,#send:disabled,#send:disabled:hover,#send[data-state=stop]{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff}
+#send:hover:not(:disabled){background:rgba(255,255,255,.24)}
+#send:disabled{opacity:.5}
+
+/* A separate stellar identity for MalGuard AI and a readable galaxy account surface. */
+.ai-product-mark{width:26px;height:26px;object-fit:contain;flex:none}
+.account-product-mark{display:block;width:40px;height:40px;object-fit:contain;margin:0 0 14px}
+.ai-account,#local-welcome{background:linear-gradient(rgba(8,12,23,.91),rgba(8,12,23,.94)),url('./milky-way-background.webp') center/cover;border-color:rgba(213,225,255,.25);box-shadow:0 24px 100px #000b}
+.ai-account input{background:rgba(12,18,31,.75);border-color:rgba(220,230,255,.32)}
+.ai-account::backdrop{background:rgba(3,6,13,.55);backdrop-filter:blur(4px)}
+
+/* Entry is a distinct screen; application elements stay out of view until sign-in. */
+body.auth-required{padding:0}
+body.auth-required>.site-header,body.auth-required>main:not(#entry-gate),body.auth-required>.navigation,body.auth-required>#navigation-backdrop{display:none!important}
+#entry-gate[hidden]{display:none}
+.entry-gate{width:100%;min-height:100svh;display:grid;place-items:center;padding:32px 20px}
+.entry-content{width:min(100%,440px);text-align:center;color:#f7f7ff}
+.entry-mark{width:74px;height:74px;object-fit:contain}.entry-brand{font-size:14px;font-weight:600;letter-spacing:.08em;color:#e5e8ee;text-transform:uppercase;margin:8px 0 24px}
+.entry-content h1{font-size:clamp(30px,5vw,44px);line-height:1.15;letter-spacing:-.04em;margin:0}.entry-description{color:#c6c8d6;line-height:1.6;margin:16px 0 28px}.entry-content>a{display:inline-block;margin-top:24px;color:#c5c7d6;font-size:13px}
+.entry-actions{display:grid;gap:10px}.entry-actions button{min-height:52px;border:1px solid rgba(228,235,245,.35);background:rgba(200,215,235,.10);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;font-weight:600}.entry-actions button:hover{background:rgba(200,215,235,.18)}
+body.auth-required .ai-account{position:fixed;inset:0;margin:0;width:100%;max-width:none;height:100dvh;max-height:none;border:0;border-radius:0;padding:28px 20px;background:linear-gradient(rgba(6,9,18,.76),rgba(6,9,18,.86)),url('./milky-way-background.webp') center/cover;box-shadow:none}
+body.auth-required .ai-account>*{width:min(100%,440px);margin-inline:auto}body.auth-required .ai-account .account-close{display:block;text-align:right;margin-bottom:20px}
+

@@ -35,7 +35,7 @@ const date=(value,locale)=>new Intl.DateTimeFormat(locale==='fa'?'fa-IR':'en-US'
 const displaySource=source=>source?.provider==='openphish'?'OpenPhish':'URLhaus';
 
 function App(){
- const [locale,setLocale]=useState(()=>read('guard-locale-v2')==='fa'?'fa':'en');
+ const [locale]=useState('en');
  const [page,setPage]=useState('scan'),[url,setUrl]=useState(''),[mode,setMode]=useState('basic');
  const [result,setResult]=useState(null),[busy,setBusy]=useState(false),[linked,setLinked]=useState(false),[events,setEvents]=useState([]),[started,setStarted]=useState(null);
  const [pending,setPending]=useState(pendingFromStorage),[activeQueue,setActiveQueue]=useState(null);
@@ -75,7 +75,7 @@ function App(){
  async function selfTest(){if(testing)return;setTesting(true);setError(null);try{setDiagnostic(await jsonRequest('self-test'));}catch(error){setError(error);}finally{setTesting(false);}}
  const nav=[['scan',ScanLine],['history',History],['selfTest',Stethoscope],['settings',Settings2]];
  return <div className="g-app">
-  <header className="g-header"><a className="g-brand" href="#" onClick={event=>{event.preventDefault();navigate('scan');}}><img className="g-brand-logo" src={`${import.meta.env.BASE_URL}icons/icon-192.png`} alt="" width="38" height="38"/><b>GameScam Guard<span>MalGuard</span></b></a><div className="g-header-actions"><button type="button" className="locale-button" aria-label={t(locale,'language')} onClick={()=>setLocale(value=>value==='en'?'fa':'en')}><Globe2 size={17}/>{locale==='en'?'FA':'EN'}</button><button type="button" className="icon-button" aria-label={t(locale,'account')} onClick={()=>setModal('account')}><UserRound size={19}/></button><button type="button" className="icon-button" aria-label={t(locale,'help')} onClick={()=>setModal('help')}><Info size={18}/></button></div></header>
+  <header className="g-header"><a className="g-brand" href="#" onClick={event=>{event.preventDefault();navigate('scan');}}><img className="g-brand-logo" src={`${import.meta.env.BASE_URL}icons/icon-192.png`} alt="" width="38" height="38"/><b>GameScam Guard<span>MalGuard</span></b></a><div className="g-header-actions"><button type="button" className="icon-button" aria-label={t(locale,'account')} onClick={()=>setModal('account')}><UserRound size={19}/></button><button type="button" className="icon-button" aria-label={t(locale,'help')} onClick={()=>setModal('help')}><Info size={18}/></button></div></header>
   <nav className="g-nav" aria-label={t(locale,'scan')}>{nav.map(([id,Icon])=><button key={id} aria-current={page===id?'page':undefined} className={page===id?'selected':''} onClick={()=>navigate(id)}><Icon size={17}/>{t(locale,id)}</button>)}</nav>
   <main>
    {busy&&page!=='scan'&&<button className="active-scan-return" onClick={()=>navigate('scan')}><LoaderCircle className="spin" size={17}/>{t(locale,'returnToScan')}</button>}

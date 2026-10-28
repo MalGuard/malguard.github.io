@@ -20,10 +20,13 @@ export async function clearLocalModelCache(remove){
  const results=await Promise.allSettled(cacheConfig.model_list.map(m=>remove(m.model_id,cacheConfig)));
  if(results.some(r=>r.status==='rejected'))throw new Error('local_cache_clear_failed');
 }
-export async function localCapability(gpu=globalThis.navigator?.gpu){
- if(!globalThis.isSecureContext||!gpu)return false;
- try{const adapter=await gpu.requestAdapter();return !!adapter?.features.has('shader-f16');}catch{return false;}
+export async function localCapabilityDetails({secure=globalThis.isSecureContext,gpu=globalThis.navigator?.gpu}={}){
+ if(!secure)return {ready:false,reason:'insecure_context'};
+ if(!gpu)return {ready:false,reason:'webgpu_unavailable'};
+ try{const adapter=await gpu.requestAdapter();if(!adapter)return {ready:false,reason:'adapter_unavailable'};if(!adapter.features.has('shader-f16'))return {ready:false,reason:'shader_f16_unavailable'};return {ready:true,reason:'ready'};}
+ catch{return {ready:false,reason:'adapter_unavailable'};}
 }
+export async function localCapability(gpu=globalThis.navigator?.gpu){return (await localCapabilityDetails({gpu})).ready;}
 export function localMessages(message,locale,history=[]){
  const instruction=locale==='fa'?'پاسخ را کوتاه، طبیعی و فقط به فارسی روان بنویس؛ عنوان و فهرست را فقط وقتی لازم است اضافه کن. برای سلام دوستانه جواب بده. هیچ نتیجهٔ بررسی امنیتی یا جست‌وجوی وب جعل نکن.':'Reply concisely in natural English paragraphs; add headings or lists only when useful. Never invent security checks or web searches.';
  // A short context keeps GPU memory bounded. Conversation remains page memory.

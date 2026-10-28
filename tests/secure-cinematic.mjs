@@ -45,8 +45,8 @@ for(const engine of engines){
     assert(await page.evaluate(()=>MalGuardSecureMotion.snapshot().activeAnimations>0));
     assert(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth<=1));
     const title=await page.locator('.secure-story h1').boundingBox(),nav=await page.locator('#navbar').boundingBox();assert(title.y>=nav.y+nav.height);
-    const language=page.locator('.mg-language select').first();await language.selectOption('fa');await page.waitForFunction(()=>document.documentElement.dir==='rtl'&&document.querySelector('.secure-start span').textContent.startsWith('شروع'));
-    assert(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth<=1));await language.selectOption('en');await page.waitForFunction(()=>document.documentElement.lang==='en'&&document.querySelector('.secure-start span').textContent.startsWith('Start'));
+    assert.equal(await page.locator('.mg-language select').count(),0);assert.equal(await page.locator('html').getAttribute('lang'),'en');
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth<=1));
     await page.locator('.secure-start').focus();await page.keyboard.press('Enter');
     await page.locator('#motionToggle').press('Enter');await page.waitForFunction(()=>MalGuardSecureMotion.snapshot().paused===true);
     assert.equal(await page.locator('.vault-slab').first().evaluate(el=>getComputedStyle(el).transitionDuration),'0s');

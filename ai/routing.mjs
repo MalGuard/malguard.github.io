@@ -14,18 +14,38 @@ export function planChat(message,history=[]){
  return {tier:'medium',model:'local_medium',needsWeb:false,reason:'general_request'};
 }
 
-export const routedModels=['gemini_flash','groq_gptoss'];
-
-// Remote Auto never schedules an on-device download or a different provider.
-export const cloudRoutedModels=['cf_qwen3','cf_gptoss20','cf_gptoss120'];
-export function planCloudChat(message,history=[]){
- const current=message.trim(),base=planChat(current,history);
- if(base.tier==='fast')return {...base,model:'cf_qwen3'};
- const followup=/^(?:ادامه|بیشتر|چرا|چطور|continue|more|why|how)[؟?.!\s]*$/iu.test(current);
- const context=followup?history.filter(m=>m.role==='user').slice(-2).map(m=>m.content).join('\n')+'\n'+current:current;
- const complex=/(?:^|\s)کد(?:\s|$)/u.test(context)||base.tier==='expert'||context.length>600||/```|\b(?:code|coding|debug|implement|algorithm|refactor)\b|کدنویسی|برنامه.?نویسی|دیباگ|الگوریتم|پیاده.?سازی/iu.test(context);
- if(complex)return {...base,tier:'expert',model:'cf_gptoss120',reason:'complex_request'};
- if(!base.needsWeb&&!followup&&context.length<=80&&!/\b(?:explain|why|how|compare|analy[sz]e)\b|توضیح|چرا|چطور|مقایسه|تحلیل/iu.test(context))return {...base,tier:'fast',model:'cf_qwen3',reason:'brief_request'};
- if(!base.needsWeb&&context.length<=100&&/^(?:what is|who is|define|translate|meaning of|معنی|ترجمه|چیست|کیست)(?:\s|$)/iu.test(context))return {...base,tier:'fast',model:'cf_qwen3',reason:'brief_request'};
- return {...base,tier:base.needsWeb?'strong':'medium',model:'cf_gptoss20'};
+// Priority lists are an allowlist; availability comes from the server's catalog.
+export const tierModels=Object.freeze({
+ fast:['cf_glm','cf_llama3b','cf_qwen3'],
+ search:['gemini_flash','cf_qwen3','cf_gemma4'],
+ build:['groq_qwen','cf_gptoss120','cf_qwen_coder'],
+ coding:['cf_qwen_coder','groq_gptoss','cf_gptoss120'],
+ expert:['groq_gptoss','cf_gptoss120','cf_nemotron'],
+ medium:['cf_gptoss20','cf_qwen3']
+});
+export const routedModels=['gemini_flash','groq_qwen','groq_gptoss'];
+export const cloudRoutedModels=[...new Set(Object.values(tierModels).flat())];
+// Catalog state decides eligibility. A free-tier flag must not hide Gemini or Groq
+// when the backend still reports the model, including state "configured".
+export function cloudModelOffered(model){
+ if(!model||typeof model.id!=='string')return false;
+ if(model.state==='configured')return true;
+ return routedModels.includes(model.id)&&model.reason==='free_tier_not_confirmed';
 }
+export function planCloudChat(message,history=[],{models,mode,needsWeb=false}={}){
+ const current=String(message||'').trim();
+ const followup=/^(?:ادامه|بیشتر|چرا|چطور|continue|more|why|how)[؟?.!\s]*$/iu.test(current);
+ const prior=history.filter(m=>m.role==='user').slice(-2).map(m=>m.content).join('\n');
+ const context=followup?`${prior}\n${current}`:current;
+ const web=needsWeb||/سرچ|جست.?جو|تحقیق|منابع|منبع|امروز|جدیدترین|آخرین|قیمت|اخبار|نسخه.?ی? جدید|\b(?:search|research|sources?|citations?|latest|today|current|news|prices?)\b/iu.test(context);
+ const build=mode==='build'||/\b(?:build|create|make|generate)\b[^\n]{0,100}\b(?:ui|html|css|website|webpage|web page|interface|preview)\b|ساخت.{0,30}(?:صفحه|رابط|سایت)/iu.test(context);
+ const expert=context.length>1500||/اثبات|استدلال پیچیده|چند.?مرحله|تحلیل عمیق|تحلیل امنیت|\b(?:prove|proof|theorem|complex reasoning|deep analysis|multi.?step|security analysis)\b/iu.test(context);
+ const coding=/(?:^|\s)کد(?:\s|$)|```|\b(?:code|coding|debug|implement|algorithm|refactor|programming)\b|کدنویسی|برنامه.?نویسی|دیباگ|الگوریتم|پیاده.?سازی/iu.test(context);
+ const brief=current.length<80&&!followup&&(/^(?:سلام|سلان|درود|ممنون|مرسی|خداحافظ|hi|hello|hey|thanks|thank you|how are you|translate|what is|who is|define|ترجمه|معنی|چیست|کیست)(?:[،,\s!؟?.]|$)/iu.test(current)||/^[\d+*/=(). -]+$/u.test(current));
+ const tier=web?'search':build?'build':expert?'expert':coding?'coding':brief?'fast':'medium';
+ // When no catalog is supplied, use the existing Cloudflare-only defaults.
+ const configured=models===undefined?new Set(['cf_qwen3','cf_gptoss20','cf_gptoss120']):new Set(models.filter(m=>m.state==='configured').map(m=>m.id));
+ const model=tierModels[tier].find(id=>configured.has(id))||cloudRoutedModels.find(id=>configured.has(id))||null;
+ return {tier,model,needsWeb:web,reason:web?'research_request':build?'build_request':expert?'complex_request':coding?'coding_request':brief?'brief_request':'general_request'};
+}
+

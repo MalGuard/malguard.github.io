@@ -19,6 +19,7 @@ try {
     const body=document.body,doc=document.documentElement;
     return {shared:body.classList.contains('mg-precision-shared'),
       bg:getComputedStyle(body).backgroundColor,
+      background:getComputedStyle(body).backgroundImage,
       heading:h?getComputedStyle(h).fontFamily:'',
       overflow:doc.scrollWidth>doc.clientWidth+1,
       typed:document.querySelectorAll('main .type-ink').length,
@@ -26,7 +27,8 @@ try {
     };
    });
    assert.equal(result.shared,true,'Design opt-in missing on '+route);
-   assert.equal(result.bg,'rgb(8, 10, 14)','Palette differs on '+route);
+   assert.equal(result.bg,'rgb(8, 10, 18)','Palette differs on '+route);
+   assert.match(result.background,/radial-gradient/,'Space background missing on '+route);
    assert.match(result.heading,/MGPrecisionMono|JetBrains/i,'Heading coding font differs on '+route);
    assert.equal(result.overflow,false,'Horizontal overflow on '+route+' @'+width);
    assert.equal(result.typed,0,'Reduced motion must show all text on '+route);

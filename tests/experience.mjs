@@ -30,7 +30,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     for (const path of routes) await check(`${name} ${width}px ${path} layout`, async () => {
       const startErrors=errors.length; const response=await page.goto(base+path); assert.equal(response.status(),200); await publicEntry(page); await settle(page);
       if(['/ai-intelligence.html','/malware-ai.html'].includes(path))assert.equal(new URL(page.url()).pathname,'/ai/','Legacy AI URL must open chat');
-      if(path!=='/'&&new URL(page.url()).pathname!=='/ai/')assert.equal(await page.evaluate(()=>document.fonts.check('16px "Inter"')),true,'Shared body font loaded');
+      if(path!=='/'&&new URL(page.url()).pathname!=='/ai/')assert.equal(await page.evaluate(()=>document.fonts.check(getComputedStyle(document.body).font)),true,'Actual body font loaded');
       assert.equal(await page.evaluate(()=>document.fonts.check(getComputedStyle(document.querySelector('main h1')||document.querySelector('h1')).font)),true,'Actual heading font loaded');
       const state=await page.evaluate(()=>{
         const vw=document.documentElement.clientWidth;

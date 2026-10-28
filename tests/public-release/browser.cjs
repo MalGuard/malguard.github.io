@@ -63,10 +63,9 @@ const {createServer}=require('node:http');
   await page.locator('#buildInput').fill(old);await page.locator('#buildCheckForm button').click();check('older-build-explained',/newer release/.test(await page.locator('#buildCheckStatus').innerText()));
   await page.locator('#buildInput').fill(build);await page.locator('#buildCheckForm button').click();check('current-build-confirmed',/current build/.test(await page.locator('#buildCheckStatus').innerText()));
   mkdirSync('test-results',{recursive:true});await page.setViewportSize({width:1280,height:1000});await page.locator('#scanner').screenshot({path:'test-results/public-download-en.png'});
-  check('one-language-control',await page.locator('.mg-language select').count()===1);
-  await page.locator('.mg-language select').selectOption('fa');check('persian-rtl',await page.locator('html').getAttribute('dir')==='rtl');check('persian-download-button',/دانلود/.test(await page.locator('#downloadButton').innerText()));check('persian-public-no-password-help',/به رمز.*نیاز ندارد/.test(await page.locator('#downloadHelp').innerText()));check('persian-current-build',/بیلد فعلی/.test(await page.locator('#buildCheckStatus').innerText()));
-  await page.setViewportSize({width:320,height:1000});check('mobile-without-overflow',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.locator('#scanner').screenshot({path:'test-results/public-download-fa-mobile.png'});
-  await page.reload();await page.waitForFunction(()=>!document.getElementById('downloadButton').disabled);check('language-persists',await page.locator('.mg-language select').inputValue()==='fa');
+  check('no-language-selector',await page.locator('.mg-language select').count()===0);
+  await page.setViewportSize({width:320,height:1000});check('mobile-without-overflow',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.locator('#scanner').screenshot({path:'test-results/public-download-en-mobile.png'});
+  await page.evaluate(()=>localStorage.setItem('malguard-language','fa'));await page.reload();await page.waitForFunction(()=>!document.getElementById('downloadButton').disabled);check('english-after-stale-preference',await page.locator('html').getAttribute('lang')==='en');
   check('no-browser-errors: '+JSON.stringify(errors.slice(0,8)),errors.length===0);
   const result={passed:checks.length,checks,errors,synthetic_download_only:true};writeFileSync('test-results/public-download-browser.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify({passed:checks.length,errors,public_download_without_password:true}));
  }finally{await browser?.close();await new Promise(done=>server?server.close(done):done());staticServer.kill();}
