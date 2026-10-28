@@ -61,10 +61,11 @@ html{background:#030303}
 body{
   background-color:#050507!important;
   background-image:
-    radial-gradient(ellipse at 50% 112%,rgba(255,255,255,.14),transparent 40%),
-    linear-gradient(180deg,rgba(5,5,7,.2),rgba(5,5,7,.62)),
-    url('/assets/precision/obsidian-space.webp')!important;
-  background-size:auto,auto,cover!important;
+    radial-gradient(ellipse at 50% 118%,rgba(255,255,255,.2),transparent 34%),
+    url('/assets/precision/stars.svg?v=20261028-4k'),
+    linear-gradient(180deg,rgba(5,5,7,.08),rgba(5,5,7,.45)),
+    url('/assets/precision/obsidian-space.webp?v=20261028-4k')!important;
+  background-size:auto,cover,auto,cover!important;
   background-repeat:no-repeat!important;
   background-position:center!important;
   background-attachment:scroll!important;

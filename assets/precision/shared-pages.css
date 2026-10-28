@@ -46,8 +46,8 @@ body.mg-precision-shared :is(#navbar,.mg-site-footer){--mg-bg:#080a0e;--mg-surfa
 /* Same character ink and cursor as the homepage. */
 body.mg-precision-shared main .type{position:relative}
 body.mg-precision-shared main .type-source{white-space:inherit}
-body.mg-precision-shared main .type-ink{position:absolute;inset:0;white-space:inherit;pointer-events:none;color:inherit}
-.type-system body.mg-precision-shared main .type:not([data-type-state=complete])>.type-source{color:transparent!important}
+body.mg-precision-shared main .type-ink{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);pointer-events:none}
+.type-system body.mg-precision-shared main .type>.type-source{color:inherit!important}
 body.mg-precision-shared main .type-cursor{display:inline-block;width:0;position:relative;pointer-events:none;vertical-align:baseline}
 body.mg-precision-shared main .type-cursor:after{content:'';position:absolute;left:.08em;background:currentColor}
 body.mg-precision-shared main .type-cursor.vertical{height:.72em}
@@ -227,28 +227,12 @@ body.mg-precision-shared main :is(.btn,.button,.action-button,.release-button,.p
  font-family:MGPrecisionMono,JetBrains,ui-monospace,Consolas,monospace!important;
 }
 body.mg-precision-shared .type-link{position:relative}
-body.mg-precision-shared .type-link>.type-ink{
- position:absolute;inset:0;display:inline-flex;align-items:center;justify-content:center;
- white-space:nowrap;overflow:visible;pointer-events:none;color:inherit;
+body.mg-precision-shared .type-link>.type-ink{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);pointer-events:none}
+body.mg-precision-shared #navbar,
+body.mg-precision-shared #navbar :is(.nav-icon,.menu-btn,.type-link,.mg-brand,img){
+ opacity:1!important;visibility:visible!important;pointer-events:auto!important;
 }
-body.mg-precision-shared #navbar .mg-brand.type-link>.type-ink{
- left:36px;justify-content:flex-start;
-}
-body.mg-precision-shared #navbar .mg-primary-links .type-link>.type-ink,
-body.mg-precision-shared main .type-link.text-link>.type-ink{justify-content:flex-start}
-.type-system body.mg-precision-shared #navbar:not([data-reveal-state=active]):not([data-reveal-state=complete]){
- opacity:0;pointer-events:none;
-}
-.type-system body.mg-precision-shared #navbar:not([data-nav-motion=complete]) :is(.nav-icon,.menu-btn){
- visibility:hidden;pointer-events:none;
-}
-.type-system body.mg-precision-shared .type-link[data-type-state=pending]{
- visibility:hidden;pointer-events:none;
-}
-.type-system body.mg-precision-shared #navbar .type-link:not([data-type-state=complete])>.type-source,
-.type-system body.mg-precision-shared main .type-link:not([data-type-state=complete])>.type-source{color:transparent!important}
-.type-system body.mg-precision-shared .type-link:not([data-type-state=complete])>svg,
-.type-system body.mg-precision-shared #navbar .mg-brand.type-link:not([data-type-state=complete])>img{visibility:hidden}
+.type-system body.mg-precision-shared .type-link>.type-source{color:inherit!important}
 body.mg-precision-shared .type-cursor.vertical{height:.9em}
 body.mg-precision-shared .type-cursor.vertical:after{
  content:"";position:absolute;left:.1em;bottom:-.05em;width:3px;height:100%;
@@ -394,8 +378,9 @@ body.mg-precision-shared .secure-eyebrow::before{animation:none!important}
 /* Shared obsidian cosmos. The color stays #050507; the photograph is a small monochrome plate. */
 body.mg-precision-shared,body.mg-unified.mg-precision-shared,body.mg-unified.mg-content-page.mg-precision-shared{
  background-color:#050507!important;
- background-image:radial-gradient(ellipse at 50% 112%,rgba(255,255,255,.14),transparent 40%),linear-gradient(180deg,rgba(5,5,7,.2),rgba(5,5,7,.62)),url('/assets/precision/obsidian-space.webp')!important;
- background-size:auto,auto,cover!important;background-repeat:no-repeat!important;background-position:center!important;background-attachment:scroll!important;
+ background-image:radial-gradient(ellipse at 50% 118%,rgba(255,255,255,.2),transparent 34%),url('/assets/precision/stars.svg?v=20261028-4k'),linear-gradient(180deg,rgba(5,5,7,.08),rgba(5,5,7,.45)),url('/assets/precision/obsidian-space.webp?v=20261028-4k')!important;
+ background-size:auto,cover,auto,cover!important;background-repeat:no-repeat!important;background-position:center!important;background-attachment:scroll!important;
 }
+body.mg-precision-shared :is(.mg-reveal,.reveal,.hero-copy){opacity:1!important;visibility:visible!important;filter:none!important;translate:none!important}
 body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare,.compare-card,.notice,.platform-card,.release-card,.result-card,.timeline .step,.secure-card,.feature-card,.radar-card){background:linear-gradient(145deg,#141416d9,#050507ee)!important;border-color:#ffffff16!important;box-shadow:inset 0 1px #ffffff14,0 14px 40px #0006!important;backdrop-filter:blur(16px)}
 body.secure-page .secure-panel{background:linear-gradient(145deg,#161618e0,#050507f2);border-color:#ffffff1a;box-shadow:inset 0 1px #ffffff14,0 24px 70px #0008}
