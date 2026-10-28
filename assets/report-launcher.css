@@ -10,9 +10,9 @@ body:has(#conversation) #mg-report-launcher{inset-inline-end:auto;inset-inline-s
 body:has(.g-app [role="dialog"][aria-modal="true"]) #mg-report-launcher{display:none}
 
 /* Compact glass control, shared across pages without affecting its stored state. */
-#mg-report-launcher{background:linear-gradient(140deg,#273348d9,#131a27dc);border-color:#a8c3ea50;box-shadow:inset 0 1px #ffffff24,0 8px 26px #0007;backdrop-filter:blur(18px) saturate(135%);-webkit-backdrop-filter:blur(18px) saturate(135%);transition:background .2s ease,border-color .2s ease,box-shadow .2s ease,opacity .2s ease}
-#mg-report-launcher.minimized{background:#192335df;opacity:.92}
+#mg-report-launcher{background:rgba(0,0,0,.55);border-color:rgba(255,255,255,.28);color:#f4f4f5;box-shadow:inset 0 1px #ffffff24,0 8px 26px #000a;backdrop-filter:blur(18px) saturate(120%);-webkit-backdrop-filter:blur(18px) saturate(120%);transition:background .2s ease,border-color .2s ease,box-shadow .2s ease,opacity .2s ease}
+#mg-report-launcher.minimized{background:rgba(0,0,0,.72);opacity:.92}
 #mg-report-launcher a{font-weight:600;letter-spacing:.01em}
 #mg-report-launcher :is(a,button){transition:background .18s ease,color .18s ease,transform .18s ease}
-@media(hover:hover){#mg-report-launcher:hover{border-color:#c2d8f399;box-shadow:inset 0 1px #ffffff35,0 10px 30px #0008}#mg-report-launcher button:hover{transform:scale(1.06)}}
+@media(hover:hover){#mg-report-launcher:hover{border-color:rgba(255,255,255,.45);box-shadow:inset 0 1px #ffffff35,0 10px 30px #000c}#mg-report-launcher button:hover{transform:scale(1.06)}}
 @media(prefers-reduced-motion:reduce){#mg-report-launcher,#mg-report-launcher :is(a,button){transition:none}}

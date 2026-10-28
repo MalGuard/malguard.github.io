@@ -68,6 +68,5 @@ main,.site-footer{position:relative}.hero{position:relative;isolation:isolate;mi
 @keyframes mg-coding-caret{50%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.precision-home .type-cursor.vertical:after{animation:none!important}}
 
-/* Star field paints immediately. The photograph is added after load so it cannot block scripts or the load event. */
-body.precision-home{background-color:#080a12;background-image:radial-gradient(ellipse at 70% 0%,#26345266,transparent 45%),radial-gradient(circle at 18% 22%,#dbe7ff88 0 1px,transparent 1.5px),radial-gradient(circle at 79% 37%,#c7dcff66 0 1px,transparent 1.5px);background-size:auto,137px 137px,211px 211px;background-attachment:scroll}
-html.mg-milky-way body.precision-home{background-image:radial-gradient(ellipse at 70% 0%,#26345266,transparent 45%),radial-gradient(circle at 18% 22%,#dbe7ff88 0 1px,transparent 1.5px),radial-gradient(circle at 79% 37%,#c7dcff66 0 1px,transparent 1.5px),linear-gradient(180deg,rgba(8,10,18,.5),rgba(8,10,18,.68)),url('/ai/milky-way-background.webp');background-size:auto,137px 137px,211px 211px,auto,cover;background-repeat:repeat,repeat,repeat,no-repeat,no-repeat;background-position:center;background-attachment:scroll}
+/* Obsidian field and white starlight only. No photograph, so the homepage load stays fast. */
+body.precision-home{background-color:#050507;background-image:radial-gradient(ellipse at 50% 0%,#ffffff12,transparent 46%),radial-gradient(circle at 18% 22%,#ffffff66 0 1px,transparent 1.5px),radial-gradient(circle at 79% 37%,#ffffff44 0 1px,transparent 1.5px);background-size:auto,137px 137px,211px 211px;background-attachment:scroll}
