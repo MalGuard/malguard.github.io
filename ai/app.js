@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 21794)
-Total output lines: 494
-
 import {createChatLibrary} from './library.mjs?v=sidebar-20261026';
 import {createNavigation} from './navigation.mjs?v=sidebar-20261026';
 import {errorMessage} from './error-message.mjs?v=codex-chat-20261025';
@@ -14,7 +11,7 @@ import {answerIdentityQuestion} from './identity.mjs';
 import {typeText,formatElapsed} from './reply-motion.mjs';
 import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=codex-chat-20261025';
 import {renderRichText} from './code-view.mjs?v=codex-chat-20261025';
-import {createAccount} from './account.mjs?v=sidebar-20261026';
+import {createAccount} from './account.mjs?v=account-entry-20261028';
 import {createBuilder} from './builder.mjs?v=qwen-coder-restored-20261026';
 import {parseProposal} from './build-project.mjs?v=codex-chat-20261025';
 const $=id=>document.getElementById(id);
@@ -36,8 +33,9 @@ let projectOpen=false;
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
 const builder=createBuilder({locale:()=>locale});
-const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{navigation.profile(profile);library.profile(profile);if(profile)return;for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
+const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{navigation.profile(profile);library.profile(profile);document.body.classList.toggle('auth-required',!profile);$('entry-gate').hidden=!!profile;if(profile){void welcomeLocalModels();$('message').focus();return;}for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
 const navigation=createNavigation({account,onLanguage:()=>{locale='en';translate();}});
+$('entry-signin').onclick=()=>account.open(false);$('entry-signup').onclick=()=>account.open(true);
 const library=createChatLibrary({account,snapshot:()=>({mode:activeMode,title:(history.find(item=>item.bubble)?.bubble||'New chat').slice(0,100),messages:history.flatMap(item=>item.bubble?[{role:'user',text:String(item.bubble).slice(0,12000)}]:item.response?.generated?.text?[{role:'assistant',text:item.response.generated.text.slice(0,12000)}]:[]).slice(-64)}),restore:chat=>{switchMode(chat.mode);history.length=0;modelHistory.length=0;for(const message of chat.messages){if(message.role==='user')history.push({bubble:message.text});else history.push({response:{generated:{text:message.text,provider:'Saved chat',model:'History'}}});modelHistory.push({role:message.role,content:message.text.slice(0,2000)});}modelHistory.splice(0,Math.max(0,modelHistory.length-8));$('message').value='';translate();}});
 let desktopConnecting=false;
 const permissionInputs={fileUpload:'file-consent',websiteFetch:'website-consent',remoteLookup:'lookup-consent',modelShare:'model-consent'};
@@ -116,7 +114,63 @@ async function runDesktop(model,message){
  try{const generated=await desktopChat.respond({model,message,locale:replyLanguage(message,locale,modelHistory),history:modelHistory.slice(-8),signal:turn.controller.signal});await presentResponse({generated},turn);modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-8));if($('message').value.trim()===message)$('message').value='';}
  catch{if(turn.controller.signal.aborted)stopped(turn);else showError('desktopFailed');}finally{endTurn(turn);}
 }
-Object.assign(copy.en,{hideProject:'Back to conversation',buildIntroTitle:'What shall we build?',showProject:'Files and preview',buildStartHint:'Talk through an idea, then say “build it”. I will create project fi…1794 tokens truncated…'conversation'),follow=log.scrollTop+log.clientHeight>=log.scrollHeight-120;update();if(follow)log.scrollTop=log.scrollHeight;return;}
+Object.assign(copy.en,{hideProject:'Back to conversation',buildIntroTitle:'What shall we build?',showProject:'Files and preview',buildStartHint:'Talk through an idea, then say “build it”. I will create project files and run the web preview.',autoBuild:'Apply and preview explicit build requests automatically, with Undo.',buildTab:'Build and code',projectTitle:'My project',chatChoice:'Questions and conversation',workChoice:'File, link and web tools',buildChoice:'Edit files, preview and export',buildHint:'Talk or plan here, then ask me to build. Review the proposed code, apply it to files, then run the preview.',exportProject:'Download ZIP',projectFile:'Project file',newFile:'New file',addFile:'Add file',importCode:'Import files',undoProject:'Undo apply',codeEditor:'Code editor',projectPreview:'Project preview',runPreview:'Run preview',stopPreview:'Stop preview',previewOutput:'Preview output',previewEmpty:'Run preview to see your project.',shareCode:'Include the currently selected file in my next model request.',buildLimit:'Files stay in page memory; export before leaving. Local HTML/CSS/JS preview has no network access. Run backend code and packages in your own development environment after export.',buildPlaceholder:'Describe what to build or change…',buildTooLarge:'This request and shared file exceed the coding model input budget. Shorten the request or share a smaller file.',buildNoModel:'Choose an enabled coding model or connect an installed desktop model.',buildUnstructured:'The model returned a text answer. No project files were changed; ask for a smaller, complete file proposal.'});
+Object.assign(copy.fa,{hideProject:'برگشت به گفت‌وگو',buildIntroTitle:'چه چیزی بسازیم؟',showProject:'فایل‌ها و پیش‌نمایش',buildStartHint:'ایده‌ات را بگو، درباره‌اش گفت‌وگو کن و بعد بگو «حالا بسازش». فایل‌های پروژه و پیش‌نمایش همین‌جا ساخته می‌شوند.',autoBuild:'درخواست صریح ساخت را خودکار در فایل‌ها اعمال و پیش‌نمایش را اجرا کن؛ قابل برگرداندن.',buildTab:'ساخت و کدنویسی',projectTitle:'پروژهٔ من',chatChoice:'پرسش و گفت‌وگوی روزمره',workChoice:'ابزارهای فایل، لینک و سرچ وب',buildChoice:'ویرایش فایل، پیش‌نمایش و خروجی پروژه',buildHint:'در گفت‌وگو بگو چه بسازیم؛ کد پیشنهادی را بررسی کن، در فایل‌ها اعمال کن و پیش‌نمایش را اجرا کن.',exportProject:'دانلود ZIP پروژه',projectFile:'فایل پروژه',newFile:'فایل جدید',addFile:'افزودن فایل',importCode:'وارد کردن فایل',undoProject:'برگرداندن',codeEditor:'ویرایشگر کد',projectPreview:'پیش‌نمایش پروژه',runPreview:'اجرای پیش‌نمایش',stopPreview:'توقف',previewOutput:'خروجی پیش‌نمایش',previewEmpty:'برای دیدن نتیجه، پیش‌نمایش را اجرا کن.',shareCode:'برای اصلاح دقیق، فایل انتخاب‌شده را به درخواست بعدی پیوست کن.',buildLimit:'فایل‌ها در حافظهٔ صفحه‌اند؛ قبل از خروج دانلود کن. پیش‌نمایش HTML/CSS/JS بدون دسترسی شبکه اجرا می‌شود. کد بک‌اند و بسته‌ها را پس از دانلود در محیط توسعهٔ خودت اجرا کن.',buildPlaceholder:'بگو چه بسازیم یا کدام بخش را تغییر بدهیم…',buildTooLarge:'درخواست و کد پیوست از ظرفیت ورودی این مسیر مدل بیشتر است؛ متن درخواست یا فایل را کوتاه‌تر کن.',buildNoModel:'یک مدل کدنویسی فعال انتخاب کن یا مدل نصب‌شدهٔ دسکتاپ را متصل کن.',buildUnstructured:'مدل پاسخ متنی داده است؛ فایل‌های پروژه تغییر نکردند. یک پیشنهاد کوچک‌تر با فایل کامل بخواه.'});
+function updateElapsed(turn){
+ const text=formatElapsed(turn.elapsedMs??performance.now()-turn.startedAt,locale);
+ if($('activity-elapsed').textContent!==text){const node=$('activity-elapsed'),previous=node.textContent;node.textContent=text;if(previous&&!matchMedia('(prefers-reduced-motion: reduce)').matches)node.animate([{opacity:.45,transform:'translateY(2px)'},{opacity:1,transform:'translateY(0)'}],{duration:160,easing:'ease-out'});}
+}
+function freezeElapsed(turn){
+ clearInterval(turn.elapsedTimer);
+ turn.elapsedMs??=performance.now()-turn.startedAt;
+}
+function timingText(timing){return `${t(timing.label)} ${formatElapsed(timing.elapsedMs,locale,true)}`;}
+function renderTiming(timing){
+ const node=el('p',timingText(timing),'response-duration');
+ node.dataset.elapsedMs=timing.elapsedMs;node.dataset.label=timing.label;
+ $('conversation').append(node);
+}
+function activityLabel(key,detail){
+ if(key==='running')return detail.map(id=>id==='chat'?t('thinking'):id==='ai_web'?t('searching'):id==='game_scam_guard'?t('readingWebsite'):id==='gta_guard'?t('checkingFile'):`${t('checking')} · ${names[id]}`).join(' · ');
+ return detail?`${t(key)} · ${detail}`:t(key);
+}
+function setActivity(key,detail=''){
+ if(activeTurn?.controller.signal.aborted)return;
+ if(activeTurn)activeTurn.stage={key,detail};
+ const label=activityLabel(key,detail);
+ if($('activity').dataset.label===label)return;
+ $('activity').dataset.label=label;$('activity').hidden=false;
+ // Keep a visible character across stage changes; announce each stage only once.
+ $('activity-label').textContent=label;
+ $('activity-announcement').textContent=label;
+}
+function showRunningActivity(turn){
+ const work=[...(turn.modelStarted?['chat']:[]),...turn.tools];
+ setActivity(work.length?'running':'preparing',work.length?work:'');
+}
+function beginTurn(stage,{recordTiming=true}={}){
+ busy=true;closeAttach();const turn={controller:new AbortController(),tools:new Set(),partial:false,startedAt:performance.now(),recordTiming};activeTurn=turn;
+ updateElapsed(turn);turn.elapsedTimer=setInterval(()=>updateElapsed(turn),250);
+ $('conversation').setAttribute('aria-busy','true');renderStatus();setActivity(stage);return turn;
+}
+function endTurn(turn){
+ freezeElapsed(turn);
+ if(activeTurn!==turn)return;
+ if(turn.recordTiming){const timing={elapsedMs:turn.elapsedMs,label:turn.controller.signal.aborted?'stoppedAfter':turn.completed?'respondedIn':'elapsedTime'};history.push({timing});renderTiming(timing);}
+ $('activity').hidden=true;delete $('activity').dataset.label;
+ activeTurn=undefined;busy=false;library.capture();$('conversation').setAttribute('aria-busy','false');renderStatus();
+}
+function stopTurn(){
+ if(!activeTurn||activeTurn.controller.signal.aborted)return;
+ freezeElapsed(activeTurn);
+ activeTurn.controller.abort(new DOMException('Stopped by user','AbortError'));localChat.stop();desktopChat.stop();$('activity').hidden=true;renderStatus();
+}
+function stopped(turn){
+ if(turn.partial)return;
+ const response={message:t('stopped'),interrupted:true};history.push({response});renderResponse(response,false);
+}
+function followReply(update){
+ if(activeMode==='build'&&projectOpen&&matchMedia('(min-width:901px)').matches){const log=$('conversation'),follow=log.scrollTop+log.clientHeight>=log.scrollHeight-120;update();if(follow)log.scrollTop=log.scrollHeight;return;}
  const follow=innerHeight+scrollY>=document.documentElement.scrollHeight-160;
  update();if(follow)scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'});
 }
@@ -436,6 +490,5 @@ $('retry-local-capability').onclick=()=>{void checkLocalDevice();};
 $('open-downloads').onclick=()=>{if(!busy)$('download-hub').showModal();};$('hub-browser').onclick=()=>{$('download-hub').close();void offerLocalModels();};$('hub-desktop').onclick=()=>{$('download-hub').close();openDesktopModels();};$('copy-desktop-command').onclick=async()=>{try{await navigator.clipboard.writeText(desktopModels[$('desktop-model').value].command);$('copy-desktop-command').textContent=t('commandCopied');}catch{$('desktop-command').focus();}};
 $('desktop-model').onchange=updateDesktopInfo;$('manage-desktop-models').onclick=openDesktopModels;$('desktop-connect').onclick=connectDesktop;
 translate();
-void welcomeLocalModels();
 await Promise.all([checkLocalDevice(),(async()=>{try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}})()]);renderStatus();
 

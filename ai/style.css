@@ -313,3 +313,22 @@ body:has(.conversation:not(:empty)) .composer-area{background:transparent}
 #send:hover:not(:disabled){background:rgba(255,255,255,.24)}
 #send:disabled{opacity:.5}
 
+/* A separate stellar identity for MalGuard AI and a readable galaxy account surface. */
+.ai-product-mark{width:26px;height:26px;object-fit:contain;flex:none}
+.account-product-mark{display:block;width:40px;height:40px;object-fit:contain;margin:0 0 14px}
+.ai-account,#local-welcome{background:linear-gradient(rgba(8,12,23,.91),rgba(8,12,23,.94)),url('./milky-way-background.webp') center/cover;border-color:rgba(213,225,255,.25);box-shadow:0 24px 100px #000b}
+.ai-account input{background:rgba(12,18,31,.75);border-color:rgba(220,230,255,.32)}
+.ai-account::backdrop{background:rgba(3,6,13,.55);backdrop-filter:blur(4px)}
+
+/* Entry is a distinct screen; application elements stay out of view until sign-in. */
+body.auth-required{padding:0}
+body.auth-required>.site-header,body.auth-required>main:not(#entry-gate),body.auth-required>.navigation,body.auth-required>#navigation-backdrop{display:none!important}
+#entry-gate[hidden]{display:none}
+.entry-gate{width:100%;min-height:100svh;display:grid;place-items:center;padding:32px 20px}
+.entry-content{width:min(100%,440px);text-align:center;color:#f7f7ff}
+.entry-mark{width:74px;height:74px;object-fit:contain}.entry-brand{font-size:14px;font-weight:600;letter-spacing:.08em;color:#d9d3ff;text-transform:uppercase;margin:8px 0 24px}
+.entry-content h1{font-size:clamp(30px,5vw,44px);line-height:1.15;letter-spacing:-.04em;margin:0}.entry-description{color:#c6c8d6;line-height:1.6;margin:16px 0 28px}.entry-content>a{display:inline-block;margin-top:24px;color:#c5c7d6;font-size:13px}
+.entry-actions{display:grid;gap:10px}.entry-actions button{min-height:52px;border:1px solid rgba(238,232,255,.35);background:rgba(150,111,225,.15);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#fff;font-weight:600}.entry-actions button:hover{background:rgba(160,120,230,.27)}
+body.auth-required .ai-account{position:fixed;inset:0;margin:0;width:100%;max-width:none;height:100dvh;max-height:none;border:0;border-radius:0;padding:28px 20px;background:linear-gradient(rgba(6,9,18,.76),rgba(6,9,18,.86)),url('./milky-way-background.webp') center/cover;box-shadow:none}
+body.auth-required .ai-account>*{width:min(100%,440px);margin-inline:auto}body.auth-required .ai-account .account-close{display:block;text-align:right;margin-bottom:20px}
+
