@@ -45,7 +45,7 @@ try{
   const paper=await context.request.get(new URL('./technical-report.md',page.url()).href);assert.equal(paper.status(),200);assert.match(await paper.text(),/not a peer-reviewed paper/);
   const other=locale==='en'?'fa':'en';
   const languageMenu=page.getByRole('navigation',{name:locale==='en'?'Video language':'زبان فیلم',exact:true});
-  assert.equal(await languageMenu.locator('[aria-current="page"]').getAttribute('lang'),'en');
+  assert.equal(await languageMenu.locator('[aria-current="page"]').getAttribute('lang'),locale);
   await page.locator('video').evaluate(video=>video.play());
   if(locale==='en'){assert.equal(await languageMenu.getByRole('link',{name:'فارسی',exact:true}).count(),0);await page.goto(base+'/game-scam-guard/learn/fa.html#movie');}else await languageMenu.getByRole('link',{name:'English',exact:true}).click();
   assert.equal(await page.locator('html').getAttribute('lang'),other);
@@ -73,3 +73,4 @@ try{
  assert.deepEqual(errors,[]);evidence.status='passed';console.log('PASS: both guides, two localized articles, 20 check descriptions, local report downloads, MP4 decoding/playback/range requests, both help links, player-language switching in both directions, persisted app language, offline guide/app separation and four viewport sizes.');
 }catch(error){evidence.status='failed';evidence.error=error.message;process.exitCode=1;console.error(error.stack);}
 finally{await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await writeFile('test-results/game-scam-learning.json',JSON.stringify(evidence,null,2));}
+
