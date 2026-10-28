@@ -10,8 +10,11 @@
     if(href===location.pathname)continue;
     const hint=document.createElement('link');hint.rel='prefetch';hint.href=href;document.head.append(hint);
   }
-  if(!document.querySelector('link[rel="preload"][href="/assets/precision/obsidian-space.webp"]')){
-    const plate=document.createElement('link');plate.rel='preload';plate.as='image';plate.href='/assets/precision/obsidian-space.webp';document.head.append(plate);
+  if(!document.querySelector('link[href="/assets/precision/stars.svg?v=20261028-4k"]')){
+    const stars=document.createElement('link');stars.rel='preload';stars.as='image';stars.href='/assets/precision/stars.svg?v=20261028-4k';stars.fetchPriority='high';document.head.append(stars);
+  }
+  if(!document.querySelector('link[href="/assets/precision/obsidian-space.webp?v=20261028-4k"]')){
+    const plate=document.createElement('link');plate.rel='preload';plate.as='image';plate.href='/assets/precision/obsidian-space.webp?v=20261028-4k';plate.fetchPriority='low';document.head.append(plate);
   }
   const pages = [
     ['Home', 'MalGuard overview', '/', 'home malguard'],
