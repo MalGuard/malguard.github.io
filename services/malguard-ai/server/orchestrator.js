@@ -29,7 +29,7 @@ export function createOrchestrator(adapters = {gta_guard:createGtaGuard(),game_s
   async function run(body,onEvent=()=>{}){
     const request=parseRequest(body),{input,consent,locale,mode,history}=request;
     if(mode==='chat'&&(request.tool!=='auto'||Object.keys(input).length))throw new InputError('workspace_required',400);
-    const routed=['auto','gemini_flash','groq_gptoss'].includes(request.model);
+    const routed=['auto','gemini_flash','groq_qwen','groq_gptoss'].includes(request.model);
     const tool=mode==='chat'?null:request.tool!=='auto'?request.tool:input.file?'gta_guard':input.sha256?'malwarebazaar':input.url?'game_scam_guard':null;
     const wrap=extra=>({locale,mode,model:model.status(),...extra});
     if(mode==='chat'){
@@ -44,9 +44,9 @@ export function createOrchestrator(adapters = {gta_guard:createGtaGuard(),game_s
       }
       if(model.status().state!=='disabled'&&request.message.trim()){
         if(!consent.modelShare)throw new InputError('model_consent_required',403);
-        if(routed&&planChat(request.message,history).needsWeb&&!consent.remoteLookup)throw new InputError('lookup_consent_required',403);
+        if(routed&&planChat(request.routingText??request.message,history).needsWeb&&!consent.remoteLookup)throw new InputError('lookup_consent_required',403);
         onEvent({phase:'model_started',tool:'chat'});
-        try{return wrap({result:null,generated:await model.respond(request.message,replyLanguage(request.message,locale,history),history,request.model,consent)});}catch(error){return wrap({result:null,...publicFailure(error,'model_unavailable')});}
+        try{return wrap({result:null,generated:await model.respond(request.message,replyLanguage(request.message,locale,history),history,request.model,{...consent,routingMode:request.routingMode,routingText:request.routingText})});}catch(error){return wrap({result:null,...publicFailure(error,'model_unavailable')});}
       }
       return wrap({result:null,message:locale==='fa'?'اتصال مدل هنوز در سرور تنظیم نشده است؛ بررسی فایل و سایت در دسترس است.':'The server model connection is not configured yet. File and URL inspection remain available.'});
     }
@@ -89,3 +89,4 @@ export function createOrchestrator(adapters = {gta_guard:createGtaGuard(),game_s
   async function refresh(){await Promise.all([model.refresh?.(),...Object.values(adapters).map(a=>a.refresh?.())]);}
   return {status,run,refresh};
 }
+

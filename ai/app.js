@@ -4,7 +4,7 @@ import {errorMessage} from './error-message.mjs?v=codex-chat-20261025';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=codex-chat-20261025';
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
-import {planChat,planCloudChat} from './routing.mjs?v=codex-chat-20261025';
+import {planChat,planCloudChat} from './routing.mjs?v=smart-router-20261028';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=codex-chat-20261025';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs';
@@ -225,17 +225,19 @@ function renderStatus(){
  $('send').ariaLabel=t(activeTurn?'stop':'send');$('send').title=t(activeTurn?'stop':'send');$('send-label').textContent=t(activeTurn?'stop':'send');
  for(const id of ['clear','mode','tool','file','remove-file','remove-models','attach-toggle','attach-file','attach-chat','attach-inspect','attach-web','chat-tab','workspace-tab','build-tab','workspace-tool','workspace-model','isolation-consent','open-downloads'])$(id).disabled=busy;
  $('connection').textContent=!service?(localReady?t('localAvailable'):t('offline')):!ready?t('serviceDisabled'):'';
- const selectedId=$('model').value,remote=service?.model?.models||[],models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار · چهار سطح':'Automatic · four tiers',state:localReady||remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remote.filter(m=>m.id!=='auto'),...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))];
+ const selectedId=$('model').value,remote=service?.model?.models||[],fallbacks={gemini_flash:'cf_qwen3',groq_qwen:'cf_qwen3',groq_gptoss:'cf_gptoss120'};
+ const remoteOptions=remote.filter(m=>m.id!=='auto').map(m=>{const fallback=remote.find(candidate=>candidate.id===fallbacks[m.id]&&candidate.state==='configured');return m.reason==='missing_credential'&&fallback?{...m,state:'configured',label:`${m.label} → Cloudflare: ${fallback.label} (fallback)`}:m;});
+ const models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار':'Automatic',state:localReady||remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remoteOptions,...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))];
  const cloudAutoReady=remote.some(m=>m.id==='auto'&&m.state==='configured');
  if(models.length){
   $('model').replaceChildren();
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
-  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t(cloudAutoReady?'autoCloud':'autoLocal'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured'||activeMode==='build'&&(m.id==='auto'||m.id.startsWith('local_'));$('model').append(option);}
+  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t(cloudAutoReady?'autoCloud':'autoLocal'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured'||activeMode==='build'&&(m.id==='auto'&&!cloudAutoReady||m.id.startsWith('local_'));$('model').append(option);}
   const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);const desktop=el('option',t('desktopModels')+'…');desktop.value='__desktop';$('model').append(desktop);
-  const defaultId=activeMode==='build'?(['cf_gptoss120','cf_gptoss20','cf_qwen3'].find(id=>remote.some(m=>m.id===id&&m.state==='configured'))||desktopChat.availability.installedIDs[0]||''):cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':service?.model?.defaultModel||(localReady?'local_fast':'');
+  const defaultId=activeMode==='build'?(cloudAutoReady?'auto':['cf_gptoss120','cf_gptoss20','cf_qwen3'].find(id=>remote.some(m=>m.id===id&&m.state==='configured'))||desktopChat.availability.installedIDs[0]||''):cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':service?.model?.defaultModel||(localReady?'local_fast':'');
   const strongCloudReady=cloudAutoReady||remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured');
   const applyCloudDefault=activeMode!=='build'&&strongCloudReady&&!cloudDefaultApplied&&!modelChosen&&!Object.hasOwn(localModels,preferredLocal);
-  $('model').value=applyCloudDefault?defaultId:!modelsInitialized&&localReady&&activeMode!=='build'?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured'&&(activeMode!=='build'||m.id!=='auto'&&!m.id.startsWith('local_')))?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
+  $('model').value=applyCloudDefault?defaultId:!modelsInitialized&&localReady&&activeMode!=='build'?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured'&&(activeMode!=='build'||(m.id!=='auto'||cloudAutoReady)&&!m.id.startsWith('local_')))?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
   if(strongCloudReady)cloudDefaultApplied=true;
   lastSelectedModel=$('model').value;
   if(service||localReady)modelsInitialized=true;
@@ -372,9 +374,11 @@ async function runBuild(message){
  const selected=$('model').value,native=Object.hasOwn(desktopModels,selected);
  if(!selected){showError('buildNoModel');return;}
  if(!native&&!$('model-consent').checked){if(!await requestModelShare()||activeMode!=='build'||$('message').value.trim()!==message||$('model').value!==selected)return;}
- const contextHistory=modelHistory.slice(-6),revision=builder.revision;builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
+ const contextHistory=modelHistory.slice(-6),revision=builder.revision;
+ if(!native&&planChat(message,contextHistory).needsWeb&&!$('lookup-consent').checked){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
+ builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
- else{const r=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:prompt,locale,mode:'chat',tool:'auto',model:selected,history:contextHistory,consent:{modelShare:true,remoteLookup:false}}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(45000)])});const data=await r.json();if(!r.ok||data.error){showError(publicFailure(data));return;}generated=data.generated;}
+ else{const r=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:prompt,locale,mode:'chat',routingMode:'build',routingText:message,tool:'auto',model:selected,history:contextHistory,consent:{modelShare:true,remoteLookup:$('lookup-consent').checked}}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(60000)])});const data=await r.json();if(!r.ok||data.error){showError(publicFailure(data));return;}generated=data.generated;}
  if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn);if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
  }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error.name==='TimeoutError'?'provider_timeout':'model_unavailable'});}finally{endTurn(turn);}
 }
@@ -425,19 +429,19 @@ $('composer').onsubmit=async event=>{
  if(tool==='ai_web')input.query=message.slice(0,500);
  // URL/hash routing is validated again on the server before any tool starts.
  const effective=mode==='chat'?'model':tool==='auto'?(file?'gta_guard':/(?:^|\s)[a-f\d]{64}(?=$|\s)/i.test(message)?'malwarebazaar':/https?:\/\//i.test(message)?'game_scam_guard':'model'):tool;
- const selected=mode==='worker'?$('workspace-model').value:$('model').value,cloudAuto=selected==='auto'&&service?.model?.models?.some(m=>m.id==='auto'&&m.state==='configured'),plan=selected==='auto'?(cloudAuto?planCloudChat(message,modelHistory):planChat(message,modelHistory)):null;
- if(effective==='model'&&mode==='chat'&&(selected.startsWith('local_')||!cloudAuto&&plan?.model.startsWith('local_'))){await runLocal(plan?.model||selected,message,consent);return;}
+ const selected=mode==='worker'?$('workspace-model').value:$('model').value,cloudAuto=selected==='auto'&&service?.model?.models?.some(m=>m.id==='auto'&&m.state==='configured'),plan=selected==='auto'?(cloudAuto?planCloudChat(message,modelHistory,{models:service.model.models,mode:activeMode}):planChat(message,modelHistory)):null;
+ if(effective==='model'&&mode==='chat'&&(selected.startsWith('local_')||!cloudAuto&&plan?.model?.startsWith('local_'))){await runLocal(plan?.model||selected,message,consent);return;}
  if(mode==='chat'&&Object.hasOwn(desktopModels,selected)){await runDesktop(selected,message);return;}
  if(['file_sandbox','url_sandbox'].includes(tool)&&!consent.isolatedExecution){showError('isolationMissing');$('isolation-consent').focus();return;}
  if(!service?.enabled){showError('offline');return;}
- if(effective==='model'&&(plan?.needsWeb||['gemini_flash','groq_gptoss'].includes(selected)&&planChat(message,modelHistory).needsWeb)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
+ if(effective==='model'&&(plan?.needsWeb||['gemini_flash','groq_qwen','groq_gptoss'].includes(selected)&&planChat(message,modelHistory).needsWeb)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  if(['game_scam_guard','url_sandbox'].includes(effective)&&!consent.websiteFetch||['malwarebazaar','urlhaus','ai_web'].includes(effective)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  if(effective==='model'&&mode==='chat'&&service.model.state==='configured'&&!consent.modelShare){if(!await requestModelShare()||activeMode!==mode||$('message').value.trim()!==message||$('model').value!==selected)return;consent.modelShare=true;}
  const turn=beginTurn('connecting');history.push({bubble:message||file.name});followReply(()=>$('conversation').append(el('div',message||file.name,'bubble')));
  try{
   if(file){setActivity('readingFile');input={file:await fileData(file)};setActivity('connecting');}
   turn.controller.signal.throwIfAborted();
-  const response=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({message,tool,locale,input,consent,mode,model:selected,history:mode==='worker'?[]:modelHistory.slice(-8)}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(mode==='worker'?110000:45000)])});
+  const response=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({message,tool,locale,input,consent,mode,model:selected,history:mode==='worker'?[]:modelHistory.slice(-8)}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(mode==='worker'?110000:60000)])});
   if(!response.ok){let failure;try{failure=await response.json();}catch{}const details=publicFailure(failure,response.status===429?'rate_limited':response.status===503?'service_busy':response.status>=500?'provider_unavailable':'invalid_request');if(!details.retryAt)Object.assign(details,retryDetails(response.headers.get('retry-after')));showError(details);return;}
   let result;
   await readStream(response,data=>{
@@ -489,3 +493,4 @@ $('desktop-model').onchange=updateDesktopInfo;$('manage-desktop-models').onclick
 translate();
 void welcomeLocalModels();
 await Promise.all([checkLocalDevice(),(async()=>{try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}})()]);renderStatus();
+
