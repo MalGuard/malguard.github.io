@@ -44,7 +44,8 @@ try{
   if([390,1280].includes(width))await page.screenshot({path:path.join(output,`welcome-${width}.png`)});
   await page.locator('#local-welcome button[value="later"]').click();
   assert.equal(await page.locator('#model').isVisible(),true);assert.equal(await page.locator('#composer #model').count(),1);assert.equal(await page.locator('#model-toolbar').count(),0);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
-  assert.equal(await page.locator('#model').inputValue(),'local_fast');
+  assert.equal(await page.locator('#model').inputValue(),'','No downloadable model selected automatically while cloud is offline');
+  await page.locator('#model').selectOption('local_fast');
   if([390,1280].includes(width))await page.screenshot({path:path.join(output,`quiet-${width}.png`)});
   await page.reload();await page.waitForFunction(()=>!document.getElementById('manage-models').disabled);
   assert.equal(await page.locator('#local-welcome').isVisible(),false,'Skip persists across reload');
