@@ -25,12 +25,9 @@ export const tierModels=Object.freeze({
 });
 export const routedModels=['gemini_flash','groq_qwen','groq_gptoss'];
 export const cloudRoutedModels=[...new Set(Object.values(tierModels).flat())];
-// Catalog state decides eligibility. A free-tier flag must not hide Gemini or Groq
-// when the backend still reports the model, including state "configured".
+// A model is available only when the backend reports it configured.
 export function cloudModelOffered(model){
- if(!model||typeof model.id!=='string')return false;
- if(model.state==='configured')return true;
- return routedModels.includes(model.id)&&model.reason==='free_tier_not_confirmed';
+ return !!model&&typeof model.id==='string'&&model.state==='configured';
 }
 export function planCloudChat(message,history=[],{models,mode,needsWeb=false}={}){
  const current=String(message||'').trim();
@@ -48,4 +45,6 @@ export function planCloudChat(message,history=[],{models,mode,needsWeb=false}={}
  const model=tierModels[tier].find(id=>configured.has(id))||cloudRoutedModels.find(id=>configured.has(id))||null;
  return {tier,model,needsWeb:web,reason:web?'research_request':build?'build_request':expert?'complex_request':coding?'coding_request':brief?'brief_request':'general_request'};
 }
+
+
 

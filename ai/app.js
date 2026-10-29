@@ -4,7 +4,7 @@ import {errorMessage} from './error-message.mjs?v=codex-chat-20261025';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=codex-chat-20261025';
 import {apiUrl,readStream} from './client.mjs';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
-import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
+import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=configured-only-20261029';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs';
