@@ -34,6 +34,18 @@ test('first-party email auth accepts a Persian username and trims the email addr
   assert.equal(body.to[0].email,'player@example.com');assert.equal(auth.session(verified).username,'محمد آذر درخش');
 });
 
+test('registration rejects under-13 and impossible birth dates before emailing a code',async()=>{
+  let delivered=0;
+  const store={enabled:true,status:{},findByEmail:async()=>null,findByUsername:async()=>null};
+  const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',accountStore:store,fetchImpl:async()=>{delivered++;return {ok:true};}});
+  const now=new Date();
+  const under13=new Date(Date.UTC(now.getUTCFullYear()-12,now.getUTCMonth(),now.getUTCDate())).toISOString().slice(0,10);
+  const profile={firstName:'Alex',lastName:'Morgan',birthDate:under13,username:'alex_guard',password:'StrongPass1'};
+  await assert.rejects(()=>auth.start({emailAddress:'player@example.com',profile}),{status:400});
+  await assert.rejects(()=>auth.start({emailAddress:'player@example.com',profile:{...profile,birthDate:'2000-02-30'}}),{status:400});
+  assert.equal(delivered,0);
+});
+
 test('profile signup hashes a valid password and creates a persistent account only after the email code',async()=>{
   let body,created;const store={enabled:true,status:{hasUrl:true,hasServiceKey:true},findByEmail:async()=>null,findByUsername:async()=>null,create:async profile=>{created=profile;return {...profile,id:'account-1'};}};const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',accountStore:store,fetchImpl:async(_url,options)=>{body=JSON.parse(options.body);return {ok:true};}});
   const started=await auth.start({emailAddress:'player@example.com',profile:{firstName:'محمد',lastName:'آذر درخش',birthDate:'2000-01-01',username:'محمد Guard',password:'StrongPass1'}});assert.equal(created,undefined);const code=body.htmlContent.match(/>(\d{6})</)[1];const verified=await auth.verify({verificationToken:started.verificationToken,code});
@@ -52,12 +64,12 @@ test('profile signup identifies an existing email and username before it sends a
 test('verification email includes a readable code, expiry and plain-text alternative',async()=>{
   let sent;const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',accountStore:{enabled:false,status:{}},fetchImpl:async(_,options)=>{sent=JSON.parse(options.body);return {ok:true};}});
   await auth.start({emailAddress:'player@example.com'});
-  const code=sent.htmlContent.match(/>(\d{6})</)?.[1];assert.match(code,/^[0-9]{6}$/);assert.ok(sent.textContent.includes(code));assert.match(sent.htmlContent,/expires in 10 minutes/);assert.match(sent.textContent,/Never share/);
+  const code=sent.htmlContent.match(/>(\d{6})</)?.[1];assert.match(code,/^[0-9]{6}$/);assert.ok(sent.textContent.includes(code));assert.match(sent.htmlContent,/expires in 10 minutes/);assert.match(sent.htmlContent,/select the six digits above/);assert.match(sent.textContent,/Never share/);
 });
 
 test('welcome template contains useful links and no account data',async()=>{
   const {welcomeEmail}=await import('./auth-email-template.js');const message=welcomeEmail();
-  assert.equal(message.subject,'Welcome to MalGuard');assert.match(message.htmlContent,/https:\/\/malguard\.site\/ai\//);assert.match(message.textContent,/privacy/);assert.doesNotMatch(JSON.stringify(message),/sessionToken|verificationToken/);
+  assert.equal(message.subject,'Welcome to MalGuard');assert.match(message.htmlContent,/If the button does not open/);assert.match(message.htmlContent,/https:\/\/malguard\.site\/ai\//);assert.match(message.textContent,/privacy/);assert.doesNotMatch(JSON.stringify(message),/sessionToken|verificationToken/);
 });
 
 test('a new MalGuard account receives a welcome email and a code-only sign-in does not',async()=>{
