@@ -3,6 +3,9 @@
 (()=>{'use strict';
  const root=document.documentElement,body=document.body;
  if(!body?.classList.contains('mg-precision-shared'))return;
+ // The precision site controller already owns one-time viewport typing.
+ // Never register a second controller that hides completed text and retypes it.
+ if(document.querySelector('script[src*="/assets/precision/site.js"]'))return;
  const reduce=matchMedia('(prefers-reduced-motion: reduce)');
  const isLowPower=()=>reduce.matches||navigator.connection?.saveData;
  if(!('IntersectionObserver' in window)||isLowPower())return;

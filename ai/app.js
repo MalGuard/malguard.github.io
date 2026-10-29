@@ -33,7 +33,7 @@ let projectOpen=false;
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
 const builder=createBuilder({locale:()=>locale});
-const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{navigation.profile(profile);library.profile(profile);document.body.classList.toggle('auth-required',!profile);$('entry-gate').hidden=!!profile;if(profile){void welcomeLocalModels();$('message').focus();return;}for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
+const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{navigation.profile(profile);library.profile(profile);document.body.classList.toggle('auth-required',!profile);$('entry-gate').hidden=!!profile;if(profile){$('message').focus();return;}for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
 const navigation=createNavigation({account,onLanguage:()=>{locale='en';translate();}});
 $('entry-signin').onclick=()=>account.open(false);$('entry-signup').onclick=()=>account.open(true);
 const library=createChatLibrary({account,snapshot:()=>({mode:activeMode,title:(history.find(item=>item.bubble)?.bubble||'New chat').slice(0,100),messages:history.flatMap(item=>item.bubble?[{role:'user',text:String(item.bubble).slice(0,12000)}]:item.response?.generated?.text?[{role:'assistant',text:item.response.generated.text.slice(0,12000)}]:[]).slice(-64)}),restore:chat=>{switchMode(chat.mode);history.length=0;modelHistory.length=0;for(const message of chat.messages){if(message.role==='user')history.push({bubble:message.text});else history.push({response:{generated:{text:message.text,provider:'Saved chat',model:'History'}}});modelHistory.push({role:message.role,content:message.text.slice(0,2000)});}modelHistory.splice(0,Math.max(0,modelHistory.length-8));$('message').value='';translate();}});
@@ -230,15 +230,17 @@ function renderStatus(){
  const remoteOptions=remote.filter(m=>m.id!=='auto').map(m=>{const fallback=remote.find(candidate=>candidate.id===fallbacks[m.id]&&candidate.state==='configured');if(m.reason==='missing_credential'&&fallback)return {...m,state:'configured',label:`${m.label} → Cloudflare: ${fallback.label} (fallback)`};if(cloudModelOffered(m))return {...m,state:'configured'};return m;});
  const models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار':'Automatic',state:localReady||remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remoteOptions,...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))];
  const cloudAutoReady=remote.some(m=>m.id==='auto'&&m.state==='configured');
+ const firstConfiguredCloud=remoteOptions.find(m=>m.state==='configured'&&m.id!=='auto')?.id||'';
  if(models.length){
   $('model').replaceChildren();
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
   for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t(cloudAutoReady?'autoCloud':'autoLocal'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured'||activeMode==='build'&&(m.id==='auto'&&!cloudAutoReady||m.id.startsWith('local_'));$('model').append(option);}
   const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);const desktop=el('option',t('desktopModels')+'…');desktop.value='__desktop';$('model').append(desktop);
-  const defaultId=activeMode==='build'?(cloudAutoReady?'auto':['cf_gptoss120','cf_gptoss20','cf_qwen3'].find(id=>remote.some(m=>m.id===id&&m.state==='configured'))||desktopChat.availability.installedIDs[0]||''):cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':service?.model?.defaultModel||(localReady?'local_fast':'');
-  const strongCloudReady=cloudAutoReady||remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured');
+  const defaultId=activeMode==='build'?(cloudAutoReady?'auto':['cf_gptoss120','cf_gptoss20','cf_qwen3'].find(id=>remote.some(m=>m.id===id&&m.state==='configured'))||firstConfiguredCloud||desktopChat.availability.installedIDs[0]||''):cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':firstConfiguredCloud||'';
+  const strongCloudReady=cloudAutoReady||!!firstConfiguredCloud;
   const applyCloudDefault=activeMode!=='build'&&strongCloudReady&&!cloudDefaultApplied&&!modelChosen&&!Object.hasOwn(localModels,preferredLocal);
-  $('model').value=applyCloudDefault?defaultId:!modelsInitialized&&localReady&&activeMode!=='build'?(Object.hasOwn(localModels,preferredLocal)?preferredLocal:'local_fast'):models.some(m=>m.id===selectedId&&m.state==='configured'&&(activeMode!=='build'||(m.id!=='auto'||cloudAutoReady)&&!m.id.startsWith('local_')))?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
+  const savedLocalReady=activeMode!=='build'&&localReady&&Object.hasOwn(localModels,preferredLocal)&&!modelChosen&&(!Object.hasOwn(localModels,selectedId)||selectedId===preferredLocal);
+  $('model').value=savedLocalReady?preferredLocal:applyCloudDefault?defaultId:!modelsInitialized&&localReady&&activeMode!=='build'&&Object.hasOwn(localModels,preferredLocal)?preferredLocal:models.some(m=>m.id===selectedId&&m.state==='configured'&&(activeMode!=='build'||(m.id!=='auto'||cloudAutoReady)&&!m.id.startsWith('local_')))?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
   if(strongCloudReady)cloudDefaultApplied=true;
   lastSelectedModel=$('model').value;
   if(service||localReady)modelsInitialized=true;
@@ -497,12 +499,12 @@ void bootAssistant();
 async function bootAssistant(){
  const entry=resolveAccountEntry();
  const device=checkLocalDevice();
- const serviceLoad=(async()=>{try{const r=await fetch(apiUrl('status'),{credentials:'omit',signal:AbortSignal.timeout(1500)});if(!r.ok)throw new Error();service=await r.json();}catch{service=undefined;}})();
+ const serviceLoad=(async()=>{for(let attempt=0;attempt<2;attempt++){try{const r=await fetch(apiUrl('status'),{credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error('unavailable');const next=await r.json();if(!next||typeof next!=='object'||!next.model)throw new Error('invalid_status');service=next;renderStatus();return;}catch{}}service=undefined;renderStatus();})();
  await Promise.all([entry,device,serviceLoad]);
  renderStatus();
 }
 async function resolveAccountEntry(){
- if(account.usesProductionAuth())return;
+ if(account.usesProductionAuth()){await account.restore();return;}
  try{const status=await Promise.race([account.authStatus(),new Promise((_,reject)=>setTimeout(()=>reject(Error('timeout')),1200))]);if(status?.configured===true&&status?.persistentAccounts===true)return;}catch{}
  document.body.classList.remove('auth-required');const gate=$('entry-gate');if(gate)gate.hidden=true;
  void welcomeLocalModels();

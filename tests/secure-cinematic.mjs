@@ -67,9 +67,17 @@ for(const engine of engines){
    // Observe native submit delivery as well as the resulting error. This catches
    // a lost pointer activation even when an earlier error remains on the page.
    await page.evaluate(()=>{window.__adminIdentitySubmits=0;document.getElementById('siteAdminIdentityForm').addEventListener('submit',()=>window.__adminIdentitySubmits++,true);});
-   await page.locator('#siteAdminConsent').check();assert.equal(await page.locator('#siteAdminConsent').isChecked(),true);
+   await page.locator('label.site-entry-consent').click();assert.equal(await page.locator('#siteAdminConsent').isChecked(),true,'Clicking the visible consent label must check its native checkbox');
    await page.locator('#siteAdminName').fill('x');await page.locator('#siteAdminPhone').fill('2025550148');await page.locator('#siteAdminEnter').press('Enter');await page.waitForFunction(()=>document.body.dataset.secureState==='error'&&document.getElementById('siteAdminIdentityError').textContent==='Enter your name before continuing.');assert.equal(await page.evaluate(()=>window.__adminIdentitySubmits),1,'Keyboard activation must deliver a native submit');assert.equal(auth.length,2,'Invalid name must not request an administrator session');
-   await page.locator('#siteAdminName').fill('y');await clickSettled(page,'#siteAdminEnter');await page.waitForFunction(()=>document.body.dataset.secureState==='error'&&document.getElementById('siteAdminIdentityError').textContent==='Enter your name before continuing.');assert.equal(await page.evaluate(()=>window.__adminIdentitySubmits),2,'Pointer activation must deliver a second native submit');assert.equal(auth.length,2,'Repeated invalid name must not request a session');
+   await page.locator('#siteAdminName').fill('y');
+   // WebKit may re-render the international phone input on focus/blur. Restore
+   // the intended test value immediately before submitting, then verify it.
+   await page.locator('#siteAdminPhone').fill('2025550148');
+   await page.locator('#siteAdminName').fill('y');
+   await page.locator('#siteAdminEnter').focus();
+   assert.equal(await page.locator('#siteAdminName').inputValue(),'y');
+   assert((await page.locator('#siteAdminPhone').inputValue()).length>0,'Phone input must survive button focus');
+   await clickSettled(page,'#siteAdminEnter');await page.waitForFunction(()=>document.body.dataset.secureState==='error'&&document.getElementById('siteAdminIdentityError').textContent==='Enter your name before continuing.');assert.equal(await page.evaluate(()=>window.__adminIdentitySubmits),2,'Pointer activation must deliver a second native submit');assert.equal(auth.length,2,'Repeated invalid name must not request a session');
    await context.setDefaultNavigationTimeout(30000);await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>MalGuardSecureMotion.snapshot().paused===true);
    await page.waitForFunction(()=>document.getElementById('secure-scene').getAnimations({subtree:true}).length===0);
    await page.locator('.secure-start').click();assert(await page.locator('#siteAdminIdentityStep').isVisible());

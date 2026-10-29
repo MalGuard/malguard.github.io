@@ -1,5 +1,8 @@
 // Reuse the existing first-party account API. No provider keys or credentials in storage.
 const PRODUCTION_HOSTS=['malguard.site','www.malguard.site','malguard.github.io'];
+const SESSION_KEY='malguard.ai.session.v1';
+const savedSession=()=>{try{return sessionStorage.getItem(SESSION_KEY);}catch{return null;}};
+const saveSession=token=>{try{if(token)sessionStorage.setItem(SESSION_KEY,token);else sessionStorage.removeItem(SESSION_KEY);}catch{}};
 export function accountApiBase(hostname=globalThis.location?.hostname||''){
  return PRODUCTION_HOSTS.includes(hostname)?'https://game-scam-guard-connected.vercel.app':'';
 }
@@ -12,7 +15,7 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
  const close=()=>{controller?.abort();controller=undefined;clearInterval(resendTimer);discardSignup();if(dialog){const old=dialog;dialog=undefined;old.close();old.remove();}button.focus();};
  async function request(endpoint,body){
   if(!['status','start','verify','password','session','availability'].includes(endpoint))throw Error('invalid_endpoint');
-  const response=await fetch(`${accountApiBase()}/api/game-scam-guard/auth/${endpoint}`,{method:body?'POST':'GET',credentials:'omit',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined,signal:AbortSignal.any([controller.signal,AbortSignal.timeout(20000)])});
+  const response=await fetch(`${accountApiBase()}/api/game-scam-guard/auth/${endpoint}`,{method:body?'POST':'GET',credentials:'omit',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined,signal:controller?AbortSignal.any([controller.signal,AbortSignal.timeout(20000)]):AbortSignal.timeout(20000)});
   const raw=await response.text();if(raw.length>65536)throw Error('invalid_response');let data;try{data=JSON.parse(raw);}catch{throw Error('invalid_response');}
   if(!response.ok)throw Object.assign(Error('account_failed'),{status:response.status});return data;
  }
@@ -21,8 +24,8 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
   const heading=node('h2',title);heading.id='account-title';const exit=node('button',text('Close','بستن'),'account-close');exit.type='button';exit.onclick=close;
   const mark=node('img',null,'account-product-mark');mark.src='/ai/malguard-ai-orbit.svg?v=20261028-mono';mark.alt='';mark.width=40;mark.height=40;dialog.append(exit,mark,heading);dialog.addEventListener('cancel',e=>{e.preventDefault();close();});document.body.append(dialog);dialog.showModal();return dialog;
  }
- function note(container){container.append(node('p',text('Uses your MalGuard account. Sign-in lasts on this page only; text chats and notes can be saved to your account when storage is connected. Attachments and project files are not synchronized. Signing out clears this page’s conversations and files; export your project first.','این همان حساب MalGuard است. ورود فقط در همین صفحه حفظ می‌شود؛ گفت‌وگو و یادداشت‌ها وقتی ذخیره‌سازی وصل باشد در حساب می‌مانند. پیوست‌ها و فایل پروژه همگام نمی‌شوند. خروج، گفت‌وگو و فایل‌های همین صفحه را پاک می‌کند؛ ابتدا پروژه را دانلود کن.'),'account-note'));}
- function field(form,fields,key,en,fa,type='text',autocomplete){const label=node('label',text(en,fa)),input=node('input');input.type=type;input.setAttribute('aria-label',text(en,fa));input.required=true;input.name=key;input.id='account-'+key;input.placeholder=({firstName:text('Alex','محمد'),lastName:text('Morgan','آذر درخش'),username:'Player_Guard',email:'you@example.com',password:text('At least 10 characters','حداقل ۱۰ کاراکتر'),confirm:text('Type the password again','رمز را دوباره وارد کن')})[key]||'';input.maxLength=key==='email'?254:key==='password'||key==='confirm'?128:80;if(autocomplete)input.autocomplete=autocomplete;if(['email','password'].includes(type))input.dir='ltr';if(type==='password')input.minLength=10;if(key==='birthDate'){input.min='1900-01-01';const d=new Date();d.setFullYear(d.getFullYear()-12);input.max=d.toISOString().slice(0,10);}label.append(input);form.append(label);fields[key]=input;return input;}
+ function note(container){container.append(node('p',text('Uses your MalGuard account. Sign-in survives refresh in this tab until sign-out or session expiry; text chats and notes can be saved to your account when storage is connected. Attachments and project files are not synchronized. Signing out clears this page’s conversations and files; export your project first.','این همان حساب MalGuard است. ورود بعد از رفرش همین تب باقی می‌ماند تا خروج دستی یا پایان اعتبار نشست؛ گفت‌وگو و یادداشت‌ها وقتی ذخیره‌سازی وصل باشد در حساب می‌مانند. پیوست‌ها و فایل پروژه همگام نمی‌شوند. خروج، گفت‌وگو و فایل‌های همین صفحه را پاک می‌کند؛ ابتدا پروژه را دانلود کن.'),'account-note'));}
+ function field(form,fields,key,en,fa,type='text',autocomplete){const label=node('label',text(en,fa)),input=node('input');input.type=type;input.setAttribute('aria-label',text(en,fa));input.required=true;input.name=key;input.id='account-'+key;input.placeholder=({firstName:text('Alex','محمد'),lastName:text('Morgan','آذر درخش'),username:'Player_Guard',email:'you@example.com',password:text('At least 10 characters','حداقل ۱۰ کاراکتر'),confirm:text('Type the password again','رمز را دوباره وارد کن')})[key]||'';input.maxLength=key==='email'?254:key==='password'||key==='confirm'?128:80;if(autocomplete)input.autocomplete=autocomplete;if(['email','password'].includes(type))input.dir='ltr';if(type==='password')input.minLength=10;if(key==='birthDate'){input.min='1900-01-01';const d=new Date();d.setFullYear(d.getFullYear()-13);input.max=d.toISOString().slice(0,10);}label.append(input);form.append(label);fields[key]=input;return input;}
  function action(container,en,fa,handler){const b=node('button',text(en,fa));b.type='button';b.onclick=handler;container.append(b);return b;}
  function feedback(container){const error=node('p');error.setAttribute('role','alert');error.hidden=true;container.append(error);return error;}
  function failure(error,target){target.hidden=false;target.textContent=error.status===409?text('That email or username is already registered. Sign in instead.','این ایمیل یا نام کاربری قبلاً ثبت شده است؛ وارد حساب شو.'):error.status===429?text('Too many attempts. Please wait and try again.','تعداد تلاش‌ها زیاد است؛ کمی صبر کن و دوباره امتحان کن.'):text('The account request could not be completed. Check your details and connection, then try again.','درخواست حساب کامل نشد؛ اطلاعات و اتصال را بررسی کن و دوباره امتحان کن.');}
@@ -31,7 +34,13 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
   if(typeof result.sessionToken!=='string'||result.sessionToken.length>16000)throw Error('invalid_session');
   const p=await request('session',{sessionToken:result.sessionToken});
   if(typeof p.email!=='string'||p.email.length>254||typeof p.username!=='string'||p.username.length>80||!Number.isFinite(p.expiresAt)||p.expiresAt<=Date.now())throw Error('invalid_profile');
-  if(dialog!==expected)return;sessionToken=result.sessionToken;profile={email:p.email,username:p.username};close();refresh();onChange({...profile});
+  if(dialog!==expected)return;sessionToken=result.sessionToken;saveSession(sessionToken);profile={email:p.email,username:p.username};close();refresh();onChange({...profile});
+ }
+ async function restore(){
+  const token=savedSession();if(!token)return false;
+  try{const p=await request('session',{sessionToken:token});if(typeof p.email!=='string'||p.email.length>254||typeof p.username!=='string'||p.username.length>80||!Number.isFinite(p.expiresAt)||p.expiresAt<=Date.now())throw Error('invalid_profile');
+   sessionToken=token;profile={email:p.email,username:p.username};refresh();onChange({...profile});return true;
+  }catch{saveSession(null);sessionToken=null;profile=null;refresh();return false;}
  }
  function authForm(signup=false){
   discardSignup();
@@ -39,7 +48,7 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
   const form=node('form'),fields={};form.autocomplete='on';pane.append(form);
   if(signup){const names=node('div',null,'account-two-columns');field(names,fields,'firstName','First name','نام','text','given-name');field(names,fields,'lastName','Last name','نام خانوادگی','text','family-name');form.append(names);field(form,fields,'birthDate','Date of birth','تاریخ تولد','date','bday');const u=field(form,fields,'username','Username','نام کاربری','text','username');u.minLength=3;u.maxLength=48;}
   field(form,fields,'email','Email address','ایمیل','email','email');field(form,fields,'password','Password','رمز عبور','password',signup?'new-password':'current-password');
-  if(signup){field(form,fields,'confirm','Confirm password','تکرار رمز عبور','password','new-password');form.append(node('p',text('At least 10 characters including uppercase, lowercase and a number. Existing registration requires age 12 or older.','حداقل ۱۰ کاراکتر شامل حرف بزرگ، حرف کوچک و عدد. ثبت‌نام فعلی برای سن ۱۲ سال به بالا است.'),'account-note'));}
+  if(signup){field(form,fields,'confirm','Confirm password','تکرار رمز عبور','password','new-password');form.append(node('p',text('At least 10 characters including uppercase, lowercase and a number. Registration requires age 13 or older.','حداقل ۱۰ کاراکتر شامل حرف بزرگ، حرف کوچک و عدد. ثبت‌نام برای سن ۱۳ سال به بالا است.'),'account-note'));}
   const error=feedback(form),submit=node('button',signup?text('Send verification code','ارسال کد تأیید'):text('Sign in','ورود'),'account-submit');submit.type='submit';form.append(submit);
   let submitting=false;const availability={email:'',username:''};
   const rules=()=>[fields.password.value.length>=10,/[A-Z]/.test(fields.password.value),/[a-z]/.test(fields.password.value),/\d/.test(fields.password.value)];
@@ -67,10 +76,10 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
  }
  button.onclick=async()=>{
   if(dialog)return;controller=new AbortController();
-  if(profile){const pane=shell(text('Your MalGuard account','حساب مالگارد شما'));pane.append(node('p',profile.username),node('p',profile.email));note(pane);action(pane,'Sign out on this page','خروج از همین صفحه',()=>{sessionToken=null;profile=null;close();refresh();onChange(null);});return;}
+  if(profile){const pane=shell(text('Your MalGuard account','حساب مالگارد شما'));pane.append(node('p',profile.username),node('p',profile.email));note(pane);action(pane,'Sign out on this page','خروج از همین صفحه',()=>{sessionToken=null;saveSession(null);profile=null;close();refresh();onChange(null);});return;}
   const pane=shell(text('Preparing sign-in…','در حال آماده‌سازی ورود…'));try{const status=await request('status');if(status.configured!==true||status.persistentAccounts!==true)throw Error('unavailable');if(controller)authForm();}catch(e){if(controller&&!controller.signal.aborted){const err=feedback(pane);failure(e,err);action(pane,'Retry','تلاش دوباره',()=>{close();button.click();});}}
  };refresh();
  async function authStatus(){const response=await fetch(`${accountApiBase()}/api/game-scam-guard/auth/status`,{credentials:'omit',signal:AbortSignal.timeout(4000)});const raw=await response.text();if(!response.ok||raw.length>65536)throw Error('unavailable');let data;try{data=JSON.parse(raw);}catch{throw Error('unavailable');}return data;}
- return {refresh,getToken:()=>sessionToken,authStatus,usesProductionAuth:()=>PRODUCTION_HOSTS.includes(location.hostname),open(signup=false){if(dialog)return;controller=new AbortController();if(signup)authForm(true);else button.click();}};
+ return {refresh,restore,getToken:()=>sessionToken,authStatus,usesProductionAuth:()=>PRODUCTION_HOSTS.includes(location.hostname),open(signup=false){if(dialog)return;controller=new AbortController();if(signup)authForm(true);else button.click();}};
 }
 
