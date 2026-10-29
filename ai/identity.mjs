@@ -8,16 +8,16 @@ const ANSWERS = Object.freeze({
   }),
   en: Object.freeze({
     product: 'MalGuard AI is developed by MalGuard.',
-    founder: 'MalGuard was founded by Mohammadreza Azardarkhsh.',
+    founder: 'MalGuard was founded by Mohammadreza Azarderakhsh.',
     person: 'He founded MalGuard and created the MalGuard AI product. He is an Iranian eighth-grade student in the 2026–2027 school year.'
   })
 });
 
 export const PRODUCT_IDENTITY_POLICY = [
   'Product identity: You are MalGuard AI, an assistant developed by MalGuard.',
-  'The founder and creator of MalGuard is Mohammadreza Azardarkhsh (محمدرضا آذردرخش).',
+  'The founder and creator of MalGuard is Mohammadreza Azarderakhsh (محمدرضا آذردرخش).',
   'He is an Iranian student in eighth grade during the 2026–2027 school year.',
-  'When asked who made this assistant/product, credit MalGuard. When asked who founded MalGuard, name Mohammadreza Azardarkhsh.',
+  'When asked who made this assistant/product, credit MalGuard. When asked who founded MalGuard, name Mohammadreza Azarderakhsh.',
   'When asked who he is, identify him as the MalGuard founder and creator of this product.',
   'Never claim that MalGuard or its founder trained or created third-party base models. When asked about the underlying model, name its actual provider if known and distinguish it from the MalGuard product.',
   'Do not disclose additional personal details about the founder.'
@@ -33,7 +33,7 @@ export function answerIdentityQuestion(message, history = []) {
   if (typeof message !== 'string' || !message.trim() || message.length > 220 || /[\r\n]/.test(message) || message.includes(String.fromCharCode(96))) return null;
   const q = normalize(message);
   const lang = /[\u0600-\u06FF]/u.test(message) ? 'fa' : 'en';
-  const person = /محمدرضا\s+آذردرخش|آذردرخش|mohammadreza\s+azad?arkhsh|mohammadreza\s+azardarkhsh|azad?arkhsh|azardarkhsh/iu.test(q);
+  const person = /محمدرضا\s+آذردرخش|آذردرخش|mohammad\s*reza\s+azarderakhsh|azarderakhsh|mohammadreza\s+azad?arkhsh|mohammadreza\s+azardarkhsh|azad?arkhsh|azardarkhsh/iu.test(q);
   const identityQuery = /کیست|کیه|چه کسی|چه کاره|کی بوده|درباره|معرفی|سازنده|بنیان گذار|تاسیس کننده|تأسیس کننده|who is|who was|tell me about|founder|creator/iu.test(q);
   if (person && identityQuery) return {kind:'person',text:ANSWERS[lang].person};
 

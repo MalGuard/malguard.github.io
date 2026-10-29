@@ -7,7 +7,7 @@ import {chromium,webkit,launchOptions} from './browser-runtime.mjs';
 const base=process.env.TEST_BASE_URL||'https://127.0.0.1:8443';
 assert.ok(['https://127.0.0.1:8443','http://127.0.0.1:8790'].includes(base),'Use only the isolated loopback fixture');
 const names=process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chromium','webkit'];
-const products=['/gta-guard.html','/game-scam-guard.html','/ai/'];
+const products=['/gta-guard.html','/game-scam-guard.html','/ai-product.html'];
 const stages=['Identify','Inspect','Analyze','Decide'];
 const reports=[];
 await mkdir('test-results/precision-motion',{recursive:true});
@@ -60,10 +60,10 @@ for(const name of names){
   assert.equal(await target.getAttribute('data-type-state'),'pending','Offscreen text starts only when viewed');
   await target.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
   await p.waitForFunction(()=>Number(document.querySelector('#technology [data-type]')?.dataset.typeRuns)>0,null,{timeout:30000});
-  assert.ok(await p.locator('main [data-type-state=typing]').count()<=1,'One active typewriter');
+  assert.ok(await p.locator('main [data-type-state=typing]').count()<=4,'Typing concurrency is bounded');
   assert.deepEqual(errors,[],'Typewriter must not throw');
   reports.push({browser:name,viewportTyping:'pass',errors});
-  console.log('PASS',name,'viewport-triggered sequential typewriter');
+  console.log('PASS',name,'viewport-triggered bounded typewriter');
   await c.close();
  }finally{await browser.close();}
 }

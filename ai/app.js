@@ -7,11 +7,11 @@ import {readPermissions,savePermissions,revokePermissions} from './permissions.m
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
-import {answerIdentityQuestion} from './identity.mjs';
+import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
 import {typeText,formatElapsed} from './reply-motion.mjs';
 import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=codex-chat-20261025';
 import {renderRichText} from './code-view.mjs?v=codex-chat-20261025';
-import {createAccount} from './account.mjs?v=cloud-session-20261029';
+import {createAccount} from './account.mjs?v=founder-name-20261029';
 import {createBuilder} from './builder.mjs?v=qwen-coder-restored-20261026';
 import {parseProposal} from './build-project.mjs?v=codex-chat-20261025';
 const $=id=>document.getElementById(id);

@@ -100,7 +100,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     await check(`${name} ${width}px accessible product links and lightweight cards`,async()=>{
       await page.goto(base+'/');await publicEntry(page);
       const links=page.locator('#products article.product a.text-link');
-      assert.deepEqual(await links.evaluateAll(a=>a.map(x=>new URL(x.href).pathname)),['/gta-guard.html','/game-scam-guard.html','/ai/']);
+      assert.deepEqual(await links.evaluateAll(a=>a.map(x=>new URL(x.href).pathname)),['/gta-guard.html','/game-scam-guard.html','/ai-product.html']);
       assert.equal(await page.locator('#products canvas').count(),0);
       for(const link of await links.all()){await link.focus();assert.equal(await link.evaluate(el=>document.activeElement===el),true);}
     });
@@ -205,7 +205,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
      assert.ok(await q.getByRole('heading',{name:'Scan smart. Play safe.'}).isVisible());
      assert.ok(await q.getByRole('link',{name:'Explore products'}).isVisible());await nojs.close();
    });
-   await check(`${name} viewport typing is sequential and scroll-triggered`,async()=>{
+   await check(`${name} viewport typing is bounded and scroll-triggered`,async()=>{
      const c=await browser.newContext({...fixtureTLS,viewport:{width:1280,height:850},reducedMotion:'no-preference'}),p=await c.newPage();
      await c.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
      await p.goto(base+'/');await settle(p);

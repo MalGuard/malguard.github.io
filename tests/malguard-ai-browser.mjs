@@ -14,7 +14,7 @@ web.use('/api/malguard-ai',(req,res,next)=>{if(req.method==='POST')requests++;ne
 const browser=await chromium.launch(launchOptions('chromium'));
 const skipWelcome=context=>context.addInitScript(()=>localStorage.setItem('malguard.ai.welcome.v3','seen'));
 try{
- // Public product links must open the actual assistant directly, without the radar landing page.
+ // Product cards introduce platform choices before opening the assistant.
  for(const width of [390,1280]){
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),page=await context.newPage();
   await skipWelcome(context);await context.addInitScript(()=>Object.defineProperty(navigator,'gpu',{value:undefined}));
@@ -22,11 +22,13 @@ try{
   const before=requests;
   for(const [path,selector] of [['/','#products .product-ai a.text-link'],['/products.html','.product-ai .mg-home-product-link']]){
    await page.goto(base+path);
-   const link=page.locator(selector);assert.equal(await link.getAttribute('href'),'/ai/');assert.match(await link.innerText(),/MalGuard AI/);
+   const link=page.locator(selector);assert.equal(await link.getAttribute('href'),'/ai-product.html');assert.match(await link.innerText(),/MalGuard AI/);
    const visited=[];const record=frame=>{if(frame===page.mainFrame())visited.push(new URL(frame.url()).pathname);};
-   page.on('framenavigated',record);await link.click();await page.waitForURL(base+'/ai/');
+   page.on('framenavigated',record);await link.click();await page.waitForURL(base+'/ai-product.html');
+   assert.equal(await page.getByRole('heading',{name:'Android · Samsung'}).count(),1);assert.equal(await page.getByRole('heading',{name:'Windows'}).count(),1);
+   await page.getByRole('link',{name:/Open web app/}).first().click();await page.waitForURL(base+'/ai/');
    await page.waitForFunction(()=>!document.getElementById('send').disabled);page.off('framenavigated',record);
-   assert.deepEqual(visited,['/ai/'],'Product card must skip the radar and retired feature pages');
+   assert.deepEqual(visited,['/ai-product.html','/ai/'],'Product card opens the platform guide, then the web app');
    assert.equal(await page.locator('#composer').isVisible(),true);assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
    assert.equal(await page.locator('.mg-card-hero--radar').count(),0);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Assistant must fit after navigation');
@@ -38,7 +40,7 @@ try{
   await page.goto(base+'/');await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true');
   await page.locator('#menuBtn').click();await page.locator('#navLinks a[href="/ai/"]').click();await page.waitForURL(base+'/ai/');
   assert.equal(requests,before,'Navigating into AI must not submit messages, files or consent');
-  await context.close();console.log(`PASS homepage/product cards, shared menu and legacy AI URLs open chat directly at ${width}px`);
+  await context.close();console.log(`PASS platform guide, web app, shared menu and legacy AI URLs at ${width}px`);
  }
  for(const width of [360,390,768,1280]){
   const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[],external=[];
