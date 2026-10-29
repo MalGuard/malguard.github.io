@@ -135,9 +135,10 @@ try{
   window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{generated:{text:'پاسخ محلی آزمایشی',provider:'on_device',model:data.model,securityAnalysis:false}}}),5);}terminate(){}};
  });
  const beforeLocal=requests,localExternal=[];await device.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();localExternal.push(r.request().url());return r.abort();});
- await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>!document.getElementById('send').disabled);assert.equal(await localPage.locator('#model').inputValue(),'local_fast');
+ await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>!document.getElementById('send').disabled);assert.equal(await localPage.locator('#model').inputValue(),'llama70b','Prefer a configured cloud model without downloading');
  await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
  await localPage.locator('#local-welcome').waitFor({state:'visible'});assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);await localPage.locator('#local-welcome button[value="later"]').click();
+ await localPage.locator('#model').selectOption('local_fast');
  await localPage.locator('#model').selectOption('__downloads');
  await localPage.locator('#local-offer').waitFor({state:'visible'});
  assert.match(await localPage.locator('#offer-info').innerText(),/no provider daily message quota/);
