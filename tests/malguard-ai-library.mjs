@@ -21,7 +21,15 @@ try{for(const width of [390,1280]){
  await rail();if(await page.locator('#settings-panel').getAttribute('open')!==null)await page.locator('#settings-close').click();else await page.locator('#settings-panel > summary').click();await page.locator('#permissions > summary').click();await page.locator('#model-consent').check();if(await page.locator('#settings-panel').getAttribute('open')!==null)await page.locator('#settings-close').click();else await page.locator('#settings-panel > summary').click();
  await page.locator('#message').fill('Explain synthetic persistence');await page.locator('#send').click();await page.getByText('Synthetic saved answer',{exact:true}).waitFor();await page.locator('#save-state').filter({hasText:'Saved to your account'}).waitFor();
  await rail();assert.equal(await page.locator('.history-row').count(),1);await page.locator('#manage-memory').click();await page.getByLabel('New memory').fill('Synthetic preference');await page.getByRole('button',{name:'Save memory',exact:true}).click();await page.getByRole('button',{name:'Close',exact:true}).click();await page.locator('#save-state').filter({hasText:'Saved to your account'}).waitFor();
- await page.reload();await page.waitForFunction(()=>!document.querySelector('#send').disabled);await login(`a-${width}@example.com`);await rail();await page.locator('.history-row button').first().click();await page.getByText('Synthetic saved answer',{exact:true}).waitFor();await page.locator('#manage-memory').click();await page.getByText('Synthetic preference',{exact:false}).waitFor();await page.getByRole('button',{name:'Close',exact:true}).click();
+ await page.reload();await page.waitForFunction(()=>!document.querySelector('#send').disabled);
+ // The account now restores on same-origin startup. Assert the original user
+ // was restored without opening a new sign-in dialog or minting a new token.
+ await page.locator('#message').waitFor({state:'visible'});
+ assert.equal(await page.locator('#account').innerText(),'test_account');
+ assert.equal(await page.evaluate(()=>sessionStorage.getItem('malguard.ai.session.v1')),`synthetic-a-${width}@example.com`);
+ assert.equal(await page.locator('dialog.ai-account').count(),0);
+ await page.locator('#save-state').filter({hasText:'Chats are saved to your account.'}).waitFor();
+ await rail();await page.locator('.history-row button').first().click();await page.getByText('Synthetic saved answer',{exact:true}).waitFor();await page.locator('#manage-memory').click();await page.getByText('Synthetic preference',{exact:false}).waitFor();await page.getByRole('button',{name:'Close',exact:true}).click();
  if(await page.locator('.navigation-dismiss').isVisible())await page.locator('.navigation-dismiss').click();await page.locator('#account').click();await page.getByRole('button',{name:'Sign out on this page',exact:true}).click();assert.equal(await page.locator('.history-row').count(),0);await login(`b-${width}@example.com`);await rail();assert.equal(await page.locator('.history-row').count(),0);assert.deepEqual(errors,[]);await mkdir('test-results',{recursive:true});await page.screenshot({path:`test-results/ai-sidebar-${width}.png`,fullPage:true});await context.close();console.log(`PASS navigation, English default, account history reload, memory and account isolation at ${width}px`);
 }}finally{await browser.close();server.close();}
 

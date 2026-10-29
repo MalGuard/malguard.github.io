@@ -505,7 +505,7 @@ async function bootAssistant(){
 }
 async function resolveAccountEntry(){
  if(account.usesProductionAuth()){await account.restore();return;}
- try{const status=await Promise.race([account.authStatus(),new Promise((_,reject)=>setTimeout(()=>reject(Error('timeout')),1200))]);if(status?.configured===true&&status?.persistentAccounts===true)return;}catch{}
+ try{const status=await Promise.race([account.authStatus(),new Promise((_,reject)=>setTimeout(()=>reject(Error('timeout')),1200))]);if(status?.configured===true&&status?.persistentAccounts===true){await account.restore();return;}}catch{}
  document.body.classList.remove('auth-required');const gate=$('entry-gate');if(gate)gate.hidden=true;
  void welcomeLocalModels();
 }
