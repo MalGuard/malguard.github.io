@@ -19,7 +19,7 @@
   <link rel="preload" href="/assets/precision/stars.svg?v=20261028-4k" as="image" fetchpriority="high"><link rel="preload" href="/assets/precision/obsidian-space.webp?v=20261028-4k" as="image" fetchpriority="low">
   <link rel="icon" href="./malguard-ai-orbit.svg?v=20261028-mono" type="image/svg+xml">
   <link rel="stylesheet" href="./style.css?v=20261028-4k">
-  <script type="module" src="./app.js?v=instant-20261028"></script>
+  <script type="module" src="./app.js?v=cloud-session-20261029"></script>
 <link rel="stylesheet" href="/assets/report-launcher.css?v=obsidian-20261028"><script defer src="/assets/report-launcher.js?v=20261027"></script></head>
 <body class="auth-required">
   <main id="entry-gate" class="entry-gate" aria-labelledby="entry-title">
@@ -28,7 +28,7 @@
       <p class="entry-brand">MalGuard AI</p>
       <h1 id="entry-title">Explore with MalGuard AI</h1>
       <p class="entry-description">Sign in or create an account to start your conversation.</p>
-      <div class="entry-actions"><button id="entry-signin" type="button">Sign in</button><button id="entry-signup" type="button">Create account</button></div>
+      <div class="entry-actions"><button id="entry-signin" type="button">Sign in</button><button id="entry-signup" type="button">Create account</button><button id="entry-retry" type="button" hidden>Retry saved session</button></div>
       <a href="/">Back to MalGuard</a>
     </section>
   </main>
@@ -133,6 +133,7 @@
           </div>
           <div class="attachment"><label class="file-button sr-only" for="file" data-i18n="attach">Choose file · up to 1 MiB</label><input type="file" id="file" tabindex="-1"><span id="filename" dir="auto"></span><button type="button" id="remove-file" hidden data-i18n="remove">Remove</button></div>
         </form>
+        <p id="cloud-alert" class="cloud-alert" role="status" hidden>Cloud models are temporarily unavailable. <button id="retry-cloud" type="button">Retry connection</button></p>
         <p id="disclaimer" class="footer-note" data-i18n="disclaimer">AI can make mistakes. Check important information.</p>
         <button id="stop-local" type="button" hidden data-i18n="stop">Stop</button>
       </div>

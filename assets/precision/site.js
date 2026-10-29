@@ -72,11 +72,13 @@
    const stopJob=()=>{if(!active)return;active.elapsed+=performance.now()-active.started;const n=active.node;n.classList.remove('typing');if(active.kind==='text')n.dataset.typeState='paused';if(active.kind==='count'){n.dataset.countState='paused';active.counters.forEach(c=>c.n.dataset.countState='paused');}if(active.kind==='reveal')n.dataset.revealState='paused';active=null;clearTimeout(timer);timer=0;};
    const create=node=>{
     node.dataset.motionStarts=String(Number(node.dataset.motionStarts||0)+1);
-    let job={node,elapsed:0,started:0,kind:'reveal',duration:125};
+     let job={node,elapsed:0,started:0,kind:'reveal',duration:node.dataset.reveal==='visual'?560:125};
     if(node.dataset.type){
      const source=node.querySelector('.type-source').textContent;
      const pieces=segmenter?[...segmenter.segment(source)].map(p=>p.segment):Array.from(source);
      const ink=document.createElement('span');ink.className='type-ink';ink.setAttribute('aria-hidden','true');
+      const sourceRect=node.querySelector(':scope > .type-source').getBoundingClientRect(),nodeRect=node.getBoundingClientRect();
+      ink.style.left=`${sourceRect.left-nodeRect.left}px`;ink.style.top=`${sourceRect.top-nodeRect.top}px`;ink.style.width=`${sourceRect.width}px`;
      const text=document.createTextNode(''),cursor=document.createElement('span');cursor.className='type-cursor vertical';ink.append(text,cursor);node.append(ink);
      node.dataset.typeRuns=String(Number(node.dataset.typeRuns||0)+1);
      // Keep visible code-style typing, but never block the queue with long copy.

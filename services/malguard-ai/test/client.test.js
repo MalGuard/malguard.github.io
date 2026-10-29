@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {apiUrl,readStream} from '../../../ai/client.mjs';
 test('client uses established API host only on canonical Pages hosts',()=>{
- assert.equal(apiUrl('chat','malguard.github.io'),'https://game-scam-guard-connected.vercel.app/api/malguard-ai/chat');assert.equal(apiUrl('status','localhost'),'/api/malguard-ai/status');assert.throws(()=>apiUrl('shell'));
+ assert.equal(apiUrl('chat','malguard.github.io'),'https://game-scam-guard-connected.vercel.app/api/malguard-ai/chat');assert.equal(apiUrl('status','www.malguard.site'),'https://game-scam-guard-connected.vercel.app/api/malguard-ai/status');assert.equal(apiUrl('status','localhost'),'/api/malguard-ai/status');assert.throws(()=>apiUrl('shell'));
 });
 test('stream decoder preserves Persian across split UTF-8 chunks',async()=>{
  const bytes=new TextEncoder().encode(JSON.stringify({result:{message:'سلام'}})+'\n');const received=[];

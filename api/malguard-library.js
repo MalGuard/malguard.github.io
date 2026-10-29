@@ -1,5 +1,5 @@
 let library;
-const origins=new Set(['https://malguard.site','https://malguard.github.io']);
+const origins=new Set(['https://malguard.site','https://www.malguard.site','https://malguard.github.io']);
 const limits=new Map();
 module.exports=async(req,res)=>{
  res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Vary','Origin');

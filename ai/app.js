@@ -2,7 +2,7 @@ import {createChatLibrary} from './library.mjs?v=sidebar-20261026';
 import {createNavigation} from './navigation.mjs?v=sidebar-20261026';
 import {errorMessage} from './error-message.mjs?v=codex-chat-20261025';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=codex-chat-20261025';
-import {apiUrl,readStream} from './client.mjs';
+import {apiUrl,readStream} from './client.mjs?v=cloud-session-20261029';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
@@ -11,12 +11,12 @@ import {answerIdentityQuestion} from './identity.mjs';
 import {typeText,formatElapsed} from './reply-motion.mjs';
 import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=codex-chat-20261025';
 import {renderRichText} from './code-view.mjs?v=codex-chat-20261025';
-import {createAccount} from './account.mjs?v=mono-mark-20261028';
+import {createAccount} from './account.mjs?v=cloud-session-20261029';
 import {createBuilder} from './builder.mjs?v=qwen-coder-restored-20261026';
 import {parseProposal} from './build-project.mjs?v=codex-chat-20261025';
 const $=id=>document.getElementById(id);
 const names={gta_guard:'GTA Guard',game_scam_guard:'Game Scam Guard',ai_web:'AI Web',malwarebazaar:'MalwareBazaar',urlhaus:'URLhaus',file_sandbox:'File sandbox',url_sandbox:'Link sandbox'};
-let locale='en',service,busy=false;
+let locale='en',service,busy=false,serviceLoading=true;
 
 let activeTurn;
 let localReady=false,localCapabilityReason='checking',modelsInitialized=false;
@@ -33,9 +33,10 @@ let projectOpen=false;
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
 const builder=createBuilder({locale:()=>locale});
-const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{navigation.profile(profile);library.profile(profile);document.body.classList.toggle('auth-required',!profile);$('entry-gate').hidden=!!profile;if(profile){$('message').focus();return;}for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
+const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{navigation.profile(profile);library.profile(profile);document.body.classList.toggle('auth-required',!profile);$('entry-gate').hidden=!!profile;$('entry-retry').hidden=!!profile||!account.hasSavedSession();if(profile){$('message').focus();return;}for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
 const navigation=createNavigation({account,onLanguage:()=>{locale='en';translate();}});
 $('entry-signin').onclick=()=>account.open(false);$('entry-signup').onclick=()=>account.open(true);
+$('entry-retry').onclick=async()=>{$('entry-retry').disabled=true;try{const restored=await account.restore();$('entry-retry').hidden=restored||!account.hasSavedSession();}finally{$('entry-retry').disabled=false;}};
 const library=createChatLibrary({account,snapshot:()=>({mode:activeMode,title:(history.find(item=>item.bubble)?.bubble||'New chat').slice(0,100),messages:history.flatMap(item=>item.bubble?[{role:'user',text:String(item.bubble).slice(0,12000)}]:item.response?.generated?.text?[{role:'assistant',text:item.response.generated.text.slice(0,12000)}]:[]).slice(-64)}),restore:chat=>{switchMode(chat.mode);history.length=0;modelHistory.length=0;for(const message of chat.messages){if(message.role==='user')history.push({bubble:message.text});else history.push({response:{generated:{text:message.text,provider:'Saved chat',model:'History'}}});modelHistory.push({role:message.role,content:message.text.slice(0,2000)});}modelHistory.splice(0,Math.max(0,modelHistory.length-8));$('message').value='';translate();}});
 let desktopConnecting=false;
 const permissionInputs={fileUpload:'file-consent',websiteFetch:'website-consent',remoteLookup:'lookup-consent',modelShare:'model-consent'};
@@ -215,6 +216,7 @@ function translate(){
 }
 function renderStatus(){
  $('account').disabled=busy;
+ $('cloud-alert').hidden=!!service||serviceLoading;
  $('tools').replaceChildren();
  for(const [id,name]of Object.entries(names)){
   const state=service?.tools?.[id]?.state||'disabled',row=el('div',undefined,'tool-card');row.dataset.tool=id;row.append(el('strong',name),el('span',t(state),state==='available'?'available':''));$('tools').append(row);
@@ -228,7 +230,7 @@ function renderStatus(){
  $('connection').textContent=!service?(localReady?t('localAvailable'):t('offline')):!ready?t('serviceDisabled'):'';
  const selectedId=$('model').value,remote=service?.model?.models||[],fallbacks={gemini_flash:'cf_qwen3',groq_qwen:'cf_qwen3',groq_gptoss:'cf_gptoss120'};
  const remoteOptions=remote.filter(m=>m.id!=='auto').map(m=>{const fallback=remote.find(candidate=>candidate.id===fallbacks[m.id]&&candidate.state==='configured');if(m.reason==='missing_credential'&&fallback)return {...m,state:'configured',label:`${m.label} → Cloudflare: ${fallback.label} (fallback)`};if(cloudModelOffered(m))return {...m,state:'configured'};return m;});
- const models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار':'Automatic',state:localReady||remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remoteOptions,...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))];
+ const models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار':'Automatic',state:remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remoteOptions,...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))];
  const cloudAutoReady=remote.some(m=>m.id==='auto'&&m.state==='configured');
  const firstConfiguredCloud=remoteOptions.find(m=>m.state==='configured'&&m.id!=='auto')?.id||'';
  if(models.length){
@@ -499,14 +501,19 @@ void bootAssistant();
 async function bootAssistant(){
  const entry=resolveAccountEntry();
  const device=checkLocalDevice();
- const serviceLoad=(async()=>{for(let attempt=0;attempt<2;attempt++){try{const r=await fetch(apiUrl('status'),{credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error('unavailable');const next=await r.json();if(!next||typeof next!=='object'||!next.model)throw new Error('invalid_status');service=next;renderStatus();return;}catch{}}service=undefined;renderStatus();})();
+ const serviceLoad=loadCloudStatus();
  await Promise.all([entry,device,serviceLoad]);
  renderStatus();
 }
+async function loadCloudStatus(){
+ serviceLoading=true;renderStatus();
+ try{for(let attempt=0;attempt<2;attempt++){try{const r=await fetch(apiUrl('status'),{credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error('unavailable');const next=await r.json();if(!next||typeof next!=='object'||!next.model)throw new Error('invalid_status');service=next;return;}catch{}}service=undefined;}
+ finally{serviceLoading=false;renderStatus();}
+}
+$('retry-cloud').onclick=()=>{if(!serviceLoading)void loadCloudStatus();};
 async function resolveAccountEntry(){
- if(account.usesProductionAuth()){await account.restore();return;}
+ if(account.usesProductionAuth()){const restored=await account.restore();$('entry-retry').hidden=restored||!account.hasSavedSession();return;}
  try{const status=await Promise.race([account.authStatus(),new Promise((_,reject)=>setTimeout(()=>reject(Error('timeout')),1200))]);if(status?.configured===true&&status?.persistentAccounts===true)return;}catch{}
  document.body.classList.remove('auth-required');const gate=$('entry-gate');if(gate)gate.hidden=true;
- void welcomeLocalModels();
 }
 
