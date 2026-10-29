@@ -29,8 +29,10 @@ test('configured Gemini and Groq models stay routable when a free-tier flag is a
  assert.equal(planCloudChat('build a website preview',[],{models:flagged,mode:'build'}).model,'groq_qwen');
  assert.equal(planCloudChat('debug this function',[],{models:flagged}).model,'groq_gptoss');
  for(const model of flagged.slice(0,3))assert.equal(cloudModelOffered(model),true,model.id);
- assert.equal(cloudModelOffered({id:'gemini_flash',state:'disabled',reason:'free_tier_not_confirmed'}),true);
+ assert.equal(cloudModelOffered({id:'gemini_flash',state:'disabled',reason:'free_tier_not_confirmed'}),false);
  assert.equal(cloudModelOffered({id:'cf_qwen3',state:'disabled',reason:'free_tier_not_confirmed'}),false);
  assert.equal(planCloudChat('latest sources',[],{models:[{id:'gemini_flash',state:'disabled',reason:'free_tier_not_confirmed'},{id:'cf_qwen3',state:'configured'}]}).model,'cf_qwen3');
 });
+
+
 
