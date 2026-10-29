@@ -6,10 +6,21 @@
   const menu = document.getElementById('navLinks');
   const searchButton = document.getElementById('searchButton');
   if (!navbar || !menuButton || !menu || !searchButton) return;
-  for(const href of ['/products.html','/gta-guard.html','/game-scam-guard.html','/ai/','/tools.html','/trust.html','/docs.html','/download.html']){
-    if(href===location.pathname)continue;
+  // Prefetch only a same-origin page the user shows intent to visit.
+  const prefetched=new Set();
+  const safePages=new Set(['/products.html','/gta-guard.html','/game-scam-guard.html','/ai/','/tools.html','/trust.html','/docs.html','/download.html']);
+  function prefetchIntent(event){
+    const anchor=event.target.closest?.('a[href]');
+    if(!anchor||anchor.target==='_blank'||anchor.hasAttribute('download')||navigator.connection?.saveData)return;
+    let url;try{url=new URL(anchor.href,location.href);}catch{return;}
+    if(url.origin!==location.origin||url.pathname===location.pathname||url.search||!safePages.has(url.pathname)||!/^https?:$/.test(url.protocol))return;
+    const href=url.pathname+url.search;
+    if(prefetched.has(href)||prefetched.size>=4)return;
+    prefetched.add(href);
     const hint=document.createElement('link');hint.rel='prefetch';hint.href=href;document.head.append(hint);
   }
+  document.addEventListener('pointerover',prefetchIntent,{passive:true});
+  document.addEventListener('focusin',prefetchIntent);
   if(!document.querySelector('link[href="/assets/precision/stars.svg?v=20261028-4k"]')){
     const stars=document.createElement('link');stars.rel='preload';stars.as='image';stars.href='/assets/precision/stars.svg?v=20261028-4k';stars.fetchPriority='high';document.head.append(stars);
   }
@@ -111,3 +122,5 @@
     else if (!e.shiftKey && document.activeElement === stops.at(-1)) { e.preventDefault(); stops[0]?.focus(); }
   });
 })();
+
+

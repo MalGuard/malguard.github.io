@@ -2,7 +2,8 @@
 // leave `lang` unset while a large module or canvas frame is still loading.
 document.documentElement.lang='en';
 document.documentElement.dir='ltr';
-const {translations}=await import('./i18n-catalog.mjs?v=20261014-public');
+// A cancelled or unavailable catalog must leave the English page usable.
+const {translations}=await import('./i18n-catalog.mjs?v=20261014-public').catch(()=>({translations:{}}));
 
 let locale='en';
 
@@ -44,3 +45,5 @@ new MutationObserver(records=>{
   if(scheduled)return;scheduled=true;
   queueMicrotask(()=>{scheduled=false;translate();});
 }).observe(document.body,{subtree:true,childList:true});
+
+

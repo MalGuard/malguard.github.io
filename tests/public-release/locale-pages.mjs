@@ -32,6 +32,19 @@ try{
   }
   await context.close();
  }
+ const fallbackContext=await browser.newContext({ignoreHTTPSErrors:true,reducedMotion:'reduce'});
+ await fallbackContext.route('**/*',route=>{
+  const url=new URL(route.request().url());
+  if(url.pathname==='/assets/i18n-catalog.mjs'||url.origin!=='https://127.0.0.1:8443')return route.abort();
+  return route.continue();
+ });
+ const fallbackPage=await fallbackContext.newPage(),fallbackErrors=[];
+ fallbackPage.on('pageerror',error=>fallbackErrors.push(error.message));
+ await fallbackPage.goto('https://127.0.0.1:8443/about.html',{waitUntil:'networkidle'});
+ assert.equal(await fallbackPage.locator('html').getAttribute('lang'),'en');
+ assert.ok(await fallbackPage.locator('h1').isVisible());
+ assert.deepEqual(fallbackErrors,[],'catalog failure must not break the English page');
+ await fallbackContext.close();
  console.log('PASS: '+results.length+' English page layouts and stale locale preference checks; public/admin entry remains separate.');
  await writeFile('test-results/english-pages.json',JSON.stringify({checks:results,passed:results.length,failed:0},null,2));
 }finally{await browser.close();}
