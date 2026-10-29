@@ -137,7 +137,7 @@ try{
  const beforeLocal=requests,localExternal=[];await device.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();localExternal.push(r.request().url());return r.abort();});
  await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>!document.getElementById('send').disabled);assert.equal(await localPage.locator('#model').inputValue(),'llama70b','Prefer a configured cloud model without downloading');
  await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
- await localPage.locator('#local-welcome').waitFor({state:'visible'});assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);await localPage.locator('#local-welcome button[value="later"]').click();
+ assert.equal(await localPage.locator('#local-welcome').isVisible(),false,'local downloads must remain opt-in');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.locator('#model').selectOption('local_fast');
  await localPage.locator('#model').selectOption('__downloads');
  await localPage.locator('#local-offer').waitFor({state:'visible'});
@@ -150,7 +150,7 @@ try{
  assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.reload();await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
  assert.equal(await localPage.locator('#local-offer').isVisible(),false,'do not repeat the offer in this tab');
- await localPage.locator('#model').selectOption('auto');
+ await localPage.locator('#model').selectOption('local_fast');
  await localPage.locator('#message').fill('سلام');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});
  assert.match(await localPage.locator('#download-info').innerText(),/985 MB/);assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);assert.equal(requests,beforeLocal);
  await localPage.locator('#local-download button[value="cancel"]').click();assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
@@ -159,7 +159,7 @@ try{
  await localPage.locator('#model').selectOption('local_medium');
  await localPage.locator('#message').fill('Explain DNS');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});assert.match(await localPage.locator('#download-info').innerText(),/2268 MB/);
  await localPage.keyboard.press('Escape');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),1,'Escape must not reuse previous download approval');
- assert.equal(requests,beforeLocal);assert.deepEqual(localExternal,[]);await device.close();console.log('PASS on-device download/cancel consent, local-only text, automatic greeting routing and separate model download approval (mock Worker).');
+ assert.equal(requests,beforeLocal);assert.deepEqual(localExternal,[]);await device.close();console.log('PASS on-device download/cancel consent, local-only text and separate model download approval (mock Worker).');
  const downloadContext=await browser.newContext({viewport:{width:360,height:740}}),downloadPage=await downloadContext.newPage();
  await downloadContext.addInitScript(()=>{
   Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});
