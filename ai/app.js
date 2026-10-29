@@ -239,7 +239,7 @@ function renderStatus(){
   const defaultId=activeMode==='build'?(cloudAutoReady?'auto':['cf_gptoss120','cf_gptoss20','cf_qwen3'].find(id=>remote.some(m=>m.id===id&&m.state==='configured'))||firstConfiguredCloud||desktopChat.availability.installedIDs[0]||''):cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':firstConfiguredCloud||'';
   const strongCloudReady=cloudAutoReady||!!firstConfiguredCloud;
   const applyCloudDefault=activeMode!=='build'&&strongCloudReady&&!cloudDefaultApplied&&!modelChosen&&!Object.hasOwn(localModels,preferredLocal);
-  const savedLocalReady=activeMode!=='build'&&localReady&&Object.hasOwn(localModels,preferredLocal)&&!modelChosen&&!(Object.hasOwn(localModels,selectedId)&&selectedId!==preferredLocal);
+  const savedLocalReady=activeMode!=='build'&&localReady&&Object.hasOwn(localModels,preferredLocal)&&!modelChosen&&(!Object.hasOwn(localModels,selectedId)||selectedId===preferredLocal);
   $('model').value=savedLocalReady?preferredLocal:applyCloudDefault?defaultId:!modelsInitialized&&localReady&&activeMode!=='build'&&Object.hasOwn(localModels,preferredLocal)?preferredLocal:models.some(m=>m.id===selectedId&&m.state==='configured'&&(activeMode!=='build'||(m.id!=='auto'||cloudAutoReady)&&!m.id.startsWith('local_')))?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
   if(strongCloudReady)cloudDefaultApplied=true;
   lastSelectedModel=$('model').value;
