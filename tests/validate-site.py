@@ -121,7 +121,11 @@ assert metadata['passwordKdf']=='scrypt-v1'
 assert not {'password','fingerprint','license','privateKey','code'} & set(release)
 for page in PAGES:
     text=page.read_text()
-    if page not in PUBLIC_AI_GUIDES:
+    if page.name in {'ai-intelligence.html','malware-ai.html'}:
+        assert '<meta http-equiv="refresh" content="0;url=/ai/">' in text,f'{page}: invalid AI redirect'
+        assert '<link rel="canonical" href="https://malguard.site/ai/">' in text,f'{page}: invalid AI canonical'
+        assert 'noindex,follow' in text,f'{page}: missing redirect robots policy'
+    elif page not in PUBLIC_AI_GUIDES:
         assert '/assets/i18n.mjs' in text,f'{page}: missing locale controls'
 # Keep the GTA Guard layout and schema while updating public release availability.
 gta_html=(ROOT/'gta-guard.html').read_text()
