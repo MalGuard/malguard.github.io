@@ -113,6 +113,33 @@ async function connectDesktop(){
  catch{$('desktop-status').textContent=t('desktopUnavailable');}
  finally{desktopConnecting=false;renderStatus();}
 }
+async function downloadDesktop(){
+ if(busy||desktopDownloadRunning||desktopConnecting)return;
+ const selected=$('desktop-model').value,model=desktopModels[selected];if(!model)return;
+ if(model.downloadGB>=65&&!confirm(t('desktopDownloadConfirm').replace('{size}',String(model.downloadGB))))return;
+ const controller=new AbortController();desktopDownloadController=controller;desktopDownloadRunning=true;
+ $('desktop-download-progress').hidden=false;$('desktop-progress-bar').removeAttribute('value');
+ $('desktop-progress-label').textContent=t('desktopDownloadPreparing');
+ $('desktop-status').textContent='';renderStatus();
+ try{
+  const state=await desktopChat.pull({model:selected,signal:controller.signal,onProgress:progress=>{
+   if(controller.signal.aborted)return;
+   const labels={preparing:'desktopDownloadPreparing',downloading:'desktopDownloading',verifying:'desktopDownloadVerifying',finalizing:'desktopDownloadFinalizing',complete:'desktopDownloadVerifying'};
+   const pct=Number.isInteger(progress.percent)&&progress.percent>=0&&progress.percent<=100?progress.percent:null;
+   if(pct===null)$('desktop-progress-bar').removeAttribute('value');else $('desktop-progress-bar').value=pct;
+   $('desktop-progress-label').textContent=t(labels[progress.phase]||'desktopDownloading')+(pct!==null&&progress.phase==='downloading'?' · '+pct+'%':'');
+  }});
+  if(!state.installedIDs.includes(selected))throw Error('desktop_download_unverified');
+  $('desktop-progress-bar').value=100;
+  $('desktop-progress-label').textContent=t('desktopDownloadSuccess');
+  $('desktop-status').textContent=t('desktopDownloadSuccess');
+  if(activeMode==='chat'){modelChosen=true;renderStatus();$('model').value=selected;lastSelectedModel=selected;}
+ }catch{
+  $('desktop-status').textContent=controller.signal.aborted?t('desktopDownloadStopped'):t('desktopDownloadFailed');
+  $('desktop-progress-label').textContent=$('desktop-status').textContent;
+  $('desktop-progress-bar').removeAttribute('value');
+ }finally{desktopDownloadRunning=false;desktopDownloadController=null;renderStatus();}
+}
 async function runDesktop(model,message){
  const turn=beginTurn('thinking');history.push({bubble:message});$('conversation').append(el('div',message,'bubble'));
  try{const generated=await desktopChat.respond({model,message,locale:replyLanguage(message,locale,modelHistory),history:modelHistory.slice(-8),signal:turn.controller.signal});await presentResponse({generated},turn);modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-8));if($('message').value.trim()===message)$('message').value='';}
@@ -275,7 +302,9 @@ function renderStatus(){
  const sandbox=['file_sandbox','url_sandbox'].includes($('workspace-tool').value);$('isolation-consent').closest('label').hidden=!sandbox;
  const toolState=service?.tools?.[$('workspace-tool').value];$('workspace-status').textContent=toolState?`${t(toolState.state)}${toolState.reason?' · '+toolState.reason:''}`:t('workspaceStatus');
  for(const option of $('workspace-model').options)option.disabled=!cfModels.some(m=>m.id===option.value&&m.available&&m.mode==='work');
- $('manage-desktop-models').disabled=busy||desktopConnecting;$('desktop-connect').disabled=busy||desktopConnecting;
+ $('manage-desktop-models').disabled=busy||desktopConnecting||desktopDownloadRunning;$('desktop-connect').disabled=busy||desktopConnecting||desktopDownloadRunning;
+ $('desktop-model').disabled=desktopDownloadRunning;$('desktop-download').disabled=busy||desktopConnecting||desktopDownloadRunning;
+ $('desktop-cancel-download').disabled=!desktopDownloadRunning;
  updateDesktopInfo();
  const selected=models.find(m=>m.id===$('model').value);
  const modelLabel=selected?.label||service?.model?.model||'';
@@ -425,7 +454,7 @@ document.addEventListener('pointerdown',event=>{const panel=$('settings-panel');
 document.addEventListener('keydown',event=>{if(event.key==='Escape')$('settings-panel').open=false;});
 $('cancel-download').onclick=()=>{if(preparingModel){downloadPermissions.delete(preparingModel);stopTurn();}};
 $('remove-models').onclick=async()=>{if(busy)return;busy=true;renderStatus();try{await localChat.clear();downloadPermissions.clear();preparedModels.clear();$('local-status').textContent=t('localRemoved');}catch{$('local-status').textContent=t('localFailed');}finally{busy=false;renderStatus();}};
-addEventListener('pagehide',()=>{builder.stop();stopTurn();localChat.stop();desktopChat.stop();});
+addEventListener('pagehide',()=>{builder.stop();stopTurn();localChat.stop();desktopDownloadController?.abort();desktopChat.stop();});
 $('message').addEventListener('keydown',event=>{
  if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();if(!busy)$('composer').requestSubmit();}
 });
@@ -537,6 +566,9 @@ async function checkLocalDevice(){localCapabilityReason='checking';localReady=fa
 $('retry-local-capability').onclick=()=>{void checkLocalDevice();};
 $('open-downloads').onclick=()=>{if(!busy)$('download-hub').showModal();};$('hub-browser').onclick=()=>{$('download-hub').close();void offerLocalModels();};$('hub-desktop').onclick=()=>{$('download-hub').close();openDesktopModels();};$('copy-desktop-command').onclick=async()=>{try{await navigator.clipboard.writeText(desktopModels[$('desktop-model').value].command);$('copy-desktop-command').textContent=t('commandCopied');}catch{$('desktop-command').focus();}};
 $('desktop-model').onchange=updateDesktopInfo;$('manage-desktop-models').onclick=openDesktopModels;$('desktop-connect').onclick=connectDesktop;
+ $('desktop-download').onclick=downloadDesktop;
+ $('desktop-cancel-download').onclick=()=>desktopDownloadController?.abort(new DOMException('Stopped by user','AbortError'));
+ $('desktop-models').addEventListener('close',()=>desktopDownloadController?.abort(new DOMException('Dialog closed','AbortError')));
 translate();
 renderStatus();
 void bootAssistant();
