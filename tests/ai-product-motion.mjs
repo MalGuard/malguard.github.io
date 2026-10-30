@@ -34,6 +34,12 @@ try{
  assert.equal(await title.getAttribute('data-type-runs'),'1');await shared.evaluate(()=>scrollTo(0,0));await title.scrollIntoViewIfNeeded();
  assert.equal(await title.getAttribute('data-type-runs'),'1','Returning to a section must not retype it');
  await shared.close();
+ for(const route of ['/docs.html','/research/gta-mod-security-fa.html']){
+  const p=await browser.newPage({viewport:{width:390,height:844},reducedMotion:'no-preference'});await p.goto(base+route);
+  await p.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true');
+  assert.ok(await p.evaluate(()=>{const n=[...document.querySelectorAll('main [data-type]')].find(x=>x.getBoundingClientRect().top>=innerHeight*.94&&x.dataset.typeState==='pending');if(!n)return false;n.dataset.testViewport='target';return true;}),route+' has pending offscreen content');
+  await p.locator('[data-test-viewport="target"]').evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));await p.waitForFunction(()=>Number(document.querySelector('[data-test-viewport="target"]')?.dataset.typeRuns)>0,null,{timeout:12000});await p.close();
+ }
  const gta=await browser.newPage({reducedMotion:'no-preference'});await gta.goto(base+'/gta6-security.html');
  await gta.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true');
  assert.equal(await gta.locator('.gta6-type-line[data-type]').count(),3,'GTA VI headline keeps three separately typed lines');await gta.close();
