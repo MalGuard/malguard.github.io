@@ -484,7 +484,7 @@ $('composer').onsubmit=async event=>{
  try{
   if(file){setActivity('readingFile');input={file:await fileData(file)};setActivity('connecting');}
   turn.controller.signal.throwIfAborted();
-  const response=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({message,tool,locale,input,consent:mode==='worker'?{...consent,modelShare:false}:consent,mode,model:selected,history:mode==='worker'?[]:modelHistory.slice(-8)}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(mode==='worker'?110000:60000)])});
+  const response=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({message,tool,locale,input,consent:mode==='worker'?{...consent,modelShare:false}:consent,mode,model:mode==='worker'?'cf_qwen3':selected,history:mode==='worker'?[]:modelHistory.slice(-8)}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(mode==='worker'?110000:60000)])});
   if(!response.ok){let failure;try{failure=await response.json();}catch{}const details=publicFailure(failure,response.status===429?'rate_limited':response.status===503?'service_busy':response.status>=500?'provider_unavailable':'invalid_request');if(!details.retryAt)Object.assign(details,retryDetails(response.headers.get('retry-after')));showError(details);return;}
   let result;
   await readStream(response,data=>{
