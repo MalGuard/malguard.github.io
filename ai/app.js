@@ -22,7 +22,7 @@ let locale='en',service,busy=false,serviceLoading=true;
 let activeTurn;
 let localReady=false,localCapabilityReason='checking',modelsInitialized=false;
 let lastSelectedModel='';
-let cloudDefaultApplied=false,modelChosen=false,cfModels=[];
+let cloudDefaultApplied=false,modelChosen=false,cfModels=[],accountUsage=null;
 let localOfferPending=false;
 let preferredLocal;try{preferredLocal=localStorage.getItem('malguard.ai.localModel.v1');}catch{}
 const localChat=createLocalChat(),downloadPermissions=new Set();
@@ -34,7 +34,7 @@ let projectOpen=false;
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
 const builder=createBuilder({locale:()=>locale});
-const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{navigation.profile(profile);library.profile(profile);document.body.classList.toggle('auth-required',!profile);$('entry-gate').hidden=!!profile;$('entry-retry').hidden=!!profile||!account.hasSavedSession();if(profile){$('message').focus();return;}for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
+const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{accountUsage=null;navigation.profile(profile);library.profile(profile);document.body.classList.toggle('auth-required',!profile);$('entry-gate').hidden=!!profile;$('entry-retry').hidden=!!profile||!account.hasSavedSession();if(profile){$('message').focus();return;}for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
 const navigation=createNavigation({account,onLanguage:()=>{locale='en';translate();}});
 $('entry-signin').onclick=()=>account.open(false);$('entry-signup').onclick=()=>account.open(true);
 $('entry-retry').onclick=async()=>{$('entry-retry').disabled=true;try{const restored=await account.restore();$('entry-retry').hidden=restored||!account.hasSavedSession();}finally{$('entry-retry').disabled=false;}};
@@ -232,8 +232,9 @@ function renderStatus(){
  const selectedId=$('model').value;
  const cfMode=activeMode==='build'?'code':activeMode==='worker'?'work':'chat';
  const cfAvailable=cfModels.filter(m=>m.available&&m.mode===cfMode);
+ const cfChoices=cfModels.filter(m=>m.mode===cfMode);
  const models=[
-  ...cfAvailable.map(m=>({...m,state:'configured'})),
+  ...cfChoices.map(m=>({...m,state:m.available?'configured':'disabled',label:m.label+(m.available?'':' · unavailable')})),
   ...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),
   ...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))
  ];
@@ -243,7 +244,7 @@ function renderStatus(){
   for(const m of models){
    const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.label;
    const option=el('option',label);option.value=m.id;
-   option.disabled=m.state!=='configured'||activeMode==='build'&&!['code_ultra','code_super'].includes(m.id)&&!Object.hasOwn(desktopModels,m.id);
+   option.disabled=m.state!=='configured'||activeMode==='build'&&m.mode!=='code'&&!Object.hasOwn(desktopModels,m.id);
    $('model').append(option);
   }
   const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);
@@ -251,20 +252,20 @@ function renderStatus(){
   const preferred=cfMode==='code'?CF_DEFAULTS.code:cfMode==='work'?CF_DEFAULTS.work:CF_DEFAULTS.chat;
   const defaultId=cfAvailable.find(m=>m.id===preferred)?.id||cfAvailable[0]?.id||((activeMode!=='build'&&localReady)?preferredLocal:'')||desktopChat.availability.installedIDs[0]||'';
   const saved=conversations[activeMode].model;
-  const isValid=id=>models.some(m=>m.id===id&&m.state==='configured'&&(activeMode!=='build'||['code_ultra','code_super'].includes(m.id)||Object.hasOwn(desktopModels,m.id)));
+  const isValid=id=>models.some(m=>m.id===id&&m.state==='configured'&&(activeMode!=='build'||m.mode==='code'||Object.hasOwn(desktopModels,m.id)));
   $('model').value=isValid(selectedId)?selectedId:isValid(saved)?saved:isValid(defaultId)?defaultId:'';
   lastSelectedModel=$('model').value;
   if(cfAvailable.length)cloudDefaultApplied=true;
   if(service||localReady||cfAvailable.length)modelsInitialized=true;
  }
- const workChoices=cfModels.filter(m=>m.available&&m.mode==='work');
+ const workChoices=cfModels.filter(m=>m.mode==='work');
  if(workChoices.length){
   const control=$('workspace-model'),old=control.value;
   if([...control.options].map(o=>o.value).join('|')!==workChoices.map(m=>m.id).join('|')){
    control.replaceChildren();
    for(const m of workChoices){const opt=el('option',m.label);opt.value=m.id;control.append(opt);}
   }
-  control.value=workChoices.some(m=>m.id===old)?old:CF_DEFAULTS.work;
+  control.value=workChoices.some(m=>m.id===old&&m.available)?old:workChoices.some(m=>m.id===CF_DEFAULTS.work&&m.available)?CF_DEFAULTS.work:workChoices.find(m=>m.available)?.id||'';
  }
  $('model').disabled=busy||activeMode==='worker';$('model').hidden=activeMode==='worker';
  $('build-tab').setAttribute('aria-pressed',String(activeMode==='build'));$('build-panel').hidden=activeMode!=='build'||!projectOpen;document.body.dataset.projectOpen=String(projectOpen);$('build-files-toggle').hidden=activeMode!=='build';$('build-files-toggle').setAttribute('aria-expanded',String(projectOpen));$('build-start-hint').hidden=activeMode!=='build'||projectOpen;$('build-files-toggle').textContent=t(projectOpen?'hideProject':'showProject');$('title').textContent=t(activeMode==='build'?'buildIntroTitle':'title');document.body.dataset.mode=activeMode;document.querySelector('section.workspace').setAttribute('aria-labelledby',activeMode==='build'&&projectOpen?'build-title':'title');$('mode-current').textContent=t(activeMode==='build'?'buildTab':activeMode==='worker'?'workspaceTab':'chatTab');$('message').placeholder=t(activeMode==='build'?'buildPlaceholder':$('tool').value==='ai_web'?'webPlaceholder':activeMode==='worker'?'inspectionPlaceholder':'placeholder');builder.refresh();
@@ -277,7 +278,7 @@ function renderStatus(){
  const selected=models.find(m=>m.id===$('model').value);
  const modelLabel=selected?.label||service?.model?.model||'';
  const modelNotice=locale==='fa'?`مدل انتخاب‌شده: ${modelLabel}`:`Selected model: ${modelLabel}`;
- $('model-status').textContent=cfAvailable.length?modelNotice:t('modelOff');
+ $('model-status').textContent=(cfAvailable.length?modelNotice:t('modelOff'))+(accountUsage?locale==='fa'?` · حدود ${accountUsage.remainingTokens.toLocaleString('en-US')} از ${accountUsage.limitTokens.toLocaleString('en-US')} توکن این ماه باقی‌مونده`:` · ~${accountUsage.remainingTokens.toLocaleString('en-US')} / ${accountUsage.limitTokens.toLocaleString('en-US')} monthly tokens left`:'');
  if(cfAvailable.length)document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌ها از مسیر Cloudflare اجرا می‌شن. Ultra و Gemma و Flash-Lite از داخل Worker به ارائه‌دهندهٔ اصلی وصل می‌شن.':'Models run through Cloudflare. Ultra, Gemma and Flash-Lite are proxied by the Worker to their respective providers.';
  $('manage-models').disabled=busy||localOfferPending;
  $('offer-download-button').disabled=busy||!localReady;
@@ -402,7 +403,7 @@ async function runBuild(message){
  if(!native&&planChat(message,contextHistory).needsWeb&&!$('lookup-consent').checked){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
- else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});}
+ else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
  if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn);if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
  }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error.name==='TimeoutError'?'provider_timeout':'model_unavailable'});}finally{endTurn(turn);}
 }
@@ -466,7 +467,8 @@ $('composer').onsubmit=async event=>{
   const turn=beginTurn('thinking');
   history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
   try{
-   const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
+   const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
+    if(generated.usage){accountUsage=generated.usage;renderStatus();}
    await presentResponse({generated},turn);
    modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});
    while(modelHistory.length>8)modelHistory.shift();
