@@ -27,6 +27,8 @@
  motion.addEventListener('change',e=>{if(e.matches)finish();});
  if(eligible){root.classList.add('type-system');}
  function init(){
+  // DOMContentLoaded and the late interactive fallback may both fire.
+  if(root.dataset.precisionTypeReady==='true')return;
   if(document.body.classList.contains('mg-precision-shared'))root.dataset.experienceReady='true';
   try{
    const shared=document.body.classList.contains('mg-precision-shared');
@@ -185,7 +187,12 @@
  // Defer scripts execute while readyState is "interactive". The shared
  // navigation script runs after this controller and rebuilds #navLinks;
  // initialize only at DOMContentLoaded so we type the FINAL menu entries.
- if(document.readyState==='loading'||document.readyState==='interactive')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+ if(document.readyState==='loading'||document.readyState==='interactive'){
+  document.addEventListener('DOMContentLoaded',init,{once:true});
+  // If inserted after DOMContentLoaded while still "interactive", avoid a
+  // permanently pending page; this task runs after the remaining defer scripts.
+  if(document.readyState==='interactive')setTimeout(init,0);
+ }else init();
 })();
 
 /* Keep the small-screen menu usable without disturbing viewport typing. */
