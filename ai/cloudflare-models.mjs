@@ -49,9 +49,9 @@ export async function fetchCFModels({fetchImpl=fetch,signal}={}){
  Object.defineProperty(models,"accountQuotaEnabled",{value:data.accountQuota?.enabled===true,enumerable:false});
  return models;
 }
-export async function callCFModel({mode,model,message,history=[],sessionToken,quotaEnabled=false,signal,fetchImpl=fetch}){
+export async function callCFModel({mode,model,message,history=[],sessionToken,quotaEnabled=false,freeFallback=false,signal,fetchImpl=fetch}){
  if(!["chat","work","code"].includes(mode)||!IDS.has(model)||typeof message!=="string"||!message.trim()||message.length>5000||quotaEnabled&&(typeof sessionToken!=="string"||!sessionToken))throw new Error("invalid_model_request");
- const body={mode,model,message,history:history.slice(-6).map(m=>({role:m.role,content:m.content}))};
+ const body={mode,model,message,history:history.slice(-6).map(m=>({role:m.role,content:m.content})),freeFallback:freeFallback===true};
  const response=await fetchImpl(ROOT+"/api/public-model-chat",{method:"POST",credentials:"omit",cache:"no-store",mode:"cors",signal,headers:{"Content-Type":"application/json",...(quotaEnabled?{Authorization:"Bearer "+sessionToken}:{})},body:JSON.stringify(body)});
  let data;try{data=await response.json();}catch{throw new Error("cloudflare_invalid_response");}
  if(!response.ok)throw Object.assign(new Error(data?.error||"cloudflare_unavailable"),{code:data?.error||"cloudflare_unavailable",status:response.status,retryAfterSeconds:data?.retryAfterSeconds});
