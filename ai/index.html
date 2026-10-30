@@ -18,8 +18,8 @@
   <title>MalGuard AI</title>
   <link rel="preload" href="/assets/precision/stars.svg?v=20261028-4k" as="image" fetchpriority="high"><link rel="preload" href="/assets/precision/obsidian-space.webp?v=20261028-4k" as="image" fetchpriority="low">
   <link rel="icon" href="./malguard-ai-orbit.svg?v=20261028-mono" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css?v=20261028-4k">
-  <script type="module" src="./app.js?v=opt-in-free-fallback-20261030"></script>
+  <link rel="stylesheet" href="./style.css?v=device-check-20261030">
+  <script type="module" src="./app.js?v=device-check-20261030"></script>
 <link rel="stylesheet" href="/assets/report-launcher.css?v=obsidian-20261028"><script defer src="/assets/report-launcher.js?v=20261027"></script></head>
 <body class="auth-required">
   <main id="entry-gate" class="entry-gate" aria-labelledby="entry-title">
@@ -59,7 +59,7 @@
               <label><input type="checkbox" id="website-consent"><span data-i18n="websiteConsent">Retrieve public HTML and observed redirects; DNS resolvers and destinations will see the address.</span></label>
               <label><input type="checkbox" id="lookup-consent"><span data-i18n="lookupConsent">Send the hash to MalwareBazaar, URL to URLhaus or search query to Tavily as appropriate; check OpenPhish if enabled on the server.</span></label>
               <label><input type="checkbox" id="model-consent"><span data-i18n="modelConsent">Send conversation text to the selected model provider. Files and tool evidence are never sent to the model.</span></label>
-              <label><input type="checkbox" id="free-fallback-consent"><span data-i18n="freeFallbackConsent">If a provider fails, allow my conversation text to be sent to an independent OpenRouter :free model. Separate limits apply; no paid model will be selected automatically.</span></label>
+              <label><input type="checkbox" id="free-fallback-consent"><span data-i18n="freeFallbackConsent">If the selected model is unavailable, allow a free OpenRouter model as fallback. Request text will be sent to OpenRouter; this still consumes your MalGuard monthly tokens. No paid-model fallback.</span></label>
             </fieldset>
             <button type="button" id="revoke-permissions" data-i18n="revoke">Revoke all permissions</button>
           </details>
@@ -180,6 +180,12 @@
       <p id="desktop-use-case" class="model-use-case"></p>
       <p id="desktop-memory"></p>
       <p id="desktop-model-info" aria-live="polite" aria-atomic="true"></p>
+      <div class="desktop-compat-form" aria-label="Device hardware check">
+        <label><span id="desktop-ram-label">Installed RAM (GB)</span><input id="desktop-ram-gb" type="number" inputmode="decimal" min="1" max="100000" step="1" placeholder="e.g. 16" autocomplete="off"></label>
+        <label><span id="desktop-free-label">Free disk space (GB)</span><input id="desktop-free-gb" type="number" inputmode="decimal" min="1" max="100000" step="1" placeholder="e.g. 100" autocomplete="off"></label>
+        <label><span id="desktop-gpu-label">Dedicated GPU VRAM (GB, optional)</span><input id="desktop-gpu-gb" type="number" inputmode="decimal" min="1" max="100000" step="1" placeholder="e.g. 8" autocomplete="off"></label>
+      </div>
+      <p id="desktop-compat-state" class="desktop-compat-state" data-status="unknown" role="status" aria-live="polite"></p>
       <p data-i18n="desktopSteps">1. Install Ollama. 2. Run the model download command below. 3. Allow this site and restart Ollama. 4. Press Connect, then choose the installed model in Chat.</p>
       <pre id="desktop-command" dir="ltr" tabindex="0"></pre><button id="copy-desktop-command" type="button" data-i18n="copyCommand">Copy download command</button>
       <a id="desktop-guide" href="https://ollama.com/download" target="_blank" rel="noopener noreferrer" data-i18n="desktopGuide">Install Ollama</a>
