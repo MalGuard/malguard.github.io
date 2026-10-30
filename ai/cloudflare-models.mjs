@@ -8,12 +8,14 @@ export async function fetchCFModels({fetchImpl=fetch,signal}={}){
  if(!response.ok)throw new Error("cloudflare_unavailable");
  const data=await response.json();
  if(!Array.isArray(data.models))throw new Error("invalid_model_catalog");
- return data.models.filter(m=>m&&IDS.has(m.id)&&["chat","work","code"].includes(m.mode)&&typeof m.label==="string"&&typeof m.available==="boolean").map(m=>({id:m.id,mode:m.mode,label:m.label,provider:m.provider,available:m.available}));
+ const models=data.models.filter(m=>m&&IDS.has(m.id)&&["chat","work","code"].includes(m.mode)&&typeof m.label==="string"&&typeof m.available==="boolean").map(m=>({id:m.id,mode:m.mode,label:m.label,provider:m.provider,available:m.available}));
+ Object.defineProperty(models,"accountQuotaEnabled",{value:data.accountQuota?.enabled===true,enumerable:false});
+ return models;
 }
-export async function callCFModel({mode,model,message,history=[],sessionToken,signal,fetchImpl=fetch}){
- if(!["chat","work","code"].includes(mode)||!IDS.has(model)||typeof message!=="string"||!message.trim()||message.length>5000||typeof sessionToken!=="string"||!sessionToken)throw new Error("invalid_model_request");
+export async function callCFModel({mode,model,message,history=[],sessionToken,quotaEnabled=false,signal,fetchImpl=fetch}){
+ if(!["chat","work","code"].includes(mode)||!IDS.has(model)||typeof message!=="string"||!message.trim()||message.length>5000||quotaEnabled&&(typeof sessionToken!=="string"||!sessionToken))throw new Error("invalid_model_request");
  const body={mode,model,message,history:history.slice(-6).map(m=>({role:m.role,content:m.content}))};
- const response=await fetchImpl(ROOT+"/api/public-model-chat",{method:"POST",credentials:"omit",cache:"no-store",mode:"cors",signal,headers:{"Content-Type":"application/json",Authorization:"Bearer "+sessionToken},body:JSON.stringify(body)});
+ const response=await fetchImpl(ROOT+"/api/public-model-chat",{method:"POST",credentials:"omit",cache:"no-store",mode:"cors",signal,headers:{"Content-Type":"application/json",...(quotaEnabled?{Authorization:"Bearer "+sessionToken}:{})},body:JSON.stringify(body)});
  let data;try{data=await response.json();}catch{throw new Error("cloudflare_invalid_response");}
  if(!response.ok)throw Object.assign(new Error(data?.error||"cloudflare_unavailable"),{code:data?.error||"cloudflare_unavailable",status:response.status,retryAfterSeconds:data?.retryAfterSeconds});
  if(typeof data.text!=="string"||!data.text.trim()||typeof data.model!=="string"||typeof data.provider!=="string")throw new Error("cloudflare_invalid_response");
