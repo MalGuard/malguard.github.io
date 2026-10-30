@@ -252,7 +252,7 @@ function renderStatus(){
   const defaultId=cfAvailable.find(m=>m.id===preferred)?.id||cfAvailable[0]?.id||((activeMode!=='build'&&localReady)?preferredLocal:'')||desktopChat.availability.installedIDs[0]||'';
   const saved=conversations[activeMode].model;
   const isValid=id=>models.some(m=>m.id===id&&m.state==='configured'&&(activeMode!=='build'||['code_ultra','code_super'].includes(m.id)||Object.hasOwn(desktopModels,m.id)));
-  $('model').value=!modelChosen&&isValid(saved)?saved:isValid(selectedId)?selectedId:isValid(saved)?saved:isValid(defaultId)?defaultId:'';
+  $('model').value=isValid(selectedId)?selectedId:isValid(saved)?saved:isValid(defaultId)?defaultId:'';
   lastSelectedModel=$('model').value;
   if(cfAvailable.length)cloudDefaultApplied=true;
   if(service||localReady||cfAvailable.length)modelsInitialized=true;
@@ -545,6 +545,7 @@ async function bootAssistant(){
 }
 async function loadCFModels(){
  try{cfModels=await fetchCFModels({signal:AbortSignal.timeout(7500)});}catch{cfModels=[];}
+ if(!modelChosen&&cfModels.length&&!cfModels.some(m=>m.id===$('model').value&&m.available))$('model').value=activeMode==='build'?CF_DEFAULTS.code:CF_DEFAULTS.chat;
  renderStatus();
 }
 async function loadCloudStatus(){
