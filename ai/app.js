@@ -22,7 +22,7 @@ let locale='en',service,busy=false,serviceLoading=true;
 let activeTurn;
 let localReady=false,localCapabilityReason='checking',modelsInitialized=false;
 let lastSelectedModel='';
-let cloudDefaultApplied=false,modelChosen=false,cfModels=[],accountUsage=null;
+let cloudDefaultApplied=false,modelChosen=false,cfModels=[],accountUsage=null,cfQuotaEnabled=false;
 let localOfferPending=false;
 let preferredLocal;try{preferredLocal=localStorage.getItem('malguard.ai.localModel.v1');}catch{}
 const localChat=createLocalChat(),downloadPermissions=new Set();
@@ -403,7 +403,7 @@ async function runBuild(message){
  if(!native&&planChat(message,contextHistory).needsWeb&&!$('lookup-consent').checked){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
- else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
+ else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
  if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn);if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
  }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error.name==='TimeoutError'?'provider_timeout':'model_unavailable'});}finally{endTurn(turn);}
 }
@@ -467,7 +467,7 @@ $('composer').onsubmit=async event=>{
   const turn=beginTurn('thinking');
   history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
   try{
-   const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
+   const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
     if(generated.usage){accountUsage=generated.usage;renderStatus();}
    await presentResponse({generated},turn);
    modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});
@@ -546,7 +546,7 @@ async function bootAssistant(){
  renderStatus();
 }
 async function loadCFModels(){
- try{cfModels=await fetchCFModels({signal:AbortSignal.timeout(7500)});}catch{cfModels=[];}
+ try{cfModels=await fetchCFModels({signal:AbortSignal.timeout(7500)});cfQuotaEnabled=cfModels.accountQuotaEnabled===true;}catch{cfModels=[];cfQuotaEnabled=false;}
  if(!modelChosen&&cfModels.length&&!cfModels.some(m=>m.id===$('model').value&&m.available))$('model').value=activeMode==='build'?CF_DEFAULTS.code:CF_DEFAULTS.chat;
  renderStatus();
 }
