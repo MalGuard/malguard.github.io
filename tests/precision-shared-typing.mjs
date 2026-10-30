@@ -63,7 +63,7 @@ for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chrom
     }else{
      await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navMotion==='complete',null,{timeout:25000});
      await page.waitForFunction(()=>document.querySelector('main [data-type]')?.dataset.typeRuns>0,null,{timeout:15000});
-     assert.ok(await page.locator('[data-type-state=typing]').count()<=4,path+' typing concurrency exceeded');
+     assert.ok(await page.locator('[data-type-state=typing]').count()<=1,path+' typing jobs overlapped');
      await page.emulateMedia({reducedMotion:'reduce'});
      await page.waitForFunction(()=>!document.documentElement.classList.contains('type-system'),null,{timeout:10000});
     }
