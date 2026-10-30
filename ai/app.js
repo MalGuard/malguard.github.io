@@ -5,6 +5,7 @@ import {publicFailure,retryDetails} from './service-errors.mjs?v=codex-chat-2026
 import {apiUrl,readStream} from './client.mjs?v=cloud-session-20261029';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
+import {fetchCFModels,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=cloudflare-six-20261030';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
@@ -21,14 +22,14 @@ let locale='en',service,busy=false,serviceLoading=true;
 let activeTurn;
 let localReady=false,localCapabilityReason='checking',modelsInitialized=false;
 let lastSelectedModel='';
-let cloudDefaultApplied=false,modelChosen=false;
+let cloudDefaultApplied=false,modelChosen=false,cfModels=[];
 let localOfferPending=false;
 let preferredLocal;try{preferredLocal=localStorage.getItem('malguard.ai.localModel.v1');}catch{}
 const localChat=createLocalChat(),downloadPermissions=new Set();
 const preparedModels=new Set();
 let preparingModel;
 let welcomeSeen=false;try{welcomeSeen=localStorage.getItem('malguard.ai.welcome.v3')==='seen';}catch{}
-const conversations={chat:{history:[],modelHistory:[],draft:'',model:''},worker:{history:[],modelHistory:[],draft:'',model:'cf_qwen3'},build:{history:[],modelHistory:[],draft:'',model:'cf_gptoss120'}};
+const conversations={chat:{history:[],modelHistory:[],draft:'',model:'chat_granite'},worker:{history:[],modelHistory:[],draft:'',model:'work_qwen'},build:{history:[],modelHistory:[],draft:'',model:'code_ultra'}};
 let projectOpen=false;
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
@@ -81,7 +82,7 @@ function switchMode(next,{carryDraft=false}={}){
  if(activeMode==='build')builder.stop();
  activeMode=next;history=conversations[next].history;modelHistory=conversations[next].modelHistory;
  $('mode').value=next;$('message').value=carryDraft?previous.draft:conversations[next].draft;
- if(next!=='worker'){$('tool').value='auto';$('remove-file').click();$('model').value=conversations[next].model||(next==='build'?'cf_gptoss120':'auto');}
+ if(next!=='worker'){$('tool').value='auto';$('remove-file').click();$('model').value=conversations[next].model||(next==='build'?CF_DEFAULTS.code:CF_DEFAULTS.chat);}
  else $('tool').value=$('workspace-tool').value;
  $('isolation-consent').checked=false;$('mode-picker').open=false;closeAttach();translate();
 }
@@ -228,38 +229,56 @@ function renderStatus(){
  $('send').ariaLabel=t(activeTurn?'stop':'send');$('send').title=t(activeTurn?'stop':'send');$('send-label').textContent=t(activeTurn?'stop':'send');
  for(const id of ['clear','mode','tool','file','remove-file','remove-models','attach-toggle','attach-file','attach-chat','attach-inspect','attach-web','chat-tab','workspace-tab','build-tab','workspace-tool','workspace-model','isolation-consent','open-downloads'])$(id).disabled=busy;
  $('connection').textContent=!service?(localReady?t('localAvailable'):t('offline')):!ready?t('serviceDisabled'):'';
- const selectedId=$('model').value,remote=service?.model?.models||[],fallbacks={gemini_flash:'cf_qwen3',groq_qwen:'cf_qwen3',groq_gptoss:'cf_gptoss120'};
- const remoteOptions=remote.filter(m=>m.id!=='auto').map(m=>{const fallback=remote.find(candidate=>candidate.id===fallbacks[m.id]&&candidate.state==='configured');if(m.reason==='missing_credential'&&fallback)return {...m,state:'configured',label:`${m.label} → Cloudflare: ${fallback.label} (fallback)`};if(cloudModelOffered(m))return {...m,state:'configured'};return m;});
- const models=[{id:'auto',label:locale==='fa'?'انتخاب خودکار':'Automatic',state:remote.some(m=>m.id==='auto'&&m.state==='configured')?'configured':'disabled'},...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),...remoteOptions,...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))];
- const cloudAutoReady=remote.some(m=>m.id==='auto'&&m.state==='configured');
- const firstConfiguredCloud=remoteOptions.find(m=>m.state==='configured'&&m.id!=='auto')?.id||'';
+ const selectedId=$('model').value;
+ const cfMode=activeMode==='build'?'code':activeMode==='worker'?'work':'chat';
+ const cfAvailable=cfModels.filter(m=>m.available&&m.mode===cfMode);
+ const models=[
+  ...cfAvailable.map(m=>({...m,state:'configured'})),
+  ...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),
+  ...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))
+ ];
  if(models.length){
   $('model').replaceChildren();
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
-  for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t(cloudAutoReady?'autoCloud':'autoLocal'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured'||activeMode==='build'&&(m.id==='auto'&&!cloudAutoReady||m.id.startsWith('local_'));$('model').append(option);}
-  const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);const desktop=el('option',t('desktopModels')+'…');desktop.value='__desktop';$('model').append(desktop);
-  const defaultId=activeMode==='build'?(cloudAutoReady?'auto':['cf_gptoss120','cf_gptoss20','cf_qwen3'].find(id=>remote.some(m=>m.id===id&&m.state==='configured'))||firstConfiguredCloud||desktopChat.availability.installedIDs[0]||''):cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':firstConfiguredCloud||'';
-  const strongCloudReady=cloudAutoReady||!!firstConfiguredCloud;
-  const applyCloudDefault=activeMode!=='build'&&strongCloudReady&&!cloudDefaultApplied&&!modelChosen&&!Object.hasOwn(localModels,preferredLocal);
-  const savedLocalReady=activeMode!=='build'&&localReady&&Object.hasOwn(localModels,preferredLocal)&&!modelChosen&&(!Object.hasOwn(localModels,selectedId)||selectedId===preferredLocal);
-  $('model').value=savedLocalReady?preferredLocal:applyCloudDefault?defaultId:!modelsInitialized&&localReady&&activeMode!=='build'&&Object.hasOwn(localModels,preferredLocal)?preferredLocal:models.some(m=>m.id===selectedId&&m.state==='configured'&&(activeMode!=='build'||(m.id!=='auto'||cloudAutoReady)&&!m.id.startsWith('local_')))?selectedId:models.some(m=>m.id===defaultId&&m.state==='configured')?defaultId:'';
-  if(strongCloudReady)cloudDefaultApplied=true;
+  for(const m of models){
+   const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.label;
+   const option=el('option',label);option.value=m.id;
+   option.disabled=m.state!=='configured'||activeMode==='build'&&!['code_ultra','code_super'].includes(m.id)&&!Object.hasOwn(desktopModels,m.id);
+   $('model').append(option);
+  }
+  const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);
+  const desktop=el('option',t('desktopModels')+'…');desktop.value='__desktop';$('model').append(desktop);
+  const preferred=cfMode==='code'?CF_DEFAULTS.code:cfMode==='work'?CF_DEFAULTS.work:CF_DEFAULTS.chat;
+  const defaultId=cfAvailable.find(m=>m.id===preferred)?.id||cfAvailable[0]?.id||((activeMode!=='build'&&localReady)?preferredLocal:'')||desktopChat.availability.installedIDs[0]||'';
+  const saved=conversations[activeMode].model;
+  const isValid=id=>models.some(m=>m.id===id&&m.state==='configured'&&(activeMode!=='build'||['code_ultra','code_super'].includes(m.id)||Object.hasOwn(desktopModels,m.id)));
+  $('model').value=isValid(selectedId)?selectedId:isValid(saved)?saved:isValid(defaultId)?defaultId:'';
   lastSelectedModel=$('model').value;
-  if(service||localReady)modelsInitialized=true;
+  if(cfAvailable.length)cloudDefaultApplied=true;
+  if(service||localReady||cfAvailable.length)modelsInitialized=true;
+ }
+ const workChoices=cfModels.filter(m=>m.available&&m.mode==='work');
+ if(workChoices.length){
+  const control=$('workspace-model'),old=control.value;
+  if([...control.options].map(o=>o.value).join('|')!==workChoices.map(m=>m.id).join('|')){
+   control.replaceChildren();
+   for(const m of workChoices){const opt=el('option',m.label);opt.value=m.id;control.append(opt);}
+  }
+  control.value=workChoices.some(m=>m.id===old)?old:CF_DEFAULTS.work;
  }
  $('model').disabled=busy||activeMode==='worker';$('model').hidden=activeMode==='worker';
  $('build-tab').setAttribute('aria-pressed',String(activeMode==='build'));$('build-panel').hidden=activeMode!=='build'||!projectOpen;document.body.dataset.projectOpen=String(projectOpen);$('build-files-toggle').hidden=activeMode!=='build';$('build-files-toggle').setAttribute('aria-expanded',String(projectOpen));$('build-start-hint').hidden=activeMode!=='build'||projectOpen;$('build-files-toggle').textContent=t(projectOpen?'hideProject':'showProject');$('title').textContent=t(activeMode==='build'?'buildIntroTitle':'title');document.body.dataset.mode=activeMode;document.querySelector('section.workspace').setAttribute('aria-labelledby',activeMode==='build'&&projectOpen?'build-title':'title');$('mode-current').textContent=t(activeMode==='build'?'buildTab':activeMode==='worker'?'workspaceTab':'chatTab');$('message').placeholder=t(activeMode==='build'?'buildPlaceholder':$('tool').value==='ai_web'?'webPlaceholder':activeMode==='worker'?'inspectionPlaceholder':'placeholder');builder.refresh();
  $('chat-tab').setAttribute('aria-pressed',String(activeMode==='chat'));$('workspace-tab').setAttribute('aria-pressed',String(activeMode==='worker'));$('workspace-panel').hidden=activeMode!=='worker';$('toolbox').hidden=activeMode!=='worker';$('workspace-panel').ariaLabel=t('workspaceLabel');document.querySelector('.workspace-switch').ariaLabel=t('modeGroup');
  const sandbox=['file_sandbox','url_sandbox'].includes($('workspace-tool').value);$('isolation-consent').closest('label').hidden=!sandbox;
  const toolState=service?.tools?.[$('workspace-tool').value];$('workspace-status').textContent=toolState?`${t(toolState.state)}${toolState.reason?' · '+toolState.reason:''}`:t('workspaceStatus');
- for(const option of $('workspace-model').options)option.disabled=!remoteOptions.some(m=>m.id===option.value&&m.state==='configured');
+ for(const option of $('workspace-model').options)option.disabled=!cfModels.some(m=>m.id===option.value&&m.available&&m.mode==='work');
  $('manage-desktop-models').disabled=busy||desktopConnecting;$('desktop-connect').disabled=busy||desktopConnecting;
  updateDesktopInfo();
  const selected=models.find(m=>m.id===$('model').value);
  const modelLabel=selected?.label||service?.model?.model||'';
- const modelNotice=locale==='fa'?`مدل تنظیم‌شده: ${modelLabel}`:`Configured model: ${modelLabel}`;
- $('model-status').textContent=service?.model?.state==='configured'?modelNotice:t('modelOff');
- if(service?.model?.state==='configured')document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌های کلادفلر سهمیهٔ مشترک روزانه دارند. GPT-OSS 120B برای کارهای سنگین و Qwen3 30B برای مصرف کمتر سهمیه؛ اجرای محلی سقف روزانهٔ سرویس‌دهنده ندارد.':'Cloudflare models share a daily account quota. Use GPT-OSS 120B for demanding tasks or Qwen3 30B for lower quota use. On-device chat has no provider daily quota.';
+ const modelNotice=locale==='fa'?`مدل انتخاب‌شده: ${modelLabel}`:`Selected model: ${modelLabel}`;
+ $('model-status').textContent=cfAvailable.length?modelNotice:t('modelOff');
+ if(cfAvailable.length)document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌ها از مسیر Cloudflare اجرا می‌شن. Ultra و Gemma و Flash-Lite از داخل Worker به ارائه‌دهندهٔ اصلی وصل می‌شن.':'Models run through Cloudflare. Ultra, Gemma and Flash-Lite are proxied by the Worker to their respective providers.';
  $('manage-models').disabled=busy||localOfferPending;
  $('offer-download-button').disabled=busy||!localReady;
  $('offer-compatibility').textContent=localReady?'':t({checking:'localChecking',insecure_context:'localSecure',webgpu_unavailable:'localNoWebGPU',adapter_unavailable:'localNoAdapter',shader_f16_unavailable:'localNoF16'}[localCapabilityReason]||'localCompatibility');
@@ -383,7 +402,7 @@ async function runBuild(message){
  if(!native&&planChat(message,contextHistory).needsWeb&&!$('lookup-consent').checked){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
- else{const r=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:prompt,locale,mode:'chat',routingMode:'build',routingText:message,tool:'auto',model:selected,history:contextHistory,consent:{modelShare:true,remoteLookup:$('lookup-consent').checked}}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(60000)])});const data=await r.json();if(!r.ok||data.error){showError(publicFailure(data));return;}generated=data.generated;}
+ else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});}
  if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn);if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
  }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error.name==='TimeoutError'?'provider_timeout':'model_unavailable'});}finally{endTurn(turn);}
 }
@@ -437,6 +456,25 @@ $('composer').onsubmit=async event=>{
  const selected=mode==='worker'?$('workspace-model').value:$('model').value,cloudAuto=selected==='auto'&&service?.model?.models?.some(m=>m.id==='auto'&&m.state==='configured'),plan=selected==='auto'?(cloudAuto?planCloudChat(message,modelHistory,{models:service.model.models,mode:activeMode}):planChat(message,modelHistory)):null;
  if(effective==='model'&&mode==='chat'&&(selected.startsWith('local_')||!cloudAuto&&plan?.model?.startsWith('local_'))){await runLocal(plan?.model||selected,message,consent);return;}
  if(mode==='chat'&&Object.hasOwn(desktopModels,selected)){await runDesktop(selected,message);return;}
+ const directMode=mode==='chat'?'chat':mode==='worker'&&effective==='model'?'work':null;
+ if(directMode){
+  const chosen=directMode==='work'?$('workspace-model').value:selected;
+  if(!cfModels.some(m=>m.id===chosen&&m.available&&m.mode===directMode)){showError('modelOff');return;}
+  if(!consent.modelShare){
+   if(!await requestModelShare()||activeMode!==mode||$('message').value.trim()!==message)return;
+  }
+  const turn=beginTurn('thinking');
+  history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
+  try{
+   const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
+   await presentResponse({generated},turn);
+   modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});
+   while(modelHistory.length>8)modelHistory.shift();
+   if($('message').value.trim()===message)$('message').value='';
+  }catch(e){if(turn.controller.signal.aborted)stopped(turn);else showError({error:e?.code||'provider_unavailable',retryAfterSeconds:e?.retryAfterSeconds});}
+  finally{endTurn(turn);}
+  return;
+ }
  if(['file_sandbox','url_sandbox'].includes(tool)&&!consent.isolatedExecution){showError('isolationMissing');$('isolation-consent').focus();return;}
  if(!service?.enabled){showError('offline');return;}
  if(effective==='model'&&(plan?.needsWeb||['gemini_flash','groq_qwen','groq_gptoss'].includes(selected)&&planChat(message,modelHistory).needsWeb)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
@@ -446,7 +484,7 @@ $('composer').onsubmit=async event=>{
  try{
   if(file){setActivity('readingFile');input={file:await fileData(file)};setActivity('connecting');}
   turn.controller.signal.throwIfAborted();
-  const response=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({message,tool,locale,input,consent,mode,model:selected,history:mode==='worker'?[]:modelHistory.slice(-8)}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(mode==='worker'?110000:60000)])});
+  const response=await fetch(apiUrl('chat'),{method:'POST',credentials:'omit',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({message,tool,locale,input,consent:mode==='worker'?{...consent,modelShare:false}:consent,mode,model:selected,history:mode==='worker'?[]:modelHistory.slice(-8)}),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(mode==='worker'?110000:60000)])});
   if(!response.ok){let failure;try{failure=await response.json();}catch{}const details=publicFailure(failure,response.status===429?'rate_limited':response.status===503?'service_busy':response.status>=500?'provider_unavailable':'invalid_request');if(!details.retryAt)Object.assign(details,retryDetails(response.headers.get('retry-after')));showError(details);return;}
   let result;
   await readStream(response,data=>{
@@ -502,7 +540,11 @@ async function bootAssistant(){
  const entry=resolveAccountEntry();
  const device=checkLocalDevice();
  const serviceLoad=loadCloudStatus();
- await Promise.all([entry,device,serviceLoad]);
+ await Promise.all([entry,device,serviceLoad,loadCFModels()]);
+ renderStatus();
+}
+async function loadCFModels(){
+ try{cfModels=await fetchCFModels({signal:AbortSignal.timeout(7500)});}catch{cfModels=[];}
  renderStatus();
 }
 async function loadCloudStatus(){
