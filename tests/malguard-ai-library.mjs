@@ -13,7 +13,21 @@ app.all('/api/malguard-library',(req,res)=>{const token=req.headers.authorizatio
 app.post('/api/malguard-ai/chat',(_,res)=>res.type('application/x-ndjson').send(JSON.stringify({result:{generated:{text:'Synthetic saved answer',provider:'fixture',model:'fixture'}}})+'\n'));
 app.use(express.static(fileURLToPath(new URL('../',import.meta.url))));const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));const base=`http://127.0.0.1:${server.address().port}`,browser=await chromium.launch(launchOptions('chromium'));
 try{for(const width of [390,1280]){
- const context=await browser.newContext({viewport:{width,height:1000}}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await context.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');localStorage.setItem('malguard-language','fa');});
+ const context=await browser.newContext({viewport:{width,height:1000}}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.route('https://malware-ai.malguard-security.workers.dev/**',route=>{
+  const url=new URL(route.request().url());const headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'GET, POST, OPTIONS'};
+  if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers});
+  if(url.pathname==='/api/public-models')return route.fulfill({status:200,contentType:'application/json',headers,body:JSON.stringify({models:[
+   {id:'chat_granite',mode:'chat',label:'Granite Micro',provider:'workers_ai',available:true},
+   {id:'chat_flash',mode:'chat',label:'Flash-Lite',provider:'gemini',available:true},
+   {id:'work_qwen',mode:'work',label:'Qwen3 30B',provider:'workers_ai',available:true},
+   {id:'work_gemma',mode:'work',label:'Gemma 4',provider:'gemini',available:true},
+   {id:'code_ultra',mode:'code',label:'Nemotron Ultra',provider:'openrouter',available:true},
+   {id:'code_super',mode:'code',label:'Nemotron Super',provider:'workers_ai',available:true}
+  ]})});
+  if(url.pathname==='/api/public-model-chat')return route.fulfill({status:200,contentType:'application/json',headers,body:JSON.stringify({text:'Synthetic saved answer',provider:'workers_ai',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:'chat_granite',fallback:false})});
+  return route.abort();
+ });await context.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');localStorage.setItem('malguard-language','fa');});
  await page.goto(base+'/ai/');await page.locator('#entry-gate').waitFor();assert.equal(await page.locator('#message').isVisible(),false);assert.equal(await page.locator('html').getAttribute('lang'),'en','legacy site language does not override English default');assert.equal(await page.locator('#language').isVisible(),false);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  async function rail(){if(!(await page.locator('#mode-toggle').isVisible()))await page.locator('#navigation-toggle').click();}
  async function login(email){if(await page.locator('#entry-signin').isVisible())await page.locator('#entry-signin').click();else{if(await page.locator('.navigation-dismiss').isVisible())await page.locator('.navigation-dismiss').click();await page.locator('#account').click();}await page.getByLabel('Email address',{exact:true}).fill(email);await page.getByLabel('Password',{exact:true}).fill('SyntheticPassword1');await page.locator('dialog.ai-account').getByRole('button',{name:'Sign in',exact:true}).click();await page.locator('#message').waitFor();await page.locator('#save-state').filter({hasText:'Chats are saved to your account.'}).waitFor();}

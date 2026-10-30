@@ -9,7 +9,25 @@ import {chromium,launchOptions} from './browser-runtime.mjs';
 const web=express(),root=fileURLToPath(new URL('../',import.meta.url));let requests=0;
 const server=web.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));
 const base=`http://127.0.0.1:${server.address().port}`;
-const testModel={status:()=>({state:'configured',provider:'fixture',model:'benign-test-model',defaultModel:'llama70b',models:[{id:'llama70b',label:'Llama 3.3 70B',state:'configured'},{id:'llama8b',label:'Llama 3.1 8B',state:'configured'},{id:'gemini_flash',label:'Gemini 3.8 Flash',state:'disabled'}]}),respond:async(message,locale,history,selectedModel)=>{if(message==='سلام')assert.equal(selectedModel,'llama8b');return {text:message==='سلام'&&locale==='fa'?'پاسخ فارسی آزمایشی':`Benign test reply ${history.length}`,provider:'fixture',model:'benign-test-model',securityAnalysis:false};}};
+const CLOUD_ORIGIN='https://malware-ai.malguard-security.workers.dev';
+const cfFixtures=[
+ {id:'chat_granite',mode:'chat',label:'Granite 4 Micro',provider:'workers_ai',available:true},
+ {id:'chat_flash',mode:'chat',label:'Gemini Flash-Lite',provider:'gemini',available:true},
+ {id:'work_qwen',mode:'work',label:'Qwen3 30B',provider:'workers_ai',available:true},
+ {id:'work_gemma',mode:'work',label:'Gemma 4 31B',provider:'gemini',available:true},
+ {id:'code_ultra',mode:'code',label:'Nemotron Ultra',provider:'openrouter',available:true},
+ {id:'code_super',mode:'code',label:'Nemotron Super',provider:'workers_ai',available:true}
+];
+const isCFRoute=r=>new URL(r.request().url()).origin===CLOUD_ORIGIN;
+function cfFixture(r){
+ const url=new URL(r.request().url()),headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'POST, OPTIONS'};
+ if(r.request().method()==='OPTIONS')return r.fulfill({status:204,headers});
+ if(url.pathname==='/api/public-models')return r.fulfill({contentType:'application/json',headers,body:JSON.stringify({models:cfFixtures})});
+ const data=r.request().postDataJSON();
+ const reply=data.message==='سلام'?'پاسخ فارسی آزمایشی':`Benign test reply ${data.history.length}`;
+ return r.fulfill({contentType:'application/json',headers,body:JSON.stringify({text:reply,provider:'workers_ai',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:data.model,fallback:false})});
+}
+const testModel={status:()=>({state:'configured',provider:'fixture',model:'benign-test-model',defaultModel:'llama70b',models:[{id:'llama70b',label:'Llama 3.3 70B',state:'configured'},{id:'llama8b',label:'Llama 3.1 8B',state:'configured'},{id:'gemini_flash',label:'Gemini 3.8 Flash',state:'disabled'}]}),respond:async(message,locale,history,selectedModel)=>{if(message==='سلام')assert.equal(selectedModel,'chat_flash');return {text:message==='سلام'&&locale==='fa'?'پاسخ فارسی آزمایشی':`Benign test reply ${history.length}`,provider:'fixture',model:'benign-test-model',securityAnalysis:false};}};
 web.use('/api/malguard-ai',(req,res,next)=>{if(req.method==='POST')requests++;next();},createApp({orchestrator:createOrchestrator(undefined,testModel),enabled:true,publicOrigin:base,log:()=>{}}));web.use(express.static(root));
 const browser=await chromium.launch(launchOptions('chromium'));
 const skipWelcome=context=>context.addInitScript(()=>localStorage.setItem('malguard.ai.welcome.v3','seen'));
@@ -18,7 +36,7 @@ try{
  for(const width of [390,1280]){
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),page=await context.newPage();
   await skipWelcome(context);await context.addInitScript(()=>Object.defineProperty(navigator,'gpu',{value:undefined}));
-  await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
+  await context.route('**/*',r=>isCFRoute(r)?cfFixture(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
   const before=requests;
   for(const [path,selector] of [['/','#products .product-ai a.text-link'],['/products.html','.product-ai .mg-home-product-link']]){
    await page.goto(base+path);
@@ -45,7 +63,7 @@ try{
  for(const width of [360,390,768,1280]){
   const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[],external=[];
   await skipWelcome(context);page.on('pageerror',e=>errors.push(e.message));
-  await context.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
+  await context.route('**/*',r=>{if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
   await page.goto(base+'/ai/');await page.locator('#send').waitFor({state:'visible'});await page.waitForFunction(()=>!document.getElementById('send').disabled);
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
   assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
@@ -92,14 +110,14 @@ try{
    await toggleSettings(page);if(await page.locator('#permissions').getAttribute('open')===null)await page.locator('#permissions summary').click();await page.locator('#model-consent').check();await toggleSettings(page);
    await page.locator('#message').fill('Hello');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
    assert.equal(await page.locator('.assistant-message h3').count(),0);
-   assert.equal(await page.getByText('fixture · benign-test-model',{exact:true}).isVisible(),false);
-   await page.locator('.response-details summary').first().click();assert.equal(await page.getByText('fixture · benign-test-model',{exact:true}).isVisible(),true);
+   assert.equal(await page.getByText('workers_ai · @cf/ibm-granite/granite-4.0-h-micro',{exact:true}).isVisible(),false);
+   await page.locator('.response-details summary').first().click();assert.equal(await page.getByText('workers_ai · @cf/ibm-granite/granite-4.0-h-micro',{exact:true}).isVisible(),true);
    await page.locator('.response-details summary').first().click();
    await page.screenshot({path:'test-results/malguard-ai/quiet-reply-1280.png',fullPage:true});
    await page.locator('#message').fill('Continue');await page.locator('#send').click();await page.getByText('Benign test reply 2',{exact:true}).waitFor();
    assert.equal(await page.locator('html').getAttribute('lang'),'en');
-   await page.locator('#model').selectOption('llama8b');await page.locator('#message').fill('سلام');await page.locator('#send').click();await page.getByText('پاسخ فارسی آزمایشی',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
-   await toggleSettings(page);await page.locator('#mode').selectOption('worker');await toggleSettings(page);await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('This mode inspects files, hashes and websites. Switch to Chat for general or technical questions.',{exact:true}).waitFor();
+   await page.locator('#model').selectOption('chat_flash');await page.locator('#message').fill('سلام');await page.locator('#send').click();await page.getByText('پاسخ فارسی آزمایشی',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
+   await toggleSettings(page);await page.locator('#mode').selectOption('worker');await toggleSettings(page);await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
    await newConversation(page);
    console.log('PASS Chat multi-turn context and inspection-only mode (injected benign model fixture).');
   }
@@ -108,26 +126,8 @@ try{
   console.log(`PASS real AI frontend → backend → static worker, consent, English interface, no overflow/history at ${width}px`);
  }
  const context=await browser.newContext(),page=await context.newPage();await skipWelcome(context);await context.route('**/api/malguard-ai/status',r=>r.abort());await page.goto(base+'/ai/');await toggleSettings(page);await page.getByRole('status').filter({hasText:'Backend unavailable'}).waitFor();assert.equal(await page.locator('#send').isDisabled(),true);await context.close();console.log('PASS backend failure shown; submission disabled.');
- const errorContext=await browser.newContext({timezoneId:'Asia/Tehran'}),errorPage=await errorContext.newPage();
- await skipWelcome(errorContext);
- const retryAt=new Date(Date.now()+300000).toISOString();let errorCase=0;
- await errorContext.route('**/api/malguard-ai/chat',route=>{
-  errorCase++;
-  if(errorCase===1)return route.fulfill({status:429,contentType:'application/json',body:JSON.stringify({error:'provider_rate_limited',retryAt,retryAfterSeconds:300})});
-  const result=errorCase===2?{error:'provider_quota_exhausted'}:{error:'provider_billing_required'};
-  return route.fulfill({contentType:'application/x-ndjson',body:JSON.stringify({event:{phase:'model_started',tool:'chat'}})+'\n'+JSON.stringify({result})+'\n'});
- });
- await errorPage.goto(base+'/ai/');await errorPage.waitForFunction(()=>!document.getElementById('send').disabled);
- await toggleSettings(errorPage);await errorPage.locator('#permissions summary').click();await errorPage.locator('#model-consent').check();await toggleSettings(errorPage);
- await errorPage.locator('#message').fill('سلام');await errorPage.locator('#send').click();
- await errorPage.getByRole('alert').filter({hasText:'request or token limit'}).waitFor();
- const expected=await errorPage.evaluate(stamp=>new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'long'}).format(new Date(stamp)),retryAt);
- await errorPage.waitForFunction(expected=>document.querySelector('[role=alert]')?.innerText.includes(expected),expected);assert.ok((await errorPage.getByRole('alert').innerText()).includes(expected));assert.equal(await errorPage.locator('#message').inputValue(),'سلام');
- await errorPage.locator('#send').click();await errorPage.getByRole('alert').filter({hasText:'did not supply a reset time'}).waitFor();
- assert.match(await errorPage.getByRole('alert').last().innerText(),/did not supply a reset time/);
- assert.match(await errorPage.getByRole('alert').last().innerText(),/did not supply a reset time/);
- await errorPage.locator('#send').click();await errorPage.getByRole('alert').filter({hasText:'credit or billing'}).waitFor();
- await errorContext.close();console.log('PASS HTTP and streamed provider limit/quota/billing errors, real local retry time and preserved message (fixtures).');
+ // Cloudflare-only model rate/quota errors are tested in cloudflare-models.test.js.
+ // The old Vercel NDJSON error fixture does not apply to the JSON Cloudflare model endpoint.
  // Device inference is a Worker fixture here: no model weights or GPU results
  // are fabricated as live verification. Assert the privacy/consent boundaries.
  const device=await browser.newContext({viewport:{width:390,height:844}}),localPage=await device.newPage();
@@ -136,8 +136,8 @@ try{
   window.localWorkerCalls=[];
   window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{generated:{text:'پاسخ محلی آزمایشی',provider:'on_device',model:data.model,securityAnalysis:false}}}),5);}terminate(){}};
  });
- const beforeLocal=requests,localExternal=[];await device.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();localExternal.push(r.request().url());return r.abort();});
- await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>!document.getElementById('send').disabled);assert.equal(await localPage.locator('#model').inputValue(),'llama70b','Prefer a configured cloud model without downloading');
+ const beforeLocal=requests,localExternal=[];await device.route('**/*',r=>{if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();localExternal.push(r.request().url());return r.abort();});
+ await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>!document.getElementById('send').disabled);assert.equal(await localPage.locator('#model').inputValue(),'chat_granite','Prefer the fast Cloudflare chat model without downloading');
  await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
  assert.equal(await localPage.locator('#local-welcome').isVisible(),false,'local downloads must remain opt-in');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.locator('#model').selectOption('local_fast');
@@ -168,7 +168,7 @@ try{
   window.localWorkerCalls=[];
   window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{prepared:true}}),5);}terminate(){}};
  });
- const downloadExternal=[];await downloadContext.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();downloadExternal.push(r.request().url());return r.abort();});
+ const downloadExternal=[];await downloadContext.route('**/*',r=>{if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();downloadExternal.push(r.request().url());return r.abort();});
  await downloadPage.goto(base+'/ai/');await downloadPage.waitForFunction(()=>!document.getElementById('send').disabled);
  assert.equal(await downloadPage.locator('#local-welcome').isVisible(),false,'Local downloads remain opt-in');await downloadPage.locator('#model').selectOption('__downloads');
  await downloadPage.locator('#local-offer').waitFor({state:'visible'});
@@ -186,6 +186,7 @@ try{
  const desktopRequests=[];
  await workContext.route('**/*',r=>{
   const url=new URL(r.request().url());
+  if(isCFRoute(r))return cfFixture(r);
   if(url.origin===base)return r.continue();
   if(url.origin==='http://127.0.0.1:11434'){
    desktopRequests.push({path:url.pathname,body:r.request().postDataJSON()});
