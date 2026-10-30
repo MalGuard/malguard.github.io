@@ -29,7 +29,7 @@
     // Public editorial text only, never forms, live verdicts or interactive results.
     const excluded='form,nav,footer,[aria-live],[role="status"],[role="alert"],.result,.verdict,.scan-result,.status,.badge,.counter,.actions,pre,code,[contenteditable],details:not([open]),.site-search,.scam-model-composition'+(document.body.classList.contains('gta-static')?'':',.gta-stage');
     for(const el of document.querySelectorAll('main h1,main h2,main h3,main h4,main p,main .eyebrow,main .kicker,main .gta6-type-line')){
-     if(el.closest(excluded)||el.isContentEditable||el.hasAttribute('data-type')||el.parentElement?.closest('[data-type]')||[...el.children].some(child=>!child.matches('span,strong,em,b,i,br')))continue;
+     if(el.closest(excluded)||el.isContentEditable||el.hasAttribute('data-type')||el.parentElement?.closest('[data-type]')||el.querySelector('.gta6-type-line')||[...el.children].some(child=>!child.matches('span,strong,em,b,i,br')))continue;
      const value=el.textContent.trim();
      if(value.length<3||value.length>350||!el.getClientRects().length)continue;
      el.classList.add('type');el.dataset.type=el.matches('h1,h2,h3,h4,.gta6-type-line')?'title':'body';el.dataset.typeState='pending';

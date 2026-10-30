@@ -34,6 +34,9 @@ try{
  assert.equal(await title.getAttribute('data-type-runs'),'1');await shared.evaluate(()=>scrollTo(0,0));await title.scrollIntoViewIfNeeded();
  assert.equal(await title.getAttribute('data-type-runs'),'1','Returning to a section must not retype it');
  await shared.close();
+ const gta=await browser.newPage({reducedMotion:'no-preference'});await gta.goto(base+'/gta6-security.html');
+ await gta.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true');
+ assert.equal(await gta.locator('.gta6-type-line[data-type]').count(),3,'GTA VI headline keeps three separately typed lines');await gta.close();
  const fallback=await browser.newPage();await fallback.route('**/assets/precision/site.js*',route=>route.abort());
  await fallback.goto(base+'/ai-product.html');await fallback.waitForFunction(()=>!document.documentElement.classList.contains('type-system'),null,{timeout:8000});
  assert.equal(await fallback.getByRole('heading',{name:'Curiosity, with clarity.'}).isVisible(),true,'Content returns if the motion controller fails');
