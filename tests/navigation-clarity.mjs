@@ -5,7 +5,7 @@ const browser = await chromium.launch(launchOptions('chromium'));
 const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8790';
 try {
   for (const width of [390, 1280]) {
-    const page = await browser.newPage({ viewport: { width, height: 850 }, reducedMotion: 'reduce' });
+    const page = await browser.newPage({ viewport: { width, height: 850 }, reducedMotion: 'reduce', ignoreHTTPSErrors: true });
     await page.goto(`${base}/products.html`);
     await page.waitForFunction(() => document.querySelector('#navbar')?.dataset.navigationReady === 'true');
     await page.locator('#menuBtn').click();
