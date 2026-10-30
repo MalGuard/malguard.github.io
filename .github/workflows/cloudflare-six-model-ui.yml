@@ -1,0 +1,18 @@
+name: Cloudflare six-model UI tests
+on:
+  pull_request:
+    paths:
+      - 'ai/app.js'
+      - 'ai/index.html'
+      - 'ai/cloudflare-models.mjs'
+      - 'services/malguard-ai/test/cloudflare-models.test.js'
+      - '.github/workflows/cloudflare-six-model-ui.yml'
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - run: node --check ai/app.js && node --check ai/cloudflare-models.mjs
+      - run: node --test services/malguard-ai/test/cloudflare-models.test.js
