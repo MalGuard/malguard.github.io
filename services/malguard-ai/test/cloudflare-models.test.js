@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {CF_DEFAULTS,fetchCFModels,callCFModel} from "../../../ai/cloudflare-models.mjs";
+import {CF_DEFAULTS,fetchCFModels,fetchCFUsage,callCFModel} from "../../../ai/cloudflare-models.mjs";
 
 const models=[
  {id:"chat_granite",mode:"chat",label:"Granite 4 Micro",available:true,provider:"workers_ai"},
@@ -68,4 +68,16 @@ test('old deployed Worker remains supported until it advertises account quotas',
   return Response.json({text:'Legacy result',provider:'workers_ai',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:'chat_granite'});
  }});
  assert.equal(got.text,'Legacy result');
+});
+
+test('account usage is read only with an authenticated session and strict numeric validation',async()=>{
+ let calls=0;
+ const usage=await fetchCFUsage({sessionToken:'synthetic-session-valid-user',fetchImpl:async(url,options)=>{
+  calls++;assert.equal(url,'https://malware-ai.malguard-security.workers.dev/api/account-usage');
+  assert.equal(options.headers.Authorization,'Bearer synthetic-session-valid-user');
+  return Response.json({limitTokens:100000,remainingTokens:98000,usedTokens:2000,resetAt:'2026-11-01T00:00:00.000Z'});
+ }});
+ assert.equal(calls,1);assert.equal(usage.remainingTokens,98000);assert.equal(usage.estimated,true);
+ await assert.rejects(fetchCFUsage({sessionToken:'',fetchImpl:async()=>{throw Error('should not fetch');}}),/sign_in_required/);
+ await assert.rejects(fetchCFUsage({sessionToken:'synthetic-session-valid-user',fetchImpl:async()=>Response.json({limitTokens:100000,remainingTokens:200000,usedTokens:0,resetAt:'2026-11-01T00:00:00.000Z'})}),/invalid_usage/);
 });
