@@ -5,7 +5,7 @@ import {publicFailure,retryDetails} from './service-errors.mjs?v=codex-chat-2026
 import {apiUrl,readStream} from './client.mjs?v=cloud-session-20261029';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
-import {fetchCFModels,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=cloudflare-six-20261030';
+import {fetchCFModels,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=quota-models-20261030';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
