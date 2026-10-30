@@ -8,7 +8,7 @@
   if (!navbar || !menuButton || !menu || !searchButton) return;
   // Prefetch only a same-origin page the user shows intent to visit.
   const prefetched=new Set();
-  const safePages=new Set(['/products.html','/gta-guard.html','/game-scam-guard.html','/ai/','/tools.html','/trust.html','/docs.html','/download.html']);
+  const safePages=new Set(['/products.html','/gta-guard.html','/game-scam-guard.html','/ai/','/ai-product.html','/tools.html','/trust.html','/docs.html','/download.html']);
   function prefetchIntent(event){
     const anchor=event.target.closest?.('a[href]');
     if(!anchor||anchor.target==='_blank'||anchor.hasAttribute('download')||navigator.connection?.saveData)return;
