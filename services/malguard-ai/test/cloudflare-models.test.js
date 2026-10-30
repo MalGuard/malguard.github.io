@@ -23,7 +23,7 @@ test("model catalog uses Cloudflare Worker endpoint only, not Vercel",async()=>{
 test("chat/work/code send only to Cloudflare worker without API secrets",async()=>{
  for(const [mode,model] of [["chat","chat_granite"],["work","work_qwen"],["code","code_ultra"]]){
   let count=0;
-  const result=await callCFModel({mode,model,message:"hello",sessionToken:"synthetic-session-valid-user",history:[{role:"user",content:"prior"}],fetchImpl:async(url,options)=>{
+  const result=await callCFModel({mode,model,message:"hello",sessionToken:"synthetic-session-valid-user",quotaEnabled:true,history:[{role:"user",content:"prior"}],fetchImpl:async(url,options)=>{
    count++;
    assert.equal(url,"https://malware-ai.malguard-security.workers.dev/api/public-model-chat");
    assert.ok(!JSON.stringify(options).includes("sk-"));
@@ -36,7 +36,7 @@ test("chat/work/code send only to Cloudflare worker without API secrets",async()
  }
 });
 test("Cloudflare failure returns code without silently changing to a different host",async()=>{
- await assert.rejects(callCFModel({mode:"chat",model:"chat_granite",message:"hello",sessionToken:"synthetic-session-valid-user",fetchImpl:async()=>Response.json({error:"provider_rate_limited",retryAfterSeconds:47},{status:429})}),e=>e.status===429&&e.code==="provider_rate_limited"&&e.retryAfterSeconds===47);
+ await assert.rejects(callCFModel({mode:"chat",model:"chat_granite",message:"hello",sessionToken:"synthetic-session-valid-user",quotaEnabled:true,fetchImpl:async()=>Response.json({error:"provider_rate_limited",retryAfterSeconds:47},{status:429})}),e=>e.status===429&&e.code==="provider_rate_limited"&&e.retryAfterSeconds===47);
 });
 test("existing site styling stays untouched and CSP permits direct Cloudflare",()=>{
  const html=readFileSync(new URL("../../../ai/index.html",import.meta.url),"utf8");
@@ -50,7 +50,7 @@ test("existing site styling stays untouched and CSP permits direct Cloudflare",(
 test('client accepts previously offered models without leaking session into URLs',async()=>{
  const legacy=[['chat','cf_llama3b'],['work','cf_gptoss20'],['code','cf_qwen_coder']];
  for(const [mode,model] of legacy){
-  const generated=await callCFModel({mode,model,message:'hello',sessionToken:'synthetic-session-valid-user',fetchImpl:async(url,opt)=>{
+  const generated=await callCFModel({mode,model,message:'hello',sessionToken:'synthetic-session-valid-user',quotaEnabled:true,fetchImpl:async(url,opt)=>{
    assert.ok(!url.includes('synthetic-session'));
    assert.equal(opt.headers.Authorization,'Bearer synthetic-session-valid-user');
    return Response.json({text:'answer',model:'@cf/example',provider:'workers_ai',modelId:model,usage:{limitTokens:100000,remainingTokens:99880,usedTokens:120,estimated:true}});
@@ -58,4 +58,14 @@ test('client accepts previously offered models without leaking session into URLs
   assert.equal(generated.selectedModel,model);
   assert.equal(generated.usage.remainingTokens,99880);
  }
+});
+
+test('old deployed Worker remains supported until it advertises account quotas',async()=>{
+ const models=await fetchCFModels({fetchImpl:async()=>Response.json({models:[{id:'chat_granite',mode:'chat',label:'Granite',provider:'workers_ai',available:true}]})});
+ assert.equal(models.accountQuotaEnabled,false);
+ const got=await callCFModel({mode:'chat',model:'chat_granite',message:'hello',quotaEnabled:models.accountQuotaEnabled,fetchImpl:async(_,options)=>{
+  assert.equal(options.headers.Authorization,undefined,'do not send an Authorization preflight to the old Worker');
+  return Response.json({text:'Legacy result',provider:'workers_ai',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:'chat_granite'});
+ }});
+ assert.equal(got.text,'Legacy result');
 });
