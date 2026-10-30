@@ -5,21 +5,25 @@ import {createOrchestrator} from '../server/orchestrator.js';
 import {planCloudChat} from '../../../ai/routing.mjs';
 
 const ID='nvidia_nemotron_ultra';
+const OPENROUTER='openrouter_nemotron_ultra';
 test('NVIDIA model is an explicit allowlisted ID, not a user-supplied endpoint',()=>{
  const base={mode:'chat',message:'Create a website',consent:{modelShare:true}};
  assert.equal(parseRequest({...base,model:ID}).model,ID);
+ assert.equal(parseRequest({...base,model:OPENROUTER}).model,OPENROUTER);
  assert.throws(()=>parseRequest({...base,model:'https://integrate.api.nvidia.com/v1'}),InputError);
 });
 
 test('Code Auto uses NVIDIA only when the gateway advertises it configured',()=>{
  const models=[
-  {id:ID,state:'disabled'}, {id:'cf_gptoss120',state:'configured'}
+  {id:ID,state:'disabled'}, {id:OPENROUTER,state:'disabled'}, {id:'cf_gptoss120',state:'configured'}
  ];
  const message='Build a simple website with HTML';
  assert.equal(planCloudChat(message,[],{models,mode:'build'}).model,'cf_gptoss120');
+ models[1].state='configured';
+ assert.equal(planCloudChat(message,[],{models,mode:'build'}).model,OPENROUTER);
+ assert.equal(planCloudChat('Write code',[],{models,mode:'build'}).model,OPENROUTER);
  models[0].state='configured';
- assert.equal(planCloudChat(message,[],{models,mode:'build'}).model,ID);
- assert.equal(planCloudChat('Write code',[],{models,mode:'build'}).model,ID);
+ assert.equal(planCloudChat(message,[],{models,mode:'build'}).model,OPENROUTER);
 });
 
 test('explicit NVIDIA Code request keeps consent, language, and model selection',async()=>{
