@@ -81,3 +81,24 @@ test('account usage is read only with an authenticated session and strict numeri
  await assert.rejects(fetchCFUsage({sessionToken:'',fetchImpl:async()=>{throw Error('should not fetch');}}),/sign_in_required/);
  await assert.rejects(fetchCFUsage({sessionToken:'synthetic-session-valid-user',fetchImpl:async()=>Response.json({limitTokens:100000,remainingTokens:200000,usedTokens:0,resetAt:'2026-11-01T00:00:00.000Z'})}),/invalid_usage/);
 });
+
+test('free cross-provider fallback is opt-in, never sends paid-model IDs or hidden credentials',async()=>{
+ let bodies=[];
+ const fetchImpl=async(_,options)=>{bodies.push(JSON.parse(options.body));return Response.json({text:'Free reply',provider:'openrouter',model:'nvidia/nemotron-3-ultra-550b-a55b:free',modelId:'code_ultra',fallback:true});};
+ const base={mode:'chat',model:'chat_granite',message:'hi',sessionToken:'synthetic-session-valid-user',quotaEnabled:true,fetchImpl};
+ await callCFModel(base);
+ await callCFModel({...base,freeFallback:true});
+ assert.equal(bodies[0].freeFallback,undefined);
+ assert.equal(bodies[1].freeFallback,true);
+ assert.equal(bodies[1].model,'chat_granite','chosen primary model must not be disguised');
+ assert.ok(!JSON.stringify(bodies).includes('OPENROUTER_API_KEY'));
+ await assert.rejects(callCFModel({...base,freeFallback:'paid'}),/invalid_model_request/);
+});
+test('opt-in provider consent is independently revocable',async()=>{
+ const {readPermissions,savePermissions,revokePermissions}=await import('../../../ai/permissions.mjs');
+ const storage=new Map(),store={getItem:key=>storage.get(key)||null,setItem:(k,v)=>storage.set(k,v),removeItem:key=>storage.delete(key)};
+ assert.equal(readPermissions(store).freeFallback,false);
+ savePermissions(store,{freeFallback:true,modelShare:true});
+ assert.equal(readPermissions(store).freeFallback,true);
+ revokePermissions(store);assert.equal(readPermissions(store).freeFallback,false);
+});
