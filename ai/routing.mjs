@@ -18,8 +18,8 @@ export function planChat(message,history=[]){
 export const tierModels=Object.freeze({
  fast:['cf_glm','cf_llama3b','cf_qwen3'],
  search:['gemini_flash','cf_qwen3','cf_gemma4'],
- build:['groq_qwen','cf_gptoss120','cf_qwen_coder'],
- coding:['cf_qwen_coder','groq_gptoss','cf_gptoss120'],
+ build:['openrouter_nemotron_ultra','nvidia_nemotron_ultra','groq_qwen','cf_gptoss120','cf_qwen_coder'],
+ coding:['openrouter_nemotron_ultra','nvidia_nemotron_ultra','cf_qwen_coder','groq_gptoss','cf_gptoss120'],
  expert:['groq_gptoss','cf_gptoss120','cf_nemotron'],
  medium:['cf_gptoss20','cf_qwen3']
 });

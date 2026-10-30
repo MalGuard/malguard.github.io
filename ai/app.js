@@ -28,7 +28,7 @@ const localChat=createLocalChat(),downloadPermissions=new Set();
 const preparedModels=new Set();
 let preparingModel;
 let welcomeSeen=false;try{welcomeSeen=localStorage.getItem('malguard.ai.welcome.v3')==='seen';}catch{}
-const conversations={chat:{history:[],modelHistory:[],draft:'',model:''},worker:{history:[],modelHistory:[],draft:'',model:'cf_qwen3'},build:{history:[],modelHistory:[],draft:'',model:'cf_gptoss120'}};
+const conversations={chat:{history:[],modelHistory:[],draft:'',model:''},worker:{history:[],modelHistory:[],draft:'',model:'cf_qwen3'},build:{history:[],modelHistory:[],draft:'',model:'openrouter_nemotron_ultra'}};
 let projectOpen=false;
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
@@ -81,7 +81,7 @@ function switchMode(next,{carryDraft=false}={}){
  if(activeMode==='build')builder.stop();
  activeMode=next;history=conversations[next].history;modelHistory=conversations[next].modelHistory;
  $('mode').value=next;$('message').value=carryDraft?previous.draft:conversations[next].draft;
- if(next!=='worker'){$('tool').value='auto';$('remove-file').click();$('model').value=conversations[next].model||(next==='build'?'cf_gptoss120':'auto');}
+ if(next!=='worker'){$('tool').value='auto';$('remove-file').click();$('model').value=conversations[next].model||(next==='build'?'openrouter_nemotron_ultra':'auto');}
  else $('tool').value=$('workspace-tool').value;
  $('isolation-consent').checked=false;$('mode-picker').open=false;closeAttach();translate();
 }
@@ -238,7 +238,7 @@ function renderStatus(){
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
   for(const m of models){const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.id==='auto'?t(cloudAutoReady?'autoCloud':'autoLocal'):m.label;const option=el('option',label);option.value=m.id;option.disabled=m.state!=='configured'||activeMode==='build'&&(m.id==='auto'&&!cloudAutoReady||m.id.startsWith('local_'));$('model').append(option);}
   const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);const desktop=el('option',t('desktopModels')+'…');desktop.value='__desktop';$('model').append(desktop);
-  const defaultId=activeMode==='build'?(cloudAutoReady?'auto':['cf_gptoss120','cf_gptoss20','cf_qwen3'].find(id=>remote.some(m=>m.id===id&&m.state==='configured'))||firstConfiguredCloud||desktopChat.availability.installedIDs[0]||''):cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':firstConfiguredCloud||'';
+  const defaultId=activeMode==='build'?(remote.some(m=>m.id==='openrouter_nemotron_ultra'&&m.state==='configured')?'openrouter_nemotron_ultra':remote.some(m=>m.id==='nvidia_nemotron_ultra'&&m.state==='configured')?'nvidia_nemotron_ultra':cloudAutoReady?'auto':['cf_gptoss120','cf_gptoss20','cf_qwen3'].find(id=>remote.some(m=>m.id===id&&m.state==='configured'))||firstConfiguredCloud||desktopChat.availability.installedIDs[0]||''):cloudAutoReady?'auto':remote.some(m=>m.id==='cf_gptoss120'&&m.state==='configured')?'cf_gptoss120':firstConfiguredCloud||'';
   const strongCloudReady=cloudAutoReady||!!firstConfiguredCloud;
   const applyCloudDefault=activeMode!=='build'&&strongCloudReady&&!cloudDefaultApplied&&!modelChosen&&!Object.hasOwn(localModels,preferredLocal);
   const savedLocalReady=activeMode!=='build'&&localReady&&Object.hasOwn(localModels,preferredLocal)&&!modelChosen&&(!Object.hasOwn(localModels,selectedId)||selectedId===preferredLocal);
