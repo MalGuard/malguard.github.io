@@ -38,9 +38,14 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
  }
  async function restore(){
   const token=savedSession();if(!token)return false;
-  try{const p=await request('session',{sessionToken:token});if(typeof p.email!=='string'||p.email.length>254||typeof p.username!=='string'||p.username.length>80||!Number.isFinite(p.expiresAt)||p.expiresAt<=Date.now())throw Error('invalid_profile');
+  try{const p=await request('session',{sessionToken:token});if(typeof p.email!=='string'||p.email.length>254||typeof p.username!=='string'||p.username.length>80||!Number.isFinite(p.expiresAt))throw Error('invalid_profile');if(p.expiresAt<=Date.now())throw Error('expired_session');
    sessionToken=typeof p.sessionToken==='string'?p.sessionToken:token;saveSession(sessionToken);profile={email:p.email,username:p.username};refresh();onChange({...profile});return true;
-  }catch(error){if(error.status===401||error.message==='invalid_profile')saveSession(null);sessionToken=null;profile=null;refresh();return false;}
+  }catch(error){
+   // A temporary outage must not erase an otherwise valid session. The server
+   // explicitly rejects invalid/expired bearer tokens with 401.
+   if([400,401,403].includes(error?.status)||error?.message==='expired_session')saveSession(null);
+   sessionToken=null;profile=null;refresh();return false;
+  }
  }
  function authForm(signup=false){
   discardSignup();

@@ -16,8 +16,8 @@ try{
   assert.match(pending,/, 0\)$/,'Queued text was visible before typing');
   const image=page.locator('.product-art[data-reveal=visual]').last();
   assert.equal(await image.evaluate(node=>getComputedStyle(node).opacity),'0','Queued image was visible before reveal');
-  await page.waitForFunction(()=>!!document.querySelector('.type.typing'),null,{timeout:12000});
-  const active=await page.locator('.type.typing').first().evaluate(node=>({source:getComputedStyle(node.querySelector(':scope > .type-source')).color,ink:getComputedStyle(node.querySelector(':scope > .type-ink')).clipPath}));
+  const sample=await page.waitForFunction(()=>{const node=document.querySelector('.type.typing'),source=node?.querySelector(':scope > .type-source'),ink=node?.querySelector(':scope > .type-ink');return source&&ink?{source:getComputedStyle(source).color,ink:getComputedStyle(ink).clipPath}:false;},null,{timeout:12000});
+  const active=await sample.jsonValue();
   assert.match(active.source,/, 0\)$/,'Original text was visible behind animated text');
   assert.equal(active.ink,'none');
   await image.scrollIntoViewIfNeeded();

@@ -31,5 +31,9 @@ try{
  await title.scrollIntoViewIfNeeded();await shared.waitForFunction(()=>document.querySelector('#malguard-ai h2')?.dataset.typeState==='complete',null,{timeout:12000});
  assert.equal(await title.getAttribute('data-type-runs'),'1');await shared.evaluate(()=>scrollTo(0,0));await title.scrollIntoViewIfNeeded();
  assert.equal(await title.getAttribute('data-type-runs'),'1','Returning to a section must not retype it');
- await shared.close();console.log('PASS platform guide, shared-page once-only typing and reduced motion at mobile and desktop sizes');
+ await shared.close();
+ const fallback=await browser.newPage();await fallback.route('**/assets/precision/site.js*',route=>route.abort());
+ await fallback.goto(base+'/ai-product.html');await fallback.waitForFunction(()=>!document.documentElement.classList.contains('type-system'),null,{timeout:8000});
+ assert.equal(await fallback.getByRole('heading',{name:'Curiosity, with clarity.'}).isVisible(),true,'Content returns if the motion controller fails');
+ await fallback.close();console.log('PASS platform guide, shared-page once-only typing, fallback and reduced motion at mobile and desktop sizes');
 }finally{await browser.close();}

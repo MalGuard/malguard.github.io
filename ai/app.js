@@ -513,7 +513,7 @@ async function loadCloudStatus(){
 $('retry-cloud').onclick=()=>{if(!serviceLoading)void loadCloudStatus();};
 async function resolveAccountEntry(){
  if(account.usesProductionAuth()){const restored=await account.restore();$('entry-retry').hidden=restored||!account.hasSavedSession();return;}
- try{const status=await Promise.race([account.authStatus(),new Promise((_,reject)=>setTimeout(()=>reject(Error('timeout')),1200))]);if(status?.configured===true&&status?.persistentAccounts===true)return;}catch{}
+ try{const status=await Promise.race([account.authStatus(),new Promise((_,reject)=>setTimeout(()=>reject(Error('timeout')),1200))]);if(status?.configured===true&&status?.persistentAccounts===true){const restored=await account.restore();$('entry-retry').hidden=restored||!account.hasSavedSession();return;}}catch{}
  document.body.classList.remove('auth-required');const gate=$('entry-gate');if(gate)gate.hidden=true;
 }
 
