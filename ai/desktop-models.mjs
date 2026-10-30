@@ -34,6 +34,56 @@ export function createDesktopChat({fetchImpl=globalThis.fetch,connectTimeout=500
  }
  return {
   get availability(){return snapshot();},
+  // A real, explicit user-initiated pull from an already running *local* Ollama.
+  // Never download model weights through MalGuard's servers or silently install software.
+  async download({model,signal,onProgress=()=>{}}={}){
+   if(!Object.hasOwn(desktopModels,model))throw fail('invalid_desktop_model');
+   if(!available)throw fail('desktop_unavailable');
+   if(active)throw fail('desktop_busy');
+   const controller=new AbortController();active=controller;
+   const abort=()=>controller.abort(signal?.reason||new DOMException('Stopped by user','AbortError'));
+   if(signal?.aborted)abort();else signal?.addEventListener('abort',abort,{once:true});
+   let finished=false,reader;
+   try{
+    controller.signal.throwIfAborted();
+    const selected=desktopModels[model];
+    const response=await fetchImpl(BASE+'/api/pull',{method:'POST',redirect:'error',credentials:'omit',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:selected.model,stream:true}),signal:controller.signal});
+    if(!response.ok)throw fail('desktop_download_failed');
+    reader=response.body?.getReader();if(!reader)throw fail('desktop_download_invalid_response');
+    const decoder=new TextDecoder('utf-8',{fatal:true});let buffered='',received=0;
+    const record=line=>{
+     if(line.length>8192)throw fail('desktop_download_invalid_response');
+     let event;try{event=JSON.parse(line);}catch{throw fail('desktop_download_invalid_response');}
+     if(!event||typeof event.status!=='string')throw fail('desktop_download_invalid_response');
+     if(event.error)throw fail('desktop_download_failed');
+     const status=event.status.slice(0,90);
+     const total=Number(event.total),completed=Number(event.completed);
+     const hasProgress=Number.isFinite(total)&&total>0&&Number.isFinite(completed)&&completed>=0&&completed<=total;
+     onProgress({status,progress:hasProgress?Math.min(99,Math.floor(completed/total*100)):null,completed:hasProgress?completed:null,total:hasProgress?total:null,finished:status==='success'});
+     if(status==='success')finished=true;
+    };
+    while(true){
+     controller.signal.throwIfAborted();
+     const {done,value}=await reader.read();if(done)break;
+     received+=value.byteLength;if(received>10*1024*1024)throw fail('desktop_download_invalid_response');
+     buffered+=decoder.decode(value,{stream:true});
+     if(buffered.length>16384&&!buffered.includes('\\n'))throw fail('desktop_download_invalid_response');
+     let index;while((index=buffered.indexOf('\\n'))>=0){const line=buffered.slice(0,index).trim();buffered=buffered.slice(index+1);if(line)record(line);}
+     if(buffered.length>16384)throw fail('desktop_download_invalid_response');
+    }
+    buffered+=decoder.decode();
+    if(buffered.trim())record(buffered.trim());
+    if(!finished)throw fail('desktop_download_incomplete');
+   }finally{
+    try{await reader?.cancel();}catch{}
+    signal?.removeEventListener('abort',abort);
+    if(active===controller)active=undefined;
+   }
+   // A completed stream is not enough; only the model reported by Ollama /api/tags is usable.
+   const after=await this.connect({signal});
+   if(!after.installedIDs.includes(model))throw fail('desktop_download_not_installed');
+   return after;
+  },
   stop(){active?.abort(new DOMException('Stopped by user','AbortError'));},
   async connect({signal}={}){
    if(active)throw fail('desktop_busy');available=false;installedIDs=[];
