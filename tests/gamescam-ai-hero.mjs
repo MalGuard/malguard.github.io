@@ -4,9 +4,9 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {chromium,webkit,launchOptions} from './browser-runtime.mjs';
 const js=readFileSync('assets/precision/site.js','utf8');
-assert.match(js,/per:29,min:230,max:455/,'button timing should be slightly faster');
-assert.match(js,/per:39,min:335,max:900/,'title timing should be slightly faster');
-assert.match(js,/per:21,min:360,max:1320/,'body timing should be slightly faster');
+const limits=[...js.matchAll(/per:(\d+),min:(\d+),max:(\d+)/g)].map(match=>Number(match[3]));
+assert.equal(limits.length,3,'Button, title and body timing must be configured');
+assert.ok(limits.every(max=>max<=650),'Each text animation must finish quickly');
 const root='https://127.0.0.1:8443',browserName=process.env.TEST_BROWSER||'chromium';
 const browser=await(browserName==='webkit'?webkit:chromium).launch(launchOptions(browserName));
 try{

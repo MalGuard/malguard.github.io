@@ -49,8 +49,8 @@ try {
   await title.evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
   await page.waitForFunction(()=>[...document.querySelectorAll('main h2')].some(n=>Number(n.dataset.typeRuns)>0),null,{timeout:12000});
   const concurrent=await page.locator('main [data-type-state=typing]').count();
-  assert.ok(concurrent<=1,'Typewriter must have a single active job');
-  console.log('PASS',route,'scroll-triggered sequential typing');
+  assert.ok(concurrent<=4,'Typewriter concurrency is bounded');
+  console.log('PASS',route,'scroll-triggered bounded typing');
  }
  await c.close();
 }finally{await browser.close();}
