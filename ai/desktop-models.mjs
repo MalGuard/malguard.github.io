@@ -42,7 +42,70 @@ export function createDesktopChat({fetchImpl=globalThis.fetch,connectTimeout=500
    installedIDs=Object.values(desktopModels).filter(model=>data.models.some(row=>row&&row.name===model.model)).map(model=>model.id);
    available=true;return snapshot();
   },
-  async respond({model,message,locale='en',history=[],signal}){
+  async pull({model,signal,onProgress=()=>{}}={}){
+   if(!Object.hasOwn(desktopModels,model))throw fail('invalid_desktop_model');
+   if(typeof onProgress!=='function')throw fail('desktop_invalid_input');
+   if(active)throw fail('desktop_busy');
+   const selected=desktopModels[model],controller=new AbortController();active=controller;
+   const abort=()=>controller.abort(signal?.reason);
+   if(signal?.aborted)abort();else signal?.addEventListener('abort',abort,{once:true});
+   let reader;
+   try{
+    controller.signal.throwIfAborted();
+    // Explicit user action only. Request goes to local Ollama, never MalGuard's server.
+    const response=await fetchImpl(BASE+'/api/pull',{method:'POST',redirect:'error',credentials:'omit',cache:'no-store',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({model:selected.model,stream:true}),signal:controller.signal});
+    if(!response.ok||!response.body)throw fail('desktop_download_unavailable');
+    reader=response.body.getReader();
+    const decoder=new TextDecoder(),MAX_LINE=32768;
+    let pending='',success=false,seen=0;
+    const line=raw=>{
+     if(!raw.trim())return;
+     if(raw.length>MAX_LINE)throw fail('desktop_download_response_too_large');
+     let event;try{event=JSON.parse(raw);}catch{throw fail('desktop_download_invalid_response');}
+     if(!event||typeof event!=='object'||Array.isArray(event))throw fail('desktop_download_invalid_response');
+     if(typeof event.error==='string'||event.error)throw fail('desktop_download_failed');
+     const status=typeof event.status==='string'?event.status:'';
+     if(status.length>256)throw fail('desktop_download_invalid_response');
+     if(status==='success'){success=true;onProgress({phase:'complete',percent:100});return;}
+     if(success)throw fail('desktop_download_invalid_response');
+     const completed=Number(event.completed),total=Number(event.total);
+     const validTotal=Number.isFinite(total)&&total>0&&total<=1e13;
+     const validCompleted=validTotal&&Number.isFinite(completed)&&completed>=0&&completed<=total;
+     // Ollama reports per-layer (not full-model) progress; do not mislabel as total.
+     const phase=status.startsWith('pulling ')||status.startsWith('downloading ')?'downloading':
+       status.includes('verifying')?'verifying':status.includes('writing')?'finalizing':'preparing';
+     onProgress({phase,percent:validCompleted?Math.floor(completed/total*100):null});
+    };
+    while(true){
+     controller.signal.throwIfAborted();
+     const {done,value}=await reader.read();if(done)break;
+     pending+=decoder.decode(value,{stream:true});
+     if(pending.length>MAX_LINE*2)throw fail('desktop_download_response_too_large');
+     let pos;
+     while((pos=pending.indexOf('\n'))!==-1){
+      line(pending.slice(0,pos));pending=pending.slice(pos+1);
+      if(++seen>1000000)throw fail('desktop_download_response_too_large');
+     }
+    }
+    pending+=decoder.decode();if(pending.trim())line(pending);
+    if(!success)throw fail('desktop_download_incomplete');
+    // A final success event alone is not enough: confirm Ollama installed the
+    // EXACT model name before we advertise it as selectable in MalGuard.
+    const tagsResponse=await fetchImpl(BASE+'/api/tags',{method:'GET',redirect:'error',credentials:'omit',cache:'no-store',signal:controller.signal});
+    const tags=await readJSON(tagsResponse,controller.signal);
+    if(!Array.isArray(tags.models)||tags.models.length>1000)throw fail('desktop_invalid_response');
+    installedIDs=Object.values(desktopModels).filter(m=>tags.models.some(row=>row&&row.name===m.model)).map(m=>m.id);
+    available=true;
+    if(!installedIDs.includes(model))throw fail('desktop_download_unverified');
+    return snapshot();
+   }finally{
+    try{await reader?.cancel();}catch{}
+    signal?.removeEventListener('abort',abort);
+    if(active===controller)active=undefined;
+   }
+  },
+ async respond({model,message,locale='en',history=[],signal}){
    if(!Object.hasOwn(desktopModels,model))throw fail('invalid_desktop_model');
    if(!available||!installedIDs.includes(model))throw fail('desktop_model_not_installed');
    if(typeof message!=='string'||!message.trim()||message.length>5000||!['en','fa'].includes(locale)||!Array.isArray(history)||history.length>8||history.some(row=>!row||!['user','assistant'].includes(row.role)||typeof row.content!=='string'||row.content.length>2000))throw fail('desktop_invalid_input');
