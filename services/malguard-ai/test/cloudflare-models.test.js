@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {CF_DEFAULTS,fetchCFModels,fetchCFUsage,callCFModel} from "../../../ai/cloudflare-models.mjs";
+import {CF_DEFAULTS,fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel} from "../../../ai/cloudflare-models.mjs";
 
 const models=[
  {id:"chat_granite",mode:"chat",label:"Granite 4 Micro",available:true,provider:"workers_ai"},
@@ -17,7 +17,7 @@ test("model catalog uses Cloudflare Worker endpoint only, not Vercel",async()=>{
   assert.equal(options.credentials,"omit");
   return Response.json({models});
  };
- const got=await fetchCFModels({fetchImpl});assert.deepEqual(got,models);
+ const got=await fetchCFModels({fetchImpl});assert.equal(got.length,22);assert.deepEqual(got.filter(m=>m.available),models);assert.equal(got.filter(m=>!m.available).length,16);
  assert.deepEqual(CF_DEFAULTS,{chat:"chat_granite",work:"work_qwen",code:"code_ultra"});
 });
 test("chat/work/code send only to Cloudflare worker without API secrets",async()=>{
@@ -41,7 +41,7 @@ test("Cloudflare failure returns code without silently changing to a different h
 test("existing site styling stays untouched and CSP permits direct Cloudflare",()=>{
  const html=readFileSync(new URL("../../../ai/index.html",import.meta.url),"utf8");
  assert.match(html,/connect-src[^"]+https:\/\/malware-ai\.malguard-security\.workers\.dev/);
- assert.match(html,/\.\/app\.js\?v=opt-in-free-fallback-20261030/);
+ assert.match(html,/\.\/app\.js\?v=device-check-20261030/);
  const script=readFileSync(new URL("../../../ai/app.js",import.meta.url),"utf8");
  assert.match(script,/callCFModel\(/);
  assert.match(script,/mode==='worker'\?'cf_qwen3':selected/);
@@ -103,4 +103,21 @@ test('cross-provider consent is never silently persisted on a shared device',asy
  revokePermissions(store);assert.equal(readPermissions(store).modelShare,false);
  const script=readFileSync(new URL('../../../ai/app.js',import.meta.url),'utf8');
  assert.match(script,/\$\('free-fallback-consent'\)\.checked=false/,'sign-out/revoke must clear free fallback');
+});
+
+test('a stale or incomplete backend never hides classic models or wrongly enables them',async()=>{
+ const partial=await fetchCFModels({fetchImpl:async()=>Response.json({models:[{id:'chat_granite',mode:'chat',label:'Granite',provider:'workers_ai',available:true}]})});
+ assert.equal(partial.length,22);
+ assert.equal(partial.find(m=>m.id==='chat_granite').available,true);
+ for(const id of ['cf_gptoss120','llama70b','cf_qwen_coder','groq_qwen']){
+  assert.equal(partial.find(m=>m.id===id).available,false,id);
+ }
+ const invalid=await fetchCFModels({fetchImpl:async()=>Response.json({models:[
+  {id:'chat_granite',mode:'code',label:'Incorrect mode',provider:'workers_ai',available:true},
+  {id:'cf_gptoss120',mode:'code',label:'Incorrect provider',provider:'wrong',available:true},
+ ]})});
+ assert.equal(invalid.filter(m=>m.available).length,0);
+ const offline=unavailableCFModels();
+ assert.equal(offline.length,22);
+ assert.ok(offline.every(m=>m.available===false));
 });
