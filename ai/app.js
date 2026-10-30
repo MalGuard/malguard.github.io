@@ -10,7 +10,7 @@ import {localModels,localCapabilityDetails,createLocalChat} from './local-models
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
 import {typeText,formatElapsed} from './reply-motion.mjs';
-import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=codex-chat-20261025';
+import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=desktop-pull-20261030';
 import {renderRichText} from './code-view.mjs?v=codex-chat-20261025';
 import {createAccount} from './account.mjs?v=founder-name-20261029';
 import {createBuilder} from './builder.mjs?v=qwen-coder-restored-20261026';
