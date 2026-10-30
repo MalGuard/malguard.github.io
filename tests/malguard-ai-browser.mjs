@@ -126,30 +126,8 @@ try{
   console.log(`PASS real AI frontend → backend → static worker, consent, English interface, no overflow/history at ${width}px`);
  }
  const context=await browser.newContext(),page=await context.newPage();await skipWelcome(context);await context.route('**/api/malguard-ai/status',r=>r.abort());await page.goto(base+'/ai/');await toggleSettings(page);await page.getByRole('status').filter({hasText:'Backend unavailable'}).waitFor();assert.equal(await page.locator('#send').isDisabled(),true);await context.close();console.log('PASS backend failure shown; submission disabled.');
- const errorContext=await browser.newContext({timezoneId:'Asia/Tehran'}),errorPage=await errorContext.newPage();
- await skipWelcome(errorContext);
- const retryAt=new Date(Date.now()+300000).toISOString();let errorCase=0;
- await errorContext.route('**/api/malguard-ai/status',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({enabled:true,model:testModel.status(),tools:{}})}));
- await errorContext.route('**/api/public-models',cfFixture);
- await errorContext.route('**/api/public-model-chat',route=>{
-  const headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'POST, OPTIONS'};
-  if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers});
-  errorCase++;
-  if(errorCase===1)return route.fulfill({status:429,contentType:'application/json',headers,body:JSON.stringify({error:'provider_rate_limited',retryAt,retryAfterSeconds:300})});
-  const result=errorCase===2?{error:'provider_quota_exhausted'}:{error:'provider_billing_required'};
-  return route.fulfill({status:503,contentType:'application/json',headers,body:JSON.stringify(result)});
- });
- await errorPage.goto(base+'/ai/');await errorPage.waitForFunction(()=>!document.getElementById('send').disabled);
- await toggleSettings(errorPage);await errorPage.locator('#permissions summary').click();await errorPage.locator('#model-consent').check();await toggleSettings(errorPage);
- await errorPage.locator('#message').fill('سلام');await errorPage.locator('#send').click();
- await errorPage.getByRole('alert').filter({hasText:'request or token limit'}).waitFor();
- const expected=await errorPage.evaluate(stamp=>new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'long'}).format(new Date(stamp)),retryAt);
- await errorPage.waitForFunction(expected=>document.querySelector('[role=alert]')?.innerText.includes(expected),expected);assert.ok((await errorPage.getByRole('alert').innerText()).includes(expected));assert.equal(await errorPage.locator('#message').inputValue(),'سلام');
- await errorPage.locator('#send').click();await errorPage.getByRole('alert').filter({hasText:'did not supply a reset time'}).waitFor();
- assert.match(await errorPage.getByRole('alert').last().innerText(),/did not supply a reset time/);
- assert.match(await errorPage.getByRole('alert').last().innerText(),/did not supply a reset time/);
- await errorPage.locator('#send').click();await errorPage.getByRole('alert').filter({hasText:'credit or billing'}).waitFor();
- await errorContext.close();console.log('PASS HTTP and streamed provider limit/quota/billing errors, real local retry time and preserved message (fixtures).');
+ // Cloudflare-only model rate/quota errors are tested in cloudflare-models.test.js.
+ // The old Vercel NDJSON error fixture does not apply to the JSON Cloudflare model endpoint.
  // Device inference is a Worker fixture here: no model weights or GPU results
  // are fabricated as live verification. Assert the privacy/consent boundaries.
  const device=await browser.newContext({viewport:{width:390,height:844}}),localPage=await device.newPage();
