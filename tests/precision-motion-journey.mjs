@@ -60,7 +60,7 @@ for(const name of names){
   assert.equal(await target.getAttribute('data-type-state'),'pending','Offscreen text starts only when viewed');
   await target.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
   await p.waitForFunction(()=>Number(document.querySelector('#technology [data-type]')?.dataset.typeRuns)>0,null,{timeout:30000});
-  assert.ok(await p.locator('main [data-type-state=typing]').count()<=4,'Typing concurrency is bounded');
+  assert.ok(await p.locator('main [data-type-state=typing]').count()<=1,'Typing concurrency is bounded');
   assert.deepEqual(errors,[],'Typewriter must not throw');
   reports.push({browser:name,viewportTyping:'pass',errors});
   console.log('PASS',name,'viewport-triggered bounded typewriter');
