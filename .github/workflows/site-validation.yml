@@ -59,6 +59,9 @@ jobs:
             test -s "$file" || { echo "Missing required file: $file"; exit 1; }
           done
 
+      - name: Validate public no-signup tool entry point
+        run: node --test tests/growth-local-tools.test.mjs
+
       - name: Validate MalGuard AI without live providers or deployment
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
