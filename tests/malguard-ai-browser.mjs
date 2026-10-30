@@ -20,11 +20,12 @@ const cfFixtures=[
 ];
 const isCFRoute=r=>new URL(r.request().url()).origin===CLOUD_ORIGIN;
 function cfFixture(r){
- const url=new URL(r.request().url());
- if(url.pathname==='/api/public-models')return r.fulfill({contentType:'application/json',body:JSON.stringify({models:cfFixtures})});
+ const url=new URL(r.request().url()),headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'POST, OPTIONS'};
+ if(r.request().method()==='OPTIONS')return r.fulfill({status:204,headers});
+ if(url.pathname==='/api/public-models')return r.fulfill({contentType:'application/json',headers,body:JSON.stringify({models:cfFixtures})});
  const data=r.request().postDataJSON();
  const reply=data.message==='سلام'?'پاسخ فارسی آزمایشی':`Benign test reply ${data.history.length}`;
- return r.fulfill({contentType:'application/json',body:JSON.stringify({text:reply,provider:'workers_ai',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:data.model,fallback:false})});
+ return r.fulfill({contentType:'application/json',headers,body:JSON.stringify({text:reply,provider:'workers_ai',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:data.model,fallback:false})});
 }
 const testModel={status:()=>({state:'configured',provider:'fixture',model:'benign-test-model',defaultModel:'llama70b',models:[{id:'llama70b',label:'Llama 3.3 70B',state:'configured'},{id:'llama8b',label:'Llama 3.1 8B',state:'configured'},{id:'gemini_flash',label:'Gemini 3.8 Flash',state:'disabled'}]}),respond:async(message,locale,history,selectedModel)=>{if(message==='سلام')assert.equal(selectedModel,'chat_flash');return {text:message==='سلام'&&locale==='fa'?'پاسخ فارسی آزمایشی':`Benign test reply ${history.length}`,provider:'fixture',model:'benign-test-model',securityAnalysis:false};}};
 web.use('/api/malguard-ai',(req,res,next)=>{if(req.method==='POST')requests++;next();},createApp({orchestrator:createOrchestrator(undefined,testModel),enabled:true,publicOrigin:base,log:()=>{}}));web.use(express.static(root));
@@ -130,10 +131,12 @@ try{
  const retryAt=new Date(Date.now()+300000).toISOString();let errorCase=0;
  await errorContext.route('**/api/public-models',cfFixture);
  await errorContext.route('**/api/public-model-chat',route=>{
+  const headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'POST, OPTIONS'};
+  if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers});
   errorCase++;
-  if(errorCase===1)return route.fulfill({status:429,contentType:'application/json',body:JSON.stringify({error:'provider_rate_limited',retryAt,retryAfterSeconds:300})});
+  if(errorCase===1)return route.fulfill({status:429,contentType:'application/json',headers,body:JSON.stringify({error:'provider_rate_limited',retryAt,retryAfterSeconds:300})});
   const result=errorCase===2?{error:'provider_quota_exhausted'}:{error:'provider_billing_required'};
-  return route.fulfill({contentType:'application/x-ndjson',body:JSON.stringify({event:{phase:'model_started',tool:'chat'}})+'\n'+JSON.stringify({result})+'\n'});
+  return route.fulfill({status:503,contentType:'application/json',headers,body:JSON.stringify(result)});
  });
  await errorPage.goto(base+'/ai/');await errorPage.waitForFunction(()=>!document.getElementById('send').disabled);
  await toggleSettings(errorPage);await errorPage.locator('#permissions summary').click();await errorPage.locator('#model-consent').check();await toggleSettings(errorPage);
