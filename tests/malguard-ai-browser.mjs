@@ -28,9 +28,14 @@ function cfFixture(r){
  return r.fulfill({contentType:'application/json',headers,body:JSON.stringify({text:reply,provider:'workers_ai',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:data.model,fallback:false})});
 }
 const testModel={status:()=>({state:'configured',provider:'fixture',model:'benign-test-model',defaultModel:'llama70b',models:[{id:'llama70b',label:'Llama 3.3 70B',state:'configured'},{id:'llama8b',label:'Llama 3.1 8B',state:'configured'},{id:'gemini_flash',label:'Gemini 3.8 Flash',state:'disabled'}]}),respond:async(message,locale,history,selectedModel)=>{if(message==='سلام')assert.equal(selectedModel,'chat_flash');return {text:message==='سلام'&&locale==='fa'?'پاسخ فارسی آزمایشی':`Benign test reply ${history.length}`,provider:'fixture',model:'benign-test-model',securityAnalysis:false};}};
+web.get('/api/game-scam-guard/auth/status',(req,res)=>res.json({configured:req.headers['x-test-synthetic-login']==='yes',persistentAccounts:true}));
+web.post('/api/game-scam-guard/auth/session',express.json(),(req,res)=>{
+ if(req.body?.sessionToken!=='synthetic-session-valid-user')return res.status(401).json({error:'invalid_session'});
+ res.json({email:'synthetic@example.com',username:'fixture_user',expiresAt:Date.now()+600000});
+});
 web.use('/api/malguard-ai',(req,res,next)=>{if(req.method==='POST')requests++;next();},createApp({orchestrator:createOrchestrator(undefined,testModel),enabled:true,publicOrigin:base,log:()=>{}}));web.use(express.static(root));
 const browser=await chromium.launch(launchOptions('chromium'));
-const skipWelcome=context=>context.addInitScript(()=>localStorage.setItem('malguard.ai.welcome.v3','seen'));
+const skipWelcome=async context=>{await context.setExtraHTTPHeaders({'x-test-synthetic-login':'yes'});await context.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');localStorage.setItem('malguard.ai.session.v1','synthetic-session-valid-user');});};
 try{
  // Product cards introduce platform choices before opening the assistant.
  for(const width of [390,1280]){
@@ -98,7 +103,7 @@ try{
   assert.equal(await page.locator('#file-consent').isChecked(),true);
   await page.getByText('Inspection details',{exact:true}).click();assert.match(await page.locator('.result code').last().innerText(),/sha256/);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`overflow ${width}`);
-  assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage).sort()),['malguard-ai-permissions-v1','malguard.ai.welcome.v3']);assert.ok(!JSON.stringify(await page.evaluate(()=>({...localStorage}))).includes('benign.txt'));
+  assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage).sort()),['malguard-ai-permissions-v1','malguard.ai.session.v1','malguard.ai.welcome.v3']);assert.ok(!JSON.stringify(await page.evaluate(()=>({...localStorage}))).includes('benign.txt'));
   assert.equal(await page.locator('#tool option[value="ai_web"]').isDisabled(),true);
   assert.equal(await page.locator('#tool option[value="malwarebazaar"]').isDisabled(),true);
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
@@ -125,7 +130,13 @@ try{
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);await context.close();
   console.log(`PASS real AI frontend → backend → static worker, consent, English interface, no overflow/history at ${width}px`);
  }
- const context=await browser.newContext(),page=await context.newPage();await skipWelcome(context);await context.route('**/api/malguard-ai/status',r=>r.abort());await page.goto(base+'/ai/');await toggleSettings(page);await page.getByRole('status').filter({hasText:'Backend unavailable'}).waitFor();assert.equal(await page.locator('#send').isDisabled(),true);await context.close();console.log('PASS backend failure shown; submission disabled.');
+ const context=await browser.newContext(),page=await context.newPage();await skipWelcome(context);
+ await context.route('**/api/malguard-ai/status',r=>r.abort());
+ await context.route('https://malware-ai.malguard-security.workers.dev/**',r=>cfFixture(r));
+ await page.goto(base+'/ai/');
+ await page.waitForFunction(()=>document.getElementById('entry-gate')?.hidden&&document.getElementById('send')?.disabled===false);
+ assert.equal(await page.locator('#send').isDisabled(),false,'Cloudflare chat remains available during a legacy Vercel backend outage');
+ await context.close();console.log('PASS backend outage does not disable Cloudflare-only chat.');
  // Cloudflare-only model rate/quota errors are tested in cloudflare-models.test.js.
  // The old Vercel NDJSON error fixture does not apply to the JSON Cloudflare model endpoint.
  // Device inference is a Worker fixture here: no model weights or GPU results
