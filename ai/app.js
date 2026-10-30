@@ -5,7 +5,7 @@ import {publicFailure,retryDetails} from './service-errors.mjs?v=account-quota-2
 import {apiUrl,readStream} from './client.mjs?v=cloud-session-20261029';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
-import {fetchCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=quota-models-20261030';
+import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=visible-models-20261030';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
@@ -620,7 +620,7 @@ async function loadAccountUsage(){
  try{const usage=await fetchCFUsage({sessionToken:token,signal:AbortSignal.timeout(6000)});if(account.getToken()===token){accountUsage=usage;renderStatus();}}catch{ /* Optional quota status never blocks the assistant. */ }
 }
 async function loadCFModels(){
- try{cfModels=await fetchCFModels({signal:AbortSignal.timeout(7500)});cfQuotaEnabled=cfModels.accountQuotaEnabled===true;}catch{cfModels=[];cfQuotaEnabled=false;}
+ try{cfModels=await fetchCFModels({signal:AbortSignal.timeout(7500)});cfQuotaEnabled=cfModels.accountQuotaEnabled===true;}catch{cfModels=unavailableCFModels();cfQuotaEnabled=false;}
  if(!modelChosen&&cfModels.length&&!cfModels.some(m=>m.id===$('model').value&&m.available))$('model').value=activeMode==='build'?CF_DEFAULTS.code:CF_DEFAULTS.chat;
  renderStatus();
 }
