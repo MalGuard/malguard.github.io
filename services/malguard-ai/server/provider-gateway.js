@@ -10,7 +10,7 @@ export function gatewayEndpoint(env=process.env){
  if(!candidate)return PRODUCTION_GATEWAY;
  let url;try{url=new URL(candidate);}catch{throw new ServiceError('provider_gateway_unavailable',503);}
  if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||url.port||
-    !/^malware(?:-ai)?-[a-z0-9-]+-mcazarderakhsh-4187\\.vercel\\.app$/.test(url.hostname)||
+    !/^malware(?:-ai)?-[a-z0-9-]+-mcazarderakhsh-4187\.vercel\.app$/.test(url.hostname)||
     url.pathname!=='/api/malguard-assistant')throw new ServiceError('provider_gateway_unavailable',503);
  return url.href;
 }
