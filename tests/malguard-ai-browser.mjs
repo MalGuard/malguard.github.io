@@ -206,6 +206,7 @@ try{
   return r.abort();
  });
  await workPage.goto(base+'/ai/');await workPage.waitForFunction(()=>!document.querySelector('#send').disabled);
+ assert.equal(await workPage.locator('#model option[value="llama8b"]').count(),1,'legacy model stays visible with six-model Worker');assert.equal(await workPage.locator('#model option[value="llama8b"]').isDisabled(),true,'unreported models are never falsely enabled');
  assert.equal(desktopRequests.length,0,'Opening the site must not probe local services');
  await workPage.locator('#message').fill('Chat draft');await openModePicker(workPage);await workPage.locator('#workspace-tab').click();
  assert.equal(await workPage.locator('#workspace-tab').getAttribute('aria-pressed'),'true');assert.equal(await workPage.locator('#workspace-panel').isVisible(),true);assert.equal(await workPage.locator('#model').isVisible(),false);assert.equal(await workPage.locator('#message').inputValue(),'');
@@ -214,10 +215,27 @@ try{
  await workPage.locator('#open-downloads').click();assert.equal(await workPage.locator('#download-hub').isVisible(),true);await workPage.locator('#hub-desktop').click();await workPage.locator('#desktop-models').waitFor({state:'visible'});await workPage.locator('.desktop-setup > summary').click();
  assert.equal(await workPage.locator('#desktop-model option').count(),6);assert.match(await workPage.locator('#desktop-origin').innerText(),/OLLAMA_ORIGINS=https:\/\/malguard.site/);assert.equal(desktopRequests.length,0,'Opening catalog must not connect or download');
  await workPage.locator('#desktop-model').selectOption('native_deepseek671');assert.match(await workPage.locator('#desktop-command').innerText(),/ollama pull deepseek-r1:671b/);assert.match(await workPage.locator('#desktop-model-info').innerText(),/404 GB/);
- await workPage.locator('#desktop-model').selectOption('native_qwen8');await workPage.locator('#desktop-connect').click();await workPage.getByText('Connected. Installed models are available in the chat model picker.',{exact:true}).waitFor();
+ assert.equal(await workPage.locator('#desktop-download').isDisabled(),true,'require specs before desktop download');
+ await workPage.locator('#desktop-ram-gb').fill('16');await workPage.locator('#desktop-free-gb').fill('100');
+ assert.equal(await workPage.locator('#desktop-compat-state').getAttribute('data-status'),'blocked');
+ assert.equal(await workPage.locator('#desktop-download').isDisabled(),true,'404 GB cannot be downloaded to 100 GB free disk');
+
+ await workPage.locator('#desktop-model').selectOption('native_qwen8');assert.equal(await workPage.locator('#desktop-compat-state').getAttribute('data-status'),'eligible');assert.equal(await workPage.locator('#desktop-download').isDisabled(),false,'small model may be considered after safe user-entered specs');await workPage.locator('#desktop-connect').click();await workPage.getByText('Connected. Installed models are available in the chat model picker.',{exact:true}).waitFor();
  assert.deepEqual(desktopRequests.map(r=>r.path),['/api/tags']);await workPage.locator('#desktop-models button[value="close"]').click();assert.equal(await workPage.locator('#model').inputValue(),'native_qwen8');
  const beforeNative=requests;await workPage.locator('#message').fill('A private desktop question');await workPage.locator('#send').click();await workPage.getByText('Private desktop reply',{exact:true}).waitFor();assert.equal(requests,beforeNative);assert.deepEqual(desktopRequests.map(r=>r.path),['/api/tags','/api/chat']);assert.equal(desktopRequests[1].body.model,'qwen3:8b');
  await openModePicker(workPage);await workPage.locator('#workspace-tab').click();assert.equal(await workPage.getByText('Private desktop reply',{exact:true}).count(),0,'Workspace has its own conversation');await openModePicker(workPage);await workPage.locator('#chat-tab').click();assert.equal(await workPage.getByText('Private desktop reply',{exact:true}).count(),1);
  assert.ok(await workPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await workContext.close();console.log('PASS dedicated Workspace, independent drafts/history, six desktop models and explicit local-only connection/chat');
+ const samsungContext=await browser.newContext({viewport:{width:390,height:844},userAgent:'Mozilla/5.0 (Linux; Android 16; SM-S928B) AppleWebKit/537.36 SamsungBrowser/29.0 Mobile Safari/537.36'});
+ await skipWelcome(samsungContext);
+ await samsungContext.route('**/*',r=>isCFRoute(r)?cfFixture(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
+ const samsungPage=await samsungContext.newPage();await samsungPage.goto(base+'/ai/');await samsungPage.locator('#open-downloads').click();await samsungPage.locator('#hub-desktop').click();
+ await samsungPage.locator('#desktop-models').waitFor({state:'visible'});
+ assert.equal(await samsungPage.locator('#desktop-model option').count(),6);
+ await samsungPage.locator('#desktop-ram-gb').fill('512');await samsungPage.locator('#desktop-free-gb').fill('1000');
+ assert.equal(await samsungPage.locator('#desktop-compat-state').getAttribute('data-status'),'blocked');
+ assert.equal(await samsungPage.locator('#desktop-download').isDisabled(),true,'Samsung mobile must never offer Ollama download even with unrealistic specs');
+ assert.match(await samsungPage.locator('#desktop-compat-state').innerText(),/phones or tablets/);
+ await samsungContext.close();console.log('PASS Samsung Android Ollama incompatibility and visible small-model alternative');
+
 
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
