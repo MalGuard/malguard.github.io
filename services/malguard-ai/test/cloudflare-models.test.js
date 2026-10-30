@@ -41,7 +41,7 @@ test("Cloudflare failure returns code without silently changing to a different h
 test("existing site styling stays untouched and CSP permits direct Cloudflare",()=>{
  const html=readFileSync(new URL("../../../ai/index.html",import.meta.url),"utf8");
  assert.match(html,/connect-src[^"]+https:\/\/malware-ai\.malguard-security\.workers\.dev/);
- assert.match(html,/\.\/app\.js\?v=desktop-pull-20261030/);
+ assert.match(html,/\.\/app\.js\?v=opt-in-free-fallback-20261030/);
  const script=readFileSync(new URL("../../../ai/app.js",import.meta.url),"utf8");
  assert.match(script,/callCFModel\(/);
  assert.match(script,/mode==='worker'\?'cf_qwen3':selected/);
@@ -80,4 +80,27 @@ test('account usage is read only with an authenticated session and strict numeri
  assert.equal(calls,1);assert.equal(usage.remainingTokens,98000);assert.equal(usage.estimated,true);
  await assert.rejects(fetchCFUsage({sessionToken:'',fetchImpl:async()=>{throw Error('should not fetch');}}),/sign_in_required/);
  await assert.rejects(fetchCFUsage({sessionToken:'synthetic-session-valid-user',fetchImpl:async()=>Response.json({limitTokens:100000,remainingTokens:200000,usedTokens:0,resetAt:'2026-11-01T00:00:00.000Z'})}),/invalid_usage/);
+});
+
+test('free cross-provider fallback is opt-in, never sends paid-model IDs or hidden credentials',async()=>{
+ let bodies=[];
+ const fetchImpl=async(_,options)=>{bodies.push(JSON.parse(options.body));return Response.json({text:'Free reply',provider:'openrouter',model:'nvidia/nemotron-3-ultra-550b-a55b:free',modelId:'code_ultra',fallback:true});};
+ const base={mode:'chat',model:'chat_granite',message:'hi',sessionToken:'synthetic-session-valid-user',quotaEnabled:true,fetchImpl};
+ await callCFModel(base);
+ await callCFModel({...base,freeFallback:true});
+ assert.equal(bodies[0].freeFallback,undefined);
+ assert.equal(bodies[1].freeFallback,true);
+ assert.equal(bodies[1].model,'chat_granite','chosen primary model must not be disguised');
+ assert.ok(!JSON.stringify(bodies).includes('OPENROUTER_API_KEY'));
+ await assert.rejects(callCFModel({...base,freeFallback:'paid'}),/invalid_model_request/);
+});
+test('cross-provider consent is never silently persisted on a shared device',async()=>{
+ const {readPermissions,savePermissions,revokePermissions}=await import('../../../ai/permissions.mjs');
+ const storage=new Map(),store={getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)};
+ savePermissions(store,{modelShare:true,freeFallback:true});
+ assert.equal(readPermissions(store).modelShare,true);
+ assert.equal(readPermissions(store).freeFallback,undefined,'cross-provider consent requires a new explicit action each session');
+ revokePermissions(store);assert.equal(readPermissions(store).modelShare,false);
+ const script=readFileSync(new URL('../../../ai/app.js',import.meta.url),'utf8');
+ assert.match(script,/\$\('free-fallback-consent'\)\.checked=false/,'sign-out/revoke must clear free fallback');
 });
