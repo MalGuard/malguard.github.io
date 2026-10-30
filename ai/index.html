@@ -19,13 +19,6 @@
   <link rel="preload" href="/assets/precision/stars.svg?v=20261028-4k" as="image" fetchpriority="high"><link rel="preload" href="/assets/precision/obsidian-space.webp?v=20261028-4k" as="image" fetchpriority="low">
   <link rel="icon" href="./malguard-ai-orbit.svg?v=20261028-mono" type="image/svg+xml">
   <link rel="stylesheet" href="./style.css?v=20261028-4k">
-  <dialog id="desktop-download-confirm" aria-labelledby="desktop-download-confirm-title">
-    <form method="dialog">
-      <h2 id="desktop-download-confirm-title" data-i18n="desktopDownloadConfirmTitle">Download large model to this computer?</h2>
-      <p id="desktop-download-warning"></p>
-      <div class="download-actions"><button value="cancel" data-i18n="cancel">Cancel</button><button value="download" class="primary-action" data-i18n="desktopDownloadDirect">Download to this computer</button></div>
-    </form>
-  </dialog>
   <script type="module" src="./app.js?v=quota-accounts-20261030"></script>
 <link rel="stylesheet" href="/assets/report-launcher.css?v=obsidian-20261028"><script defer src="/assets/report-launcher.js?v=20261027"></script></head>
 <body class="auth-required">
@@ -192,6 +185,13 @@
       <details class="desktop-setup"><summary data-i18n="desktopSetup">Site connection settings</summary><p id="desktop-origin"></p></details><a id="desktop-source" href="https://ollama.com/library/qwen3:8b" target="_blank" rel="noopener noreferrer">Official model page and requirements</a><p id="desktop-status" role="status"></p>
       <div id="desktop-download-progress-container" class="model-progress" hidden><label for="desktop-download-progress" id="desktop-progress-label" aria-live="polite">Downloading to this computer…</label><progress id="desktop-download-progress" max="100"></progress><button id="desktop-cancel-download" type="button" data-i18n="desktopCancelDownload">Cancel download</button></div>
       <div class="download-actions"><button value="close" autofocus data-i18n="close">Close</button><button id="desktop-connect" type="button" data-i18n="desktopConnect">Connect</button><button id="desktop-download" class="primary-action" type="button" data-i18n="desktopDownloadDirect">Download to this computer</button></div>
+    </form>
+  </dialog>
+  <dialog id="desktop-download-confirm" aria-labelledby="desktop-download-confirm-title">
+    <form method="dialog">
+      <h2 id="desktop-download-confirm-title" data-i18n="desktopDownloadConfirmTitle">Download large model to this computer?</h2>
+      <p id="desktop-download-warning"></p>
+      <div class="download-actions"><button value="cancel" data-i18n="cancel">Cancel</button><button value="download" class="primary-action" data-i18n="desktopDownloadDirect">Download to this computer</button></div>
     </form>
   </dialog>
 </body>
