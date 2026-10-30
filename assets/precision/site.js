@@ -4,7 +4,10 @@
  const root=document.documentElement,motion=matchMedia('(prefers-reduced-motion: reduce)'),formatter=new Intl.NumberFormat('en-US');
  if(document.body?.classList.contains('mg-precision-shared'))root.dataset.experienceReady='true';
  const eligible=!motion.matches&&'IntersectionObserver'in window;
- let nodes=[],observer,timer=0,stopped=false;const active=new Map(),maxActive=4;
+ // Never animate two items at once: headline, copy, menus, visuals, and counters
+ // all share ONE ordered, viewport-gated queue.
+ let nodes=[],observer,timer=0,stopped=false;const active=new Map(),maxActive=1;
+ root.dataset.precisionMotionOrder='strict-serial';
  const done=new WeakSet(),visible=new Set(),pending=new Set(),jobs=new WeakMap();
  const complete=node=>{
   done.add(node);pending.delete(node);node.classList.remove('typing');
@@ -16,7 +19,9 @@
   }
   observer?.unobserve(node);
   const nav=node.closest('#navbar');
-  if(nav&&[...nav.querySelectorAll('[data-type]')].every(n=>done.has(n)))nav.dataset.navMotion='complete';
+  // Collapsed menus are not blocking the navigation entrance. Their links
+  // retain pending state and animate strictly in order once opened.
+  if(nav&&[...nav.querySelectorAll('[data-type]')].every(n=>done.has(n)||!n.getClientRects().length))nav.dataset.navMotion='complete';
  };
  const finish=()=>{stopped=true;clearTimeout(timer);observer?.disconnect();active.clear();pending.clear();nodes.forEach(complete);root.classList.remove('type-system');};
  motion.addEventListener('change',e=>{if(e.matches)finish();});
@@ -37,14 +42,16 @@
      while(el.firstChild)source.append(el.firstChild);el.append(source);
     }
     for(const visual of document.querySelectorAll('main img,main svg[role="img"],main .chart svg')){
-     if(visual.closest('form,[aria-live],[role="status"],[role="alert"],.result,.verdict,.scan-result,button')||visual.hasAttribute('data-reveal'))continue;
+     if(visual.closest('form,[aria-live],[role="status"],[role="alert"],.result,.verdict,.scan-result,button')||visual.hasAttribute('data-reveal')||visual.closest('[data-reveal="visual"]'))continue;
      visual.dataset.reveal='visual';visual.dataset.revealState='pending';
     }
    }
    // Header first, then page text and CTAs. Keep original accessible source text.
    if(document.body.classList.contains('precision-home')||shared){
+    // Wrap only direct text nodes; preserve SVG icons, links, layout and
+    // accessibility semantics. Source copy remains available to screen readers.
     const markLink=link=>{
-     if(link.querySelector(':scope > .type-source'))return;
+     if(link.hasAttribute('data-type')||link.querySelector(':scope > .type-source'))return;
      const textNodes=[...link.childNodes].filter(n=>n.nodeType===3&&n.textContent.trim());
      if(!textNodes.length)return;
      const source=document.createElement('span');source.className='type-source';
@@ -54,7 +61,7 @@
     const nav=document.getElementById('navbar');
     if(nav){
      nav.dataset.reveal='nav';nav.dataset.revealState='pending';nav.dataset.navMotion='pending';
-     nav.querySelectorAll('.mg-brand,.mg-primary-links a,.nav-links a,.nav-download').forEach(link=>{if(link.getClientRects().length)markLink(link);});
+     nav.querySelectorAll('.mg-brand,.mg-primary-links a,.nav-links a,.nav-download').forEach(markLink);
     }
     if(shared){
      const actions='main a.btn,main a.button,main a.action-button,main a.release-button,main a.platform-button,main a.download-button,main a.mg-home-product-link,main a.mg-home-product-extra,main a.ai-product-primary,main a.ai-platform-action,main a.gta6-button,main a[role="button"],main .actions>a,main .hero-actions>a,main .legacy-actions>a,main .action-group>a';
@@ -62,7 +69,13 @@
       if(!link.closest('form,[aria-live],[role="dialog"],.site-search,.result,.verdict,.scan-result')&&link.getClientRects().length&&!link.hasAttribute('disabled'))markLink(link);
      });
     }else{
-     document.querySelectorAll('.hero-actions>a.button,#products a.text-link,#technology a.text-link,.home-tools a.text-link').forEach(markLink);
+     // All editorial copy on the homepage uses the same order: headings,
+     // small labels, CTAs, counters and footer navigation. Never wrap inputs
+     // or live security verdicts, and never retype an already prepared node.
+     document.querySelectorAll('.hero-actions>a.button,#products a.text-link,#technology a.text-link,.home-tools a.text-link,main .eyebrow,main .metric-clarification,main .activity-caption>span,main .metric dt,main .product .index,main .product .status,main .gta-vi-badge,main #products a.text-link,main #technology .principles .index,footer nav h2,footer nav a,footer .footer-brand p,footer .footer-bottom>span,footer .footer-bottom>a').forEach(el=>{
+      if(el.closest('form,[aria-live],[role="status"],[role="alert"],.result,.verdict,.scan-result')||!el.textContent.trim()||!el.getClientRects().length) return;
+      markLink(el);
+     });
     }
    }
    nodes=[...document.querySelectorAll('[data-type],[data-reveal],[data-count-group]')].filter(n=>!n.hasAttribute('data-type')||!!n.querySelector(':scope > .type-source'));root.dataset.precisionTypeReady='true';
@@ -142,7 +155,12 @@
     for(const n of nodes){
      if(done.has(n))continue;
      // Hidden desktop-only links must never hold the mobile header hostage.
-     if(n.closest('#navbar')&&!n.getClientRects().length){complete(n);continue;}
+     // A closed responsive menu is deferred, not marked complete: opening it
+     // later must still type entry 1, then 2, then 3, without parallel work.
+     if(n.closest('#navbar')&&!n.getClientRects().length){
+      if(n.closest('.nav-links,.mg-primary-links'))continue;
+      complete(n);continue;
+     }
      const r=n.getBoundingClientRect();
      if(r.height>0&&r.bottom>0&&r.top<innerHeight*.94){
       visible.add(n);pending.add(n);
