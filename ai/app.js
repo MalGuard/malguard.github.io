@@ -11,6 +11,7 @@ import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
 import {typeText,formatElapsed} from './reply-motion.mjs';
 import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=desktop-pull-20261030';
+import {detectDevice,assessDesktopModel} from './model-compatibility.mjs?v=hardware-check-20261030';
 import {renderRichText} from './code-view.mjs?v=codex-chat-20261025';
 import {createAccount} from './account.mjs?v=founder-name-20261029';
 import {createBuilder} from './builder.mjs?v=qwen-coder-restored-20261026';
@@ -33,6 +34,7 @@ const conversations={chat:{history:[],modelHistory:[],draft:'',model:'chat_grani
 let projectOpen=false;
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
+const desktopDevice=detectDevice({userAgent:navigator.userAgent,platform:navigator.userAgentData?.platform||navigator.platform,maxTouchPoints:navigator.maxTouchPoints,mobileHint:navigator.userAgentData?.mobile});
 const builder=createBuilder({locale:()=>locale});
 const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{accountUsage=null;navigation.profile(profile);library.profile(profile);document.body.classList.toggle('auth-required',!profile);$('entry-gate').hidden=!!profile;$('entry-retry').hidden=!!profile||!account.hasSavedSession();if(profile){void loadAccountUsage();$('message').focus();return;}for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
 const navigation=createNavigation({account,onLanguage:()=>{locale='en';translate();}});
@@ -98,6 +100,11 @@ const desktopDescriptions={
  native_qwen235:{fa:['مدل بزرگ خانوادهٔ Qwen3 برای نوشتن، استدلال، ریاضی و برنامه‌نویسی.','حدود ۱۴۲ گیگابایت وزن، به‌علاوهٔ حافظهٔ اجرا؛ مناسب ورک‌استیشن یا سرور پرحافظه. MoE بودن، نیاز به نگهداری وزن‌ها را حذف نمی‌کند.'],en:['A large Qwen3 model for writing, reasoning, mathematics and programming.','About 142 GB of weights plus runtime memory; intended for high-memory workstations or servers. MoE does not remove weight-storage requirements.']},
  native_deepseek671:{fa:['مدل بسیار بزرگ با تمرکز بر استدلال، ریاضی و حل مسائل برنامه‌نویسی؛ انتخاب تخصصی برای دستگاه‌های بسیار پرقدرت.','حدود ۴۰۴ گیگابایت وزن، به‌علاوهٔ حافظهٔ اجرا و متن؛ به زیرساخت بسیار پرحافظه نیاز دارد و برای کامپیوتر معمولی پیشنهاد نمی‌شود.'],en:['A very large reasoning model for mathematics and programming problems; a specialist option for powerful systems.','About 404 GB of weights plus runtime/context memory; requires very high-memory infrastructure and is unsuitable for ordinary computers.']}
 };
+function desktopAssessment(){
+ return assessDesktopModel(desktopModels[$('desktop-model').value],desktopDevice,{
+  ramGB:$('desktop-ram-gb').value,freeDiskGB:$('desktop-free-gb').value,gpuGB:$('desktop-gpu-gb').value
+ });
+}
 function updateDesktopInfo(){
  const model=desktopModels[$('desktop-model').value];if(!model)return;const description=desktopDescriptions[model.id][locale];$('desktop-use-case').textContent=description[0];$('desktop-memory').textContent=description[1];
  $('desktop-model-info').textContent=`~${model.downloadGB} GB · `+(locale==='fa'?'با دکمه دانلود، مدل مستقیماً روی کامپیوتر دارای Ollama دریافت می‌شود؛ این سایت Ollama را نصب نمی‌کند.':'The Download button pulls model files directly to the computer running Ollama; this site does not install Ollama.');
@@ -105,18 +112,32 @@ function updateDesktopInfo(){
  $('desktop-command').textContent=model.command;
  $('desktop-origin').textContent=locale==='fa'?'پس از نصب Ollama، متغیر OLLAMA_ORIGINS را برابر https://malguard.site قرار دهید و Ollama را دوباره اجرا کنید. اتصال فقط به 127.0.0.1:11434 است. مدل محلی سقف روزانهٔ سرویس‌دهنده ندارد؛ سرعت و ظرفیت به دستگاه بستگی دارد.':'After installing Ollama, set OLLAMA_ORIGINS=https://malguard.site and restart Ollama. Keep it bound to 127.0.0.1:11434. Local chat has no provider daily quota; speed and capacity depend on the device.';
  const source=$('desktop-source');source.href=model.source;source.textContent=locale==='fa'?'صفحهٔ رسمی مدل و نیازهای اجرا':'Official model page and requirements';
+ $('desktop-ram-label').textContent=locale==='fa'?'RAM نصب‌شده (گیگابایت)':'Installed RAM (GB)';
+ $('desktop-free-label').textContent=locale==='fa'?'فضای خالی دیسک (گیگابایت)':'Free disk space (GB)';
+ $('desktop-gpu-label').textContent=locale==='fa'?'حافظهٔ اختصاصی کارت گرافیک (گیگابایت، اختیاری)':'Dedicated GPU VRAM (GB, optional)';
+ const check=desktopAssessment(),status=$('desktop-compat-state');status.dataset.status=check.status;
+ const fa=locale==='fa';
+ if(check.reason==='mobile')status.textContent=fa?'برای گوشی و تبلت در دسترس نیست. دو مدل سبک داخل مرورگر را انتخاب کن یا این صفحه را روی کامپیوتر دارای Ollama باز کن.':'Not available on phones or tablets. Use one of the two small browser models, or open this page on a computer with Ollama.';
+ else if(check.reason==='device_unknown')status.textContent=fa?'نوع دستگاه قابل تأیید نیست؛ دانلود Ollama فقط از مرورگر دسکتاپ پشتیبانی می‌شود.':'Device type is unknown; Ollama download requires a desktop browser.';
+ else if(check.reason==='specs_required')status.textContent=fa?'برای بررسی تقریبی سازگاری، RAM نصب‌شده و فضای خالی دیسک را وارد کن. اطلاعات فقط داخل همین صفحه استفاده می‌شوند.':'Enter installed RAM and free disk space for an approximate compatibility check. These values stay on this page.';
+ else if(check.reason==='disk')status.textContent=fa?`برای این دستگاه در دسترس نیست: حداقل حدود ${check.diskRequiredGB} گیگابایت فضای خالی برای دریافت و حاشیهٔ ایمنی لازم است.`:`Unavailable with the supplied storage: at least about ${check.diskRequiredGB} GB free disk is needed for the model and a safety margin.`;
+ else if(check.reason==='memory_recommendation')status.textContent=fa?`برای این پیکربندی پیشنهاد نمی‌شود: هدف محافظه‌کارانه حدود ${check.memoryTargetGB} گیگابایت RAM یا VRAM است. این حد قطعی Ollama نیست؛ حافظهٔ GPU را هم می‌توانی وارد کنی.`:`Not recommended for these specs: a conservative target is about ${check.memoryTargetGB} GB RAM or dedicated VRAM. This is not an Ollama hard minimum; you can enter GPU memory too.`;
+ else if(check.status==='eligible')status.textContent=fa?`بررسی اولیه قابل قبول است (حدود ${check.diskRequiredGB} GB فضای خالی و ${check.memoryTargetGB} GB هدف حافظه). اجرا قطعی نیست؛ تأیید دانلود و آزمون Ollama همچنان لازم است.`:`Initial screening passed (~${check.diskRequiredGB} GB free disk and ${check.memoryTargetGB} GB memory target). This does not guarantee execution; Ollama must still verify the model.`;
+ else status.textContent=fa?'امکان بررسی این مدل وجود ندارد.':'This model cannot be assessed.';
+ $('desktop-download').disabled=busy||desktopConnecting||desktopDownloading||check.status!=='eligible';
+ $('copy-desktop-command').disabled=check.status!=='eligible';
 }
 function openDesktopModels(){if(busy)return;$('settings-panel').open=false;updateDesktopInfo();if(!$('desktop-models').open)$('desktop-models').showModal();}
 async function downloadDesktop(){
  if(busy||desktopConnecting||desktopDownloading)return;
- const chosen=$('desktop-model').value,model=desktopModels[chosen];if(!model)return;
+ const chosen=$('desktop-model').value,model=desktopModels[chosen];if(!model||desktopAssessment().status!=='eligible')return;
  const approval=$('desktop-download-confirm');
  $('desktop-download-warning').textContent=locale==='fa'
    ?`دانلود ${model.label} حدود ${model.downloadGB} گیگابایت فضا و اینترنت مصرف می‌کند. دانلود فقط روی همین کامپیوتر که Ollama روی آن نصب و اجرا شده انجام می‌شود، نه روی سرور MalGuard. برای اجرای مدل به RAM/VRAM اضافی نیاز است و دانلود تضمین نمی‌کند دستگاه توان اجرا داشته باشد. تأیید می‌کنی؟`
    :`${model.label} downloads about ${model.downloadGB} GB to the computer running Ollama, not to MalGuard servers. Extra disk space and RAM/VRAM are required; downloading does not guarantee this computer can run it. Continue?`;
  approval.returnValue='cancel';approval.showModal();
  const confirmed=await new Promise(resolve=>approval.addEventListener('close',()=>resolve(approval.returnValue==='download'),{once:true}));
- if(!confirmed)return;
+ if(!confirmed||$('desktop-model').value!==chosen||desktopAssessment().status!=='eligible')return;
  const controller=new AbortController();desktopDownloadController=controller;desktopDownloading=true;
  const progress=$('desktop-download-progress'),section=$('desktop-download-progress-container');
  section.hidden=false;progress.removeAttribute('value');
@@ -579,7 +600,7 @@ for(const m of Object.values(desktopModels)){const option=el('option',`${m.label
 async function checkLocalDevice(){localCapabilityReason='checking';localReady=false;renderStatus();const result=await localCapabilityDetails();localReady=result.ready;localCapabilityReason=result.reason;renderStatus();}
 $('retry-local-capability').onclick=()=>{void checkLocalDevice();};
 $('open-downloads').onclick=()=>{if(!busy)$('download-hub').showModal();};$('hub-browser').onclick=()=>{$('download-hub').close();void offerLocalModels();};$('hub-desktop').onclick=()=>{$('download-hub').close();openDesktopModels();};$('copy-desktop-command').onclick=async()=>{try{await navigator.clipboard.writeText(desktopModels[$('desktop-model').value].command);$('copy-desktop-command').textContent=t('commandCopied');}catch{$('desktop-command').focus();}};
-$('desktop-model').onchange=updateDesktopInfo;$('manage-desktop-models').onclick=openDesktopModels;$('desktop-connect').onclick=connectDesktop;
+$('desktop-model').onchange=updateDesktopInfo;for(const field of ['desktop-ram-gb','desktop-free-gb','desktop-gpu-gb'])$(field).addEventListener('input',updateDesktopInfo);$('manage-desktop-models').onclick=openDesktopModels;$('desktop-connect').onclick=connectDesktop;
 $('desktop-download').onclick=downloadDesktop;
 $('desktop-cancel-download').onclick=()=>{desktopDownloadController?.abort(new DOMException('Cancelled by user','AbortError'));desktopChat.stop();};
 translate();
