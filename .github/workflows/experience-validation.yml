@@ -47,6 +47,7 @@ jobs:
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/secure-cinematic.mjs
           TEST_BROWSER=chromium node tests/secure-cinematic.mjs
           node tests/precision-pages-qa.mjs
+          TEST_BASE_URL=https://127.0.0.1:8443 node tests/navigation-clarity.mjs
           npm run test:experience
           TEST_BROWSER=chromium node tests/game-scam-preview.mjs
           node tests/game-scam-extended-flow.mjs
