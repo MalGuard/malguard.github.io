@@ -85,8 +85,8 @@ for(const name of names){
     await page.waitForFunction(()=>
      ['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),
      null,{timeout:30000});
-    assert.ok(await page.locator('[data-type-state=typing]').count()<=4,
-     'Typewriter exceeded its bounded concurrency');
+    assert.ok(await page.locator('[data-type-state=typing]').count()<=1,
+     'Typewriter exceeded its strict one-at-a-time concurrency');
     await page.emulateMedia({reducedMotion:'reduce'});
     await page.waitForFunction(()=>!document.documentElement.classList.contains('type-system'));
     assert.equal(await page.locator('.type-ink').count(),0,
