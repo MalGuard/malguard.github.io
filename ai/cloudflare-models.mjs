@@ -2,13 +2,50 @@
 // This module never contains provider secrets. Browser supplies Origin automatically.
 const ROOT="https://malware-ai.malguard-security.workers.dev";
 export const CF_DEFAULTS=Object.freeze({chat:"chat_granite",work:"work_qwen",code:"code_ultra"});
-const IDS=new Set(["chat_granite","chat_flash","work_qwen","work_gemma","code_super","code_ultra","llama70b","llama8b","cf_gptoss120","cf_gptoss20","cf_qwen3","cf_granite","cf_llama3b","cf_qwen_coder","cf_scout","cf_mistral","cf_nemotron","cf_glm","cf_gemma4","gemini_flash","groq_qwen","groq_gptoss"]);
+// The client keeps the complete known catalog visible even if an older Worker
+// responds with only six models or the catalog cannot be fetched. Unverified
+// entries are NEVER enabled until the server explicitly advertises them.
+const CATALOG=Object.freeze([
+ ['chat_granite','chat','Granite 4 Micro · Fast','workers_ai'],
+ ['chat_flash','chat','Gemini 3.1 Flash-Lite','gemini'],
+ ['work_qwen','work','Qwen3 30B · Work','workers_ai'],
+ ['work_gemma','work','Gemma 4 31B · Work','gemini'],
+ ['code_super','code','Nemotron 3 Super 120B','workers_ai'],
+ ['code_ultra','code','Nemotron 3 Ultra 550B · Free','openrouter'],
+ ['llama70b','work','Llama 3.3 70B · Legacy','workers_ai'],
+ ['llama8b','chat','Llama 3.1 8B · Legacy','workers_ai'],
+ ['cf_gptoss120','code','GPT-OSS 120B · Cloudflare','workers_ai'],
+ ['cf_gptoss20','work','GPT-OSS 20B · Cloudflare','workers_ai'],
+ ['cf_qwen3','work','Qwen3 30B · Classic','workers_ai'],
+ ['cf_granite','chat','Granite 4 Micro · Classic','workers_ai'],
+ ['cf_llama3b','chat','Llama 3.2 3B · Fast','workers_ai'],
+ ['cf_qwen_coder','code','Qwen2.5 Coder 32B · Classic','workers_ai'],
+ ['cf_scout','work','Llama 4 Scout · Classic','workers_ai'],
+ ['cf_mistral','work','Mistral Small 3.1 24B','workers_ai'],
+ ['cf_nemotron','code','Nemotron 3 Super · Classic','workers_ai'],
+ ['cf_glm','chat','GLM 4.7 Flash · Classic','workers_ai'],
+ ['cf_gemma4','work','Gemma 4 26B · Cloudflare','workers_ai'],
+ ['gemini_flash','chat','Gemini Flash · Classic','gemini'],
+ ['groq_qwen','work','Qwen 3.8 27B · Groq','groq'],
+ ['groq_gptoss','code','GPT-OSS 120B · Groq','groq']
+]);
+const IDS=new Set(CATALOG.map(([id])=>id));
+export function unavailableCFModels(){
+ return CATALOG.map(([id,mode,label,provider])=>({id,mode,label,provider,available:false}));
+}
 export async function fetchCFModels({fetchImpl=fetch,signal}={}){
  const response=await fetchImpl(ROOT+"/api/public-models",{method:"GET",credentials:"omit",cache:"no-store",mode:"cors",signal});
  if(!response.ok)throw new Error("cloudflare_unavailable");
  const data=await response.json();
- if(!Array.isArray(data.models))throw new Error("invalid_model_catalog");
- const models=data.models.filter(m=>m&&IDS.has(m.id)&&["chat","work","code"].includes(m.mode)&&typeof m.label==="string"&&typeof m.available==="boolean").map(m=>({id:m.id,mode:m.mode,label:m.label,provider:m.provider,available:m.available}));
+ if(!Array.isArray(data.models)||data.models.length>500)throw new Error("invalid_model_catalog");
+ const seen=new Map();
+ for(const m of data.models){
+  if(m&&IDS.has(m.id)&&!seen.has(m.id)&&["chat","work","code"].includes(m.mode)&&typeof m.available==="boolean"&&typeof m.label==="string")seen.set(m.id,m);
+ }
+ const models=CATALOG.map(([id,mode,label,provider])=>{
+  const server=seen.get(id),consistent=server&&server.mode===mode&&server.provider===provider;
+  return {id,mode,label:consistent?server.label:label,provider,available:!!(consistent&&server.available)};
+ });
  Object.defineProperty(models,"accountQuotaEnabled",{value:data.accountQuota?.enabled===true,enumerable:false});
  return models;
 }
