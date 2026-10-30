@@ -122,8 +122,10 @@ try{
  }
  console.log('PASS strongest configured cloud default survives capability/status ordering and preserves explicit choice');
  const autoContext=await browser.newContext({reducedMotion:'reduce'}),autoPage=await autoContext.newPage(),autoPosts=[];
- await autoContext.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');window.autoWorkerCalls=[];window.Worker=class{postMessage(value){window.autoWorkerCalls.push(value);}terminate(){}};Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});});
- await autoContext.route('**/api/malguard-ai/status',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({enabled:true,tools:{},model:{state:'configured',defaultModel:'auto',models:[{id:'auto',label:'Auto',state:'configured'}]}})}));
+ await autoContext.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');localStorage.setItem('malguard.ai.session.v1','synthetic-session-valid-user');window.autoWorkerCalls=[];window.Worker=class{postMessage(value){window.autoWorkerCalls.push(value);}terminate(){}};Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});});
+ await autoContext.route('**/api/game-scam-guard/auth/status',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({configured:true,persistentAccounts:true})}));
+  await autoContext.route('**/api/game-scam-guard/auth/session',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({email:'synthetic@example.com',username:'fixture_user',expiresAt:Date.now()+600000})}));
+  await autoContext.route('**/api/malguard-ai/status',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({enabled:true,tools:{},model:{state:'configured',defaultModel:'auto',models:[{id:'auto',label:'Auto',state:'configured'}]}})}));
  await autoContext.route('**/api/public-models',r=>cfResponse(r,{enabled:true}));
  await autoContext.route('**/api/public-model-chat',r=>{if(r.request().method()==='POST')autoPosts.push(r.request().postDataJSON());return cfResponse(r,{enabled:true});});
  await autoPage.goto(base+'/ai/');await autoPage.waitForFunction(()=>document.getElementById('model').value==='chat_granite');
