@@ -61,7 +61,7 @@
     const nav=document.getElementById('navbar');
     if(nav){
      nav.dataset.reveal='nav';nav.dataset.revealState='pending';nav.dataset.navMotion='pending';
-     nav.querySelectorAll('.mg-brand,.mg-primary-links a,.nav-links a,.nav-download').forEach(markLink);
+     nav.querySelectorAll('.mg-brand,.mg-primary-links a,.nav-links a,.nav-links .mg-menu-label,.nav-download').forEach(markLink);
     }
     if(shared){
      const actions='main a.btn,main a.button,main a.action-button,main a.release-button,main a.platform-button,main a.download-button,main a.mg-home-product-link,main a.mg-home-product-extra,main a.ai-product-primary,main a.ai-platform-action,main a.gta6-button,main a[role="button"],main .actions>a,main .hero-actions>a,main .legacy-actions>a,main .action-group>a';
@@ -182,7 +182,10 @@
    document.querySelectorAll('.product').forEach(card=>card.addEventListener('focusin',()=>{[card,...card.querySelectorAll('[data-type],[data-reveal]')].forEach(n=>{active.delete(n);complete(n);});advance();}));
   }catch{finish();}
  }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+ // Defer scripts execute while readyState is "interactive". The shared
+ // navigation script runs after this controller and rebuilds #navLinks;
+ // initialize only at DOMContentLoaded so we type the FINAL menu entries.
+ if(document.readyState==='loading'||document.readyState==='interactive')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 
 /* Keep the small-screen menu usable without disturbing viewport typing. */
