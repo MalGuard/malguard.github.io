@@ -41,7 +41,7 @@ test("Cloudflare failure returns code without silently changing to a different h
 test("existing site styling stays untouched and CSP permits direct Cloudflare",()=>{
  const html=readFileSync(new URL("../../../ai/index.html",import.meta.url),"utf8");
  assert.match(html,/connect-src[^"]+https:\/\/malware-ai\.malguard-security\.workers\.dev/);
- assert.match(html,/\.\/app\.js\?v=device-check-20261030/);
+ assert.match(html,/\.\/app\.js\?v=smart-usage-20261030/);
  const script=readFileSync(new URL("../../../ai/app.js",import.meta.url),"utf8");
  assert.match(script,/callCFModel\(/);
  assert.match(script,/mode==='worker'\?'cf_qwen3':selected/);
@@ -120,4 +120,14 @@ test('a stale or incomplete backend never hides classic models or wrongly enable
  const offline=unavailableCFModels();
  assert.equal(offline.length,22);
  assert.ok(offline.every(m=>m.available===false));
+});
+
+test('smart usage errors remain separate from Cloudflare neuron limits',async()=>{
+ const response=async()=>Response.json({error:'usage_limit_reached',limitScope:'five_hour',resetAt:'2026-10-30T17:00:00.000Z',retryAfterSeconds:300},{status:429});
+ await assert.rejects(callCFModel({mode:'chat',model:'chat_granite',message:'hello',fetchImpl:response}),e=>e.code==='usage_limit_reached'&&e.resetAt==='2026-10-30T17:00:00.000Z'&&e.status===429);
+});
+test('UI does not show raw monthly token balances on model selection',()=>{
+ const src=readFileSync(new URL('../../../ai/app.js',import.meta.url),'utf8');
+ assert.doesNotMatch(src,/remainingTokens\\.toLocaleString/);
+ assert.match(src,/Fair-use limits apply to cloud models/);
 });
