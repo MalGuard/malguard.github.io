@@ -21,3 +21,12 @@ export async function callCFModel({mode,model,message,history=[],sessionToken,qu
  if(typeof data.text!=="string"||!data.text.trim()||typeof data.model!=="string"||typeof data.provider!=="string")throw new Error("cloudflare_invalid_response");
  return {text:data.text,model:data.model,selectedModel:data.modelId,provider:data.provider,fallbackUsed:!!data.fallback,securityAnalysis:false,...(data.usage&&typeof data.usage.remainingTokens==="number"?{usage:data.usage}:{})};
 }
+
+export async function fetchCFUsage({sessionToken,signal,fetchImpl=fetch}={}){
+ if(typeof sessionToken!=="string"||!sessionToken)throw new Error("sign_in_required");
+ const response=await fetchImpl(ROOT+"/api/account-usage",{method:"GET",credentials:"omit",cache:"no-store",mode:"cors",signal,headers:{Authorization:"Bearer "+sessionToken}});
+ if(!response.ok)throw new Error(response.status===401?"sign_in_required":"quota_unavailable");
+ const data=await response.json();
+ if(!Number.isSafeInteger(data.limitTokens)||!Number.isSafeInteger(data.remainingTokens)||!Number.isSafeInteger(data.usedTokens)||data.limitTokens<0||data.remainingTokens<0||data.remainingTokens>data.limitTokens||typeof data.resetAt!=="string")throw new Error("invalid_usage");
+ return {limitTokens:data.limitTokens,remainingTokens:data.remainingTokens,usedTokens:data.usedTokens,resetAt:data.resetAt,estimated:true};
+}
