@@ -46,3 +46,16 @@ The Code assistant now supports the free model ID `openrouter_nemotron_ultra`, r
 Use https://openrouter.ai/settings/keys to create the key. Store it in the **private** Vercel `malware-ai` project under `OPENROUTER_API_KEY` for Preview only, then deploy the private and public companion Preview branches. The model is disabled in the catalog until the server environment supplies that key. The existing Cloudflare/Groq/Gemini options remain unchanged.
 
 The free account limit is typically 50 requests/day and 20 requests/minute. Do not send private source files, secrets or personal data into this provider; the free endpoint can log data for model improvements. Test live requests, response model metadata, project proposal format, and usage limits before approving Production. See https://openrouter.ai/nvidia/nemotron-3-ultra-550b-a55b%3Afree
+
+
+### Preview-only end-to-end verification (do not merge to Production)
+
+1. Confirm in private \`malware-ai\` Vercel project that \`OPENROUTER_API_KEY\` is a Sensitive variable targeted **Preview**. Never expose or copy its value into any web client.
+2. Once the deployment quota allows it, deploy the \`feature/nvidia-nemotron-ultra-code-20261030\` branch of \`MalGuard/malware-ai\` to Preview and **verify its commit SHA matches PR #49**.
+3. Open \`https://<actual-malware-preview-host>.vercel.app/api/malguard-assistant\` and check the **GET** catalog reports \`openrouter_nemotron_ultra\` as \`configured\`; no secret should appear in JSON. For a protected deployment, use the Vercel Preview protection flow rather than disabling protections.
+4. In the Vercel project serving the public assistant backend (\`game-scam-guard-connected\`), add **Preview-only** \`MALGUARD_AI_PREVIEW_GATEWAY_URL\` equal to that verified preview gateway endpoint, including \`/api/malguard-assistant\`. The code validates the URL host belongs to the known Vercel team. Production ignores this variable.
+5. Deploy PR #318 of \`MalGuard/malguard.github.io\` to Preview and confirm the Code mode chooses \`openrouter_nemotron_ultra\`, the chat endpoint returns an actual free Nemotron response, no keys are emitted, and a synthetic 429 is safely handled. If the private Vercel Preview is protected from service-to-service traffic, configure a safe server-side preview access mechanism before testing; do not turn off protection globally.
+6. Without Cloudflare Preview credentials and an explicit free-usage confirmation, a 429 from OpenRouter correctly surfaces a controlled \`provider_rate_limited\`/\`provider_quota_exhausted\` status. Never route to a paid model without explicit approval.
+7. Only after tests pass should a separate production rollout be considered; Preview keys do not become available in Production automatically.
+
+Vercel's free API deployment quota can return HTTP 402 (\`api-deployments-free-per-day\`), preventing a new Preview deployment despite valid GitHub CI. This is an account-level deploy limit, not an application bug.
