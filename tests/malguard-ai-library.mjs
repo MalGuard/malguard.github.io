@@ -26,7 +26,7 @@ try{for(const width of [390,1280]){
  // was restored without opening a new sign-in dialog or minting a new token.
  await page.locator('#message').waitFor({state:'visible'});
  assert.equal(await page.locator('#account').innerText(),'test_account');
- assert.equal(await page.evaluate(()=>sessionStorage.getItem('malguard.ai.session.v1')),`synthetic-a-${width}@example.com`);
+ assert.equal(await page.evaluate(()=>localStorage.getItem('malguard.ai.session.v1')),`synthetic-a-${width}@example.com`);
  assert.equal(await page.locator('dialog.ai-account').count(),0);
  await page.locator('#save-state').filter({hasText:'Chats are saved to your account.'}).waitFor();
  await rail();await page.locator('.history-row button').first().click();await page.getByText('Synthetic saved answer',{exact:true}).waitFor();await page.locator('#manage-memory').click();await page.getByText('Synthetic preference',{exact:false}).waitFor();await page.getByRole('button',{name:'Close',exact:true}).click();

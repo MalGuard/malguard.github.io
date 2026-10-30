@@ -7,7 +7,7 @@ const assertIdentity=(query,kind)=>assert.equal(answerIdentityQuestion(query)?.k
 test('the same assistant identity works with Persian and English prompts',()=>{
   for(const q of ['سازنده شما کیست؟','سازنده‌ات کیه؟','سازنده ات کیه؟','سازندت کیه؟','کی ساختت؟','چه کسی تو را ساخته؟','Who made you?','Who created this assistant?'])assertIdentity(q,'product');
   for(const q of ['چه کسی مالگارد را ساخته؟','شرکت MalGuard را کی ساخته است؟','Who founded MalGuard?'])assertIdentity(q,'founder');
-  for(const q of ['محمدرضا آذردرخش کیست؟','محمدرضا آذردرخش کیه؟','Who is Mohammadreza Azardarkhsh?'])assertIdentity(q,'person');
+  for(const q of ['محمدرضا آذردرخش کیست؟','محمدرضا آذردرخش کیه؟','Who is Mohammadreza Azarderakhsh?','Who is Mohammad Reza Azarderakhsh?'])assertIdentity(q,'person');
 });
 
 test('founder identification supports an immediately related follow-up',()=>{
@@ -28,4 +28,6 @@ test('product identity is accurately distinguished from the foundation model',()
   assert.match(product.text,/MalGuard/);
   const founder=answerIdentityQuestion('مالگارد را چه کسی ساخته؟');
   assert.match(founder.text,/محمدرضا آذردرخش/);
+  assert.match(answerIdentityQuestion('Who founded MalGuard?').text,/Mohammadreza Azarderakhsh/);
+  assert.match(PRODUCT_IDENTITY_POLICY,/Mohammadreza Azarderakhsh/);
 });

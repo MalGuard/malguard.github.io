@@ -14,7 +14,7 @@ web.use('/api/malguard-ai',(req,res,next)=>{if(req.method==='POST')requests++;ne
 const browser=await chromium.launch(launchOptions('chromium'));
 const skipWelcome=context=>context.addInitScript(()=>localStorage.setItem('malguard.ai.welcome.v3','seen'));
 try{
- // Public product links must open the actual assistant directly, without the radar landing page.
+ // Product cards introduce platform choices before opening the assistant.
  for(const width of [390,1280]){
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),page=await context.newPage();
   await skipWelcome(context);await context.addInitScript(()=>Object.defineProperty(navigator,'gpu',{value:undefined}));
@@ -22,11 +22,13 @@ try{
   const before=requests;
   for(const [path,selector] of [['/','#products .product-ai a.text-link'],['/products.html','.product-ai .mg-home-product-link']]){
    await page.goto(base+path);
-   const link=page.locator(selector);assert.equal(await link.getAttribute('href'),'/ai/');assert.match(await link.innerText(),/MalGuard AI/);
+   const link=page.locator(selector);assert.equal(await link.getAttribute('href'),'/ai-product.html');assert.match(await link.innerText(),/MalGuard AI/);
    const visited=[];const record=frame=>{if(frame===page.mainFrame())visited.push(new URL(frame.url()).pathname);};
-   page.on('framenavigated',record);await link.click();await page.waitForURL(base+'/ai/');
+   page.on('framenavigated',record);await link.click();await page.waitForURL(base+'/ai-product.html');
+   assert.equal(await page.getByRole('heading',{name:'Android · Samsung'}).count(),1);assert.equal(await page.getByRole('heading',{name:'Windows'}).count(),1);
+   await page.getByRole('link',{name:/Open web app/}).first().click();await page.waitForURL(base+'/ai/');
    await page.waitForFunction(()=>!document.getElementById('send').disabled);page.off('framenavigated',record);
-   assert.deepEqual(visited,['/ai/'],'Product card must skip the radar and retired feature pages');
+   assert.deepEqual(visited,['/ai-product.html','/ai/'],'Product card opens the platform guide, then the web app');
    assert.equal(await page.locator('#composer').isVisible(),true);assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
    assert.equal(await page.locator('.mg-card-hero--radar').count(),0);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Assistant must fit after navigation');
@@ -38,7 +40,7 @@ try{
   await page.goto(base+'/');await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true');
   await page.locator('#menuBtn').click();await page.locator('#navLinks a[href="/ai/"]').click();await page.waitForURL(base+'/ai/');
   assert.equal(requests,before,'Navigating into AI must not submit messages, files or consent');
-  await context.close();console.log(`PASS homepage/product cards, shared menu and legacy AI URLs open chat directly at ${width}px`);
+  await context.close();console.log(`PASS platform guide, web app, shared menu and legacy AI URLs at ${width}px`);
  }
  for(const width of [360,390,768,1280]){
   const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[],external=[];
@@ -137,7 +139,7 @@ try{
  const beforeLocal=requests,localExternal=[];await device.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();localExternal.push(r.request().url());return r.abort();});
  await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>!document.getElementById('send').disabled);assert.equal(await localPage.locator('#model').inputValue(),'llama70b','Prefer a configured cloud model without downloading');
  await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
- await localPage.locator('#local-welcome').waitFor({state:'visible'});assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);await localPage.locator('#local-welcome button[value="later"]').click();
+ assert.equal(await localPage.locator('#local-welcome').isVisible(),false,'local downloads must remain opt-in');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.locator('#model').selectOption('local_fast');
  await localPage.locator('#model').selectOption('__downloads');
  await localPage.locator('#local-offer').waitFor({state:'visible'});
@@ -150,7 +152,7 @@ try{
  assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.reload();await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
  assert.equal(await localPage.locator('#local-offer').isVisible(),false,'do not repeat the offer in this tab');
- await localPage.locator('#model').selectOption('auto');
+ await localPage.locator('#model').selectOption('local_fast');
  await localPage.locator('#message').fill('سلام');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});
  assert.match(await localPage.locator('#download-info').innerText(),/985 MB/);assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);assert.equal(requests,beforeLocal);
  await localPage.locator('#local-download button[value="cancel"]').click();assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
@@ -159,7 +161,7 @@ try{
  await localPage.locator('#model').selectOption('local_medium');
  await localPage.locator('#message').fill('Explain DNS');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});assert.match(await localPage.locator('#download-info').innerText(),/2268 MB/);
  await localPage.keyboard.press('Escape');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),1,'Escape must not reuse previous download approval');
- assert.equal(requests,beforeLocal);assert.deepEqual(localExternal,[]);await device.close();console.log('PASS on-device download/cancel consent, local-only text, automatic greeting routing and separate model download approval (mock Worker).');
+ assert.equal(requests,beforeLocal);assert.deepEqual(localExternal,[]);await device.close();console.log('PASS on-device download/cancel consent, local-only text and separate model download approval (mock Worker).');
  const downloadContext=await browser.newContext({viewport:{width:360,height:740}}),downloadPage=await downloadContext.newPage();
  await downloadContext.addInitScript(()=>{
   Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});
@@ -168,7 +170,7 @@ try{
  });
  const downloadExternal=[];await downloadContext.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();downloadExternal.push(r.request().url());return r.abort();});
  await downloadPage.goto(base+'/ai/');await downloadPage.waitForFunction(()=>!document.getElementById('send').disabled);
- await downloadPage.locator('#local-welcome').waitFor({state:'visible'});await downloadPage.locator('#local-welcome button[value="choose"]').click();
+ assert.equal(await downloadPage.locator('#local-welcome').isVisible(),false,'Local downloads remain opt-in');await downloadPage.locator('#model').selectOption('__downloads');
  await downloadPage.locator('#local-offer').waitFor({state:'visible'});
  await downloadPage.locator('#offer-model').selectOption('local_medium');assert.match(await downloadPage.locator('#offer-size').innerText(),/2268 MB/);
  assert.equal(await downloadPage.evaluate(()=>localWorkerCalls.length),0);

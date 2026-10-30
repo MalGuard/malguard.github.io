@@ -21,6 +21,10 @@
       "surface": "preserved content and functional controls"
     },
     {
+      "path": "ai-product.html",
+      "surface": "MalGuard AI platform guide"
+    },
+    {
       "path": "app.html",
       "baselineSHA256": "06e0be9fc22f8758244bd59d7bf9ffa448e26113e4db75a04dfee2a4e487620a",
       "preparedSHA256": "9030c0875d00495f57697db96e7444adc5af292c63f1d060ad9864296e615120",
@@ -241,7 +245,7 @@
       "surface": "preserved content and functional controls"
     }
   ],
-  "publicRouteCount": 47,
+  "publicRouteCount": 48,
   "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
   "functionalRuntimePreserved": [
     "assets/public-release.mjs",

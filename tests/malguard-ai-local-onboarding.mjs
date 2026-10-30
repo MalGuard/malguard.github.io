@@ -36,19 +36,18 @@ try{
     terminate(){clearTimeout(this.timer);this.onmessage=undefined;window.terminated++;}
    };
   });
-  await page.goto(base+'/ai/');await page.locator('#local-welcome').waitFor({state:'visible'});
+  await page.goto(base+'/ai/');await page.waitForFunction(()=>!document.getElementById('manage-models').disabled);
   assert.equal(await page.evaluate(()=>workerCalls.length),0,'First visit must not fetch model weights');
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
-  assert.match(await page.locator('#welcome-info').innerText(),/daily message quota/);
+  assert.equal(await page.locator('#local-welcome').isVisible(),false,'Download invitation must be opt-in');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-  if([390,1280].includes(width))await page.screenshot({path:path.join(output,`welcome-${width}.png`)});
-  await page.locator('#local-welcome button[value="later"]').click();
+  if([390,1280].includes(width))await page.screenshot({path:path.join(output,`initial-${width}.png`)});
   assert.equal(await page.locator('#model').isVisible(),true);assert.equal(await page.locator('#composer #model').count(),1);assert.equal(await page.locator('#model-toolbar').count(),0);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
   assert.equal(await page.locator('#model').inputValue(),'','No downloadable model selected automatically while cloud is offline');
   await page.locator('#model').selectOption('local_fast');
   if([390,1280].includes(width))await page.screenshot({path:path.join(output,`quiet-${width}.png`)});
   await page.reload();await page.waitForFunction(()=>!document.getElementById('manage-models').disabled);
-  assert.equal(await page.locator('#local-welcome').isVisible(),false,'Skip persists across reload');
+  assert.equal(await page.locator('#local-welcome').isVisible(),false,'Download invitation stays opt-in across reload');
   await page.locator('#model').selectOption('__downloads');await page.locator('#local-offer').waitFor({state:'visible'});assert.equal(await page.locator('#model').inputValue(),'local_fast','Opening downloads restores the active selection');
   assert.match(await page.locator('#offer-size').innerText(),/985/);
   await page.locator('#offer-model').selectOption('local_medium');
@@ -78,14 +77,15 @@ try{
   await page.reload();await page.waitForFunction(()=>!document.getElementById('manage-models').disabled);
   assert.equal(await page.locator('#model').inputValue(),'local_medium','The chosen local model persists without downloading on reload');
   assert.equal(await page.evaluate(()=>workerCalls.length),0);
-  await context.close();console.log(`PASS welcome, skip, explicit download, cancel, failure/retry, active model and English interface at ${width}px (mock worker)`);
+  await context.close();console.log(`PASS opt-in download, cancel, failure/retry, active model and English interface at ${width}px (mock worker)`);
  }
  const delayed=await browser.newContext(),delayedPage=await delayed.newPage();
  await delayed.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v2','seen');Object.defineProperty(navigator,'gpu',{value:{requestAdapter:()=>new Promise(resolve=>{window.resolveAdapter=()=>resolve({features:new Set(['shader-f16'])});})}});});
  await delayed.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
- await delayedPage.goto(base+'/ai/');await delayedPage.locator('#local-welcome').waitFor({state:'visible'});
- assert.equal(await delayedPage.evaluate(()=>localStorage.getItem('malguard.ai.welcome.v3')),'seen','The new introduction appears even after an older welcome was dismissed');
- await delayedPage.evaluate(()=>window.resolveAdapter());await delayedPage.keyboard.press('Escape');await delayed.close();console.log('PASS introduction appears before capability resolution and upgrades the welcome key');
+ await delayedPage.goto(base+'/ai/');await delayedPage.waitForFunction(()=>typeof window.resolveAdapter==='function');
+ assert.equal(await delayedPage.locator('#local-welcome').isVisible(),false,'No download prompt before device capability resolves');
+ assert.equal(await delayedPage.evaluate(()=>localStorage.getItem('malguard.ai.welcome.v3')),null,'No onboarding flag is written without consent');
+ await delayedPage.evaluate(()=>window.resolveAdapter());await delayed.close();console.log('PASS delayed device capability does not force a download prompt');
  const startup=await browser.newContext(),startupPage=await startup.newPage();
  await startup.addInitScript(()=>{
   localStorage.setItem('malguard.ai.welcome.v3','seen');localStorage.setItem('malguard.ai.localModel.v1','local_medium');
@@ -117,6 +117,6 @@ try{
  await context.addInitScript(()=>{Object.defineProperty(navigator,'gpu',{value:undefined});window.workerCalls=[];window.Worker=class{postMessage(data){window.workerCalls.push(data);}terminate(){}};});
  await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
  await page.goto(base+'/ai/');await page.waitForFunction(()=>document.getElementById('device-note').textContent.includes('WebGPU'));
- assert.equal(await page.locator('#local-welcome').isVisible(),true);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);await page.locator('#local-welcome button[value="choose"]').click();await page.locator('#local-offer').waitFor({state:'visible'});assert.equal(await page.locator('#offer-download-button').isDisabled(),true);assert.match(await page.locator('#offer-compatibility').innerText(),/WebGPU/);await page.locator('#local-offer').evaluate(dialog=>{window.offerClosed=new Promise(resolve=>dialog.addEventListener('close',()=>resolve(),{once:true}));});await page.keyboard.press('Escape');await page.evaluate(()=>window.offerClosed);assert.equal(await page.evaluate(()=>workerCalls.length),0);
+ assert.equal(await page.locator('#local-welcome').isVisible(),false);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);await page.locator('#open-downloads').click();await page.locator('#hub-browser').click();await page.locator('#local-offer').waitFor({state:'visible'});assert.equal(await page.locator('#offer-download-button').isDisabled(),true);assert.match(await page.locator('#offer-compatibility').innerText(),/WebGPU/);await page.locator('#local-offer').evaluate(dialog=>{window.offerClosed=new Promise(resolve=>dialog.addEventListener('close',()=>resolve(),{once:true}));});await page.keyboard.press('Escape');await page.evaluate(()=>window.offerClosed);assert.equal(await page.evaluate(()=>workerCalls.length),0);
  await context.close();assert.deepEqual(external,[]);console.log('PASS unsupported-device guidance and zero external downloads/uploads');
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

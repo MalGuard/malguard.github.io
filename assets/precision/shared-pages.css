@@ -44,10 +44,16 @@ body.mg-precision-shared main :is(input:not([type="checkbox"]):not([type="radio"
 body.mg-precision-shared main :is(.hero,.product-hero,.mg-page-hero,.platform-hero,.release-hero){background:transparent}
 body.mg-precision-shared :is(#navbar,.mg-site-footer){--mg-bg:#080a0e;--mg-surface:#10141b}
 /* Same character ink and cursor as the homepage. */
+.type-system:not([data-precision-type-ready]) body.mg-precision-shared main :is(h1,h2,h3,h4,p,.eyebrow,.kicker){color:transparent!important}
+.type-system:not([data-precision-type-ready]) body.mg-precision-shared main img{opacity:0!important}
+.type-system:not([data-precision-type-ready]) body.mg-precision-shared #navbar :is(.mg-brand,.nav-links a,.mg-primary-links a,.nav-download){color:transparent!important}
 body.mg-precision-shared main .type{position:relative}
 body.mg-precision-shared main .type-source{white-space:inherit}
 body.mg-precision-shared main .type-ink{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);pointer-events:none}
-.type-system body.mg-precision-shared main .type>.type-source{color:inherit!important}
+.type-system body.mg-precision-shared .type:is([data-type-state=pending],[data-type-state=typing],[data-type-state=paused])>.type-source{color:transparent!important}
+.type-system body.mg-precision-shared .type.typing>.type-ink{height:auto;overflow:visible;clip-path:none;color:inherit}
+.type-system body.mg-precision-shared .type-link:focus-visible>.type-source{color:inherit!important}
+.type-system body.mg-precision-shared .type-link:focus-visible>.type-ink{display:none}
 body.mg-precision-shared main .type-cursor{display:inline-block;width:0;position:relative;pointer-events:none;vertical-align:baseline}
 body.mg-precision-shared main .type-cursor:after{content:'';position:absolute;left:.08em;background:currentColor}
 body.mg-precision-shared main .type-cursor.vertical{height:.72em}
@@ -232,7 +238,7 @@ body.mg-precision-shared #navbar,
 body.mg-precision-shared #navbar :is(.nav-icon,.menu-btn,.type-link,.mg-brand,img){
  opacity:1!important;visibility:visible!important;pointer-events:auto!important;
 }
-.type-system body.mg-precision-shared .type-link>.type-source{color:inherit!important}
+.type-system body.mg-precision-shared .type-link:is([data-type-state=pending],[data-type-state=typing],[data-type-state=paused])>.type-source{color:transparent!important}
 body.mg-precision-shared .type-cursor.vertical{height:.9em}
 body.mg-precision-shared .type-cursor.vertical:after{
  content:"";position:absolute;left:.1em;bottom:-.05em;width:3px;height:100%;
@@ -369,7 +375,14 @@ body.mg-unified.mg-precision-shared #navbar #navLinks:not([hidden]) :is(a,button
 
 /* Shared editorial motion: the once-only text system owns reveals. */
 body.mg-precision-shared :is([data-tilt],.secure-story,.secure-story>p,.secure-page h1,.secure-panel,.signal-status){animation:none!important;transform:none!important}
-body.mg-precision-shared [data-reveal]:not([data-type]){opacity:1!important;transform:none!important;transition:none!important}
+.gta-vi-badge{display:inline-flex;align-items:center;border:1px solid #8654c8;border-radius:999px;background:#4b2075;color:#f5edff!important;padding:.35em .75em;font:600 11px/1.3 system-ui,sans-serif;letter-spacing:.04em;text-decoration:none;vertical-align:middle}
+body.mg-precision-shared [data-reveal]:not([data-type]):not([data-reveal=visual]){opacity:1!important;transform:none!important;transition:none!important}
+@media (prefers-reduced-motion:no-preference){
+ .type-system body.mg-precision-shared [data-reveal=visual]:is([data-reveal-state=pending],[data-reveal-state=paused]){opacity:0!important}
+ .type-system body.mg-precision-shared [data-reveal=visual][data-reveal-state=active]{animation:mg-visual-appear .35s ease-out both!important}
+ .type-system body.mg-precision-shared a:focus-visible [data-reveal=visual]{opacity:1!important}
+ @keyframes mg-visual-appear{from{opacity:0}to{opacity:1}}
+}
 body.mg-precision-shared :is(.secure-scene,.secure-vault-stage,#secure-scene){display:none!important}
 #reportAiChoice input{width:18px!important;height:18px!important;min-height:18px!important;display:inline-block!important;margin:0 8px 0 0;vertical-align:middle}#reportAiReply{white-space:pre-wrap;overflow-wrap:anywhere}
 

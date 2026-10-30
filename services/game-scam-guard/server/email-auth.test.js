@@ -20,12 +20,28 @@ test('first-party email auth sends a code through Brevo and issues an expiring o
   assert.equal(body.sender.name,'MalGuard');assert.equal(body.subject,'Your MalGuard verification code');assert.match(body.htmlContent,/Your MalGuard verification code/);
   assert.equal(auth.enabled,true);assert.equal(auth.status.hasApiKey,true);assert.equal(auth.status.hasFromEmail,true);assert.match(started.verificationToken,/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);assert.equal(body.to[0].email,'player@example.com');
   const code=body.htmlContent.match(/>(\d{6})</)[1];const verified=await auth.verify({verificationToken:started.verificationToken,code});const session=auth.session(verified);
-  assert.deepEqual(session,{email:'player@example.com',username:'player_guard',firstName:null,lastName:null,birthDate:null,expiresAt:1000+30*24*60*60*1000});
+  const {sessionToken,...profile}=session;
+  assert.deepEqual(profile,{email:'player@example.com',username:'player_guard',firstName:null,lastName:null,birthDate:null,expiresAt:1000+30*24*60*60*1000});
+  assert.match(sessionToken,/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
+  assert.equal(auth.session({sessionToken}).expiresAt,session.expiresAt);
 });
 
 test('first-party email auth rejects bad codes and does not expose them in its responses',async()=>{
   const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',fetchImpl:async()=>({ok:true})});const started=await auth.start({emailAddress:'player@example.com',ip:'198.51.100.7'});
   await assert.rejects(async()=>auth.verify({verificationToken:started.verificationToken,code:'000000'}),{status:400});assert.deepEqual(Object.keys(started),['verificationToken']);
+});
+
+test('an active session renews for another 30 days and an expired token stays invalid',async()=>{
+  let time=1000,body;
+  const auth=createEmailAuth({apiKey:'x'.repeat(32),fromEmail:'guard@example.com',now:()=>time,fetchImpl:async(_url,options)=>{body=JSON.parse(options.body);return {ok:true};}});
+  const started=await auth.start({emailAddress:'player@example.com'}),code=body.htmlContent.match(/>(\d{6})</)[1];
+  const first=await auth.verify({...started,code});
+  time+=20*24*60*60*1000;
+  const renewed=auth.session(first);
+  assert.equal(renewed.expiresAt,time+30*24*60*60*1000);
+  time+=11*24*60*60*1000;
+  assert.throws(()=>auth.session(first),{status:401});
+  assert.equal(auth.session({sessionToken:renewed.sessionToken}).email,'player@example.com');
 });
 
 test('first-party email auth accepts a Persian username and trims the email address',async()=>{

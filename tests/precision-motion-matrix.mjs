@@ -42,7 +42,7 @@ for(const name of names){
    assert.equal(await page.locator('#products article.product').count(),3,'Three product cards retained');
    assert.deepEqual(await page.locator('#products article.product a.text-link').evaluateAll(nodes=>
     nodes.map(n=>new URL(n.href).pathname)),[
-    '/gta-guard.html','/game-scam-guard.html','/ai/'
+    '/gta-guard.html','/game-scam-guard.html','/ai-product.html'
    ],'Current public product destinations');
    assert.equal(await page.locator('#products canvas').count(),0,'No heavyweight product renderer');
    assert.ok(['vector','webgl'].includes(await page.locator('.flow-stage').getAttribute('data-renderer')),'Renderer must be initialized');
@@ -64,7 +64,7 @@ for(const name of names){
    assert.equal(await page.locator('.hero-actions>a[data-type="button"]').count(),2,
     'Homepage CTAs should be queued as typed actions');
    assert.equal(await page.locator('#navbar .mg-brand[data-type="button"]').count(),1,
-    'Header brand should participate in the single typing queue');
+    'Header brand should participate in viewport typing');
    const menu=page.locator('#menuBtn');
    if(!profile.reduced)await page.waitForFunction(()=>
     document.querySelector('#navbar')?.dataset.navMotion==='complete',
@@ -85,8 +85,8 @@ for(const name of names){
     await page.waitForFunction(()=>
      ['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),
      null,{timeout:30000});
-    assert.ok(await page.locator('[data-type-state=typing]').count()<=1,
-     'Typewriter ran multiple concurrent jobs');
+    assert.ok(await page.locator('[data-type-state=typing]').count()<=4,
+     'Typewriter exceeded its bounded concurrency');
     await page.emulateMedia({reducedMotion:'reduce'});
     await page.waitForFunction(()=>!document.documentElement.classList.contains('type-system'));
     assert.equal(await page.locator('.type-ink').count(),0,

@@ -18,7 +18,7 @@ app.use('/api', (req,res,next)=>{
   res.vary('Origin');
   const protocol=process.env.VERCEL?'https':process.env.NODE_ENV==='production'?req.protocol:(req.headers['x-forwarded-proto']||req.protocol);
   const ownOrigin=process.env.PUBLIC_ORIGIN||`${protocol}://${req.headers.host}`;
-  const allowed=new Set([ownOrigin,'https://malguard.site','https://malguard.github.io']);
+  const allowed=new Set([ownOrigin,'https://malguard.site','https://www.malguard.site','https://malguard.github.io']);
   const origin=req.headers.origin;
   if(origin&&!allowed.has(origin))return res.status(403).json({error:'درخواست باید از داخل برنامه ارسال شود.'});
   if(origin){res.set('Access-Control-Allow-Origin',origin);}

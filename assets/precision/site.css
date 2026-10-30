@@ -66,9 +66,17 @@ main,.site-footer{position:relative}.hero{position:relative;isolation:isolate;mi
 body.precision-home{background-color:#050507;background-image:radial-gradient(ellipse at 50% 118%,rgba(255,255,255,.2),transparent 34%),url('/assets/precision/stars.svg?v=20261028-4k'),linear-gradient(180deg,rgba(5,5,7,.08),rgba(5,5,7,.45)),url('/assets/precision/obsidian-space.webp?v=20261028-4k');background-size:auto,cover,auto,cover;background-repeat:no-repeat;background-position:center;background-attachment:scroll}
 
 
-/* Animate only the active homepage text; keep pending text visible. */
+.gta-vi-badge{display:inline-flex;margin-top:.7rem;align-items:center;border:1px solid #8654c8;border-radius:999px;background:#4b2075;color:#f5edff;padding:.35em .75em;font:600 11px/1.3 system-ui,sans-serif;letter-spacing:.04em;text-decoration:none}
+/* Preserve geometry and accessible source text while each visual is drawn once. */
 @media (prefers-reduced-motion: no-preference){
- .type-system body.precision-home main .type.typing > .type-source{color:transparent}
- .type-system body.precision-home main .type.typing > .type-ink{position:absolute;inset:0;width:100%;height:auto;overflow:visible;clip-path:none;white-space:inherit;color:inherit}
+ .type-system body.precision-home #navbar :is(.mg-brand,.mg-primary-links a,.nav-download):not(.type-link){color:transparent}
+ .type-system body.precision-home .type:is([data-type-state=pending],[data-type-state=typing],[data-type-state=paused]) > .type-source{color:transparent}
+ .type-system body.precision-home .type.typing > .type-ink{height:auto;overflow:visible;clip-path:none;white-space:inherit;color:inherit}
+ .type-system body.precision-home .type-link:focus-visible > .type-source{color:inherit}
+ .type-system body.precision-home .type-link:focus-visible > .type-ink{display:none}
+ .type-system body.precision-home .metrics:is([data-count-state=pending],[data-count-state=counting],[data-count-state=paused]) .count-source{color:transparent}
+ .type-system body.precision-home [data-reveal=visual]:is([data-reveal-state=pending],[data-reveal-state=paused]){opacity:0}
+ .type-system body.precision-home [data-reveal=visual][data-reveal-state=active]{animation:precision-visual-draw .56s ease-out both}
+ @keyframes precision-visual-draw{from{opacity:0;filter:blur(8px)}to{opacity:1;filter:blur(0)}}
 }
 

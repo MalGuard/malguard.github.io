@@ -7,7 +7,7 @@ import {InputError,MAX_BODY_BYTES} from './contracts.js';
 export function createApp({orchestrator=createOrchestrator(),enabled=process.env.MALGUARD_AI_ENABLED!=='false',publicOrigin=process.env.MALGUARD_AI_PUBLIC_ORIGIN,now=Date.now,log=entry=>console.info(JSON.stringify(entry))}={}) {
   const app=express(),rates=new Map();let active=0;
   app.disable('x-powered-by');
-  const allowed=new Set(['https://malguard.site','https://malguard.github.io','https://game-scam-guard-connected.vercel.app','https://api.malguard.site']);
+  const allowed=new Set(['https://malguard.site','https://www.malguard.site','https://malguard.github.io','https://game-scam-guard-connected.vercel.app','https://api.malguard.site']);
   if(publicOrigin)allowed.add(new URL(publicOrigin).origin);
   if(process.env.NODE_ENV!=='production'){allowed.add('http://127.0.0.1:8787');allowed.add('http://localhost:8787');}
   app.use((req,res,next)=>{
