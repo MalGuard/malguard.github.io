@@ -94,11 +94,13 @@ test('free cross-provider fallback is opt-in, never sends paid-model IDs or hidd
  assert.ok(!JSON.stringify(bodies).includes('OPENROUTER_API_KEY'));
  await assert.rejects(callCFModel({...base,freeFallback:'paid'}),/invalid_model_request/);
 });
-test('opt-in provider consent is independently revocable',async()=>{
+test('cross-provider consent is never silently persisted on a shared device',async()=>{
  const {readPermissions,savePermissions,revokePermissions}=await import('../../../ai/permissions.mjs');
- const storage=new Map(),store={getItem:key=>storage.get(key)||null,setItem:(k,v)=>storage.set(k,v),removeItem:key=>storage.delete(key)};
- assert.equal(readPermissions(store).freeFallback,false);
- savePermissions(store,{freeFallback:true,modelShare:true});
- assert.equal(readPermissions(store).freeFallback,true);
- revokePermissions(store);assert.equal(readPermissions(store).freeFallback,false);
+ const storage=new Map(),store={getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)};
+ savePermissions(store,{modelShare:true,freeFallback:true});
+ assert.equal(readPermissions(store).modelShare,true);
+ assert.equal(readPermissions(store).freeFallback,undefined,'cross-provider consent requires a new explicit action each session');
+ revokePermissions(store);assert.equal(readPermissions(store).modelShare,false);
+ const script=readFileSync(new URL('../../../ai/app.js',import.meta.url),'utf8');
+ assert.match(script,/\$\('free-fallback-consent'\)\.checked=false/,'sign-out/revoke must clear free fallback');
 });
