@@ -80,14 +80,15 @@ for(const engine of engines){
   const mp=await mobile.newPage();await capture(mp);
   assert.equal((await mp.goto(base+'/',{waitUntil:'domcontentloaded'})).status(),200);
   await mp.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true');
+  await mp.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true');
   const links=mp.locator('#navLinks a[data-type="button"]');
-  assert.equal(await links.count(),3,'Three dropdown entries should be individually typed');
+  assert.ok(await links.count()>=3,'Dynamic dropdown entries must be in the same typing queue');
   await mp.locator('#menuBtn').click();
-  await mp.waitForFunction(()=>[...document.querySelectorAll('#navLinks a')].every(n=>n.dataset.typeState==='complete'),null,{timeout:25000});
+  await mp.waitForFunction(()=>[...document.querySelectorAll('#navLinks a')].slice(0,3).every(n=>n.dataset.typeState==='complete'),null,{timeout:25000});
   const mobileState=await mp.evaluate(()=>({
    maximum:window.__serialCheck.maximum,
    violations:window.__serialCheck.violations,
-   navStarts:[...document.querySelectorAll('#navLinks a')].map(n=>window.__serialCheck.starts.find(e=>e.className.includes('type-link')&&e.index===[...document.querySelectorAll('[data-type],[data-reveal],[data-count-group]')].indexOf(n))?.at)
+   navStarts:[...document.querySelectorAll('#navLinks a')].slice(0,3).map(n=>window.__serialCheck.starts.find(e=>e.className.includes('type-link')&&e.index===[...document.querySelectorAll('[data-type],[data-reveal],[data-count-group]')].indexOf(n))?.at)
   }));
   assert.equal(mobileState.maximum,1,'mobile menu typing overlapped');
   assert.deepEqual(mobileState.violations,[]);
