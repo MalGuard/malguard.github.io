@@ -1,6 +1,6 @@
 // Only fixed codes and validated timing cross the provider boundary. Never
 // forward upstream messages, URLs, account identifiers or credential details.
-const codes=new Set(['quota_exhausted','sign_in_required','account_unavailable','quota_unconfigured','quota_unavailable','rate_limited','provider_rate_limited','provider_quota_exhausted','provider_billing_required','provider_auth_failed','provider_unavailable','provider_timeout','model_unavailable','model_not_configured','routing_not_configured','search_not_configured','search_no_sources','search_consent_required','model_consent_required','lookup_consent_required','file_consent_required','website_consent_required','service_busy','service_disabled','request_too_large','invalid_request','invalid_json','json_required','origin_denied','network_error','request_failed','local_execution_required','invalid_model','invalid_message','invalid_history','invalid_consent','invalid_operation','invalid_query','method_not_allowed','workspace_required','isolated_execution_consent_required']);
+const codes=new Set(['usage_limit_reached','quota_exhausted','sign_in_required','account_unavailable','quota_unconfigured','quota_unavailable','rate_limited','provider_rate_limited','provider_quota_exhausted','provider_billing_required','provider_auth_failed','provider_unavailable','provider_timeout','model_unavailable','model_not_configured','routing_not_configured','search_not_configured','search_no_sources','search_consent_required','model_consent_required','lookup_consent_required','file_consent_required','website_consent_required','service_busy','service_disabled','request_too_large','invalid_request','invalid_json','json_required','origin_denied','network_error','request_failed','local_execution_required','invalid_model','invalid_message','invalid_history','invalid_consent','invalid_operation','invalid_query','method_not_allowed','workspace_required','isolated_execution_consent_required']);
 export class ServiceError extends Error {
  constructor(code,status=502,details={}){super(code);this.code=code;this.status=status;Object.assign(this,details);}
 }
@@ -20,6 +20,7 @@ export function publicFailure(error,fallback='provider_unavailable'){
   result.retryAt=new Date(error.retryAt).toISOString();
   if(Number.isInteger(error.retryAfterSeconds)&&error.retryAfterSeconds>=0&&error.retryAfterSeconds<=366*86400)result.retryAfterSeconds=error.retryAfterSeconds;
  }
+ if(result.error==='usage_limit_reached'&&typeof error?.resetAt==='string'&&Number.isFinite(Date.parse(error.resetAt)))result.resetAt=new Date(error.resetAt).toISOString();
  return result;
 }
 export function httpFailure(status,headers,body,now=Date.now()){

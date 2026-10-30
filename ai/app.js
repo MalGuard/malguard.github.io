@@ -1,11 +1,11 @@
 import {createChatLibrary} from './library.mjs?v=sidebar-20261026';
 import {createNavigation} from './navigation.mjs?v=sidebar-20261026';
-import {errorMessage} from './error-message.mjs?v=account-quota-20261030';
-import {publicFailure,retryDetails} from './service-errors.mjs?v=account-quota-20261030';
+import {errorMessage} from './error-message.mjs?v=smart-usage-20261030';
+import {publicFailure,retryDetails} from './service-errors.mjs?v=smart-usage-20261030';
 import {apiUrl,readStream} from './client.mjs?v=cloud-session-20261029';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs?v=free-fallback-20261030';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
-import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=visible-models-20261030';
+import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=smart-usage-20261030';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
@@ -346,7 +346,7 @@ function renderStatus(){
  const selected=models.find(m=>m.id===$('model').value);
  const modelLabel=selected?.label||service?.model?.model||'';
  const modelNotice=locale==='fa'?`مدل انتخاب‌شده: ${modelLabel}`:`Selected model: ${modelLabel}`;
- $('model-status').textContent=(cfAvailable.length?modelNotice:t('modelOff'))+(accountUsage?locale==='fa'?` · حدود ${accountUsage.remainingTokens.toLocaleString('en-US')} از ${accountUsage.limitTokens.toLocaleString('en-US')} توکن این ماه باقی‌مونده`:` · ~${accountUsage.remainingTokens.toLocaleString('en-US')} / ${accountUsage.limitTokens.toLocaleString('en-US')} monthly tokens left`:'');
+ $('model-status').textContent=(cfAvailable.length?modelNotice:t('modelOff'))+(accountUsage?(locale==='fa'?' · استفاده از مدل ابری تابع سهمیهٔ منصفانه است':' · Fair-use limits apply to cloud models'):'');
  if(cfAvailable.length)document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌ها از مسیر Cloudflare اجرا می‌شن. Ultra و Gemma و Flash-Lite از داخل Worker به ارائه‌دهندهٔ اصلی وصل می‌شن.':'Models run through Cloudflare. Ultra, Gemma and Flash-Lite are proxied by the Worker to their respective providers.';
  $('manage-models').disabled=busy||localOfferPending;
  $('offer-download-button').disabled=busy||!localReady;
@@ -473,7 +473,7 @@ async function runBuild(message){
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
  else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
  if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn);if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
- }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error.name==='TimeoutError'?'provider_timeout':'model_unavailable'});}finally{endTurn(turn);}
+ }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error?.code|| (error.name==='TimeoutError'?'provider_timeout':'model_unavailable'),retryAt:error?.resetAt,resetAt:error?.resetAt,retryAfterSeconds:error?.retryAfterSeconds});}finally{endTurn(turn);}
 }
 $('build-files-toggle').onclick=()=>setProjectOpen(!projectOpen);
 $('stop-local').onclick=stopTurn;
@@ -541,7 +541,7 @@ $('composer').onsubmit=async event=>{
    modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});
    while(modelHistory.length>8)modelHistory.shift();
    if($('message').value.trim()===message)$('message').value='';
-  }catch(e){if(turn.controller.signal.aborted)stopped(turn);else showError({error:e?.code||'provider_unavailable',retryAfterSeconds:e?.retryAfterSeconds});}
+  }catch(e){if(turn.controller.signal.aborted)stopped(turn);else showError({error:e?.code||'provider_unavailable',retryAfterSeconds:e?.retryAfterSeconds,resetAt:e?.resetAt,retryAt:e?.resetAt});}
   finally{endTurn(turn);}
   return;
  }

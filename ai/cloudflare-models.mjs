@@ -55,7 +55,7 @@ export async function callCFModel({mode,model,message,history=[],sessionToken,qu
  const body={mode,model,message,history:history.slice(-6).map(m=>({role:m.role,content:m.content})),...(freeFallback?{freeFallback:true}:{})};
  const response=await fetchImpl(ROOT+"/api/public-model-chat",{method:"POST",credentials:"omit",cache:"no-store",mode:"cors",signal,headers:{"Content-Type":"application/json",...(quotaEnabled?{Authorization:"Bearer "+sessionToken}:{})},body:JSON.stringify(body)});
  let data;try{data=await response.json();}catch{throw new Error("cloudflare_invalid_response");}
- if(!response.ok)throw Object.assign(new Error(data?.error||"cloudflare_unavailable"),{code:data?.error||"cloudflare_unavailable",status:response.status,retryAfterSeconds:data?.retryAfterSeconds});
+ if(!response.ok)throw Object.assign(new Error(data?.error||"cloudflare_unavailable"),{code:data?.error||"cloudflare_unavailable",status:response.status,retryAfterSeconds:data?.retryAfterSeconds,...(typeof data?.resetAt==="string"?{resetAt:data.resetAt}:{}),...(typeof data?.limitScope==="string"?{limitScope:data.limitScope}:{})});
  if(typeof data.text!=="string"||!data.text.trim()||typeof data.model!=="string"||typeof data.provider!=="string")throw new Error("cloudflare_invalid_response");
  return {text:data.text,model:data.model,selectedModel:data.modelId,provider:data.provider,fallbackUsed:!!data.fallback,securityAnalysis:false,...(data.usage&&typeof data.usage.remainingTokens==="number"?{usage:data.usage}:{})};
 }
