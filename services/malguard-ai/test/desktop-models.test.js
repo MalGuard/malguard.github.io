@@ -42,3 +42,69 @@ test('oversized chat responses and pre-aborted signals fail without starting ano
  const controller=new AbortController();controller.abort();await assert.rejects(chat.respond({model:'native_qwen8',message:'Hello',signal:controller.signal}),error=>error.name==='AbortError');assert.equal(calls,1);
  await assert.rejects(chat.respond({model:'native_qwen8',message:'Hello'}),/response_too_large/);assert.equal(calls,2);
 });
+
+test('explicit Ollama pull streams real layer progress, verifies installation, and never calls external URLs',async()=>{
+ const urls=[],progress=[];
+ const stream=new ReadableStream({start(c){
+  const enc=new TextEncoder();
+  c.enqueue(enc.encode('{"status":"pulling manifest"}\n{"status":"downloading sha256:fake","total":200,"completed":100}\n'));
+  c.enqueue(enc.encode('{"status":"verifying sha256 digest"}\n{"status":"success"}\n'));c.close();
+ }});
+ const chat=createDesktopChat({fetchImpl:async(url,options)=>{
+  urls.push(url);
+  if(url.endsWith('/api/pull')){
+   assert.equal(options.method,'POST');assert.equal(options.redirect,'error');
+   assert.equal(options.credentials,'omit');
+   assert.deepEqual(JSON.parse(options.body),{model:'qwen3:8b',stream:true});
+   return new Response(stream);
+  }
+  assert.equal(url,'http://127.0.0.1:11434/api/tags');
+  return Response.json({models:[{name:'qwen3:8b'}]});
+ }});
+ const installed=await chat.pull({model:'native_qwen8',onProgress:event=>progress.push(event)});
+ assert.deepEqual(urls,['http://127.0.0.1:11434/api/pull','http://127.0.0.1:11434/api/tags']);
+ assert.deepEqual(installed.installedIDs,['native_qwen8']);
+ assert.ok(progress.some(p=>p.phase==='downloading'&&p.percent===50));
+ assert.equal(progress.at(-1).phase,'complete');
+});
+test('download is blocked for arbitrary model names and never runs on page load',async()=>{
+ let requests=0;
+ const chat=createDesktopChat({fetchImpl:async()=>{requests++;return Response.json({});}});
+ await assert.rejects(chat.pull({model:'evil/untrusted'}),/invalid_desktop_model/);
+ assert.equal(requests,0);
+ assert.equal(chat.availability.available,false);
+});
+test('success stream cannot mark an absent model as installed',async()=>{
+ const encoder=new TextEncoder();
+ const chat=createDesktopChat({fetchImpl:async(url)=>url.endsWith('/pull')?
+  new Response(encoder.encode('{"status":"success"}\n')):
+  Response.json({models:[]})});
+ await assert.rejects(chat.pull({model:'native_gpt20'}),/desktop_download_unverified/);
+ assert.equal(chat.availability.installedIDs.length,0);
+});
+test('Ollama download errors and truncated streams never report a successful install',async()=>{
+ const encoder=new TextEncoder();
+ for(const events of ['{"status":"pulling manifest"}\n','{"error":"provider quota failed"}\n','{not-json}\n']){
+  let calls=0;
+  const chat=createDesktopChat({fetchImpl:async()=>{calls++;return new Response(encoder.encode(events));}});
+  await assert.rejects(chat.pull({model:'native_qwen32'}),/desktop_download_(incomplete|failed|invalid_response)/);
+  assert.equal(calls,1,'do not fetch /api/tags after incomplete download');
+ }
+});
+test('Ollama pull is cancellable by the user, freeing the connection slot',async()=>{
+ let capture,started;
+ const begun=new Promise(r=>started=r),enc=new TextEncoder();
+ const chat=createDesktopChat({fetchImpl:async(url,options)=>{
+  if(url.endsWith('/pull')){
+   const stream=new ReadableStream({start(c){capture=c;started();options.signal.addEventListener('abort',()=>{try{c.error(options.signal.reason);}catch{}},{once:true});}});
+   return new Response(stream);
+  }
+  throw Error('must not check tags after cancellation');
+ }});
+ const controller=new AbortController();
+ const pull=chat.pull({model:'native_qwen8',signal:controller.signal});
+ await begun;capture.enqueue(enc.encode('{"status":"pulling manifest"}\n'));
+ controller.abort(new DOMException('Stopped by user','AbortError'));
+ await assert.rejects(pull,error=>error.name==='AbortError');
+ assert.deepEqual(chat.availability.installedIDs,[]);
+});
