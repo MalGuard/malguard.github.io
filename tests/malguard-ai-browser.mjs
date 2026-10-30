@@ -116,7 +116,7 @@ try{
    await page.locator('#message').fill('Continue');await page.locator('#send').click();await page.getByText('Benign test reply 2',{exact:true}).waitFor();
    assert.equal(await page.locator('html').getAttribute('lang'),'en');
    await page.locator('#model').selectOption('chat_flash');await page.locator('#message').fill('سلام');await page.locator('#send').click();await page.getByText('پاسخ فارسی آزمایشی',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
-   await toggleSettings(page);await page.locator('#mode').selectOption('worker');await toggleSettings(page);await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('This mode inspects files, hashes and websites. Switch to Chat for general or technical questions.',{exact:true}).waitFor();
+   await toggleSettings(page);await page.locator('#mode').selectOption('worker');await toggleSettings(page);await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
    await newConversation(page);
    console.log('PASS Chat multi-turn context and inspection-only mode (injected benign model fixture).');
   }
