@@ -5,14 +5,14 @@ const messages={
 export function errorMessage(failure,locale='en',{now=Date.now(),timeZone}={}){
  const m=messages[locale]||messages.en,code=failure?.error;
  let text=m[code]||(/_consent_required$/.test(code||'')?m.consent:m.request_failed);
- const limited=['rate_limited','provider_rate_limited','provider_quota_exhausted','provider_billing_required'].includes(code);
+ const limited=['all_providers_cooling_down','rate_limited','provider_rate_limited','provider_quota_exhausted','provider_billing_required'].includes(code);
  if(limited){
-  const stamp=typeof failure?.retryAt==='string'?Date.parse(failure.retryAt):NaN;
+  const stamp=typeof failure?.retryAt==='string'?Date.parse(failure.retryAt):typeof failure?.resetAt==='string'?Date.parse(failure.resetAt):NaN;
   if(Number.isFinite(stamp)){
    if(stamp<=now)text+=' '+m.retryNow;
    else{const formatter=new Intl.DateTimeFormat(locale==='fa'?'fa-IR':'en-GB',{dateStyle:'medium',timeStyle:'long',...(timeZone?{timeZone}:{})});text+=' '+m.retryAt+' '+formatter.format(stamp);}
   }else text+=' '+m.unknownReset;
-  if(code!=='rate_limited')text+=' '+m.shared;
+  if(code!=='rate_limited'&&code!=='all_providers_cooling_down')text+=' '+m.shared;
  }
  return text;
 }
