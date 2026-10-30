@@ -13,6 +13,8 @@ try{
   assert.equal(await page.getByRole('heading',{name:'Windows'}).count(),1);
   assert.equal(await page.getByText('App not available yet').count(),2);
   assert.equal(await page.locator('.ai-platform-card a[href="/ai/"]').count(),1);
+  await page.locator('#mg-report-launcher').waitFor({state:'visible'});
+  assert.equal(await page.locator('#mg-report-launcher a').getAttribute('href'),'/report.html?kind=bug');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Platform guide overflows');
   const offscreen=page.locator('.ai-platform-art').last();
   assert.equal(await offscreen.evaluate(node=>getComputedStyle(node).opacity),'0','Offscreen image begins hidden');

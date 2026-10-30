@@ -170,7 +170,7 @@ try{
  });
  const downloadExternal=[];await downloadContext.route('**/*',r=>{if(new URL(r.request().url()).origin===base)return r.continue();downloadExternal.push(r.request().url());return r.abort();});
  await downloadPage.goto(base+'/ai/');await downloadPage.waitForFunction(()=>!document.getElementById('send').disabled);
- await downloadPage.locator('#local-welcome').waitFor({state:'visible'});await downloadPage.locator('#local-welcome button[value="choose"]').click();
+ assert.equal(await downloadPage.locator('#local-welcome').isVisible(),false,'Local downloads remain opt-in');await downloadPage.locator('#model').selectOption('__downloads');
  await downloadPage.locator('#local-offer').waitFor({state:'visible'});
  await downloadPage.locator('#offer-model').selectOption('local_medium');assert.match(await downloadPage.locator('#offer-size').innerText(),/2268 MB/);
  assert.equal(await downloadPage.evaluate(()=>localWorkerCalls.length),0);
