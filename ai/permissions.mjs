@@ -1,5 +1,5 @@
 const key='malguard-ai-permissions-v1';
-const fields=['fileUpload','websiteFetch','remoteLookup','modelShare'];
+const fields=['fileUpload','websiteFetch','remoteLookup','modelShare','freeFallback'];
 export function readPermissions(storage){
  try{const value=JSON.parse(storage.getItem(key));return Object.fromEntries(fields.map(f=>[f,value?.version===1&&value[f]===true]));}catch{return Object.fromEntries(fields.map(f=>[f,false]));}
 }
