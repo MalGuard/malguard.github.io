@@ -65,7 +65,7 @@ export function createDesktopChat({fetchImpl=globalThis.fetch,connectTimeout=500
     while(true){
      controller.signal.throwIfAborted();
      const {done,value}=await reader.read();if(done)break;
-     received+=value.byteLength;if(received>10*1024*1024)throw fail('desktop_download_invalid_response');
+     received+=value.byteLength;if(received>256*1024*1024)throw fail('desktop_download_invalid_response');
      buffered+=decoder.decode(value,{stream:true});
      if(buffered.length>16384&&!buffered.includes('\n'))throw fail('desktop_download_invalid_response');
      let index;while((index=buffered.indexOf('\n'))>=0){const line=buffered.slice(0,index).trim();buffered=buffered.slice(index+1);if(line)record(line);}
