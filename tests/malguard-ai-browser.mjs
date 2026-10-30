@@ -130,7 +130,13 @@ try{
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);await context.close();
   console.log(`PASS real AI frontend → backend → static worker, consent, English interface, no overflow/history at ${width}px`);
  }
- const context=await browser.newContext(),page=await context.newPage();await skipWelcome(context);await context.route('**/api/malguard-ai/status',r=>r.abort());await page.goto(base+'/ai/');await toggleSettings(page);await page.getByRole('status').filter({hasText:'Backend unavailable'}).waitFor();assert.equal(await page.locator('#send').isDisabled(),true);await context.close();console.log('PASS backend failure shown; submission disabled.');
+ const context=await browser.newContext(),page=await context.newPage();await skipWelcome(context);
+ await context.route('**/api/malguard-ai/status',r=>r.abort());
+ await context.route('https://malware-ai.malguard-security.workers.dev/**',r=>cfFixture(r));
+ await page.goto(base+'/ai/');
+ await page.waitForFunction(()=>document.getElementById('entry-gate')?.hidden&&document.getElementById('send')?.disabled===false);
+ assert.equal(await page.locator('#send').isDisabled(),false,'Cloudflare chat remains available during a legacy Vercel backend outage');
+ await context.close();console.log('PASS backend outage does not disable Cloudflare-only chat.');
  // Cloudflare-only model rate/quota errors are tested in cloudflare-models.test.js.
  // The old Vercel NDJSON error fixture does not apply to the JSON Cloudflare model endpoint.
  // Device inference is a Worker fixture here: no model weights or GPU results
