@@ -20,7 +20,7 @@ for(const engineName of [process.env.TEST_BROWSER||'chromium']){
     const initial=await page.evaluate(()=>({
      menuOpen:document.querySelector('#menuBtn')?.getAttribute('aria-expanded'),
      menuHidden:document.querySelector('#navLinks')?.hidden,
-     script:[...document.scripts].some(s=>s.src.includes('site.js?v=slightly-faster-typing-20261022')),
+     script:[...document.scripts].some(s=>s.src.includes('site.js?v=fast-reveal-20261029')),
      titleLines:document.querySelectorAll('#gta6-heading .gta6-type-line[data-type="title"]').length,
      buttons:document.querySelectorAll('.gta6-actions a[data-type="button"]').length,
      width:document.documentElement.clientWidth,

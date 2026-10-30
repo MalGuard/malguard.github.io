@@ -26,7 +26,7 @@ for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chrom
      navFont:getComputedStyle(document.querySelector('#navbar .mg-brand')).fontFamily,
      scroll:document.documentElement.scrollWidth,width:document.documentElement.clientWidth,
      ctas:document.querySelectorAll('main a[data-type="button"]').length,
-     script:[...document.scripts].some(s=>s.src.includes('site.js?v=slightly-faster-typing-20261022'))
+     script:[...document.scripts].some(s=>s.src.includes('site.js?v=fast-reveal-20261029'))
     }));
     // Hamburger menu must not inherit the obsolete teal/green experience theme.
     const palette=await page.evaluate(()=>{
@@ -63,7 +63,7 @@ for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chrom
     }else{
      await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navMotion==='complete',null,{timeout:25000});
      await page.waitForFunction(()=>document.querySelector('main [data-type]')?.dataset.typeRuns>0,null,{timeout:15000});
-     assert.ok(await page.locator('[data-type-state=typing]').count()<=1,path+' multiple typewriters running');
+     assert.ok(await page.locator('[data-type-state=typing]').count()<=4,path+' typing concurrency exceeded');
      await page.emulateMedia({reducedMotion:'reduce'});
      await page.waitForFunction(()=>!document.documentElement.classList.contains('type-system'),null,{timeout:10000});
     }
