@@ -129,6 +129,7 @@ try{
  const errorContext=await browser.newContext({timezoneId:'Asia/Tehran'}),errorPage=await errorContext.newPage();
  await skipWelcome(errorContext);
  const retryAt=new Date(Date.now()+300000).toISOString();let errorCase=0;
+ await errorContext.route('**/api/malguard-ai/status',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({enabled:true,model:testModel.status(),tools:{}})}));
  await errorContext.route('**/api/public-models',cfFixture);
  await errorContext.route('**/api/public-model-chat',route=>{
   const headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'POST, OPTIONS'};
