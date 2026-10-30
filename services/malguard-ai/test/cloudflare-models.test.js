@@ -41,7 +41,7 @@ test("Cloudflare failure returns code without silently changing to a different h
 test("existing site styling stays untouched and CSP permits direct Cloudflare",()=>{
  const html=readFileSync(new URL("../../../ai/index.html",import.meta.url),"utf8");
  assert.match(html,/connect-src[^"]+https:\/\/malware-ai\.malguard-security\.workers\.dev/);
- assert.match(html,/\.\/app\.js\?v=device-check-20261030/);
+ assert.match(html,/\.\/app\.js\?v=neuron-resilience-20261030/);
  const script=readFileSync(new URL("../../../ai/app.js",import.meta.url),"utf8");
  assert.match(script,/callCFModel\(/);
  assert.match(script,/mode==='worker'\?'cf_qwen3':selected/);
@@ -120,4 +120,13 @@ test('a stale or incomplete backend never hides classic models or wrongly enable
  const offline=unavailableCFModels();
  assert.equal(offline.length,22);
  assert.ok(offline.every(m=>m.available===false));
+});
+
+test('cross-provider fallback consent explains independent verified free tiers',()=>{
+ const page=readFileSync(new URL('../../../ai/index.html',import.meta.url),'utf8');
+ const script=readFileSync(new URL('../../../ai/app.js',import.meta.url),'utf8');
+ assert.match(page,/Groq\/Gemini only when MalGuard has separately verified/);
+ assert.match(script,/free OpenRouter model/);
+ assert.match(script,/Groq\/Gemini only if MalGuard has separately verified/);
+ assert.doesNotMatch(script,/remainingTokens\.toLocaleString/,'do not show exact raw allowances on the public chat UI');
 });

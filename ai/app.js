@@ -1,11 +1,11 @@
 import {createChatLibrary} from './library.mjs?v=sidebar-20261026';
 import {createNavigation} from './navigation.mjs?v=sidebar-20261026';
-import {errorMessage} from './error-message.mjs?v=account-quota-20261030';
+import {errorMessage} from './error-message.mjs?v=neuron-resilience-20261030';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=account-quota-20261030';
 import {apiUrl,readStream} from './client.mjs?v=cloud-session-20261029';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs?v=free-fallback-20261030';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
-import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=visible-models-20261030';
+import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=neuron-resilience-20261030';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
@@ -92,8 +92,8 @@ Object.assign(copy.en,{downloadEntry:'↓ Download models · choose for your dev
 Object.assign(copy.fa,{downloadEntry:'↓ دانلود مدل‌ها · انتخاب مناسب دستگاهت',downloadHubInfo:'انتخاب کن مدل کجا اجرا شود. باز کردن این راهنما چیزی دانلود نمی‌کند.',browserRoute:'داخل همین مرورگر',browserRouteInfo:'دو مدل کم‌حجم · حدود ۹۸۵ مگابایت یا ۲٫۳ گیگابایت · نیازمند WebGPU سازگار',desktopRoute:'روی کامپیوتر با Ollama',desktopRouteInfo:'شش مدل بزرگ‌تر · حدود ۵٫۲ تا ۴۰۴ گیگابایت · همراه راهنما و دستور نصب',desktopSteps:'۱. Ollama را نصب کن. ۲. دستور دانلود زیر را در ترمینال اجرا کن. ۳. طبق توضیح پایین، دسترسی سایت را تنظیم و Ollama را دوباره اجرا کن. ۴. «اتصال» را بزن، این پنجره را ببند و مدل نصب‌شده را در چت انتخاب کن.',desktopSetup:'تنظیم دسترسی سایت',copyCommand:'کپی دستور دانلود',commandCopied:'دستور دانلود کپی شد'});
 Object.assign(copy.en,{desktopDownloadDirect:'Download to this computer',desktopDownloadConfirmTitle:'Download a large local model?',desktopCancelDownload:'Cancel download'});
 Object.assign(copy.fa,{desktopDownloadDirect:'دانلود روی همین کامپیوتر',desktopDownloadConfirmTitle:'دانلود مدل بزرگ روی کامپیوتر؟',desktopCancelDownload:'لغو دانلود'});
-Object.assign(copy.en,{freeFallbackConsent:'When a model is unavailable or out of provider capacity, allow the explicitly free OpenRouter model as fallback. Your text goes to OpenRouter, and MalGuard monthly tokens still apply. No paid-model fallback.'});
-Object.assign(copy.fa,{freeFallbackConsent:'اگر مدل در دسترس نبود یا ظرفیت ارائه‌دهنده تمام شد، با اجازهٔ من از مدل صراحتاً رایگان OpenRouter استفاده کن. متن درخواست به OpenRouter می‌رود و سهمیهٔ ماهانهٔ MalGuard همچنان اعمال می‌شود؛ مدل پولی مجاز نیست.'});
+Object.assign(copy.en,{freeFallbackConsent:'If the selected provider fails, I permit sending this conversation to a free OpenRouter model, or to Groq/Gemini only if MalGuard has separately verified their free tier. Independent limits apply, my MalGuard allowance still applies, and paid fallback is disabled.'});
+Object.assign(copy.fa,{freeFallbackConsent:'اگر سرویس مدل قطع شد، اجازه می‌دم متن همین گفت‌وگو به مدل رایگان OpenRouter یا فقط در صورت تأیید رایگان‌بودن حساب، به Groq/Gemini فرستاده بشه. سهمیه هر سرویس مستقل و سهمیه MalGuard همچنان معتبره؛ مدل پولی خودکار مجاز نیست.'});
 const desktopDescriptions={
  native_qwen8:{fa:['برای گفت‌وگوی روزمره، نوشتن و کمک به کدنویسی؛ کم‌حجم‌ترین گزینهٔ دسکتاپ این فهرست.','۵٫۲ گیگابایت فقط وزن مدل است؛ برای اجرا و متن، RAM/VRAM آزاد بیشتری لازم است. از این گزینه برای شروع مدل‌های دسکتاپ استفاده کن.'],en:['Everyday chat, writing and coding help; the smallest desktop option in this list.','The 5.2 GB weights need additional free RAM/VRAM for runtime and context. A starting point for desktop models.']},
  native_qwen32:{fa:['برای نوشتن، تحلیل متن و کمک به برنامه‌نویسی با مدل بزرگ‌تر از Qwen3 8B.','حدود ۲۰ گیگابایت وزن مدل، به‌علاوهٔ حافظهٔ اجرا و متن؛ مناسب دستگاه‌های پرحافظه.'],en:['Writing, text analysis and programming help with a larger model than Qwen3 8B.','About 20 GB of weights plus runtime/context memory; intended for high-memory devices.']},
@@ -346,7 +346,7 @@ function renderStatus(){
  const selected=models.find(m=>m.id===$('model').value);
  const modelLabel=selected?.label||service?.model?.model||'';
  const modelNotice=locale==='fa'?`مدل انتخاب‌شده: ${modelLabel}`:`Selected model: ${modelLabel}`;
- $('model-status').textContent=(cfAvailable.length?modelNotice:t('modelOff'))+(accountUsage?locale==='fa'?` · حدود ${accountUsage.remainingTokens.toLocaleString('en-US')} از ${accountUsage.limitTokens.toLocaleString('en-US')} توکن این ماه باقی‌مونده`:` · ~${accountUsage.remainingTokens.toLocaleString('en-US')} / ${accountUsage.limitTokens.toLocaleString('en-US')} monthly tokens left`:'');
+ $('model-status').textContent=(cfAvailable.length?modelNotice:t('modelOff'))+(cfQuotaEnabled?(locale==='fa'?' · استفاده منصفانه با سقف ماهانه':' · Monthly fair-use limits apply'):'');
  if(cfAvailable.length)document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌ها از مسیر Cloudflare اجرا می‌شن. Ultra و Gemma و Flash-Lite از داخل Worker به ارائه‌دهندهٔ اصلی وصل می‌شن.':'Models run through Cloudflare. Ultra, Gemma and Flash-Lite are proxied by the Worker to their respective providers.';
  $('manage-models').disabled=busy||localOfferPending;
  $('offer-download-button').disabled=busy||!localReady;
@@ -473,7 +473,7 @@ async function runBuild(message){
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
  else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
  if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn);if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
- }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error.name==='TimeoutError'?'provider_timeout':'model_unavailable'});}finally{endTurn(turn);}
+ }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error?.code|| (error.name==='TimeoutError'?'provider_timeout':'model_unavailable'),retryAfterSeconds:error?.retryAfterSeconds,retryAt:error?.retryAt});}finally{endTurn(turn);}
 }
 $('build-files-toggle').onclick=()=>setProjectOpen(!projectOpen);
 $('stop-local').onclick=stopTurn;
@@ -541,7 +541,7 @@ $('composer').onsubmit=async event=>{
    modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});
    while(modelHistory.length>8)modelHistory.shift();
    if($('message').value.trim()===message)$('message').value='';
-  }catch(e){if(turn.controller.signal.aborted)stopped(turn);else showError({error:e?.code||'provider_unavailable',retryAfterSeconds:e?.retryAfterSeconds});}
+  }catch(e){if(turn.controller.signal.aborted)stopped(turn);else showError({error:e?.code||'provider_unavailable',retryAfterSeconds:e?.retryAfterSeconds,retryAt:e?.retryAt});}
   finally{endTurn(turn);}
   return;
  }
