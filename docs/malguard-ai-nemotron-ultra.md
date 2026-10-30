@@ -38,3 +38,11 @@ and the fixture-backed test results are not proof of live execution.
 
 Public contract tests: `services/malguard-ai/test/nvidia-code.test.js`.
 Private gateway tests: `tests/assistant-nvidia.test.mjs`.
+
+## Preferred free option: OpenRouter Nemotron 3 Ultra
+
+The Code assistant now supports the free model ID `openrouter_nemotron_ultra`, routed on the server to `nvidia/nemotron-3-ultra-550b-a55b:free` through OpenRouter. This uses an **OpenRouter key**, not an NVIDIA Build key, and does not enable paid routing.
+
+Use https://openrouter.ai/settings/keys to create the key. Store it in the **private** Vercel `malware-ai` project under `OPENROUTER_API_KEY` for Preview only, then deploy the private and public companion Preview branches. The model is disabled in the catalog until the server environment supplies that key. The existing Cloudflare/Groq/Gemini options remain unchanged.
+
+The free account limit is typically 50 requests/day and 20 requests/minute. Do not send private source files, secrets or personal data into this provider; the free endpoint can log data for model improvements. Test live requests, response model metadata, project proposal format, and usage limits before approving Production. See https://openrouter.ai/nvidia/nemotron-3-ultra-550b-a55b%3Afree
