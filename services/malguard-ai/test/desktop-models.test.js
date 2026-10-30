@@ -42,3 +42,64 @@ test('oversized chat responses and pre-aborted signals fail without starting ano
  const controller=new AbortController();controller.abort();await assert.rejects(chat.respond({model:'native_qwen8',message:'Hello',signal:controller.signal}),error=>error.name==='AbortError');assert.equal(calls,1);
  await assert.rejects(chat.respond({model:'native_qwen8',message:'Hello'}),/response_too_large/);assert.equal(calls,2);
 });
+
+const progressStream=(events,split=false)=>new ReadableStream({
+ start(controller){
+  const encoded=new TextEncoder().encode(events.map(x=>JSON.stringify(x)+'\n').join(''));
+  if(split){controller.enqueue(encoded.slice(0,15));controller.enqueue(encoded.slice(15));}
+  else controller.enqueue(encoded);
+  controller.close();
+ }
+});
+test('explicit Ollama download really POSTs /api/pull, tracks model-layer progress, then verifies installation',async()=>{
+ const calls=[],progress=[];let installed=false;
+ const chat=createDesktopChat({fetchImpl:async(url,opts)=>{
+  calls.push({url,options:opts});
+  if(url.endsWith('/api/tags'))return Response.json({models:installed?[{name:'qwen3:8b'}]:[]});
+  assert.equal(url,'http://127.0.0.1:11434/api/pull');
+  assert.equal(opts.method,'POST');assert.equal(opts.redirect,'error');
+  assert.equal(opts.credentials,'omit');assert.deepEqual(JSON.parse(opts.body),{model:'qwen3:8b',stream:true});
+  installed=true;
+  return new Response(progressStream([
+   {status:'pulling manifest'},
+   {status:'pulling layer',total:200,completed:100},
+   {status:'pulling layer',total:200,completed:200},
+   {status:'verifying sha256 digest'},
+   {status:'success'}
+  ],true),{headers:{'Content-Type':'application/x-ndjson'}});
+ }});
+ await assert.rejects(chat.download({model:'native_qwen8'}),/desktop_unavailable/);
+ assert.equal(calls.length,0);
+ await chat.connect();
+ const state=await chat.download({model:'native_qwen8',onProgress:x=>progress.push(x)});
+ assert.ok(state.installedIDs.includes('native_qwen8'));
+ assert.deepEqual(calls.map(x=>new URL(x.url).pathname),['/api/tags','/api/pull','/api/tags']);
+ assert.ok(progress.some(x=>x.progress===50&&x.total===200));
+ assert.equal(progress.at(-1).finished,true);
+});
+test('404 GB download is never automatic and only uses the exact allowlisted Ollama model',async()=>{
+ let calls=0;
+ const chat=createDesktopChat({fetchImpl:async(url,opts)=>{calls++;if(url.endsWith('/tags'))return Response.json({models:[{name:'deepseek-r1:671b'}]});
+  assert.deepEqual(JSON.parse(opts.body),{model:'deepseek-r1:671b',stream:true});
+  return new Response(progressStream([{status:'success'}]));}});
+ await chat.connect();assert.equal(calls,1);
+ const state=await chat.download({model:'native_deepseek671'});assert.equal(calls,3);assert.ok(state.installedIDs.includes('native_deepseek671'));
+ await assert.rejects(chat.download({model:'https://example.invalid/model'}),/invalid_desktop_model/);
+ assert.equal(calls,3);
+});
+test('a partial or malformed download is never marked installed',async()=>{
+ for(const events of [[{status:'pulling manifest'}],[{status:'x',total:100,completed:1000}],[{error:'network lost'}]]){
+  let calls=0;const chat=createDesktopChat({fetchImpl:async(url)=>{calls++;return url.endsWith('/tags')?Response.json({models:[]}):new Response(progressStream(events));}});
+  await chat.connect();await assert.rejects(chat.download({model:'native_qwen8'}));
+  assert.equal(calls,2);assert.deepEqual(chat.availability.installedIDs,[]);
+ }
+});
+test('abort of a download interrupts the browser request and never reports an installed model',async()=>{
+ let waiting;const started=new Promise(resolve=>waiting=resolve);
+ const chat=createDesktopChat({fetchImpl:async(url,options)=>url.endsWith('/tags')?Response.json({models:[]}):new Promise((resolve,reject)=>{
+  waiting();options.signal.addEventListener('abort',()=>reject(options.signal.reason),{once:true});
+ })});
+ await chat.connect();const abort=new AbortController();
+ const promise=chat.download({model:'native_qwen8',signal:abort.signal});await started;abort.abort();
+ await assert.rejects(promise,x=>x.name==='AbortError');assert.deepEqual(chat.availability.installedIDs,[]);
+});

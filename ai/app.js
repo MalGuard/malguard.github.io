@@ -10,7 +10,7 @@ import {localModels,localCapabilityDetails,createLocalChat} from './local-models
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
 import {typeText,formatElapsed} from './reply-motion.mjs';
-import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=codex-chat-20261025';
+import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=desktop-pull-20261030';
 import {renderRichText} from './code-view.mjs?v=codex-chat-20261025';
 import {createAccount} from './account.mjs?v=founder-name-20261029';
 import {createBuilder} from './builder.mjs?v=qwen-coder-restored-20261026';
@@ -39,7 +39,7 @@ const navigation=createNavigation({account,onLanguage:()=>{locale='en';translate
 $('entry-signin').onclick=()=>account.open(false);$('entry-signup').onclick=()=>account.open(true);
 $('entry-retry').onclick=async()=>{$('entry-retry').disabled=true;try{const restored=await account.restore();$('entry-retry').hidden=restored||!account.hasSavedSession();}finally{$('entry-retry').disabled=false;}};
 const library=createChatLibrary({account,snapshot:()=>({mode:activeMode,title:(history.find(item=>item.bubble)?.bubble||'New chat').slice(0,100),messages:history.flatMap(item=>item.bubble?[{role:'user',text:String(item.bubble).slice(0,12000)}]:item.response?.generated?.text?[{role:'assistant',text:item.response.generated.text.slice(0,12000)}]:[]).slice(-64)}),restore:chat=>{switchMode(chat.mode);history.length=0;modelHistory.length=0;for(const message of chat.messages){if(message.role==='user')history.push({bubble:message.text});else history.push({response:{generated:{text:message.text,provider:'Saved chat',model:'History'}}});modelHistory.push({role:message.role,content:message.text.slice(0,2000)});}modelHistory.splice(0,Math.max(0,modelHistory.length-8));$('message').value='';translate();}});
-let desktopConnecting=false;
+let desktopConnecting=false,desktopDownloading=false,desktopDownloadController;
 const permissionInputs={fileUpload:'file-consent',websiteFetch:'website-consent',remoteLookup:'lookup-consent',modelShare:'model-consent'};
 const copy={
  fa:{skip:'رفتن به گفت‌وگو',private:'حریم خصوصی، پیش‌فرض',workspace:'فضای بررسی',tools:'ابزارهای امنیتی',toolsHint:'هر بررسی، با منبع و محدودیت روشن.',scope:'تحلیل ایستا؛ بدون اجرای نمونه یا دانلود بدافزار.',privacy:'سیاست حریم خصوصی',title:'از شواهد شروع کنیم.',subtitle:'فایل، هش یا لینک را بررسی کنید. نتیجهٔ هر ابزار، همراه با منبع، زمان و محدودیت‌های واقعی نمایش داده می‌شود.',modelNotice:'مدل زبانی متصل نیست. درخواست‌ها با قواعد مشخص به ابزارها هدایت می‌شوند؛ این رابط گفت‌وگوی مولد ندارد.',choose:'انتخاب ابزار',auto:'انتخاب خودکار',input:'لینک، هش یا درخواست شما',placeholder:'یک لینک عمومی یا هش SHA-256 وارد کنید…',attach:'＋ انتخاب فایل · حداکثر ۱ MiB',remove:'حذف',consent:'رضایت برای همین درخواست',fileConsent:'ارسال فایل به سرور MalGuard برای تحلیل ایستا در حافظه؛ بدون ذخیره یا ارسال به پایگاه‌های تهدید.',websiteConsent:'دریافت HTML از سایت عمومی و مسیر انتقال آن؛ آدرس برای DNS و مقصدهای مشاهده‌شده قابل مشاهده خواهد بود.',lookupConsent:'ارسال هش به MalwareBazaar، URL به URLhaus یا عبارت جست‌وجو به Tavily، متناسب با ابزار؛ بررسی OpenPhish در صورت فعال بودن سرور.',modelConsent:'ارسال متن همین پیام به Gemini یا Workers AI، فقط در صورت اتصال مدل. شواهد فایل و ابزار به مدل ارسال نمی‌شوند.',clear:'پاک‌کردن گفت‌وگو',send:'شروع بررسی ↗',retention:'تاریخچه فقط در حافظهٔ همین صفحه است؛ با بستن یا تازه‌کردن پاک می‌شود. نبود یافته تضمین امنیت نیست. اطلاعات محرمانه ارسال نکنید.',available:'آمادهٔ بررسی',configured:'تنظیم‌شده؛ اتصال تأیید نشده',disabled:'غیرفعال',offline:'ارتباط با بک‌اند برقرار نشد. بررسی انجام نشده است.',connected:'متصل به بک‌اند · آمادهٔ درخواست',serviceDisabled:'بک‌اند هنوز برای استفاده فعال نشده است.',working:'در حال بررسی',suspicious:'شواهد مخرب یا مشکوک شناسایی شد.',no_evidence:'شواهد مخرب در بررسی‌های انجام‌شده یافت نشد.',insufficient:'اطلاعات کافی برای نتیجه‌گیری وجود ندارد.',error:'بررسی به دلیل خطای سرویس تکمیل نشد.',evidence:'شواهد و مشاهدات',sources:'منابع',limits:'محدودیت‌ها',metadata:'جزئیات بررسی',fileTooLarge:'حجم فایل باید بین ۱ بایت و ۱ MiB باشد.',consentMissing:'پیش از ارسال، رضایت مربوط به فایل، سایت، پایگاه تهدید یا مدل را انتخاب کنید.',invalid:'درخواست پذیرفته نشد؛ ورودی و رضایت مربوط به ابزار را بررسی کنید.',rate:'تعداد درخواست‌ها به سقف مجاز رسید.',generated:'پاسخ مدل · تحلیل امنیتی نیست',modelReady:'مدل تنظیم‌شده: Gemini؛ اتصال زنده هنوز تأیید نشده است.',modelOff:'مدل زبانی: غیرفعال',streamError:'پاسخ کامل دریافت نشد؛ نتیجه‌ای برای تأیید وجود ندارد.'},
@@ -88,6 +88,8 @@ function switchMode(next,{carryDraft=false}={}){
 }
 Object.assign(copy.en,{downloadEntry:'↓ Download models · choose for your device',downloadHubInfo:'Choose where the model should run. Opening this guide does not download anything.',browserRoute:'In this browser',browserRouteInfo:'Two small models · ~985 MB or ~2.3 GB · compatible WebGPU required',desktopRoute:'On your computer with Ollama',desktopRouteInfo:'Six larger models · ~5.2–404 GB · installation guide and commands',desktopSteps:'1. Install Ollama. 2. Run the download command below in your terminal. 3. Allow this site and restart Ollama, as explained below. 4. Press Connect, close this window and choose the installed model in Chat.',desktopSetup:'Site connection settings',copyCommand:'Copy download command',commandCopied:'Download command copied'});
 Object.assign(copy.fa,{downloadEntry:'↓ دانلود مدل‌ها · انتخاب مناسب دستگاهت',downloadHubInfo:'انتخاب کن مدل کجا اجرا شود. باز کردن این راهنما چیزی دانلود نمی‌کند.',browserRoute:'داخل همین مرورگر',browserRouteInfo:'دو مدل کم‌حجم · حدود ۹۸۵ مگابایت یا ۲٫۳ گیگابایت · نیازمند WebGPU سازگار',desktopRoute:'روی کامپیوتر با Ollama',desktopRouteInfo:'شش مدل بزرگ‌تر · حدود ۵٫۲ تا ۴۰۴ گیگابایت · همراه راهنما و دستور نصب',desktopSteps:'۱. Ollama را نصب کن. ۲. دستور دانلود زیر را در ترمینال اجرا کن. ۳. طبق توضیح پایین، دسترسی سایت را تنظیم و Ollama را دوباره اجرا کن. ۴. «اتصال» را بزن، این پنجره را ببند و مدل نصب‌شده را در چت انتخاب کن.',desktopSetup:'تنظیم دسترسی سایت',copyCommand:'کپی دستور دانلود',commandCopied:'دستور دانلود کپی شد'});
+Object.assign(copy.en,{desktopDownloadDirect:'Download to this computer',desktopDownloadConfirmTitle:'Download a large local model?',desktopCancelDownload:'Cancel download'});
+Object.assign(copy.fa,{desktopDownloadDirect:'دانلود روی همین کامپیوتر',desktopDownloadConfirmTitle:'دانلود مدل بزرگ روی کامپیوتر؟',desktopCancelDownload:'لغو دانلود'});
 const desktopDescriptions={
  native_qwen8:{fa:['برای گفت‌وگوی روزمره، نوشتن و کمک به کدنویسی؛ کم‌حجم‌ترین گزینهٔ دسکتاپ این فهرست.','۵٫۲ گیگابایت فقط وزن مدل است؛ برای اجرا و متن، RAM/VRAM آزاد بیشتری لازم است. از این گزینه برای شروع مدل‌های دسکتاپ استفاده کن.'],en:['Everyday chat, writing and coding help; the smallest desktop option in this list.','The 5.2 GB weights need additional free RAM/VRAM for runtime and context. A starting point for desktop models.']},
  native_qwen32:{fa:['برای نوشتن، تحلیل متن و کمک به برنامه‌نویسی با مدل بزرگ‌تر از Qwen3 8B.','حدود ۲۰ گیگابایت وزن مدل، به‌علاوهٔ حافظهٔ اجرا و متن؛ مناسب دستگاه‌های پرحافظه.'],en:['Writing, text analysis and programming help with a larger model than Qwen3 8B.','About 20 GB of weights plus runtime/context memory; intended for high-memory devices.']},
@@ -98,15 +100,58 @@ const desktopDescriptions={
 };
 function updateDesktopInfo(){
  const model=desktopModels[$('desktop-model').value];if(!model)return;const description=desktopDescriptions[model.id][locale];$('desktop-use-case').textContent=description[0];$('desktop-memory').textContent=description[1];
- $('desktop-model-info').textContent=`~${model.downloadGB} GB · `+(locale==='fa'?'دانلود دستی است؛ این صفحه مدل یا برنامه‌ای را خودکار نصب نمی‌کند.':'Downloads are manual. This page never installs models or applications automatically.');
+ $('desktop-model-info').textContent=`~${model.downloadGB} GB · `+(locale==='fa'?'با دکمه دانلود، مدل مستقیماً روی کامپیوتر دارای Ollama دریافت می‌شود؛ این سایت Ollama را نصب نمی‌کند.':'The Download button pulls model files directly to the computer running Ollama; this site does not install Ollama.');
  $('copy-desktop-command').textContent=t('copyCommand');
  $('desktop-command').textContent=model.command;
  $('desktop-origin').textContent=locale==='fa'?'پس از نصب Ollama، متغیر OLLAMA_ORIGINS را برابر https://malguard.site قرار دهید و Ollama را دوباره اجرا کنید. اتصال فقط به 127.0.0.1:11434 است. مدل محلی سقف روزانهٔ سرویس‌دهنده ندارد؛ سرعت و ظرفیت به دستگاه بستگی دارد.':'After installing Ollama, set OLLAMA_ORIGINS=https://malguard.site and restart Ollama. Keep it bound to 127.0.0.1:11434. Local chat has no provider daily quota; speed and capacity depend on the device.';
  const source=$('desktop-source');source.href=model.source;source.textContent=locale==='fa'?'صفحهٔ رسمی مدل و نیازهای اجرا':'Official model page and requirements';
 }
 function openDesktopModels(){if(busy)return;$('settings-panel').open=false;updateDesktopInfo();if(!$('desktop-models').open)$('desktop-models').showModal();}
+async function downloadDesktop(){
+ if(busy||desktopConnecting||desktopDownloading)return;
+ const chosen=$('desktop-model').value,model=desktopModels[chosen];if(!model)return;
+ const approval=$('desktop-download-confirm');
+ $('desktop-download-warning').textContent=locale==='fa'
+   ?`دانلود ${model.label} حدود ${model.downloadGB} گیگابایت فضا و اینترنت مصرف می‌کند. دانلود فقط روی همین کامپیوتر که Ollama روی آن نصب و اجرا شده انجام می‌شود، نه روی سرور MalGuard. برای اجرای مدل به RAM/VRAM اضافی نیاز است و دانلود تضمین نمی‌کند دستگاه توان اجرا داشته باشد. تأیید می‌کنی؟`
+   :`${model.label} downloads about ${model.downloadGB} GB to the computer running Ollama, not to MalGuard servers. Extra disk space and RAM/VRAM are required; downloading does not guarantee this computer can run it. Continue?`;
+ approval.returnValue='cancel';approval.showModal();
+ const confirmed=await new Promise(resolve=>approval.addEventListener('close',()=>resolve(approval.returnValue==='download'),{once:true}));
+ if(!confirmed)return;
+ const controller=new AbortController();desktopDownloadController=controller;desktopDownloading=true;
+ const progress=$('desktop-download-progress'),section=$('desktop-download-progress-container');
+ section.hidden=false;progress.removeAttribute('value');
+ $('desktop-progress-label').textContent=locale==='fa'?'در حال اتصال به Ollama…':'Connecting to Ollama…';
+ $('desktop-status').textContent='';
+ $('desktop-download').disabled=true;$('desktop-connect').disabled=true;$('desktop-model').disabled=true;
+ let successful=false;
+ try{
+  if(!desktopChat.availability.available)await desktopChat.connect({signal:controller.signal});
+  await desktopChat.download({model:chosen,signal:controller.signal,onProgress:state=>{
+   if(controller.signal.aborted)return;
+   if(state.finished){progress.value=100;$('desktop-progress-label').textContent=locale==='fa'?'دانلود تمام شد؛ بررسی نصب…':'Download finished; checking installed model…';return;}
+   if(state.progress===null)progress.removeAttribute('value');else progress.value=state.progress;
+   const label=state.status.startsWith('pulling ')?locale==='fa'?'دریافت بخش مدل':'Downloading model layer':state.status;
+   const units=state.completed!==null?` · ${(state.completed/1e9).toFixed(2)} / ${(state.total/1e9).toFixed(2)} GB`:'';
+   $('desktop-progress-label').textContent=label+(state.progress!==null?` · ${state.progress}%`:'')+units;
+  }});
+  successful=true;progress.value=100;
+  $('desktop-status').textContent=locale==='fa'?'مدل با موفقیت روی همین کامپیوتر نصب و تأیید شد.':'Model downloaded and verified on this computer.';
+  if(activeMode==='chat'){modelChosen=true;renderStatus();$('model').value=chosen;lastSelectedModel=chosen;}
+ }catch(error){
+  const stopped=controller.signal.aborted||error?.name==='AbortError';
+  $('desktop-status').textContent=stopped
+    ?(locale==='fa'?'دانلود متوقف شد؛ اگر Ollama از ادامه دانلود پشتیبانی کند، دفعه بعد از همان‌جا ادامه می‌دهد.':'Download cancelled; Ollama may resume a partial download next time.')
+    :error?.message==='desktop_unavailable'
+      ?(locale==='fa'?'Ollama روی همین کامپیوتر پیدا نشد. اول نصب و اجراش کن و دسترسی این سایت را مجاز کن.':'Ollama is not reachable on this computer. Install/run it and allow this site origin.')
+      :(locale==='fa'?'دانلود کامل یا نصب مدل تأیید نشد. اتصال، فضای ذخیره‌سازی و Ollama را بررسی کن.':'Download or installation could not be verified. Check Ollama, disk space and connectivity.');
+ }finally{
+  desktopDownloading=false;desktopDownloadController=undefined;$('desktop-download').disabled=busy;$('desktop-connect').disabled=busy;$('desktop-model').disabled=false;
+  if(!successful)section.hidden=true;
+  renderStatus();
+ }
+}
 async function connectDesktop(){
- if(busy||desktopConnecting)return;desktopConnecting=true;$('desktop-status').textContent=t('desktopConnecting');renderStatus();
+ if(busy||desktopConnecting||desktopDownloading)return;desktopConnecting=true;$('desktop-status').textContent=t('desktopConnecting');renderStatus();
  try{const state=await desktopChat.connect();$('desktop-status').textContent=t(state.installedIDs.includes($('desktop-model').value)?'desktopReady':'desktopMissing');if(state.installedIDs.includes($('desktop-model').value)&&activeMode==='chat'){modelChosen=true;renderStatus();$('model').value=$('desktop-model').value;lastSelectedModel=$('model').value;}}
  catch{$('desktop-status').textContent=t('desktopUnavailable');}
  finally{desktopConnecting=false;renderStatus();}
@@ -423,7 +468,7 @@ document.addEventListener('pointerdown',event=>{const panel=$('settings-panel');
 document.addEventListener('keydown',event=>{if(event.key==='Escape')$('settings-panel').open=false;});
 $('cancel-download').onclick=()=>{if(preparingModel){downloadPermissions.delete(preparingModel);stopTurn();}};
 $('remove-models').onclick=async()=>{if(busy)return;busy=true;renderStatus();try{await localChat.clear();downloadPermissions.clear();preparedModels.clear();$('local-status').textContent=t('localRemoved');}catch{$('local-status').textContent=t('localFailed');}finally{busy=false;renderStatus();}};
-addEventListener('pagehide',()=>{builder.stop();stopTurn();localChat.stop();desktopChat.stop();});
+addEventListener('pagehide',()=>{builder.stop();stopTurn();desktopDownloadController?.abort();localChat.stop();desktopChat.stop();});
 $('message').addEventListener('keydown',event=>{
  if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();if(!busy)$('composer').requestSubmit();}
 });
@@ -535,6 +580,8 @@ async function checkLocalDevice(){localCapabilityReason='checking';localReady=fa
 $('retry-local-capability').onclick=()=>{void checkLocalDevice();};
 $('open-downloads').onclick=()=>{if(!busy)$('download-hub').showModal();};$('hub-browser').onclick=()=>{$('download-hub').close();void offerLocalModels();};$('hub-desktop').onclick=()=>{$('download-hub').close();openDesktopModels();};$('copy-desktop-command').onclick=async()=>{try{await navigator.clipboard.writeText(desktopModels[$('desktop-model').value].command);$('copy-desktop-command').textContent=t('commandCopied');}catch{$('desktop-command').focus();}};
 $('desktop-model').onchange=updateDesktopInfo;$('manage-desktop-models').onclick=openDesktopModels;$('desktop-connect').onclick=connectDesktop;
+$('desktop-download').onclick=downloadDesktop;
+$('desktop-cancel-download').onclick=()=>{desktopDownloadController?.abort(new DOMException('Cancelled by user','AbortError'));desktopChat.stop();};
 translate();
 renderStatus();
 void bootAssistant();
