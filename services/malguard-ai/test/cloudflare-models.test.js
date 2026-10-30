@@ -38,13 +38,23 @@ test("chat/work/code send only to Cloudflare worker without API secrets",async()
   assert.equal(count,1);assert.equal(result.text,"answer");assert.equal(result.selectedModel,model);
  }
 });
+test('free-provider fallback is disabled by default and forwarded only with explicit opt-in',async()=>{
+ const sent=[];
+ const fetchImpl=async(_,options)=>{
+  sent.push(JSON.parse(options.body));
+  return Response.json({text:'safe reply',provider:'workers_ai',model:'safe-model',modelId:'chat_granite'});
+ };
+ await callCFModel({mode:'chat',model:'chat_granite',message:'hello',fetchImpl});
+ await callCFModel({mode:'chat',model:'chat_granite',message:'hello',freeFallback:true,fetchImpl});
+ assert.deepEqual(sent.map(body=>body.freeFallback),[false,true]);
+});
 test("Cloudflare failure returns code without silently changing to a different host",async()=>{
  await assert.rejects(callCFModel({mode:"chat",model:"chat_granite",message:"hello",sessionToken:"synthetic-session-valid-user",quotaEnabled:true,fetchImpl:async()=>Response.json({error:"provider_rate_limited",retryAfterSeconds:47},{status:429})}),e=>e.status===429&&e.code==="provider_rate_limited"&&e.retryAfterSeconds===47);
 });
 test("existing site styling stays untouched and CSP permits direct Cloudflare",()=>{
  const html=readFileSync(new URL("../../../ai/index.html",import.meta.url),"utf8");
  assert.match(html,/connect-src[^"]+https:\/\/malware-ai\.malguard-security\.workers\.dev/);
- assert.match(html,/\.\/app\.js\?v=desktop-pull-20261030/);
+ assert.match(html,/\.\/app\.js\?v=device-check-20261030/);
  const script=readFileSync(new URL("../../../ai/app.js",import.meta.url),"utf8");
  assert.match(script,/callCFModel\(/);
  assert.match(script,/mode==='worker'\?'cf_qwen3':selected/);
