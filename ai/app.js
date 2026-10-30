@@ -5,7 +5,7 @@ import {publicFailure,retryDetails} from './service-errors.mjs?v=codex-chat-2026
 import {apiUrl,readStream} from './client.mjs?v=cloud-session-20261029';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
-import {fetchCFModels,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=quota-models-20261030';
+import {fetchCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=quota-models-20261030';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
@@ -34,7 +34,7 @@ let projectOpen=false;
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
 const builder=createBuilder({locale:()=>locale});
-const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{accountUsage=null;navigation.profile(profile);library.profile(profile);document.body.classList.toggle('auth-required',!profile);$('entry-gate').hidden=!!profile;$('entry-retry').hidden=!!profile||!account.hasSavedSession();if(profile){$('message').focus();return;}for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
+const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{accountUsage=null;navigation.profile(profile);library.profile(profile);document.body.classList.toggle('auth-required',!profile);$('entry-gate').hidden=!!profile;$('entry-retry').hidden=!!profile||!account.hasSavedSession();if(profile){void loadAccountUsage();$('message').focus();return;}for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
 const navigation=createNavigation({account,onLanguage:()=>{locale='en';translate();}});
 $('entry-signin').onclick=()=>account.open(false);$('entry-signup').onclick=()=>account.open(true);
 $('entry-retry').onclick=async()=>{$('entry-retry').disabled=true;try{const restored=await account.restore();$('entry-retry').hidden=restored||!account.hasSavedSession();}finally{$('entry-retry').disabled=false;}};
@@ -543,7 +543,13 @@ async function bootAssistant(){
  const device=checkLocalDevice();
  const serviceLoad=loadCloudStatus();
  await Promise.all([entry,device,serviceLoad,loadCFModels()]);
+ await loadAccountUsage();
  renderStatus();
+}
+async function loadAccountUsage(){
+ if(!cfQuotaEnabled||!account.getToken())return;
+ const token=account.getToken();
+ try{const usage=await fetchCFUsage({sessionToken:token,signal:AbortSignal.timeout(6000)});if(account.getToken()===token){accountUsage=usage;renderStatus();}}catch{ /* Optional quota status never blocks the assistant. */ }
 }
 async function loadCFModels(){
  try{cfModels=await fetchCFModels({signal:AbortSignal.timeout(7500)});cfQuotaEnabled=cfModels.accountQuotaEnabled===true;}catch{cfModels=[];cfQuotaEnabled=false;}
