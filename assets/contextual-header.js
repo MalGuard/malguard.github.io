@@ -64,7 +64,18 @@
   navbar.querySelector('.nav-actions').before(primary);
   menu.replaceChildren(); menu.setAttribute('aria-label', 'All MalGuard pages');
   const label = text => { const e = document.createElement('span'); e.className = 'mg-menu-label'; e.textContent = text; menu.append(e); };
-  label('EXPLORE MALGUARD'); const mainRoutes=new Set(['/','/products.html','/ai/','/gta-guard.html','/gta6-security.html','/game-scam-guard.html','/tools.html','/docs.html','/labs.html','/trust.html','/about.html','/support.html','/report.html']);pages.filter(p=>mainRoutes.has(p[2])).forEach(p => menu.append(link(p[0], p[2])));
+  const menuGroups = [
+    ['START HERE', ['/', '/products.html', '/ai/', '/gta-guard.html', '/game-scam-guard.html']],
+    ['TOOLS AND GUIDES', ['/tools.html', '/gta6-security.html', '/docs.html', '/labs.html']],
+    ['HELP AND PROJECT', ['/support.html', '/report.html', '/trust.html', '/about.html']]
+  ];
+  for (const [heading, paths] of menuGroups) {
+    label(heading);
+    for (const path of paths) {
+      const page = pages.find(item => item[2] === path);
+      if (page) menu.append(link(page[0], page[2]));
+    }
+  }
   if (sections.length) { label('ON THIS PAGE'); sections.forEach(p => menu.append(link(...p))); }
   function setMenu(open, focus = false) {
     menu.classList.toggle('active', open); menu.hidden = !open;
