@@ -35,7 +35,7 @@ test("chat/work/code send only to Cloudflare worker without API secrets",async()
  }
 });
 test("Cloudflare failure returns code without silently changing to a different host",async()=>{
- await assert.rejects(callCFModel({mode:"chat",model:"chat_granite",message:"hello",fetchImpl:async()=>Response.json({error:"provider_rate_limited"},{status:429})}),e=>e.status===429&&e.code==="provider_rate_limited");
+ await assert.rejects(callCFModel({mode:"chat",model:"chat_granite",message:"hello",fetchImpl:async()=>Response.json({error:"provider_rate_limited",retryAfterSeconds:47},{status:429})}),e=>e.status===429&&e.code==="provider_rate_limited"&&e.retryAfterSeconds===47);
 });
 test("existing site styling stays untouched and CSP permits direct Cloudflare",()=>{
  const html=readFileSync(new URL("../../../ai/index.html",import.meta.url),"utf8");
