@@ -59,6 +59,7 @@
               <label><input type="checkbox" id="website-consent"><span data-i18n="websiteConsent">Retrieve public HTML and observed redirects; DNS resolvers and destinations will see the address.</span></label>
               <label><input type="checkbox" id="lookup-consent"><span data-i18n="lookupConsent">Send the hash to MalwareBazaar, URL to URLhaus or search query to Tavily as appropriate; check OpenPhish if enabled on the server.</span></label>
               <label><input type="checkbox" id="model-consent"><span data-i18n="modelConsent">Send conversation text to the selected model provider. Files and tool evidence are never sent to the model.</span></label>
+              <label><input type="checkbox" id="free-fallback-consent"><span data-i18n="freeFallbackConsent">If the selected model is unavailable, allow a free OpenRouter model as fallback. Request text will be sent to OpenRouter; this still consumes your MalGuard monthly tokens. No paid-model fallback.</span></label>
             </fieldset>
             <button type="button" id="revoke-permissions" data-i18n="revoke">Revoke all permissions</button>
           </details>
