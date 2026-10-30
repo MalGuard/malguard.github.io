@@ -326,3 +326,11 @@ body.auth-required>.site-header,body.auth-required>main:not(#entry-gate),body.au
 body.auth-required .ai-account{position:fixed;inset:0;margin:0;width:100%;max-width:none;height:100dvh;max-height:none;border:0;border-radius:0;padding:28px 20px;background:rgba(5,5,7,.78);box-shadow:none}
 body.auth-required .ai-account>*{width:min(100%,440px);margin-inline:auto}body.auth-required .ai-account .account-close{display:block;text-align:right;margin-bottom:20px}
 
+
+/* Local Ollama eligibility is a transparent advisory gate, not automatic hardware detection. */
+.desktop-compat-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:14px 0}
+.desktop-compat-form label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted)}
+.desktop-compat-form input{width:100%;min-width:0;min-height:40px;padding:7px 10px;color:var(--ink);background:#151515;border:1px solid var(--line);border-radius:9px}
+.desktop-compat-state{margin:12px 0;padding:10px 12px;border:1px solid #615482;border-radius:9px;color:#d2c3ff;background:#281c37}
+.desktop-compat-state[data-status="blocked"]{color:#ffb6b6;border-color:#9c4c5c;background:#35191f}
+.desktop-compat-state[data-status="eligible"]{color:#c8efcc;border-color:#456b4e;background:#193020}
