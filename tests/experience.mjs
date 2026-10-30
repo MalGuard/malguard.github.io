@@ -203,7 +203,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
      await c.close();
      const nojs=await browser.newContext({...fixtureTLS,javaScriptEnabled:false}),q=await nojs.newPage();await q.goto(base+'/');
      assert.ok(await q.getByRole('heading',{name:'Scan smart. Play safe.'}).isVisible());
-     assert.ok(await q.getByRole('link',{name:'Explore products'}).isVisible());await nojs.close();
+     const trial=q.getByRole('link',{name:'Try free link check'});assert.ok(await trial.isVisible());assert.equal(await trial.getAttribute('href'),'/tools.html#link-inspector');await nojs.close();
    });
    await check(`${name} viewport typing is bounded and scroll-triggered`,async()=>{
      const c=await browser.newContext({...fixtureTLS,viewport:{width:1280,height:850},reducedMotion:'no-preference'}),p=await c.newPage();
