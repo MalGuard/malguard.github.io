@@ -223,7 +223,7 @@ function renderStatus(){
   const state=service?.tools?.[id]?.state||'disabled',row=el('div',undefined,'tool-card');row.dataset.tool=id;row.append(el('strong',name),el('span',t(state),state==='available'?'available':''));$('tools').append(row);
   const option=$('tool').querySelector(`[value="${id}"]`);if(option)option.disabled=state==='disabled';const workspaceOption=$('workspace-tool').querySelector(`[value="${id}"]`);if(workspaceOption)workspaceOption.disabled=state==='disabled';
  }
- const ready=activeMode==='worker'?service?.enabled===true:service?.enabled===true||localReady||desktopChat.availability.installedIDs.length>0;
+ const ready=activeMode==='worker'?service?.enabled===true||cfModels.some(m=>m.available&&m.mode==='work'):service?.enabled===true||cfModels.some(m=>m.available&&m.mode===(activeMode==='build'?'code':'chat'))||localReady||desktopChat.availability.installedIDs.length>0;
  $('send').disabled=activeTurn?activeTurn.controller.signal.aborted:!ready||busy;
  $('send').dataset.state=activeTurn?'stop':'send';$('send-arrow').toggleAttribute('hidden',!!activeTurn);$('send-stop').toggleAttribute('hidden',!activeTurn);
  $('send').ariaLabel=t(activeTurn?'stop':'send');$('send').title=t(activeTurn?'stop':'send');$('send-label').textContent=t(activeTurn?'stop':'send');
@@ -252,7 +252,7 @@ function renderStatus(){
   const defaultId=cfAvailable.find(m=>m.id===preferred)?.id||cfAvailable[0]?.id||((activeMode!=='build'&&localReady)?preferredLocal:'')||desktopChat.availability.installedIDs[0]||'';
   const saved=conversations[activeMode].model;
   const isValid=id=>models.some(m=>m.id===id&&m.state==='configured'&&(activeMode!=='build'||['code_ultra','code_super'].includes(m.id)||Object.hasOwn(desktopModels,m.id)));
-  $('model').value=isValid(selectedId)?selectedId:isValid(saved)?saved:isValid(defaultId)?defaultId:'';
+  $('model').value=!modelChosen&&isValid(saved)?saved:isValid(selectedId)?selectedId:isValid(saved)?saved:isValid(defaultId)?defaultId:'';
   lastSelectedModel=$('model').value;
   if(cfAvailable.length)cloudDefaultApplied=true;
   if(service||localReady||cfAvailable.length)modelsInitialized=true;
