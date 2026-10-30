@@ -178,12 +178,21 @@
       <select id="desktop-model" aria-describedby="desktop-model-info"></select>
       <p id="desktop-use-case" class="model-use-case"></p>
       <p id="desktop-memory"></p>
+      <p id="desktop-safety-note" class="muted" data-i18n="desktopSafetyNote">Only download to this computer after checking available disk space, local Ollama installation, and your network data allowance.</p>
       <p id="desktop-model-info" aria-live="polite" aria-atomic="true"></p>
       <p data-i18n="desktopSteps">1. Install Ollama. 2. Run the model download command below. 3. Allow this site and restart Ollama. 4. Press Connect, then choose the installed model in Chat.</p>
       <pre id="desktop-command" dir="ltr" tabindex="0"></pre><button id="copy-desktop-command" type="button" data-i18n="copyCommand">Copy download command</button>
       <a id="desktop-guide" href="https://ollama.com/download" target="_blank" rel="noopener noreferrer" data-i18n="desktopGuide">Install Ollama</a>
       <details class="desktop-setup"><summary data-i18n="desktopSetup">Site connection settings</summary><p id="desktop-origin"></p></details><a id="desktop-source" href="https://ollama.com/library/qwen3:8b" target="_blank" rel="noopener noreferrer">Official model page and requirements</a><p id="desktop-status" role="status"></p>
-      <div class="download-actions"><button value="close" autofocus data-i18n="close">Close</button><button id="desktop-connect" class="primary-action" type="button" data-i18n="desktopConnect">Connect</button></div>
+      <div id="desktop-download-progress" class="model-progress" hidden>
+        <label id="desktop-progress-label" for="desktop-progress-bar" aria-live="polite">Download progress</label>
+        <progress id="desktop-progress-bar" max="100" value="0"></progress>
+        <p class="muted" data-i18n="desktopProgressNote">Percentages refer to the current file layer, not the entire model.</p>
+        <button id="desktop-cancel-download" type="button" data-i18n="desktopCancel">Cancel download</button>
+      </div>
+      <div class="download-actions"><button value="close" autofocus data-i18n="close">Close</button>
+        <button id="desktop-download" type="button" data-i18n="desktopDownload">Download to this computer</button>
+        <button id="desktop-connect" class="primary-action" type="button" data-i18n="desktopConnect">Connect</button></div>
     </form>
   </dialog>
 </body>
