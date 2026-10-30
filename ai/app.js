@@ -3,9 +3,9 @@ import {createNavigation} from './navigation.mjs?v=sidebar-20261026';
 import {errorMessage} from './error-message.mjs?v=account-quota-20261030';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=account-quota-20261030';
 import {apiUrl,readStream} from './client.mjs?v=cloud-session-20261029';
-import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs';
+import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs?v=free-fallback-20261030';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
-import {fetchCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=quota-models-20261030';
+import {fetchCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=free-fallback-20261030';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
@@ -90,6 +90,8 @@ Object.assign(copy.en,{downloadEntry:'↓ Download models · choose for your dev
 Object.assign(copy.fa,{downloadEntry:'↓ دانلود مدل‌ها · انتخاب مناسب دستگاهت',downloadHubInfo:'انتخاب کن مدل کجا اجرا شود. باز کردن این راهنما چیزی دانلود نمی‌کند.',browserRoute:'داخل همین مرورگر',browserRouteInfo:'دو مدل کم‌حجم · حدود ۹۸۵ مگابایت یا ۲٫۳ گیگابایت · نیازمند WebGPU سازگار',desktopRoute:'روی کامپیوتر با Ollama',desktopRouteInfo:'شش مدل بزرگ‌تر · حدود ۵٫۲ تا ۴۰۴ گیگابایت · همراه راهنما و دستور نصب',desktopSteps:'۱. Ollama را نصب کن. ۲. دستور دانلود زیر را در ترمینال اجرا کن. ۳. طبق توضیح پایین، دسترسی سایت را تنظیم و Ollama را دوباره اجرا کن. ۴. «اتصال» را بزن، این پنجره را ببند و مدل نصب‌شده را در چت انتخاب کن.',desktopSetup:'تنظیم دسترسی سایت',copyCommand:'کپی دستور دانلود',commandCopied:'دستور دانلود کپی شد'});
 Object.assign(copy.en,{desktopDownloadDirect:'Download to this computer',desktopDownloadConfirmTitle:'Download a large local model?',desktopCancelDownload:'Cancel download'});
 Object.assign(copy.fa,{desktopDownloadDirect:'دانلود روی همین کامپیوتر',desktopDownloadConfirmTitle:'دانلود مدل بزرگ روی کامپیوتر؟',desktopCancelDownload:'لغو دانلود'});
+Object.assign(copy.en,{freeFallbackConsent:'If the selected provider fails, I allow this conversation to be sent to OpenRouter’s explicitly free model. It has separate rate limits; no paid model will be chosen automatically.'});
+Object.assign(copy.fa,{freeFallbackConsent:'اگر سرویس مدل انتخابی قطع شد، اجازه می‌دم متن همین گفت‌وگو به مدل صریحاً رایگان OpenRouter فرستاده بشه. اون هم محدودیت خودش رو داره و مدل پولی خودکار انتخاب نمی‌شه.'});
 const desktopDescriptions={
  native_qwen8:{fa:['برای گفت‌وگوی روزمره، نوشتن و کمک به کدنویسی؛ کم‌حجم‌ترین گزینهٔ دسکتاپ این فهرست.','۵٫۲ گیگابایت فقط وزن مدل است؛ برای اجرا و متن، RAM/VRAM آزاد بیشتری لازم است. از این گزینه برای شروع مدل‌های دسکتاپ استفاده کن.'],en:['Everyday chat, writing and coding help; the smallest desktop option in this list.','The 5.2 GB weights need additional free RAM/VRAM for runtime and context. A starting point for desktop models.']},
  native_qwen32:{fa:['برای نوشتن، تحلیل متن و کمک به برنامه‌نویسی با مدل بزرگ‌تر از Qwen3 8B.','حدود ۲۰ گیگابایت وزن مدل، به‌علاوهٔ حافظهٔ اجرا و متن؛ مناسب دستگاه‌های پرحافظه.'],en:['Writing, text analysis and programming help with a larger model than Qwen3 8B.','About 20 GB of weights plus runtime/context memory; intended for high-memory devices.']},
@@ -448,7 +450,7 @@ async function runBuild(message){
  if(!native&&planChat(message,contextHistory).needsWeb&&!$('lookup-consent').checked){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
- else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
+ else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
  if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn);if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
  }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error.name==='TimeoutError'?'provider_timeout':'model_unavailable'});}finally{endTurn(turn);}
 }
@@ -512,7 +514,7 @@ $('composer').onsubmit=async event=>{
   const turn=beginTurn('thinking');
   history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
   try{
-   const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
+   const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
     if(generated.usage){accountUsage=generated.usage;renderStatus();}
    await presentResponse({generated},turn);
    modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});
@@ -557,7 +559,7 @@ $('composer').onsubmit=async event=>{
 let permissionStorage;try{permissionStorage=globalThis.localStorage;}catch{}
 const saved=readPermissions(permissionStorage);
 for(const [name,id]of Object.entries(permissionInputs)){$(id).checked=saved[name];$(id).onchange=()=>savePermissions(permissionStorage,Object.fromEntries(Object.entries(permissionInputs).map(([k,v])=>[k,$(v).checked])));}
-$('revoke-permissions').onclick=()=>{$('build-share-code').checked=false;$('isolation-consent').checked=false;revokePermissions(permissionStorage);for(const id of Object.values(permissionInputs))$(id).checked=false;};
+$('revoke-permissions').onclick=()=>{$('build-share-code').checked=false;$('isolation-consent').checked=false;revokePermissions(permissionStorage);$('free-fallback-consent').checked=false;for(const id of Object.values(permissionInputs))$(id).checked=false;};
 $('mode').onchange=()=>switchMode($('mode').value);
 $('mode-toggle').addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();$('mode-picker').open=true;$(activeMode==='build'?'build-tab':activeMode==='worker'?'workspace-tab':'chat-tab').focus();}});
 for(const [index,id]of ['chat-tab','build-tab','workspace-tab'].entries())$(id).addEventListener('keydown',event=>{if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();const ids=['chat-tab','build-tab','workspace-tab'];$(ids[event.key==='Home'?0:event.key==='End'?2:(index+(event.key==='ArrowDown'?1:2))%3]).focus();}});
