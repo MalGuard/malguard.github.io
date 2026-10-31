@@ -11,8 +11,12 @@
   function draw() {
     scheduled = false;
     const scroll = reducedMotion.matches ? 0 : Math.max(0, window.scrollY || 0);
-    const far = Math.round(-Math.min(85, scroll * .045));
-    const near = Math.round(Math.min(240, scroll * .16));
+    // Spread the perspective shift across the *entire* page, not just
+    // the first screenful. This also adapts when page length changes.
+    const scrollRange = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const progress = Math.min(1, scroll / scrollRange);
+    const far = Math.round(-110 * progress);
+    const near = Math.round(280 * progress);
     if (far !== lastFar) {
       scene.style.setProperty('--mg-space-far', far + 'px');
       lastFar = far;
