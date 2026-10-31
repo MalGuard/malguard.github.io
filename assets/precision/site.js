@@ -111,6 +111,33 @@
     if(!regions.has(region))regions.set(region,[]);
     regions.get(region).push(node);
    }
+   // The homepage product artwork is already eager-loaded by the browser.
+   // Order each card as card -> title -> image -> supporting copy so users
+   // see what the product is before its image, without waiting for all labels.
+   // Keep all three cards in one serial section queue.
+   if(document.body.classList.contains('precision-home')){
+    const section=document.getElementById('products');
+    const original=regions.get(section);
+    if(original){
+     const reordered=[],seen=new Set();
+     for(const node of original){
+      const card=node.closest('#products article.product');
+      if(!card){reordered.push(node);continue;}
+      if(seen.has(card))continue;
+      seen.add(card);
+      const members=original.filter(item=>item===card||card.contains(item));
+      const title=members.find(item=>item.matches('h3[data-type]'));
+      const picture=members.find(item=>item.matches('.product-art[data-reveal]'));
+      reordered.push(card);
+      if(title)reordered.push(title);
+      if(picture)reordered.push(picture);
+      for(const item of members){
+       if(item!==card&&item!==title&&item!==picture)reordered.push(item);
+      }
+     }
+     regions.set(section,reordered);
+    }
+   }
    root.dataset.precisionTypeReady='true';
    if(!eligible||stopped){finish();return;}
    const segmenter=Intl.Segmenter?new Intl.Segmenter('en',{granularity:'grapheme'}):null;
@@ -122,7 +149,10 @@
    };
    const create=node=>{
     node.dataset.motionStarts=String(Number(node.dataset.motionStarts||0)+1);
-     let job={node,elapsed:0,started:0,kind:'reveal',duration:node.dataset.reveal==='visual'?350:125};
+     const inProductCard=!!node.closest('#products article.product');
+     const inProductSection=!!node.closest('#products');
+     let job={node,elapsed:0,started:0,kind:'reveal',
+      duration:inProductCard?(node.dataset.reveal==='visual'?55:45):node.dataset.reveal==='visual'?350:125};
     if(node.dataset.type){
      const source=node.querySelector('.type-source').textContent;
      const pieces=segmenter?[...segmenter.segment(source)].map(p=>p.segment):Array.from(source);
@@ -137,7 +167,12 @@
       : node.dataset.type==='title'
        ? {per:18,min:180,max:480}
        : {per:10,min:200,max:650};
-     const duration=Math.min(timing.max,Math.max(timing.min,pieces.length*timing.per));
+     // Product-only override keeps the three site-wide timing contracts intact.
+     const productDuration=node.dataset.type==='title'
+      ? Math.min(135,Math.max(60,pieces.length*5))
+      : Math.min(155,Math.max(65,pieces.length*3));
+     const duration=inProductSection?productDuration
+      : Math.min(timing.max,Math.max(timing.min,pieces.length*timing.per));
      job={...job,kind:'text',pieces,text,cursor,duration,blink:65};
     }else if(node.hasAttribute('data-count-group')){
      const counters=[...node.querySelectorAll('.counter')].map(n=>{const ink=document.createElement('span');ink.className='count-ink';ink.setAttribute('aria-hidden','true');ink.textContent='0';n.append(ink);n.dataset.countRuns=String(Number(n.dataset.countRuns||0)+1);return {n,ink,value:Number(n.dataset.count)};});

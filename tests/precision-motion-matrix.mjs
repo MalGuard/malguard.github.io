@@ -68,6 +68,8 @@ for(const name of names){
     null,{timeout:5000});
    assert.match(layout.bodyImage,/radial-gradient/,'Homepage keeps its star field');
    assert.equal(layout.urls.length,3);
+   assert.equal(await page.locator('link[rel="preload"][href*="-card"]').count(),3,
+    'Product photos should begin loading before the browser reaches card markup');
    // Product images must be real loaded pixels, not only valid-looking src paths.
    await page.waitForFunction(()=>
     [...document.querySelectorAll('#products .product-photo')].length===3
@@ -79,13 +81,37 @@ for(const name of names){
    }
    if(!profile.reduced && profile.width===390) {
     const firstCard=page.locator('#products article.product').first();
-    await firstCard.scrollIntoViewIfNeeded();
-    await page.waitForFunction(()=>{
+    // Observe actual typing/visual state transitions before scrolling. The
+    // product name must start first, then the cached picture must appear.
+    await page.evaluate(()=>{
      const card=document.querySelector('#products article.product');
-     return card && ['active','complete'].includes(card.dataset.revealState);
-    },null,{timeout:25000});
-    assert.equal(await firstCard.locator('.product-art').evaluate(n=>getComputedStyle(n).opacity),'1',
-     'First product image must be visible as soon as its card starts revealing');
+     const title=card.querySelector('h3[data-type]');
+     const art=card.querySelector('.product-art[data-reveal]');
+     window.__productRevealOrder=[];
+     const observer=new MutationObserver(changes=>{
+      for(const change of changes){
+       if(change.target===title&&title.dataset.typeState==='typing')
+        window.__productRevealOrder.push('title');
+       if(change.target===art&&art.dataset.revealState==='active')
+        window.__productRevealOrder.push('image');
+      }
+     });
+     observer.observe(title,{attributes:true,attributeFilter:['data-type-state']});
+     observer.observe(art,{attributes:true,attributeFilter:['data-reveal-state']});
+    });
+    const started=Date.now();
+    await firstCard.scrollIntoViewIfNeeded();
+    await page.waitForFunction(()=>[...document.querySelectorAll('#products article.product')].every(card=>
+     card.dataset.revealState==='complete'
+      && card.querySelector('.product-art')?.dataset.revealState==='complete'
+      && card.querySelector('h3')?.dataset.typeState==='complete'),
+     null,{timeout:8500});
+    assert.ok(Date.now()-started<6500,'Product cards took too long after entering viewport');
+    const order=await page.evaluate(()=>window.__productRevealOrder.slice(0,2));
+    assert.deepEqual(order,['title','image'],'Product title must render before its image');
+    assert.ok(await page.locator('#products .product-art').evaluateAll(nodes=>nodes.every(n=>
+     getComputedStyle(n).opacity==='1'&&getComputedStyle(n).visibility==='visible')),
+     'All product images should be visible after the fast reveal');
     assert.equal(await firstCard.locator('.product-art').evaluate(n=>getComputedStyle(n).zIndex),'0',
      'Product artwork must have a stable stacking position');
    }

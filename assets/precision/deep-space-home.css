@@ -114,7 +114,18 @@ body.precision-home #products .product > :not(.product-art) {
   position: relative;
   z-index: 1;
 }
-body.precision-home #products .product:is([data-reveal-state="active"],[data-reveal-state="paused"],[data-reveal-state="complete"]) > .product-art {
+/* Keep images ready but hidden until their own fast turn; title goes first.
+   No half-second blurred fade or offscreen GPU layer animation. */
+.type-system body.precision-home #products .product > .product-art[data-reveal-state="pending"] {
+  opacity: 0;
+  visibility: hidden;
+}
+body.precision-home #products .product > .product-art:is([data-reveal-state="active"],[data-reveal-state="complete"],[data-reveal-state="paused"]) {
   opacity: 1;
   visibility: visible;
+  animation: none !important;
+  filter: none !important;
+}
+body.precision-home #products .product-photo {
+  opacity: 1;
 }
