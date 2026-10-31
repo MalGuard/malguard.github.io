@@ -84,7 +84,7 @@ for(const name of names){
    assert.equal(staticDepth.afterAnimation,'none','Nearby stars must never animate');
    assert.equal(staticDepth.beforeTransform,'none','Distant stars must have zero parallax');
    assert.equal(staticDepth.afterTransform,'none','Nearby stars must have zero parallax');
-   assert.match(staticDepth.beforeImage,/stars\\.svg/,'Static distant stars must paint');
+   assert.match(staticDepth.beforeImage,/stars\.svg/,'Static distant stars must paint');
    assert.match(staticDepth.afterImage,/radial-gradient/,'Static nearby stars must paint');
    assert.equal(staticDepth.far,'','No distant-star scroll offset');
    assert.equal(staticDepth.near,'','No near-star scroll offset');
