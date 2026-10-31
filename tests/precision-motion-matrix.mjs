@@ -68,6 +68,27 @@ for(const name of names){
     null,{timeout:5000});
    assert.match(layout.bodyImage,/radial-gradient/,'Homepage keeps its star field');
    assert.equal(layout.urls.length,3);
+   // Product images must be real loaded pixels, not only valid-looking src paths.
+   await page.waitForFunction(()=>
+    [...document.querySelectorAll('#products .product-photo')].length===3
+    && [...document.querySelectorAll('#products .product-photo')].every(img=>img.complete && img.naturalWidth>0),
+    null,{timeout:12000});
+   if(profile.reduced) {
+    assert.ok(await page.locator('#products .product-art').evaluateAll(nodes=>
+     nodes.every(n=>getComputedStyle(n).opacity==='1')),'Reduced-motion product art is hidden');
+   }
+   if(!profile.reduced && profile.width===390) {
+    const firstCard=page.locator('#products article.product').first();
+    await firstCard.scrollIntoViewIfNeeded();
+    await page.waitForFunction(()=>{
+     const card=document.querySelector('#products article.product');
+     return card && ['active','complete'].includes(card.dataset.revealState);
+    },null,{timeout:25000});
+    assert.equal(await firstCard.locator('.product-art').evaluate(n=>getComputedStyle(n).opacity),'1',
+     'First product image must be visible as soon as its card starts revealing');
+    assert.equal(await firstCard.locator('.product-art').evaluate(n=>getComputedStyle(n).zIndex),'0',
+     'Product artwork must have a stable stacking position');
+   }
    assert.equal(await page.locator('.hero-actions>a[data-type="button"]').count(),2,
     'Homepage CTAs should be queued as typed actions');
    assert.equal(await page.locator('#navbar .mg-brand[data-type="button"]').count(),1,
