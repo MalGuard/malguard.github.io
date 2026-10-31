@@ -27,7 +27,7 @@ for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chrom
      navFont:getComputedStyle(document.querySelector('#navbar .mg-brand')).fontFamily,
      scroll:document.documentElement.scrollWidth,width:document.documentElement.clientWidth,
      ctas:document.querySelectorAll('main a[data-type="button"]').length,
-     script:[...document.scripts].some(s=>s.src.includes('site.js?v=viewport-handoff-20261031'))
+     script:[...document.scripts].some(s=>s.src.includes('site.js?v=continue-visited-20261031'))
     }));
     // Hamburger menu must not inherit the obsolete teal/green experience theme.
     const palette=await page.evaluate(()=>{
