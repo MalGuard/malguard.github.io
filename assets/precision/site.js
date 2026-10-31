@@ -105,7 +105,7 @@
     }
     return node.parentElement||node;
    };
-   const regions=new Map();
+   const regions=new Map(),activatedRegions=new Set();
    for(const node of nodes){
     const region=regionOf(node);
     if(!regions.has(region))regions.set(region,[]);
@@ -149,12 +149,18 @@
    const advance=()=>{
     if(stopped)return;
     // One running job per section, never a global one-job bottleneck.
-    // The trigger is sticky: scrolling away does not unqueue or pause work.
+    // Once ANY part of a section has been seen, finish that section's
+    // complete ordered queue, even while the visitor scrolls elsewhere.
     const busy=new Set([...active.keys()].map(regionOf));
     for(const [region,items] of regions){
-     if(busy.has(region))continue;
+     if(busy.has(region)||!activatedRegions.has(region))continue;
      for(const node of items){
-      if(!pending.has(node)||done.has(node)||active.has(node))continue;
+      if(done.has(node)||active.has(node))continue;
+      // Unopened navigation links must type when the user opens the menu,
+      // not invisibly while it is collapsed.
+      if(node.closest('#navLinks')&&document.getElementById('navLinks')?.hidden)continue;
+      // Hidden responsive-only links do not block visible navigation.
+      if(node.closest('#navbar')&&!node.getClientRects().length)continue;
       if(node.hasAttribute('data-type')&&!node.querySelector(':scope > .type-source')){complete(node);continue;}
       const job=jobs.get(node)||create(node);
       active.set(node,job);job.started=performance.now();
@@ -188,7 +194,7 @@
     for(const entry of entries){
      const node=entry.target;
      if(entry.isIntersecting&&entry.intersectionRatio>=.06){
-      visible.add(node);pending.add(node);
+      visible.add(node);pending.add(node);activatedRegions.add(regionOf(node));
      }else visible.delete(node);
     }
     // Reconcile viewport geometry without ever pausing a started job.
@@ -208,7 +214,7 @@
      const r=node.getBoundingClientRect();
      if(r.height>0&&r.bottom>0&&r.top<innerHeight*.97){
       visible.add(node);
-      if(inView(node))pending.add(node);
+      if(inView(node)){pending.add(node);activatedRegions.add(regionOf(node));}
      }else visible.delete(node);
     }
     advance();
@@ -219,6 +225,7 @@
    };
    addEventListener('scroll',queueViewportSync,{passive:true});
    addEventListener('resize',queueViewportSync,{passive:true});
+   document.getElementById('menuBtn')?.addEventListener('click',queueViewportSync);
    queueViewportSync();
    document.addEventListener('visibilitychange',()=>{
     // Rendering can be throttled in background tabs, but scrolling is never
