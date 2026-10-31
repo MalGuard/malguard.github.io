@@ -61,11 +61,33 @@ for(const name of names){
    assert.ok(layout.heading,'Visible semantic homepage heading');
    assert.equal(layout.bodyBg,'rgb(5, 5, 7)','Homepage obsidian background');
    const depthLayer=page.locator('body.precision-home > .particle-atmosphere');
-   assert.equal(await depthLayer.evaluate(n=>getComputedStyle(n).position),'fixed',
-    'Deep-space backdrop must stay visible while scrolling');
-   await page.waitForFunction(()=>
-    document.querySelector('body.precision-home > .particle-atmosphere')?.dataset.spaceDepth==='ready',
-    null,{timeout:5000});
+   // The premium background stays still at every scroll position. Nothing
+   // should update pseudo-element transforms, use CSS animation, or execute
+   // the retired scroll-parallax script.
+   assert.equal(await page.locator('script[src*="deep-space-home.js"]').count(),0,
+    'Homepage must not load scroll-driven particle JavaScript');
+   const staticDepth=await depthLayer.evaluate(n=>{
+    const before=getComputedStyle(n,'::before');
+    const after=getComputedStyle(n,'::after');
+    return {
+     position:getComputedStyle(n).position,
+     beforeAnimation:before.animationName,afterAnimation:after.animationName,
+     beforeTransform:before.transform,afterTransform:after.transform,
+     beforeImage:before.backgroundImage,afterImage:after.backgroundImage,
+     viewportTop:Math.round(n.getBoundingClientRect().top),
+     far:n.style.getPropertyValue('--mg-space-far'),
+     near:n.style.getPropertyValue('--mg-space-near'),
+    };
+   });
+   assert.equal(staticDepth.position,'fixed','Deep-space backdrop must stay visible while scrolling');
+   assert.equal(staticDepth.beforeAnimation,'none','Distant stars must never animate');
+   assert.equal(staticDepth.afterAnimation,'none','Nearby stars must never animate');
+   assert.equal(staticDepth.beforeTransform,'none','Distant stars must have zero parallax');
+   assert.equal(staticDepth.afterTransform,'none','Nearby stars must have zero parallax');
+   assert.match(staticDepth.beforeImage,/stars\.svg/,'Static distant stars must paint');
+   assert.match(staticDepth.afterImage,/radial-gradient/,'Static nearby stars must paint');
+   assert.equal(staticDepth.far,'','No distant-star scroll offset');
+   assert.equal(staticDepth.near,'','No near-star scroll offset');
    assert.match(layout.bodyImage,/radial-gradient/,'Homepage keeps its star field');
    assert.equal(layout.urls.length,3);
    assert.equal(await page.locator('link[rel="preload"][href*="-card"]').count(),3,
@@ -141,15 +163,21 @@ for(const name of names){
      null,{timeout:30000});
     assert.ok((await maximumSimultaneousJobsInRegion(page))<=1,
      'Typewriter exceeded one simultaneous item per section');
-    await page.waitForFunction(()=>{
-     const el=document.querySelector('body.precision-home > .particle-atmosphere');
-     return Number.parseInt(el?.style.getPropertyValue('--mg-space-near')||'0',10)>0
-      && Number.parseInt(el?.style.getPropertyValue('--mg-space-far')||'0',10)<0;
-    },null,{timeout:5000});
+    const afterScrollDepth=await depthLayer.evaluate(n=>{
+     const before=getComputedStyle(n,'::before'),after=getComputedStyle(n,'::after');
+     return {
+      position:getComputedStyle(n).position,
+      beforeAnimation:before.animationName,afterAnimation:after.animationName,
+      beforeTransform:before.transform,afterTransform:after.transform,
+      beforeImage:before.backgroundImage,afterImage:after.backgroundImage,
+      viewportTop:Math.round(n.getBoundingClientRect().top),
+      far:n.style.getPropertyValue('--mg-space-far'),
+      near:n.style.getPropertyValue('--mg-space-near'),
+     };
+    });
+    assert.deepEqual(afterScrollDepth,staticDepth,
+     'Scroll must not move or mutate either layer of the static deep-space background');
     await page.emulateMedia({reducedMotion:'reduce'});
-    await page.waitForFunction(()=>
-     document.querySelector('body.precision-home > .particle-atmosphere')
-      ?.style.getPropertyValue('--mg-space-near')==='0px',null,{timeout:5000});
     await page.waitForFunction(()=>!document.documentElement.classList.contains('type-system'));
     assert.equal(await page.locator('.type-ink').count(),0,
      'Motion-preference update left synthetic text over content');
