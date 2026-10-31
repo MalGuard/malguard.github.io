@@ -1,105 +1,99 @@
-/* Deep-space homepage v2: persistent atmosphere at every scroll depth.
-   Low-cost compositor parallax with static/reduced-motion fallback.
-   No layout changes, filters, canvas, or WebGL. */
+/* MalGuard Obsidian / Static Deep Space.
+ * Homepage only. Zero scroll handlers, parallax, transforms, animations,
+ * dynamic blur, or compositing hints. The star field extends to the footer.
+ * All imagery is served locally and the existing product-card safeguards
+ * below remain intact.
+ */
 body.precision-home {
-  background-color: #050507; /* Existing regression-tested obsidian base */
+  background-color: #050507;
   background-image:
-    radial-gradient(ellipse 70% 24% at 68% 12%, rgba(132, 147, 176, .15), transparent 92%),
-    radial-gradient(ellipse 58% 19% at 22% 48%, rgba(75, 96, 134, .13), transparent 90%),
-    radial-gradient(ellipse 72% 25% at 76% 82%, rgba(114, 123, 148, .12), transparent 92%),
-    linear-gradient(180deg, rgba(5, 5, 7, .04), rgba(5, 5, 7, .5) 45%, rgba(5, 5, 7, .25)),
+    radial-gradient(ellipse 53% 15% at 72% 8%, rgba(191, 202, 225, .13), transparent 85%),
+    radial-gradient(ellipse 36% 19% at 19% 33%, rgba(103, 120, 156, .10), transparent 88%),
+    radial-gradient(ellipse 51% 24% at 79% 74%, rgba(115, 129, 165, .10), transparent 89%),
+    radial-gradient(ellipse 75% 48% at 50% 48%, rgba(3, 5, 11, .03) 25%, rgba(2, 3, 8, .47) 100%),
     url('/assets/precision/stars.svg?v=20261028-4k'),
+    linear-gradient(180deg, rgba(5, 5, 7, .10), rgba(5, 5, 7, .38) 43%, #050507 100%),
     url('/assets/precision/obsidian-space.webp?v=20261028-4k');
   background-size:
-    100% 100%, 100% 100%, 100% 100%, 100% 100%,
-    max(1280px, 100%) auto, max(1280px, 100%) auto;
-  background-position: center, center, center, center, center top, center top;
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat-y, no-repeat;
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    max(1280px, 100%) auto,
+    100% 100%,
+    max(1280px, 100%) auto;
+  background-position:
+    center, center, center, center, center top, center, center top;
+  background-repeat:
+    no-repeat, no-repeat, no-repeat, no-repeat, repeat-y, no-repeat, no-repeat;
   background-attachment: scroll;
 }
 
-/* Existing DOM atmosphere is promoted to a fixed, viewport-clipped scene.
-   It remains behind all page content and cannot intercept clicks/selection. */
+/* A still, viewport-sized cosmic scene. Nothing animates or responds to
+ * scroll; the content simply passes in front of it.
+ * Fixed-position atmosphere avoids any enormous full-document painting layer. */
 body.precision-home > .particle-atmosphere {
   position: fixed;
   inset: 0;
-  width: 100%;
   height: 100vh;
   height: 100dvh;
+  width: 100%;
   overflow: hidden;
-  contain: paint;
+  pointer-events: none;
   z-index: 0;
   opacity: 1;
-  pointer-events: none;
   background:
-    radial-gradient(ellipse 55% 28% at 78% 24%, rgba(166, 180, 211, .14), transparent 86%),
-    radial-gradient(ellipse 50% 36% at 18% 75%, rgba(93, 115, 158, .12), transparent 90%),
-    radial-gradient(ellipse 25% 50% at 49% 50%, transparent 15%, rgba(5, 5, 7, .21) 100%);
+    radial-gradient(ellipse 61% 34% at 73% 22%, rgba(161, 179, 211, .14), transparent 88%),
+    radial-gradient(ellipse 54% 36% at 19% 79%, rgba(105, 124, 160, .11), transparent 90%),
+    radial-gradient(ellipse 77% 68% at 50% 48%, transparent 29%, rgba(2, 3, 7, .49) 100%);
 }
 
-/* Distant starfield: small, densely spaced points and slow upward drift. */
+/* Far field: thousands of tiny points, fixed forever; no active renderer. */
 body.precision-home > .particle-atmosphere::before {
   content: '';
   position: absolute;
-  inset: -300px -18vw;
-  opacity: .68;
+  inset: 0;
+  opacity: .55;
   background:
-    linear-gradient(105deg, transparent 25%, rgba(201, 210, 231, .05) 49%, transparent 73%),
-    url('/assets/precision/stars.svg?v=20261028-4k') center / 1500px auto repeat;
-  transform: translate3d(0, var(--mg-space-far, 0px), 0);
-  will-change: transform;
+    linear-gradient(114deg, transparent 19%, rgba(207, 217, 237, .055) 51%, transparent 83%),
+    url('/assets/precision/stars.svg?v=20261028-4k') center / 1540px auto repeat;
 }
 
-/* Foreground stars: a few brighter points, larger apparent separation,
-   and faster counter-motion during scroll for a real depth cue. */
+/* Sparse foreground highlights give near / far depth without motion. */
 body.precision-home > .particle-atmosphere::after {
   content: '';
   position: absolute;
-  inset: -300px -18vw;
-  opacity: .82;
+  inset: 0;
+  opacity: .81;
   background-image:
-    radial-gradient(circle at 12% 17%, rgba(255,255,255,.95) 0 1.5px, transparent 3px),
-    radial-gradient(circle at 36% 31%, rgba(232,240,255,.75) 0 1px, transparent 2.5px),
-    radial-gradient(circle at 85% 21%, rgba(255,255,255,.92) 0 1.8px, transparent 3.4px),
-    radial-gradient(circle at 64% 68%, rgba(239,244,255,.87) 0 1.3px, transparent 3px),
-    radial-gradient(circle at 19% 82%, rgba(249,250,255,.85) 0 1.5px, transparent 3px),
-    radial-gradient(circle at 92% 76%, rgba(235,243,255,.78) 0 1.3px, transparent 2.8px),
-    url('/assets/precision/stars.svg?v=20261028-4k');
-  background-size:
-    100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%,
-    2250px auto;
-  background-position: center;
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
-  transform: translate3d(0, var(--mg-space-near, 0px), 0);
-  will-change: transform;
+    radial-gradient(circle at 11% 16%, rgba(255,255,255,.92) 0 1.3px, transparent 2.7px),
+    radial-gradient(circle at 37% 29%, rgba(237,243,255,.75) 0 1px, transparent 2px),
+    radial-gradient(circle at 84% 21%, rgba(255,255,255,.92) 0 1.4px, transparent 3px),
+    radial-gradient(circle at 63% 68%, rgba(230,237,253,.76) 0 1.05px, transparent 2.3px),
+    radial-gradient(circle at 20% 81%, rgba(253,253,255,.83) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 92% 77%, rgba(238,245,255,.7) 0 1.1px, transparent 2.3px);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }
 
-/* Smaller viewports retain perceptible depth without oversized bright stars. */
+/* Mobile devices: quiet, readable monochrome, no scroll-induced workload. */
 @media (max-width: 760px) {
   body.precision-home {
-    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 1150px auto, 1150px auto;
-    background-position: center, center, center, center, center top, 52% top;
+    background-size:
+      100% 100%, 100% 100%, 100% 100%, 100% 100%,
+      1150px auto, 100% 100%, 1150px auto;
+    background-position:
+      center, center, center, center, center top, center, 52% top;
   }
   body.precision-home > .particle-atmosphere {
     background:
-      radial-gradient(ellipse 70% 35% at 76% 22%, rgba(149, 163, 195, .11), transparent 88%),
-      radial-gradient(ellipse 62% 45% at 16% 82%, rgba(79, 98, 139, .09), transparent 90%);
+      radial-gradient(ellipse 64% 39% at 76% 23%, rgba(156, 175, 208, .10), transparent 88%),
+      radial-gradient(ellipse 67% 48% at 18% 81%, rgba(95, 113, 153, .075), transparent 91%),
+      radial-gradient(ellipse 86% 72% at 50% 50%, transparent 26%, rgba(2, 3, 7, .48) 100%);
   }
-  body.precision-home > .particle-atmosphere::before { opacity: .54; }
-  body.precision-home > .particle-atmosphere::after { opacity: .56; }
+  body.precision-home > .particle-atmosphere::before { opacity: .44; }
+  body.precision-home > .particle-atmosphere::after { opacity: .63; }
 }
-
-/* Motion sensitivity: no scroll transforms or flashing, but stars remain. */
-@media (prefers-reduced-motion: reduce) {
-  body.precision-home > .particle-atmosphere::before,
-  body.precision-home > .particle-atmosphere::after {
-    transform: none !important;
-    will-change: auto;
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
 
 /* Product art visibility regression guard.
    A nested visual starts as pending while serial typing runs. As soon as
