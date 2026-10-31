@@ -1,0 +1,65 @@
+/* Homepage-only deep-space treatment. Reuses compressed 4K and SVG assets.
+   No canvas, runtime JS, blur filters, or scroll listeners. */
+body.precision-home {
+  background-color: #020307;
+  background-image:
+    radial-gradient(ellipse 85% 48% at 50% 16%, transparent 12%, rgba(1, 2, 5, .35) 71%, rgba(1, 2, 5, .9) 100%),
+    radial-gradient(ellipse 40% 15% at 76% 9%, rgba(204, 215, 231, .10), transparent 85%),
+    radial-gradient(ellipse 29% 11% at 22% 30%, rgba(160, 170, 195, .06), transparent 90%),
+    url('/assets/precision/stars.svg?v=20261028-4k'),
+    linear-gradient(180deg, rgba(2, 3, 7, .26), rgba(2, 3, 7, .56) 36%, rgba(2, 3, 7, .82) 82%, #020307 100%),
+    url('/assets/precision/obsidian-space.webp?v=20261028-4k');
+  background-size:
+    100% 100%,
+    100% 1100px,
+    100% 1800px,
+    max(1280px, 100%) auto,
+    100% 100%,
+    max(1280px, 100%) auto;
+  background-position: center, center top, center top, center top, center, center top;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat-y, no-repeat, no-repeat;
+  background-attachment: scroll;
+}
+
+/* Static near stars and atmospheric depth never intercept content. */
+body.precision-home .particle-atmosphere {
+  height: min(1050px, 100vh);
+  opacity: .75;
+  background:
+    radial-gradient(ellipse 48% 26% at 76% 47%, rgba(210, 220, 236, .115), transparent 80%),
+    radial-gradient(ellipse 49% 35% at 25% 83%, rgba(104, 115, 145, .075), transparent 87%);
+  pointer-events: none;
+}
+body.precision-home .particle-atmosphere::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 12% 17%, rgba(255, 255, 255, .85) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 37% 30%, rgba(236, 241, 255, .65) 0 1.3px, transparent 2px),
+    radial-gradient(circle at 82% 23%, rgba(255, 255, 255, .9) 0 1.1px, transparent 2px),
+    radial-gradient(circle at 61% 68%, rgba(229, 235, 250, .6) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 19% 80%, rgba(249, 250, 255, .73) 0 1.2px, transparent 2px),
+    radial-gradient(circle at 93% 74%, rgba(239, 244, 255, .68) 0 1px, transparent 1.8px);
+}
+
+/* Mobile: lower paint cost, no fixed backgrounds or parallax. */
+@media (max-width: 760px) {
+  body.precision-home {
+    background-image:
+      linear-gradient(180deg, rgba(2, 3, 7, .22), rgba(2, 3, 7, .66) 48%, #020307),
+      url('/assets/precision/stars.svg?v=20261028-4k'),
+      url('/assets/precision/obsidian-space.webp?v=20261028-4k');
+    background-size: 100% 100%, 1100px auto, 1100px auto;
+    background-repeat: no-repeat, repeat-y, no-repeat;
+    background-position: center, 50% top, 53% top;
+  }
+  body.precision-home .particle-atmosphere { opacity: .5; }
+  body.precision-home .particle-atmosphere::before { opacity: .4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.precision-home,
+  body.precision-home .particle-atmosphere,
+  body.precision-home .particle-atmosphere::before { animation: none !important; transition: none !important; }
+}
