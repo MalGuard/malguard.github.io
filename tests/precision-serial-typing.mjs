@@ -98,6 +98,55 @@ for(const engine of engines){
   assert.equal(await mp.locator('#menuBtn').getAttribute('aria-expanded'),'false','Escape navigation remains usable');
   await mobile.close();
 
+  // A user can scroll away halfway through a long paragraph. The next
+  // section must type promptly and the interrupted copy must stay frozen
+  // until scrolled back into view, then resume without a new type-run.
+  const scrollContext=await browser.newContext({ignoreHTTPSErrors:true,
+   viewport:{width:390,height:844},reducedMotion:'no-preference'});
+  await guarded(scrollContext);
+  const sp=await scrollContext.newPage();
+  const scrollErrors=[];sp.on('pageerror',e=>scrollErrors.push(e.message));
+  await sp.goto(base+'/',{waitUntil:'domcontentloaded'});
+  await sp.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true');
+  const paragraph=sp.locator('.hero-description[data-type="body"]');
+  await sp.waitForFunction(()=>{
+   const n=document.querySelector('.hero-description');
+   return n?.dataset.typeState==='typing'&&(n.querySelector('.type-ink')?.textContent.length||0)>5;
+  },null,{timeout:12000});
+  const started=await paragraph.evaluate(n=>({
+   runs:Number(n.dataset.typeRuns),motionStarts:Number(n.dataset.motionStarts),
+   partial:n.querySelector('.type-ink')?.textContent||''
+  }));
+  assert.equal(started.runs,1,'hero description must only be created once');
+  await sp.locator('#technology-title').evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
+  await sp.waitForFunction(()=>document.querySelector('.hero-description')?.dataset.typeState==='paused',
+   null,{timeout:2500});
+  const paused=await paragraph.evaluate(n=>({
+   runs:Number(n.dataset.typeRuns),motionStarts:Number(n.dataset.motionStarts),
+   partial:n.querySelector('.type-ink')?.textContent||''
+  }));
+  assert.equal(paused.runs,1,'scrolling away must not restart previous text');
+  assert.ok(paused.partial.length>=started.partial.length,'scrolling away lost typed progress');
+  await sp.waitForFunction(()=>{
+   const n=document.querySelector('#technology [data-type]');
+   return n?.dataset.typeState==='typing'||n?.dataset.typeState==='complete';
+  },null,{timeout:3000});
+  assert.equal(await sp.locator('main [data-type-state=typing]').count()<=1,true,
+   'new section started while an old section was still typing');
+  await paragraph.evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
+  await sp.waitForFunction(()=>{
+   const n=document.querySelector('.hero-description');
+   return n?.dataset.typeState==='typing'||n?.dataset.typeState==='complete';
+  },null,{timeout:3000});
+  assert.equal(await paragraph.getAttribute('data-type-runs'),'1',
+   'returning to interrupted text must resume, not replay typing from scratch');
+  assert.equal(await paragraph.getAttribute('data-motion-starts'),String(started.motionStarts),
+   'returning must reuse its original animation job');
+  await sp.waitForFunction(()=>document.querySelector('.hero-description')?.dataset.typeState==='complete',
+   null,{timeout:4000});
+  assert.deepEqual(scrollErrors,[],'scroll navigation must not throw JS exceptions');
+  await scrollContext.close();
+
   // Accessibility: never conceal copy for reduced-motion users.
   const reduce=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:390,height:844},reducedMotion:'reduce'});
   await guarded(reduce);
