@@ -2,6 +2,7 @@
 // Covers browser engines, motion preferences, weak-GPU fallback, viewport-gated
 // typing, product navigation and layout without contacting external services.
 import assert from 'node:assert/strict';
+import {maximumSimultaneousJobsInRegion} from './precision-region-assertions.mjs';
 import {chromium,webkit,launchOptions} from './browser-runtime.mjs';
 const base='https://127.0.0.1:8443';
 const names=process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chromium','webkit'];
@@ -85,8 +86,8 @@ for(const name of names){
     await page.waitForFunction(()=>
      ['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),
      null,{timeout:30000});
-    assert.ok(await page.locator('[data-type-state=typing]').count()<=1,
-     'Typewriter exceeded its strict one-at-a-time concurrency');
+    assert.ok((await maximumSimultaneousJobsInRegion(page))<=1,
+     'Typewriter exceeded one simultaneous item per section');
     await page.emulateMedia({reducedMotion:'reduce'});
     await page.waitForFunction(()=>!document.documentElement.classList.contains('type-system'));
     assert.equal(await page.locator('.type-ink').count(),0,

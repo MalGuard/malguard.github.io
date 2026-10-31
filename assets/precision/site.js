@@ -1,13 +1,13 @@
-/* Viewport-gated, once-only text. One timer; no offscreen completion. */
+/* Once-visible motion continues to completion offscreen; each section has one ordered queue. */
 (() => {
  'use strict';
  const root=document.documentElement,motion=matchMedia('(prefers-reduced-motion: reduce)'),formatter=new Intl.NumberFormat('en-US');
  if(document.body?.classList.contains('mg-precision-shared'))root.dataset.experienceReady='true';
  const eligible=!motion.matches&&'IntersectionObserver'in window;
- // Never animate two items at once: headline, copy, menus, visuals, and counters
- // all share ONE ordered, viewport-gated queue.
- let nodes=[],observer,timer=0,stopped=false;const active=new Map(),maxActive=1;
- root.dataset.precisionMotionOrder='strict-serial';
+ // Only one active item per semantic section. An already-started section
+ // keeps going after scroll; a new section can animate independently.
+ let nodes=[],observer,timer=0,stopped=false;const active=new Map();
+ root.dataset.precisionMotionOrder='section-serial';
  const done=new WeakSet(),visible=new Set(),pending=new Set(),jobs=new WeakMap();
  const complete=node=>{
   done.add(node);pending.delete(node);node.classList.remove('typing');
@@ -80,7 +80,38 @@
      });
     }
    }
-   nodes=[...document.querySelectorAll('[data-type],[data-reveal],[data-count-group]')].filter(n=>!n.hasAttribute('data-type')||!!n.querySelector(':scope > .type-source'));root.dataset.precisionTypeReady='true';
+   nodes=[...document.querySelectorAll('[data-type],[data-reveal],[data-count-group]')].filter(n=>!n.hasAttribute('data-type')||!!n.querySelector(':scope > .type-source'));
+   // Group content at the highest semantic section under main so the three
+   // product cards remain in a single sequential queue. Navbar and footer
+   // have independent queues. Each entry can be scheduled only after it has
+   // intersected the viewport at least once.
+   const regionOf=node=>{
+    const nav=node.closest('#navbar');if(nav)return nav;
+    const footer=node.closest('footer');if(footer)return footer;
+    const main=node.closest('main');
+    if(main){
+     let section=node.closest('main section');
+     if(section){
+      while(section.parentElement){
+       const parentSection=section.parentElement.closest('main section');
+       if(!parentSection)break;
+       section=parentSection;
+      }
+      return section;
+     }
+     let top=node;
+     while(top.parentElement&&top.parentElement!==main)top=top.parentElement;
+     return top.parentElement===main?top:main;
+    }
+    return node.parentElement||node;
+   };
+   const regions=new Map(),activatedRegions=new Set();
+   for(const node of nodes){
+    const region=regionOf(node);
+    if(!regions.has(region))regions.set(region,[]);
+    regions.get(region).push(node);
+   }
+   root.dataset.precisionTypeReady='true';
    if(!eligible||stopped){finish();return;}
    const segmenter=Intl.Segmenter?new Intl.Segmenter('en',{granularity:'grapheme'}):null;
    const inView=node=>{
@@ -88,17 +119,6 @@
     const r=node.getBoundingClientRect(),bottom=innerHeight*.97;
     // Start shortly after new copy, menus, or images enter the viewing area.
     return r.height>0&&Math.max(0,Math.min(r.bottom,bottom)-Math.max(r.top,0))/r.height>=Math.min(.18,Math.max(.045,innerHeight*.10/Math.max(r.height,1)));
-   };
-   // Preserve elapsed time and the visible partial ink while a different
-   // viewport region takes over. Returning resumes the SAME job and cursor.
-   const stopJob=node=>{
-    const job=active.get(node);if(!job)return;
-    job.elapsed+=Math.max(0,performance.now()-job.started);
-    node.classList.remove('typing');
-    if(job.kind==='text')node.dataset.typeState='paused';
-    if(job.kind==='count'){node.dataset.countState='paused';job.counters.forEach(c=>c.n.dataset.countState='paused');}
-    if(job.kind==='reveal')node.dataset.revealState='paused';
-    active.delete(node);
    };
    const create=node=>{
     node.dataset.motionStarts=String(Number(node.dataset.motionStarts||0)+1);
@@ -126,37 +146,37 @@
     }
     jobs.set(node,job);return job;
    };
-   // A deliberate scroll hands ownership to content entering the viewport.
-   // Earlier, still-partially-visible text must not hold the next section
-   // hostage. Jobs behind the viewport frontier stay paused until the user
-   // scrolls back to them. Normal stationary reading remains DOM-ordered.
-   let viewportFrontier=null,scrollDirection=0,lastScrollY=scrollY;
-   let lastViewportVisible=new Set();
-   const canRun=n=>pending.has(n)&&!done.has(n)&&!active.has(n)&&inView(n);
-   const menuOpen=()=>{const menu=document.getElementById('navLinks');return !!menu&&!menu.hidden;};
    const advance=()=>{
-    if(stopped||document.hidden)return;
-    const menuActive=menuOpen();
-    if(menuActive){
-     for(const node of [...active.keys()])if(!node.closest('#navLinks'))stopJob(node);
-    }
-    while(active.size<maxActive){
-     const node=menuActive
-      ? nodes.find(n=>n.closest('#navLinks')&&canRun(n))
-      : nodes.find((n,index)=>((viewportFrontier===null)||index>=viewportFrontier)&&canRun(n));
-     if(!node)break;
-     if(node.hasAttribute('data-type')&&!node.querySelector(':scope > .type-source')){complete(node);continue;}
-     const job=jobs.get(node)||create(node);active.set(node,job);job.started=performance.now();
-     if(job.kind==='text'){node.dataset.typeState='typing';node.classList.add('typing');}
-     if(job.kind==='reveal')node.dataset.revealState='active';
-     if(job.kind==='count'){node.dataset.countState='counting';job.counters.forEach(({n})=>n.dataset.countState='counting');}
+    if(stopped)return;
+    // One running job per section, never a global one-job bottleneck.
+    // Once ANY part of a section has been seen, finish that section's
+    // complete ordered queue, even while the visitor scrolls elsewhere.
+    const busy=new Set([...active.keys()].map(regionOf));
+    for(const [region,items] of regions){
+     if(busy.has(region)||!activatedRegions.has(region))continue;
+     for(const node of items){
+      if(done.has(node)||active.has(node))continue;
+      // Unopened navigation links must type when the user opens the menu,
+      // not invisibly while it is collapsed.
+      if(node.closest('#navLinks')&&document.getElementById('navLinks')?.hidden)continue;
+      // Hidden responsive-only links do not block visible navigation.
+      if(node.closest('#navbar')&&!node.getClientRects().length)continue;
+      if(node.hasAttribute('data-type')&&!node.querySelector(':scope > .type-source')){complete(node);continue;}
+      const job=jobs.get(node)||create(node);
+      active.set(node,job);job.started=performance.now();
+      if(job.kind==='text'){node.dataset.typeState='typing';node.classList.add('typing');}
+      if(job.kind==='reveal')node.dataset.revealState='active';
+      if(job.kind==='count'){node.dataset.countState='counting';job.counters.forEach(({n})=>n.dataset.countState='counting');}
+      busy.add(region);
+      break;
+     }
     }
     if(active.size&&!timer)timer=setTimeout(tick,16);
    };
    const tick=()=>{
     timer=0;if(stopped)return;
     for(const [node,job] of active){
-     if(!inView(node)){stopJob(node);continue;}
+     // Once triggered, progress never depends on the current scroll position.
      const elapsed=job.elapsed+performance.now()-job.started,p=Math.min(1,elapsed/job.duration);
      if(job.kind==='text'){
       const count=Math.min(job.pieces.length,Math.floor(p*job.pieces.length));job.text.textContent=job.pieces.slice(0,count).join('');
@@ -172,82 +192,46 @@
    };
    observer=new IntersectionObserver(entries=>{
     for(const entry of entries){
-     const n=entry.target;
-     if(entry.isIntersecting&&entry.intersectionRatio>=.06){visible.add(n);pending.add(n);}
-     else{visible.delete(n);stopJob(n);}
+     const node=entry.target;
+     if(entry.isIntersecting&&entry.intersectionRatio>=.06){
+      visible.add(node);pending.add(node);activatedRegions.add(regionOf(node));
+     }else visible.delete(node);
     }
-    // The scroll reconciliation owns priority. Observer callbacks can
-    // arrive before or after the scroll event on slower mobile browsers.
+    // Reconcile viewport geometry without ever pausing a started job.
     queueViewportSync();
    },{rootMargin:'0px 0px -3% 0px',threshold:[0,.06,.18,.35,1]});
-   nodes.forEach(n=>observer.observe(n));
-   // Some browsers do not dispatch a new threshold crossing when an element
-   // is scrolled into view programmatically. Reconcile viewport geometry too.
+   nodes.forEach(node=>observer.observe(node));
    let viewportSyncQueued=false;
    const syncViewport=()=>{
     viewportSyncQueued=false;
-    const seenNow=new Set();
-    for(const n of nodes){
-     if(done.has(n))continue;
-     // Hidden desktop-only links must never hold the mobile header hostage.
-     // A closed responsive menu is deferred, not marked complete: opening it
-     // later must still type entry 1, then 2, then 3, without parallel work.
-     if(n.closest('#navbar')&&!n.getClientRects().length){
-      if(n.closest('.nav-links,.mg-primary-links'))continue;
-      complete(n);continue;
+    for(const node of nodes){
+     if(done.has(node))continue;
+     // Closed dropdown links are deferred until the menu actually opens.
+     if(node.closest('#navbar')&&!node.getClientRects().length){
+      if(node.closest('.nav-links,.mg-primary-links'))continue;
+      complete(node);continue;
      }
-     const r=n.getBoundingClientRect();
+     const r=node.getBoundingClientRect();
      if(r.height>0&&r.bottom>0&&r.top<innerHeight*.97){
-      visible.add(n);pending.add(n);
-      // The job itself must be visible to start, not just its parent section.
-      if(inView(n))seenNow.add(n);
-     }else{
-      visible.delete(n);
-      stopJob(n);
-     }
+      visible.add(node);
+      if(inView(node)){pending.add(node);activatedRegions.add(regionOf(node));}
+     }else visible.delete(node);
     }
-    if(scrollDirection!==0){
-     // At the top of the page, let the brand and headings complete normally.
-     if(scrollY<8)viewportFrontier=null;
-     else{
-      const entrants=nodes.filter(n=>seenNow.has(n)&&!lastViewportVisible.has(n)&&!done.has(n));
-      // When many nodes enter together, preserve their DOM reading order.
-      // Reverse scrolling chooses the earliest newly visible node, allowing
-      // older, interrupted material to resume rather than restart.
-      if(entrants.length){
-       const target=entrants[0];
-       viewportFrontier=nodes.indexOf(target);
-       for(const node of [...active.keys()]){
-        if(node!==target&&(!menuOpen()||!node.closest('#navLinks')))stopJob(node);
-       }
-      }else if(viewportFrontier!==null){
-       // If the current item has moved offscreen, the next visible item
-       // should start immediately; a stale frontier must never block it.
-       const remaining=nodes.slice(viewportFrontier).some(n=>seenNow.has(n)&&!done.has(n));
-       if(!remaining){
-        const first=nodes.find(n=>seenNow.has(n)&&!done.has(n));
-        if(first)viewportFrontier=nodes.indexOf(first);
-       }
-      }
-     }
-    }
-    lastViewportVisible=seenNow;
-    scrollDirection=0;
     advance();
    };
    const queueViewportSync=()=>{
     if(viewportSyncQueued)return;
     viewportSyncQueued=true;requestAnimationFrame(syncViewport);
    };
-   addEventListener('scroll',()=>{
-    const current=scrollY,delta=current-lastScrollY;
-    if(Math.abs(delta)>1)scrollDirection=delta>0?1:-1;
-    lastScrollY=current;
-    queueViewportSync();
-   },{passive:true});
+   addEventListener('scroll',queueViewportSync,{passive:true});
    addEventListener('resize',queueViewportSync,{passive:true});
+   document.getElementById('menuBtn')?.addEventListener('click',queueViewportSync);
    queueViewportSync();
-   document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const n of active.keys())stopJob(n);}else advance();});
+   document.addEventListener('visibilitychange',()=>{
+    // Rendering can be throttled in background tabs, but scrolling is never
+    // a reason to pause an animation already activated in the viewport.
+    if(!document.hidden){queueViewportSync();advance();}
+   });
    document.querySelectorAll('.product').forEach(card=>card.addEventListener('focusin',()=>{[card,...card.querySelectorAll('[data-type],[data-reveal]')].forEach(n=>{active.delete(n);complete(n);});advance();}));
   }catch{finish();}
  }

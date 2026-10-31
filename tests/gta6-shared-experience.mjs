@@ -20,7 +20,7 @@ for(const engineName of [process.env.TEST_BROWSER||'chromium']){
     const initial=await page.evaluate(()=>({
      menuOpen:document.querySelector('#menuBtn')?.getAttribute('aria-expanded'),
      menuHidden:document.querySelector('#navLinks')?.hidden,
-     script:[...document.scripts].some(s=>s.src.includes('site.js?v=viewport-handoff-20261031')),
+     script:[...document.scripts].some(s=>s.src.includes('site.js?v=continue-visited-20261031')),
      titleLines:document.querySelectorAll('#gta6-heading .gta6-type-line[data-type="title"]').length,
      buttons:document.querySelectorAll('.gta6-actions a[data-type="button"]').length,
      width:document.documentElement.clientWidth,

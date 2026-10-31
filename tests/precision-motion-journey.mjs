@@ -1,6 +1,7 @@
 // Production-layout browser regression for the approved lightweight homepage.
 // The old GPU card-flip/camera handoff was intentionally retired; do not require it.
 import assert from 'node:assert/strict';
+import {maximumSimultaneousJobsInRegion} from './precision-region-assertions.mjs';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {chromium,webkit,launchOptions} from './browser-runtime.mjs';
 
@@ -60,7 +61,7 @@ for(const name of names){
   assert.equal(await target.getAttribute('data-type-state'),'pending','Offscreen text starts only when viewed');
   await target.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
   await p.waitForFunction(()=>Number(document.querySelector('#technology [data-type]')?.dataset.typeRuns)>0,null,{timeout:30000});
-  assert.ok(await p.locator('main [data-type-state=typing]').count()<=1,'Typing concurrency is bounded');
+  assert.ok((await maximumSimultaneousJobsInRegion(p))<=1,'Typing must stay serial within a section');
   assert.deepEqual(errors,[],'Typewriter must not throw');
   reports.push({browser:name,viewportTyping:'pass',errors});
   console.log('PASS',name,'viewport-triggered bounded typewriter');

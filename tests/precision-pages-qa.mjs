@@ -1,6 +1,7 @@
 // Precision design system acceptance: page parity, bilingual docs and scroll typing.
 // Browser fixture is local HTTPS; no request is sent to an external scanner endpoint.
 import assert from 'node:assert/strict';
+import {maximumSimultaneousJobsInRegion} from './precision-region-assertions.mjs';
 import {chromium,launchOptions} from './browser-runtime.mjs';
 const base='https://127.0.0.1:8443';
 const routes=['/products.html','/tools.html','/docs.html','/trust.html','/about.html','/gta-guard.html','/research/gta-5-mod-security.html','/research/gta-mod-security-fa.html','/game-scam-guard.html','/download.html','/services/game-scam-guard/public/learn/index.html'];
@@ -48,8 +49,8 @@ try {
   const title=page.locator('[data-test-viewport="target"]');
   await title.evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
   await page.waitForFunction(()=>Number(document.querySelector('[data-test-viewport="target"]')?.dataset.typeRuns)>0,null,{timeout:12000});
-  const concurrent=await page.locator('main [data-type-state=typing]').count();
-  assert.ok(concurrent<=4,'Typewriter concurrency is bounded');
+  const concurrent=await maximumSimultaneousJobsInRegion(page);
+  assert.ok(concurrent<=1,'Animations must stay serial inside each section');
   console.log('PASS',route,'scroll-triggered bounded typing');
  }
  await c.close();
