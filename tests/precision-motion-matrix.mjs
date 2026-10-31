@@ -60,6 +60,12 @@ for(const name of names){
    assert.match(layout.title,/JetBrains/i,'Homepage uses the bundled coding font');
    assert.ok(layout.heading,'Visible semantic homepage heading');
    assert.equal(layout.bodyBg,'rgb(5, 5, 7)','Homepage obsidian background');
+   const depthLayer=page.locator('body.precision-home > .particle-atmosphere');
+   assert.equal(await depthLayer.evaluate(n=>getComputedStyle(n).position),'fixed',
+    'Deep-space backdrop must stay visible while scrolling');
+   await page.waitForFunction(()=>
+    document.querySelector('body.precision-home > .particle-atmosphere')?.dataset.spaceDepth==='ready',
+    null,{timeout:5000});
    assert.match(layout.bodyImage,/radial-gradient/,'Homepage keeps its star field');
    assert.equal(layout.urls.length,3);
    assert.equal(await page.locator('.hero-actions>a[data-type="button"]').count(),2,
@@ -88,7 +94,15 @@ for(const name of names){
      null,{timeout:30000});
     assert.ok((await maximumSimultaneousJobsInRegion(page))<=1,
      'Typewriter exceeded one simultaneous item per section');
+    await page.waitForFunction(()=>{
+     const el=document.querySelector('body.precision-home > .particle-atmosphere');
+     return Number.parseInt(el?.style.getPropertyValue('--mg-space-near')||'0',10)>0
+      && Number.parseInt(el?.style.getPropertyValue('--mg-space-far')||'0',10)<0;
+    },null,{timeout:5000});
     await page.emulateMedia({reducedMotion:'reduce'});
+    await page.waitForFunction(()=>
+     document.querySelector('body.precision-home > .particle-atmosphere')
+      ?.style.getPropertyValue('--mg-space-near')==='0px',null,{timeout:5000});
     await page.waitForFunction(()=>!document.documentElement.classList.contains('type-system'));
     assert.equal(await page.locator('.type-ink').count(),0,
      'Motion-preference update left synthetic text over content');
