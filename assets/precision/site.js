@@ -162,16 +162,17 @@
      const text=document.createTextNode(''),cursor=document.createElement('span');cursor.className='type-cursor vertical';ink.append(text,cursor);node.append(ink);
      node.dataset.typeRuns=String(Number(node.dataset.typeRuns||0)+1);
      // Keep visible code-style typing, but never block the queue with long copy.
-     const timing=inProductSection
-      ? (node.dataset.type==='title'
-       ? {per:5,min:60,max:135}
-       : {per:3,min:65,max:155})
-      : node.dataset.type==='button'
-       ? {per:15,min:130,max:280}
-       : node.dataset.type==='title'
-        ? {per:18,min:180,max:480}
-        : {per:10,min:200,max:650};
-     const duration=Math.min(timing.max,Math.max(timing.min,pieces.length*timing.per));
+     const timing=node.dataset.type==='button'
+      ? {per:15,min:130,max:280}
+      : node.dataset.type==='title'
+       ? {per:18,min:180,max:480}
+       : {per:10,min:200,max:650};
+     // Product-only override keeps the three site-wide timing contracts intact.
+     const productDuration=node.dataset.type==='title'
+      ? Math.min(135,Math.max(60,pieces.length*5))
+      : Math.min(155,Math.max(65,pieces.length*3));
+     const duration=inProductSection?productDuration
+      : Math.min(timing.max,Math.max(timing.min,pieces.length*timing.per));
      job={...job,kind:'text',pieces,text,cursor,duration,blink:65};
     }else if(node.hasAttribute('data-count-group')){
      const counters=[...node.querySelectorAll('.counter')].map(n=>{const ink=document.createElement('span');ink.className='count-ink';ink.setAttribute('aria-hidden','true');ink.textContent='0';n.append(ink);n.dataset.countRuns=String(Number(n.dataset.countRuns||0)+1);return {n,ink,value:Number(n.dataset.count)};});
