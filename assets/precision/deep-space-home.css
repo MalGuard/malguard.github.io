@@ -1,7 +1,7 @@
 /* Homepage-only deep-space treatment. Reuses compressed 4K and SVG assets.
    No canvas, runtime JS, blur filters, or scroll listeners. */
 body.precision-home {
-  background-color: #020307;
+  background-color: #050507;
   background-image:
     radial-gradient(ellipse 85% 48% at 50% 16%, transparent 12%, rgba(1, 2, 5, .35) 71%, rgba(1, 2, 5, .9) 100%),
     radial-gradient(ellipse 40% 15% at 76% 9%, rgba(204, 215, 231, .10), transparent 85%),
