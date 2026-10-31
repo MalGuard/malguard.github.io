@@ -1,6 +1,7 @@
 // Internal pages must use the same typing sequence and coding font as home.
 // Test static copy only; never submit forms or contact external services.
 import assert from 'node:assert/strict';
+import {maximumSimultaneousJobsInRegion} from './precision-region-assertions.mjs';
 import {chromium,webkit,launchOptions} from './browser-runtime.mjs';
 const base='https://127.0.0.1:8443';
 const paths=['/products.html','/tools.html','/about.html','/gta-guard.html','/research/repackaged-mod.html'];
@@ -63,7 +64,7 @@ for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chrom
     }else{
      await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navMotion==='complete',null,{timeout:25000});
      await page.waitForFunction(()=>document.querySelector('main [data-type]')?.dataset.typeRuns>0,null,{timeout:15000});
-     assert.ok(await page.locator('[data-type-state=typing]').count()<=1,path+' typing jobs overlapped');
+     assert.ok((await maximumSimultaneousJobsInRegion(page))<=1,path+' same-section jobs overlapped');
      await page.emulateMedia({reducedMotion:'reduce'});
      await page.waitForFunction(()=>!document.documentElement.classList.contains('type-system'),null,{timeout:10000});
     }
