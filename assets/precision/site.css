@@ -75,8 +75,8 @@ body.precision-home{background-color:#050507;background-image:radial-gradient(el
  .type-system body.precision-home .type-link:focus-visible > .type-source{color:inherit}
  .type-system body.precision-home .type-link:focus-visible > .type-ink{display:none}
  .type-system body.precision-home .metrics:is([data-count-state=pending],[data-count-state=counting],[data-count-state=paused]) .count-source{color:transparent}
- .type-system body.precision-home [data-reveal=visual]:is([data-reveal-state=pending],[data-reveal-state=paused]){opacity:0}
- .type-system body.precision-home [data-reveal=visual][data-reveal-state=active]{animation:precision-visual-draw .56s ease-out both}
+ .type-system body.precision-home [data-reveal=visual][data-reveal-state=pending]{opacity:0}
+ .type-system body.precision-home [data-reveal=visual]:is([data-reveal-state=active],[data-reveal-state=paused]){animation:precision-visual-draw .56s ease-out both}
  @keyframes precision-visual-draw{from{opacity:0;filter:blur(8px)}to{opacity:1;filter:blur(0)}}
 }
 
@@ -87,14 +87,27 @@ body.precision-home{background-color:#050507;background-image:radial-gradient(el
    order, instead of showing the three product cards at the same moment.
    Keep page geometry reserved to avoid visual layout shift. */
 @media (prefers-reduced-motion:no-preference){
- .type-system body.precision-home .product[data-reveal="card"]:is([data-reveal-state="pending"],[data-reveal-state="paused"]){
+ .type-system body.precision-home .product[data-reveal="card"][data-reveal-state="pending"]{
   opacity:0;
  }
- .type-system body.precision-home .product[data-reveal="card"][data-reveal-state="active"]{
+ .type-system body.precision-home .product[data-reveal="card"]:is([data-reveal-state="active"],[data-reveal-state="paused"]){
   animation:precision-card-serial-in .125s ease-out both;
  }
  @keyframes precision-card-serial-in{
   from{opacity:0;transform:translateY(4px)}
   to{opacity:1;transform:none}
+ }
+}
+
+/* Interrupted jobs retain partial text and frozen visual progress while
+   offscreen; bringing them back into view resumes without a new animation. */
+@media (prefers-reduced-motion:no-preference){
+ .type-system body.precision-home .type[data-type-state="paused"] > .type-ink{
+  height:auto;overflow:visible;clip-path:none;white-space:inherit;color:inherit;
+ }
+ .type-system body.precision-home .type[data-type-state="paused"] .type-cursor{visibility:hidden}
+ .type-system body.precision-home [data-reveal=visual][data-reveal-state=paused],
+ .type-system body.precision-home .product[data-reveal=card][data-reveal-state=paused]{
+  animation-play-state:paused;
  }
 }

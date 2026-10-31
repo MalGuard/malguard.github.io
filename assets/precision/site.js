@@ -85,10 +85,21 @@
    const segmenter=Intl.Segmenter?new Intl.Segmenter('en',{granularity:'grapheme'}):null;
    const inView=node=>{
     if(document.hidden||!visible.has(node))return false;
-    const r=node.getBoundingClientRect(),bottom=innerHeight*.94;
-    return r.height>0&&Math.max(0,Math.min(r.bottom,bottom)-Math.max(r.top,0))/r.height>=Math.min(.35,Math.max(.08,innerHeight*.24/Math.max(r.height,1)));
+    const r=node.getBoundingClientRect(),bottom=innerHeight*.97;
+    // Start shortly after new copy, menus, or images enter the viewing area.
+    return r.height>0&&Math.max(0,Math.min(r.bottom,bottom)-Math.max(r.top,0))/r.height>=Math.min(.18,Math.max(.045,innerHeight*.10/Math.max(r.height,1)));
    };
-   const stopJob=node=>{const job=active.get(node);if(!job)return;job.elapsed+=performance.now()-job.started;node.classList.remove('typing');if(job.kind==='text')node.dataset.typeState='paused';if(job.kind==='count'){node.dataset.countState='paused';job.counters.forEach(c=>c.n.dataset.countState='paused');}if(job.kind==='reveal')node.dataset.revealState='paused';active.delete(node);};
+   // Preserve elapsed time and the visible partial ink while a different
+   // viewport region takes over. Returning resumes the SAME job and cursor.
+   const stopJob=node=>{
+    const job=active.get(node);if(!job)return;
+    job.elapsed+=Math.max(0,performance.now()-job.started);
+    node.classList.remove('typing');
+    if(job.kind==='text')node.dataset.typeState='paused';
+    if(job.kind==='count'){node.dataset.countState='paused';job.counters.forEach(c=>c.n.dataset.countState='paused');}
+    if(job.kind==='reveal')node.dataset.revealState='paused';
+    active.delete(node);
+   };
    const create=node=>{
     node.dataset.motionStarts=String(Number(node.dataset.motionStarts||0)+1);
      let job={node,elapsed:0,started:0,kind:'reveal',duration:node.dataset.reveal==='visual'?350:125};
@@ -115,10 +126,25 @@
     }
     jobs.set(node,job);return job;
    };
+   // A deliberate scroll hands ownership to content entering the viewport.
+   // Earlier, still-partially-visible text must not hold the next section
+   // hostage. Jobs behind the viewport frontier stay paused until the user
+   // scrolls back to them. Normal stationary reading remains DOM-ordered.
+   let viewportFrontier=null,scrollDirection=0,lastScrollY=scrollY;
+   let lastViewportVisible=new Set();
+   const canRun=n=>pending.has(n)&&!done.has(n)&&!active.has(n)&&inView(n);
+   const menuOpen=()=>{const menu=document.getElementById('navLinks');return !!menu&&!menu.hidden;};
    const advance=()=>{
     if(stopped||document.hidden)return;
+    const menuActive=menuOpen();
+    if(menuActive){
+     for(const node of [...active.keys()])if(!node.closest('#navLinks'))stopJob(node);
+    }
     while(active.size<maxActive){
-     const node=nodes.find(n=>pending.has(n)&&!done.has(n)&&!active.has(n)&&inView(n));if(!node)break;
+     const node=menuActive
+      ? nodes.find(n=>n.closest('#navLinks')&&canRun(n))
+      : nodes.find((n,index)=>((viewportFrontier===null)||index>=viewportFrontier)&&canRun(n));
+     if(!node)break;
      if(node.hasAttribute('data-type')&&!node.querySelector(':scope > .type-source')){complete(node);continue;}
      const job=jobs.get(node)||create(node);active.set(node,job);job.started=performance.now();
      if(job.kind==='text'){node.dataset.typeState='typing';node.classList.add('typing');}
@@ -145,15 +171,22 @@
     advance();
    };
    observer=new IntersectionObserver(entries=>{
-    for(const entry of entries){const n=entry.target;if(entry.isIntersecting&&entry.intersectionRatio>=.18){visible.add(n);pending.add(n);}else{visible.delete(n);stopJob(n);}}
-    advance();
-   },{rootMargin:'0px 0px -6% 0px',threshold:[0,.18,.35,1]});
+    for(const entry of entries){
+     const n=entry.target;
+     if(entry.isIntersecting&&entry.intersectionRatio>=.06){visible.add(n);pending.add(n);}
+     else{visible.delete(n);stopJob(n);}
+    }
+    // The scroll reconciliation owns priority. Observer callbacks can
+    // arrive before or after the scroll event on slower mobile browsers.
+    queueViewportSync();
+   },{rootMargin:'0px 0px -3% 0px',threshold:[0,.06,.18,.35,1]});
    nodes.forEach(n=>observer.observe(n));
    // Some browsers do not dispatch a new threshold crossing when an element
    // is scrolled into view programmatically. Reconcile viewport geometry too.
    let viewportSyncQueued=false;
    const syncViewport=()=>{
     viewportSyncQueued=false;
+    const seenNow=new Set();
     for(const n of nodes){
      if(done.has(n))continue;
      // Hidden desktop-only links must never hold the mobile header hostage.
@@ -164,20 +197,54 @@
       complete(n);continue;
      }
      const r=n.getBoundingClientRect();
-     if(r.height>0&&r.bottom>0&&r.top<innerHeight*.94){
+     if(r.height>0&&r.bottom>0&&r.top<innerHeight*.97){
       visible.add(n);pending.add(n);
+      // The job itself must be visible to start, not just its parent section.
+      if(inView(n))seenNow.add(n);
      }else{
       visible.delete(n);
       stopJob(n);
      }
     }
+    if(scrollDirection!==0){
+     // At the top of the page, let the brand and headings complete normally.
+     if(scrollY<8)viewportFrontier=null;
+     else{
+      const entrants=nodes.filter(n=>seenNow.has(n)&&!lastViewportVisible.has(n)&&!done.has(n));
+      // When many nodes enter together, preserve their DOM reading order.
+      // Reverse scrolling chooses the earliest newly visible node, allowing
+      // older, interrupted material to resume rather than restart.
+      if(entrants.length){
+       const target=entrants[0];
+       viewportFrontier=nodes.indexOf(target);
+       for(const node of [...active.keys()]){
+        if(node!==target&&(!menuOpen()||!node.closest('#navLinks')))stopJob(node);
+       }
+      }else if(viewportFrontier!==null){
+       // If the current item has moved offscreen, the next visible item
+       // should start immediately; a stale frontier must never block it.
+       const remaining=nodes.slice(viewportFrontier).some(n=>seenNow.has(n)&&!done.has(n));
+       if(!remaining){
+        const first=nodes.find(n=>seenNow.has(n)&&!done.has(n));
+        if(first)viewportFrontier=nodes.indexOf(first);
+       }
+      }
+     }
+    }
+    lastViewportVisible=seenNow;
+    scrollDirection=0;
     advance();
    };
    const queueViewportSync=()=>{
     if(viewportSyncQueued)return;
     viewportSyncQueued=true;requestAnimationFrame(syncViewport);
    };
-   addEventListener('scroll',queueViewportSync,{passive:true});
+   addEventListener('scroll',()=>{
+    const current=scrollY,delta=current-lastScrollY;
+    if(Math.abs(delta)>1)scrollDirection=delta>0?1:-1;
+    lastScrollY=current;
+    queueViewportSync();
+   },{passive:true});
    addEventListener('resize',queueViewportSync,{passive:true});
    queueViewportSync();
    document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const n of active.keys())stopJob(n);}else advance();});
