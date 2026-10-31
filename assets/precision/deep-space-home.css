@@ -99,3 +99,22 @@ body.precision-home > .particle-atmosphere::after {
     transition: none !important;
   }
 }
+
+
+/* Product art visibility regression guard.
+   A nested visual starts as pending while serial typing runs. As soon as
+   its parent card is activated, make its artwork visible; otherwise long
+   queues can show featureless cards even though the image loaded.
+   Keep copy and CTAs above the artwork without relying on negative z-index
+   (which is brittle with animated/composited stacking contexts on iOS). */
+body.precision-home #products .product > .product-art {
+  z-index: 0;
+}
+body.precision-home #products .product > :not(.product-art) {
+  position: relative;
+  z-index: 1;
+}
+body.precision-home #products .product:is([data-reveal-state="active"],[data-reveal-state="paused"],[data-reveal-state="complete"]) > .product-art {
+  opacity: 1;
+  visibility: visible;
+}
