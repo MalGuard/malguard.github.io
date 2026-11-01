@@ -57,14 +57,15 @@ for(const name of names){
   const p=await c.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));
   await p.goto(base+'/');
   await p.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true');
-  const target=p.locator('#technology [data-type]').first();
-  assert.equal(await target.getAttribute('data-type-state'),'pending','Offscreen text starts only when viewed');
-  await target.evaluate(el=>el.scrollIntoView({block:'center',behavior:'instant'}));
-  await p.waitForFunction(()=>Number(document.querySelector('#technology [data-type]')?.dataset.typeRuns)>0,null,{timeout:30000});
-  assert.ok((await maximumSimultaneousJobsInRegion(p))<=1,'Typing must stay serial within a section');
-  assert.deepEqual(errors,[],'Typewriter must not throw');
-  reports.push({browser:name,viewportTyping:'pass',errors});
-  console.log('PASS',name,'viewport-triggered bounded typewriter');
+  const target=p.locator('#technology h2').first();
+  const heading=await target.textContent();
+  assert.ok(heading.trim().length>5,'Offscreen text must be complete on load');
+  assert.equal(await p.locator('html.type-system,.type-ink,.type-cursor').count(),0);
+  await target.scrollIntoViewIfNeeded();
+  assert.equal(await target.textContent(),heading,'Scroll must not retype text');
+  assert.deepEqual(errors,[],'Instant text controller must not throw');
+  reports.push({browser:name,instantText:'pass',errors});
+  console.log('PASS',name,'instant copy without typewriter');
   await c.close();
  }finally{await browser.close();}
 }
