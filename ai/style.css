@@ -334,3 +334,29 @@ body.auth-required .ai-account>*{width:min(100%,440px);margin-inline:auto}body.a
 .desktop-compat-state{margin:12px 0;padding:10px 12px;border:1px solid #615482;border-radius:9px;color:#d2c3ff;background:#281c37}
 .desktop-compat-state[data-status="blocked"]{color:#ffb6b6;border-color:#9c4c5c;background:#35191f}
 .desktop-compat-state[data-status="eligible"]{color:#c8efcc;border-color:#456b4e;background:#193020}
+
+/* 2026-11: deep-space fast path: pure CSS and one small local star tile.
+   Overrides the old 4K image plate and expensive glass blur. */
+body {
+  background-color: #03050a;
+  background-image:
+    radial-gradient(ellipse 58% 24% at 66% 12%, rgba(94, 116, 179, .16), transparent 83%),
+    radial-gradient(ellipse 46% 32% at 15% 72%, rgba(45, 69, 122, .11), transparent 88%),
+    url('/assets/precision/stars.svg?v=20261028-4k'),
+    linear-gradient(180deg, #040712, #05060c 55%, #020309);
+  background-size: 100% 100%, 100% 100%, max(1280px, 100%) auto, 100% 100%;
+  background-position: center, center, center top, center;
+  background-repeat: no-repeat, no-repeat, repeat-y, no-repeat;
+  background-attachment: scroll;
+}
+.composer-shell, .composer-shell:focus-within {
+  background: rgba(19, 22, 30, .97);
+  border-color: rgba(255,255,255,.20);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,.20);
+}
+.entry-actions button, .ai-account, #local-welcome, .ai-account::backdrop {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
