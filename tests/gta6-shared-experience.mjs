@@ -20,23 +20,20 @@ for(const engineName of [process.env.TEST_BROWSER||'chromium']){
     const initial=await page.evaluate(()=>({
      menuOpen:document.querySelector('#menuBtn')?.getAttribute('aria-expanded'),
      menuHidden:document.querySelector('#navLinks')?.hidden,
-     script:[...document.scripts].some(s=>s.src.includes('site.js?v=continue-visited-20261031')),
-     titleLines:document.querySelectorAll('#gta6-heading .gta6-type-line[data-type="title"]').length,
+     script:[...document.scripts].some(s=>s.src.includes('/assets/precision/site.js')),
+     titleLines:document.querySelectorAll('#gta6-heading .gta6-type-line').length,
      buttons:document.querySelectorAll('.gta6-actions a[data-type="button"]').length,
      width:document.documentElement.clientWidth,
      scroll:document.documentElement.scrollWidth
     }));
     assert.equal(initial.menuOpen,'false','hamburger must start closed');
     assert.equal(initial.menuHidden,true,'dropdown is always open');
-    assert.ok(initial.script,'missing shared typewriter');
-    assert.equal(initial.titleLines,3,'hero headline must type three lines');
-    assert.ok(initial.buttons>=2,'GTA VI actions not registered for typing');
+    assert.ok(initial.script,'missing shared content controller');
+    assert.equal(initial.titleLines,3,'hero headline retains three readable lines');
+    assert.ok(await page.locator('.gta6-actions a').count()>=2,'GTA VI actions missing');
     assert.ok(initial.scroll<=initial.width+2,'horizontal overflow');
     const menu=page.locator('#menuBtn');
-    if(!reduced){
-     await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navMotion==='complete',null,{timeout:25000});
-     await page.waitForFunction(()=>[...document.querySelectorAll('#gta6-heading .gta6-type-line')].some(e=>Number(e.dataset.typeRuns)>0),null,{timeout:15000});
-    }
+    assert.equal(await page.locator('.type-ink').count(),0,'Editorial copy must not be typed');
     await menu.click();
     assert.equal(await menu.getAttribute('aria-expanded'),'true','hamburger cannot open');
     assert.ok(await page.locator('#navLinks').isVisible(),'open dropdown not visible');

@@ -61,11 +61,11 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
       await page.locator('#searchButton').click();
       assert.equal(await page.locator('#siteSearch').isVisible(),true);
       await page.keyboard.press('Escape');assert.equal(await page.locator('#siteSearch').isVisible(),false);
-      await page.waitForFunction(()=>document.querySelector('.flow-stage')?.dataset.renderer==='vector');
+      assert.equal(await page.locator('.product-eclipse').count(),1);
       assert.equal(await page.locator('.flow-stage svg text').filter({hasText:'undefined'}).count(),0);
-      assert.equal(await page.locator('.flow-stage canvas').isVisible(),false);
+      assert.equal(await page.locator('.product-eclipse canvas').count(),0);
       for(const step of ['Identify','Inspect','Analyze','Decide'])assert.ok((await page.locator('#technology h3').allTextContents()).some(t=>t.trim()===step));
-      assert.ok((await page.locator('.metric-clarification').innerText()).includes('not verified'));
+      assert.equal(await page.locator('.metrics').count(),0,'Illustrative usage counters retired');
     });
     await check(`${name} ${width}px URL inputs and local SHA-256`,async()=>{
       for(const path of ['/tools.html','/scan-url.html']){
