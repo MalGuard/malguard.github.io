@@ -13,9 +13,9 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
  const refresh=()=>{button.textContent=profile?.username||text('Sign in','ورود');button.ariaLabel=profile?text('Your MalGuard account','حساب مالگارد شما'):text('Sign in or create account','ورود یا ساخت حساب');};
  const discardSignup=()=>{clearTimeout(expiryTimer);if(pendingSignup)pendingSignup.password='';pendingSignup=undefined;};
  const close=()=>{controller?.abort();controller=undefined;clearInterval(resendTimer);discardSignup();if(dialog){const old=dialog;dialog=undefined;old.close();old.remove();}button.focus();};
- async function request(endpoint,body){
+ async function request(endpoint,body,timeoutMs=20000){
   if(!['status','start','verify','password','session','availability'].includes(endpoint))throw Error('invalid_endpoint');
-  const response=await fetch(`${accountApiBase()}/api/game-scam-guard/auth/${endpoint}`,{method:body?'POST':'GET',credentials:'omit',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined,signal:controller?AbortSignal.any([controller.signal,AbortSignal.timeout(20000)]):AbortSignal.timeout(20000)});
+  const response=await fetch(`${accountApiBase()}/api/game-scam-guard/auth/${endpoint}`,{method:body?'POST':'GET',credentials:'omit',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined,signal:controller?AbortSignal.any([controller.signal,AbortSignal.timeout(timeoutMs)]):AbortSignal.timeout(timeoutMs)});
   const raw=await response.text();if(raw.length>65536)throw Error('invalid_response');let data;try{data=JSON.parse(raw);}catch{throw Error('invalid_response');}
   if(!response.ok)throw Object.assign(Error('account_failed'),{status:response.status});return data;
  }
@@ -38,7 +38,9 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
  }
  async function restore(){
   const token=savedSession();if(!token)return false;
-  try{const p=await request('session',{sessionToken:token});if(typeof p.email!=='string'||p.email.length>254||typeof p.username!=='string'||p.username.length>80||!Number.isFinite(p.expiresAt))throw Error('invalid_profile');if(p.expiresAt<=Date.now())throw Error('expired_session');
+  // Keep the signed-out gate responsive even when the auth host is slow.
+  // A temporary timeout keeps the saved session for an explicit retry.
+  try{const p=await request('session',{sessionToken:token},6500);if(typeof p.email!=='string'||p.email.length>254||typeof p.username!=='string'||p.username.length>80||!Number.isFinite(p.expiresAt))throw Error('invalid_profile');if(p.expiresAt<=Date.now())throw Error('expired_session');
    sessionToken=typeof p.sessionToken==='string'?p.sessionToken:token;saveSession(sessionToken);profile={email:p.email,username:p.username};refresh();onChange({...profile});return true;
   }catch(error){
    // A temporary outage must not erase an otherwise valid session. The server
