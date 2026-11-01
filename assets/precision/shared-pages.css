@@ -479,3 +479,22 @@ body.mg-precision-shared :is(.gta-vi-badge){
 @media(prefers-reduced-motion:reduce){
  body.mg-precision-shared main :is(.card,.product-entry,.tool,.platform-card,.release-card,.feature-card){transition:none!important}
 }
+
+
+/* Neutralize every shared navigation state (closed dropdown is measured
+ * independently in the responsive regression; open menu stays fully opaque). */
+body.mg-unified.mg-precision-shared #navbar #navLinks,
+body.mg-unified.mg-precision-shared #navbar #navLinks:not([hidden]){
+ background:#0e0f14f7!important;background-color:#0e0f14f7!important;
+ background-image:none!important;border-color:#ffffff31!important;
+ -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+}
+body.mg-unified.mg-precision-shared #navbar #navLinks :is(a,button){
+ color:#d6d6de!important;
+}
+body.mg-unified.mg-precision-shared #navbar #navLinks .mg-menu-label{
+ color:#b8b8c2!important;
+}
+body.mg-unified.mg-precision-shared #navbar #navLinks :is(a,button):is(:hover,:focus-visible,[aria-current="page"]){
+ background:#24262e!important;color:#fff!important;
+}
