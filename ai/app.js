@@ -608,27 +608,47 @@ $('desktop-cancel-download').onclick=()=>{desktopDownloadController?.abort(new D
 translate();
 renderStatus();
 void bootAssistant();
-async function bootAssistant(){
- const entry=resolveAccountEntry();
- const device=checkLocalDevice();
- const serviceLoad=loadCloudStatus();
- await Promise.all([entry,device,serviceLoad,loadCFModels()]);
- await loadAccountUsage();
- renderStatus();
+function bootAssistant(){
+ // Render the shell immediately. Independent network/device checks must not
+ // gate account controls, the model selector or each other's failure path.
+ void resolveAccountEntry().catch(()=>{ $('entry-retry').hidden=!account.hasSavedSession(); });
+ void checkLocalDevice().catch(()=>{localCapabilityReason='adapter_unavailable';renderStatus();});
+ void loadCFModels().then(()=>{if(account.getToken())void loadAccountUsage();}).catch(()=>{
+  cfModels=unavailableCFModels();cfQuotaEnabled=false;renderStatus();
+ });
+ // Legacy status is only needed for inspection tools. Let the Cloudflare
+ // model catalog load without competing with a potentially slow Vercel API.
+ const legacy=()=>{void loadCloudStatus().catch(()=>{service=undefined;serviceLoading=false;renderStatus();});};
+ if(typeof requestIdleCallback==='function')requestIdleCallback(legacy,{timeout:1200});
+ else setTimeout(legacy,200);
 }
 async function loadAccountUsage(){
  if(!cfQuotaEnabled||!account.getToken())return;
  const token=account.getToken();
  try{const usage=await fetchCFUsage({sessionToken:token,signal:AbortSignal.timeout(6000)});if(account.getToken()===token){accountUsage=usage;renderStatus();}}catch{ /* Optional quota status never blocks the assistant. */ }
 }
-async function loadCFModels(){
- try{cfModels=await fetchCFModels({signal:AbortSignal.timeout(7500)});cfQuotaEnabled=cfModels.accountQuotaEnabled===true;}catch{cfModels=unavailableCFModels();cfQuotaEnabled=false;}
+async function loadCFModels(retryOnFailure=true){
+ try{
+  cfModels=await fetchCFModels({signal:AbortSignal.timeout(6500)});
+  cfQuotaEnabled=cfModels.accountQuotaEnabled===true;
+ }catch{
+  cfModels=unavailableCFModels();cfQuotaEnabled=false;
+  // One bounded retry avoids leaving all cloud models disabled after a
+  // transient first connection failure; no infinite polling.
+  if(retryOnFailure)setTimeout(()=>{void loadCFModels(false);},3000);
+ }
  if(!modelChosen&&cfModels.length&&!cfModels.some(m=>m.id===$('model').value&&m.available))$('model').value=activeMode==='build'?CF_DEFAULTS.code:CF_DEFAULTS.chat;
  renderStatus();
 }
 async function loadCloudStatus(){
  serviceLoading=true;renderStatus();
- try{for(let attempt=0;attempt<2;attempt++){try{const r=await fetch(apiUrl('status'),{credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error('unavailable');const next=await r.json();if(!next||typeof next!=='object'||!next.model)throw new Error('invalid_status');service=next;return;}catch{}}service=undefined;}
+ try{
+  const r=await fetch(apiUrl('status'),{credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(5000)});
+  if(!r.ok)throw new Error('unavailable');
+  const next=await r.json();
+  if(!next||typeof next!=='object'||!next.model)throw new Error('invalid_status');
+  service=next;
+ }catch{service=undefined;}
  finally{serviceLoading=false;renderStatus();}
 }
 $('retry-cloud').onclick=()=>{if(!serviceLoading)void loadCloudStatus();};
