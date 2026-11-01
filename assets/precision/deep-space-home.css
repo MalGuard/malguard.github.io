@@ -1,125 +1,71 @@
-/* MalGuard Obsidian / Static Deep Space.
- * Homepage only. Zero scroll handlers, parallax, transforms, animations,
- * dynamic blur, or compositing hints. The star field extends to the footer.
- * All imagery is served locally and the existing product-card safeguards
- * below remain intact.
- */
+/* MalGuard: static deep-space field. No parallax, blur, animation or giant backdrop image.
+   One lightweight local star SVG supplies texture even on long pages. */
 body.precision-home {
-  background-color: #050507;
+  background-color: #03050a;
   background-image:
-    radial-gradient(ellipse 53% 15% at 72% 8%, rgba(191, 202, 225, .13), transparent 85%),
-    radial-gradient(ellipse 36% 19% at 19% 33%, rgba(103, 120, 156, .10), transparent 88%),
-    radial-gradient(ellipse 51% 24% at 79% 74%, rgba(115, 129, 165, .10), transparent 89%),
-    radial-gradient(ellipse 75% 48% at 50% 48%, rgba(3, 5, 11, .03) 25%, rgba(2, 3, 8, .47) 100%),
+    radial-gradient(ellipse 60% 20% at 67% 11%, rgba(91, 111, 164, .20), transparent 84%),
+    radial-gradient(ellipse 45% 31% at 12% 62%, rgba(53, 76, 125, .15), transparent 89%),
+    radial-gradient(ellipse 78% 46% at 53% 66%, rgba(26, 40, 75, .10), transparent 93%),
     url('/assets/precision/stars.svg?v=20261028-4k'),
-    linear-gradient(180deg, rgba(5, 5, 7, .10), rgba(5, 5, 7, .38) 43%, #050507 100%),
-    url('/assets/precision/obsidian-space.webp?v=20261028-4k');
-  background-size:
-    100% 100%,
-    100% 100%,
-    100% 100%,
-    100% 100%,
-    max(1280px, 100%) auto,
-    100% 100%,
-    max(1280px, 100%) auto;
-  background-position:
-    center, center, center, center, center top, center, center top;
-  background-repeat:
-    no-repeat, no-repeat, no-repeat, no-repeat, repeat-y, no-repeat, no-repeat;
+    linear-gradient(180deg, #040711 0%, #04050b 48%, #020309 100%);
+  background-size: 100% 100%, 100% 100%, 100% 100%, max(1280px, 100%) auto, 100% 100%;
+  background-position: center, center, center, center top, center;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat-y, no-repeat;
   background-attachment: scroll;
 }
-
-/* A still, viewport-sized cosmic scene. Nothing animates or responds to
- * scroll; the content simply passes in front of it.
- * Fixed-position atmosphere avoids any enormous full-document painting layer. */
 body.precision-home > .particle-atmosphere {
   position: fixed;
   inset: 0;
-  height: 100vh;
-  height: 100dvh;
   width: 100%;
-  overflow: hidden;
+  height: 100dvh;
   pointer-events: none;
   z-index: 0;
   opacity: 1;
   background:
-    radial-gradient(ellipse 61% 34% at 73% 22%, rgba(161, 179, 211, .14), transparent 88%),
-    radial-gradient(ellipse 54% 36% at 19% 79%, rgba(105, 124, 160, .11), transparent 90%),
-    radial-gradient(ellipse 77% 68% at 50% 48%, transparent 29%, rgba(2, 3, 7, .49) 100%);
+    radial-gradient(ellipse 36% 24% at 77% 19%, rgba(153, 171, 220, .095), transparent 92%),
+    radial-gradient(ellipse 32% 32% at 18% 78%, rgba(76, 102, 166, .065), transparent 95%);
 }
+body.precision-home > .particle-atmosphere::before,
+body.precision-home > .particle-atmosphere::after { content: none; }
 
-/* Far field: thousands of tiny points, fixed forever; no active renderer. */
-body.precision-home > .particle-atmosphere::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: .55;
-  background:
-    linear-gradient(114deg, transparent 19%, rgba(207, 217, 237, .055) 51%, transparent 83%),
-    url('/assets/precision/stars.svg?v=20261028-4k') center / 1540px auto repeat;
+/* Product artwork is content, not an animation. Never hide it while
+   a sequential text/reveal queue runs, or when JavaScript is delayed. */
+body.precision-home #products .product,
+.type-system body.precision-home #products .product[data-reveal="card"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+  animation: none !important;
 }
-
-/* Sparse foreground highlights give near / far depth without motion. */
-body.precision-home > .particle-atmosphere::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: .81;
-  background-image:
-    radial-gradient(circle at 11% 16%, rgba(255,255,255,.92) 0 1.3px, transparent 2.7px),
-    radial-gradient(circle at 37% 29%, rgba(237,243,255,.75) 0 1px, transparent 2px),
-    radial-gradient(circle at 84% 21%, rgba(255,255,255,.92) 0 1.4px, transparent 3px),
-    radial-gradient(circle at 63% 68%, rgba(230,237,253,.76) 0 1.05px, transparent 2.3px),
-    radial-gradient(circle at 20% 81%, rgba(253,253,255,.83) 0 1.5px, transparent 3px),
-    radial-gradient(circle at 92% 77%, rgba(238,245,255,.7) 0 1.1px, transparent 2.3px);
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-}
-
-/* Mobile devices: quiet, readable monochrome, no scroll-induced workload. */
-@media (max-width: 760px) {
-  body.precision-home {
-    background-size:
-      100% 100%, 100% 100%, 100% 100%, 100% 100%,
-      1150px auto, 100% 100%, 1150px auto;
-    background-position:
-      center, center, center, center, center top, center, 52% top;
-  }
-  body.precision-home > .particle-atmosphere {
-    background:
-      radial-gradient(ellipse 64% 39% at 76% 23%, rgba(156, 175, 208, .10), transparent 88%),
-      radial-gradient(ellipse 67% 48% at 18% 81%, rgba(95, 113, 153, .075), transparent 91%),
-      radial-gradient(ellipse 86% 72% at 50% 50%, transparent 26%, rgba(2, 3, 7, .48) 100%);
-  }
-  body.precision-home > .particle-atmosphere::before { opacity: .44; }
-  body.precision-home > .particle-atmosphere::after { opacity: .63; }
-}
-
-/* Product art visibility regression guard.
-   A nested visual starts as pending while serial typing runs. As soon as
-   its parent card is activated, make its artwork visible; otherwise long
-   queues can show featureless cards even though the image loaded.
-   Keep copy and CTAs above the artwork without relying on negative z-index
-   (which is brittle with animated/composited stacking contexts on iOS). */
-body.precision-home #products .product > .product-art {
+body.precision-home #products .product > .product-art,
+.type-system body.precision-home #products .product > .product-art[data-reveal-state="pending"] {
   z-index: 0;
+  opacity: 1 !important;
+  visibility: visible !important;
+  animation: none !important;
+  filter: none !important;
 }
 body.precision-home #products .product > :not(.product-art) {
   position: relative;
   z-index: 1;
 }
-/* Keep images ready but hidden until their own fast turn; title goes first.
-   No half-second blurred fade or offscreen GPU layer animation. */
-.type-system body.precision-home #products .product > .product-art[data-reveal-state="pending"] {
-  opacity: 0;
-  visibility: hidden;
-}
-body.precision-home #products .product > .product-art:is([data-reveal-state="active"],[data-reveal-state="complete"],[data-reveal-state="paused"]) {
-  opacity: 1;
-  visibility: visible;
-  animation: none !important;
+body.precision-home #products .product-photo {
+  display: block;
+  opacity: 1 !important;
+  visibility: visible !important;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   filter: none !important;
 }
-body.precision-home #products .product-photo {
-  opacity: 1;
+@media (max-width: 760px) {
+  body.precision-home {
+    background-size: 100% 100%, 100% 100%, 100% 100%, 1080px auto, 100% 100%;
+    background-position: center, center, center, 50% top, center;
+  }
+  body.precision-home > .particle-atmosphere { opacity: .78; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.precision-home #products .product,
+  body.precision-home #products .product-art { animation: none !important; }
 }
