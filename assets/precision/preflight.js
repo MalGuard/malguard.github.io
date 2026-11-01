@@ -1,5 +1,3 @@
-/* Hide only during initialization; content returns if the motion controller fails. */
-if('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches){
- document.documentElement.classList.add('type-system');
- setTimeout(()=>{if(!document.documentElement.dataset.precisionTypeReady)document.documentElement.classList.remove('type-system');},4000);
-}
+/* All public text remains visible from the first HTML paint.
+   The retired typewriter must never hide copy during initialization. */
+document.documentElement.classList.remove('type-system');
