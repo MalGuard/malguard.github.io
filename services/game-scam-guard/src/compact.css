@@ -5,3 +5,51 @@
 @media(prefers-reduced-motion:reduce){.g-app *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 .g-brand-logo{display:block;width:38px;height:38px;border-radius:9px;flex-shrink:0;object-fit:contain}.g-dialog-logo{display:block;border-radius:12px}.g-url-sources{padding-top:10px}.g-url-sources>small{color:#a0b3cc}.g-url-sources>p{margin:5px 0;color:#c7d8ed}
+
+
+/* 2026-11-01 — Game Scam Guard: shared monochrome deep-space identity.
+ * CSS-only atmosphere: works when this Vite app is hosted separately.
+ * Result severity remains colored to preserve the meaning of risk signals. */
+:root{
+ --ink:#f1f1f5;--muted:#b2b3bf;--line:#ffffff29;
+ --sidebar:#101116;--green:#d8d9df;--lime:#e3e4e9;
+ color:#f1f1f5;background:#050507;
+}
+html,body{background-color:#050507;min-height:100%}
+body{
+ background-image:
+  radial-gradient(ellipse 54% 29% at 81% 4%,rgba(213,216,227,.12),transparent 88%),
+  radial-gradient(ellipse 57% 27% at 7% 66%,rgba(132,141,158,.10),transparent 90%),
+  radial-gradient(circle at 8% 12%,rgba(255,255,255,.67) 0 1px,transparent 1.5px),
+  radial-gradient(circle at 69% 34%,rgba(255,255,255,.53) 0 1px,transparent 1.5px),
+  radial-gradient(circle at 84% 78%,rgba(255,255,255,.47) 0 1px,transparent 1.5px),
+  linear-gradient(180deg,#050507,#090a0f 55%,#050507);
+ background-size:100% 960px,100% 100%,440px 490px,610px 700px,760px 620px,100% 100%;
+ background-repeat:no-repeat,no-repeat,repeat,repeat,repeat,no-repeat;
+ background-attachment:scroll;
+}
+.app-shell,.main-shell,.g-app{background:transparent;color:#f1f1f5}
+.sidebar,.topbar{background:#101116;color:#e6e6ec;border-color:#ffffff26}
+.breadcrumb,.breadcrumb b,.topbar .profile-name{color:#d3d3db}
+.g-nav,.g-app .scan-tabs{background:#111218;border-color:#ffffff28}
+.g-nav button.selected,.g-app .scan-tabs button.selected{background:#292b34;color:#fff}
+.g-scan-card,.g-panel,.g-app .report-card,
+.g-test-groups>span,.g-app .g-modal{
+ background:linear-gradient(155deg,#1b1d25,#0d0e14);
+ border-color:#ffffff28;color:#ededf3;
+ box-shadow:inset 0 1px #ffffff12;
+}
+.g-url-field{background:#0c0d12;border-color:#ffffff38}
+.g-url-field>input{color:#fff}
+.g-app .g-brand,.g-app :is(.g-intro h1,.g-panel h1,.g-section-title h2){color:#f4f4f6}
+.g-brand>svg,.g-eyebrow{color:#dedee5}
+.g-nav button{color:#c7c7d0}
+.g-app .g-footer{color:#aaabb7}
+.account-modal{background:#181a21;color:#f1f1f5;border:1px solid #ffffff30}
+.account-modal input{background:#0d0e13;border-color:#ffffff39;color:#f5f5f7}
+@media (hover:hover) and (pointer:fine){
+ .g-scan-card:hover,.g-panel:hover{border-color:#ffffff40}
+}
+@media(prefers-reduced-motion:reduce){
+ .g-app :is(.g-panel,.g-scan-card,.report-card){transition:none}
+}
