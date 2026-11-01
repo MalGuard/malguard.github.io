@@ -1,0 +1,46 @@
+/* Static depth first; motion enhances artwork without delaying content. */
+body.precision-home,body.mg-precision-shared.mg-unified{background-color:#05070c!important;background-image:radial-gradient(ellipse 65% 800px at 90% 0,rgba(45,65,104,.24),transparent 75%),radial-gradient(ellipse 60% 650px at 0 55%,rgba(42,62,91,.15),transparent 80%),url('/assets/precision/stars.svg')!important;background-size:auto,auto,1700px auto!important;background-attachment:scroll!important}
+body.precision-home>.particle-atmosphere{background:radial-gradient(ellipse at 80% 15%,#24355020,transparent 60%)!important;opacity:.5}
+body.precision-home>.particle-atmosphere:before{opacity:.15}
+body.precision-home>.particle-atmosphere:after{opacity:.45}
+body.precision-home .hero{min-height:650px;gap:40px;align-items:center}
+body.precision-home .hero h1{letter-spacing:-.065em;font-family:Arial,system-ui,sans-serif}
+body.precision-home .hero-statement{font-family:Arial,system-ui,sans-serif;font-weight:500;letter-spacing:-.04em}
+body.precision-home .hero-description{font:15px/1.8 Arial,system-ui,sans-serif;max-width:43ch;color:#b7bfcb}
+.product-eclipse{position:relative;isolation:isolate;height:420px;width:100%;margin:0;overflow:hidden;border-radius:50%;background:radial-gradient(ellipse at 50% 66%,#7890b530,transparent 60%)}
+.eclipse-world{position:absolute;width:110%;aspect-ratio:1;left:-5%;top:36%;border-radius:50%;background:radial-gradient(ellipse at 50% 0,#222b3b 0,#080c14 15%,#020308 53%);box-shadow:0 -2px 2px #e4ecff,0 -12px 40px #a2bce534,0 -35px 90px #5676a52a;animation:eclipse-arrival 1.7s cubic-bezier(.16,1,.3,1) both}
+.eclipse-orbit{position:absolute;width:86%;height:70%;left:7%;top:13%;border:1px solid #8aa1c329;border-radius:50%;transform:rotate(-28deg)}
+.product-eclipse figcaption{position:absolute;bottom:34px;left:0;right:0;text-align:center;font:10px/1.6 Arial,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#95a3b8;z-index:1}
+body.precision-home .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+body.precision-home #products .product,body.mg-precision-shared main .mg-home-product-grid .mg-home-product{padding:0 28px 24px!important;min-height:0;border-radius:20px!important;background:#0b1019!important;border-color:#ffffff22!important;box-shadow:0 20px 60px #0003!important}
+body.precision-home #products .product>.product-art,body.mg-precision-shared main .mg-home-product-art{position:relative!important;inset:auto;width:calc(100% + 56px);height:auto;aspect-ratio:16/9;margin:0 -28px 20px;z-index:0!important;opacity:1!important;visibility:visible!important;overflow:hidden;background:#101725}
+body.precision-home #products .product-art:after,body.mg-precision-shared main .mg-home-product-art:after{background:linear-gradient(0deg,#0b1019,transparent 40%);pointer-events:none}
+body.precision-home #products .product-photo,body.mg-precision-shared main .mg-home-product-art img{width:100%;height:100%;object-fit:cover;object-position:center;opacity:1!important;display:block}
+body.precision-home #products .product-top,body.mg-precision-shared main .mg-home-product-top{min-height:24px;margin:0 0 16px}
+body.precision-home #products .product .status{margin:0;color:#9caec4;font-size:9px}
+body.precision-home #products .product h3{font:500 30px/1.2 Arial,sans-serif;letter-spacing:-.04em;margin:12px 0}
+body.precision-home #products .product p{font:14px/1.8 Arial,sans-serif;min-height:76px;color:#aebaca}
+body.precision-home #products .product .text-link{font:500 13px Arial,sans-serif;margin-top:18px;border-top:1px solid #ffffff15;padding-top:18px}
+body.precision-home .gta6-home-notice{border-radius:16px;background:#0c121dcc;border-color:#ffffff1f}
+body.mg-precision-shared main .mg-home-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+body.precision-home main,body.precision-home .site-footer{position:relative;z-index:1}
+.product-agent .status{color:#b7b0e3!important}
+.product-art:before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+.product-gta:hover .product-photo{transform:scale(1.035);transition:transform .7s ease-out}
+.product-game:hover .product-art:before{background:linear-gradient(100deg,transparent 30%,#a2f2d023 50%,transparent 70%);opacity:1;animation:link-sweep .9s ease-out both}
+.product-ai:hover .product-photo{transform:translateY(-4px);transition:transform .5s ease-out}
+.product-agent:hover .product-art:before{border:1px solid #c4baff70;border-radius:18px;inset:15%;opacity:1;animation:guard-lock .5s ease-out both}
+}
+@keyframes eclipse-arrival{from{transform:translateY(85px) scale(.94)}to{transform:none}}
+@keyframes link-sweep{from{transform:translateX(-90%)}to{transform:translateX(90%)}}
+@keyframes guard-lock{from{transform:scale(1.12);opacity:0}to{transform:scale(1);opacity:1}}
+@media(max-width:760px){body.precision-home .hero{min-height:0;gap:0}.product-eclipse{height:280px;max-width:470px;justify-self:center}.product-eclipse figcaption{bottom:20px;font-size:8px}body.precision-home .product-grid,body.mg-precision-shared main .mg-home-product-grid{grid-template-columns:1fr}body.precision-home #products .product p{min-height:0}body.precision-home #products .product h3{font-size:27px}}
+@media(prefers-reduced-motion:reduce){.eclipse-world,.product-art:before{animation:none!important}.product-photo{transition:none!important;transform:none!important}}
+/* Readable editorial hierarchy, shared with the new product artwork. */
+body.precision-home .hero h1{font-family:Arial,system-ui,sans-serif!important;font-weight:600!important}
+body.precision-home .hero-statement{font-family:Arial,system-ui,sans-serif!important}
+body.precision-home .hero-description{font:15px/1.8 Arial,system-ui,sans-serif!important}
+body.precision-home #products .product h3{font:500 30px/1.2 Arial,system-ui,sans-serif!important}
+body.precision-home #products .product p{font:14px/1.8 Arial,system-ui,sans-serif!important}
+body.precision-home .section-intro h2{font-family:Arial,system-ui,sans-serif!important;font-weight:500!important}
