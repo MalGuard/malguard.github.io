@@ -60,10 +60,19 @@ for(const engine of engines){
    await page.locator('#siteAdminPassword').focus();let reached=false;for(let i=0;i<10;i++){await page.keyboard.press('Shift+Tab');if(await page.locator('.secure-start').evaluate(el=>el===document.activeElement)){reached=true;break;}}assert(reached,'Start must be reachable through the administrator focus loop');await page.keyboard.press('Enter');
    await page.locator('#siteAdminPassword').fill('synthetic-password');assert.match(await page.locator('#passwordSignal').textContent(),/^•+$/);
    assert.equal(await page.locator('#siteAdminPassword').getAttribute('type'),'password');
-   await page.locator('#siteAdminPasswordSubmit').click();await page.waitForFunction(()=>document.body.dataset.secureState==='checking');
+   // The mobile replay button can start a smooth scroll. On WebKit a click
+   // dispatched while the form is still moving may focus the submit button
+   // without activating it. Wait for a stable hit target and verify that the
+   // native submit event actually fired; never silently retry credentials.
+   await page.evaluate(()=>{window.__adminPasswordSubmits=0;document.getElementById('siteAdminPasswordForm').addEventListener('submit',()=>window.__adminPasswordSubmits++,true);});
+   await clickSettled(page,'#siteAdminPasswordSubmit');
+   assert.equal(await page.evaluate(()=>window.__adminPasswordSubmits),1,'First password pointer click must submit the native form');
+   await page.waitForFunction(()=>document.body.dataset.secureState==='checking');
    assert.equal(await page.locator('.secure-panel').getAttribute('aria-busy'),'true');assert.equal(auth.length,1);releaseAuth();
    await page.waitForFunction(()=>document.body.dataset.secureState==='error');assert.equal(await page.locator('#siteAdminIdentityStep').isVisible(),false);
-   allow=true;await page.locator('#siteAdminPasswordSubmit').click();await page.waitForFunction(()=>document.body.dataset.secureState==='identity');assert(await page.locator('#siteAdminIdentityStep').isVisible());assert.equal(await page.locator('#passwordSignal').textContent(),'');
+   allow=true;await clickSettled(page,'#siteAdminPasswordSubmit');
+   assert.equal(await page.evaluate(()=>window.__adminPasswordSubmits),2,'Second password pointer click must submit the native form');
+   await page.waitForFunction(()=>document.body.dataset.secureState==='identity');assert(await page.locator('#siteAdminIdentityStep').isVisible());assert.equal(await page.locator('#passwordSignal').textContent(),'');
    // Observe native submit delivery as well as the resulting error. This catches
    // a lost pointer activation even when an earlier error remains on the page.
    await page.evaluate(()=>{window.__adminIdentitySubmits=0;document.getElementById('siteAdminIdentityForm').addEventListener('submit',()=>window.__adminIdentitySubmits++,true);});
