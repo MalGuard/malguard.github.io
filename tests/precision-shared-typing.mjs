@@ -1,77 +1,40 @@
-// Internal pages must use the same typing sequence and coding font as home.
-// Test static copy only; never submit forms or contact external services.
+// All product and editorial pages render original HTML copy immediately.
 import assert from 'node:assert/strict';
-import {maximumSimultaneousJobsInRegion} from './precision-region-assertions.mjs';
 import {chromium,webkit,launchOptions} from './browser-runtime.mjs';
 const base='https://127.0.0.1:8443';
 const paths=['/products.html','/tools.html','/about.html','/gta-guard.html','/research/repackaged-mod.html'];
-for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chromium','webkit'])){
- const browser=await (engine==='chromium'?chromium:webkit).launch(launchOptions(engine));
+for(const name of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chromium','webkit'])){
+ const browser=await (name==='webkit'?webkit:chromium).launch(launchOptions(name));
  try{
-  for(const path of paths){
-   for(const reduced of [true,false]){
-    const context=await browser.newContext({ignoreHTTPSErrors:true,
-     viewport:{width:reduced?390:1280,height:850},reducedMotion:reduced?'reduce':'no-preference'});
-    await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
-    const page=await context.newPage(),errors=[];
-    page.on('pageerror',err=>errors.push(err.message));
-    const response=await page.goto(base+path,{waitUntil:'domcontentloaded'});
-    assert.equal(response?.status(),200,path+' returned an HTTP error');
-    await page.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true',null,{timeout:12000});
-    await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true',null,{timeout:12000});
-    const status=await page.evaluate(()=>({
-     main:document.querySelectorAll('main [data-type]').length,
-     nav:document.querySelector('#navbar')?.dataset.reveal,
-     brand:document.querySelector('#navbar .mg-brand')?.dataset.type,
-     titleFont:getComputedStyle(document.querySelector('main h1')).fontFamily,
-     navFont:getComputedStyle(document.querySelector('#navbar .mg-brand')).fontFamily,
-     scroll:document.documentElement.scrollWidth,width:document.documentElement.clientWidth,
-     ctas:document.querySelectorAll('main a[data-type="button"]').length,
-     script:[...document.scripts].some(s=>s.src.includes('site.js?v=continue-visited-20261031'))
-    }));
-    // Hamburger menu must not inherit the obsolete teal/green experience theme.
-    const palette=await page.evaluate(()=>{
-     const nav=document.querySelector('#navbar'),menu=document.querySelector('#navLinks');
-     return {
-      nav:getComputedStyle(nav).backgroundColor,
-      dropdown:getComputedStyle(menu).backgroundColor,
-      link:getComputedStyle(menu.querySelector('a')).color,
-      hamburger:getComputedStyle(document.querySelector('#menuBtn')).color,
-      label:getComputedStyle(menu.querySelector('.mg-menu-label')).color
-     };
-    });
-    assert.match(palette.nav,/rgba?\(16,\s*17,\s*22[,)]/,path+' navbar monochrome palette mismatch');
-    assert.equal(palette.dropdown,'rgb(11, 15, 21)',path+' dropdown must remain fully opaque');
-    assert.equal(palette.link,'rgb(214, 214, 222)',path+' links not matching monochrome design');
-    assert.equal(palette.label,'rgb(184, 184, 194)',path+' menu section labels differ');
-    assert.ok(status.script,path+' uses outdated script');
-    assert.ok(status.main>0,path+' has no queued page copy');
-    assert.equal(status.nav,'nav',path+' does not queue header');
-    assert.equal(status.brand,'button',path+' does not type brand');
-    assert.match(status.titleFont,/MGPrecisionMono|JetBrains/,path+' title not in coding font');
-    assert.match(status.navFont,/MGPrecisionMono|JetBrains/,path+' navbar font not in coding font');
-    assert.ok(status.scroll<=status.width+2,path+' horizontal overflow at '+(reduced?390:1280));
-    if(['/products.html','/gta-guard.html'].includes(path))
-     assert.ok(status.ctas>0,path+' does not type action buttons');
-    if(reduced){
-     assert.equal(await page.locator('.type-ink').count(),0,path+' ignores reduce-motion');
-     assert.equal(await page.locator('.type-system').count(),0,path+' hides text with reduce-motion');
-     const nav=page.locator('#menuBtn');
-     await nav.click();
-     assert.equal(await nav.getAttribute('aria-expanded'),'true',path+' menu fails');
-     await page.keyboard.press('Escape');
-     assert.equal(await nav.getAttribute('aria-expanded'),'false',path+' escape fails');
-    }else{
-     await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navMotion==='complete',null,{timeout:25000});
-     await page.waitForFunction(()=>document.querySelector('main [data-type]')?.dataset.typeRuns>0,null,{timeout:15000});
-     assert.ok((await maximumSimultaneousJobsInRegion(page))<=1,path+' same-section jobs overlapped');
-     await page.emulateMedia({reducedMotion:'reduce'});
-     await page.waitForFunction(()=>!document.documentElement.classList.contains('type-system'),null,{timeout:10000});
-    }
-    assert.deepEqual(errors,[],path+' browser exceptions');
-    console.log('PASS shared coding UI',engine,path,reduced?'reduced/mobile':'desktop/typing');
-    await context.close();
-   }
+  for(const path of paths)for(const width of [390,1280]){
+   const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width,height:850},reducedMotion:'no-preference'});
+   await context.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
+   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+   assert.equal((await page.goto(base+path,{waitUntil:'domcontentloaded'})).status(),200);
+   await page.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true');
+   await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true');
+   const snap=await page.evaluate(()=>({
+    mode:document.documentElement.dataset.precisionMotionOrder,
+    typeSystem:document.documentElement.classList.contains('type-system'),
+    synthetic:document.querySelectorAll('.type-ink,.type-cursor,.mg-precision-type-target,[data-type-state=typing]').length,
+    h1:document.querySelector('main h1')?.textContent.trim(),
+    scroll:document.documentElement.scrollWidth,width:document.documentElement.clientWidth,
+    nav:getComputedStyle(document.getElementById('navbar')).backgroundColor,
+    dropdown:getComputedStyle(document.getElementById('navLinks')).backgroundColor
+   }));
+   assert.equal(snap.mode,'instant',path);
+   assert.equal(snap.typeSystem,false,path);
+   assert.equal(snap.synthetic,0,path);
+   assert.ok(snap.h1?.length>4,path+' missing heading');
+   assert.ok(snap.scroll<=snap.width+2,path+' horizontal overflow');
+   assert.match(snap.nav,/rgba?\(16,\s*17,\s*22[,)]/,path+' changed header design');
+   assert.equal(snap.dropdown,'rgb(11, 15, 21)',path+' navigation menu not opaque');
+   const menu=page.locator('#menuBtn');
+   await menu.click();assert.equal(await menu.getAttribute('aria-expanded'),'true',path);
+   await page.keyboard.press('Escape');assert.equal(await menu.getAttribute('aria-expanded'),'false',path);
+   assert.deepEqual(errors,[],path+' JS errors');
+   await context.close();
+   console.log('PASS instant editorial copy',name,path,width);
   }
  }finally{await browser.close();}
 }
