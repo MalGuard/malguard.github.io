@@ -123,3 +123,103 @@ body.precision-home #products .product > .product-art:is([data-reveal-state="act
 body.precision-home #products .product-photo {
   opacity: 1;
 }
+
+
+/* 2026-11-01 — Unified Obsidian Galaxy. Static and compositing-free.
+   Product artwork and routes are deliberately untouched. */
+body.precision-home {
+  background-color:#050507;
+  background-image:
+    radial-gradient(ellipse 40% 24% at 77% 8%,rgba(216,220,230,.14),transparent 88%),
+    radial-gradient(ellipse 64% 21% at 14% 42%,rgba(128,137,154,.10),transparent 92%),
+    radial-gradient(ellipse 50% 22% at 82% 79%,rgba(157,163,179,.10),transparent 92%),
+    linear-gradient(180deg,rgba(3,4,7,.32),rgba(3,4,7,.04) 32%,rgba(3,4,7,.54) 100%),
+    url('/assets/precision/stars.svg?v=20261101-obsidian'),
+    linear-gradient(180deg,#050507,#090b10 44%,#040507 100%);
+  background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,repeat-y,no-repeat;
+  background-position:center top,center,center,center,center top,center;
+  background-size:100% 1100px,100% 100%,100% 100%,100% 100%,min(100%,1400px) auto,100% 100%;
+  background-attachment:scroll;
+}
+body.precision-home > .particle-atmosphere {
+  position:fixed;inset:0;width:100%;height:100vh;height:100dvh;
+  z-index:0;pointer-events:none;overflow:hidden;opacity:1;
+  background:
+    radial-gradient(ellipse 55% 32% at 80% 19%,rgba(203,209,222,.10),transparent 87%),
+    radial-gradient(ellipse 43% 28% at 13% 81%,rgba(141,153,178,.075),transparent 90%);
+}
+body.precision-home > .particle-atmosphere::before {
+  content:"";position:absolute;inset:0;opacity:.50;
+  background:url('/assets/precision/stars.svg?v=20261101-obsidian') center/1250px auto repeat;
+  animation:none;transform:none;
+}
+body.precision-home > .particle-atmosphere::after {
+  content:"";position:absolute;inset:0;opacity:.78;
+  background-image:
+    radial-gradient(circle at 10% 24%,rgba(255,255,255,.84) 0 1px,transparent 2px),
+    radial-gradient(circle at 69% 13%,rgba(246,247,255,.75) 0 1px,transparent 2px),
+    radial-gradient(circle at 88% 68%,rgba(255,255,255,.64) 0 1.1px,transparent 2px),
+    radial-gradient(circle at 34% 80%,rgba(240,242,250,.75) 0 1px,transparent 2px);
+  background-repeat:no-repeat;animation:none;transform:none;
+}
+body.precision-home .hero{min-height:560px;gap:clamp(26px,4vw,72px)}
+body.precision-home .hero-copy{max-width:690px}
+body.precision-home .hero .eyebrow{color:#c4c5cb;letter-spacing:.15em}
+body.precision-home .hero h1{color:#fafafb;letter-spacing:-.077em;text-shadow:0 9px 65px #0008}
+body.precision-home .hero-description{color:#bec0c8}
+body.precision-home .button.primary{border-radius:11px;background:#f4f4f6;color:#101115;transition:background-color .12s ease,border-color .12s ease}
+body.precision-home .button.primary:hover{background:#fff}
+body.precision-home .button.quiet{border-radius:11px;border:1px solid #ffffff19;background:#ffffff07;color:#e2e2e6}
+body.precision-home .button.quiet:hover{background:#ffffff10;border-color:#ffffff35}
+body.precision-home .security-art{perspective:none}
+body.precision-home .flow-stage{
+  border:1px solid rgba(245,245,249,.16);border-radius:23px;overflow:hidden;
+  box-shadow:inset 0 1px rgba(255,255,255,.09),0 26px 90px rgba(0,0,0,.47);
+  background:linear-gradient(153deg,rgba(29,31,39,.70),rgba(6,7,11,.91));
+}
+body.precision-home .telemetry-chart{background:none;border-radius:0}
+body.precision-home .hud-scan{display:none}
+body.precision-home .motion-active .hud-pulse{animation:none}
+body.precision-home .security-art figcaption{color:#a5a8b2}
+body.precision-home .demo-presets button{border-radius:999px;border-color:#ffffff25;color:#c9cbd3;background:#ffffff05;transition:background-color .12s,border-color .12s}
+body.precision-home .demo-presets button:is(:hover,[aria-pressed="true"]){border-color:#ffffff75;background:#ffffff15;color:#fff}
+body.precision-home .motion-toggle{display:none}
+body.precision-home .product-grid{gap:clamp(12px,1.5vw,22px)}
+body.precision-home .product{
+  border:1px solid rgba(240,240,248,.18);border-radius:20px;
+  background:#0d0f14;box-shadow:inset 0 1px rgba(255,255,255,.10),0 22px 65px #0006;
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+@media(hover:hover) and (pointer:fine){
+ body.precision-home .product:hover{
+  border-color:rgba(255,255,255,.42);
+  box-shadow:inset 0 1px rgba(255,255,255,.16),0 24px 62px rgba(0,0,0,.64),0 0 34px rgba(213,215,226,.055);
+ }
+}
+body.precision-home .product-art::after{
+  background:linear-gradient(180deg,rgba(4,5,9,.14) 0%,rgba(5,6,11,.28) 26%,rgba(5,6,10,.89) 69%,#08090c 100%);
+}
+body.precision-home .product-photo{filter:none}
+body.precision-home .product .status{color:#e2e2e8}
+body.precision-home .gta-vi-badge{background:#ffffff10;color:#d7d9e1;border-color:#ffffff39}
+body.precision-home .technology,
+body.precision-home .section{border-color:#ffffff22}
+body.precision-home .principles li+li{border-color:#ffffff1a}
+body.precision-home .mg-evidence-strip{
+  margin-block:18px 12px;padding-block:20px 26px;
+  border-block:1px solid #ffffff24;
+}
+body.precision-home .mg-evidence-strip .activity-caption{color:#d1d2da;letter-spacing:.12em}
+body.precision-home .mg-evidence-message{max-width:69ch;color:#d1d2da;font:12px/1.9 var(--mono);margin:0}
+body.precision-home .mg-evidence-strip .metric-clarification{margin:10px 0 0}
+@media(max-width:760px){
+ body.precision-home .hero{min-height:0;gap:22px}
+ body.precision-home .flow-stage{border-radius:17px}
+ body.precision-home .product{border-radius:17px;box-shadow:0 12px 40px #0005}
+ body.precision-home > .particle-atmosphere::before{opacity:.37}
+}
+@media(prefers-reduced-motion:reduce){
+ body.precision-home .product,
+ body.precision-home .button,
+ body.precision-home .demo-presets button{transition:none}
+}
