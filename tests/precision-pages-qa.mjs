@@ -1,4 +1,4 @@
-// Precision design system acceptance: page parity, bilingual docs and scroll typing.
+// Precision design system acceptance: page parity, bilingual docs and instant readable content.
 // Browser fixture is local HTTPS; no request is sent to an external scanner endpoint.
 import assert from 'node:assert/strict';
 import {maximumSimultaneousJobsInRegion} from './precision-region-assertions.mjs';
@@ -43,15 +43,17 @@ try {
  const page=await c.newPage();
  for(const route of ['/products.html','/docs.html','/research/gta-mod-security-fa.html']){
   await page.goto(base+route);
-  await page.waitForFunction(()=>document.querySelectorAll('main [data-type]').length>1,null,{timeout:6000});
-  const found=await page.evaluate(()=>{const node=[...document.querySelectorAll('main [data-type]')].find(n=>n.getBoundingClientRect().top>=innerHeight*.94&&n.dataset.typeState==='pending');if(!node)return false;node.dataset.testViewport='target';return true;});
-  assert.ok(found,route+' has no pending offscreen copy');
-  const title=page.locator('[data-test-viewport="target"]');
-  await title.evaluate(n=>n.scrollIntoView({block:'center',behavior:'instant'}));
-  await page.waitForFunction(()=>Number(document.querySelector('[data-test-viewport="target"]')?.dataset.typeRuns)>0,null,{timeout:12000});
-  const concurrent=await maximumSimultaneousJobsInRegion(page);
-  assert.ok(concurrent<=1,'Animations must stay serial inside each section');
-  console.log('PASS',route,'scroll-triggered bounded typing');
+  await page.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true');
+  const first=await page.locator('main h1').first().textContent();
+  assert.ok(first.trim().length>5,route+' heading hidden on load');
+  assert.equal(await page.locator('html.type-system,.type-ink,.type-cursor').count(),0,route+' still types content');
+  const article=page.locator('main h2').first();
+  if(await article.count()){
+   const before=await article.textContent();
+   await article.scrollIntoViewIfNeeded();
+   assert.equal(await article.textContent(),before,route+' text changed on scroll');
+  }
+  console.log('PASS',route,'full content visible without typing or scroll delay');
  }
  await c.close();
 }finally{await browser.close();}
