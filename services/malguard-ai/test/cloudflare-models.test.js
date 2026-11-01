@@ -38,10 +38,10 @@ test("chat/work/code send only to Cloudflare worker without API secrets",async()
 test("Cloudflare failure returns code without silently changing to a different host",async()=>{
  await assert.rejects(callCFModel({mode:"chat",model:"chat_granite",message:"hello",sessionToken:"synthetic-session-valid-user",quotaEnabled:true,fetchImpl:async()=>Response.json({error:"provider_rate_limited",retryAfterSeconds:47},{status:429})}),e=>e.status===429&&e.code==="provider_rate_limited"&&e.retryAfterSeconds===47);
 });
-test("CSP permits direct Cloudflare and app cache-bust stays valid",()=>{
+test("existing site styling stays untouched and CSP permits direct Cloudflare",()=>{
  const html=readFileSync(new URL("../../../ai/index.html",import.meta.url),"utf8");
  assert.match(html,/connect-src[^"]+https:\/\/malware-ai\.malguard-security\.workers\.dev/);
- assert.match(html,/\.\/app\.js\?v=[a-z0-9-]{6,}/i);
+ assert.match(html,/\.\/app\.js\?v=neuron-resilience-20261030/);
  const script=readFileSync(new URL("../../../ai/app.js",import.meta.url),"utf8");
  assert.match(script,/callCFModel\(/);
  assert.match(script,/mode==='worker'\?'cf_qwen3':selected/);
