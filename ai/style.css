@@ -334,3 +334,45 @@ body.auth-required .ai-account>*{width:min(100%,440px);margin-inline:auto}body.a
 .desktop-compat-state{margin:12px 0;padding:10px 12px;border:1px solid #615482;border-radius:9px;color:#d2c3ff;background:#281c37}
 .desktop-compat-state[data-status="blocked"]{color:#ffb6b6;border-color:#9c4c5c;background:#35191f}
 .desktop-compat-state[data-status="eligible"]{color:#c8efcc;border-color:#456b4e;background:#193020}
+
+
+/* 2026-11-01 — MalGuard AI shares the static monochrome cosmic identity.
+   Chat behavior, login, model selection and navigation remain unchanged. */
+:root {
+ --bg:#050507;--panel:#101116;--line:#ffffff2c;
+ --muted:#b7b7c1;--ink:#f5f5f7;--accent:#dedee5;
+ background:#050507;
+}
+body {
+ background-color:#050507;
+ background-image:
+  radial-gradient(ellipse 54% 27% at 77% 6%,rgba(210,215,230,.11),transparent 90%),
+  radial-gradient(ellipse 48% 38% at 9% 69%,rgba(134,142,165,.075),transparent 92%),
+  url('/assets/precision/stars.svg?v=20261101-obsidian'),
+  linear-gradient(180deg,#050507,#0a0b10 52%,#050507);
+ background-size:100% 980px,100% 100%,min(100%,1400px) auto,100% 100%;
+ background-position:center top,center,center top,center;
+ background-repeat:no-repeat,no-repeat,repeat-y,no-repeat;
+ background-attachment:scroll;
+}
+.navigation{background:#111217;border-right:1px solid #ffffff21}
+.navigation .mode-options{background:#1a1b22;border-color:#ffffff30}
+.bubble{background:#1e2028}
+.result:not(.assistant-message),.workspace-panel,.settings-panel{
+ background:linear-gradient(150deg,#1b1d25,#101116);border-color:#ffffff23;
+}
+.composer-shell,.composer-shell:focus-within{
+ background:#111217f2;border:1px solid #ffffff33;
+ -webkit-backdrop-filter:none;backdrop-filter:none;
+ box-shadow:0 12px 40px #0006,inset 0 1px #ffffff12;
+}
+body:has(.conversation:not(:empty)) .composer-area{
+ background:linear-gradient(0deg,#07080de8 65%,transparent);
+}
+#send:hover:not(:disabled),.entry-actions button:hover{background:#ffffff22}
+.entry-actions button,.ai-account,#local-welcome{
+ -webkit-backdrop-filter:none;backdrop-filter:none;
+}
+@media(max-width:760px){
+ .composer-shell,.composer-shell:focus-within{box-shadow:0 5px 22px #0005}
+}
