@@ -41,7 +41,7 @@ for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chrom
      };
     });
     assert.match(palette.nav,/rgba?\(16,\s*17,\s*22[,)]/,path+' navbar monochrome palette mismatch');
-    assert.match(palette.dropdown,/rgba?\(14,\s*15,\s*20[,)]/,path+' dropdown monochrome palette mismatch');
+    assert.equal(palette.dropdown,'rgb(11, 15, 21)',path+' dropdown must remain fully opaque');
     assert.equal(palette.link,'rgb(214, 214, 222)',path+' links not matching monochrome design');
     assert.equal(palette.label,'rgb(184, 184, 194)',path+' menu section labels differ');
     assert.ok(status.script,path+' uses outdated script');
