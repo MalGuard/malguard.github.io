@@ -1,125 +1,106 @@
-/* MalGuard Obsidian / Static Deep Space.
- * Homepage only. Zero scroll handlers, parallax, transforms, animations,
- * dynamic blur, or compositing hints. The star field extends to the footer.
- * All imagery is served locally and the existing product-card safeguards
- * below remain intact.
+/* MalGuard Deep Space Tour — Premium, lightweight, cinematic.
+ * Homepage only. CSS-only stars + soft nebulae. No heavy SVG or large webp for the base layer.
+ * Optimized for fast paint and mobile.
  */
 body.precision-home {
-  background-color: #050507;
+  background-color: #02030a;
   background-image:
-    radial-gradient(ellipse 53% 15% at 72% 8%, rgba(191, 202, 225, .13), transparent 85%),
-    radial-gradient(ellipse 36% 19% at 19% 33%, rgba(103, 120, 156, .10), transparent 88%),
-    radial-gradient(ellipse 51% 24% at 79% 74%, rgba(115, 129, 165, .10), transparent 89%),
-    radial-gradient(ellipse 75% 48% at 50% 48%, rgba(3, 5, 11, .03) 25%, rgba(2, 3, 8, .47) 100%),
-    url('/assets/precision/stars.svg?v=20261028-4k'),
-    linear-gradient(180deg, rgba(5, 5, 7, .10), rgba(5, 5, 7, .38) 43%, #050507 100%),
-    url('/assets/precision/obsidian-space.webp?v=20261028-4k');
-  background-size:
-    100% 100%,
-    100% 100%,
-    100% 100%,
-    100% 100%,
-    max(1280px, 100%) auto,
-    100% 100%,
-    max(1280px, 100%) auto;
-  background-position:
-    center, center, center, center, center top, center, center top;
-  background-repeat:
-    no-repeat, no-repeat, no-repeat, no-repeat, repeat-y, no-repeat, no-repeat;
-  background-attachment: scroll;
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(80, 110, 180, .18), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 90%, rgba(40, 60, 120, .12), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 10% 70%, rgba(90, 50, 140, .08), transparent 65%),
+    linear-gradient(180deg, #02030a 0%, #050712 40%, #03040c 100%);
+  background-attachment: fixed;
+  background-size: cover;
+  min-height: 100vh;
 }
 
-/* A still, viewport-sized cosmic scene. Nothing animates or responds to
- * scroll; the content simply passes in front of it.
- * Fixed-position atmosphere avoids any enormous full-document painting layer. */
+/* Lightweight CSS star field (no SVG) */
 body.precision-home > .particle-atmosphere {
   position: fixed;
   inset: 0;
   height: 100vh;
   height: 100dvh;
   width: 100%;
-  overflow: hidden;
   pointer-events: none;
   z-index: 0;
-  opacity: 1;
+  overflow: hidden;
   background:
-    radial-gradient(ellipse 61% 34% at 73% 22%, rgba(161, 179, 211, .14), transparent 88%),
-    radial-gradient(ellipse 54% 36% at 19% 79%, rgba(105, 124, 160, .11), transparent 90%),
-    radial-gradient(ellipse 77% 68% at 50% 48%, transparent 29%, rgba(2, 3, 7, .49) 100%);
+    radial-gradient(1.5px 1.5px at 12% 18%, rgba(255,255,255,.9), transparent),
+    radial-gradient(1px 1px at 28% 42%, rgba(220,230,255,.7), transparent),
+    radial-gradient(1.2px 1.2px at 45% 15%, rgba(255,255,255,.8), transparent),
+    radial-gradient(1px 1px at 62% 68%, rgba(200,220,255,.6), transparent),
+    radial-gradient(1.4px 1.4px at 78% 28%, rgba(255,255,255,.85), transparent),
+    radial-gradient(1px 1px at 88% 82%, rgba(210,225,255,.65), transparent),
+    radial-gradient(1.1px 1.1px at 22% 78%, rgba(255,255,255,.75), transparent),
+    radial-gradient(1px 1px at 55% 92%, rgba(190,210,255,.55), transparent),
+    radial-gradient(1.3px 1.3px at 92% 45%, rgba(255,255,255,.8), transparent),
+    radial-gradient(1px 1px at 8% 55%, rgba(220,235,255,.6), transparent);
+  background-size: 100% 100%;
+  opacity: .7;
 }
 
-/* Far field: thousands of tiny points, fixed forever; no active renderer. */
+/* Subtle nebula overlay for depth */
 body.precision-home > .particle-atmosphere::before {
   content: '';
   position: absolute;
-  inset: 0;
-  opacity: .55;
+  inset: -20%;
   background:
-    linear-gradient(114deg, transparent 19%, rgba(207, 217, 237, .055) 51%, transparent 83%),
-    url('/assets/precision/stars.svg?v=20261028-4k') center / 1540px auto repeat;
+    radial-gradient(circle at 30% 20%, rgba(70, 100, 180, .09) 0%, transparent 40%),
+    radial-gradient(circle at 70% 80%, rgba(100, 60, 160, .07) 0%, transparent 45%);
+  pointer-events: none;
 }
 
-/* Sparse foreground highlights give near / far depth without motion. */
-body.precision-home > .particle-atmosphere::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: .81;
-  background-image:
-    radial-gradient(circle at 11% 16%, rgba(255,255,255,.92) 0 1.3px, transparent 2.7px),
-    radial-gradient(circle at 37% 29%, rgba(237,243,255,.75) 0 1px, transparent 2px),
-    radial-gradient(circle at 84% 21%, rgba(255,255,255,.92) 0 1.4px, transparent 3px),
-    radial-gradient(circle at 63% 68%, rgba(230,237,253,.76) 0 1.05px, transparent 2.3px),
-    radial-gradient(circle at 20% 81%, rgba(253,253,255,.83) 0 1.5px, transparent 3px),
-    radial-gradient(circle at 92% 77%, rgba(238,245,255,.7) 0 1.1px, transparent 2.3px);
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
+/* Product cards — glassmorphism space feel */
+body.precision-home #products .product {
+  background: rgba(10, 14, 28, .55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(140, 170, 220, .18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255,255,255,.06);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+body.precision-home #products .product:hover {
+  transform: translateY(-4px);
+  border-color: rgba(160, 190, 255, .35);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, .5), 0 0 0 1px rgba(120, 160, 255, .15);
+}
+body.precision-home #products .product-art {
+  opacity: .85;
+}
+body.precision-home #products .product-photo {
+  filter: brightness(.85) contrast(1.05);
 }
 
-/* Mobile devices: quiet, readable monochrome, no scroll-induced workload. */
-@media (max-width: 760px) {
-  body.precision-home {
-    background-size:
-      100% 100%, 100% 100%, 100% 100%, 100% 100%,
-      1150px auto, 100% 100%, 1150px auto;
-    background-position:
-      center, center, center, center, center top, center, 52% top;
-  }
-  body.precision-home > .particle-atmosphere {
-    background:
-      radial-gradient(ellipse 64% 39% at 76% 23%, rgba(156, 175, 208, .10), transparent 88%),
-      radial-gradient(ellipse 67% 48% at 18% 81%, rgba(95, 113, 153, .075), transparent 91%),
-      radial-gradient(ellipse 86% 72% at 50% 50%, transparent 26%, rgba(2, 3, 7, .48) 100%);
-  }
-  body.precision-home > .particle-atmosphere::before { opacity: .44; }
-  body.precision-home > .particle-atmosphere::after { opacity: .63; }
-}
-
-/* Product art visibility regression guard.
-   A nested visual starts as pending while serial typing runs. As soon as
-   its parent card is activated, make its artwork visible; otherwise long
-   queues can show featureless cards even though the image loaded.
-   Keep copy and CTAs above the artwork without relying on negative z-index
-   (which is brittle with animated/composited stacking contexts on iOS). */
-body.precision-home #products .product > .product-art {
-  z-index: 0;
-}
-body.precision-home #products .product > :not(.product-art) {
+/* Hero refinements for deeper space feel */
+body.precision-home .hero {
   position: relative;
   z-index: 1;
 }
-/* Keep images ready but hidden until their own fast turn; title goes first.
-   No half-second blurred fade or offscreen GPU layer animation. */
-.type-system body.precision-home #products .product > .product-art[data-reveal-state="pending"] {
-  opacity: 0;
-  visibility: hidden;
+body.precision-home .hero h1 {
+  text-shadow: 0 0 40px rgba(140, 180, 255, .15);
 }
-body.precision-home #products .product > .product-art:is([data-reveal-state="active"],[data-reveal-state="complete"],[data-reveal-state="paused"]) {
-  opacity: 1;
-  visibility: visible;
-  animation: none !important;
-  filter: none !important;
+body.precision-home .eyebrow {
+  color: #b8c8e8;
 }
-body.precision-home #products .product-photo {
-  opacity: 1;
+
+/* Keep content readable */
+body.precision-home main,
+body.precision-home .site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 760px) {
+  body.precision-home > .particle-atmosphere {
+    opacity: .5;
+  }
+  body.precision-home #products .product {
+    backdrop-filter: blur(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.precision-home #products .product {
+    transition: none;
+  }
 }
