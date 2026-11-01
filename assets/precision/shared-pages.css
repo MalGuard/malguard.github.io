@@ -485,7 +485,7 @@ body.mg-precision-shared :is(.gta-vi-badge){
  * independently in the responsive regression; open menu stays fully opaque). */
 body.mg-unified.mg-precision-shared #navbar #navLinks,
 body.mg-unified.mg-precision-shared #navbar #navLinks:not([hidden]){
- background:#0e0f14f7!important;background-color:#0e0f14f7!important;
+ background:#0b0f15!important;background-color:#0b0f15!important;
  background-image:none!important;border-color:#ffffff31!important;
  -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
 }
