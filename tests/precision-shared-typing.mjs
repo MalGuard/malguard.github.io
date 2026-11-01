@@ -40,10 +40,10 @@ for(const engine of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chrom
       label:getComputedStyle(menu.querySelector('.mg-menu-label')).color
      };
     });
-    assert.match(palette.nav,/rgba?\(7,\s*11,\s*19[,)]/,path+' navbar palette mismatch');
-    assert.match(palette.dropdown,/rgba?\(8,\s*17,\s*30[,)]/,path+' dropdown teal theme leaked');
-    assert.equal(palette.link,'rgb(184, 201, 222)',path+' links not matching homepage');
-    assert.equal(palette.label,'rgb(156, 167, 181)',path+' menu section labels differ');
+    assert.match(palette.nav,/rgba?\(16,\s*17,\s*22[,)]/,path+' navbar monochrome palette mismatch');
+    assert.match(palette.dropdown,/rgba?\(14,\s*15,\s*20[,)]/,path+' dropdown monochrome palette mismatch');
+    assert.equal(palette.link,'rgb(214, 214, 222)',path+' links not matching monochrome design');
+    assert.equal(palette.label,'rgb(184, 184, 194)',path+' menu section labels differ');
     assert.ok(status.script,path+' uses outdated script');
     assert.ok(status.main>0,path+' has no queued page copy');
     assert.equal(status.nav,'nav',path+' does not queue header');
