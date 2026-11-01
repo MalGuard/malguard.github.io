@@ -1,6 +1,5 @@
 // Regression for the CURRENT Precision homepage, not the removed 3D flip-card prototype.
-// Covers browser engines, motion preferences, weak-GPU fallback, viewport-gated
-// typing, product navigation and layout without contacting external services.
+// Covers browser engines, motion preferences, weak-GPU fallback, instant readable text, product navigation and layout without contacting external services.
 import assert from 'node:assert/strict';
 import {maximumSimultaneousJobsInRegion} from './precision-region-assertions.mjs';
 import {chromium,webkit,launchOptions} from './browser-runtime.mjs';
@@ -101,46 +100,13 @@ for(const name of names){
     assert.ok(await page.locator('#products .product-art').evaluateAll(nodes=>
      nodes.every(n=>getComputedStyle(n).opacity==='1')),'Reduced-motion product art is hidden');
    }
-   if(!profile.reduced && profile.width===390) {
-    const firstCard=page.locator('#products article.product').first();
-    // Observe actual typing/visual state transitions before scrolling. The
-    // product name must start first, then the cached picture must appear.
-    await page.evaluate(()=>{
-     const card=document.querySelector('#products article.product');
-     const title=card.querySelector('h3[data-type]');
-     const art=card.querySelector('.product-art[data-reveal]');
-     window.__productRevealOrder=[];
-     const observer=new MutationObserver(changes=>{
-      for(const change of changes){
-       if(change.target===title&&title.dataset.typeState==='typing')
-        window.__productRevealOrder.push('title');
-       if(change.target===art&&art.dataset.revealState==='active')
-        window.__productRevealOrder.push('image');
-      }
-     });
-     observer.observe(title,{attributes:true,attributeFilter:['data-type-state']});
-     observer.observe(art,{attributes:true,attributeFilter:['data-reveal-state']});
-    });
-    const started=Date.now();
-    await firstCard.scrollIntoViewIfNeeded();
-    await page.waitForFunction(()=>[...document.querySelectorAll('#products article.product')].every(card=>
-     card.dataset.revealState==='complete'
-      && card.querySelector('.product-art')?.dataset.revealState==='complete'
-      && card.querySelector('h3')?.dataset.typeState==='complete'),
-     null,{timeout:8500});
-    assert.ok(Date.now()-started<6500,'Product cards took too long after entering viewport');
-    const order=await page.evaluate(()=>window.__productRevealOrder.slice(0,2));
-    assert.deepEqual(order,['title','image'],'Product title must render before its image');
-    assert.ok(await page.locator('#products .product-art').evaluateAll(nodes=>nodes.every(n=>
-     getComputedStyle(n).opacity==='1'&&getComputedStyle(n).visibility==='visible')),
-     'All product images should be visible after the fast reveal');
-    assert.equal(await firstCard.locator('.product-art').evaluate(n=>getComputedStyle(n).zIndex),'0',
-     'Product artwork must have a stable stacking position');
-   }
-   assert.equal(await page.locator('.hero-actions>a[data-type="button"]').count(),2,
-    'Homepage CTAs should be queued as typed actions');
-   assert.equal(await page.locator('#navbar .mg-brand[data-type="button"]').count(),1,
-    'Header brand should participate in viewport typing');
+   assert.equal(await page.locator('html.type-system,.type-ink,.type-cursor').count(),0,
+    'Static copy should never be concealed or assembled letter by letter');
+   assert.ok((await page.locator('#technology h2').textContent()).trim().length>5);
+   assert.ok(await page.locator('#products .product-art').evaluateAll(nodes=>nodes.every(n=>
+    getComputedStyle(n).opacity==='1'&&getComputedStyle(n).visibility==='visible')),
+    'Product artwork must be immediately visible');
+   assert.equal(await page.locator('#products article.product').first().locator('.product-art').evaluate(n=>getComputedStyle(n).zIndex),'0');
    const menu=page.locator('#menuBtn');
    if(!profile.reduced)await page.waitForFunction(()=>
     document.querySelector('#navbar')?.dataset.navMotion==='complete',
@@ -149,44 +115,28 @@ for(const name of names){
    assert.equal(await menu.getAttribute('aria-expanded'),'true','Mobile menu does not open');
    await page.keyboard.press('Escape');
    assert.equal(await menu.getAttribute('aria-expanded'),'false','Escape does not close menu');
-   if(profile.reduced){
-    assert.equal(await page.locator('.type-ink').count(),0,'Reduced motion still typed text');
-    assert.equal(await page.locator('.type-system').count(),0,'Reduced motion still conceals content');
-    assert.ok((await page.locator('#technology h2').textContent()).trim().length>5);
-   }else{
-    const title=page.locator('#technology [data-type]').first();
-    assert.equal(await title.getAttribute('data-type-state'),'pending',
-     'Below-fold copy should not type before scrolling');
-    await title.evaluate(node=>node.scrollIntoView({behavior:'instant',block:'center'}));
-    await page.waitForFunction(()=>
-     ['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),
-     null,{timeout:30000});
-    assert.ok((await maximumSimultaneousJobsInRegion(page))<=1,
-     'Typewriter exceeded one simultaneous item per section');
-    const afterScrollDepth=await depthLayer.evaluate(n=>{
-     const before=getComputedStyle(n,'::before'),after=getComputedStyle(n,'::after');
-     return {
-      position:getComputedStyle(n).position,
-      beforeAnimation:before.animationName,afterAnimation:after.animationName,
-      beforeTransform:before.transform,afterTransform:after.transform,
-      beforeImage:before.backgroundImage,afterImage:after.backgroundImage,
-      viewportTop:Math.round(n.getBoundingClientRect().top),
-      far:n.style.getPropertyValue('--mg-space-far'),
-      near:n.style.getPropertyValue('--mg-space-near'),
-     };
-    });
-    assert.deepEqual(afterScrollDepth,staticDepth,
-     'Scroll must not move or mutate either layer of the static deep-space background');
-    await page.emulateMedia({reducedMotion:'reduce'});
-    await page.waitForFunction(()=>!document.documentElement.classList.contains('type-system'));
-    assert.equal(await page.locator('.type-ink').count(),0,
-     'Motion-preference update left synthetic text over content');
-   }
+   const headingBefore=await page.locator('#technology h2').textContent();
+   await page.locator('#technology').scrollIntoViewIfNeeded();
+   assert.equal(await page.locator('#technology h2').textContent(),headingBefore);
+   assert.equal(await page.locator('html.type-system,.type-ink,.type-cursor').count(),0);
+   const afterScrollDepth=await depthLayer.evaluate(n=>{
+    const before=getComputedStyle(n,'::before'),after=getComputedStyle(n,'::after');
+    return {
+     position:getComputedStyle(n).position,
+     beforeAnimation:before.animationName,afterAnimation:after.animationName,
+     beforeTransform:before.transform,afterTransform:after.transform,
+     beforeImage:before.backgroundImage,afterImage:after.backgroundImage,
+     viewportTop:Math.round(n.getBoundingClientRect().top),
+     far:n.style.getPropertyValue('--mg-space-far'),
+     near:n.style.getPropertyValue('--mg-space-near')
+    };
+   });
+   assert.deepEqual(afterScrollDepth,staticDepth,'Backdrop must remain static on scroll');
    assert.deepEqual(errors,[],'Browser page exceptions');
    assert.deepEqual(writes,[],'Public design made an outbound write');
    await context.close();
    console.log('PASS precision motion matrix',name,profile.width,
-    profile.reduced?'reduced/no-WebGL':'viewport typing/motion switch');
+    profile.reduced?'reduced/no-WebGL':'instant copy and static background');
   }
  }finally{await browser.close();}
 }
