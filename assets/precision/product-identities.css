@@ -21,7 +21,7 @@ body.precision-home #products .product .status{margin:0;color:#9caec4;font-size:
 body.precision-home #products .product h3{font:500 30px/1.2 Arial,sans-serif;letter-spacing:-.04em;margin:12px 0}
 body.precision-home #products .product p{font:14px/1.8 Arial,sans-serif;min-height:76px;color:#aebaca}
 body.precision-home #products .product .text-link{font:500 13px Arial,sans-serif;margin-top:18px;border-top:1px solid #ffffff15;padding-top:18px}
-body.precision-home .gta6-home-notice{border-radius:16px;background:#0c121dcc;border-color:#ffffff1f}
+body.precision-home .gta6-home-notice{border-radius:16px;background:#11151b;border-color:#ffffff1f}
 body.mg-precision-shared main .mg-home-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
 body.precision-home main,body.precision-home .site-footer{position:relative;z-index:1}
 .product-agent .status{color:#b7b0e3!important}
