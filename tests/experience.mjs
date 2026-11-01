@@ -197,22 +197,22 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
   await check(`${name} reduced motion and JS-free copy remain visible`,async()=>{
      const c=await browser.newContext({...fixtureTLS,reducedMotion:'reduce'}),p=await c.newPage();
      await p.goto(base+'/');await settle(p);
-     await p.waitForFunction(()=>document.querySelector('.flow-stage')?.dataset.renderer==='vector');
-     assert.equal(await p.locator('.motion-toggle').isVisible(),false);
+     assert.equal(await p.locator('.product-eclipse').count(),1);
+     assert.equal(await p.locator('.motion-toggle').count(),0);
      assert.equal(await p.locator('.flow-stage svg text').filter({hasText:'undefined'}).count(),0);
      await c.close();
      const nojs=await browser.newContext({...fixtureTLS,javaScriptEnabled:false}),q=await nojs.newPage();await q.goto(base+'/');
      assert.ok(await q.getByRole('heading',{name:'Scan smart. Play safe.'}).isVisible());
      assert.ok(await q.getByRole('link',{name:'Explore products'}).isVisible());await nojs.close();
    });
-   await check(`${name} viewport typing is bounded and scroll-triggered`,async()=>{
+   await check(`${name} public content is immediately available`,async()=>{
      const c=await browser.newContext({...fixtureTLS,viewport:{width:1280,height:850},reducedMotion:'no-preference'}),p=await c.newPage();
      await c.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
      await p.goto(base+'/');await settle(p);
-     const title=p.locator('#technology [data-type]').first();assert.equal(await title.getAttribute('data-type-state'),'pending');
+     const title=p.locator('#technology [data-type]').first();assert.equal(await title.getAttribute('data-type-state'),'complete');
      await title.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
      await p.waitForFunction(()=>['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),null,{timeout:30000});
-     assert.equal(await p.locator('#products article.product').count(),3);await c.close();
+     assert.equal(await p.locator('#products article.product').count(),4);await c.close();
    });
    await browser.close();
 }

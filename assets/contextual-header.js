@@ -29,6 +29,7 @@
   }
   const pages = [
     ['Home', 'MalGuard overview', '/', 'home malguard'],
+    ['Agent Guard', 'Agent security concept — in development', '/products.html#agent-guard', 'agent guard permissions ایجنت دسترسی'],
     ['Products', 'Products and current availability', '/products.html', 'gta guard malguard ai scam guard'],
     ['Game Scam Guard', 'Online link inspector and signed Android app', '/game-scam-guard.html', 'game gaming scam'],
     ['iPhone Preview', 'Bounded local mobile inspection', '/ios-preview/', 'iphone ios'],
