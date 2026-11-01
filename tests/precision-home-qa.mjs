@@ -25,11 +25,14 @@ for(const name of (process.env.TEST_BROWSER?[process.env.TEST_BROWSER]:['chromiu
   const c=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:1280,height:850},reducedMotion:'no-preference'});
   await c.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
   const p=await c.newPage();await p.goto(base+'/');
-  const title=p.locator('#technology [data-type]').first();
-  assert.equal(await title.getAttribute('data-type-state'),'pending');
-  await title.evaluate(node=>node.scrollIntoView({behavior:'instant',block:'center'}));
-  await p.waitForFunction(()=>['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),null,{timeout:30000});
+  await p.waitForFunction(()=>document.documentElement.dataset.precisionTypeReady==='true');
+  const title=p.locator('#technology h2').first();
+  const copy=await title.textContent();
+  assert.ok(copy.trim().length>5,'Offscreen copy must be available immediately');
+  assert.equal(await p.locator('html.type-system,.type-ink,.type-cursor').count(),0);
+  await title.scrollIntoViewIfNeeded();
+  assert.equal(await title.textContent(),copy,'Scroll retyped the heading');
   assert.deepEqual(await p.locator('#products .text-link').evaluateAll(a=>a.map(n=>new URL(n.href).pathname)),['/gta-guard.html','/game-scam-guard.html','/ai-product.html']);
-  await c.close();console.log('PASS',name,'viewport typing and product links');
+  await c.close();console.log('PASS',name,'instant copy and product links');
  }finally{await browser.close();}
 }

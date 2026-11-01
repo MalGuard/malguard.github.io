@@ -21,22 +21,21 @@ for(const engineName of [process.env.TEST_BROWSER||'chromium']){
      menuOpen:document.querySelector('#menuBtn')?.getAttribute('aria-expanded'),
      menuHidden:document.querySelector('#navLinks')?.hidden,
      script:[...document.scripts].some(s=>s.src.includes('site.js?v=continue-visited-20261031')),
-     titleLines:document.querySelectorAll('#gta6-heading .gta6-type-line[data-type="title"]').length,
-     buttons:document.querySelectorAll('.gta6-actions a[data-type="button"]').length,
+     titleLines:document.querySelectorAll('#gta6-heading .gta6-type-line').length,
+     buttons:document.querySelectorAll('.gta6-actions a').length,
      width:document.documentElement.clientWidth,
      scroll:document.documentElement.scrollWidth
     }));
     assert.equal(initial.menuOpen,'false','hamburger must start closed');
     assert.equal(initial.menuHidden,true,'dropdown is always open');
-    assert.ok(initial.script,'missing shared typewriter');
-    assert.equal(initial.titleLines,3,'hero headline must type three lines');
-    assert.ok(initial.buttons>=2,'GTA VI actions not registered for typing');
+    assert.ok(initial.script,'missing shared instant-copy controller');
+    assert.equal(initial.titleLines,3,'all three headline lines remain visible');
+    assert.ok(initial.buttons>=2,'GTA VI action buttons missing');
     assert.ok(initial.scroll<=initial.width+2,'horizontal overflow');
     const menu=page.locator('#menuBtn');
-    if(!reduced){
-     await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navMotion==='complete',null,{timeout:25000});
-     await page.waitForFunction(()=>[...document.querySelectorAll('#gta6-heading .gta6-type-line')].some(e=>Number(e.dataset.typeRuns)>0),null,{timeout:15000});
-    }
+    assert.equal(await page.locator('html.type-system,.type-ink,.type-cursor').count(),0,
+     'GTA VI content must be visible without typing');
+    assert.equal(await page.locator('#navbar').getAttribute('data-nav-motion'),'complete');
     await menu.click();
     assert.equal(await menu.getAttribute('aria-expanded'),'true','hamburger cannot open');
     assert.ok(await page.locator('#navLinks').isVisible(),'open dropdown not visible');
@@ -46,7 +45,7 @@ for(const engineName of [process.env.TEST_BROWSER||'chromium']){
     await page.locator('#gta6-url-form button[type=submit]').click();
     assert.ok(await page.locator('#gta6-url-result').isVisible(),'local URL review not working');
     assert.deepEqual(errors,[],'browser page errors');
-    console.log('PASS GTA VI header, typewriter and local review',engineName,viewport.width,reduced?'reduced':'normal');
+    console.log('PASS GTA VI header, instant copy and local review',engineName,viewport.width,reduced?'reduced':'normal');
     await ctx.close();
    }
   }

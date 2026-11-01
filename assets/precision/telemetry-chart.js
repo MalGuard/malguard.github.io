@@ -11,47 +11,36 @@
    clean:'M36,228 C100,210 140,156 200,148 C260,140 300,176 360,138 C430,92 500,124 604,108',
    blocked:'M36,250 C110,246 160,230 230,236 C300,242 360,214 430,224 C500,234 550,206 604,214',
    pulse:[604,108],
-   kpis:['99.4% clean','18ms p95','0 false-lock'],
-   text:'Mixed examples · gray in, green / red out'
+   kpis:['Example input','Local review','No execution'],
+   text:'Mixed illustration · sample signals only'
   },
   clean:{
    clean:'M36,176 C110,150 160,118 230,108 C310,96 360,132 430,96 C500,60 550,84 604,68',
    blocked:'M36,274 C140,270 220,262 320,266 C420,270 510,256 604,260',
    pulse:[604,68],
-   kpis:['99.9% clean','12ms p95','0 false-lock'],
-   text:'Clean only · verified local artifacts'
+   kpis:['Clean sample','Local review','No execution'],
+   text:'Clean-only illustration · no files analyzed'
   },
   risky:{
    clean:'M36,268 C140,262 240,250 340,254 C440,258 520,244 604,248',
    blocked:'M36,198 C100,160 160,124 230,118 C310,110 370,156 450,108 C510,74 560,92 604,80',
    pulse:[604,248],
-   kpis:['22.0% clean','64ms p95','0 false-lock'],
-   text:'Risky only · blocked before use'
+   kpis:['Risky sample','Local review','No execution'],
+   text:'Risky-only illustration · no files analyzed'
   }
  };
  const motion=matchMedia('(prefers-reduced-motion: reduce)');
  let typing=0;
  function writeStatus(text){
   if(!status)return;
-  const token=++typing;
+  ++typing;
   status.querySelector('.type-ink')?.remove();
   let source=status.querySelector('.type-source');
   if(!source){source=document.createElement('span');source.className='type-source';status.replaceChildren(source);}
   source.textContent=text;
-  source.style.color='';
-  if(motion.matches){status.dataset.typeState='complete';return;}
-  const ink=document.createElement('span');ink.className='type-ink';ink.setAttribute('aria-hidden','true');status.append(ink);
-  status.dataset.typeState='typing';
-  let index=0;
-  const step=()=>{
-   if(token!==typing)return;
-   if(motion.matches){ink.remove();status.dataset.typeState='complete';return;}
-   index+=1;ink.textContent=text.slice(0,index);
-   if(index<text.length)setTimeout(step,16);
-   else{ink.remove();status.dataset.typeState='complete';}
-  };
-  step();
+  status.dataset.typeState='complete';
  }
+
  const apply=(name,announce)=>{
   const scene=scenes[name]||scenes.mixed;
   art.dataset.verdict=name==='risky'?'flagged':name==='clean'?'clean':'mixed';

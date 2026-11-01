@@ -205,13 +205,15 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
      assert.ok(await q.getByRole('heading',{name:'Scan smart. Play safe.'}).isVisible());
      assert.ok(await q.getByRole('link',{name:'Explore products'}).isVisible());await nojs.close();
    });
-   await check(`${name} viewport typing is bounded and scroll-triggered`,async()=>{
+   await check(`${name} editorial copy is immediate and stable on scroll`,async()=>{
      const c=await browser.newContext({...fixtureTLS,viewport:{width:1280,height:850},reducedMotion:'no-preference'}),p=await c.newPage();
      await c.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
      await p.goto(base+'/');await settle(p);
-     const title=p.locator('#technology [data-type]').first();assert.equal(await title.getAttribute('data-type-state'),'pending');
-     await title.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
-     await p.waitForFunction(()=>['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),null,{timeout:30000});
+     const title=p.locator('#technology h2').first(),copy=await title.textContent();
+     assert.ok(copy.trim().length>5);
+     assert.equal(await p.locator('html.type-system,.type-ink,.type-cursor').count(),0);
+     await title.scrollIntoViewIfNeeded();
+     assert.equal(await title.textContent(),copy);
      assert.equal(await p.locator('#products article.product').count(),3);await c.close();
    });
    await browser.close();
