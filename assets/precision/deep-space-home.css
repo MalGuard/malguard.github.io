@@ -1,16 +1,15 @@
 /* MalGuard: static deep-space field. No parallax, blur, animation or giant backdrop image.
    One lightweight local star SVG supplies texture even on long pages. */
 body.precision-home {
-  background-color: #03050a;
+  background-color: #050507;
   background-image:
     radial-gradient(ellipse 60% 20% at 67% 11%, rgba(91, 111, 164, .20), transparent 84%),
     radial-gradient(ellipse 45% 31% at 12% 62%, rgba(53, 76, 125, .15), transparent 89%),
     radial-gradient(ellipse 78% 46% at 53% 66%, rgba(26, 40, 75, .10), transparent 93%),
-    url('/assets/precision/stars.svg?v=20261028-4k'),
     linear-gradient(180deg, #040711 0%, #04050b 48%, #020309 100%);
-  background-size: 100% 100%, 100% 100%, 100% 100%, max(1280px, 100%) auto, 100% 100%;
-  background-position: center, center, center, center top, center;
-  background-repeat: no-repeat, no-repeat, no-repeat, repeat-y, no-repeat;
+  background-size: 100% 100%, 100% 100%, 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
   background-attachment: scroll;
 }
 body.precision-home > .particle-atmosphere {
@@ -25,8 +24,29 @@ body.precision-home > .particle-atmosphere {
     radial-gradient(ellipse 36% 24% at 77% 19%, rgba(153, 171, 220, .095), transparent 92%),
     radial-gradient(ellipse 32% 32% at 18% 78%, rgba(76, 102, 166, .065), transparent 95%);
 }
-body.precision-home > .particle-atmosphere::before,
-body.precision-home > .particle-atmosphere::after { content: none; }
+/* Keep all depth layers still. Reuse the small SVG exactly once and
+   add a few close foreground glints without any particle animation. */
+body.precision-home > .particle-atmosphere::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .53;
+  background: url('/assets/precision/stars.svg?v=20261028-4k') center top / 1380px auto repeat;
+}
+body.precision-home > .particle-atmosphere::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .68;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(245,248,255,.8) 0 1px, transparent 2px),
+    radial-gradient(circle at 72% 31%, rgba(230,241,255,.74) 0 1px, transparent 2px),
+    radial-gradient(circle at 33% 74%, rgba(230,236,255,.7) 0 1px, transparent 2px);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
 
 /* Product artwork is content, not an animation. Never hide it while
    a sequential text/reveal queue runs, or when JavaScript is delayed. */
@@ -60,8 +80,8 @@ body.precision-home #products .product-photo {
 }
 @media (max-width: 760px) {
   body.precision-home {
-    background-size: 100% 100%, 100% 100%, 100% 100%, 1080px auto, 100% 100%;
-    background-position: center, center, center, 50% top, center;
+    background-size: 100% 100%;
+    background-position: center;
   }
   body.precision-home > .particle-atmosphere { opacity: .78; }
 }
