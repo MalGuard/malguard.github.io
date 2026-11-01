@@ -96,3 +96,7 @@
 .precision-home .hero-motion-active .hero-description .terminal-rest::after{animation-play-state:running}
 .precision-home .hero-description .type-cursor.vertical:after{width:3px;height:.95em;bottom:-.05em;animation:mg-coding-caret .85s steps(1,end) infinite}
 @media(prefers-reduced-motion:reduce){.precision-home .hero-description .terminal-rest::after{animation:none!important}}
+
+/* The editorial typewriter and its blinking terminal caret have been retired. */
+body.precision-home .hero-description .terminal-rest,
+body.precision-home .hero-description .type-cursor{display:none!important;animation:none!important}
