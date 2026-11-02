@@ -1,18 +1,19 @@
-# Product orbit reference variants
+# Product app-orbit previews and physical engine
 
-Reference: user-provided 11.58-second Codex_compatible_video.mp4. Contact sheet inspected across the full clip at 0.5-second intervals. Key visual rules: upright app tiles, a clean circular arrangement, steady rotation and a restrained transition to a final brand mark.
+The public homepage exposes three motion previews through `?motion=merge`, `?motion=orbit` and `?motion=engine`. The first two retain the reviewed circular choreography and logo reveal. All three use eight locally bundled, filled application icons for MalGuard products and tools, with rounded light app surfaces instead of line-only symbols. These are product illustrations, not claims of integrations with third-party apps.
 
-Replace the homepage orbital-sphere scene with three query-selected decorative variants:
-- `?motion=merge`: the rotating ring expands out of the frame; a large monochrome MalGuard mark appears, settles, then scales down beside its wordmark. Replay is available.
-- `?motion=orbit`: steady rotation with the MalGuard mark fixed in the middle. Default presentation.
-- `?motion=engine`: steady rotation with four metallic cutaway cylinders with rotating cranks, constant-length connecting rods and a four-stroke valve cycle, labelled link, file, AI and agent. This is a conceptual motion illustration, not live performance telemetry.
+## Real 3D engine
 
-The tiles use dedicated monochrome GTA Guard, Game Scam Guard and Agent Guard symbols, the existing white MalGuard AI mark, and monochrome tool symbols. The central MalGuard mark preserves its existing geometry with white fills. No claim of new integrations or engine implementation is made.
+The engine preview loads a self-hosted, pinned Three.js 0.180.0 bundle only after its variant is selected. Source: `tools/product-engine3d.mjs`; rebuild with `node tools/build-product-engine.mjs` after installing the repository dependencies. The compiled module is committed as a public asset. Three.js is already pinned in the project and its MIT license is included.
 
-CSS and JavaScript total under 16 KB uncompressed. No new dependency or runtime image service. Moving icons remain upright. Motion can be paused, pauses offscreen and in hidden tabs, and respects reduced motion. Without JavaScript the component remains static. Main content visibility never depends on animation.
+A perspective camera renders four cutaway cylinders, hollow piston skirts, compression rings, wrist pins, rigid connecting rods, crank webs, shaft journals, a drilled flywheel, valve stems and helical springs. The model has approximately 178 mesh parts and 80,000 triangles. Steel, anodized metal and bronze use physically based materials and a generated studio environment, key and rim lights. Intake and combustion are illustrated by restrained chamber colors. This is a visual mechanism, not application-performance telemetry.
 
-Validated with Chromium at 320, 390 and 1440 pixels for all three variants. Checked horizontal overflow, pause/resume, outward ring expansion, merge completion and replay, crank-pin/connecting-rod endpoint alignment within 1 screen pixel, reduced motion and browser exceptions. Pause verification waits for animation pause acknowledgements before comparing held times. Screenshots of the running and final states were inspected. Static site validation passed for 49 documents. AI and service sources are unchanged.
+Piston travel and rod orientation come from the slider-crank equations. The four crank phases are balanced; valve cycles correspond to the four-stroke cycle. The model rotates under horizontal pointer drag, including while animation is paused. No SVG piston mechanism remains in the page.
 
-## Natural material and cycle finish
+## Loading and motion
 
-User authorized color for the engine and rotating elements. Add cold-steel and glass materials, small brass bearing details and restrained optical tints to the orbit tiles. Product symbols stay monochrome. Shift crank phase so intake coincides with the downstroke; model the visible chamber volume up to the moving piston crown. Use blue for intake, pale compression, amber combustion and a quiet exhaust tint. Valve springs compress against stationary seats. Desktop orbit spacing expands to separate tiles from the engine. Geometry checks cover both conrod-pin and gas-volume/crown alignment.
+The lazy 3D bundle is approximately 139 KB compressed. The other two variants do not download it. Continuous rendering is capped near 30 fps with a limited pixel ratio; rendering stops while paused, offscreen, in a hidden tab or under reduced motion. There is no new runtime CDN or model-service request. Without WebGL, a small static poster captured from the actual 3D scene is displayed. Context loss switches to that poster.
+
+## Evidence
+
+Static validation passed for 49 HTML documents and public assets. Chromium checked 320, 390, 820 and 1440 pixel layouts, the real renderer and perspective camera, rotation under pointer drag, rigid rod/journal alignment across seven sampled crank positions, pause/resume, reduced motion and the no-WebGL poster. A separate regression covered the three motion variants, outward ring exit and replay. Screenshots from multiple camera angles were inspected and materials/framing were refined. AI logic, authentication, API and service sources are unchanged. Field performance and untested device/browser combinations are not certified by these checks.

@@ -74,3 +74,19 @@
 @media(forced-colors:active){.orbit-tile{background:Canvas;border-color:CanvasText;box-shadow:none}}
 @media(min-width:1051px){.brand-orbit[data-mode=engine]{--orbit-radius:188px}.brand-orbit[data-mode=engine] .orbit-stage{height:470px}}
 @media(min-width:761px) and (max-width:1050px){.brand-orbit[data-mode=engine]{--orbit-radius:136px}.orbit-engine{width:184px;height:150px}}
+/* Filled, app-style product identities; 3D is loaded only for the engine variant. */
+.brand-orbit.app-orbit .orbit-tile{background:#f3f6fa;border:0;border-radius:14px;box-shadow:0 6px 18px #0005,inset 0 1px #fff}
+.brand-orbit.app-orbit .orbit-tile img{width:100%;height:100%;border-radius:inherit}
+.engine3d-host{display:none;position:absolute;left:50%;top:50%;width:360px;height:330px;transform:translate(-50%,-50%);isolation:isolate}
+.brand-orbit[data-mode=engine] .engine3d-host{display:block}
+.engine3d-canvas,.engine3d-poster{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;object-fit:contain;border:0!important;box-shadow:none!important;background:none!important}
+.engine3d-canvas{cursor:grab;opacity:0;transition:opacity .2s}
+.engine3d-canvas:active{cursor:grabbing}
+.engine3d-host[data-render-state=webgl] .engine3d-canvas{opacity:1}
+.engine3d-host[data-render-state=webgl] .engine3d-poster{visibility:hidden}
+@media(min-width:1051px){.brand-orbit[data-mode=engine]{--orbit-radius:214px}.brand-orbit[data-mode=engine] .orbit-stage{height:530px}}
+@media(min-width:761px) and (max-width:1050px){body.precision-home .hero:has(.brand-orbit[data-mode=engine]){grid-template-columns:1fr}.brand-orbit[data-mode=engine]{--orbit-radius:194px;max-width:500px}.brand-orbit[data-mode=engine] .orbit-stage{height:490px}}
+@media(max-width:760px){.brand-orbit.app-orbit .orbit-tile{border-radius:12px}.brand-orbit[data-mode=engine]{--orbit-radius:140px}.brand-orbit[data-mode=engine] .orbit-stage{height:430px}.brand-orbit[data-mode=engine] .orbit-path{transform:scaleY(1.23)}.brand-orbit[data-mode=engine] .orbit-tile{animation-name:engine-app-upright}.brand-orbit[data-mode=engine] .orbit-stage:before{height:calc(var(--orbit-radius)*2.46)}.engine3d-host{width:260px;height:250px}}
+@media(max-width:360px){.brand-orbit[data-mode=engine]{--orbit-radius:116px}.engine3d-host{width:218px;height:220px}.brand-orbit[data-mode=engine] .orbit-stage{height:380px}}
+@keyframes engine-app-upright{from{transform:rotate(0) scaleY(.813008)}to{transform:rotate(-360deg) scaleY(.813008)}}
+@media(prefers-reduced-motion:reduce){.engine3d-canvas{transition:none}}
