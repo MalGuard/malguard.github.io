@@ -63,3 +63,14 @@
 @media(prefers-reduced-motion:reduce){.brand-orbit[data-mode=merge] .orbit-message{display:none}.brand-orbit[data-mode=merge] .orbit-center{display:grid;width:160px;height:auto;gap:12px}.brand-orbit[data-mode=merge] .orbit-center>img,.brand-orbit[data-mode=merge] .orbit-wordmark{position:static;opacity:1;transform:none;animation:none!important}.brand-orbit[data-mode=merge] .orbit-stage:before{opacity:0}}
 .brand-orbit:is(.is-paused,.is-offscreen,.is-tab-hidden) .orbit-stage::before{animation-play-state:paused!important}
 @media(prefers-reduced-motion:reduce){.brand-orbit .orbit-stage::before{animation:none!important}}
+/* Cold steel, glass and restrained optical color around the monochrome marks. */
+.orbit-tile{--tile-tint:119,172,221;background:radial-gradient(ellipse at 20% 0%,rgba(var(--tile-tint),.14),transparent 72%),linear-gradient(145deg,#18222f,#0b111a);border-color:rgba(var(--tile-tint),.36);box-shadow:0 7px 22px #0007,inset 0 1px #e2f1ff1a,0 0 18px rgba(var(--tile-tint),.055)}
+.orbit-item:nth-child(2n) .orbit-tile{--tile-tint:124,179,178}
+.orbit-item:nth-child(3n) .orbit-tile{--tile-tint:169,150,210}
+.orbit-item:nth-child(4n) .orbit-tile{--tile-tint:194,164,132}
+.brand-orbit[data-mode=engine] .orbit-stage{background:radial-gradient(ellipse 45% 35% at 50% 50%,#628cb51c,transparent 95%)}
+.motor-spring{transform-origin:0 35px}
+@media(min-width:1051px){.orbit-engine{width:282px;height:196px}}
+@media(forced-colors:active){.orbit-tile{background:Canvas;border-color:CanvasText;box-shadow:none}}
+@media(min-width:1051px){.brand-orbit[data-mode=engine]{--orbit-radius:188px}.brand-orbit[data-mode=engine] .orbit-stage{height:470px}}
+@media(min-width:761px) and (max-width:1050px){.brand-orbit[data-mode=engine]{--orbit-radius:136px}.orbit-engine{width:184px;height:150px}}

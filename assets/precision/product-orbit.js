@@ -10,20 +10,27 @@
  function syncMechanical(){const pause=reduce.matches||document.hidden||host.classList.contains('is-paused')||host.classList.contains('is-offscreen');mechanical.forEach(a=>pause?a.pause():a.play());}
  function createMechanical(){
   if(mode!=='engine'||reduce.matches||mechanical.length)return;
-  const piston=[],rod=[],crank=[],intake=[],exhaust=[],light=[];
+  const piston=[],rod=[],crank=[],intake=[],exhaust=[],intakeSpring=[],exhaustSpring=[],charge=[],gas=[];
   for(let i=0;i<=120;i++){
-   const angle=i/120*Math.PI*2,pinX=-17*Math.sin(angle),pinY=150+17*Math.cos(angle);
+   const angle=i/120*Math.PI*2+Math.PI,pinX=-17*Math.sin(angle),pinY=150+17*Math.cos(angle);
    const sliderY=pinY-Math.sqrt(58*58-pinX*pinX),rodAngle=-Math.atan2(pinX,pinY-sliderY)*180/Math.PI;
-   piston.push({transform:`translateY(${sliderY}px)`});rod.push({transform:`translateY(${sliderY}px) rotate(${rodAngle}deg)`});crank.push({transform:`rotate(${i/120*360}deg)`});
+   piston.push({transform:`translateY(${sliderY}px)`});rod.push({transform:`translateY(${sliderY}px) rotate(${rodAngle}deg)`});crank.push({transform:`rotate(${180+i/120*360}deg)`});
    const cycle=i/120*Math.PI*4;
-   intake.push({transform:`translateY(${cycle<Math.PI?Math.sin(cycle)*5:0}px)`});
-   exhaust.push({transform:`translateY(${cycle>Math.PI*3?Math.sin(cycle-Math.PI*3)*5:0}px)`});
-   light.push({opacity:cycle>Math.PI*2&&cycle<Math.PI*3?.06+Math.sin(cycle-Math.PI*2)*.18:.04});
+   const inlet=cycle<Math.PI?Math.sin(cycle)*5:0,outlet=cycle>Math.PI*3?Math.sin(cycle-Math.PI*3)*5:0;
+   intake.push({transform:`translateY(${inlet}px)`});exhaust.push({transform:`translateY(${outlet}px)`});
+   intakeSpring.push({transform:`scaleY(${1-inlet/12})`});exhaustSpring.push({transform:`scaleY(${1-outlet/12})`});
+   charge.push({transform:`translateY(45px) scaleY(${sliderY-53})`});
+   const stroke=cycle/Math.PI;
+   let fill='rgba(114,192,239,.18)';
+   if(stroke>=1&&stroke<2)fill=`rgba(184,211,234,${.15+(stroke-1)*.17})`;
+   else if(stroke>=2&&stroke<3)fill=`rgba(246,165,83,${.06+.43*Math.exp(-(stroke-2)*2.8)})`;
+   else if(stroke>=3)fill=`rgba(157,168,192,${.12-(stroke-3)*.06})`;
+   gas.push({fill});
   }
   host.querySelectorAll('.motor-unit').forEach((unit,i)=>{
    const options={duration:2600,iterations:Infinity,delay:-i*650,fill:'both'};
-   [['.motor-piston',piston],['.motor-rod',rod],['.motor-crank',crank]].forEach(([selector,frames])=>mechanical.push(unit.querySelector(selector).animate(frames,options)));
-   [['.motor-intake',intake],['.motor-exhaust',exhaust],['.motor-combustion',light]].forEach(([selector,frames])=>mechanical.push(unit.querySelector(selector).animate(frames,{...options,duration:5200})));
+   [['.motor-piston',piston],['.motor-rod',rod],['.motor-crank',crank],['.motor-combustion',charge]].forEach(([selector,frames])=>mechanical.push(unit.querySelector(selector).animate(frames,options)));
+   [['.motor-intake',intake],['.motor-exhaust',exhaust],['.motor-intake-spring',intakeSpring],['.motor-exhaust-spring',exhaustSpring],['.motor-gas',gas]].forEach(([selector,frames])=>mechanical.push(unit.querySelector(selector).animate(frames,{...options,duration:5200})));
   });syncMechanical();
  }
  function replay(){
