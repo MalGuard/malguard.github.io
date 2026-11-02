@@ -7,12 +7,14 @@ try{
  const page=await browser.newPage({viewport:{width:390,height:500}});
  await page.goto(base+'/?motion=engine',{waitUntil:'networkidle'});
  const model=page.locator('.engine3d-host');
- // Warm the module just outside the viewport; preparing shaders must not start its clock.
+ // Near-view preparation may preload code, but cannot construct a GPU scene.
  await model.evaluate(n=>window.scrollTo(0,scrollY+n.getBoundingClientRect().top-innerHeight-30));
- await page.waitForFunction(()=>document.querySelector('.engine3d-host')?.engine3D,{timeout:30000});
+ await page.waitForTimeout(250);assert.equal(await model.locator('canvas').count(),0);
  const inspect=()=>model.evaluate(n=>n.engine3D.inspect());
- await page.waitForTimeout(250);let state=await inspect();assert.equal(state.time,0);assert.ok(state.paused);assert.equal(state.startupPhase,'off');assert.ok(state.effects.every(e=>!e.air&&!e.fuel&&!e.fire&&!e.spark&&!e.exhaust));
- await model.scrollIntoViewIfNeeded();await page.waitForFunction(()=>document.querySelector('.brand-orbit').dataset.motionStarted==='true');
+ await model.scrollIntoViewIfNeeded();
+ await page.waitForFunction(()=>document.querySelector('.engine3d-host')?.engine3D,{timeout:30000});
+ let state=await inspect();assert.ok(state.time<.85);assert.equal(state.startupPhase,'off');assert.ok(state.effects.every(e=>!e.air&&!e.fuel&&!e.fire&&!e.spark&&!e.exhaust));
+ await page.waitForFunction(()=>document.querySelector('.brand-orbit').dataset.motionStarted==='true');
  await page.waitForFunction(()=>document.querySelector('.engine3d-host').engine3D.inspect().time>0);state=await inspect();assert.ok(state.time>0&&state.time<1);assert.equal(state.paused,false);
  await page.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));await page.waitForFunction(()=>document.querySelector('.engine3d-host').engine3D.inspect().paused);const frozen=await inspect();const ringBefore=await page.locator('.orbit-rotor').evaluate(n=>getComputedStyle(n).transform);await page.waitForTimeout(250);assert.equal(await page.locator('.orbit-rotor').evaluate(n=>getComputedStyle(n).transform),ringBefore,'Offscreen ring freezes with the crank');assert.ok(frozen.paused);assert.equal((await inspect()).time,frozen.time);
  await model.scrollIntoViewIfNeeded();await page.waitForFunction(t=>document.querySelector('.engine3d-host').engine3D.inspect().time>t,frozen.time);

@@ -9,6 +9,7 @@ for(const width of [320,390,1440])for(const mode of ['merge','orbit','engine']){
  const h=p.locator('.brand-orbit');if(await h.getAttribute('data-mode')!==mode||await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))throw Error('Mode/overflow '+width+mode);
  const srcs=await h.locator('img').evaluateAll(ns=>ns.map(n=>n.getAttribute('src')));if(srcs.some(s=>s.includes('product-gta-guard')||s.includes('product-game-scam-guard')||s.includes('/fusion/')))throw Error('Colored mark remains');
  if(mode==='engine'){
+  await p.locator('.engine3d-host').scrollIntoViewIfNeeded();
   await p.waitForFunction(()=>document.querySelector('.engine3d-host')?.engine3D,{timeout:20000});
   const geometry=await p.locator('.engine3d-host').evaluate(n=>n.engine3D.inspect());
   if(geometry.renderer!=='WebGLRenderer'||geometry.cylinders!==4||geometry.meshes<100||geometry.rodErrors.some(d=>d>1e-5))throw Error('Invalid 3D mechanics '+JSON.stringify(geometry));

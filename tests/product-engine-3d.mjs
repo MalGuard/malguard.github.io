@@ -11,6 +11,7 @@ try{
   await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base+'/?motion=engine',{waitUntil:'networkidle'});
+  await page.locator('.engine3d-host').scrollIntoViewIfNeeded();
   await page.waitForFunction(()=>document.querySelector('.engine3d-host')?.engine3D,{timeout:20000});
   const model=page.locator('.engine3d-host');
   assert.equal(await page.locator('.orbit-item img').count(),8);assert.equal(await page.locator('.orbit-item svg,.orbit-engine').count(),0);
@@ -37,6 +38,7 @@ try{
  const context=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:390,height:1000}});
  await context.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return /webgl/i.test(type)?null:original.call(this,type,...args);};});
  const page=await context.newPage();await page.goto(base+'/?motion=engine',{waitUntil:'networkidle'});
+ await page.locator('.engine3d-host').scrollIntoViewIfNeeded();
  await page.waitForFunction(()=>document.querySelector('.engine3d-host')?.dataset.renderState==='poster');
  assert.ok(await page.locator('.engine3d-poster').isVisible());assert.ok(await page.locator('.engine3d-poster').evaluate(i=>i.complete&&i.naturalWidth>0));
  await context.close();console.log('PASS actual 3D-rendered poster fallback without WebGL');
