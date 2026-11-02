@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {chromium,launchOptions} from './browser-runtime.mjs';
-import {engineDriveAt} from '../tools/product-engine-drive.mjs';
+import {engineDriveAt,ENGINE_STARTUP,ENGINE_REV_CYCLE} from '../tools/product-engine-drive.mjs';
 const base=process.env.TEST_BASE_URL||'http://127.0.0.1:8085';
 assert.equal(new URL(base).hostname,'127.0.0.1');
 const browser=await chromium.launch(launchOptions('chromium'));
@@ -41,15 +41,17 @@ try{
   else{assert.equal(valve.inlet,0);assert.equal(valve.outlet,0);}
   for(let i=0;i<2;i++){const lift=i?valve.outlet:valve.inlet;assert.equal(valve.stemY[i],-lift);assert.ok(Math.abs(valve.springScale[i]-(1-lift/.22))<1e-7,'Spring compresses as the valve opens into the chamber');}
  }
- // Shared rev envelope climbs to the maximum, then coasts down and repeats.
+ // Each long rev ends in a rolling idle before the next gentle acceleration.
+ const {rise,hold,fall,idle,idleSpeed}=ENGINE_REV_CYCLE,period=rise+hold+fall+idle;
  let previous=0;
- for(const [time,trend] of [[2,'up'],[4,'up'],[6,'up'],[7.8,'peak'],[10,'down'],[13,'down'],[16.52,'stopped'],[19,'restart']]){
+ for(const [elapsed,trend] of [[1,'up'],[rise/2,'up'],[rise-.1,'up'],[rise+hold/2,'peak'],[rise+hold+fall*.3,'down'],[rise+hold+fall*.8,'down'],[rise+hold+fall+.5,'idle'],[period-.5,'idle'],[period+rise/2,'restart']]){
+  const time=ENGINE_STARTUP.motion+elapsed;
   const rev=await model.evaluate((n,t)=>{n.engine3D.renderAt(t);const state=n.engine3D.inspect(),rotor=n.closest('.brand-orbit').querySelector('.orbit-rotor');return {...state,display:Number(n.closest('.brand-orbit').querySelector('.engine-speed-value').textContent),orbit:parseFloat(rotor.style.getPropertyValue('--engine-drive-angle'))};},time);
   assert.equal(rev.display,Math.round(rev.speed*100),'Readout follows the same rev clock');
   if(trend==='up'||trend==='restart')assert.ok(rev.speed>previous);
   if(trend==='down')assert.ok(rev.speed<previous);
   if(trend==='peak')assert.equal(rev.display,100);
-  if(trend==='stopped')assert.equal(rev.display,0);
+  if(trend==='idle'){assert.equal(rev.display,Math.round(idleSpeed*100));assert.equal(rev.speed,idleSpeed);}
   assert.ok(Math.abs(rev.orbit-(rev.crankAngle-rev.restAngle)*180/Math.PI/8)<1e-5,'Revving preserves app gearing');
   previous=rev.speed;
  }
