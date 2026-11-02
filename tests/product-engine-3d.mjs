@@ -18,7 +18,7 @@ try{
   for(const time of [0,.4,.9,1.6,2.4,3.3,4.8]){
    const state=await model.evaluate((n,t)=>{n.engine3D.renderAt(t);return n.engine3D.inspect();},time);
    assert.equal(state.renderer,'WebGLRenderer');assert.equal(state.camera,'PerspectiveCamera');assert.equal(state.cylinders,4);
-   assert.ok(state.meshes>=100);assert.ok(state.triangles>50000&&state.triangles<150000);assert.ok(state.drawCalls<220);
+   assert.ok(state.meshes>=100);assert.ok(state.triangles>50000&&state.triangles<150000);assert.ok(state.drawCalls<280);
    assert.ok(state.rodErrors.every(v=>v<1e-5),'Rigid rod ends stay connected throughout a rotation');
   }
   const views=await model.evaluate(n=>{n.engine3D.setYaw(0);const a=n.engine3D.capture();n.engine3D.setYaw(.65);const b=n.engine3D.capture();n.engine3D.setYaw(0);return {different:a!==b,bytes:a.length};});

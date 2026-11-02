@@ -66,6 +66,19 @@ export async function mountEngine3D(container){
  const pistonGeometry=new THREE.LatheGeometry(pistonProfile,64);
  const helix=new THREE.CatmullRomCurve3(Array.from({length:101},(_,i)=>{const a=i/100*Math.PI*10;return new THREE.Vector3(Math.cos(a)*.038,i/100*.22,Math.sin(a)*.038);}));
  const springGeometry=new THREE.TubeGeometry(helix,100,.0055,5,false);
+ // Compact, pre-rendered flame/particle textures; no video or per-frame image generation.
+ const flameCanvas=document.createElement('canvas');flameCanvas.width=128;flameCanvas.height=192;
+ const fc=flameCanvas.getContext('2d');const fireGradient=fc.createLinearGradient(0,8,0,190);
+ fireGradient.addColorStop(0,'rgba(255,255,225,.95)');fireGradient.addColorStop(.25,'rgba(255,219,94,.95)');fireGradient.addColorStop(.6,'rgba(255,111,24,.8)');fireGradient.addColorStop(1,'rgba(192,35,5,0)');
+ fc.fillStyle=fireGradient;fc.shadowColor='#ff7a1c';fc.shadowBlur=10;fc.beginPath();fc.moveTo(64,9);fc.bezierCurveTo(76,36,107,49,105,91);fc.bezierCurveTo(119,74,128,128,96,171);fc.bezierCurveTo(94,139,87,151,81,185);fc.bezierCurveTo(68,150,64,180,53,188);fc.bezierCurveTo(44,151,17,165,24,118);fc.bezierCurveTo(2,130,12,73,30,61);fc.bezierCurveTo(30,90,45,55,45,34);fc.closePath();fc.fill();
+ const core=fc.createRadialGradient(63,45,1,63,63,44);core.addColorStop(0,'rgba(255,255,230,.95)');core.addColorStop(.4,'rgba(255,220,115,.6)');core.addColorStop(1,'rgba(255,120,10,0)');fc.fillStyle=core;fc.fillRect(15,8,100,110);
+ const fireTexture=new THREE.CanvasTexture(flameCanvas);fireTexture.colorSpace=THREE.SRGBColorSpace;
+ const dotCanvas=document.createElement('canvas');dotCanvas.width=64;dotCanvas.height=64;const dc=dotCanvas.getContext('2d'),dg=dc.createRadialGradient(32,32,0,32,32,31);dg.addColorStop(0,'rgba(255,255,255,1)');dg.addColorStop(.2,'rgba(255,255,255,.85)');dg.addColorStop(1,'rgba(255,255,255,0)');dc.fillStyle=dg;dc.fillRect(0,0,64,64);
+ const dotTexture=new THREE.CanvasTexture(dotCanvas);
+ const combustionLight=new THREE.PointLight(0xffa348,0,1.4,2);rig.add(combustionLight);
+ const plugCeramic=new THREE.MeshStandardMaterial({color:0xe3e5dc,metalness:.08,roughness:.2});
+ const sparkMaterial=new THREE.MeshBasicMaterial({color:0xe3f4ff,toneMapped:false});
+ function particles(count,color,size,parent){const positions=new Float32Array(count*3),geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));const material=new THREE.PointsMaterial({color,size,map:dotTexture,transparent:true,opacity:.8,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false});const points=new THREE.Points(geometry,material);points.frustumCulled=false;parent.add(points);return points;}
  const units=[];const phases=[0,Math.PI,Math.PI*3,Math.PI*2];
  centers.forEach((x,i)=>{
   const group=new THREE.Group();group.position.x=x;rig.add(group);
@@ -98,15 +111,34 @@ export async function mountEngine3D(container){
    mesh(cylinder(.055,.013,32),dark,group).position.set(side*.1,1.007,0);
    valves.push({stem,spring});
   }
-  units.push({x,group,crank,piston,rod,gas,gasMaterial,valves,phase:phases[i],slider:0,angle:0});
+  // Spark plug and inlet/exhaust ports are physical parts of the cutaway head.
+  mesh(cylinder(.023,.13,24),plugCeramic,group).position.set(0,1.055,.12);
+  for(const y of [1.02,1.055,1.09])ring(.024,.004,plugCeramic,group).position.set(0,y,.12);
+  mesh(cylinder(.032,.035,6),steel,group).position.set(0,.972,.12);
+  mesh(cylinder(.006,.065,12),steel,group).position.set(0,.922,.12);
+  const electrodeCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(.024,.952,.12),new THREE.Vector3(.025,.9,.12),new THREE.Vector3(.01,.89,.12)]);
+  mesh(new THREE.TubeGeometry(electrodeCurve,14,.004,5,false),satin,group);
+  const inletCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(-.36,1.1,.05),new THREE.Vector3(-.2,1.08,.05),new THREE.Vector3(-.10,.95,.03)]);
+  const outletCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(.10,.95,-.04),new THREE.Vector3(.22,1.07,-.08),new THREE.Vector3(.36,1.1,-.08)]);
+  const portMaterial=new THREE.MeshStandardMaterial({color:0x8aa9be,metalness:.7,roughness:.3,transparent:true,opacity:.48,depthWrite:false});
+  mesh(new THREE.TubeGeometry(inletCurve,18,.019,8,false),portMaterial,group);
+  mesh(new THREE.TubeGeometry(outletCurve,18,.019,8,false),satin,group);
+  const nozzle=mesh(new THREE.CylinderGeometry(.019,.012,.16,18),bronze,group);nozzle.position.set(.18,1.01,.14);nozzle.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(-.08,-.14,0).normalize());
+  const flow=particles(16,0x72d5ff,.046,group),fuel=particles(11,0xffcf78,.027,group);
+  const flame=new THREE.Sprite(new THREE.SpriteMaterial({map:fireTexture,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));group.add(flame);
+  const spark=new THREE.Sprite(new THREE.SpriteMaterial({map:dotTexture,color:0xc7ebff,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false}));spark.position.set(.005,.889,.12);spark.scale.set(.12,.12,1);group.add(spark);
+  const sparkCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(0,.902,.12),new THREE.Vector3(.012,.896,.122),new THREE.Vector3(.004,.888,.12),new THREE.Vector3(.014,.888,.12)]);
+  const arc=mesh(new THREE.TubeGeometry(sparkCurve,10,.0025,4,false),sparkMaterial,group);arc.castShadow=false;
+  units.push({x,group,crank,piston,rod,gas,gasMaterial,valves,flow,fuel,flame,spark,arc,phase:phases[i],primeAngle:phases[i]===0?0:Math.PI*4-phases[i],slider:0,angle:0,stage:'intake'});
  });
  // Soft studio grounding is a tiny locally generated texture, not a post-processing pass.
  const shadowCanvas=document.createElement('canvas');shadowCanvas.width=128;shadowCanvas.height=128;const ctx=shadowCanvas.getContext('2d');const g=ctx.createRadialGradient(64,64,10,64,64,63);g.addColorStop(0,'rgba(0,0,0,.65)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,128,128);
  const shadow=mesh(new THREE.PlaneGeometry(4.1,2.0),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shadowCanvas),transparent:true,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=-.945;shadow.castShadow=false;
  const yAxis=new THREE.Vector3(0,1,0),top=new THREE.Vector3(),bottom=new THREE.Vector3(),direction=new THREE.Vector3();
+ const iSeed=x=>x*13.7;
  const intakeColor=new THREE.Color(0x63bdf0),powerColor=new THREE.Color(0xffac55),compressionColor=new THREE.Color(0xb8cde0),exhaustColor=new THREE.Color(0x8e9fb5);
  function apply(time){
-  const angle=time*Math.PI*2/3.4;fly.rotation.x=angle;
+  const angle=time*Math.PI*2/3.4;fly.rotation.x=angle;let strongestBurn=0;
   for(const u of units){
    const a=angle+u.phase,pinY=-.35+.22*Math.cos(a),pinZ=.22*Math.sin(a),slider=pinY+Math.sqrt(.7*.7-pinZ*pinZ);
    u.slider=slider;u.angle=a;u.crank.rotation.x=a;u.piston.position.y=slider;
@@ -115,13 +147,38 @@ export async function mountEngine3D(container){
    const inlet=stroke<1?Math.sin(cycle)*.05:0,outlet=stroke>3?Math.sin(cycle-Math.PI*3)*.05:0;
    [inlet,outlet].forEach((lift,j)=>{u.valves[j].stem.position.y=-lift;u.valves[j].spring.scale.y=1-lift/.22;});
    const crown=slider+.145,height=Math.max(.02,.905-crown);u.gas.scale.y=height;u.gas.position.y=crown+height/2;
-   if(stroke<1){u.gasMaterial.color.copy(intakeColor);u.gasMaterial.opacity=.07;}
+   const primed=angle>=u.primeAngle,charged=angle>=u.primeAngle+Math.PI,canFire=angle>=u.primeAngle+Math.PI*2;
+   u.stage=stroke<1?'intake':stroke<2?'compression':stroke<3?'combustion':'exhaust';
+   if(!primed){u.gasMaterial.color.copy(exhaustColor);u.gasMaterial.opacity=.008;}
+   else if(stroke<1){u.gasMaterial.color.copy(intakeColor);u.gasMaterial.opacity=.10;}
    else if(stroke<2){u.gasMaterial.color.copy(compressionColor);u.gasMaterial.opacity=.055+(stroke-1)*.045;}
-   else if(stroke<3){u.gasMaterial.color.copy(powerColor);u.gasMaterial.opacity=.045+.14*Math.exp(-(stroke-2)*3);}
-   else{u.gasMaterial.color.copy(exhaustColor);u.gasMaterial.opacity=.045;}
+   else if(stroke<3){u.gasMaterial.color.copy(powerColor);u.gasMaterial.opacity=canFire?.035+.08*Math.exp(-(stroke-2)*3):.008;}
+   else{u.gasMaterial.color.copy(exhaustColor);u.gasMaterial.opacity=.035;}
+   const intake=primed&&stroke<1,exhaust=charged&&stroke>=3;
+   u.flow.visible=intake||exhaust;u.fuel.visible=intake&&inlet>.002;
+   if(u.flow.visible){
+    u.flow.material.color.set(exhaust?0xa3acb9:0x67d1ff);u.flow.material.opacity=exhaust?.3:.8;
+    const positions=u.flow.geometry.attributes.position.array;
+    for(let j=0;j<16;j++){
+     const p=(time*1.45+j/16)%1,w=Math.sin(j*2.1+time*3)*.012;
+     if(exhaust){positions[j*3]=.1+.38*p;positions[j*3+1]=.95+.18*p;positions[j*3+2]=-.08+w+p*.04;}
+     else if(p<.55){const q=p/.55;positions[j*3]=-.44+.34*q;positions[j*3+1]=1.16-.21*q+Math.sin(q*Math.PI)*.035;positions[j*3+2]=.06+w;}
+     else{const q=(p-.55)/.45;positions[j*3]=-.1*(1-q)+w;positions[j*3+1]=.95-(.95-crown-.03)*q;positions[j*3+2]=.08+Math.sin(q*Math.PI)*.08;}
+    }u.flow.geometry.attributes.position.needsUpdate=true;
+   }
+   if(u.fuel.visible){const positions=u.fuel.geometry.attributes.position.array;for(let j=0;j<11;j++){const p=(time*2.1+j/11)%1;positions[j*3]=.14*(1-p)+Math.sin(j*5.2)*.022*p;positions[j*3+1]=.95-(.95-crown-.025)*p;positions[j*3+2]=.14+Math.cos(j*3.4)*.024*p;}u.fuel.geometry.attributes.position.needsUpdate=true;}
+   const ignition=charged&&angle>=u.primeAngle+Math.PI*1.9&&stroke>1.9&&stroke<2.06;
+   u.spark.visible=ignition;u.arc.visible=ignition;u.spark.material.opacity=.72+.22*Math.sin(time*89+iSeed(u.x));
+   const progress=stroke-2,burn=canFire&&progress>=0&&progress<.92?Math.min(1,progress/.045)*Math.exp(-progress*3):0;
+   u.flame.visible=burn>.012;
+   if(u.flame.visible){const flicker=.93+.07*Math.sin(time*29+u.x*7);u.flame.material.opacity=Math.min(.98,burn*1.15);u.flame.scale.set(.46*flicker,height*.98,1);u.flame.position.set(0,crown+height*.52,.105);}
+   if(burn>strongestBurn){strongestBurn=burn;combustionLight.position.set(u.x,crown+height*.65,.12);}
+
   }
+  combustionLight.intensity=strongestBurn*.75;
+  const phase=units[0].stage;if(container.dataset.cyclePhase!==phase){container.dataset.cyclePhase=phase;container.closest('.brand-orbit').dataset.cyclePhase=phase;}
  }
- let simTime=.58,paused=true,disposed=false,frame=0,last=0,previousDraw=0,yaw=0,contextLost=false;
+ let simTime=0,paused=true,disposed=false,frame=0,last=0,previousDraw=0,yaw=0,contextLost=false;
  function draw(){if(disposed||contextLost)return;apply(simTime);rig.rotation.y=yaw;renderer.render(scene,camera);container.dataset.renderState='webgl';}
  function resize(){const rect=container.getBoundingClientRect();if(rect.width<1||rect.height<1)return;renderer.setSize(rect.width,rect.height,false);camera.aspect=rect.width/rect.height;camera.updateProjectionMatrix();draw();}
  function tick(now){if(disposed||paused||contextLost){frame=0;return;}frame=requestAnimationFrame(tick);if(now-previousDraw<32)return;simTime+=last?Math.min((now-last)/1000,.08):0;last=now;previousDraw=now;draw();}
@@ -135,14 +192,15 @@ export async function mountEngine3D(container){
  canvas.addEventListener('webglcontextrestored',()=>{contextLost=false;draw();if(!paused)frame=requestAnimationFrame(tick);});
  const initial=container.getBoundingClientRect();renderer.setSize(Math.max(1,initial.width),Math.max(1,initial.height),false);camera.aspect=Math.max(1,initial.width)/Math.max(1,initial.height);camera.updateProjectionMatrix();apply(simTime);
  // Let supported drivers compile material programs without holding up page interaction.
- await renderer.compileAsync(scene,camera);
+ units.forEach(u=>{u.flame.visible=true;u.spark.visible=true;u.arc.visible=true;u.flow.visible=true;u.fuel.visible=true;});combustionLight.intensity=.01;
+ await renderer.compileAsync(scene,camera);apply(simTime);
  const observer=new ResizeObserver(resize);observer.observe(container);resize();
  const api={
   setPaused,
   renderAt(time){setPaused(true);simTime=time;draw();},
   setYaw(value){yaw=value;draw();},
   capture(){draw();return canvas.toDataURL('image/png');},
-  inspect(){scene.updateMatrixWorld(true);return {renderer:'WebGLRenderer',camera:camera.type,paused,time:simTime,yaw,meshes:scene.getObjectsByProperty('isMesh',true).length,triangles:renderer.info.render.triangles,drawCalls:renderer.info.render.calls,rodErrors:units.map(u=>{const upper=u.rod.localToWorld(new THREE.Vector3(0,.35,0)),lower=u.rod.localToWorld(new THREE.Vector3(0,-.35,0)),p=u.piston.localToWorld(new THREE.Vector3()),pin=u.crank.localToWorld(new THREE.Vector3(0,.22,0));return Math.max(upper.distanceTo(p),lower.distanceTo(pin));}),cylinders:units.length};},
+  inspect(){scene.updateMatrixWorld(true);return {renderer:'WebGLRenderer',camera:camera.type,paused,time:simTime,yaw,cyclePhase:units[0].stage,effects:units.map(u=>({air:u.flow.visible&&u.stage==='intake',fuel:u.fuel.visible,spark:u.spark.visible,fire:u.flame.visible,exhaust:u.flow.visible&&u.stage==='exhaust'})),meshes:scene.getObjectsByProperty('isMesh',true).length,triangles:renderer.info.render.triangles,drawCalls:renderer.info.render.calls,rodErrors:units.map(u=>{const upper=u.rod.localToWorld(new THREE.Vector3(0,.35,0)),lower=u.rod.localToWorld(new THREE.Vector3(0,-.35,0)),p=u.piston.localToWorld(new THREE.Vector3()),pin=u.crank.localToWorld(new THREE.Vector3(0,.22,0));return Math.max(upper.distanceTo(p),lower.distanceTo(pin));}),cylinders:units.length};},
   dispose(){disposed=true;setPaused(true);observer.disconnect();const geometries=new Set(),materials=new Set(),textures=new Set();scene.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)for(const m of(Array.isArray(o.material)?o.material:[o.material]))materials.add(m);});materials.forEach(m=>{Object.values(m).forEach(v=>{if(v?.isTexture)textures.add(v);});m.dispose();});geometries.forEach(g=>g.dispose());textures.forEach(t=>t.dispose());environment.dispose();renderer.dispose();canvas.remove();}
  };
  container.engine3D=api;return api;

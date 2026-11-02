@@ -17,3 +17,11 @@ The lazy 3D bundle is approximately 139 KB compressed. The other two variants do
 ## Evidence
 
 Static validation passed for 49 HTML documents and public assets. Chromium checked 320, 390, 820 and 1440 pixel layouts, the real renderer and perspective camera, rotation under pointer drag, rigid rod/journal alignment across seven sampled crank positions, pause/resume, reduced motion and the no-WebGL poster. A separate regression covered the three motion variants, outward ring exit and replay. Screenshots from multiple camera angles were inspected and materials/framing were refined. AI logic, authentication, API and service sources are unchanged. Field performance and untested device/browser combinations are not certified by these checks.
+
+### Viewport-triggered combustion revision
+
+The engine now starts cold at simulation time zero. Each cylinder must complete its own intake before it can ignite: blue air particles and gold fuel droplets enter through the valve/injector, compression closes the valve, a spark flashes at the plug, and an orange-white flame expands above the descending piston. Exhaust particles leave through the outlet. Spark plugs, injector nozzles and curved ports are solid geometry; flame sprites and small particle buffers keep the effect inexpensive without a fluid simulation.
+
+A separate observer prepares the lazy module within 320px of the viewport without advancing time. Playback begins when 65% of the engine surface becomes visible; after the first start it pauses below 15% visibility and resumes from the saved phase. Hidden tabs, the pause button and reduced-motion preferences also stop the render loop. Other hero modes do not download Three.js. A static render remains available if WebGL is unavailable or the context is lost.
+
+Validation includes actual WebGL rendering at four widths, connected crank/rod joints throughout rotation, drag controls, reduced motion and context failure. The combustion regression additionally checks preparation without playback, scroll activation, offscreen time freezing and the intake/compression/spark/fire/exhaust sequence.
