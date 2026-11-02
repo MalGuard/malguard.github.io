@@ -1,9 +1,26 @@
 import * as THREE from 'three';
-import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+import {HDRLoader} from 'three/addons/loaders/HDRLoader.js';
+import {gunzipSync} from 'three/addons/libs/fflate.module.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+// The prefiltered atlas uses the original studio at its original resolution.
+async function loadStudio(){
+ const response=await fetch('/assets/precision/engine-studio-pmrem-256.hdr.gz',{cache:'force-cache'});
+ if(!response.ok)throw new Error('Studio texture unavailable');
+ let bytes=new Uint8Array(await response.arrayBuffer());
+ if(bytes[0]===31&&bytes[1]===139){
+  if(typeof DecompressionStream==='function')bytes=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+  else bytes=gunzipSync(bytes);
+ }
+ const data=new HDRLoader().parse(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength));
+ const texture=new THREE.DataTexture(data.data,data.width,data.height,THREE.RGBAFormat,data.type);
+ texture.mapping=THREE.CubeUVReflectionMapping;texture.colorSpace=THREE.LinearSRGBColorSpace;texture.flipY=false;
+ texture.minFilter=texture.magFilter=THREE.LinearFilter;texture.generateMipmaps=false;texture.needsUpdate=true;return texture;
+}
 
 // Real meshes, a perspective camera and physically based materials. No SVG piston fallback.
 export async function mountEngine3D(container){
+ const yieldMain=()=>new Promise(resolve=>setTimeout(resolve,0));
  const canvas=document.createElement('canvas');canvas.className='engine3d-canvas';canvas.setAttribute('aria-hidden','true');container.append(canvas);
  let renderer;
  try{const context=canvas.getContext('webgl2',{alpha:true,antialias:true,powerPreference:'low-power'});if(!context){canvas.remove();container.dataset.renderState='poster';return null;}renderer=new THREE.WebGLRenderer({canvas,context,alpha:true,antialias:true,powerPreference:'low-power'});}catch{canvas.remove();container.dataset.renderState='poster';return null;}
@@ -13,8 +30,11 @@ export async function mountEngine3D(container){
  const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(34,1,.1,50);
  camera.position.set(3.1,2.3,6.3);camera.lookAt(0,.33,0);
  const rig=new THREE.Group();scene.add(rig);
- const pmrem=new THREE.PMREMGenerator(renderer),room=new RoomEnvironment();
- const environment=pmrem.fromScene(room,.04);scene.environment=environment.texture;scene.environmentIntensity=1.05;room.dispose();pmrem.dispose();
+ // This is the original studio, prefiltered offline. Never render/blur it on a visitor's device.
+ let environment;try{environment=await loadStudio();}catch{renderer.dispose();canvas.remove();container.dataset.renderState='poster';return null;}
+ environment.mapping=THREE.CubeUVReflectionMapping;environment.flipY=false;
+ scene.environment=environment;scene.environmentIntensity=1.05;
+ await yieldMain();
  scene.add(new THREE.HemisphereLight(0xcce2ff,0x292533,.48));
  const key=new THREE.DirectionalLight(0xfff3e5,3.2);key.position.set(-3,5,4);key.castShadow=true;key.shadow.mapSize.set(innerWidth<600?512:1024,innerWidth<600?512:1024);key.shadow.camera.left=-3;key.shadow.camera.right=3;key.shadow.camera.top=3;key.shadow.camera.bottom=-3;key.shadow.camera.near=.5;key.shadow.camera.far=15;key.shadow.normalBias=.015;key.shadow.bias=-.0002;scene.add(key);
  const rim=new THREE.DirectionalLight(0x7bbcff,2.1);rim.position.set(3,2,-3);scene.add(rim);
@@ -70,6 +90,7 @@ export async function mountEngine3D(container){
  const flyMesh=mesh(new THREE.ExtrudeGeometry(flyShape,{depth:.09,bevelEnabled:true,bevelSize:.009,bevelThickness:.009,bevelSegments:2,curveSegments:20}),satin,fly);flyMesh.rotation.y=Math.PI/2;flyMesh.position.x=-.045;
  const hub=axle(.13,.145,steel,fly);hub.position.x=.01;
  // One piston design, including hollow skirt, crown bevel, wrist pin and compression rings.
+ await yieldMain();
  const pistonProfile=[new THREE.Vector2(.215,-.25),new THREE.Vector2(.237,-.235)];
  for(let y=-.22;y<.063;y+=.008)pistonProfile.push(new THREE.Vector2(.246,y));
  for(const y of [.075,.115,.155])pistonProfile.push(new THREE.Vector2(.246,y-.009),new THREE.Vector2(.235,y-.006),new THREE.Vector2(.235,y+.006),new THREE.Vector2(.246,y+.009));
@@ -103,7 +124,7 @@ export async function mountEngine3D(container){
  const sparkMaterial=new THREE.MeshBasicMaterial({color:0xe3f4ff,toneMapped:false});
  function particles(count,color,size,parent){const positions=new Float32Array(count*3),geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));const material=new THREE.PointsMaterial({color,size,map:dotTexture,transparent:true,opacity:.8,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false});const points=new THREE.Points(geometry,material);points.frustumCulled=false;parent.add(points);return points;}
  const units=[];const phases=[0,Math.PI,Math.PI*3,Math.PI*2];
- centers.forEach((x,i)=>{
+ for(const [i,x] of centers.entries()){
   const group=new THREE.Group();group.position.x=x;rig.add(group);
   // Rear half of a bore leaves a real open cutaway, rather than a painted cylinder.
   const wallProfile=[new THREE.Vector2(.285,-.43),new THREE.Vector2(.285,.43),new THREE.Vector2(.258,.43),new THREE.Vector2(.258,-.43),new THREE.Vector2(.285,-.43)];
@@ -153,7 +174,8 @@ export async function mountEngine3D(container){
   const sparkCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(0,.902,.12),new THREE.Vector3(.012,.896,.122),new THREE.Vector3(.004,.888,.12),new THREE.Vector3(.014,.888,.12)]);
   const arc=mesh(new THREE.TubeGeometry(sparkCurve,10,.0025,4,false),sparkMaterial,group);arc.castShadow=false;
   units.push({x,group,crank,piston,rod,gas,gasMaterial,valves,flow,fuel,flame,spark,arc,phase:phases[i],primeAngle:i===0?0:(Math.PI*4-phases[i]<Math.PI*2?Math.PI*8-phases[i]:Math.PI*4-phases[i]),index:i,slider:0,angle:0,stage:'off',valveLift:[0,0]});
- });
+  await yieldMain();
+ }
  // Soft studio grounding is a tiny locally generated texture, not a post-processing pass.
  const shadowCanvas=document.createElement('canvas');shadowCanvas.width=128;shadowCanvas.height=128;const ctx=shadowCanvas.getContext('2d');const g=ctx.createRadialGradient(64,64,10,64,64,63);g.addColorStop(0,'rgba(0,0,0,.65)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,128,128);
  const shadow=mesh(new THREE.PlaneGeometry(4.1,2.0),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shadowCanvas),transparent:true,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=-.945;shadow.castShadow=false;
