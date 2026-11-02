@@ -6,13 +6,13 @@ The public homepage exposes three motion previews through `?motion=merge`, `?mot
 
 The engine preview loads a self-hosted, pinned Three.js 0.180.0 bundle only after its variant is selected. Source: `tools/product-engine3d.mjs`; rebuild with `node tools/build-product-engine.mjs` after installing the repository dependencies. The compiled module is committed as a public asset. Three.js is already pinned in the project and its MIT license is included.
 
-A perspective camera renders four cutaway cylinders, hollow piston skirts, compression rings, wrist pins, rigid connecting rods, crank webs, shaft journals, a drilled flywheel, valve stems and helical springs. The model has approximately 222 mesh parts and 93,000 triangles. Steel, anodized metal and bronze use physically based materials and a generated studio environment, key and rim lights. Intake, injection, ignition and combustion use small particle buffers, a compact combustion-front texture and chamber lighting. This is a visual mechanism, not application-performance telemetry.
+A perspective camera renders four cutaway cylinders, hollow piston skirts, compression rings, wrist pins, rigid connecting rods, crank webs, shaft journals, a drilled flywheel, valve stems and helical springs. The model has approximately 222 mesh parts and 140,000 triangles. Steel, anodized metal and bronze use physically based materials and a generated studio environment, key and rim lights. Intake, injection, ignition and combustion use small particle buffers, a compact combustion-front texture and chamber lighting. This is a visual mechanism, not application-performance telemetry.
 
 Piston travel and rod orientation come from the slider-crank equations. The four crank phases are balanced; valve cycles correspond to the four-stroke cycle. The model rotates under horizontal pointer drag, including while animation is paused. No SVG piston mechanism remains in the page.
 
 ## Loading and motion
 
-The lazy 3D bundle is approximately 139 KB compressed. The other two variants do not download it. Continuous rendering is capped near 30 fps with a limited pixel ratio; rendering stops while paused, offscreen, in a hidden tab or under reduced motion. There is no new runtime CDN or model-service request. Without WebGL, a small static poster captured from the actual 3D scene is displayed. Context loss switches to that poster.
+The lazy 3D bundle is approximately 140 KB compressed. The other two variants do not download it. Continuous rendering is capped near 30 fps with a limited pixel ratio; rendering stops while paused, offscreen, in a hidden tab or under reduced motion. There is no new runtime CDN or model-service request. Without WebGL, a small static poster captured from the actual 3D scene is displayed. Context loss switches to that poster.
 
 ## Evidence
 
@@ -31,3 +31,10 @@ Validation includes actual WebGL rendering at four widths, connected crank/rod j
 ### Crank-driven app orbit
 
 In the engine variant, the app ring now uses the engine's simulation clock with an 8:1 reduction: eight crank revolutions produce one app-ring revolution. Counter-rotation keeps every app face upright, including the mobile elliptical layout. The existing engine frame writes one CSS angle to the rotor; there is no independent animation loop or additional dependency. Preparation, pause, offscreen/hidden states, context loss and reduced motion cannot leave the apps rotating ahead of a stopped engine. The other two hero variants keep their own choreography.
+
+
+### Machined piston production release
+
+The default homepage now selects the engine; the merge and orbit variants remain accessible through their explicit query parameters. Pistons use a shared machined-aluminum physical material with generated fine roughness/bump texture, dished crowns, recessed compression-ring grooves, actual openings through the skirt for wrist pins and bronze bushes. Forged connecting rods have beveled geometry and a real lightening opening. A darker liner and directional studio lighting distinguish the moving metal surfaces. Startup rests slightly after top dead center, keeping initial combustion away from a zero-torque dead-center pose. The app drive subtracts the resting crank angle and stays stationary until ignition has occurred. No model download or external texture request is added.
+
+The existing experience regression is updated to cover all four authorized product-card destinations, including Agent Guard. Production deployment follows the repository's `main` → GitHub Pages workflow for `malguard.site`.

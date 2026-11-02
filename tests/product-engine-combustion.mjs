@@ -21,8 +21,8 @@ try{
   state=await model.evaluate((n,t)=>{n.engine3D.renderAt(t);return n.engine3D.inspect();},time);
   assert.equal(state.startupPhase,stage);if(effect)assert.ok(state.effects[0][effect],effect+' is visible');
   if(time<1.94)assert.ok(state.effects.every(e=>!e.fire),'No combustion before injection and spark');
-  if(time<2.12){assert.ok(Math.abs(state.crankAngle-Math.PI*2)<1e-8,'Crank stays still until after combustion');assert.equal(await page.locator('.orbit-rotor').evaluate(n=>parseFloat(n.style.getPropertyValue('--engine-drive-angle'))),0);}
-  if(time>=2.12)assert.ok(state.crankAngle>Math.PI*2,'Combustion starts crank motion');
+  if(time<2.12){assert.ok(Math.abs(state.crankAngle-state.restAngle)<1e-8,'Crank stays still until after combustion');assert.equal(await page.locator('.orbit-rotor').evaluate(n=>parseFloat(n.style.getPropertyValue('--engine-drive-angle'))),0);}
+  if(time>=2.12)assert.ok(state.crankAngle>state.restAngle,'Combustion starts crank motion');
   assert.equal(state.valves[0].inlet,0);assert.equal(state.valves[0].outlet,0,'Initial combustion is sealed');
   assert.ok(state.rodErrors.every(v=>v<1e-5));
  }
@@ -38,9 +38,9 @@ try{
  for(const width of [390,1440]){
   await page.setViewportSize({width,height:1000});
   for(const time of [0,2.02,2.65,6.8]){
-   const geometry=await model.evaluate((n,t)=>{n.engine3D.renderAt(t);const rotor=n.closest('.brand-orbit').querySelector('.orbit-rotor'),tile=rotor.querySelector('.orbit-tile');return {crank:n.engine3D.inspect().crankAngle,angle:parseFloat(rotor.style.getPropertyValue('--engine-drive-angle')),rotor:[...['a','b','c','d'].map(k=>new DOMMatrix(getComputedStyle(rotor).transform)[k])],tile:[...['a','b','c','d'].map(k=>new DOMMatrix(getComputedStyle(tile).transform)[k])],animation:getComputedStyle(rotor).animationName};},time);
-   assert.equal(geometry.animation,'none','Engine ring has no independent animation');assert.ok(Math.abs(geometry.angle-(geometry.crank-Math.PI*2)*180/Math.PI/8)<1e-5);
-   const angle=(geometry.crank-Math.PI*2)/8;assert.ok(Math.abs(geometry.rotor[0]-Math.cos(angle))<1e-5);assert.ok(Math.abs(geometry.rotor[1]-Math.sin(angle))<1e-5);
+   const geometry=await model.evaluate((n,t)=>{n.engine3D.renderAt(t);const rotor=n.closest('.brand-orbit').querySelector('.orbit-rotor'),tile=rotor.querySelector('.orbit-tile');return {rest:n.engine3D.inspect().restAngle,crank:n.engine3D.inspect().crankAngle,angle:parseFloat(rotor.style.getPropertyValue('--engine-drive-angle')),rotor:[...['a','b','c','d'].map(k=>new DOMMatrix(getComputedStyle(rotor).transform)[k])],tile:[...['a','b','c','d'].map(k=>new DOMMatrix(getComputedStyle(tile).transform)[k])],animation:getComputedStyle(rotor).animationName};},time);
+   assert.equal(geometry.animation,'none','Engine ring has no independent animation');assert.ok(Math.abs(geometry.angle-(geometry.crank-geometry.rest)*180/Math.PI/8)<1e-5);
+   const angle=(geometry.crank-geometry.rest)/8;assert.ok(Math.abs(geometry.rotor[0]-Math.cos(angle))<1e-5);assert.ok(Math.abs(geometry.rotor[1]-Math.sin(angle))<1e-5);
    assert.ok(Math.abs(geometry.tile[1]+Math.sin(angle))<1e-5,'App face counter-rotates to stay upright');
   }
  }

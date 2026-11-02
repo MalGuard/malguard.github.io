@@ -100,7 +100,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     await check(`${name} ${width}px accessible product links and lightweight cards`,async()=>{
       await page.goto(base+'/');await publicEntry(page);
       const links=page.locator('#products article.product a.text-link');
-      assert.deepEqual(await links.evaluateAll(a=>a.map(x=>new URL(x.href).pathname)),['/gta-guard.html','/game-scam-guard.html','/ai-product.html']);
+      assert.deepEqual(await links.evaluateAll(a=>a.map(x=>new URL(x.href).pathname)),['/gta-guard.html','/game-scam-guard.html','/ai-product.html','/products.html']);
       assert.equal(await page.locator('#products canvas').count(),0);
       for(const link of await links.all()){await link.focus();assert.equal(await link.evaluate(el=>document.activeElement===el),true);}
     });

@@ -2,7 +2,7 @@
 (()=>{
  const host=document.querySelector('.brand-orbit');if(!host)return;
  const requested=new URLSearchParams(location.search).get('motion');
- const mode=['merge','orbit','engine'].includes(requested)?requested:'orbit';host.dataset.mode=mode;
+ const mode=['merge','orbit','engine'].includes(requested)?requested:'engine';host.dataset.mode=mode;
  const captions={merge:'Your tools. One MalGuard.',orbit:'Your tools. Connected by MalGuard.',engine:'Link. File. AI. Agent. Drag the engine to inspect.'};
  host.querySelector('figcaption').textContent=captions[mode];
  const button=host.querySelector('.orbit-control'),reduce=matchMedia('(prefers-reduced-motion: reduce)');
@@ -15,7 +15,7 @@
  host.querySelector('.orbit-path').addEventListener('animationend',e=>{if(mode==='merge'&&e.animationName==='reference-orbit-exit'){finished=true;button.textContent='Replay animation';button.setAttribute('aria-pressed','false');}});
  async function warmEngine(){
   if(mode!=='engine'||loading||document.hidden)return;loading=true;
-  try{const module=await import('/assets/precision/product-engine3d.js?v=20261102-cold-start');engine=await module.mountEngine3D(target);if(!engine)host.querySelector('figcaption').textContent='Link. File. AI. Agent.';sync();}
+  try{const module=await import('/assets/precision/product-engine3d.js?v=20261102-machined-piston');engine=await module.mountEngine3D(target);if(!engine)host.querySelector('figcaption').textContent='Link. File. AI. Agent.';sync();}
   catch{target.dataset.renderState='poster';}
  }
  if('IntersectionObserver'in window){
