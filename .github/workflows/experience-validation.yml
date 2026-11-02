@@ -73,7 +73,7 @@ jobs:
       options: --ipc=host
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - name: Verify viewport typing, menus and reduced-motion fallback
+      - name: Verify immediate content, menus and reduced-motion fallback
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
@@ -84,12 +84,8 @@ jobs:
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/gamescam-ai-hero.mjs
           TEST_BROWSER=chromium node tests/opaque-menu-static-gta.mjs
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/opaque-menu-static-gta.mjs
-          TEST_BROWSER=chromium node tests/precision-motion-matrix.mjs
-          TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/precision-motion-matrix.mjs
-          TEST_BROWSER=chromium node tests/precision-serial-typing.mjs
-          TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/precision-serial-typing.mjs
-          TEST_BROWSER=chromium node tests/precision-shared-typing.mjs
-          TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/precision-shared-typing.mjs
+          TEST_BROWSER=chromium node tests/instant-public-content.mjs
+          TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/instant-public-content.mjs
           TEST_BROWSER=chromium node tests/gta6-shared-experience.mjs
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/gta6-shared-experience.mjs
           TEST_BROWSER=chromium node tests/product-card-hero-backdrops.mjs
@@ -110,28 +106,16 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: Install pinned verification tools
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Verify complete cinematic and failure matrix
+      - name: Verify immediate content and lightweight space artwork
         env:
           TEST_BROWSER: ${{ matrix.browser }}
         run: |
           openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
           python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
-          # WebKit 26.5's Linux WPE headless compositor crashes on the
-          # full-motion card scene. Use its GTK display compositor under
-          # Xvfb; keep the same engine, effects and complete test matrix.
           if [ "$TEST_BROWSER" = "webkit" ]; then
-            xvfb-run --auto-servernum npm run test:motion
+            xvfb-run --auto-servernum node tests/instant-public-content.mjs
           else
-            npm run test:motion
-          fi
-      - name: Verify particle text assembly, reverse scroll and readable holds
-        env:
-          TEST_BROWSER: ${{ matrix.browser }}
-        run: |
-          if [ "$TEST_BROWSER" = "webkit" ]; then
-            xvfb-run --auto-servernum node tests/precision-home-qa.mjs
-          else
-            node tests/precision-home-qa.mjs
+            node tests/instant-public-content.mjs
           fi
       - name: Capture desktop and mobile visual review
         if: matrix.browser == 'chromium'

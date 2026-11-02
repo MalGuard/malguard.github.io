@@ -61,11 +61,11 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
       await page.locator('#searchButton').click();
       assert.equal(await page.locator('#siteSearch').isVisible(),true);
       await page.keyboard.press('Escape');assert.equal(await page.locator('#siteSearch').isVisible(),false);
-      await page.waitForFunction(()=>document.querySelector('.flow-stage')?.dataset.renderer==='vector');
+      assert.equal(await page.locator('.brand-orbit').count(),1);
       assert.equal(await page.locator('.flow-stage svg text').filter({hasText:'undefined'}).count(),0);
-      assert.equal(await page.locator('.flow-stage canvas').isVisible(),false);
+      assert.equal(await page.locator('.brand-orbit canvas').count(),0);
       for(const step of ['Identify','Inspect','Analyze','Decide'])assert.ok((await page.locator('#technology h3').allTextContents()).some(t=>t.trim()===step));
-      assert.ok((await page.locator('.metric-clarification').innerText()).includes('not verified'));
+      assert.equal(await page.locator('.metrics').count(),0,'Illustrative usage counters retired');
     });
     await check(`${name} ${width}px URL inputs and local SHA-256`,async()=>{
       for(const path of ['/tools.html','/scan-url.html']){
@@ -100,7 +100,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     await check(`${name} ${width}px accessible product links and lightweight cards`,async()=>{
       await page.goto(base+'/');await publicEntry(page);
       const links=page.locator('#products article.product a.text-link');
-      assert.deepEqual(await links.evaluateAll(a=>a.map(x=>new URL(x.href).pathname)),['/gta-guard.html','/game-scam-guard.html','/ai-product.html']);
+      assert.deepEqual(await links.evaluateAll(a=>a.map(x=>new URL(x.href).pathname)),['/gta-guard.html','/game-scam-guard.html','/ai-product.html','/products.html']);
       assert.equal(await page.locator('#products canvas').count(),0);
       for(const link of await links.all()){await link.focus();assert.equal(await link.evaluate(el=>document.activeElement===el),true);}
     });
@@ -197,22 +197,22 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
   await check(`${name} reduced motion and JS-free copy remain visible`,async()=>{
      const c=await browser.newContext({...fixtureTLS,reducedMotion:'reduce'}),p=await c.newPage();
      await p.goto(base+'/');await settle(p);
-     await p.waitForFunction(()=>document.querySelector('.flow-stage')?.dataset.renderer==='vector');
-     assert.equal(await p.locator('.motion-toggle').isVisible(),false);
+     assert.equal(await p.locator('.brand-orbit').count(),1);
+     assert.equal(await p.locator('.motion-toggle').count(),0);
      assert.equal(await p.locator('.flow-stage svg text').filter({hasText:'undefined'}).count(),0);
      await c.close();
      const nojs=await browser.newContext({...fixtureTLS,javaScriptEnabled:false}),q=await nojs.newPage();await q.goto(base+'/');
      assert.ok(await q.getByRole('heading',{name:'Scan smart. Play safe.'}).isVisible());
      assert.ok(await q.getByRole('link',{name:'Explore products'}).isVisible());await nojs.close();
    });
-   await check(`${name} viewport typing is bounded and scroll-triggered`,async()=>{
+   await check(`${name} public content is immediately available`,async()=>{
      const c=await browser.newContext({...fixtureTLS,viewport:{width:1280,height:850},reducedMotion:'no-preference'}),p=await c.newPage();
      await c.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
      await p.goto(base+'/');await settle(p);
-     const title=p.locator('#technology [data-type]').first();assert.equal(await title.getAttribute('data-type-state'),'pending');
+     const title=p.locator('#technology [data-type]').first();assert.equal(await title.getAttribute('data-type-state'),'complete');
      await title.evaluate(node=>node.scrollIntoView({block:'center',behavior:'instant'}));
      await p.waitForFunction(()=>['typing','complete'].includes(document.querySelector('#technology [data-type]')?.dataset.typeState),null,{timeout:30000});
-     assert.equal(await p.locator('#products article.product').count(),3);await c.close();
+     assert.equal(await p.locator('#products article.product').count(),4);await c.close();
    });
    await browser.close();
 }
