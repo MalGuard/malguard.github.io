@@ -1,0 +1,40 @@
+/* A simple ring of upright product tiles. No canvas, video or rendering library. */
+.brand-orbit{--orbit-radius:168px;position:relative;isolation:isolate;width:100%;max-width:540px;margin:0 auto;padding:18px 0 0;text-align:center}
+.orbit-stage{height:430px;position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(ellipse 48% 47% at 50% 50%,#548bcc1c,transparent 95%)}
+.orbit-stage:before{content:'';position:absolute;left:50%;top:50%;width:calc(var(--orbit-radius)*2);height:calc(var(--orbit-radius)*2);border:1px solid #a1c4f115;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
+.orbit-path,.orbit-rotor{position:absolute;inset:0;transform-origin:center}
+.orbit-rotor{animation:product-orbit-turn 32s linear infinite}
+.orbit-item{position:absolute;left:50%;top:50%;width:60px;height:60px;transform:translate(-50%,-50%) rotate(var(--angle)) translateY(calc(-1*var(--orbit-radius))) rotate(calc(-1*var(--angle)));pointer-events:none}
+.orbit-tile{width:100%;height:100%;display:grid;place-items:center;border:1px solid #cadcf23b;border-radius:16px;background:linear-gradient(145deg,#1a2433,#0b111c);box-shadow:0 6px 20px #0005,inset 0 1px #ffffff0c;animation:product-orbit-upright 32s linear infinite}
+.orbit-tile img{width:36px;height:36px;display:block;object-fit:contain;border:0!important;margin:0!important}
+.orbit-tile svg{width:27px;height:27px;color:#c9dcef}
+.orbit-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;gap:12px;width:160px}
+.orbit-center>img{width:92px;height:92px;object-fit:contain;border:0!important;background:none!important;box-shadow:none!important}
+.orbit-wordmark{font:500 19px/1.2 Arial,system-ui,sans-serif;letter-spacing:-.04em;color:#e9f0fb}
+.brand-orbit figcaption{font:11px/1.7 Arial,system-ui,sans-serif;color:#a4b5c9;letter-spacing:.025em;margin:2px 12px 0}
+.orbit-control{margin:14px auto 0;padding:7px 13px;min-height:44px;border:1px solid #a8bfd92b;border-radius:999px;background:#0a111b;color:#aebfd4;font:11px/1.5 Arial,sans-serif;cursor:pointer}
+.orbit-control:hover{border-color:#c7dcf66b;color:#eef4ff}
+.orbit-control:focus-visible{outline:2px solid #b9d7ff;outline-offset:4px}
+.brand-orbit:not([data-orbit-ready]) *{animation:none!important}
+.brand-orbit:not([data-orbit-ready]) .orbit-control{visibility:hidden}
+.brand-orbit:is(.is-paused,.is-offscreen,.is-tab-hidden) *{animation-play-state:paused!important}
+@keyframes product-orbit-turn{to{transform:rotate(360deg)}}
+@keyframes product-orbit-upright{to{transform:rotate(-360deg)}}
+.brand-orbit[data-mode=merge] .orbit-path{animation:products-converge 8.4s cubic-bezier(.4,0,.2,1) both}
+.brand-orbit[data-mode=merge] .orbit-rotor{animation:merge-turn 8.4s linear both}
+.brand-orbit[data-mode=merge] .orbit-tile{animation:merge-upright 8.4s linear both}
+.brand-orbit[data-mode=merge] .orbit-center{animation:brand-reveal 8.4s ease both}
+@keyframes merge-turn{0%{transform:rotate(0)}78%,100%{transform:rotate(110deg)}}
+@keyframes merge-upright{0%{transform:rotate(0)}78%,100%{transform:rotate(-110deg)}}
+@keyframes products-converge{0%,69%{transform:scale(1);opacity:1}92%,100%{transform:scale(.12);opacity:0}}
+@keyframes brand-reveal{0%,76%{opacity:0;transform:translate(-50%,-50%) scale(.82)}96%,100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.orbit-engine{display:none;position:absolute;left:50%;top:50%;width:232px;height:168px;transform:translate(-50%,-50%)}
+.brand-orbit[data-mode=engine] .orbit-center{display:none}
+.brand-orbit[data-mode=engine] .orbit-engine{display:block}
+.engine-piston{animation:engine-stroke 1.9s ease-in-out infinite;animation-delay:var(--phase);transform-box:fill-box;transform-origin:center}
+@keyframes engine-stroke{0%,100%{transform:translateY(0)}50%{transform:translateY(22px)}}
+@media(max-width:1050px){.brand-orbit{--orbit-radius:128px}.orbit-item{width:54px;height:54px}.orbit-stage{height:390px}.orbit-engine{width:205px}.orbit-center>img{width:80px;height:80px}}
+@media(max-width:760px){.orbit-control{display:block;margin-left:12px;margin-right:auto}.brand-orbit{--orbit-radius:136px;max-width:420px;margin-top:20px}.orbit-stage{height:345px}.orbit-item{width:49px;height:49px}.orbit-tile{border-radius:13px}.orbit-tile img{width:31px;height:31px}.orbit-center>img{width:76px;height:76px}.orbit-wordmark{font-size:17px}.orbit-engine{width:190px}.brand-orbit figcaption{font-size:10px}}
+@media(max-width:360px){.brand-orbit{--orbit-radius:116px}.orbit-item{width:45px;height:45px}.orbit-stage{height:300px}.orbit-engine{width:164px}}
+@media(prefers-reduced-motion:reduce){.brand-orbit *{animation:none!important}.brand-orbit .orbit-center{opacity:1!important;transform:translate(-50%,-50%)!important}.brand-orbit[data-mode=merge] .orbit-path{opacity:0}.orbit-control{display:none}}
+@media(forced-colors:active){.orbit-tile,.orbit-control{border-color:CanvasText;box-shadow:none}.orbit-stage{background:none}}

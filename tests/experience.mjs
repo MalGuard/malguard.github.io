@@ -61,9 +61,9 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
       await page.locator('#searchButton').click();
       assert.equal(await page.locator('#siteSearch').isVisible(),true);
       await page.keyboard.press('Escape');assert.equal(await page.locator('#siteSearch').isVisible(),false);
-      assert.equal(await page.locator('.home-nexus').count(),1);
+      assert.equal(await page.locator('.brand-orbit').count(),1);
       assert.equal(await page.locator('.flow-stage svg text').filter({hasText:'undefined'}).count(),0);
-      assert.equal(await page.locator('.home-nexus canvas').count(),0);
+      assert.equal(await page.locator('.brand-orbit canvas').count(),0);
       for(const step of ['Identify','Inspect','Analyze','Decide'])assert.ok((await page.locator('#technology h3').allTextContents()).some(t=>t.trim()===step));
       assert.equal(await page.locator('.metrics').count(),0,'Illustrative usage counters retired');
     });
@@ -197,7 +197,7 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
   await check(`${name} reduced motion and JS-free copy remain visible`,async()=>{
      const c=await browser.newContext({...fixtureTLS,reducedMotion:'reduce'}),p=await c.newPage();
      await p.goto(base+'/');await settle(p);
-     assert.equal(await p.locator('.home-nexus').count(),1);
+     assert.equal(await p.locator('.brand-orbit').count(),1);
      assert.equal(await p.locator('.motion-toggle').count(),0);
      assert.equal(await p.locator('.flow-stage svg text').filter({hasText:'undefined'}).count(),0);
      await c.close();

@@ -23,7 +23,7 @@ try{
   assert.ok(await page.locator('#products .product-art').evaluateAll(nodes=>nodes.every(n=>getComputedStyle(n).visibility==='visible'&&Number(getComputedStyle(n).opacity)===1)));
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   assert.equal(await page.locator('#products canvas').count(),0);
-  if(reducedMotion==='reduce')assert.equal(await page.locator('.nexus-scene').evaluate(n=>getComputedStyle(n).animationName),'none');
+  if(reducedMotion==='reduce')assert.equal(await page.locator('.orbit-rotor').evaluate(n=>getComputedStyle(n).animationName),'none');
   await page.locator('#menuBtn').click();assert.equal(await page.locator('#menuBtn').getAttribute('aria-expanded'),'true');
   await page.keyboard.press('Escape');assert.equal(await page.locator('#menuBtn').getAttribute('aria-expanded'),'false');
   assert.deepEqual(errors,[]);
