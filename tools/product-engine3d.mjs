@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {engineDriveAt,ENGINE_STARTUP,ENGINE_REST_ANGLE} from './product-engine-drive.mjs';
 import {HDRLoader} from 'three/addons/loaders/HDRLoader.js';
 import {gunzipSync} from 'three/addons/libs/fflate.module.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
@@ -185,14 +186,15 @@ export async function mountEngine3D(container){
  const drivenRotor=container.closest('.brand-orbit')?.querySelector('.orbit-rotor');
  // The presentation begins with direct injection into a stationary, sealed chamber.
  // Combustion precedes crank motion; acceleration integrates continuously into running speed.
- const tau=Math.PI*2,restAngle=tau+.04,motionStart=2.12,ignitionTime=1.94,rampDuration=.95;
- function driveAt(time){
-  const elapsed=Math.max(0,time-motionStart);
-  const travel=elapsed<rampDuration?elapsed*elapsed/(2*rampDuration):elapsed-rampDuration/2;
-  return {angle:restAngle+travel*tau/3.4,stage:time<.85?'off':time<1.78?'fuel':time<ignitionTime?'ignition':time<motionStart?'combustion':'running'};
- }
+ const tau=Math.PI*2,restAngle=ENGINE_REST_ANGLE,motionStart=ENGINE_STARTUP.motion,ignitionTime=ENGINE_STARTUP.ignition;
+ const driveAt=engineDriveAt;
+ const speedMeter=document.createElement('output');speedMeter.className='engine-speed';speedMeter.setAttribute('aria-label','Engine animation speed');speedMeter.setAttribute('aria-live','off');
+ speedMeter.innerHTML='<span class="engine-speed-label">Engine speed</span><span class="engine-speed-value">0</span><span class="engine-speed-unit">%</span>';
+ container.closest('.brand-orbit').querySelector('figcaption').before(speedMeter);
+ const speedValue=speedMeter.querySelector('.engine-speed-value');let lastSpeed=-1;
  function apply(time){
-  const drive=driveAt(time),angle=drive.angle;
+  const drive=driveAt(time),angle=drive.angle,level=Math.round(drive.speed*100);
+  if(level!==lastSpeed){speedValue.textContent=String(level);lastSpeed=level;}
   drivenRotor?.style.setProperty('--engine-drive-angle',`${(angle-restAngle)*180/Math.PI/8}deg`);
   fly.rotation.x=angle;let strongestBurn=0;
   for(const u of units){
@@ -207,7 +209,7 @@ export async function mountEngine3D(container){
    [inlet,outlet].forEach((lift,j)=>{u.valves[j].stem.position.y=-lift;u.valves[j].spring.scale.y=(.22-lift)/.22;});
    const crown=slider+.205,height=Math.max(.02,.905-crown);u.gas.scale.y=height;u.gas.position.y=crown+height/2;
    const firstStart=u.index===0&&angle<Math.PI*3;
-   const startupFuel=firstStart&&time>=.85&&time<1.64;
+   const startupFuel=firstStart&&time>=ENGINE_STARTUP.fuelStart&&time<ENGINE_STARTUP.fuelEnd;
    const intake=primed&&stroke<1,exhaust=charged&&stroke>=3;
    // Direct injection uses a short cone of fine droplets, not streams from every cylinder.
    const injection=startupFuel||(intake&&stroke>.12&&stroke<.65);
@@ -232,7 +234,7 @@ export async function mountEngine3D(container){
      positions[j*3+2]=.14+Math.sin(azimuth)*spread;
     }u.fuel.geometry.attributes.position.needsUpdate=true;
    }
-   const ignition=firstStart?(time>=1.78&&time<2.01):(charged&&angle>=u.primeAngle+Math.PI*1.94&&stroke>1.94&&stroke<2.035);
+   const ignition=firstStart?(time>=ENGINE_STARTUP.sparkStart&&time<ENGINE_STARTUP.sparkEnd):(charged&&angle>=u.primeAngle+Math.PI*1.94&&stroke>1.94&&stroke<2.035);
    u.spark.visible=ignition;u.arc.visible=ignition;u.spark.material.opacity=.8+.15*Math.sin(time*89+iSeed(u.x));
    const progress=stroke-2,age=time-ignitionTime;
    const burn=firstStart?(age>=0&&age<1.15?Math.min(1,age/.055)*Math.exp(-age*2.25):0):(canFire&&progress>=0&&progress<.65?Math.min(1,progress/.035)*Math.exp(-progress*5):0);
@@ -243,7 +245,7 @@ export async function mountEngine3D(container){
     u.flame.material.opacity=Math.min(.98,burn*1.2);u.flame.scale.set((.08+.40*spread)*flicker,flameHeight,1);u.flame.position.set(.005*(1-spread),.89-flameHeight*.5,.12);
    }
    u.gasMaterial.color.copy(burn>.016?powerColor:intake?intakeColor:exhaust?exhaustColor:compressionColor);
-   u.gasMaterial.opacity=burn>.016?.04+burn*.18:intake?.045:!running&&u.index===0&&time>=.85?.025:charged&&stroke<2?.035:.004;
+   u.gasMaterial.opacity=burn>.016?.04+burn*.18:intake?.045:!running&&u.index===0&&time>=ENGINE_STARTUP.fuelStart?.025:charged&&stroke<2?.035:.004;
    if(burn>strongestBurn){strongestBurn=burn;combustionLight.position.set(u.x,crown+height*.65,.12);}
   }
   combustionLight.intensity=strongestBurn*1.1;
@@ -272,8 +274,8 @@ export async function mountEngine3D(container){
   renderAt(time){setPaused(true);simTime=time;draw();},
   setYaw(value){yaw=value;draw();},
   capture(){draw();return canvas.toDataURL('image/png');},
-  inspect(){scene.updateMatrixWorld(true);return {renderer:'WebGLRenderer',camera:camera.type,paused,time:simTime,yaw,restAngle,startupPhase:driveAt(simTime).stage,crankAngle:driveAt(simTime).angle,cyclePhase:units[0].stage,valves:units.map(u=>({inlet:u.valveLift[0],outlet:u.valveLift[1],stemY:u.valves.map(v=>v.stem.position.y),springScale:u.valves.map(v=>v.spring.scale.y)})),effects:units.map(u=>({air:u.flow.visible&&u.stage==='intake',fuel:u.fuel.visible,spark:u.spark.visible,fire:u.flame.visible,exhaust:u.flow.visible&&u.stage==='exhaust'})),meshes:scene.getObjectsByProperty('isMesh',true).length,triangles:renderer.info.render.triangles,drawCalls:renderer.info.render.calls,rodErrors:units.map(u=>{const upper=u.rod.localToWorld(new THREE.Vector3(0,.35,0)),lower=u.rod.localToWorld(new THREE.Vector3(0,-.35,0)),p=u.piston.localToWorld(new THREE.Vector3()),pin=u.crank.localToWorld(new THREE.Vector3(0,.22,0));return Math.max(upper.distanceTo(p),lower.distanceTo(pin));}),cylinders:units.length};},
-  dispose(){disposed=true;setPaused(true);observer.disconnect();const geometries=new Set(),materials=new Set(),textures=new Set();scene.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)for(const m of(Array.isArray(o.material)?o.material:[o.material]))materials.add(m);});materials.forEach(m=>{Object.values(m).forEach(v=>{if(v?.isTexture)textures.add(v);});m.dispose();});geometries.forEach(g=>g.dispose());textures.forEach(t=>t.dispose());environment.dispose();renderer.dispose();canvas.remove();}
+  inspect(){scene.updateMatrixWorld(true);return {renderer:'WebGLRenderer',camera:camera.type,paused,time:simTime,yaw,restAngle,startupPhase:driveAt(simTime).stage,speed:driveAt(simTime).speed,crankAngle:driveAt(simTime).angle,cyclePhase:units[0].stage,valves:units.map(u=>({inlet:u.valveLift[0],outlet:u.valveLift[1],stemY:u.valves.map(v=>v.stem.position.y),springScale:u.valves.map(v=>v.spring.scale.y)})),effects:units.map(u=>({air:u.flow.visible&&u.stage==='intake',fuel:u.fuel.visible,spark:u.spark.visible,fire:u.flame.visible,exhaust:u.flow.visible&&u.stage==='exhaust'})),meshes:scene.getObjectsByProperty('isMesh',true).length,triangles:renderer.info.render.triangles,drawCalls:renderer.info.render.calls,rodErrors:units.map(u=>{const upper=u.rod.localToWorld(new THREE.Vector3(0,.35,0)),lower=u.rod.localToWorld(new THREE.Vector3(0,-.35,0)),p=u.piston.localToWorld(new THREE.Vector3()),pin=u.crank.localToWorld(new THREE.Vector3(0,.22,0));return Math.max(upper.distanceTo(p),lower.distanceTo(pin));}),cylinders:units.length};},
+  dispose(){disposed=true;setPaused(true);observer.disconnect();const geometries=new Set(),materials=new Set(),textures=new Set();scene.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)for(const m of(Array.isArray(o.material)?o.material:[o.material]))materials.add(m);});materials.forEach(m=>{Object.values(m).forEach(v=>{if(v?.isTexture)textures.add(v);});m.dispose();});geometries.forEach(g=>g.dispose());textures.forEach(t=>t.dispose());environment.dispose();renderer.dispose();canvas.remove();speedMeter.remove();}
  };
  container.engine3D=api;return api;
 }
