@@ -1,0 +1,38 @@
+/* Product gallery: separate ambient light from the opaque reading surfaces. */
+html:root body.mg-deep-space main :is(.product-grid,.mg-home-product-grid){
+ position:relative;isolation:isolate;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:36px;width:100%;grid-column:1/-1;max-width:1160px;margin:44px auto 20px;overflow:visible;
+}
+html:root body.mg-deep-space main :is(.product-grid,.mg-home-product-grid)::before{
+ content:"";position:absolute;inset:-64px -20px;z-index:-1;pointer-events:none;
+ background:radial-gradient(ellipse 49% 32% at 22% 23%,rgba(133,121,219,.2),transparent 77%),radial-gradient(ellipse 49% 32% at 78% 23%,rgba(86,173,211,.2),transparent 77%),radial-gradient(ellipse 49% 32% at 22% 77%,rgba(72,151,234,.23),transparent 77%),radial-gradient(ellipse 49% 32% at 78% 77%,rgba(146,118,224,.2),transparent 77%);
+}
+html:root body.mg-deep-space :is(#products .product,.mg-home-product-grid .mg-home-product){
+ display:flex!important;flex-direction:column;align-items:stretch;gap:0!important;min-width:0;min-height:0!important;
+ padding:0 28px 24px!important;border-radius:22px!important;border-color:rgba(185,207,239,.23)!important;
+ box-shadow:0 10px 64px -10px rgba(var(--card-light,115,174,230),.34),inset 0 1px 0 #ffffff0a!important;
+}
+html:root body.mg-deep-space :is(#products .product-art,.mg-home-product-art){
+ aspect-ratio:2/1!important;height:auto!important;margin-bottom:24px!important;flex:none;
+}
+html:root body.mg-deep-space :is(#products .product-top,.mg-home-product-top){display:none!important}
+html:root body.mg-deep-space :is(#products .product .status,.mg-home-product-status){font:500 10px/1.7 Arial,system-ui,sans-serif!important;letter-spacing:.09em;margin:0!important;color:#b0bfd2}
+html:root body.mg-deep-space :is(#products .product h3,.mg-home-product h2){font:500 clamp(25px,2.3vw,32px)/1.2 Arial,system-ui,sans-serif!important;letter-spacing:-.035em!important;margin:12px 0 14px!important}
+html:root body.mg-deep-space :is(#products .product p,.mg-home-product p){font:14px/1.8 Arial,system-ui,sans-serif!important;color:#b3bfd0!important;min-height:76px!important;margin:0 0 24px!important;flex:1}
+html:root body.mg-deep-space :is(#products .product .text-link,.mg-home-product-links){margin-top:auto!important;width:100%;border-top:1px solid #ffffff1c;padding-top:12px}
+html:root body.mg-deep-space .mg-home-product-link{min-height:44px;background:transparent!important;border:0!important;padding:0!important;font:500 13px/1.5 Arial,sans-serif!important}
+html:root body.mg-deep-space #products .product .text-link{min-height:48px;padding-top:12px;font:500 13px/1.5 Arial,sans-serif!important}
+html:root body.mg-deep-space :is(#products .gta-vi-badge,.mg-home-product .gta-vi-badge,.mg-home-product-extra){position:absolute;top:18px;left:18px;z-index:2;width:fit-content;margin:0;padding:6px 10px;border-radius:999px;background:#0c1221e8;color:#e0e9fa!important;border:1px solid #b6c7e647;font:500 10px/1.5 Arial,sans-serif!important;min-height:0}
+@media(hover:hover){
+ html:root body.mg-deep-space :is(#products .product,.mg-home-product-grid .mg-home-product):hover{border-color:#bfdaff66!important;box-shadow:0 12px 74px -8px rgba(var(--card-light,115,174,230),.43),inset 0 1px 0 #ffffff12!important}
+}
+html:root body.mg-deep-space :is(#products .product,.mg-home-product-grid .mg-home-product):focus-within{border-color:#bfdaff99!important}
+@media(min-width:761px){html:root body.mg-deep-space #products>.section-intro{max-width:1160px;margin-inline:auto}}
+@media(max-width:760px){
+ html:root body.mg-deep-space main :is(.product-grid,.mg-home-product-grid){grid-template-columns:1fr;gap:36px;margin-top:32px}
+ html:root body.mg-deep-space main :is(.product-grid,.mg-home-product-grid)::before{inset:-35px -12px;background:radial-gradient(ellipse 95% 18% at 50% 13%,#827ddd35,transparent 82%),radial-gradient(ellipse 95% 18% at 50% 38%,#66b7db35,transparent 82%),radial-gradient(ellipse 95% 18% at 50% 63%,#5caaef40,transparent 82%),radial-gradient(ellipse 95% 18% at 50% 88%,#a98aef35,transparent 82%)}
+ html:root body.mg-deep-space :is(#products .product,.mg-home-product-grid .mg-home-product){padding:0 24px 20px!important;border-radius:18px!important}
+ html:root body.mg-deep-space :is(#products .product-art,.mg-home-product-art){width:calc(100% + 48px)!important;margin-inline:-24px!important;aspect-ratio:16/9!important}
+ html:root body.mg-deep-space :is(#products .product p,.mg-home-product p){min-height:0!important;margin-bottom:18px!important}
+}
+@media(forced-colors:active){html:root body.mg-deep-space main :is(.product-grid,.mg-home-product-grid)::before{display:none}html:root body.mg-deep-space :is(#products .product,.mg-home-product-grid .mg-home-product){box-shadow:none!important;border-color:CanvasText!important}}
