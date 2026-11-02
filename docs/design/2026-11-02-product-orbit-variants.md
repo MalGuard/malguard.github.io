@@ -25,3 +25,7 @@ The engine now starts cold at simulation time zero. Each cylinder must complete 
 A separate observer prepares the lazy module within 320px of the viewport without advancing time. Playback begins when 65% of the engine surface becomes visible; after the first start it pauses below 15% visibility and resumes from the saved phase. Hidden tabs, the pause button and reduced-motion preferences also stop the render loop. Other hero modes do not download Three.js. A static render remains available if WebGL is unavailable or the context is lost.
 
 Validation includes actual WebGL rendering at four widths, connected crank/rod joints throughout rotation, drag controls, reduced motion and context failure. The combustion regression additionally checks preparation without playback, scroll activation, offscreen time freezing and the intake/compression/spark/fire/exhaust sequence.
+
+### Crank-driven app orbit
+
+In the engine variant, the app ring now uses the engine's simulation clock with an 8:1 reduction: eight crank revolutions produce one app-ring revolution. Counter-rotation keeps every app face upright, including the mobile elliptical layout. The existing engine frame writes one CSS angle to the rotor; there is no independent animation loop or additional dependency. Preparation, pause, offscreen/hidden states, context loss and reduced motion cannot leave the apps rotating ahead of a stopped engine. The other two hero variants keep their own choreography.

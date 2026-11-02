@@ -137,7 +137,10 @@ export async function mountEngine3D(container){
  const yAxis=new THREE.Vector3(0,1,0),top=new THREE.Vector3(),bottom=new THREE.Vector3(),direction=new THREE.Vector3();
  const iSeed=x=>x*13.7;
  const intakeColor=new THREE.Color(0x63bdf0),powerColor=new THREE.Color(0xffac55),compressionColor=new THREE.Color(0xb8cde0),exhaustColor=new THREE.Color(0x8e9fb5);
+ const drivenRotor=container.closest('.brand-orbit')?.querySelector('.orbit-rotor');
  function apply(time){
+  // An 8:1 reduction couples the app ring to the same crankshaft clock.
+  drivenRotor?.style.setProperty('--engine-drive-angle',`${time*360/(3.4*8)}deg`);
   const angle=time*Math.PI*2/3.4;fly.rotation.x=angle;let strongestBurn=0;
   for(const u of units){
    const a=angle+u.phase,pinY=-.35+.22*Math.cos(a),pinZ=.22*Math.sin(a),slider=pinY+Math.sqrt(.7*.7-pinZ*pinZ);

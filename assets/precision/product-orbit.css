@@ -90,3 +90,8 @@
 @media(max-width:360px){.brand-orbit[data-mode=engine]{--orbit-radius:116px}.engine3d-host{width:218px;height:220px}.brand-orbit[data-mode=engine] .orbit-stage{height:380px}}
 @keyframes engine-app-upright{from{transform:rotate(0) scaleY(.813008)}to{transform:rotate(-360deg) scaleY(.813008)}}
 @media(prefers-reduced-motion:reduce){.engine3d-canvas{transition:none}}
+
+/* Engine output drives this ring; no independent CSS clock can drift from the crank. */
+.brand-orbit[data-mode=engine] .orbit-rotor{animation:none;transform:rotate(var(--engine-drive-angle,0deg))}
+.brand-orbit[data-mode=engine] .orbit-tile{animation:none;transform:rotate(calc(-1 * var(--engine-drive-angle,0deg)))}
+@media(max-width:760px){.brand-orbit[data-mode=engine] .orbit-tile{transform:rotate(calc(-1 * var(--engine-drive-angle,0deg))) scaleY(.813008)}}
