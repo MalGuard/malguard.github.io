@@ -40,3 +40,36 @@ body.mg-deep-space.auth-required{--bg:#050507}
  html:root body.mg-deep-space.mg-deep-space.mg-deep-space::before,
  html:root body.mg-deep-space.mg-deep-space.mg-deep-space::after{display:none!important}
 }
+/* Low-intensity surface lighting: neutral starlight with a restrained blue cast. */
+html:root body.mg-deep-space #products .product,
+html:root body.mg-deep-space main :is(.product,.mg-home-product,.card,.compare-card){
+ background-color:#0b1019!important;
+ background-image:radial-gradient(ellipse 100% 55% at 85% 0%,rgba(var(--card-light,164,183,211),.075),transparent 75%),radial-gradient(ellipse 80% 50% at 0% 100%,rgba(var(--card-light,164,183,211),.025),transparent 80%)!important;
+ border-color:rgba(194,209,229,.18)!important;
+ box-shadow:inset 0 1px 0 rgba(224,234,250,.055),0 10px 30px rgba(0,0,0,.18)!important;
+ transition:border-color .18s ease,box-shadow .18s ease!important;
+}
+body.mg-deep-space .product-gta{--card-light:194,178,206}
+body.mg-deep-space .product-game{--card-light:154,194,186}
+body.mg-deep-space .product-ai{--card-light:167,191,215}
+body.mg-deep-space .product-agent{--card-light:183,174,213}
+@media(hover:hover){
+ html:root body.mg-deep-space #products .product:hover,
+ html:root body.mg-deep-space main :is(.product,.mg-home-product,.card,.compare-card):hover{
+  border-color:rgba(202,217,239,.3)!important;
+  box-shadow:inset 0 1px 0 rgba(232,240,255,.09),0 0 24px rgba(var(--card-light,164,183,211),.035),0 12px 32px rgba(0,0,0,.22)!important;
+ }
+}
+html:root body.mg-deep-space #products .product:focus-within,
+html:root body.mg-deep-space main :is(.product,.mg-home-product,.card,.compare-card):focus-within{
+ border-color:rgba(202,217,239,.38)!important;
+ box-shadow:inset 0 1px 0 rgba(232,240,255,.09),0 0 24px rgba(var(--card-light,164,183,211),.035)!important;
+}
+@media(prefers-reduced-motion:reduce){
+ html:root body.mg-deep-space #products .product,
+ html:root body.mg-deep-space main :is(.product,.mg-home-product,.card,.compare-card){transition:none!important}
+}
+@media(forced-colors:active){
+ html:root body.mg-deep-space #products .product,
+ html:root body.mg-deep-space main :is(.product,.mg-home-product,.card,.compare-card){background-image:none!important;border-color:CanvasText!important;box-shadow:none!important}
+}
