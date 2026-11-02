@@ -6,7 +6,7 @@ The public homepage exposes three motion previews through `?motion=merge`, `?mot
 
 The engine preview loads a self-hosted, pinned Three.js 0.180.0 bundle only after its variant is selected. Source: `tools/product-engine3d.mjs`; rebuild with `node tools/build-product-engine.mjs` after installing the repository dependencies. The compiled module is committed as a public asset. Three.js is already pinned in the project and its MIT license is included.
 
-A perspective camera renders four cutaway cylinders, hollow piston skirts, compression rings, wrist pins, rigid connecting rods, crank webs, shaft journals, a drilled flywheel, valve stems and helical springs. The model has approximately 178 mesh parts and 80,000 triangles. Steel, anodized metal and bronze use physically based materials and a generated studio environment, key and rim lights. Intake and combustion are illustrated by restrained chamber colors. This is a visual mechanism, not application-performance telemetry.
+A perspective camera renders four cutaway cylinders, hollow piston skirts, compression rings, wrist pins, rigid connecting rods, crank webs, shaft journals, a drilled flywheel, valve stems and helical springs. The model has approximately 222 mesh parts and 93,000 triangles. Steel, anodized metal and bronze use physically based materials and a generated studio environment, key and rim lights. Intake, injection, ignition and combustion use small particle buffers, a compact combustion-front texture and chamber lighting. This is a visual mechanism, not application-performance telemetry.
 
 Piston travel and rod orientation come from the slider-crank equations. The four crank phases are balanced; valve cycles correspond to the four-stroke cycle. The model rotates under horizontal pointer drag, including while animation is paused. No SVG piston mechanism remains in the page.
 
@@ -20,11 +20,13 @@ Static validation passed for 49 HTML documents and public assets. Chromium check
 
 ### Viewport-triggered combustion revision
 
-The engine now starts cold at simulation time zero. Each cylinder must complete its own intake before it can ignite: blue air particles and gold fuel droplets enter through the valve/injector, compression closes the valve, a spark flashes at the plug, and an orange-white flame expands above the descending piston. Exhaust particles leave through the outlet. Spark plugs, injector nozzles and curved ports are solid geometry; flame sprites and small particle buffers keep the effect inexpensive without a fluid simulation.
+The cold-start introduction holds all pistons, valves, crankshaft and apps completely still for 0.85 seconds. A fine direct-injection cone then enters only the first, sealed cylinder; injection ends before the spark at 1.78 seconds. The combustion front flashes at 1.94 seconds, before crank movement begins at 2.12 seconds. Crank speed increases smoothly over 0.95 seconds, and the app orbit follows the resulting crank angle. The remaining cylinders cannot ignite until their first intake and compression after startup.
+
+The flame is a short expanding combustion front inside the bore, replacing the earlier candle-like texture. An open cutaway in the cylinder head keeps the injection and spark visible. The injector emits a cone of 96 small mist particles rather than long streams. During running intake and exhaust, poppet valves descend into the chamber and their springs compress against a fixed lower seat; both valves remain shut for compression and combustion. This is a sequenced product illustration, not a transient thermodynamic engine simulation.
 
 A separate observer prepares the lazy module within 320px of the viewport without advancing time. Playback begins when 65% of the engine surface becomes visible; after the first start it pauses below 15% visibility and resumes from the saved phase. Hidden tabs, the pause button and reduced-motion preferences also stop the render loop. Other hero modes do not download Three.js. A static render remains available if WebGL is unavailable or the context is lost.
 
-Validation includes actual WebGL rendering at four widths, connected crank/rod joints throughout rotation, drag controls, reduced motion and context failure. The combustion regression additionally checks preparation without playback, scroll activation, offscreen time freezing and the intake/compression/spark/fire/exhaust sequence.
+Validation includes actual WebGL rendering at four widths, connected crank/rod joints throughout rotation, drag controls, reduced motion and context failure. The combustion regression additionally checks preparation without playback, scroll activation, offscreen time freezing and the stationary off/injection/spark/combustion sequence, motion only after combustion, and the running intake/compression/spark/fire/exhaust sequence. Valve direction, spring compression and sealed combustion are checked directly.
 
 ### Crank-driven app orbit
 
