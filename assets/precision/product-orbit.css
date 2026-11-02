@@ -20,21 +20,46 @@
 .brand-orbit:is(.is-paused,.is-offscreen,.is-tab-hidden) *{animation-play-state:paused!important}
 @keyframes product-orbit-turn{to{transform:rotate(360deg)}}
 @keyframes product-orbit-upright{to{transform:rotate(-360deg)}}
-.brand-orbit[data-mode=merge] .orbit-path{animation:products-converge 8.4s cubic-bezier(.4,0,.2,1) both}
-.brand-orbit[data-mode=merge] .orbit-rotor{animation:merge-turn 8.4s linear both}
-.brand-orbit[data-mode=merge] .orbit-tile{animation:merge-upright 8.4s linear both}
-.brand-orbit[data-mode=merge] .orbit-center{animation:brand-reveal 8.4s ease both}
-@keyframes merge-turn{0%{transform:rotate(0)}78%,100%{transform:rotate(110deg)}}
-@keyframes merge-upright{0%{transform:rotate(0)}78%,100%{transform:rotate(-110deg)}}
-@keyframes products-converge{0%,69%{transform:scale(1);opacity:1}92%,100%{transform:scale(.12);opacity:0}}
-@keyframes brand-reveal{0%,76%{opacity:0;transform:translate(-50%,-50%) scale(.82)}96%,100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 .orbit-engine{display:none;position:absolute;left:50%;top:50%;width:232px;height:168px;transform:translate(-50%,-50%)}
 .brand-orbit[data-mode=engine] .orbit-center{display:none}
 .brand-orbit[data-mode=engine] .orbit-engine{display:block}
-.engine-piston{animation:engine-stroke 1.9s ease-in-out infinite;animation-delay:var(--phase);transform-box:fill-box;transform-origin:center}
-@keyframes engine-stroke{0%,100%{transform:translateY(0)}50%{transform:translateY(22px)}}
 @media(max-width:1050px){.brand-orbit{--orbit-radius:128px}.orbit-item{width:54px;height:54px}.orbit-stage{height:390px}.orbit-engine{width:205px}.orbit-center>img{width:80px;height:80px}}
 @media(max-width:760px){.orbit-control{display:block;margin-left:12px;margin-right:auto}.brand-orbit{--orbit-radius:136px;max-width:420px;margin-top:20px}.orbit-stage{height:345px}.orbit-item{width:49px;height:49px}.orbit-tile{border-radius:13px}.orbit-tile img{width:31px;height:31px}.orbit-center>img{width:76px;height:76px}.orbit-wordmark{font-size:17px}.orbit-engine{width:190px}.brand-orbit figcaption{font-size:10px}}
 @media(max-width:360px){.brand-orbit{--orbit-radius:116px}.orbit-item{width:45px;height:45px}.orbit-stage{height:300px}.orbit-engine{width:164px}}
 @media(prefers-reduced-motion:reduce){.brand-orbit *{animation:none!important}.brand-orbit .orbit-center{opacity:1!important;transform:translate(-50%,-50%)!important}.brand-orbit[data-mode=merge] .orbit-path{opacity:0}.orbit-control{display:none}}
 @media(forced-colors:active){.orbit-tile,.orbit-control{border-color:CanvasText;box-shadow:none}.orbit-stage{background:none}}
+/* Revised reference choreography: ring opens outward; the large mark settles into a wordmark. */
+.orbit-stage{background:radial-gradient(ellipse 48% 47% at 50% 50%,#ffffff0b,transparent 95%)}
+.orbit-stage:before{border-color:#ffffff13}
+.orbit-tile{background:linear-gradient(145deg,#191c22,#0c0e13);border-color:#e0e5ee32;box-shadow:0 6px 20px #0005,inset 0 1px #ffffff0b}
+.orbit-tile svg{color:#e1e5eb}
+.orbit-message{display:none;position:absolute;inset:0;pointer-events:none}
+.orbit-message span{position:absolute;left:50%;top:50%;width:190px;transform:translate(-50%,-50%);font:400 20px/1.35 Arial,sans-serif;letter-spacing:-.03em;color:#e1e5eb;opacity:0}
+.brand-orbit[data-mode=merge] .orbit-message{display:block}
+.brand-orbit[data-mode=merge] .orbit-message span:nth-child(1){animation:reference-copy-one 10.5s both}
+.brand-orbit[data-mode=merge] .orbit-message span:nth-child(2){animation:reference-copy-two 10.5s both}
+.brand-orbit[data-mode=merge] .orbit-message span:nth-child(3){animation:reference-copy-three 10.5s both}
+.brand-orbit[data-mode=merge] .orbit-path{animation:reference-orbit-exit 10.5s cubic-bezier(.4,0,.2,1) both}
+.brand-orbit[data-mode=merge] .orbit-rotor{animation:reference-turn 10.5s linear both}
+.brand-orbit[data-mode=merge] .orbit-tile{animation:reference-upright 10.5s linear both}
+.brand-orbit[data-mode=merge] .orbit-stage:before{animation:reference-guide-exit 10.5s cubic-bezier(.4,0,.2,1) both}
+.brand-orbit[data-mode=merge] .orbit-center{display:block;width:300px;height:120px;animation:none}
+.brand-orbit[data-mode=merge] .orbit-center>img{position:absolute;left:50%;top:50%;animation:reference-mark-settle 10.5s cubic-bezier(.22,.7,.24,1) both}
+.brand-orbit[data-mode=merge] .orbit-wordmark{position:absolute;left:calc(50% - 20px);top:50%;transform:translateY(-50%);font-size:23px;white-space:nowrap;animation:reference-wordmark 10.5s both}
+@keyframes reference-turn{0%{transform:rotate(0)}76%,100%{transform:rotate(132deg)}}
+@keyframes reference-upright{0%{transform:rotate(0)}76%,100%{transform:rotate(-132deg)}}
+@keyframes reference-orbit-exit{0%,55%{transform:scale(1);opacity:1}68%{opacity:1}76%,100%{transform:scale(2.25);opacity:0}}
+@keyframes reference-guide-exit{0%,55%{transform:translate(-50%,-50%) scale(1);opacity:1}76%,100%{transform:translate(-50%,-50%) scale(2.25);opacity:0}}
+@keyframes reference-mark-settle{0%,68%{opacity:0;transform:translate(-50%,-50%) scale(3.5)}71%{opacity:1;transform:translate(-50%,-50%) scale(3.5)}81%,86%{opacity:1;transform:translate(-50%,-50%) scale(1)}96%,100%{opacity:1;transform:translate(-50%,-50%) translateX(-65px) scale(.58)}}
+@keyframes reference-wordmark{0%,89%{opacity:0}97%,100%{opacity:1}}
+@keyframes reference-copy-one{0%,3%{opacity:0}8%,16%{opacity:1}20%,100%{opacity:0}}
+@keyframes reference-copy-two{0%,19%{opacity:0}23%,34%{opacity:1}38%,100%{opacity:0}}
+@keyframes reference-copy-three{0%,37%{opacity:0}41%,61%{opacity:1}66%,100%{opacity:0}}
+.orbit-engine{width:270px;height:190px;overflow:visible}
+.motor-piston,.motor-rod,.motor-crank,.motor-valve{transform-origin:0 0}
+@media(max-width:1050px){.orbit-engine{width:206px;height:160px}}
+@media(max-width:760px){.orbit-engine{width:202px;height:152px}.orbit-message span{font-size:17px}.brand-orbit[data-mode=merge] .orbit-wordmark{font-size:21px}}
+@media(max-width:360px){.orbit-engine{width:176px;height:140px}}
+@media(prefers-reduced-motion:reduce){.brand-orbit[data-mode=merge] .orbit-message{display:none}.brand-orbit[data-mode=merge] .orbit-center{display:grid;width:160px;height:auto;gap:12px}.brand-orbit[data-mode=merge] .orbit-center>img,.brand-orbit[data-mode=merge] .orbit-wordmark{position:static;opacity:1;transform:none;animation:none!important}.brand-orbit[data-mode=merge] .orbit-stage:before{opacity:0}}
+.brand-orbit:is(.is-paused,.is-offscreen,.is-tab-hidden) .orbit-stage::before{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.brand-orbit .orbit-stage::before{animation:none!important}}
