@@ -14,8 +14,9 @@
  button.addEventListener('click',()=>{if(mode==='merge'&&finished){replay();return;}const paused=host.classList.toggle('is-paused');button.textContent=paused?'Resume animation':'Pause animation';button.setAttribute('aria-pressed',String(paused));sync();});
  host.querySelector('.orbit-path').addEventListener('animationend',e=>{if(mode==='merge'&&e.animationName==='reference-orbit-exit'){finished=true;button.textContent='Replay animation';button.setAttribute('aria-pressed','false');}});
  async function warmEngine(){
-  if(mode!=='engine'||loading||document.hidden)return;loading=true;
-  try{const module=await import('/assets/precision/product-engine3d.js?v=20261102-machined-piston');engine=await module.mountEngine3D(target);if(!engine)host.querySelector('figcaption').textContent='Link. File. AI. Agent.';sync();}
+  if(mode!=='engine'||loading||document.hidden)return;
+  if(reduce.matches){target.dataset.renderState='poster';host.querySelector('figcaption').textContent='Link. File. AI. Agent.';return;}loading=true;
+  try{const module=await import('/assets/precision/product-engine3d.js?v=20261102-machined-piston');engine=await module.mountEngine3D(target);host.querySelector('figcaption').textContent=engine?captions.engine:'Link. File. AI. Agent.';sync();}
   catch{target.dataset.renderState='poster';}
  }
  if('IntersectionObserver'in window){
@@ -23,6 +24,6 @@
   if(mode==='engine')new IntersectionObserver(entries=>{if(entries[0].isIntersecting)warmEngine();},{rootMargin:'320px 0px',threshold:0}).observe(target);
  }else{inView=true;host.classList.remove('is-offscreen');warmEngine();}
  document.addEventListener('visibilitychange',()=>{host.classList.toggle('is-tab-hidden',document.hidden);if(!document.hidden&&inView)warmEngine();sync();});
- reduce.addEventListener('change',sync);
+ reduce.addEventListener('change',()=>{if(!reduce.matches&&inView)warmEngine();sync();});
  host.dataset.orbitReady='true';
 })();

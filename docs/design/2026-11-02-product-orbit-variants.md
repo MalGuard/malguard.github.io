@@ -12,7 +12,7 @@ Piston travel and rod orientation come from the slider-crank equations. The four
 
 ## Loading and motion
 
-The lazy 3D bundle is approximately 140 KB compressed. The other two variants do not download it. Continuous rendering is capped near 30 fps with a limited pixel ratio; rendering stops while paused, offscreen, in a hidden tab or under reduced motion. There is no new runtime CDN or model-service request. Without WebGL, a small static poster captured from the actual 3D scene is displayed. Context loss switches to that poster.
+The lazy 3D bundle is approximately 140 KB compressed. The other two variants do not download it. An initial reduced-motion preference uses only the static poster and does not import or initialize Three.js. Turning motion back on while the engine is visible lazily loads the 3D module. Continuous rendering is capped near 30 fps with a limited pixel ratio; rendering stops while paused, offscreen, in a hidden tab or under reduced motion. There is no new runtime CDN or model-service request. Without WebGL, a small static poster captured from the actual 3D scene is displayed. Context loss switches to that poster.
 
 ## Evidence
 
