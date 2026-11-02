@@ -9,22 +9,26 @@ test('an earlier cold start preserves injection, spark and combustion before mot
  assert.ok(ENGINE_STARTUP.motion<2.12);
 });
 
-test('revs rise to the maximum, hold, then coast down more slowly and repeat smoothly',()=>{
- const start=ENGINE_STARTUP.motion,{rise,hold,fall}=ENGINE_REV_CYCLE,period=rise+hold+fall;
- assert.ok(fall>rise);
+test('ten-second ramps settle into a four-second rolling idle before accelerating again',()=>{
+ const start=ENGINE_STARTUP.motion,{rise,hold,fall,idle,idleSpeed}=ENGINE_REV_CYCLE,period=rise+hold+fall+idle;
+ assert.equal(rise,10);assert.equal(fall,10);assert.equal(idle,4);
  for(let i=1;i<=60;i++)assert.ok(engineDriveAt(start+i*rise/60).speed>engineDriveAt(start+(i-1)*rise/60).speed);
  assert.equal(engineDriveAt(start+rise+hold/2).speed,1);
  for(let i=1;i<=80;i++)assert.ok(engineDriveAt(start+rise+hold+i*fall/80).speed<engineDriveAt(start+rise+hold+(i-1)*fall/80).speed);
- for(const boundary of [start,start+rise,start+rise+hold,start+period,start+period*2]){
+ const idleStart=start+rise+hold+fall;
+ for(let t=.1;t<idle;t+=.1)assert.equal(engineDriveAt(idleStart+t).speed,idleSpeed);
+ assert.ok(idleSpeed>0,'The engine keeps turning during the low-speed dwell');
+ for(const boundary of [start,start+rise,start+rise+hold,idleStart,start+period,start+period*2]){
   const before=engineDriveAt(boundary-1e-5),after=engineDriveAt(boundary+1e-5);
   assert.ok(Math.abs(after.angle-before.angle)<.001,'No angular jump at a phase boundary');
   assert.ok(Math.abs(after.speed-before.speed)<.001,'No sudden RPM change');
  }
- assert.ok(Math.abs(engineDriveAt(start+period+rise/2).speed-engineDriveAt(start+rise/2).speed)<1e-10);
+ for(const cycle of [1,2])for(let i=0;i<=100;i++)assert.ok(engineDriveAt(start+period*cycle+period*i/100).speed>=idleSpeed-1e-12,'Later rev cycles never stop');
+ assert.ok(Math.abs(engineDriveAt(start+period+rise/2).speed-engineDriveAt(start+period*2+rise/2).speed)<1e-10);
 });
 
 test('the readout follows actual crank velocity throughout multiple rev cycles',()=>{
- for(let time=0;time<50;time+=.037){
+ for(let time=0;time<90;time+=.037){
   const state=engineDriveAt(time),step=.00001;
   const velocity=(engineDriveAt(time+step).angle-engineDriveAt(time-step).angle)/(2*step);
   assert.ok(state.speed>=0&&state.speed<=1);
