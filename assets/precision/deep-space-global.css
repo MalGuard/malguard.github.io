@@ -1,0 +1,42 @@
+/* Shared visual layer only. No canvas, timers, video, scroll listeners or dynamic blur. */
+html:root body.mg-deep-space.mg-deep-space.mg-deep-space.mg-deep-space{
+ isolation:isolate;
+ background-color:#050507!important;
+ background-image:
+  radial-gradient(ellipse 72% 900px at 86% 0,rgba(108,123,153,.12),transparent 76%),
+  radial-gradient(ellipse 58% 850px at 2% 1100px,rgba(92,108,139,.10),transparent 80%),
+  radial-gradient(ellipse 68% 1000px at 95% 2300px,rgba(94,105,133,.08),transparent 80%)!important;
+ background-size:auto!important;background-repeat:no-repeat!important;background-attachment:scroll!important;
+}
+html:root body.mg-deep-space.mg-deep-space.mg-deep-space::before{
+ content:""!important;position:fixed!important;inset:0!important;width:auto!important;height:100vh;height:100dvh;
+ z-index:-2!important;pointer-events:none!important;opacity:.88!important;transform:none!important;filter:none!important;animation:none!important;display:block!important;
+ background:
+  radial-gradient(ellipse 60% 18% at 81% 17%,rgba(155,166,189,.085),transparent 80%),
+  radial-gradient(ellipse 45% 24% at 29% 69%,rgba(116,133,162,.07),transparent 82%),
+  linear-gradient(128deg,transparent 22%,rgba(146,155,174,.035) 39%,transparent 48%,rgba(161,173,196,.055) 55%,transparent 72%),
+  url('/assets/precision/deep-space-field.svg') center top / 1600px 1000px repeat!important;
+}
+html:root body.mg-deep-space.mg-deep-space.mg-deep-space::after{
+ content:""!important;position:fixed!important;inset:0!important;width:auto!important;height:100vh;height:100dvh;
+ z-index:-1!important;pointer-events:none!important;opacity:1!important;transform:none!important;filter:none!important;animation:none!important;display:block!important;
+ background:
+  radial-gradient(circle at 87% 23%,rgba(245,248,255,.85) 0 .7px,rgba(214,225,246,.12) 1.5px,transparent 7px),
+  radial-gradient(circle at 12% 60%,rgba(248,250,255,.75) 0 .9px,rgba(214,225,246,.1) 2px,transparent 8px),
+  radial-gradient(circle at 67% 80%,rgba(240,245,255,.7) 0 .7px,rgba(214,225,246,.1) 2px,transparent 6px),
+  radial-gradient(ellipse 92% 50% at 76% 145%,#020307 0 94%,rgba(209,222,246,.26) 94.3%,rgba(143,163,193,.07) 95.3%,transparent 100%),
+  radial-gradient(ellipse at 50% 45%,transparent 35%,rgba(2,3,7,.32) 100%)!important;
+}
+/* Retire older foreground textures so depth is consistent across long pages. */
+html:root body.mg-deep-space>.particle-atmosphere{display:none!important}
+/* Reading surfaces keep their own opaque backgrounds; only the chat canvas inherits space. */
+body.mg-deep-space.auth-required{--bg:#050507}
+@media(max-width:600px){
+ html:root body.mg-deep-space.mg-deep-space.mg-deep-space::before{
+  background-size:auto,auto,auto,1100px 688px!important;opacity:.78!important;
+ }
+}
+@media(forced-colors:active){
+ html:root body.mg-deep-space.mg-deep-space.mg-deep-space::before,
+ html:root body.mg-deep-space.mg-deep-space.mg-deep-space::after{display:none!important}
+}
