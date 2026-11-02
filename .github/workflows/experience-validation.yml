@@ -25,6 +25,7 @@ jobs:
           python3 tests/validate-site.py
           npm ci --ignore-scripts --no-audit --no-fund
           npm run build
+          node --test tests/product-engine-drive.test.mjs
           node tests/public-release/browser.cjs
           npm run test:game-scam-guard
           node --check assets/precision/shared-typing.js

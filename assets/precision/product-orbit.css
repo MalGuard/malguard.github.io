@@ -97,3 +97,10 @@
 .brand-orbit[data-mode=engine] .orbit-rotor{animation:none;transform:rotate(var(--engine-drive-angle,0deg))}
 .brand-orbit[data-mode=engine] .orbit-tile{animation:none;transform:rotate(calc(-1 * var(--engine-drive-angle,0deg)))}
 @media(max-width:760px){.brand-orbit[data-mode=engine] .orbit-tile{transform:rotate(calc(-1 * var(--engine-drive-angle,0deg))) scaleY(.813008)}}
+
+/* A quiet rev readout shares the engine clock; no independent timer or animation. */
+.engine-speed{display:flex;align-items:baseline;justify-content:center;gap:6px;margin:4px auto 8px;color:#eef2f7;font:500 23px/1.2 Arial,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.engine-speed-label{margin-inline-end:7px;color:#a4b5c9;font:10px/1.5 Arial,system-ui,sans-serif;letter-spacing:.025em}
+.engine-speed-value{min-width:3ch;text-align:end}
+.engine-speed-unit{font-size:12px;color:#a4b5c9}
+.brand-orbit:not(:has(.engine3d-host[data-render-state=webgl])) .engine-speed{visibility:hidden}
