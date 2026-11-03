@@ -1,6 +1,6 @@
 export function apiUrl(endpoint,hostname=globalThis.location?.hostname){
  if(!['status','chat'].includes(endpoint))throw new Error('invalid_endpoint');
- const base=['malguard.site','www.malguard.site','malguard.github.io'].includes(hostname)?'https://api.malguard.site':'';
+ const base=['malguard.site','www.malguard.site','malguard.github.io'].includes(hostname)?'https://game-scam-guard-connected.vercel.app':'';
  return `${base}/api/malguard-ai/${endpoint}`;
 }
 export async function readStream(response,receive){
