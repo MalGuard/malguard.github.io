@@ -1,5 +1,13 @@
 name: Cloudflare six-model UI tests
 on:
+  push:
+    branches: ['main']
+    paths:
+      - 'ai/app.js'
+      - 'ai/index.html'
+      - 'ai/cloudflare-models.mjs'
+      - 'services/malguard-ai/test/cloudflare-models.test.js'
+      - '.github/workflows/cloudflare-six-model-ui.yml'
   pull_request:
     paths:
       - 'ai/app.js'
