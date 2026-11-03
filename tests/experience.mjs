@@ -41,6 +41,16 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
         return {scroll:document.documentElement.scrollWidth,client:vw,outside,spill,h1:!!document.querySelector('h1')};
       });
       assert.ok(state.h1,'h1 required'); assert.ok(state.scroll<=state.client+1,JSON.stringify(state));assert.deepEqual(state.outside,[],JSON.stringify(state.outside));assert.deepEqual(errors.slice(startErrors),[],'Runtime exception');
+      if(path==='/gta-guard.html'){
+        assert.deepEqual(await page.locator('#platforms h3').allTextContents(),['Windows x64','macOS'],'GTA Guard only lists Windows and Mac');
+        assert.equal(await page.locator('#platforms a[href$=".apk"]').count(),0,'GTA Guard must not offer an Android download');
+        assert.equal(await page.locator('#platforms .platform-action').getAttribute('href'),'/download.html#scanner');
+      }
+      if(path==='/game-scam-guard.html'){
+        assert.deepEqual(await page.locator('#platforms h3').allTextContents(),['Android','Windows','macOS','iPhone']);
+        assert.equal(await page.locator('#platforms a[download]').count(),1,'Only the published Android installer is a native download');
+        assert.equal(await page.locator('#gameScamPreview').getAttribute('href'),'/game-scam-guard/');
+      }
       if (['/','/products.html','/tools.html','/gta-guard.html','/malware-ai-windows.html'].includes(path)) await page.screenshot({path:`test-results/${name}-${width}-${path==='/'?'home':path.slice(1).replace('.html','')}.png`,fullPage:true});
     });
     await check(`${name} ${width}px substantive homepage copy is preserved`,async()=>{
