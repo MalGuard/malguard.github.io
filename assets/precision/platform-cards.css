@@ -46,3 +46,6 @@ body.mg-precision-shared main .product-platforms .platform-heading h2{font-famil
 body.mg-precision-shared main .product-platforms .platform-kicker{font:600 11px/1.4 ui-monospace,monospace!important;letter-spacing:.12em;color:#aaaab1;background:none;border:0;padding:0}
 body.mg-precision-shared main .product-platforms .platform-heading>p:not(.platform-kicker){font:400 12px/1.95 JetBrains,ui-monospace,monospace!important;color:#a1a1aa}
 body.mg-precision-shared main .product-platforms :is(.platform-action,.platform-action>span,.platform-unavailable){font-family:MGProduct,Arial,system-ui,sans-serif!important}
+
+body.mg-precision-shared main .product-platforms :is(.platform-release-note,.platform-scope-note){font:400 11px/1.9 JetBrains,ui-monospace,monospace!important;color:#a1a1aa;max-width:900px;margin:20px 0 0;overflow-wrap:anywhere}
+.product-platforms .platform-release-note code{font:inherit;color:inherit;white-space:normal}
