@@ -50,13 +50,22 @@ export async function fetchCFModels({fetchImpl=fetch,signal}={}){
  return models;
 }
 export async function callCFModel({mode,model,message,history=[],sessionToken,quotaEnabled=false,freeFallback=false,signal,fetchImpl=fetch}){
- if(!["chat","work","code"].includes(mode)||!IDS.has(model)||typeof message!=="string"||!message.trim()||message.length>5000||typeof sessionToken!=="string"||sessionToken.length<12)throw new Error("sign_in_required");
+ if(!["chat","work","code"].includes(mode)||!IDS.has(model)||typeof message!=="string"||!message.trim()||message.length>5000)throw new Error("invalid_model_request");
+ if(typeof sessionToken!=="string"||sessionToken.length<12)throw Object.assign(new Error("sign_in_required"),{code:"sign_in_required",status:401});
  if(typeof freeFallback!=="boolean")throw new Error("invalid_model_request");
  const body={mode,model,message,history:history.slice(-6).map(m=>({role:m.role,content:m.content})),consent:{modelShare:true},...(freeFallback?{freeFallback:true}:{})};
- const response=await fetchImpl(ROOT+"/api/public-model-chat",{method:"POST",credentials:"omit",cache:"no-store",mode:"cors",signal,headers:{"Content-Type":"application/json",Authorization:"Bearer "+sessionToken},body:JSON.stringify(body)});
+ let response;
+ try{
+  response=await fetchImpl(ROOT+"/api/public-model-chat",{method:"POST",credentials:"omit",cache:"no-store",mode:"cors",signal,headers:{"Content-Type":"application/json",Authorization:"Bearer "+sessionToken},body:JSON.stringify(body)});
+ }catch(error){
+  if(error?.name==="AbortError")throw error;
+  if(error?.name==="TimeoutError")throw Object.assign(new Error("provider_timeout"),{code:"provider_timeout",status:504});
+  throw Object.assign(new Error("network_error"),{code:"network_error"});
+ }
  let data;try{data=await response.json();}catch{throw new Error("provider_invalid_response");}
- if(!response.ok)throw Object.assign(new Error(data?.error||"provider_unavailable"),{code:data?.error||"cloudflare_unavailable",status:response.status,retryAfterSeconds:data?.retryAfterSeconds,retryAt:typeof data?.resetAt==='string'?data.resetAt:undefined});
- if(typeof data.text!=="string"||!data.text.trim()||typeof data.model!=="string"||typeof data.provider!=="string")throw new Error("cloudflare_invalid_response");
+ if(!response.ok){const code=typeof data?.error==="string"?data.error:response.status===401?"sign_in_required":"provider_unavailable";
+  throw Object.assign(new Error(code),{code,status:response.status,retryAfterSeconds:data?.retryAfterSeconds,retryAt:typeof data?.resetAt==="string"?data.resetAt:undefined});}
+ if(typeof data.text!=="string"||!data.text.trim()||typeof data.model!=="string"||typeof data.provider!=="string")throw Object.assign(new Error("provider_unavailable"),{code:"provider_unavailable"});
  return {text:data.text,model:data.model,selectedModel:data.modelId,provider:data.provider,fallbackUsed:!!data.fallback,securityAnalysis:false,...(data.usage&&typeof data.usage.remainingTokens==="number"?{usage:data.usage}:{})};
 }
 
