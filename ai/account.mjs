@@ -4,7 +4,7 @@ const SESSION_KEY='malguard.ai.session.v1';
 const savedSession=()=>{try{const token=localStorage.getItem(SESSION_KEY);if(token)return token;}catch{}try{return sessionStorage.getItem(SESSION_KEY);}catch{return null;}};
 const saveSession=token=>{let persisted=false;try{if(token){localStorage.setItem(SESSION_KEY,token);persisted=true;}else localStorage.removeItem(SESSION_KEY);}catch{}try{if(token&&!persisted)sessionStorage.setItem(SESSION_KEY,token);else sessionStorage.removeItem(SESSION_KEY);}catch{}};
 export function accountApiBase(hostname=globalThis.location?.hostname||''){
- return PRODUCTION_HOSTS.includes(hostname)?'https://api.malguard.site':'';
+ return PRODUCTION_HOSTS.includes(hostname)?'https://game-scam-guard-connected.vercel.app':'';
 }
 export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
  let sessionToken=null,profile=null,dialog,controller,pendingSignup,resendTimer,expiryTimer;
