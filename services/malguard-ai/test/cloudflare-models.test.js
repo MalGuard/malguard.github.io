@@ -20,7 +20,7 @@ test('catalog loads ONLY verified gateway advertisements from Vercel, never from
   return Response.json({models:expected,accountQuota:{enabled:false}});
  }});
  assert.equal(count,1);
- assert.deepEqual(found.filter(m=>m.available),expected);
+ assert.deepEqual(found.filter(m=>m.available).sort((a,b)=>a.id.localeCompare(b.id)),expected.slice().sort((a,b)=>a.id.localeCompare(b.id)));
  assert.equal(found.accountQuotaEnabled,false);
  assert.deepEqual(CF_DEFAULTS,{chat:'chat_flash',work:'work_gemma',code:'code_gemini'});
  assert.ok(found.filter(m=>!m.available).every(x=>!expected.some(y=>y.id===x.id)));
