@@ -1,141 +1,88 @@
-import test from "node:test";
-import assert from "node:assert/strict";
-import {readFileSync} from "node:fs";
-import {CF_DEFAULTS,fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel} from "../../../ai/cloudflare-models.mjs";
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {CF_DEFAULTS,fetchCFModels,unavailableCFModels,callCFModel} from '../../../ai/cloudflare-models.mjs';
 
-const models=[
- {id:"chat_granite",mode:"chat",label:"Granite 4 Micro",available:true,provider:"workers_ai"},
- {id:"chat_flash",mode:"chat",label:"Gemini Flash-Lite",available:true,provider:"gemini"},
- {id:"work_qwen",mode:"work",label:"Qwen3 30B",available:true,provider:"workers_ai"},
- {id:"work_gemma",mode:"work",label:"Gemma 4 31B",available:true,provider:"gemini"},
- {id:"code_super",mode:"code",label:"Nemotron 3 Super",available:true,provider:"workers_ai"},
- {id:"code_ultra",mode:"code",label:"Nemotron 3 Ultra",available:true,provider:"openrouter"}
+const origin='https://models.malguard.site';
+const expected=[
+ {id:'chat_flash',mode:'chat',label:'Gemini 3.5 Flash-Lite',provider:'gemini',available:true},
+ {id:'gemini_flash',mode:'chat',label:'Gemini 3.8 Flash',provider:'gemini',available:true},
+ {id:'work_gemma',mode:'work',label:'Gemini 3.8 Flash · Work',provider:'gemini',available:true},
+ {id:'code_gemini',mode:'code',label:'Gemini 3.8 Flash · Coding',provider:'gemini',available:true}
 ];
-test("model catalog uses Cloudflare Worker endpoint only, not Vercel",async()=>{
- const fetchImpl=async(url,options)=>{
-  assert.equal(url,"https://malware-ai.malguard-security.workers.dev/api/public-models");
-  assert.equal(options.credentials,"omit");
-  return Response.json({models});
- };
- const got=await fetchCFModels({fetchImpl});assert.equal(got.length,22);assert.deepEqual(got.filter(m=>m.available),models);assert.equal(got.filter(m=>!m.available).length,16);
- assert.deepEqual(CF_DEFAULTS,{chat:"chat_granite",work:"work_qwen",code:"code_ultra"});
-});
-test("chat/work/code send only to Cloudflare worker without API secrets",async()=>{
- for(const [mode,model] of [["chat","chat_granite"],["work","work_qwen"],["code","code_ultra"]]){
-  let count=0;
-  const result=await callCFModel({mode,model,message:"hello",sessionToken:"synthetic-session-valid-user",quotaEnabled:true,history:[{role:"user",content:"prior"}],fetchImpl:async(url,options)=>{
-   count++;
-   assert.equal(url,"https://malware-ai.malguard-security.workers.dev/api/public-model-chat");
-   assert.ok(!JSON.stringify(options).includes("sk-"));
-   assert.equal(JSON.parse(options.body).model,model);
-   assert.equal(JSON.parse(options.body).mode,mode);
-   assert.equal(options.headers.Authorization,'Bearer synthetic-session-valid-user');
-   return Response.json({text:"answer",provider:"workers_ai",model:"sample-model",modelId:model,fallback:false});
-  }});
-  assert.equal(count,1);assert.equal(result.text,"answer");assert.equal(result.selectedModel,model);
- }
-});
-test("Cloudflare failure returns code without silently changing to a different host",async()=>{
- await assert.rejects(callCFModel({mode:"chat",model:"chat_granite",message:"hello",sessionToken:"synthetic-session-valid-user",quotaEnabled:true,fetchImpl:async()=>Response.json({error:"provider_rate_limited",retryAfterSeconds:47},{status:429})}),e=>e.status===429&&e.code==="provider_rate_limited"&&e.retryAfterSeconds===47);
-});
-test("existing site styling stays untouched and CSP permits direct Cloudflare",()=>{
- const html=readFileSync(new URL("../../../ai/index.html",import.meta.url),"utf8");
- assert.match(html,/connect-src[^"]+https:\/\/malware-ai\.malguard-security\.workers\.dev/);
- assert.match(html,/\.\/app\.js\?v=model-recovery-20261103/);
- const script=readFileSync(new URL("../../../ai/app.js",import.meta.url),"utf8");
- assert.match(script,/callCFModel\(/);
- assert.match(script,/mode==='worker'\?'cf_qwen3':selected/);
-});
+const sessionToken='synthetic-session-valid-user';
 
-test('client accepts previously offered models without leaking session into URLs',async()=>{
- const legacy=[['chat','cf_llama3b'],['work','cf_gptoss20'],['code','cf_qwen_coder']];
- for(const [mode,model] of legacy){
-  const generated=await callCFModel({mode,model,message:'hello',sessionToken:'synthetic-session-valid-user',quotaEnabled:true,fetchImpl:async(url,opt)=>{
-   assert.ok(!url.includes('synthetic-session'));
-   assert.equal(opt.headers.Authorization,'Bearer synthetic-session-valid-user');
-   return Response.json({text:'answer',model:'@cf/example',provider:'workers_ai',modelId:model,usage:{limitTokens:100000,remainingTokens:99880,usedTokens:120,estimated:true}});
-  }});
-  assert.equal(generated.selectedModel,model);
-  assert.equal(generated.usage.remainingTokens,99880);
- }
-});
-
-test('old deployed Worker remains supported until it advertises account quotas',async()=>{
- const models=await fetchCFModels({fetchImpl:async()=>Response.json({models:[{id:'chat_granite',mode:'chat',label:'Granite',provider:'workers_ai',available:true}]})});
- assert.equal(models.accountQuotaEnabled,false);
- const got=await callCFModel({mode:'chat',model:'chat_granite',message:'hello',quotaEnabled:models.accountQuotaEnabled,fetchImpl:async(_,options)=>{
-  assert.equal(options.headers.Authorization,undefined,'do not send an Authorization preflight to the old Worker');
-  return Response.json({text:'Legacy result',provider:'workers_ai',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:'chat_granite'});
+test('catalog loads ONLY verified gateway advertisements from Vercel, never from Workers',async()=>{
+ let count=0;
+ const found=await fetchCFModels({fetchImpl:async(url,options)=>{
+  count++;assert.equal(url,origin+'/api/public-models');
+  assert.equal(options.credentials,'omit');
+  return Response.json({models:expected,accountQuota:{enabled:false}});
  }});
- assert.equal(got.text,'Legacy result');
+ assert.equal(count,1);
+ assert.deepEqual(found.filter(m=>m.available),expected);
+ assert.equal(found.accountQuotaEnabled,false);
+ assert.deepEqual(CF_DEFAULTS,{chat:'chat_flash',work:'work_gemma',code:'code_gemini'});
+ assert.ok(found.filter(m=>!m.available).every(x=>!expected.some(y=>y.id===x.id)));
 });
 
-test('account usage is read only with an authenticated session and strict numeric validation',async()=>{
- let calls=0;
- const usage=await fetchCFUsage({sessionToken:'synthetic-session-valid-user',fetchImpl:async(url,options)=>{
-  calls++;assert.equal(url,'https://malware-ai.malguard-security.workers.dev/api/account-usage');
-  assert.equal(options.headers.Authorization,'Bearer synthetic-session-valid-user');
-  return Response.json({limitTokens:100000,remainingTokens:98000,usedTokens:2000,resetAt:'2026-11-01T00:00:00.000Z'});
- }});
- assert.equal(calls,1);assert.equal(usage.remainingTokens,98000);assert.equal(usage.estimated,true);
- await assert.rejects(fetchCFUsage({sessionToken:'',fetchImpl:async()=>{throw Error('should not fetch');}}),/sign_in_required/);
- await assert.rejects(fetchCFUsage({sessionToken:'synthetic-session-valid-user',fetchImpl:async()=>Response.json({limitTokens:100000,remainingTokens:200000,usedTokens:0,resetAt:'2026-11-01T00:00:00.000Z'})}),/invalid_usage/);
-});
-
-test('free cross-provider fallback is opt-in, never sends paid-model IDs or hidden credentials',async()=>{
- let bodies=[];
- const fetchImpl=async(_,options)=>{bodies.push(JSON.parse(options.body));return Response.json({text:'Free reply',provider:'openrouter',model:'nvidia/nemotron-3-ultra-550b-a55b:free',modelId:'code_ultra',fallback:true});};
- const base={mode:'chat',model:'chat_granite',message:'hi',sessionToken:'synthetic-session-valid-user',quotaEnabled:true,fetchImpl};
- await callCFModel(base);
- await callCFModel({...base,freeFallback:true});
- assert.equal(bodies[0].freeFallback,undefined);
- assert.equal(bodies[1].freeFallback,true);
- assert.equal(bodies[1].model,'chat_granite','chosen primary model must not be disguised');
- assert.ok(!JSON.stringify(bodies).includes('OPENROUTER_API_KEY'));
- await assert.rejects(callCFModel({...base,freeFallback:'paid'}),/invalid_model_request/);
-});
-test('cross-provider consent is never silently persisted on a shared device',async()=>{
- const {readPermissions,savePermissions,revokePermissions}=await import('../../../ai/permissions.mjs');
- const storage=new Map(),store={getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)};
- savePermissions(store,{modelShare:true,freeFallback:true});
- assert.equal(readPermissions(store).modelShare,true);
- assert.equal(readPermissions(store).freeFallback,undefined,'cross-provider consent requires a new explicit action each session');
- revokePermissions(store);assert.equal(readPermissions(store).modelShare,false);
- const script=readFileSync(new URL('../../../ai/app.js',import.meta.url),'utf8');
- assert.match(script,/\$\('free-fallback-consent'\)\.checked=false/,'sign-out/revoke must clear free fallback');
-});
-
-test('a stale or incomplete backend never hides classic models or wrongly enables them',async()=>{
- const partial=await fetchCFModels({fetchImpl:async()=>Response.json({models:[{id:'chat_granite',mode:'chat',label:'Granite',provider:'workers_ai',available:true}]})});
- assert.equal(partial.length,22);
- assert.equal(partial.find(m=>m.id==='chat_granite').available,true);
- for(const id of ['cf_gptoss120','llama70b','cf_qwen_coder','groq_qwen']){
-  assert.equal(partial.find(m=>m.id===id).available,false,id);
+test('chat, work and code pass signed-in session to Vercel API without exposing keys',async()=>{
+ for(const [mode,model] of [['chat','chat_flash'],['work','work_gemma'],['code','code_gemini']]){
+  let sent=0;
+  const result=await callCFModel({mode,model,message:'سلام',history:[],sessionToken,fetchImpl:async(url,options)=>{
+   sent++;assert.equal(url,origin+'/api/public-model-chat');
+   assert.equal(options.headers.Authorization,'Bearer '+sessionToken);
+   assert.equal(options.credentials,'omit');
+   assert.ok(!url.includes(sessionToken));
+   const body=JSON.parse(options.body);
+   assert.deepEqual(body.consent,{modelShare:true});
+   assert.equal(body.mode,mode);assert.equal(body.model,model);
+   assert.ok(!JSON.stringify(body).includes('API_KEY'));
+   return Response.json({text:'سلام!',provider:'gemini',model:'gemini-3.8-flash',modelId:model});
+  }});
+  assert.equal(sent,1);
+  assert.equal(result.text,'سلام!');
+  assert.equal(result.provider,'gemini');
+  assert.equal(result.selectedModel,model);
  }
- const invalid=await fetchCFModels({fetchImpl:async()=>Response.json({models:[
-  {id:'chat_granite',mode:'code',label:'Incorrect mode',provider:'workers_ai',available:true},
-  {id:'cf_gptoss120',mode:'code',label:'Incorrect provider',provider:'wrong',available:true},
+});
+test('provider errors return the real rate-limit code, not a generic disconnected message',async()=>{
+ await assert.rejects(callCFModel({mode:'chat',model:'chat_flash',message:'hi',sessionToken,
+  fetchImpl:async()=>Response.json({error:'provider_rate_limited',retryAfterSeconds:38},{status:429})
+ }),error=>error.status===429&&error.code==='provider_rate_limited'&&error.retryAfterSeconds===38);
+});
+test('missing session fails closed before any model request',async()=>{
+ let called=false;
+ await assert.rejects(callCFModel({mode:'chat',model:'chat_flash',message:'hi',
+  fetchImpl:async()=>{called=true;throw Error('should not be called');}
+ }),/sign_in_required/);
+ assert.equal(called,false);
+});
+test('server model identities cannot be changed by untrusted catalog',async()=>{
+ const models=await fetchCFModels({fetchImpl:async()=>Response.json({models:[
+  {id:'chat_flash',mode:'code',label:'fake',provider:'gemini',available:true},
+  {id:'code_gemini',mode:'code',label:'fake',provider:'wrong',available:true},
+  {id:'work_gemma',mode:'work',label:'Gemini',provider:'gemini',available:true}
  ]})});
- assert.equal(invalid.filter(m=>m.available).length,0);
- const offline=unavailableCFModels();
- assert.equal(offline.length,22);
- assert.ok(offline.every(m=>m.available===false));
+ assert.deepEqual(models.filter(m=>m.available).map(m=>m.id),['work_gemma']);
+ assert.ok(unavailableCFModels().every(m=>m.available===false));
 });
-
-test('cross-provider fallback consent explains independent verified free tiers',()=>{
- const page=readFileSync(new URL('../../../ai/index.html',import.meta.url),'utf8');
- const script=readFileSync(new URL('../../../ai/app.js',import.meta.url),'utf8');
- assert.match(page,/Groq\/Gemini only when MalGuard has separately verified/);
- assert.match(script,/free OpenRouter model/);
- assert.match(script,/Groq\/Gemini only if MalGuard has separately verified/);
- assert.doesNotMatch(script,/remainingTokens\.toLocaleString/,'do not show exact raw allowances on the public chat UI');
+test('standalone Safari app has its own identity and no overlay report button',()=>{
+ const html=readFileSync(new URL('../../../ai/index.html',import.meta.url),'utf8');
+ const manifest=JSON.parse(readFileSync(new URL('../../../ai/manifest.webmanifest',import.meta.url),'utf8'));
+ assert.equal(manifest.display,'standalone');
+ assert.equal(manifest.start_url,'/ai/');
+ assert.equal(manifest.scope,'/ai/');
+ assert.match(html,/name="apple-mobile-web-app-capable" content="yes"/);
+ assert.match(html,/rel="manifest" href="\.\/manifest\.webmanifest"/);
+ assert.match(html,/connect-src[^\"]+https:\/\/api\.malguard\.site https:\/\/models\.malguard\.site/);
+ assert.match(html,/app\.js\?v=vercel-pwa-20261103/);
+ assert.doesNotMatch(html,/report-launcher\.js/);
 });
-
-test('standalone Safari reconnect path refreshes model catalog rather than only legacy status',()=>{
- const script=readFileSync(new URL('../../../ai/app.js',import.meta.url),'utf8');
- assert.match(script,/async function retryCloudConnections\(\)/);
- assert.match(script,/Promise\.allSettled\(\[loadCFModels\(\),loadCloudStatus\(\)\]\)/);
- assert.match(script,/\$\('retry-cloud'\)\.onclick=\(\)=>\{void retryCloudConnections\(\);\}/);
- assert.match(script,/window\.addEventListener\('pageshow',refreshOnReturn\)/);
- assert.match(script,/cfCatalogError\|\|\(!service/);
+test('model reconnection refreshes the catalog when Safari app resumes',()=>{
+ const source=readFileSync(new URL('../../../ai/app.js',import.meta.url),'utf8');
+ assert.match(source,/async function retryCloudConnections\(\)/);
+ assert.match(source,/Promise\.allSettled\(\[loadCFModels\(\),loadCloudStatus\(\)\]\)/);
+ assert.match(source,/window\.addEventListener\('pageshow',refreshOnReturn\)/);
+ assert.match(source,/cfModels\.filter\(m=>m\.available&&m\.mode===cfMode\)/);
 });
