@@ -1,15 +1,15 @@
-// Cloudflare Workers AI browser client. No model calls are sent to Vercel.
-// This module never contains provider secrets. Browser supplies Origin automatically.
-const ROOT="https://malware-ai.malguard-security.workers.dev";
-export const CF_DEFAULTS=Object.freeze({chat:"chat_granite",work:"work_qwen",code:"code_ultra"});
+// Vercel-only model client. Never exposes provider credentials to the browser.
+const ROOT="https://models.malguard.site";
+export const CF_DEFAULTS=Object.freeze({chat:"chat_flash",work:"work_gemma",code:"code_gemini"});
 // The client keeps the complete known catalog visible even if an older Worker
 // responds with only six models or the catalog cannot be fetched. Unverified
 // entries are NEVER enabled until the server explicitly advertises them.
 const CATALOG=Object.freeze([
  ['chat_granite','chat','Granite 4 Micro · Fast','workers_ai'],
- ['chat_flash','chat','Gemini 3.1 Flash-Lite','gemini'],
+ ['chat_flash','chat','Gemini 3.5 Flash-Lite','gemini'],
  ['work_qwen','work','Qwen3 30B · Work','workers_ai'],
- ['work_gemma','work','Gemma 4 31B · Work','gemini'],
+ ['work_gemma','work','Gemini 3.8 Flash · Work','gemini'],
+ ['code_gemini','code','Gemini 3.8 Flash · Coding','gemini'],
  ['code_super','code','Nemotron 3 Super 120B','workers_ai'],
  ['code_ultra','code','Nemotron 3 Ultra 550B · Free','openrouter'],
  ['llama70b','work','Llama 3.3 70B · Legacy','workers_ai'],
@@ -35,7 +35,7 @@ export function unavailableCFModels(){
 }
 export async function fetchCFModels({fetchImpl=fetch,signal}={}){
  const response=await fetchImpl(ROOT+"/api/public-models",{method:"GET",credentials:"omit",cache:"no-store",mode:"cors",signal});
- if(!response.ok)throw new Error("cloudflare_unavailable");
+ if(!response.ok)throw new Error("model_catalog_unavailable");
  const data=await response.json();
  if(!Array.isArray(data.models)||data.models.length>500)throw new Error("invalid_model_catalog");
  const seen=new Map();
@@ -50,12 +50,12 @@ export async function fetchCFModels({fetchImpl=fetch,signal}={}){
  return models;
 }
 export async function callCFModel({mode,model,message,history=[],sessionToken,quotaEnabled=false,freeFallback=false,signal,fetchImpl=fetch}){
- if(!["chat","work","code"].includes(mode)||!IDS.has(model)||typeof message!=="string"||!message.trim()||message.length>5000||quotaEnabled&&(typeof sessionToken!=="string"||!sessionToken))throw new Error("invalid_model_request");
+ if(!["chat","work","code"].includes(mode)||!IDS.has(model)||typeof message!=="string"||!message.trim()||message.length>5000||typeof sessionToken!=="string"||sessionToken.length<12)throw new Error("sign_in_required");
  if(typeof freeFallback!=="boolean")throw new Error("invalid_model_request");
- const body={mode,model,message,history:history.slice(-6).map(m=>({role:m.role,content:m.content})),...(freeFallback?{freeFallback:true}:{})};
- const response=await fetchImpl(ROOT+"/api/public-model-chat",{method:"POST",credentials:"omit",cache:"no-store",mode:"cors",signal,headers:{"Content-Type":"application/json",...(quotaEnabled?{Authorization:"Bearer "+sessionToken}:{})},body:JSON.stringify(body)});
- let data;try{data=await response.json();}catch{throw new Error("cloudflare_invalid_response");}
- if(!response.ok)throw Object.assign(new Error(data?.error||"cloudflare_unavailable"),{code:data?.error||"cloudflare_unavailable",status:response.status,retryAfterSeconds:data?.retryAfterSeconds,retryAt:typeof data?.resetAt==='string'?data.resetAt:undefined});
+ const body={mode,model,message,history:history.slice(-6).map(m=>({role:m.role,content:m.content})),consent:{modelShare:true},...(freeFallback?{freeFallback:true}:{})};
+ const response=await fetchImpl(ROOT+"/api/public-model-chat",{method:"POST",credentials:"omit",cache:"no-store",mode:"cors",signal,headers:{"Content-Type":"application/json",Authorization:"Bearer "+sessionToken},body:JSON.stringify(body)});
+ let data;try{data=await response.json();}catch{throw new Error("provider_invalid_response");}
+ if(!response.ok)throw Object.assign(new Error(data?.error||"provider_unavailable"),{code:data?.error||"cloudflare_unavailable",status:response.status,retryAfterSeconds:data?.retryAfterSeconds,retryAt:typeof data?.resetAt==='string'?data.resetAt:undefined});
  if(typeof data.text!=="string"||!data.text.trim()||typeof data.model!=="string"||typeof data.provider!=="string")throw new Error("cloudflare_invalid_response");
  return {text:data.text,model:data.model,selectedModel:data.modelId,provider:data.provider,fallbackUsed:!!data.fallback,securityAnalysis:false,...(data.usage&&typeof data.usage.remainingTokens==="number"?{usage:data.usage}:{})};
 }
