@@ -2,10 +2,10 @@ import {createChatLibrary} from './library.mjs?v=sidebar-20261026';
 import {createNavigation} from './navigation.mjs?v=sidebar-20261026';
 import {errorMessage} from './error-message.mjs?v=neuron-resilience-20261030';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=account-quota-20261030';
-import {apiUrl,readStream} from './client.mjs?v=cloud-session-20261029';
+import {apiUrl,readStream} from './client.mjs?v=vercel-api-20261103';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs?v=free-fallback-20261030';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
-import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=neuron-resilience-20261030';
+import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=vercel-models-20261103';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
@@ -13,7 +13,7 @@ import {typeText,formatElapsed} from './reply-motion.mjs';
 import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=desktop-pull-20261030';
 import {detectDevice,assessDesktopModel} from './model-compatibility.mjs?v=hardware-check-20261030';
 import {renderRichText} from './code-view.mjs?v=codex-chat-20261025';
-import {createAccount} from './account.mjs?v=founder-name-20261029';
+import {createAccount} from './account.mjs?v=vercel-auth-20261103';
 import {createBuilder} from './builder.mjs?v=qwen-coder-restored-20261026';
 import {parseProposal} from './build-project.mjs?v=codex-chat-20261025';
 const $=id=>document.getElementById(id);
@@ -302,7 +302,8 @@ function renderStatus(){
  const selectedId=$('model').value;
  const cfMode=activeMode==='build'?'code':activeMode==='worker'?'work':'chat';
  const cfAvailable=cfModels.filter(m=>m.available&&m.mode===cfMode);
- const cfChoices=cfModels.filter(m=>m.mode===cfMode);
+ // Show only models that the Vercel gateway actually offers.
+ const cfChoices=cfModels.filter(m=>m.available&&m.mode===cfMode);
  const models=[
   ...cfChoices.map(m=>({...m,state:m.available?'configured':'disabled',label:m.label+(m.available?'':' · unavailable')})),
   ...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),
@@ -328,7 +329,7 @@ function renderStatus(){
   if(cfAvailable.length)cloudDefaultApplied=true;
   if(service||localReady||cfAvailable.length)modelsInitialized=true;
  }
- const workChoices=cfModels.filter(m=>m.mode==='work');
+ const workChoices=cfModels.filter(m=>m.available&&m.mode==='work');
  if(workChoices.length){
   const control=$('workspace-model'),old=control.value;
   if([...control.options].map(o=>o.value).join('|')!==workChoices.map(m=>m.id).join('|')){
@@ -349,7 +350,7 @@ function renderStatus(){
  const modelLabel=selected?.label||service?.model?.model||'';
  const modelNotice=locale==='fa'?`مدل انتخاب‌شده: ${modelLabel}`:`Selected model: ${modelLabel}`;
  $('model-status').textContent=(cfAvailable.length?modelNotice:t('modelOff'))+(cfQuotaEnabled?(locale==='fa'?' · استفاده منصفانه با سقف ماهانه':' · Monthly fair-use limits apply'):'');
- if(cfAvailable.length)document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌ها از مسیر Cloudflare اجرا می‌شن. Ultra و Gemma و Flash-Lite از داخل Worker به ارائه‌دهندهٔ اصلی وصل می‌شن.':'Models run through Cloudflare. Ultra, Gemma and Flash-Lite are proxied by the Worker to their respective providers.';
+ if(cfAvailable.length)document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌ها از مسیر Vercel و ارائه‌دهندهٔ تنظیم‌شده اجرا می‌شن. مدل‌های غیرفعال از لیست حذف شدن.':'Models run through Vercel and the configured provider. Unavailable models are hidden.';
  $('manage-models').disabled=busy||localOfferPending;
  $('offer-download-button').disabled=busy||!localReady;
  $('offer-compatibility').textContent=localReady?'':t({checking:'localChecking',insecure_context:'localSecure',webgpu_unavailable:'localNoWebGPU',adapter_unavailable:'localNoAdapter',shader_f16_unavailable:'localNoF16'}[localCapabilityReason]||'localCompatibility');
