@@ -24,6 +24,7 @@ let activeTurn;
 let localReady=false,localCapabilityReason='checking',modelsInitialized=false;
 let lastSelectedModel='';
 let cloudDefaultApplied=false,modelChosen=false,cfModels=[],accountUsage=null,cfQuotaEnabled=false;
+let cfCatalogError=false,cfCatalogLoading=false,cfCatalogLastAttempt=0;
 let localOfferPending=false;
 let preferredLocal;try{preferredLocal=localStorage.getItem('malguard.ai.localModel.v1');}catch{}
 const localChat=createLocalChat(),downloadPermissions=new Set();
@@ -285,7 +286,8 @@ function translate(){
 }
 function renderStatus(){
  $('account').disabled=busy;
- $('cloud-alert').hidden=!!service||serviceLoading;
+ // Catalog fetch errors must remain actionable even when the separate legacy status API is healthy.
+ $('cloud-alert').hidden=!(cfCatalogError||(!service&&!serviceLoading&&!cfModels.some(m=>m.available)));
  $('tools').replaceChildren();
  for(const [id,name]of Object.entries(names)){
   const state=service?.tools?.[id]?.state||'disabled',row=el('div',undefined,'tool-card');row.dataset.tool=id;row.append(el('strong',name),el('span',t(state),state==='available'?'available':''));$('tools').append(row);
@@ -622,16 +624,45 @@ async function loadAccountUsage(){
  try{const usage=await fetchCFUsage({sessionToken:token,signal:AbortSignal.timeout(6000)});if(account.getToken()===token){accountUsage=usage;renderStatus();}}catch{ /* Optional quota status never blocks the assistant. */ }
 }
 async function loadCFModels(){
- try{cfModels=await fetchCFModels({signal:AbortSignal.timeout(7500)});cfQuotaEnabled=cfModels.accountQuotaEnabled===true;}catch{cfModels=unavailableCFModels();cfQuotaEnabled=false;}
- if(!modelChosen&&cfModels.length&&!cfModels.some(m=>m.id===$('model').value&&m.available))$('model').value=activeMode==='build'?CF_DEFAULTS.code:CF_DEFAULTS.chat;
- renderStatus();
+ if(cfCatalogLoading)return;
+ cfCatalogLoading=true;cfCatalogLastAttempt=Date.now();
+ try{
+  // A single transient error in Safari standalone must not strand all 22 model choices.
+  for(let attempt=0;attempt<2;attempt++){
+   try{
+    const fresh=await fetchCFModels({signal:AbortSignal.timeout(8500)});
+    cfModels=fresh;cfQuotaEnabled=fresh.accountQuotaEnabled===true;cfCatalogError=false;
+    break;
+   }catch{
+    cfCatalogError=true;
+    if(attempt===1){cfModels=unavailableCFModels();cfQuotaEnabled=false;}
+    else await new Promise(resolve=>setTimeout(resolve,400));
+   }
+  }
+ }finally{
+  cfCatalogLoading=false;
+  if(!modelChosen&&cfModels.length&&!cfModels.some(m=>m.id===$('model').value&&m.available))$('model').value=activeMode==='build'?CF_DEFAULTS.code:CF_DEFAULTS.chat;
+  renderStatus();
+ }
 }
 async function loadCloudStatus(){
  serviceLoading=true;renderStatus();
  try{for(let attempt=0;attempt<2;attempt++){try{const r=await fetch(apiUrl('status'),{credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error('unavailable');const next=await r.json();if(!next||typeof next!=='object'||!next.model)throw new Error('invalid_status');service=next;return;}catch{}}service=undefined;}
  finally{serviceLoading=false;renderStatus();}
 }
-$('retry-cloud').onclick=()=>{if(!serviceLoading)void loadCloudStatus();};
+async function retryCloudConnections(){
+ if(cfCatalogLoading||serviceLoading)return;
+ const button=$('retry-cloud');button.disabled=true;
+ try{await Promise.allSettled([loadCFModels(),loadCloudStatus()]);}
+ finally{button.disabled=false;renderStatus();}
+}
+$('retry-cloud').onclick=()=>{void retryCloudConnections();};
+const refreshOnReturn=()=>{
+ if((cfCatalogError||(!service&&!serviceLoading&&!cfModels.some(m=>m.available)))&&!cfCatalogLoading&&!serviceLoading&&Date.now()-cfCatalogLastAttempt>=5000)void retryCloudConnections();
+};
+window.addEventListener('online',refreshOnReturn);
+window.addEventListener('pageshow',refreshOnReturn);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshOnReturn();});
 async function resolveAccountEntry(){
  if(account.usesProductionAuth()){const restored=await account.restore();$('entry-retry').hidden=restored||!account.hasSavedSession();return;}
  try{const status=await Promise.race([account.authStatus(),new Promise((_,reject)=>setTimeout(()=>reject(Error('timeout')),1200))]);if(status?.configured===true&&status?.persistentAccounts===true){const restored=await account.restore();$('entry-retry').hidden=restored||!account.hasSavedSession();return;}}catch{}
