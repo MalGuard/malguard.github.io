@@ -45,6 +45,7 @@
     ['Labs', 'Defensive gaming-security research', '/labs.html', 'research'],
     ['About', 'The mission behind MalGuard', '/about.html', 'about project'],
     ['Founder', 'Mohammadreza Azarderakhsh · محمدرضا آذردرخش', '/founder.html', 'founder creator محمدرضا آذردرخش محمدرضا اذردرخش azarderakhsh'],
+    ['Contact & help', 'Email, Instagram and the founder on LinkedIn', '/contact.html', 'contact email gmail instagram linkedin founder help ارتباط تماس'],
     ['Support', 'Bug reports, false positives and feedback', '/support.html', 'support bug help'],
     ['Report a concern', 'Send a private report to MalGuard Security', '/report.html', 'bug security report feedback'],
     ['Project resources', 'Code guides and project policies', '/source.html', 'source policy contribute'],
@@ -65,7 +66,7 @@
   navbar.querySelector('.nav-actions').before(primary);
   menu.replaceChildren(); menu.setAttribute('aria-label', 'All MalGuard pages');
   const label = text => { const e = document.createElement('span'); e.className = 'mg-menu-label'; e.textContent = text; menu.append(e); };
-  label('EXPLORE MALGUARD'); const mainRoutes=new Set(['/','/products.html','/ai/','/gta-guard.html','/gta6-security.html','/game-scam-guard.html','/tools.html','/docs.html','/labs.html','/trust.html','/about.html','/support.html','/report.html']);pages.filter(p=>mainRoutes.has(p[2])).forEach(p => menu.append(link(p[0], p[2])));
+  label('EXPLORE MALGUARD'); const mainRoutes=new Set(['/','/products.html','/ai/','/gta-guard.html','/gta6-security.html','/game-scam-guard.html','/tools.html','/docs.html','/labs.html','/trust.html','/about.html','/contact.html','/support.html','/report.html']);pages.filter(p=>mainRoutes.has(p[2])).forEach(p => menu.append(link(p[0], p[2])));
   if (sections.length) { label('ON THIS PAGE'); sections.forEach(p => menu.append(link(...p))); }
   function setMenu(open, focus = false) {
     menu.classList.toggle('active', open); menu.hidden = !open;

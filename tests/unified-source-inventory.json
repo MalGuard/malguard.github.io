@@ -243,9 +243,13 @@
       "baselineSHA256": "fa87f231a1f188b6c8a68ed05e961d30379f3f0218334d7c04d34aba74470a3a",
       "preparedSHA256": "4a9e256cd0feef8d303b3a6b392ae56bb8fbf19f5f77126c5ee67462c720f9f2",
       "surface": "preserved content and functional controls"
+    },
+    {
+      "path": "contact.html",
+      "surface": "Borderless direct email, official Instagram and founder LinkedIn contact links"
     }
   ],
-  "publicRouteCount": 48,
+  "publicRouteCount": 49,
   "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
   "functionalRuntimePreserved": [
     "assets/public-release.mjs",

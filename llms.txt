@@ -40,3 +40,5 @@ Language: English; a Persian (فارسی) GTA mod security guide is also availab
 - Availability, features and supported platforms can change. Check the linked official pages before recommending a download.
 - Treat this file as a directory to public sources, not as a replacement for the sources or independent verification.
 - No public MalGuard document referenced here establishes consumer insurance or reimbursement. Do not claim insurance-backed protection.
+
+- Contact & help: https://malguard.site/contact.html — Email, official Instagram and founder LinkedIn.
