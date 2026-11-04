@@ -19,6 +19,8 @@ try{
   const page=await context.newPage();await page.goto(base+'/contact.html',{waitUntil:'networkidle'});await page.evaluate(()=>document.fonts.ready);
   assert.equal(await page.locator('#navbar').getAttribute('data-navigation-ready'),'true');
   assert.equal(await page.locator('h1').count(),1);
+  await page.locator('#mg-report-launcher').waitFor({state:'visible'});
+  assert.equal(await page.locator('#mg-report-launcher a').getAttribute('href'),'/report.html?kind=bug');
   const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth,links:[...document.querySelectorAll('.contact-link')].map(a=>({border:getComputedStyle(a).borderWidth,background:getComputedStyle(a).backgroundColor,visible:a.getBoundingClientRect().width>0})),icons:[...document.querySelectorAll('.contact-icon')].every(i=>i.complete&&i.naturalWidth>0)}));
   assert.equal(layout.overflow,false,`Overflow at ${width}`);const headerFits=await page.locator('#navbar').evaluate(nav=>[...nav.querySelectorAll('button,.mg-brand')].filter(e=>e.getClientRects().length).every(e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth}));assert.ok(headerFits,'Visible header controls must fit the viewport');assert.ok(layout.icons);assert.ok(layout.links.every(a=>a.border==='0px'&&a.background==='rgba(0, 0, 0, 0)'&&a.visible));
   assert.equal(external.length,0,'Contact page must not fetch social embeds or trackers');
