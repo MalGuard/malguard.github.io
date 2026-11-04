@@ -1,6 +1,6 @@
 // Vercel-only model client. Never exposes provider credentials to the browser.
 const ROOT="https://models.malguard.site";
-export const CF_DEFAULTS=Object.freeze({chat:"chat_flash",work:"work_gemma",code:"code_gemini"});
+export const CF_DEFAULTS=Object.freeze({chat:"chat_flash",work:"work_qwen",code:"code_ultra"});
 // Keep the known catalog visible for debugging; only server-confirmed Vercel models are enabled.
 // No client-side model name can force a provider connection or spending.
 const CATALOG=Object.freeze([
