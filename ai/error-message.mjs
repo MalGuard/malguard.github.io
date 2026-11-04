@@ -7,7 +7,7 @@ export function errorMessage(failure,locale='en',{now=Date.now(),timeZone}={}){
  let text=m[code]||(/_consent_required$/.test(code||'')?m.consent:m.request_failed);
  const limited=['all_providers_cooling_down','rate_limited','provider_rate_limited','provider_quota_exhausted','provider_billing_required'].includes(code);
  if(limited){
-  const stamp=typeof failure?.retryAt==='string'?Date.parse(failure.retryAt):typeof failure?.resetAt==='string'?Date.parse(failure.resetAt):NaN;
+  const stamp=typeof failure?.retryAt==='string'?Date.parse(failure.retryAt):typeof failure?.resetAt==='string'?Date.parse(failure.resetAt):Number.isInteger(failure?.retryAfterSeconds)&&failure.retryAfterSeconds>0&&failure.retryAfterSeconds<=3600?now+failure.retryAfterSeconds*1000:NaN;
   if(Number.isFinite(stamp)){
    if(stamp<=now)text+=' '+m.retryNow;
    else{const formatter=new Intl.DateTimeFormat(locale==='fa'?'fa-IR':'en-GB',{dateStyle:'medium',timeStyle:'long',...(timeZone?{timeZone}:{})});text+=' '+m.retryAt+' '+formatter.format(stamp);}
