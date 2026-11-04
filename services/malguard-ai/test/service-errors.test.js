@@ -43,3 +43,12 @@ test('Persian and English messages show a timezone-labelled real time or explici
  assert.match(errorMessage({error:'provider_billing_required'},'en'),/credit or billing/);
  assert.match(errorMessage(f,'fa',{now:now+100000,timeZone:'UTC'}),/اکنون می‌توانید/);
 });
+
+test('OpenRouter relative Retry-After is shown as a real local timestamp without exposing provider text',()=>{
+ const received={error:'provider_rate_limited',retryAfterSeconds:35};
+ const message=errorMessage(received,'en',{now,timeZone:'UTC'});
+ assert.match(message,/18:00:35/);
+ assert.doesNotMatch(message,/time to try again.*unknown/i);
+ assert.match(errorMessage(received,'fa',{now,timeZone:'Asia\/Tehran'}),/زمان اعلام‌شده/);
+ assert.match(errorMessage({error:'provider_rate_limited',retryAfterSeconds:-1},'en',{now,timeZone:'UTC'}),/not supply a reset time/);
+});
