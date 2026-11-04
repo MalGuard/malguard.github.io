@@ -22,7 +22,7 @@ test('catalog loads ONLY verified gateway advertisements from Vercel, never from
  assert.equal(count,1);
  assert.deepEqual(found.filter(m=>m.available).sort((a,b)=>a.id.localeCompare(b.id)),expected.slice().sort((a,b)=>a.id.localeCompare(b.id)));
  assert.equal(found.accountQuotaEnabled,false);
- assert.deepEqual(CF_DEFAULTS,{chat:'chat_flash',work:'work_gemma',code:'code_gemini'});
+ assert.deepEqual(CF_DEFAULTS,{chat:'chat_flash',work:'work_qwen',code:'code_ultra'});
  assert.ok(found.filter(m=>!m.available).every(x=>!expected.some(y=>y.id===x.id)));
 });
 
@@ -76,7 +76,7 @@ test('standalone Safari app has its own identity and no overlay report button',(
  assert.match(html,/name="apple-mobile-web-app-capable" content="yes"/);
  assert.match(html,/rel="manifest" href="\.\/manifest\.webmanifest"/);
  assert.match(html,/connect-src[^\"]+https:\/\/game-scam-guard-connected\.vercel\.app https:\/\/models\.malguard\.site/);
- assert.match(html,/app\.js\?v=vercel-auth-stable-20261103/);
+ assert.match(html,/app\.js\?v=flagships-20261104/);
  assert.doesNotMatch(html,/report-launcher\.js/);
 });
 test('model reconnection refreshes the catalog when Safari app resumes',()=>{
@@ -85,4 +85,26 @@ test('model reconnection refreshes the catalog when Safari app resumes',()=>{
  assert.match(source,/Promise\.allSettled\(\[loadCFModels\(\),loadCloudStatus\(\)\]\)/);
  assert.match(source,/window\.addEventListener\('pageshow',refreshOnReturn\)/);
  assert.match(source,/cfModels\.filter\(m=>m\.available&&m\.mode===cfMode\)/);
+});
+
+test('restored flagship Nemotron Ultra and free Qwen3 choices match real Vercel provider IDs',async()=>{
+ const server=[
+  {id:'chat_nemotron',mode:'chat',label:'Nemotron 3 Super · Chat · Free',provider:'openrouter',available:true},
+  {id:'work_qwen',mode:'work',label:'Qwen3 30B · Work · Free',provider:'openrouter',available:true},
+  {id:'code_ultra',mode:'code',label:'Nemotron 3 Ultra 550B · Free',provider:'openrouter',available:true},
+  {id:'code_super',mode:'code',label:'Nemotron 3 Super 120B · Free',provider:'openrouter',available:true}
+ ];
+ const models=await fetchCFModels({fetchImpl:async()=>Response.json({models:server})});
+ assert.deepEqual(models.filter(m=>m.available).map(x=>x.id).sort(),server.map(x=>x.id).sort());
+ for(const {id,mode,provider} of server){
+  const result=await callCFModel({mode,model:id,message:'سلام',history:[],sessionToken,
+   fetchImpl:async(url,opts)=>{
+    assert.equal(url,origin+'/api/public-model-chat');
+    assert.equal(JSON.parse(opts.body).model,id);
+    assert.equal(opts.headers.Authorization,'Bearer '+sessionToken);
+    return Response.json({text:'سلام!',provider,model:'verified-synthetic-fixture',modelId:id});
+   }});
+  assert.equal(result.selectedModel,id);
+  assert.equal(result.provider,'openrouter');
+ }
 });
