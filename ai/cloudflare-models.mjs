@@ -1,16 +1,16 @@
 // Vercel-only model client. Never exposes provider credentials to the browser.
 const ROOT="https://models.malguard.site";
 export const CF_DEFAULTS=Object.freeze({chat:"chat_flash",work:"work_gemma",code:"code_gemini"});
-// The client keeps the complete known catalog visible even if an older Worker
-// responds with only six models or the catalog cannot be fetched. Unverified
-// entries are NEVER enabled until the server explicitly advertises them.
+// Keep the known catalog visible for debugging; only server-confirmed Vercel models are enabled.
+// No client-side model name can force a provider connection or spending.
 const CATALOG=Object.freeze([
  ['chat_granite','chat','Granite 4 Micro · Fast','workers_ai'],
  ['chat_flash','chat','Gemini 3.5 Flash-Lite','gemini'],
- ['work_qwen','work','Qwen3 30B · Work','workers_ai'],
+ ['chat_nemotron','chat','Nemotron 3 Super · Chat · Free','openrouter'],
+ ['work_qwen','work','Qwen3 30B · Work · Free','openrouter'],
  ['work_gemma','work','Gemini 3.8 Flash · Work','gemini'],
  ['code_gemini','code','Gemini 3.8 Flash · Coding','gemini'],
- ['code_super','code','Nemotron 3 Super 120B','workers_ai'],
+ ['code_super','code','Nemotron 3 Super 120B · Free','openrouter'],
  ['code_ultra','code','Nemotron 3 Ultra 550B · Free','openrouter'],
  ['llama70b','work','Llama 3.3 70B · Legacy','workers_ai'],
  ['llama8b','chat','Llama 3.1 8B · Legacy','workers_ai'],
