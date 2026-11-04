@@ -1,0 +1,18 @@
+{
+  "name": "Game Scam Guard",
+  "short_name": "Scam Guard",
+  "id": "/game-scam-guard.html",
+  "start_url": "/game-scam-guard.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#050507",
+  "theme_color": "#050507",
+  "icons": [
+    {
+      "src": "/assets/gamescam-guard-android.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
