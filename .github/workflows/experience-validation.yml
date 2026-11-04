@@ -48,6 +48,7 @@ jobs:
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/secure-cinematic.mjs
           TEST_BROWSER=chromium node tests/secure-cinematic.mjs
           node tests/precision-pages-qa.mjs
+          node tests/contact-page.mjs
           npm run test:experience
           TEST_BROWSER=chromium node tests/game-scam-preview.mjs
           node tests/game-scam-extended-flow.mjs
