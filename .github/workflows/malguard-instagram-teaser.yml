@@ -1,0 +1,66 @@
+name: Build MalGuard Instagram teaser reel
+on:
+  push:
+    paths:
+      - .github/workflows/malguard-instagram-teaser.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.repository == 'MalGuard/malguard.github.io'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout source assets
+        uses: actions/checkout@v4
+      - name: Install free local rendering utilities
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq librsvg2-bin ffmpeg
+      - name: Render original 9:16 teaser
+        shell: bash
+        run: |
+          set -euo pipefail
+          src="assets/instagram/launch-2026"
+          mkdir -p "$src/build"
+          posters=(
+            "02-file-evidence"
+            "04-think-before-click"
+            "03-gta-guard"
+            "06-reveal-near"
+          )
+          : > "$src/build/list.txt"
+          for i in "${!posters[@]}"; do
+            id="${posters[$i]}"
+            png="$src/build/frame-$i.png"
+            clip="$src/build/part-$i.mp4"
+            rsvg-convert -w 720 -h 900 "$src/$id.svg" -o "$png"
+            ffmpeg -hide_banner -loglevel error -y -loop 1 -framerate 24 -i "$png" \
+              -vf "scale=720:900:flags=lanczos,pad=720:1280:0:190:color=0x020509,zoompan=z='min(zoom+0.0005,1.04)':d=1:s=720x1280:fps=24,fade=t=in:st=0:d=0.30,fade=t=out:st=3.30:d=0.30,format=yuv420p" \
+              -t 3.6 -c:v libx264 -preset faster -crf 24 -pix_fmt yuv420p -an "$clip"
+            printf "file '%s'\n" "part-$i.mp4" >> "$src/build/list.txt"
+          done
+          (
+            cd "$src/build"
+            ffmpeg -hide_banner -loglevel error -y -f concat -safe 0 -i list.txt -c:v copy combined.mp4
+          )
+          ffmpeg -hide_banner -loglevel error -y -i "$src/build/combined.mp4" \
+            -f lavfi -i "sine=frequency=110:sample_rate=44100" \
+            -filter_complex "[1:a]volume=0.012,afade=t=in:st=0:d=0.75,afade=t=out:st=13.0:d=1.4[a]" \
+            -map 0:v -map "[a]" -c:v copy -c:a aac -b:a 64k \
+            -shortest -movflags +faststart "$src/malguard-original-teaser-reel-14s.mp4"
+          ffprobe -v error -show_entries format=duration,size -of default=nw=1 "$src/malguard-original-teaser-reel-14s.mp4"
+          test -s "$src/malguard-original-teaser-reel-14s.mp4"
+      - name: Commit teaser media (not the final reveal video)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/instagram/launch-2026/malguard-original-teaser-reel-14s.mp4
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "assets: build original MalGuard teaser reel [skip ci]"
+          git push
