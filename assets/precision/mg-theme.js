@@ -54,7 +54,7 @@
     const link=document.createElement('link');
     link.id='mg-theme-css';
     link.rel='stylesheet';
-    link.href='/assets/precision/mg-theme.css?v=20261105-day-night-contrast';
+    link.href='/assets/precision/mg-theme.css?v=20261105-light-contrast';
     document.head.appendChild(link);
   }
   function cycle(){
