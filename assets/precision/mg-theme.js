@@ -38,7 +38,7 @@
     root.dataset.themeMode=mode||'system';
     root.style.colorScheme=effective;
     const meta=document.querySelector('meta[name="theme-color"]');
-    if(meta) meta.setAttribute('content', effective==='light' ? '#B8DFF5' : '#050507');
+    if(meta) meta.setAttribute('content', effective==='light' ? '#8EC8EC' : '#050507');
     const btn=document.getElementById('mgThemeToggle');
     if(btn){
       const show=mode||'system';
@@ -54,7 +54,7 @@
     const link=document.createElement('link');
     link.id='mg-theme-css';
     link.rel='stylesheet';
-    link.href='/assets/precision/mg-theme.css?v=20261105-day-sky';
+    link.href='/assets/precision/mg-theme.css?v=20261105-day-night-contrast';
     document.head.appendChild(link);
   }
   function cycle(){
