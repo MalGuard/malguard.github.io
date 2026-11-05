@@ -15,7 +15,7 @@
  const render=item=>{if(!item.video||!item.button)return;const playing=!item.video.paused;item.button.dataset.state=playing?'playing':'paused';item.button.setAttribute('aria-label',(playing?'Pause':'Play')+' MalGuard AI promo video');item.stage.classList.toggle('is-active',playing||item.visible);};
  const arm=item=>{if(item.armed||!item.source||!item.src)return;item.source.setAttribute('src',item.src);item.video.load();item.armed=true;};
  const disarm=item=>{if(!item.armed||!item.source)return;item.video.pause();item.source.removeAttribute('src');item.video.removeAttribute('src');item.video.load();item.armed=false;};
- const play=item=>{arm(item);item.video.muted=true;const p=item.video.play();if(p&&p.catch)p.then(()=>{item.stage.dataset.blocked='false';},()=>{item.stage.dataset.blocked='true';render(item);});};
+ const play=item=>{arm(item);const wantSound=!!item.userPlay;item.video.muted=!wantSound;const p=item.video.play();if(p&&p.catch)p.then(()=>{item.stage.dataset.blocked='false';if(wantSound){item.video.muted=false;}},()=>{if(wantSound){item.video.muted=true;const p2=item.video.play();if(p2&&p2.catch)p2.catch(()=>{item.stage.dataset.blocked='true';render(item);});}else{item.stage.dataset.blocked='true';render(item);}});};
  const pickActive=()=>{
   const candidates=items.filter(i=>i.video&&i.button&&i.visible&&!i.userPaused&&(autoAllowed()||i.userPlay));
   if(!candidates.length)return null;
