@@ -143,3 +143,86 @@ html[data-theme=light] #app{
 @media(max-width:760px){
   .mg-theme-toggle{top:10px;left:10px;width:36px;height:36px}
 }
+
+
+/* Light: readable muted copy + light nav (beat night defaults). */
+html.theme-light,
+html[data-theme=light],
+html.theme-light body,
+html[data-theme=light] body,
+html.theme-light body.precision-home,
+html[data-theme=light] body.precision-home{
+  --bg:#E8F4FC;--text:#111318;--muted:#334155;--line:#b7c7db;--accent:#1f4f8a;
+  color:#111318!important;
+}
+html.theme-light :is(.eyebrow,.hero-description,.hero-statement,.section-description,.activity-caption,.button.quiet,.text-link,.section-intro>.text-link,.footer-brand p,.footer-main nav a,.footer-bottom,.limit,.principles p,.metric dt,.prototype-label),
+html[data-theme=light] :is(.eyebrow,.hero-description,.hero-statement,.section-description,.activity-caption,.button.quiet,.text-link,.section-intro>.text-link,.footer-brand p,.footer-main nav a,.footer-bottom,.limit,.principles p,.metric dt,.prototype-label){
+  color:#334155!important;
+}
+html.theme-light :is(.hero h1,.hero-statement,.section-intro>h2,.principles h3,.brand b),
+html[data-theme=light] :is(.hero h1,.hero-statement,.section-intro>h2,.principles h3,.brand b){
+  color:#0b1220!important;
+}
+html.theme-light .button.primary,
+html[data-theme=light] .button.primary{
+  background:#0b1220!important;color:#f5f5f5!important;border-color:#0b1220!important;
+}
+html.theme-light .button.quiet:hover,
+html.theme-light .text-link:hover,
+html.theme-light .footer-main nav a:hover,
+html[data-theme=light] .button.quiet:hover,
+html[data-theme=light] .text-link:hover,
+html[data-theme=light] .footer-main nav a:hover{
+  color:#0b1220!important;
+}
+html.theme-light .tiny-dot,
+html[data-theme=light] .tiny-dot{background:#1f4f8a!important}
+
+/* Home pill nav stays dark in night CSS — force day glass. */
+html.theme-light .precision-home #navbar.nav,
+html[data-theme=light] .precision-home #navbar.nav{
+  background:rgba(245,250,255,.94)!important;
+  border-color:rgba(31,79,138,.22)!important;
+  color:#0b1220!important;
+  box-shadow:0 8px 30px rgba(31,79,138,.12)!important;
+}
+html.theme-light .precision-home #navbar .mg-brand,
+html.theme-light .precision-home #navbar .mg-primary-links a,
+html.theme-light .precision-home #navbar :is(.nav-icon,.menu-btn,.nav-download),
+html[data-theme=light] .precision-home #navbar .mg-brand,
+html[data-theme=light] .precision-home #navbar .mg-primary-links a,
+html[data-theme=light] .precision-home #navbar :is(.nav-icon,.menu-btn,.nav-download){
+  color:#0b1220!important;
+}
+html.theme-light .precision-home #navbar :is(.nav-icon,.menu-btn,.nav-download),
+html[data-theme=light] .precision-home #navbar :is(.nav-icon,.menu-btn,.nav-download){
+  border-color:rgba(31,79,138,.28)!important;
+  background:rgba(31,79,138,.06)!important;
+}
+html.theme-light .precision-home #navbar .menu-glyph span,
+html[data-theme=light] .precision-home #navbar .menu-glyph span{background:#0b1220!important}
+html.theme-light .precision-home #navbar .nav-links,
+html[data-theme=light] .precision-home #navbar .nav-links{
+  background:rgba(245,250,255,.98)!important;
+  border-color:rgba(31,79,138,.22)!important;
+}
+html.theme-light .precision-home #navbar .nav-links :is(a,button),
+html[data-theme=light] .precision-home #navbar .nav-links :is(a,button){
+  color:#0b1220!important;
+}
+
+/* AI product: pale muted leftovers */
+html.theme-light .ai-product-page :is(.eyebrow,.ai-platform-status,nav a),
+html[data-theme=light] .ai-product-page :is(.eyebrow,.ai-platform-status,nav a){
+  color:#334155!important;
+}
+html.theme-light .ai-platform-copy p,
+html.theme-light .ai-product-hero p:not(.eyebrow),
+html.theme-light .ai-section-title>p:not(.eyebrow),
+html.theme-light .ai-product-note p,
+html[data-theme=light] .ai-platform-copy p,
+html[data-theme=light] .ai-product-hero p:not(.eyebrow),
+html[data-theme=light] .ai-section-title>p:not(.eyebrow),
+html[data-theme=light] .ai-product-note p{
+  color:#334155!important;
+}
