@@ -8,9 +8,7 @@
 .mg-device-stage.is-active .mg-device{transform:none;filter:none}
 .mg-device-screen{position:relative;overflow:hidden;background:#000;isolation:isolate}
 .mg-device-video{display:block;width:100%;height:100%;object-fit:cover;background:#000}
-.mg-screen-wide{background:#050507 url('/assets/instagram/launch-2026/malguard-ai-promo-v2-poster.webp') center/cover no-repeat}
-.mg-screen-wide:before{content:'';position:absolute;inset:-24px;background:inherit;filter:blur(22px) brightness(.38) saturate(1.2);z-index:-1}
-.mg-screen-wide .mg-device-video{width:auto;height:100%;aspect-ratio:9/16;margin:0 auto;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 0 40px #000c}
+.mg-screen-wide{background:#000}
 
 /* Phone: thin black titanium bezel, Dynamic Island, side buttons. */
 .mg-phone{height:100%;max-height:272px;aspect-ratio:9/17.6;padding:5px;border-radius:30px;background:linear-gradient(145deg,#3a3a3f,#0b0b0d 38%,#1c1c20 70%,#4a4a50);box-shadow:0 0 0 1px #000,inset 0 0 0 1px rgba(255,255,255,.18),0 26px 60px #000b}
