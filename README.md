@@ -4,7 +4,7 @@
 
 [Website](https://malguard.site/) · [Documentation](https://malguard.site/docs.html) · [Trust Center](https://malguard.site/trust.html) · [Creator](https://github.com/MalGuard)
 
-[![MalGuard Core: OpenSSF Best Practices Baseline Level 1](https://www.bestpractices.dev/projects/16122/baseline)](https://www.bestpractices.dev/projects/16122)
+[![MalGuard Core: OpenSSF Best Practices (in progress)](https://www.bestpractices.dev/projects/16122/badge)](https://www.bestpractices.dev/projects/16122)
 
 </div>
 
@@ -12,7 +12,7 @@
 
 The public home of **MalGuard**, an open-source defensive security project for safer game-mod analysis. Created by **Mohammad Reza Azarderakhsh**.
 
-The [OpenSSF Best Practices Baseline Level 1 badge](https://www.bestpractices.dev/projects/16122) applies to **MalGuard Core** and reflects a project-submitted self-assessment, not an independent audit or Windows code-signing certificate.
+The [OpenSSF Best Practices entry](https://www.bestpractices.dev/projects/16122) for **MalGuard Core** is still in progress (self-assessment unfinished). It is not an earned Baseline Level 1 badge, not an independent audit, and not a Windows code-signing certificate. Always verify the live status on OpenSSF.
 
 Explore the [live website](https://malguard.site/) for product information, documentation, local tools and current release availability.
 
