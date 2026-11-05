@@ -15,6 +15,10 @@
   },
   "rewrites": [
     {
+      "source": "/ai-product",
+      "destination": "/ai-product.html"
+    },
+    {
       "source": "/api/game-scam-guard/:endpoint*",
       "destination": "/api/game-scam-guard?endpoint=:endpoint*"
     },
