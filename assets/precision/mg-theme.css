@@ -1,4 +1,4 @@
-/* MalGuard day/night theme — toggle top-left; data-theme on <html>. */
+/* MalGuard day/night — Nora spec: auto / light / dark, top-left toggle. */
 .mg-theme-toggle{
   position:fixed;top:14px;left:14px;z-index:10050;
   width:40px;height:40px;padding:0;border-radius:999px;
@@ -10,54 +10,72 @@
 }
 .mg-theme-toggle:hover,.mg-theme-toggle:focus-visible{background:rgba(255,255,255,.16)}
 .mg-theme-toggle:focus-visible{outline:2px solid #ddd;outline-offset:3px}
-.mg-theme-toggle svg{width:18px;height:18px;display:none}
-html[data-theme=dark] .mg-theme-toggle .mg-theme-icon-sun,
-html[data-theme=light] .mg-theme-toggle .mg-theme-icon-moon{display:block}
+.mg-theme-toggle svg{width:18px;height:18px;display:block}
+html.theme-light .mg-theme-toggle,
 html[data-theme=light] .mg-theme-toggle{
-  border-color:rgba(0,0,0,.18);background:rgba(255,255,255,.82);color:#111;
+  border-color:rgba(0,0,0,.18);background:rgba(255,255,255,.86);color:#111;
   box-shadow:0 8px 24px #0002;
 }
 
-html[data-theme=light]{color-scheme:light}
-html[data-theme=dark]{color-scheme:dark}
+html.theme-light,html[data-theme=light]{color-scheme:light}
+html.theme-dark,html[data-theme=dark]{color-scheme:dark}
 
+html.theme-light body,
+html.theme-light body.mg-deep-space,
+html.theme-light body.ai-product-page,
+html.theme-light body.mg-precision-shared,
 html[data-theme=light] body,
 html[data-theme=light] body.mg-deep-space,
 html[data-theme=light] body.ai-product-page,
 html[data-theme=light] body.mg-precision-shared{
   background:#f3f4f6!important;color:#111318!important;
 }
+html.theme-light body.mg-precision-shared,
 html[data-theme=light] body.mg-precision-shared{
   --mg-bg:#f3f4f6;--mg-surface:#ffffff;--mg-text:#111318;--mg-muted:#5b6573;--mg-line:#d5dae3;--mg-accent:#3a4d66;
   --bg:#f3f4f6;--panel:#ffffff;--panel2:#eef1f5;--surface:#ffffff;--text:#111318;--muted:#5b6573;--line:#d5dae3;
   --blue:#3a4d66;--blue2:#243246;--cyan:#3a4d66;
 }
+html.theme-light body.mg-precision-shared main,
 html[data-theme=light] body.mg-precision-shared main{color:#111318}
+html.theme-light body.mg-precision-shared main :is(h1,h2,h3,h4),
 html[data-theme=light] body.mg-precision-shared main :is(h1,h2,h3,h4){color:#0e1116!important}
+html.theme-light body.mg-precision-shared main :is(p,li),
 html[data-theme=light] body.mg-precision-shared main :is(p,li){color:#4b5563}
+html.theme-light body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare,.compare-card,.notice,.platform-card,.release-card,.result-card,.timeline .step,.secure-card,.feature-card,.radar-card),
 html[data-theme=light] body.mg-precision-shared main :is(.card,.product-entry,.tool,.compare,.compare-card,.notice,.platform-card,.release-card,.result-card,.timeline .step,.secure-card,.feature-card,.radar-card){
   background:#fff!important;border-color:#d5dae3!important;color:#111318;
 }
+html.theme-light .ai-product-header,
+html.theme-light .ai-product-footer,
+html.theme-light .ai-platform-card,
+html.theme-light .ai-product-note,
 html[data-theme=light] .ai-product-header,
 html[data-theme=light] .ai-product-footer,
 html[data-theme=light] .ai-platform-card,
-html[data-theme=light] .ai-product-note{
-  border-color:#d5dae3;
-}
+html[data-theme=light] .ai-product-note{border-color:#d5dae3}
+html.theme-light .ai-platform-card,
 html[data-theme=light] .ai-platform-card{background:#fff}
+html.theme-light .ai-platform-copy p,
+html.theme-light .ai-product-hero p:not(.eyebrow),
+html.theme-light .ai-section-title>p:not(.eyebrow),
+html.theme-light .ai-product-note p,
 html[data-theme=light] .ai-platform-copy p,
 html[data-theme=light] .ai-product-hero p:not(.eyebrow),
 html[data-theme=light] .ai-section-title>p:not(.eyebrow),
 html[data-theme=light] .ai-product-note p{color:#5b6573}
+html.theme-light .ai-product-page :is(.ai-product-header-cta,.ai-product-primary,.ai-platform-action),
 html[data-theme=light] .ai-product-page :is(.ai-product-header-cta,.ai-product-primary,.ai-platform-action){
   background:rgba(0,0,0,.04);border-color:#c5ccd8;color:#111;
 }
+html.theme-light .nav,
+html.theme-light .mg-context-header,
+html.theme-light .site-header,
 html[data-theme=light] .nav,
 html[data-theme=light] .mg-context-header,
 html[data-theme=light] .site-header{
   background:rgba(243,244,246,.88)!important;color:#111!important;
 }
-html[data-theme=light] a{color:inherit}
 @media(max-width:760px){
   .mg-theme-toggle{top:10px;left:10px;width:36px;height:36px}
 }
