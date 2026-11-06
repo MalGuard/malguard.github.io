@@ -17,5 +17,5 @@ document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;const
 /* Navigation must never wait for the decorative typewriter queue. */
 document.addEventListener('pointerdown',e=>{const a=e.target.closest?.('a[href]');if(!a)return;const href=a.getAttribute('href');if(!href||href.startsWith('#')||a.target==='_blank'||e.button>0)return;document.documentElement.classList.add('mg-navigating');},{capture:true,passive:true});
 
-/* Day/night theme: top-left toggle, hour auto, manual override in localStorage. */
-(()=>{const s=document.createElement('script');s.src='/assets/precision/mg-theme.js?v=20261105-nora';s.defer=true;document.head.appendChild(s);})();
+/* Day/night theme: consented solar location, local-time fallback, manual override. */
+(()=>{const s=document.createElement('script');s.src='/assets/precision/mg-theme.js?v=20261106-solar1';s.defer=true;document.head.appendChild(s);})();
