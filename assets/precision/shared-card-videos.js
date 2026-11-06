@@ -9,7 +9,7 @@ if(!cards.length)return;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const saveData=()=>!!navigator.connection?.saveData;
 const canAuto=()=>!reduced.matches&&!saveData()&&!document.hidden;
-const isHome=document.body.classList.contains('precision-home');
+
 function prepare(x){if(x.ready)return;x.ready=true;x.video.preload=saveData()?'metadata':'auto';x.video.load();}
 function update(x){if(!x.button)return;const playing=!x.video.paused;x.button.textContent=playing?'❚❚':'▶';x.button.setAttribute('aria-label',playing?'Pause promo video':'Play promo video');}
 function stop(x){clearTimeout(x.timer);x.timer=0;x.video.pause();update(x);}
@@ -26,8 +26,8 @@ function sync(x){
  if(x.manualPause)return;
  if(!canAuto()&&!x.manualPlay)return;
  if(!x.video.paused)return;
- // Homepage image remains visible for two seconds before the video starts.
- x.timer=setTimeout(()=>{x.timer=0;if(x.visible)play(x,x.manualPlay);},isHome?2000:0);
+ // Play immediately when the card becomes visible; preload happened earlier.
+ play(x);
 }
 cards.forEach(x=>{
  x.video.preload=saveData()?'metadata':'auto';x.video.muted=true;x.video.playsInline=true;
