@@ -26,8 +26,8 @@ function sync(x){
  if(x.manualPause)return;
  if(!canAuto()&&!x.manualPlay)return;
  if(!x.video.paused)return;
- // Play immediately when the card becomes visible; preload happened earlier.
- play(x);
+ // Keep the card poster visible for two full seconds after entering view.
+ x.timer=setTimeout(()=>{x.timer=0;if(x.visible&&!document.hidden)play(x);},2000);
 }
 cards.forEach(x=>{
  x.video.preload=saveData()?'metadata':'auto';x.video.muted=true;x.video.playsInline=true;
