@@ -226,3 +226,18 @@ html[data-theme=light] .ai-section-title>p:not(.eyebrow),
 html[data-theme=light] .ai-product-note p{
   color:#334155!important;
 }
+
+/* Day mode: expanded navigation must not inherit dark dropdown surfaces. */
+html:is(.theme-light,[data-theme="light"]) :is(#navbar,.nav,.mg-context-header,.site-header) :is(.nav-links,.menu-panel,.nav-menu,.nav-dropdown,.dropdown,.mobile-menu,[role="menu"]){
+ background:#f7fbff!important;color:#102b49!important;border:1px solid #a7bfd8!important;
+ box-shadow:0 14px 34px rgba(12,45,82,.14)!important;
+}
+html:is(.theme-light,[data-theme="light"]) :is(#navbar,.nav,.mg-context-header,.site-header) :is(.nav-links,.menu-panel,.nav-menu,.nav-dropdown,.dropdown,.mobile-menu,[role="menu"]) :is(a,button,span){
+ color:#102b49!important;
+}
+html:is(.theme-light,[data-theme="light"]) :is(.ai-product-page,.ai-shell) :is(.ai-product-header-cta,.ai-product-primary,.ai-platform-action,button:not(.mg-theme-toggle),[role="button"]){
+ color:#123e6a!important;border-color:#8eabc9!important;
+}
+html:is(.theme-light,[data-theme="light"]) :is(.ai-product-page,.ai-shell) :is(.ai-product-header-cta,.ai-product-primary,.ai-platform-action):focus-visible{
+ outline:3px solid #1766b4!important;outline-offset:3px;
+}
