@@ -39,6 +39,14 @@
       "surface": "Private console"
     },
     {
+      "path": "contact.html",
+      "surface": "Borderless direct email, official Instagram and founder LinkedIn contact links"
+    },
+    {
+      "path": "contribute.html",
+      "surface": "Lightweight LinkedIn campaign landing page; no sensitive data collection"
+    },
+    {
       "path": "contributing.html",
       "surface": "Native project resource or reporting page"
     },
@@ -223,6 +231,10 @@
       "surface": "Native project resource or reporting page"
     },
     {
+      "path": "start.html",
+      "surface": "Lightweight LinkedIn campaign landing page; no sensitive data collection"
+    },
+    {
       "path": "support.html",
       "baselineSHA256": "5b7eaa4e6b67256633080b7ce7e1f8b2432e8f21e6d49a4df383d8b25a450753",
       "preparedSHA256": "51bcdddc7244a87abc3b81d60c912ff77ecb89b31cc80f43adb1b246a1477f66",
@@ -243,13 +255,9 @@
       "baselineSHA256": "fa87f231a1f188b6c8a68ed05e961d30379f3f0218334d7c04d34aba74470a3a",
       "preparedSHA256": "4a9e256cd0feef8d303b3a6b392ae56bb8fbf19f5f77126c5ee67462c720f9f2",
       "surface": "preserved content and functional controls"
-    },
-    {
-      "path": "contact.html",
-      "surface": "Borderless direct email, official Instagram and founder LinkedIn contact links"
     }
   ],
-  "publicRouteCount": 49,
+  "publicRouteCount": 51,
   "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
   "functionalRuntimePreserved": [
     "assets/public-release.mjs",
