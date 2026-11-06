@@ -9,6 +9,11 @@
   };
   const labels={auto:'Theme: auto (sunrise/sunset when location is allowed). Click for light.',light:'Theme: light. Click for dark.',dark:'Theme: dark. Click for auto.'};
   let coordinates=null;
+  // Timezone is an approximate location fallback, not GPS. Never send it to a server.
+  const timezone=(()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(_){return '';}})();
+  const timezoneCoordinates={'Asia/Tehran':{latitude:35.6892,longitude:51.3890}};
+  function fallbackCoordinates(){return timezoneCoordinates[timezone]||null;}
+
   const rad=Math.PI/180;
   // NOAA solar position approximation, evaluated at the current instant (UTC).
   // Returns true for daytime; handles polar day/night without fixed sunrise hours.
@@ -71,7 +76,8 @@
   function resolveEffective(mode){
     if(mode==='light'||mode==='dark') return mode;
     if(mode==='auto'||mode===null){
-      if(coordinates)return sunIsUp(new Date(),coordinates.latitude,coordinates.longitude)?'light':'dark';
+      const location=coordinates||fallbackCoordinates();
+      if(location)return sunIsUp(new Date(),location.latitude,location.longitude)?'light':'dark';
       return hourTheme();
     }
     return systemTheme();
@@ -82,7 +88,7 @@
     root.classList.add(effective==='light'?'theme-light':'theme-dark');
     root.dataset.theme=effective;
     root.dataset.themeMode=mode||'auto';
-    root.dataset.themeSource=coordinates?'sun':'local-fallback';
+    root.dataset.themeSource=coordinates?'geolocation':fallbackCoordinates()?'timezone-solar':'local-hour';
     root.style.colorScheme=effective;
     const meta=document.querySelector('meta[name="theme-color"]');
     if(meta) meta.setAttribute('content', effective==='light' ? '#8EC8EC' : '#050507');
@@ -127,6 +133,12 @@
   const initial=readMode();
   apply(initial);
   restoreGrantedLocation();
+  // Auto attempts location once per tab; denied/unavailable stays functional via timezone.
+  if((initial===null||initial==='auto')&&navigator.geolocation){
+    try{if(!sessionStorage.getItem('mg-theme-geo-attempt')){
+      sessionStorage.setItem('mg-theme-geo-attempt','1');requestLocation();
+    }}catch(_){}
+  }
   ensureCss();
   const boot=()=>{ensureToggle();apply(readMode());};
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
