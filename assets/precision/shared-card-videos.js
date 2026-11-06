@@ -9,6 +9,16 @@ if(!cards.length)return;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const saveData=()=>!!navigator.connection?.saveData;
 const canAuto=()=>!reduced.matches&&!saveData()&&!document.hidden;
+let soundUnlocked=false;
+function tryEnableSound(){
+ // Only attempt sound during a genuine user gesture; never start playback early.
+ for(const x of cards){
+  if(!x.visible||x.video.paused)continue;
+  x.video.muted=false;
+  const p=x.video.play();
+  if(p?.then)p.then(()=>{soundUnlocked=true;}).catch(()=>{x.video.muted=true;x.video.play().catch(()=>{});});
+ }
+}
 
 function prepare(x){if(x.ready)return;x.ready=true;x.video.preload=saveData()?'metadata':'auto';x.video.load();}
 function update(x){if(!x.button)return;const playing=!x.video.paused;x.button.textContent=playing?'❚❚':'▶';x.button.setAttribute('aria-label',playing?'Pause promo video':'Play promo video');}
@@ -16,9 +26,9 @@ function stop(x){clearTimeout(x.timer);x.timer=0;x.video.pause();update(x);}
 function play(x,manual=false){
  if(document.hidden||!x.visible)return;
  if(!manual&&(!canAuto()||x.manualPause))return;
- prepare(x);x.video.muted=!manual;
+ prepare(x);x.video.muted=!(manual||soundUnlocked);
  const p=x.video.play();
- if(p?.catch)p.catch(()=>{x.video.muted=true;if(manual)x.video.play().catch(()=>{});});
+ if(p?.catch)p.catch(()=>{x.video.muted=true;x.video.play().catch(()=>{});});
 }
 function sync(x){
  clearTimeout(x.timer);
@@ -49,6 +59,8 @@ if('IntersectionObserver'in window){
  }),{threshold:[0,.35,.6]});
  cards.forEach(x=>visible.observe(x.card));
 }else{cards.forEach(x=>{x.visible=true;sync(x);});}
+document.addEventListener('pointerup',tryEnableSound,{passive:true});
+document.addEventListener('keydown',tryEnableSound);
 document.addEventListener('visibilitychange',()=>cards.forEach(sync));
 reduced.addEventListener?.('change',()=>cards.forEach(sync));
 })();
