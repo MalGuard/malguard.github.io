@@ -55,6 +55,7 @@ export async function fetchCFModels({fetchImpl=fetch,signal}={}){
  });
  Object.defineProperty(models,"accountQuotaEnabled",{value:data.accountQuota?.enabled===true,enumerable:false});
  Object.defineProperty(models,"searchAvailable",{value:data.search?.available===true&&data.search?.provider==="tavily",enumerable:false});
+ Object.defineProperty(models,"mediaCapabilities",{value:Object.freeze({analyze:data.media?.analyze===true,generate:data.media?.generate===true}),enumerable:false});
  const thinkingByMode=Object.fromEntries(["chat","work","code"].map(mode=>[mode,data.thinking?.byMode?.[mode]===true&&data.thinking?.provider==="workers_ai_rest"]));
  Object.defineProperty(models,"thinkingByMode",{value:Object.freeze(thinkingByMode),enumerable:false});
  Object.defineProperty(models,"thinkingAvailable",{value:Object.values(thinkingByMode).some(Boolean),enumerable:false});
