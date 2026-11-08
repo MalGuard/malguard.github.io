@@ -10,6 +10,8 @@ const web=express(),root=fileURLToPath(new URL('../',import.meta.url));let reque
 const server=web.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));
 const base=`http://127.0.0.1:${server.address().port}`;
 const CLOUD_ORIGIN='https://malware-ai.malguard-security.workers.dev';
+const MODELS_ORIGIN='https://models.malguard.site';
+let modelPostRequests=0;
 const cfFixtures=[
  {id:'chat_granite',mode:'chat',label:'Granite 4 Micro',provider:'workers_ai',available:true},
  {id:'chat_flash',mode:'chat',label:'Gemini Flash-Lite',provider:'gemini',available:true},
@@ -19,6 +21,33 @@ const cfFixtures=[
  {id:'code_super',mode:'code',label:'Nemotron Super',provider:'workers_ai',available:true}
 ];
 const isCFRoute=r=>new URL(r.request().url()).origin===CLOUD_ORIGIN;
+const isModelsRoute=r=>new URL(r.request().url()).origin===MODELS_ORIGIN;
+const gatewayModels=[
+ {id:'chat_granite',mode:'chat',label:'Granite 4 Micro · Efficient',provider:'workers_ai_rest',available:true},
+ {id:'chat_think',mode:'chat',label:'GPT-OSS 20B · Deep Chat',provider:'workers_ai_rest',available:true},
+ {id:'chat_flash',mode:'chat',label:'Gemini 3.5 Flash-Lite',provider:'gemini',available:true},
+ {id:'cf_gptoss20',mode:'work',label:'GPT-OSS 20B · Efficient Work',provider:'workers_ai_rest',available:true},
+ {id:'cf_qwen3',mode:'work',label:'Qwen3.8 27B · Multimodal Work',provider:'workers_ai_rest',available:true},
+ {id:'cf_gemma4',mode:'work',label:'Gemma 4 26B · Balanced Work',provider:'workers_ai_rest',available:true},
+ {id:'cf_gptoss120',mode:'code',label:'GPT-OSS 120B · Strong Code',provider:'workers_ai_rest',available:true}
+];
+function gatewayFixture(route){
+ const req=route.request(),url=new URL(req.url());
+ const headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Allow-Methods':'GET, POST, OPTIONS'};
+ if(req.method()==='OPTIONS')return route.fulfill({status:204,headers});
+ if(req.method()==='GET'&&url.pathname==='/api/public-models')return route.fulfill({contentType:'application/json',headers,body:JSON.stringify({models:gatewayModels,thinking:{available:true,provider:'workers_ai_rest',byMode:{chat:true,work:true,code:true}},accountQuota:{enabled:false}})});
+ if(req.method()!=='POST'||url.pathname!=='/api/public-model-chat')throw Error('unexpected gateway endpoint');
+ assert.equal(req.headers().authorization,'Bearer synthetic-session-valid-user');
+ const body=req.postDataJSON();
+ assert.equal(body.consent?.modelShare,true,'inference must have user consent');
+ const selected=gatewayModels.find(m=>m.id===body.model&&m.mode===body.mode);
+ assert.ok(selected,'models from another section must never reach inference');
+ modelPostRequests++;
+ const provider=selected.provider,model=provider==='gemini'?'gemini-3.5-flash-lite':body.thinking?'@cf/openai/gpt-oss-20b':'@cf/ibm-granite/granite-4.0-h-micro';
+ const message=body.message==='سلام'?'پاسخ فارسی آزمایشی':`Benign test reply ${body.history.length}`;
+ return route.fulfill({contentType:'application/json',headers,body:JSON.stringify({text:message,provider,model,modelId:body.model,thinking:body.thinking===true})});
+}
+
 function cfFixture(r){
  const url=new URL(r.request().url()),headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'POST, OPTIONS'};
  if(r.request().method()==='OPTIONS')return r.fulfill({status:204,headers});
@@ -41,7 +70,7 @@ try{
  for(const width of [390,1280]){
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),page=await context.newPage();
   await skipWelcome(context);await context.addInitScript(()=>Object.defineProperty(navigator,'gpu',{value:undefined}));
-  await context.route('**/*',r=>isCFRoute(r)?cfFixture(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
+  await context.route('**/*',r=>isModelsRoute(r)?gatewayFixture(r):isCFRoute(r)?cfFixture(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
   const before=requests;
   for(const [path,selector] of [['/','#products .product-ai a.text-link'],['/products.html','.product-ai .mg-home-product-link']]){
    await page.goto(base+path);
@@ -63,12 +92,13 @@ try{
   await page.goto(base+'/');await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true');
   await page.locator('#menuBtn').click();await page.locator('#navLinks a[href="/ai/"]').click();await page.waitForURL(base+'/ai/');
   assert.equal(requests,before,'Navigating into AI must not submit messages, files or consent');
+   assert.equal(modelPostRequests,0,'Fetching the model catalog must never submit an inference');
   await context.close();console.log(`PASS platform guide, web app, shared menu and legacy AI URLs at ${width}px`);
  }
  for(const width of [360,390,768,1280]){
   const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[],external=[];
   await skipWelcome(context);page.on('pageerror',e=>errors.push(e.message));
-  await context.route('**/*',r=>{if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
+  await context.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
   await page.goto(base+'/ai/');await page.locator('#send').waitFor({state:'visible'});await page.waitForFunction(()=>!document.getElementById('send').disabled);
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
   assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
@@ -90,6 +120,7 @@ try{
   await page.locator('#attach-toggle').click();await page.locator('#attach-chat').click();
   assert.equal(await page.locator('#mode').inputValue(),'chat');assert.equal(await page.locator('#tool').inputValue(),'auto');
   assert.equal(requests,beforeMenu,'Attachment actions must not submit requests');
+   assert.equal(modelPostRequests,0,'Attachment menus cannot send a model request');
   assert.equal(await page.locator('#local-download').isVisible(),false);assert.equal(await page.locator('#local-offer').isVisible(),false,'Attachment actions must not start model downloads');
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   await page.locator('#attach-toggle').click();const choosingFile=page.waitForEvent('filechooser');await page.locator('#attach-file').click();
@@ -115,8 +146,8 @@ try{
    await toggleSettings(page);if(await page.locator('#permissions').getAttribute('open')===null)await page.locator('#permissions summary').click();await page.locator('#model-consent').check();await toggleSettings(page);
    await page.locator('#message').fill('Hello');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
    assert.equal(await page.locator('.assistant-message h3').count(),0);
-   assert.equal(await page.getByText('workers_ai · @cf/ibm-granite/granite-4.0-h-micro',{exact:true}).isVisible(),false);
-   await page.locator('.response-details summary').first().click();assert.equal(await page.getByText('workers_ai · @cf/ibm-granite/granite-4.0-h-micro',{exact:true}).isVisible(),true);
+   assert.equal(await page.getByText('workers_ai_rest · @cf/ibm-granite/granite-4.0-h-micro',{exact:true}).isVisible(),false);
+   await page.locator('.response-details summary').first().click();assert.equal(await page.getByText('workers_ai_rest · @cf/ibm-granite/granite-4.0-h-micro',{exact:true}).isVisible(),true);
    await page.locator('.response-details summary').first().click();
    await page.screenshot({path:'test-results/malguard-ai/quiet-reply-1280.png',fullPage:true});
    await page.locator('#message').fill('Continue');await page.locator('#send').click();await page.getByText('Benign test reply 2',{exact:true}).waitFor();
@@ -133,6 +164,7 @@ try{
  const context=await browser.newContext(),page=await context.newPage();await skipWelcome(context);
  await context.route('**/api/malguard-ai/status',r=>r.abort());
  await context.route('https://malware-ai.malguard-security.workers.dev/**',r=>cfFixture(r));
+  await context.route('https://models.malguard.site/**',r=>gatewayFixture(r));
  await page.goto(base+'/ai/');
  await page.waitForFunction(()=>document.getElementById('entry-gate')?.hidden&&document.getElementById('send')?.disabled===false);
  assert.equal(await page.locator('#send').isDisabled(),false,'Cloudflare chat remains available during a legacy Vercel backend outage');
@@ -147,7 +179,7 @@ try{
   window.localWorkerCalls=[];
   window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{generated:{text:'پاسخ محلی آزمایشی',provider:'on_device',model:data.model,securityAnalysis:false}}}),5);}terminate(){}};
  });
- const beforeLocal=requests,localExternal=[];await device.route('**/*',r=>{if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();localExternal.push(r.request().url());return r.abort();});
+ const beforeLocal=requests,localExternal=[];await device.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();localExternal.push(r.request().url());return r.abort();});
  await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>!document.getElementById('send').disabled);assert.equal(await localPage.locator('#model').inputValue(),'chat_granite','Prefer the fast Cloudflare chat model without downloading');
  await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
  assert.equal(await localPage.locator('#local-welcome').isVisible(),false,'local downloads must remain opt-in');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
@@ -179,7 +211,7 @@ try{
   window.localWorkerCalls=[];
   window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{prepared:true}}),5);}terminate(){}};
  });
- const downloadExternal=[];await downloadContext.route('**/*',r=>{if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();downloadExternal.push(r.request().url());return r.abort();});
+ const downloadExternal=[];await downloadContext.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();downloadExternal.push(r.request().url());return r.abort();});
  await downloadPage.goto(base+'/ai/');await downloadPage.waitForFunction(()=>!document.getElementById('send').disabled);
  assert.equal(await downloadPage.locator('#local-welcome').isVisible(),false,'Local downloads remain opt-in');await downloadPage.locator('#model').selectOption('__downloads');
  await downloadPage.locator('#local-offer').waitFor({state:'visible'});
@@ -197,7 +229,7 @@ try{
  const desktopRequests=[];
  await workContext.route('**/*',r=>{
   const url=new URL(r.request().url());
-  if(isCFRoute(r))return cfFixture(r);
+  if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);
   if(url.origin===base)return r.continue();
   if(url.origin==='http://127.0.0.1:11434'){
    desktopRequests.push({path:url.pathname,body:r.request().postDataJSON()});
@@ -227,7 +259,7 @@ try{
  assert.ok(await workPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await workContext.close();console.log('PASS dedicated Workspace, independent drafts/history, six desktop models and explicit local-only connection/chat');
  const samsungContext=await browser.newContext({viewport:{width:390,height:844},userAgent:'Mozilla/5.0 (Linux; Android 16; SM-S928B) AppleWebKit/537.36 SamsungBrowser/29.0 Mobile Safari/537.36'});
  await skipWelcome(samsungContext);
- await samsungContext.route('**/*',r=>isCFRoute(r)?cfFixture(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
+ await samsungContext.route('**/*',r=>isModelsRoute(r)?gatewayFixture(r):isCFRoute(r)?cfFixture(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
  const samsungPage=await samsungContext.newPage();await samsungPage.goto(base+'/ai/');await samsungPage.locator('#open-downloads').click();await samsungPage.locator('#hub-desktop').click();
  await samsungPage.locator('#desktop-models').waitFor({state:'visible'});
  assert.equal(await samsungPage.locator('#desktop-model option').count(),6);
