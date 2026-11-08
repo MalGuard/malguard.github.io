@@ -19,9 +19,9 @@
   <link rel="preload" href="/assets/precision/stars.svg?v=20261028-4k" as="image" fetchpriority="high"><link rel="preload" href="/assets/precision/obsidian-space.webp?v=20261028-4k" as="image" fetchpriority="low">
   <link rel="icon" href="./malguard-ai-orbit.svg?v=20261028-mono" type="image/svg+xml"><link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261104-ai-png"><meta name="apple-mobile-web-app-title" content="MalGuard AI"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./style.css?v=thinking-new-20261108">
-  <script type="module" src="./app.js?v=thinking-new-20261108"></script>
-<link rel="stylesheet" href="/assets/precision/deep-space-global.css?v=20261102-soft-halo"><link rel="stylesheet" href="/assets/precision/mg-theme.css?v=20261105"><script src="/assets/precision/mg-theme.js?v=20261105" defer></script></head>
-<body class="mg-deep-space auth-required">
+  <script type="module" src="./app.js?v=experience-v2-20261108"></script>
+<link rel="stylesheet" href="/assets/precision/deep-space-global.css?v=20261102-soft-halo"><link rel="stylesheet" href="/assets/precision/mg-theme.css?v=20261105"><script src="/assets/precision/mg-theme.js?v=20261105" defer></script><link rel="stylesheet" href="./experience-v2.css?v=20261108-2"></head>
+<body class="mg-deep-space mg-ai-v2 auth-required">
   <main id="entry-gate" class="entry-gate" aria-labelledby="entry-title">
     <section class="entry-content">
       <img class="entry-mark" src="./malguard-ai-orbit.svg?v=20261028-mono" width="74" height="74" alt="">
@@ -34,7 +34,13 @@
   </main>
   <a class="skip" href="#message" data-i18n="skip">Skip to conversation</a>
   <header class="site-header">
-      <details id="mode-picker" class="mode-picker">
+    <nav id="experience-tabs" class="experience-tabs" role="group" aria-label="MalGuard AI modes">
+      <button id="experience-chat" class="experience-tab" type="button" aria-pressed="true" aria-label="Chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5c-1.2 0-2.4-.3-3.4-.8L4 20l1.7-4.5A7.5 7.5 0 1 1 20 11.5Z" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="navChat">Chat</span></button>
+      <button id="experience-worker" class="experience-tab" type="button" aria-pressed="false" aria-label="Work"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 10h16M9 5v14" stroke-linecap="round"/></svg><span data-i18n="navWork">Work</span></button>
+      <button id="experience-build" class="experience-tab" type="button" aria-pressed="false" aria-label="Code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m8 8-4 4 4 4m8-8 4 4-4 4m-3-11-2 14" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="navCode">Code</span></button>
+    </nav>
+    <div class="experience-current" aria-live="off"><span id="experience-current-model">MalGuard AI</span><span id="experience-new" hidden>NEW</span></div>
+       <details id="mode-picker" class="mode-picker">
         <summary id="mode-toggle" dir="ltr"><img class="ai-product-mark" src="./malguard-ai-orbit.svg?v=20261028-mono" width="26" height="26" alt=""><strong>MalGuard</strong><span id="mode-current" class="sr-only">Chat</span><svg class="mode-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
         <div class="mode-options workspace-switch" role="group" aria-label="Conversation mode">
           <button id="chat-tab" type="button" aria-pressed="true"><strong data-i18n="navChat">Chat</strong><span data-i18n="navChatHint">Ask, write, and explore</span></button>
@@ -87,7 +93,13 @@
   <main>
     <section class="workspace" aria-labelledby="title">
 
-      <div class="intro"><h1 id="title" data-i18n="title">What can I help with?</h1><p id="build-start-hint" hidden data-i18n="buildStartHint">Talk through an idea, then ask me to build it.</p></div>
+      <div class="intro"><p id="experience-kicker" class="experience-eyebrow">MALGUARD / CHAT</p><h1 id="title" data-i18n="title">What can I help with?</h1><p id="build-start-hint" hidden data-i18n="buildStartHint">Talk through an idea, then ask me to build it.</p>
+        <div class="quick-suggestions" id="quick-suggestions" role="group" aria-label="Suggested prompts">
+          <button class="quick-suggestion" type="button" data-quick-index="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M12 3 9.7 9.7 3 12l6.7 2.3L12 21l2.3-6.7L21 12l-6.7-2.3L12 3Z"/></svg><span>Explain something clearly</span></button>
+          <button class="quick-suggestion" type="button" data-quick-index="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14m-7-7 7 7-7 7"/></svg><span>Help me write</span></button>
+          <button class="quick-suggestion" type="button" data-quick-index="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="m9 10-3 2 3 2m6-4 3 2-3 2"/></svg><span>Explore a task</span></button>
+        </div>
+      </div>
       <section id="build-panel" class="build-panel" hidden aria-labelledby="build-title">
         <div class="build-heading"><div><h2 id="build-title" data-i18n="projectTitle">Build and code</h2><p class="muted" data-i18n="buildHint">Describe what to build below, review the proposed files, then apply and preview.</p></div><button id="build-export" type="button" data-i18n="exportProject">Download ZIP</button></div>
         <div class="build-toolbar"><label class="sr-only" for="build-file" data-i18n="projectFile">Project file</label><select id="build-file" dir="ltr"></select><label class="sr-only" for="build-name" data-i18n="newFile">New file</label><input id="build-name" dir="ltr" maxlength="100" placeholder="src/helper.js"><button id="build-add" type="button" data-i18n="addFile">Add file</button><input id="build-import" type="file" accept=".html,.css,.js,.json,.md,.txt,.py,.ts,.tsx,.jsx" multiple hidden><button id="build-import-button" type="button" data-i18n="importCode">Import files</button><button id="build-undo" type="button" data-i18n="undoProject" disabled>Undo apply</button><span id="build-size" class="muted" dir="ltr"></span></div>
@@ -128,13 +140,14 @@
               <div class="composer-actions">
                 <label class="sr-only" for="model" data-i18n="modelLabel">Chat model</label>
                 <select id="model" disabled aria-describedby="device-note"><option value="local_fast">Qwen3 1.7B</option></select>
-                <button type="button" id="thinking-toggle" aria-pressed="false" data-i18n="thinkingToggle" title="Use GPT-OSS 120B for deeper reasoning; more quota may be used" disabled>Thinking</button>
+                <button type="button" id="thinking-toggle" aria-pressed="false" aria-describedby="thinking-state" title="Optional deeper reasoning; may use more quota" disabled><span class="thinking-glyph" aria-hidden="true">✧</span><span data-i18n="thinkingToggle">Thinking</span></button>
                 <button type="submit" id="send" disabled aria-label="Send"><svg id="send-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><svg id="send-stop" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" hidden><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg><span id="send-label" class="sr-only">Send</span></button>
               </div>
             </div>
           </div>
           <div class="attachment"><label class="file-button sr-only" for="file" data-i18n="attach">Choose file · up to 1 MiB</label><input type="file" id="file" tabindex="-1"><span id="filename" dir="auto"></span><button type="button" id="remove-file" hidden data-i18n="remove">Remove</button></div>
         </form>
+        <p id="thinking-state" class="thinking-state" role="status" aria-live="polite" data-enabled="false">Thinking off · fast replies</p>
         <p id="cloud-alert" class="cloud-alert" role="status" hidden>Cloud models are temporarily unavailable. <button id="retry-cloud" type="button">Retry connection</button></p>
         <p id="disclaimer" class="footer-note" data-i18n="disclaimer">AI can make mistakes. Check important information.</p>
         <button id="stop-local" type="button" hidden data-i18n="stop">Stop</button>
