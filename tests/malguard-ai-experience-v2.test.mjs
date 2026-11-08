@@ -92,7 +92,7 @@ test('UX v3 keeps model selection stable while exposing faster, safer input beha
  assert.match(app,/function refreshComposerInputState\(\)/);
  assert.match(app,/dataset\.modelReady=String\(ready\)/);
  assert.match(app,/hasWorkFile=activeMode==='worker'/);
- assert.match(app,/matchMedia\('\(pointer:fine\)'\)/);
+ assert.match(app,/matchMedia\('\(pointer:fine\) and \(min-width: 761px\)'\)/);
  assert.match(app,/event\.ctrlKey\|\|event\.metaKey/);
  assert.match(app,/field\.style\.height='auto'/);
  assert.match(html,/id="composer-keyboard-hint"/);
