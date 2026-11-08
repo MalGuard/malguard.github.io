@@ -112,7 +112,7 @@ export function installExperienceV2(){
   jump.addEventListener('click',()=>{
    const newest=conversation.lastElementChild;
    if(!newest)return;
-   newest.scrollIntoView({block:'end',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+   newest.scrollIntoView({block:'end',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
    jump.hidden=true;
   });
   window.addEventListener('scroll',refreshJump,{passive:true});
