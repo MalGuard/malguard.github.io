@@ -26,7 +26,7 @@ test('new models appear only within their designated Chat, Work or Code mode',as
  assert.ok(!work.includes('cf_gptoss120'), 'Code model must never be listed in Work');
  assert.deepEqual(models.thinkingByMode,{chat:true,work:true,code:true});
  for(const id of ['chat_granite','chat_think','cf_gptoss20','cf_qwen3','cf_gemma4','cf_gptoss120'])assert.equal(isNewCloudModel(id),true);
- assert.deepEqual(CF_DEFAULTS,{chat:'chat_granite',work:'cf_gptoss20',code:'cf_gptoss120'});
+ assert.deepEqual(CF_DEFAULTS,{chat:'chat_auto',work:'work_auto',code:'code_auto'});
 });
 test('browser rejects cross-mode model requests without contacting the network',async()=>{
  let networkCalls=0;
