@@ -592,3 +592,8 @@ html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 #model-status[data-new=tr
   body.mg-ai-v2 .model-select-wrap #model{max-width:100%;padding-inline:3px;font-size:10px}
   body.mg-ai-v2 .mg-model-new:not([hidden]){font-size:8px;padding:1px 3px}
 }
+
+/* Native option-color support varies by browser; the adjacent NEW chip is
+   always the accessible visual indicator where native options cannot be styled. */
+body.mg-ai-v2 select option.mg-new-option{color:#4ade80}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 select option.mg-new-option{color:#166534}
