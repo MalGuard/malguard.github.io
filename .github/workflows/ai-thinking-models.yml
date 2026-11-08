@@ -6,6 +6,10 @@ on:
       - 'ai/index.html'
       - 'ai/cloudflare-models.mjs'
       - 'ai/style.css'
+      - 'ai/experience-v2.css'
+      - 'ai/experience-v2.mjs'
+      - 'ai/navigation.mjs'
+      - 'tests/malguard-ai-experience-v2.test.mjs'
       - 'tests/malguard-ai-thinking-modes.test.mjs'
       - '.github/workflows/ai-thinking-models.yml'
   push:
@@ -15,6 +19,10 @@ on:
       - 'ai/index.html'
       - 'ai/cloudflare-models.mjs'
       - 'ai/style.css'
+      - 'ai/experience-v2.css'
+      - 'ai/experience-v2.mjs'
+      - 'ai/navigation.mjs'
+      - 'tests/malguard-ai-experience-v2.test.mjs'
       - 'tests/malguard-ai-thinking-modes.test.mjs'
       - '.github/workflows/ai-thinking-models.yml'
 permissions:
@@ -27,6 +35,6 @@ jobs:
         with:
           persist-credentials: false
       - name: Validate browser modules
-        run: node --check ai/app.js && node --check ai/cloudflare-models.mjs
+        run: node --check ai/app.js && node --check ai/cloudflare-models.mjs && node --check ai/navigation.mjs && node --check ai/experience-v2.mjs
       - name: Validate mode isolation and Thinking
-        run: node --test tests/malguard-ai-thinking-modes.test.mjs
+        run: node --test tests/malguard-ai-thinking-modes.test.mjs tests/malguard-ai-experience-v2.test.mjs

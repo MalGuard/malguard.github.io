@@ -1,5 +1,6 @@
 import {createChatLibrary} from './library.mjs?v=sidebar-20261026';
-import {createNavigation} from './navigation.mjs?v=sidebar-20261026';
+import {createNavigation} from './navigation.mjs?v=experience-v2-20261108';
+import {installExperienceV2,syncExperienceV2} from './experience-v2.mjs?v=20261108-2';
 import {errorMessage} from './error-message.mjs?v=openrouter-routing-20261104';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=account-quota-20261030';
 import {apiUrl,readStream} from './client.mjs?v=vercel-auth-stable-20261103';
@@ -318,7 +319,7 @@ function renderStatus(){
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
   for(const m of models){
    const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.label;
-   const option=el('option',isNewCloudModel(m.id)?'🆕 NEW · '+label:label);option.value=m.id;
+   const option=el('option',isNewCloudModel(m.id)?label+' · NEW':label);option.value=m.id;if(isNewCloudModel(m.id))option.classList.add('mg-new-option');
    option.disabled=m.state!=='configured'||activeMode==='build'&&m.mode!=='code'&&!Object.hasOwn(desktopModels,m.id);
    $('model').append(option);
   }
@@ -338,7 +339,7 @@ function renderStatus(){
   const control=$('workspace-model'),old=control.value;
   if([...control.options].map(o=>o.value).join('|')!==workChoices.map(m=>m.id).join('|')){
    control.replaceChildren();
-   for(const m of workChoices){const opt=el('option',isNewCloudModel(m.id)?'🆕 NEW · '+m.label:m.label);opt.value=m.id;control.append(opt);}
+   for(const m of workChoices){const opt=el('option',isNewCloudModel(m.id)?m.label+' · NEW':m.label);opt.value=m.id;if(isNewCloudModel(m.id))opt.classList.add('mg-new-option');control.append(opt);}
   }
   control.value=workChoices.some(m=>m.id===old&&m.available)?old:workChoices.some(m=>m.id===CF_DEFAULTS.work&&m.available)?CF_DEFAULTS.work:workChoices.find(m=>m.available)?.id||'';
  }
@@ -361,6 +362,8 @@ function renderStatus(){
  const thinkingModelLabel=cfMode==='code'?'GPT-OSS 120B':'GPT-OSS 20B';
  $('thinking-toggle').title=t(!thinkingCloudReady?'thinkingUnavailable':thinkingEnabled?'thinkingActive':'thinkingInactive')+(thinkingCloudReady?' · '+thinkingModelLabel:'');
  $('model-status').dataset.new=String(isNewCloudModel(selectedIdForMode));
+  $('composer-model-new').hidden=activeMode==='worker'||!isNewCloudModel(selectedIdForMode);
+  $('workspace-model-new').hidden=activeMode!=='worker'||!isNewCloudModel(selectedIdForMode);
  const modelNotice=locale==='fa'?`مدل انتخاب‌شده: ${modelLabel}`:`Selected model: ${modelLabel}`;
  $('model-status').textContent=(cfAvailable.length?modelNotice:t('modelOff'))+(cfQuotaEnabled?(locale==='fa'?' · استفاده منصفانه با سقف ماهانه':' · Monthly fair-use limits apply'):'');
  if(cfAvailable.length)document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌ها از مسیر Vercel و ارائه‌دهندهٔ تنظیم‌شده اجرا می‌شن. مدل‌های غیرفعال از لیست حذف شدن.':'Models run through Vercel and the configured provider. Unavailable models are hidden.';
@@ -371,6 +374,7 @@ function renderStatus(){
  $('device-note').textContent=!localReady?t('deviceUnsupported'):$('model').value.startsWith('local_')?t(preparedModels.has($('model').value)?'readyDevice':'downloadNeeded'):'';
  for(const option of $('offer-model').options){const m=localModels[option.value];option.textContent=`${t(option.value==='local_fast'?'lightModel':'strongModel')} · ~${m.downloadMB} MB`;}
  $('local-status').textContent=localReady?(locale==='fa'?'اجرای روی دستگاه ممکن است؛ سرعت و حافظه باید هنگام بارگذاری بررسی شوند.':'On-device inference may be supported; loading still depends on memory and device capabilities.'):t('localOff');
+  syncExperienceV2({mode:activeMode,locale,busy,selectedId:selectedIdForMode,modelLabel,isNew:isNewCloudModel(selectedIdForMode),thinkingReady:thinkingCloudReady,thinkingOn:thinkingCloudReady&&thinkingEnabled,thinkingModel:thinkingModelLabel});
 }
 function showError(key,remember=true){if(remember)history.push({error:key});const card=el('article',undefined,'result error'),text=typeof key==='object'?errorMessage(key,locale):t(key),heading=el('h3',text,'outcome');card.append(heading);card.setAttribute('role','alert');$('conversation').append(card);if(remember&&!matchMedia('(prefers-reduced-motion: reduce)').matches){heading.setAttribute('aria-label',text);const ink=el('span',text);ink.setAttribute('aria-hidden','true');heading.replaceChildren(ink);typeText(text,value=>{ink.textContent=value;},{charactersPerSecond:130}).catch(()=>{ink.textContent=text;});}}
 function renderResponse(response,remember=true){
@@ -623,6 +627,7 @@ $('open-downloads').onclick=()=>{if(!busy)$('download-hub').showModal();};$('hub
 $('desktop-model').onchange=updateDesktopInfo;for(const field of ['desktop-ram-gb','desktop-free-gb','desktop-gpu-gb'])$(field).addEventListener('input',updateDesktopInfo);$('manage-desktop-models').onclick=openDesktopModels;$('desktop-connect').onclick=connectDesktop;
 $('desktop-download').onclick=downloadDesktop;
 $('desktop-cancel-download').onclick=()=>{desktopDownloadController?.abort(new DOMException('Cancelled by user','AbortError'));desktopChat.stop();};
+installExperienceV2();
 translate();
 renderStatus();
 void bootAssistant();
