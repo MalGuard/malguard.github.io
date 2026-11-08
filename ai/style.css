@@ -343,3 +343,7 @@ body.auth-required .ai-account>*{width:min(100%,440px);margin-inline:auto}body.a
 #model-status[data-new=true]::before{content:'NEW';display:inline-flex;align-items:center;padding:2px 7px;margin-inline-end:7px;border:1px solid #ffffff65;border-radius:999px;font:700 10px/1.6 system-ui,sans-serif;letter-spacing:.04em;color:#fff;background:#ffffff20}
 @media(max-width:440px){.composer-shell{grid-template-columns:40px minmax(0,1fr) 86px 40px}.composer-actions #thinking-toggle{grid-column:3;grid-row:2;min-width:0;padding-inline:6px}.composer-actions #send{grid-column:4;grid-row:2}.composer-actions #model{grid-column:2;grid-row:2;min-width:0;max-width:100%;font-size:11px}}
 @media(min-width:901px){body[data-mode=build] .composer-shell{grid-template-columns:40px minmax(0,1fr) 86px 40px}body[data-mode=build] .composer-actions #thinking-toggle{grid-column:3;grid-row:2;min-width:0;padding-inline:6px}body[data-mode=build] .composer-actions #send{grid-column:4;grid-row:2}}
+
+/* Prevent the global theme control from covering MalGuard AI's new-conversation/sidebar button. */
+body:has(#navigation-toggle) .mg-theme-toggle{top:78px;left:auto;right:16px;z-index:32}
+@media(max-width:760px){body:has(#navigation-toggle) .mg-theme-toggle{top:68px;left:auto;right:12px}}
