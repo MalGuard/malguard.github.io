@@ -9,6 +9,8 @@ const browser=await chromium.launch(launchOptions('chromium'));
 try {
  for(const width of [390,1440]){
   const c=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width,height:850},reducedMotion:'reduce'});
+   // Color-palette QA explicitly selects dark; Auto can resolve light by local sunrise/time.
+   await c.addInitScript(()=>localStorage.setItem('malguard-theme','dark'));
   await c.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
   const page=await c.newPage();
   for(const route of routes){
