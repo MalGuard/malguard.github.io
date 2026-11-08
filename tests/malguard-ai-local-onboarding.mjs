@@ -39,7 +39,7 @@ try{
  for(const width of [360,390,768,1280]){
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
-  await context.route('**/*',r=>{if(isCF(r))return cfResponse(r);if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
+  await context.route('**/*',r=>{if(isCF(r))return cfResponse(r);if(new URL(r.request().url()).origin===base)return r.continue();external.push({url:r.request().url(),method:r.request().method()});return r.abort();});
   await context.addInitScript(()=>{
    localStorage.setItem('malguard.ai.language.v1','fa');
    Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});
@@ -138,5 +138,5 @@ try{
  await context.route('**/*',r=>isCF(r)?cfResponse(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
  await page.goto(base+'/ai/');await page.waitForFunction(()=>document.getElementById('device-note').textContent.includes('WebGPU'));
  assert.equal(await page.locator('#local-welcome').isVisible(),false);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);await page.locator('#open-downloads').click();await page.locator('#hub-browser').click();await page.locator('#local-offer').waitFor({state:'visible'});assert.equal(await page.locator('#offer-download-button').isDisabled(),true);assert.match(await page.locator('#offer-compatibility').innerText(),/WebGPU/);await page.locator('#local-offer').evaluate(dialog=>{window.offerClosed=new Promise(resolve=>dialog.addEventListener('close',()=>resolve(),{once:true}));});await page.keyboard.press('Escape');await page.evaluate(()=>window.offerClosed);assert.equal(await page.evaluate(()=>workerCalls.length),0);
- await context.close();assert.deepEqual(external,[]);console.log('PASS unsupported-device guidance and zero external downloads/uploads');
+ await context.close();assert.ok(external.every(row=>row.url==='https://models.malguard.site/api/public-models'&&row.method==='GET'),'Only public model-catalog reads may be attempted; no provider inference, uploads or downloads');console.log('PASS unsupported-device guidance: public catalog GET allowed, zero external inference/downloads/uploads');
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
