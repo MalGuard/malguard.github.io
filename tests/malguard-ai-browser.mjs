@@ -195,6 +195,8 @@ try{
    assert.equal(await page.getByText('workers_ai_rest · @cf/ibm-granite/granite-4.0-h-micro',{exact:true}).isVisible(),false);
    await page.locator('.response-details summary').first().click();assert.equal(await page.getByText('workers_ai_rest · @cf/ibm-granite/granite-4.0-h-micro',{exact:true}).isVisible(),true);
    await page.locator('.response-details summary').first().click();
+   await page.screenshot({path:'test-results/malguard-ai/quiet-reply-1280.png',fullPage:true});
+   await page.locator('#message').fill('Continue');await page.locator('#send').click();await page.getByText('Benign test reply 2',{exact:true}).waitFor();
    // Opt-in research is never sent before the user approves external lookup.
    assert.equal(await page.locator('#web-search-toggle').isEnabled(),true);
    await page.locator('#web-search-toggle').click();
@@ -209,8 +211,7 @@ try{
    assert.equal(await page.locator('.research-source').first().getAttribute('href'),'https://example.org/research');
    assert.equal(await page.locator('#web-search-toggle').getAttribute('aria-pressed'),'true');
    await page.locator('#web-search-toggle').click();
-   await page.screenshot({path:'test-results/malguard-ai/quiet-reply-1280.png',fullPage:true});
-   await page.locator('#message').fill('Continue');await page.locator('#send').click();await page.getByText('Benign test reply 2',{exact:true}).waitFor();
+
    assert.equal(await page.locator('html').getAttribute('lang'),'en');
    await page.locator('#model').selectOption('chat_flash');await page.locator('#message').fill('سلام');await page.locator('#send').click();await page.getByText('پاسخ فارسی آزمایشی',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
    await toggleSettings(page);await page.locator('#mode').selectOption('worker');await toggleSettings(page);await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
