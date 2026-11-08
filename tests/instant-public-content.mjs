@@ -28,7 +28,12 @@ try{
   await page.keyboard.press('Escape');assert.equal(await page.locator('#menuBtn').getAttribute('aria-expanded'),'false');
   assert.deepEqual(errors,[]);
   await page.evaluate(()=>scrollTo(0,0));
-  await page.screenshot({path:`test-results/instant-${name}-${width}-${reducedMotion}.png`,fullPage:true});
+  // Playwright may wait indefinitely for a stalled optional @font-face request
+  // even though the semantic, layout and interaction assertions above passed.
+  // Preserve screenshots when fonts resolve, without treating an unavailable
+  // font resource as a content/application failure.
+  try{await page.screenshot({path:`test-results/instant-${name}-${width}-${reducedMotion}.png`,fullPage:true,timeout:12000});}
+  catch(error){if(!/waiting for fonts to load/i.test(String(error?.message||'')))throw error;console.warn('Optional screenshot skipped: font loading did not settle',name,width,reducedMotion);}
   await context.close();
  }
  const context=await browser.newContext({ignoreHTTPSErrors:true,javaScriptEnabled:false,viewport:{width:390,height:844}});
