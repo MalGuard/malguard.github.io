@@ -702,3 +702,40 @@ html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 .entry-capability{
   }
   body.mg-ai-v2 .entry-capability>span:last-child{font-size:11px}
 }
+
+
+/* Scroll affordance is available only when there are earlier messages below
+   the current viewport. No forced auto-scroll while the user is reading. */
+body.mg-ai-v2 .composer-area{position:relative}
+body.mg-ai-v2 .composer-area>.jump-latest{
+  position:absolute;
+  bottom:calc(100% + 12px);
+  left:50%;
+  transform:translateX(-50%);
+  z-index:12;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:max-content;
+  min-height:38px;
+  padding:8px 14px;
+  border:1px solid var(--ai-stroke-hover);
+  border-radius:999px;
+  color:var(--ai-fg);
+  background:var(--ai-raised);
+  box-shadow:0 7px 24px rgba(0,0,0,.25);
+  font-size:12px;
+  font-weight:650;
+  cursor:pointer;
+}
+body.mg-ai-v2 .composer-area>.jump-latest[hidden]{display:none!important}
+body.mg-ai-v2 .composer-area>.jump-latest:hover{background:var(--ai-raised-hover)}
+body.mg-ai-v2 .composer-area>.jump-latest:focus-visible{
+  outline:2px solid var(--ai-focus);
+  outline-offset:3px;
+}
+body.mg-ai-v2 .composer-area>.jump-latest span:first-child{font-size:17px;line-height:1}
+@media(max-width:760px){
+ body.mg-ai-v2 .composer-area>.jump-latest{min-height:42px;padding:9px 16px}
+}
