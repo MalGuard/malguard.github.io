@@ -25,7 +25,7 @@ try{
   await page.clock.install();
   await context.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');Object.defineProperty(navigator,'gpu',{value:undefined});});
   await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
-  await page.goto(base+'/ai/');await page.waitForFunction(()=>!document.getElementById('send').disabled);
+  await page.goto(base+'/ai/');await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
   const beforeActions=jobs.length;
   await page.locator('#attach-toggle').click();await page.locator('#attach-web').click();
   assert.equal(await page.locator('#mode').inputValue(),'worker');assert.equal(await page.locator('#tool').inputValue(),'ai_web');assert.equal(await page.locator('#workspace-panel').isVisible(),true);
@@ -34,7 +34,7 @@ try{
   assert.equal(await page.locator('#tool').inputValue(),'auto');assert.equal(jobs.length,beforeActions);
   if(await page.locator('#settings-panel').getAttribute('open')!==null)await page.locator('#settings-close').click();else await toggleSettings(page);await page.locator('#permissions > summary').click();await page.locator('#model-consent').check();if(await page.locator('#settings-panel').getAttribute('open')!==null)await page.locator('#settings-close').click();else await toggleSettings(page);
   const send=async text=>{
-   const count=jobs.length;await page.locator('#message').fill(text);await page.locator('#message').press('Enter');
+   const count=jobs.length;await page.locator('#message').fill(text);if(width===390){await page.locator('#message').press('Enter');assert.equal(jobs.length,count,'Mobile Enter inserts a line break without submitting');await page.locator('#message').fill(text);await page.locator('#message').press('Control+Enter');}else await page.locator('#message').press('Enter');
    await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking');assert.equal(jobs.length,count+1);return jobs.at(-1);
   };
   const job=await send('Hello'),jobIndex=jobs.length;await page.locator('#activity-label').filter({hasText:/^Thinking$/}).waitFor();
@@ -127,7 +127,7 @@ try{
   assert.equal(await page.locator('#send').getAttribute('aria-label'),'Stop response');assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   jobs.at(-1).finish(generated('پاسخ کامل فارسی'));await page.getByText('پاسخ کامل فارسی',{exact:true}).waitFor();await page.waitForFunction(()=>document.getElementById('send').dataset.state==='send');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-  await page.reload();await page.waitForFunction(()=>document.documentElement.lang==='en'&&!document.getElementById('send').disabled);
+  await page.reload();await page.waitForFunction(()=>document.documentElement.lang==='en'&&document.getElementById('send').dataset.modelReady==='true');
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr','The English interface survives refresh');
   assert.equal(await page.locator('#activity').isVisible(),false);
   assert.equal(await page.locator('.response-duration').count(),0,'Elapsed timings share the in-memory conversation lifetime');
@@ -143,7 +143,7 @@ try{
   window.Worker=class{constructor(){window.localWorker=this;}postMessage(data){window.workerCalls.push(data);}terminate(){window.workerStops++;}};
  });
  await local.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
- await page.goto(base+'/ai/');await page.waitForFunction(()=>!document.getElementById('send').disabled);
+ await page.goto(base+'/ai/');await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
  await page.locator('#model').selectOption('local_fast');
  const beforeLocal=jobs.length;await page.locator('#message').fill('Hello');await page.locator('#send').click();await page.locator('#local-download button[value="download"]').click();
  await page.waitForFunction(()=>window.workerCalls.length===1);
