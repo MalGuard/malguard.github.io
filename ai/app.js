@@ -1,6 +1,7 @@
 import {createChatLibrary} from './library.mjs?v=sidebar-20261026';
 import {createNavigation} from './navigation.mjs?v=ux-v3-20261108';
 import {renderResearchEvidence,attachResearchCitations} from './research-ui.mjs?v=20261108-research1';
+import {mediaFromCatalog,toMediaPayload,callMedia,MEDIA_LIMIT_BYTES} from './media-client.mjs?v=20261108-media1';
 import {installExperienceV2,syncExperienceV2} from './experience-v2.mjs?v=ux-v3-20261108';
 import {errorMessage} from './error-message.mjs?v=openrouter-routing-20261104';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=account-quota-20261030';
@@ -27,6 +28,7 @@ let localReady=false,localCapabilityReason='checking',modelsInitialized=false;
 let lastSelectedModel='';
 let cloudDefaultApplied=false,modelChosen=false,cfModels=[],accountUsage=null,cfQuotaEnabled=false,cfThinkingByMode={chat:false,work:false,code:false},thinkingEnabled=false;
 let cfCatalogError=false,cfCatalogLoading=false,cfCatalogLastAttempt=0,cfSearchAvailable=false;
+let mediaCaps={analyze:false,generate:false},mediaAction='off',mediaFile=null;
 const webModeByMode={chat:'off',worker:'off',build:'off'};
 const activeWebMode=()=>webModeByMode[activeMode];
 let localOfferPending=false;
@@ -90,6 +92,7 @@ function switchMode(next,{carryDraft=false}={}){
  thinkingEnabled=false; // Explicit opt-in per mode, never carry Code reasoning into Chat.
  const previous=conversations[activeMode];previous.draft=$('message').value;previous.model=$('model').value;
  if(activeMode==='build')builder.stop();
+ if(next!=='chat'&&mediaAction!=='off')clearMediaDraft();
  activeMode=next;history=conversations[next].history;modelHistory=conversations[next].modelHistory;
  $('mode').value=next;$('message').value=carryDraft?previous.draft:conversations[next].draft;
  if(next!=='worker'){$('tool').value='auto';$('remove-file').click();$('model').value=conversations[next].model||(next==='build'?CF_DEFAULTS.code:CF_DEFAULTS.chat);}
@@ -301,8 +304,9 @@ function resizeComposerInput(){
 function refreshComposerInputState(){
  const hasMessage=Boolean($('message').value.trim());
  const hasWorkFile=activeMode==='worker'&&Boolean($('file').files?.[0]);
+ const hasMediaImage=activeMode==='chat'&&mediaAction==='analyze'&&Boolean(mediaFile);
  const ready=$('send').dataset.modelReady==='true';
- $('send').disabled=activeTurn?activeTurn.controller.signal.aborted:busy||!ready||!(hasMessage||hasWorkFile);
+ $('send').disabled=activeTurn?activeTurn.controller.signal.aborted:busy||!ready||!(hasMessage||hasWorkFile||hasMediaImage);
 }
 function updateModelSelectIfChanged(select,choices){
  const current=[...select.options];
@@ -328,7 +332,7 @@ function renderStatus(){
   const option=$('tool').querySelector(`[value="${id}"]`);if(option)option.disabled=state==='disabled';const workspaceOption=$('workspace-tool').querySelector(`[value="${id}"]`);if(workspaceOption)workspaceOption.disabled=state==='disabled';
  }
  const ready=activeMode==='worker'?service?.enabled===true||cfModels.some(m=>m.available&&m.mode==='work'):service?.enabled===true||cfModels.some(m=>m.available&&m.mode===(activeMode==='build'?'code':'chat'))||localReady||desktopChat.availability.installedIDs.length>0;
- $('send').dataset.modelReady=String(ready);
+ $('send').dataset.modelReady=String(ready||(activeMode==='chat'&&mediaAction==='analyze'&&mediaCaps.analyze)||(activeMode==='chat'&&mediaAction==='generate'&&mediaCaps.generate));
  refreshComposerInputState();
  $('send').dataset.state=activeTurn?'stop':'send';$('send-arrow').toggleAttribute('hidden',!!activeTurn);$('send-stop').toggleAttribute('hidden',!activeTurn);
  $('send').ariaLabel=t(activeTurn?'stop':'send');$('send').title=t(activeTurn?'stop':'send');$('send-label').textContent=t(activeTurn?'stop':'send');
@@ -408,7 +412,7 @@ function renderStatus(){
   const webMode=activeWebMode(),webOn=webMode!=='off';
   const modelCapable=cfModels.some(m=>m.id===selectedIdForMode&&m.available&&m.mode===cfMode);
   const workCapable=activeMode!=='worker'||($('workspace-tool').value==='auto'&&!$('file').files?.[0]);
-  const canSearch=cfSearchAvailable&&modelCapable&&workCapable;
+  const canSearch=cfSearchAvailable&&modelCapable&&workCapable&&mediaAction==='off';
   $('web-search-toggle').disabled=busy||!canSearch;
   $('web-search-toggle').setAttribute('aria-pressed',String(webOn&&canSearch));
   $('web-search-toggle').setAttribute('aria-label',locale==='fa'?'جست‌وجوی اینترنتی':'Search the web');
@@ -421,6 +425,10 @@ function renderStatus(){
   $('web-search-depth').setAttribute('aria-label',locale==='fa'?'عمق جست‌وجو':'Search depth');
   $('web-search-depth').options[0].textContent=locale==='fa'?'وب':'Web';
   $('web-search-depth').options[1].textContent=locale==='fa'?'تحقیق':'Research';
+  $('attach-media-analyze').hidden=!mediaCaps.analyze;
+  $('attach-media-generate').hidden=!mediaCaps.generate;
+  $('attach-media-analyze').disabled=busy||!mediaCaps.analyze;
+  $('attach-media-generate').disabled=busy||!mediaCaps.generate;
   const webHint=$('web-search-hint');
   webHint.hidden=!webOn;
   webHint.textContent=!canSearch?(locale==='fa'?'جست‌وجو با این مدل یا ابزار در دسترس نیست.':'Search is unavailable for the selected model or tool.'):
@@ -757,11 +765,11 @@ async function loadCFModels(){
   for(let attempt=0;attempt<2;attempt++){
    try{
     const fresh=await fetchCFModels({signal:AbortSignal.timeout(8500)});
-    cfModels=fresh;cfQuotaEnabled=fresh.accountQuotaEnabled===true;cfSearchAvailable=fresh.searchAvailable===true;cfThinkingByMode={chat:fresh.thinkingByMode?.chat===true,work:fresh.thinkingByMode?.work===true,code:fresh.thinkingByMode?.code===true};cfCatalogError=false;
+    cfModels=fresh;cfQuotaEnabled=fresh.accountQuotaEnabled===true;cfSearchAvailable=fresh.searchAvailable===true;mediaCaps=mediaFromCatalog(fresh);cfThinkingByMode={chat:fresh.thinkingByMode?.chat===true,work:fresh.thinkingByMode?.work===true,code:fresh.thinkingByMode?.code===true};cfCatalogError=false;
     break;
    }catch{
     cfCatalogError=true;
-    if(attempt===1){cfModels=unavailableCFModels();cfQuotaEnabled=false;cfSearchAvailable=false;cfThinkingByMode={chat:false,work:false,code:false};thinkingEnabled=false;}
+    if(attempt===1){cfModels=unavailableCFModels();cfQuotaEnabled=false;cfSearchAvailable=false;mediaCaps={analyze:false,generate:false};cfThinkingByMode={chat:false,work:false,code:false};thinkingEnabled=false;}
     else await new Promise(resolve=>setTimeout(resolve,400));
    }
   }
