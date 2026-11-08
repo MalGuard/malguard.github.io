@@ -7,7 +7,7 @@ import {publicFailure,retryDetails} from './service-errors.mjs?v=account-quota-2
 import {apiUrl,readStream} from './client.mjs?v=vercel-auth-stable-20261103';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs?v=free-fallback-20261030';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
-import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS,isNewCloudModel} from './cloudflare-models.mjs?v=thinking-new-20261108';
+import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS,isNewCloudModel} from './cloudflare-models.mjs?v=search-auto-20261108';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
@@ -264,6 +264,7 @@ async function presentResponse(response,turn){
   card.classList.remove('is-typing');actions.hidden=false;
   if(display.generated.text){
    renderRichText(answer,display.generated.text,locale);
+   attachResearchCitations(answer,display.generated.webSearch);
    display.interrupted=turn.controller.signal.aborted;
    if(display.interrupted){turn.partial=true;card.append(el('p',t('stopped'),'reply-stopped'));}
    history.push({response:display});
@@ -415,9 +416,13 @@ function renderResponse(response,remember=true){
  if(response.generated){
   const n=el('article',undefined,'result assistant-message'),answer=el('div',undefined,'answer');renderRichText(answer,response.generated.text,locale);answer.dir='auto';n.ariaLabel='MalGuard AI';
   const actions=el('div',undefined,'response-actions'),details=el('details',undefined,'response-details'),summary=el('summary'),detailLabel=el('span',t('responseDetails'),'sr-only');detailLabel.dataset.i18n='responseDetails';summary.title=t('responseDetails');summary.append(responseIcon('details'),detailLabel);details.append(summary,el('p',t('generated')),el('p',`${response.generated.provider} · ${response.generated.model}`));
-  if(response.generated.webSearch?.sources?.length){const sources=el('ul');for(const source of response.generated.webSearch.sources){try{const url=new URL(source.url);if(!['https:','http:'].includes(url.protocol)||url.username||url.password)continue;const item=el('li'),a=el('a',`[${source.citation}] ${source.title||url.hostname}`);a.href=url.href;a.target='_blank';a.rel='noopener noreferrer';item.append(a);sources.append(item);}catch{}}details.append(el('p',t('researchLimit')),sources);}
+   if(response.generated.webSearch?.sources?.length)details.append(el('p',t('researchLimit')));
+   if(response.generated.auto?.selectedModelId)details.append(el('p',(locale==='fa'?'مدل خودکار: ':'Auto model: ')+(response.generated.auto.selectedLabel||response.generated.auto.selectedModelId)));
   const copy=el('button',undefined,'copy-response'),copyLabel=el('span',t('copy'),'sr-only');copyLabel.dataset.i18n='copy';copy.type='button';copy.title=t('copy');copy.append(responseIcon('copy'),copyLabel);copy.onclick=async()=>{try{await navigator.clipboard.writeText(response.generated.text);copyLabel.textContent=t('copied');copy.title=t('copied');setTimeout(()=>{copyLabel.textContent=t('copy');copy.title=t('copy');},1800);}catch{copyLabel.textContent=t('copy');}};
-  actions.append(copy,details);n.append(answer,actions);if(response.interrupted)n.append(el('p',t('stopped'),'reply-stopped'));$('conversation').append(n);return n;
+   const evidence=renderResearchEvidence(response.generated.webSearch,locale);
+   if(evidence)n.append(evidence);
+   attachResearchCitations(answer,response.generated.webSearch);
+   actions.append(copy,details);n.append(answer,actions);if(response.interrupted)n.append(el('p',t('stopped'),'reply-stopped'));$('conversation').append(n);return n;
  }
  const r=response.result;if(!r){showError('streamError',false);return;}
  const card=el('article',undefined,`result ${r.outcome}`);card.append(el('div',names[r.tool],'eyebrow'),el('h3',t(r.outcome),'outcome'));
