@@ -82,3 +82,37 @@ test('NEW badges are tiny emerald text chips, with no emoji in model selectors',
  assert.match(styles,/\.mg-model-new:not\(\[hidden\]\)/);
  assert.match(styles,/html:is\(\.theme-light,\[data-theme=light\]\).*\.mg-model-new/);
 });
+
+
+test('UX v3 keeps model selection stable while exposing faster, safer input behavior',()=>{
+ assert.match(app,/function updateModelSelectIfChanged\(select,choices\)/);
+ assert.match(app,/if\(same\)return false/);
+ assert.match(app,/function resizeComposerInput\(\)/);
+ assert.match(app,/Math\.min\(field\.scrollHeight,185\)/);
+ assert.match(app,/function refreshComposerInputState\(\)/);
+ assert.match(app,/dataset\.modelReady=String\(ready\)/);
+ assert.match(app,/hasWorkFile=activeMode==='worker'/);
+ assert.match(app,/matchMedia\('\(pointer:fine\)'\)/);
+ assert.match(app,/event\.ctrlKey\|\|event\.metaKey/);
+ assert.match(app,/field\.style\.height='auto'/);
+ assert.match(html,/id="composer-keyboard-hint"/);
+ assert.match(html,/id="jump-latest"[^>]*hidden/);
+ assert.match(html,/class="entry-capabilities"/);
+ assert.match(styles,/\.model-select-wrap\[hidden\]/);
+ assert.match(styles,/\.entry-capabilities/);
+ assert.match(styles,/\.composer-area>\.jump-latest/);
+});
+
+test('UX v3 labels connections accurately and provides accessible sidebar dismissal',()=>{
+ const nav=read('ai/navigation.mjs');
+ assert.match(nav,/aria-controls','navigation'/);
+ assert.match(nav,/Only the live service can confirm a connection/);
+ assert.doesNotMatch(nav,/GitHub'[,]?'Not connected'/);
+ assert.doesNotMatch(nav,/Not connected/);
+ assert.match(nav,/hide\(false\)/);
+ assert.match(nav,/if\(settings\.open\)/);
+ assert.match(client,/new MutationObserver\(refreshJump\)/);
+ assert.match(client,/Jump to latest message/);
+ assert.match(client,/prefers-reduced-motion/);
+ assert.match(html,/app\.js\?v=experience-v3-20261108/);
+});
