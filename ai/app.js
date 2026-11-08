@@ -319,7 +319,7 @@ function renderStatus(){
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
   for(const m of models){
    const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.label;
-   const option=el('option',isNewCloudModel(m.id)?label+' · NEW':label);option.value=m.id;
+   const option=el('option',isNewCloudModel(m.id)?label+' · NEW':label);option.value=m.id;if(isNewCloudModel(m.id))option.classList.add('mg-new-option');
    option.disabled=m.state!=='configured'||activeMode==='build'&&m.mode!=='code'&&!Object.hasOwn(desktopModels,m.id);
    $('model').append(option);
   }
@@ -339,7 +339,7 @@ function renderStatus(){
   const control=$('workspace-model'),old=control.value;
   if([...control.options].map(o=>o.value).join('|')!==workChoices.map(m=>m.id).join('|')){
    control.replaceChildren();
-   for(const m of workChoices){const opt=el('option',isNewCloudModel(m.id)?m.label+' · NEW':m.label);opt.value=m.id;control.append(opt);}
+   for(const m of workChoices){const opt=el('option',isNewCloudModel(m.id)?m.label+' · NEW':m.label);opt.value=m.id;if(isNewCloudModel(m.id))opt.classList.add('mg-new-option');control.append(opt);}
   }
   control.value=workChoices.some(m=>m.id===old&&m.available)?old:workChoices.some(m=>m.id===CF_DEFAULTS.work&&m.available)?CF_DEFAULTS.work:workChoices.find(m=>m.available)?.id||'';
  }
