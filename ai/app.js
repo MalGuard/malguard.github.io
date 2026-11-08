@@ -5,7 +5,7 @@ import {publicFailure,retryDetails} from './service-errors.mjs?v=account-quota-2
 import {apiUrl,readStream} from './client.mjs?v=vercel-auth-stable-20261103';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs?v=free-fallback-20261030';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
-import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS} from './cloudflare-models.mjs?v=flagships-20261104';
+import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS,isNewCloudModel} from './cloudflare-models.mjs?v=flagships-20261104';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
@@ -23,7 +23,7 @@ let locale='en',service,busy=false,serviceLoading=true;
 let activeTurn;
 let localReady=false,localCapabilityReason='checking',modelsInitialized=false;
 let lastSelectedModel='';
-let cloudDefaultApplied=false,modelChosen=false,cfModels=[],accountUsage=null,cfQuotaEnabled=false;
+let cloudDefaultApplied=false,modelChosen=false,cfModels=[],accountUsage=null,cfQuotaEnabled=false,cfThinkingAvailable=false,thinkingEnabled=false;
 let cfCatalogError=false,cfCatalogLoading=false,cfCatalogLastAttempt=0;
 let localOfferPending=false;
 let preferredLocal;try{preferredLocal=localStorage.getItem('malguard.ai.localModel.v1');}catch{}
@@ -31,7 +31,7 @@ const localChat=createLocalChat(),downloadPermissions=new Set();
 const preparedModels=new Set();
 let preparingModel;
 let welcomeSeen=false;try{welcomeSeen=localStorage.getItem('malguard.ai.welcome.v3')==='seen';}catch{}
-const conversations={chat:{history:[],modelHistory:[],draft:'',model:'chat_flash'},worker:{history:[],modelHistory:[],draft:'',model:'work_qwen'},build:{history:[],modelHistory:[],draft:'',model:'code_ultra'}};
+const conversations={chat:{history:[],modelHistory:[],draft:'',model:'chat_granite'},worker:{history:[],modelHistory:[],draft:'',model:'cf_gptoss20'},build:{history:[],modelHistory:[],draft:'',model:'cf_gptoss120'}};
 let projectOpen=false;
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
@@ -78,6 +78,8 @@ Object.assign(copy.en,{retention:'Guests: chats stay on this page. Signed-in cha
 Object.assign(copy.fa,{retention:'گفت‌وگوی مهمان فقط در همین صفحه است. گفت‌وگوی حساب فقط پس از اتصال ذخیره می‌شود. فایل‌ها و پروژه همگام نمی‌شوند؛ نتیجه تضمین امنیت نیست.'});
 Object.assign(copy.en,{navChat:'Chat',navCode:'Code',navWork:'Work',navChatHint:'Ask, write, and explore',navCodeHint:'Build, debug, and preview',navWorkHint:'Inspect files, links, and threats'});
 Object.assign(copy.fa,{navChat:'گفت‌وگو',navCode:'کد',navWork:'کار',navChatHint:'بپرس، بنویس و کشف کن',navCodeHint:'بساز، رفع اشکال کن و پیش‌نمایش بگیر',navWorkHint:'بررسی فایل، لینک و تهدیدها'});
+Object.assign(copy.en,{thinkingToggle:'Thinking',thinkingActive:'Deep reasoning enabled · GPT-OSS 120B (more quota)',thinkingInactive:'Enable deeper reasoning with GPT-OSS 120B (may use more quota)',thinkingUnavailable:'Thinking requires an available Cloudflare reasoning model'});
+Object.assign(copy.fa,{thinkingToggle:'تفکر',thinkingActive:'تفکر عمیق فعال · GPT-OSS 120B (مصرف سهمیه بیشتر)',thinkingInactive:'فعال‌سازی تفکر عمیق با GPT-OSS 120B (مصرف سهمیه بیشتر)',thinkingUnavailable:'تفکر عمیق به مدل استدلالی فعال در Cloudflare نیاز دارد'});
 function switchMode(next,{carryDraft=false}={}){
  if(busy||!['chat','worker','build'].includes(next)){$('mode').value=activeMode;return;}
  if(next===activeMode){$('mode-picker').open=false;$('mode').value=next;renderStatus();return;}
@@ -314,7 +316,7 @@ function renderStatus(){
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
   for(const m of models){
    const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.label;
-   const option=el('option',label);option.value=m.id;
+   const option=el('option',isNewCloudModel(m.id)?'🆕 NEW · '+label:label);option.value=m.id;
    option.disabled=m.state!=='configured'||activeMode==='build'&&m.mode!=='code'&&!Object.hasOwn(desktopModels,m.id);
    $('model').append(option);
   }
@@ -334,7 +336,7 @@ function renderStatus(){
   const control=$('workspace-model'),old=control.value;
   if([...control.options].map(o=>o.value).join('|')!==workChoices.map(m=>m.id).join('|')){
    control.replaceChildren();
-   for(const m of workChoices){const opt=el('option',m.label);opt.value=m.id;control.append(opt);}
+   for(const m of workChoices){const opt=el('option',isNewCloudModel(m.id)?'🆕 NEW · '+m.label:m.label);opt.value=m.id;control.append(opt);}
   }
   control.value=workChoices.some(m=>m.id===old&&m.available)?old:workChoices.some(m=>m.id===CF_DEFAULTS.work&&m.available)?CF_DEFAULTS.work:workChoices.find(m=>m.available)?.id||'';
  }
@@ -348,6 +350,12 @@ function renderStatus(){
  updateDesktopInfo();
  const selected=models.find(m=>m.id===$('model').value);
  const modelLabel=selected?.label||service?.model?.model||'';
+ const thinkingCloudReady=cfThinkingAvailable&&(activeMode==='worker'||cfModels.some(m=>m.id===$('model').value&&m.available&&m.mode===(activeMode==='build'?'code':'chat')));
+ $('thinking-toggle').disabled=busy||!thinkingCloudReady;
+ $('thinking-toggle').setAttribute('aria-pressed',String(thinkingEnabled&&thinkingCloudReady));
+ $('thinking-toggle').classList.toggle('active',thinkingEnabled&&thinkingCloudReady);
+ $('thinking-toggle').title=t(!thinkingCloudReady?'thinkingUnavailable':thinkingEnabled?'thinkingActive':'thinkingInactive');
+ $('model-status').dataset.new=String(isNewCloudModel($('model').value));
  const modelNotice=locale==='fa'?`مدل انتخاب‌شده: ${modelLabel}`:`Selected model: ${modelLabel}`;
  $('model-status').textContent=(cfAvailable.length?modelNotice:t('modelOff'))+(cfQuotaEnabled?(locale==='fa'?' · استفاده منصفانه با سقف ماهانه':' · Monthly fair-use limits apply'):'');
  if(cfAvailable.length)document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌ها از مسیر Vercel و ارائه‌دهندهٔ تنظیم‌شده اجرا می‌شن. مدل‌های غیرفعال از لیست حذف شدن.':'Models run through Vercel and the configured provider. Unavailable models are hidden.';
@@ -474,7 +482,7 @@ async function runBuild(message){
  if(!native&&planChat(message,contextHistory).needsWeb&&!$('lookup-consent').checked){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
- else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
+ else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
  if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn);if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
  }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error?.code|| (error.name==='TimeoutError'?'provider_timeout':'model_unavailable'),retryAfterSeconds:error?.retryAfterSeconds,retryAt:error?.retryAt});}finally{endTurn(turn);}
 }
@@ -538,7 +546,7 @@ $('composer').onsubmit=async event=>{
   const turn=beginTurn('thinking');
   history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
   try{
-   const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
+   const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
     if(generated.usage){accountUsage=generated.usage;renderStatus();}
    await presentResponse({generated},turn);
    modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});
@@ -592,6 +600,7 @@ document.addEventListener('pointerdown',event=>{if(!$('mode-picker').contains(ev
 $('workspace-tool').onchange=()=>{$('tool').value=$('workspace-tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
 $('tool').onchange=()=>{$('workspace-tool').value=$('tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
 function rememberLocalModel(){const model=$('model').value;if(Object.hasOwn(localModels,model))try{localStorage.setItem('malguard.ai.localModel.v1',model);}catch{}}
+$('thinking-toggle').onclick=()=>{if($('thinking-toggle').disabled||busy)return;thinkingEnabled=!thinkingEnabled;renderStatus();};
 $('model').onchange=()=>{if($('model').value==='__desktop'){$('model').value=lastSelectedModel;openDesktopModels();return;}if($('model').value==='__downloads'){$('model').value=lastSelectedModel;void offerLocalModels();return;}modelChosen=true;rememberLocalModel();renderStatus();};
 for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()=>{
  if(busy)return;
@@ -632,11 +641,11 @@ async function loadCFModels(){
   for(let attempt=0;attempt<2;attempt++){
    try{
     const fresh=await fetchCFModels({signal:AbortSignal.timeout(8500)});
-    cfModels=fresh;cfQuotaEnabled=fresh.accountQuotaEnabled===true;cfCatalogError=false;
+    cfModels=fresh;cfQuotaEnabled=fresh.accountQuotaEnabled===true;cfThinkingAvailable=fresh.thinkingAvailable===true;cfCatalogError=false;
     break;
    }catch{
     cfCatalogError=true;
-    if(attempt===1){cfModels=unavailableCFModels();cfQuotaEnabled=false;}
+    if(attempt===1){cfModels=unavailableCFModels();cfQuotaEnabled=false;cfThinkingAvailable=false;}
     else await new Promise(resolve=>setTimeout(resolve,400));
    }
   }
