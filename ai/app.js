@@ -404,6 +404,29 @@ function renderStatus(){
  for(const option of $('offer-model').options){const m=localModels[option.value];option.textContent=`${t(option.value==='local_fast'?'lightModel':'strongModel')} · ~${m.downloadMB} MB`;}
  $('local-status').textContent=localReady?(locale==='fa'?'اجرای روی دستگاه ممکن است؛ سرعت و حافظه باید هنگام بارگذاری بررسی شوند.':'On-device inference may be supported; loading still depends on memory and device capabilities.'):t('localOff');
   syncExperienceV2({mode:activeMode,locale,busy,selectedId:selectedIdForMode,modelLabel,isNew:isNewCloudModel(selectedIdForMode),thinkingReady:thinkingCloudReady,thinkingOn:thinkingCloudReady&&thinkingEnabled,thinkingModel:thinkingModelLabel});
+
+  const webMode=activeWebMode(),webOn=webMode!=='off';
+  const modelCapable=cfModels.some(m=>m.id===selectedIdForMode&&m.available&&m.mode===cfMode);
+  const workCapable=activeMode!=='worker'||($('workspace-tool').value==='auto'&&!$('file').files?.[0]);
+  const canSearch=cfSearchAvailable&&modelCapable&&workCapable;
+  $('web-search-toggle').disabled=busy||!canSearch;
+  $('web-search-toggle').setAttribute('aria-pressed',String(webOn&&canSearch));
+  $('web-search-toggle').setAttribute('aria-label',locale==='fa'?'جست‌وجوی اینترنتی':'Search the web');
+  $('web-search-label').textContent=locale==='fa'?
+    (webMode==='research'?'تحقیق':webOn&&canSearch?'وب روشن':'جست‌وجو'):
+    (webMode==='research'?'Research':webOn&&canSearch?'Web on':'Search');
+  $('web-search-depth').hidden=!webOn||!canSearch;
+  $('web-search-depth').disabled=busy||!canSearch;
+  $('web-search-depth').value=webMode==='research'?'research':'web';
+  $('web-search-depth').setAttribute('aria-label',locale==='fa'?'عمق جست‌وجو':'Search depth');
+  $('web-search-depth').options[0].textContent=locale==='fa'?'وب':'Web';
+  $('web-search-depth').options[1].textContent=locale==='fa'?'تحقیق':'Research';
+  const webHint=$('web-search-hint');
+  webHint.hidden=!webOn;
+  webHint.textContent=!canSearch?(locale==='fa'?'جست‌وجو با این مدل یا ابزار در دسترس نیست.':'Search is unavailable for the selected model or tool.'):
+    locale==='fa'?'جست‌وجوی '+(webMode==='research'?'عمیق':'وب')+' با اجازه شما · همراه منابع':
+    (webMode==='research'?'Research':'Web search')+' is on · sourced answers';
+
 }
 function showError(key,remember=true){if(remember)history.push({error:key});const card=el('article',undefined,'result error'),text=typeof key==='object'?errorMessage(key,locale):t(key),heading=el('h3',text,'outcome');card.append(heading);card.setAttribute('role','alert');$('conversation').append(card);if(remember&&!matchMedia('(prefers-reduced-motion: reduce)').matches){heading.setAttribute('aria-label',text);const ink=el('span',text);ink.setAttribute('aria-hidden','true');heading.replaceChildren(ink);typeText(text,value=>{ink.textContent=value;},{charactersPerSecond:130}).catch(()=>{ink.textContent=text;});}}
 function renderResponse(response,remember=true){
@@ -535,6 +558,7 @@ $('manage-models').onclick=offerLocalModels;
 function webOptions(message){
  const mode=activeWebMode();
  if(mode==='off')return {};
+ if($('web-search-toggle').disabled)throw Object.assign(new Error('web_search_unavailable'),{code:'web_search_unavailable'});
  // Only the bounded, user-authored first line goes to web search.
  const line=String(message).split('\n',1)[0].trim();
  if(!line||line.length>300||/[{}<>\\]/.test(line))
@@ -567,7 +591,7 @@ $('attach-file').onclick=()=>{closeAttach();$(activeMode==='build'?'build-import
 function chooseAction(mode,tool){if(busy)return;switchMode(mode,{carryDraft:true});$('tool').value=tool;$('workspace-tool').value=tool;closeAttach();translate();$('message').placeholder=t(tool==='ai_web'?'webPlaceholder':mode==='worker'?'inspectionPlaceholder':'placeholder');$('message').focus();}
 $('attach-chat').onclick=()=>chooseAction('chat','auto');
 $('attach-inspect').onclick=()=>chooseAction('worker','auto');
-$('attach-web').onclick=()=>chooseAction('worker','ai_web');
+$('attach-web').onclick=()=>{if(cfSearchAvailable&&cfModels.some(m=>m.available&&m.mode==='chat')){switchMode('chat',{carryDraft:true});closeAttach();if(activeWebMode()==='off')$('web-search-toggle').click();$('message').focus();}else chooseAction('worker','ai_web');};
 document.addEventListener('pointerdown',event=>{if(!event.target.closest('.attach-menu'))closeAttach();});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('attach-options').hidden){closeAttach(true);event.preventDefault();}});
 document.addEventListener('pointerdown',event=>{const panel=$('settings-panel');if(panel.open&&!panel.contains(event.target))panel.open=false;});
