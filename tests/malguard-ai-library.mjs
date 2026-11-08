@@ -35,7 +35,7 @@ try{for(const width of [390,1280]){
  await rail();if(await page.locator('#settings-panel').getAttribute('open')!==null)await page.locator('#settings-close').click();else await page.locator('#settings-panel > summary').click();await page.locator('#permissions > summary').click();await page.locator('#model-consent').check();if(await page.locator('#settings-panel').getAttribute('open')!==null)await page.locator('#settings-close').click();else await page.locator('#settings-panel > summary').click();
  await page.locator('#message').fill('Explain synthetic persistence');await page.locator('#send').click();await page.getByText('Synthetic saved answer',{exact:true}).waitFor();await page.locator('#save-state').filter({hasText:'Saved to your account'}).waitFor();
  await rail();assert.equal(await page.locator('.history-row').count(),1);await page.locator('#manage-memory').click();await page.getByLabel('New memory').fill('Synthetic preference');await page.getByRole('button',{name:'Save memory',exact:true}).click();await page.getByRole('button',{name:'Close',exact:true}).click();await page.locator('#save-state').filter({hasText:'Saved to your account'}).waitFor();
- await page.reload();await page.waitForFunction(()=>!document.querySelector('#send').disabled);
+ await page.reload();await page.waitForFunction(()=>document.querySelector('#send').dataset.modelReady==='true');
  // The account now restores on same-origin startup. Assert the original user
  // was restored without opening a new sign-in dialog or minting a new token.
  await page.locator('#message').waitFor({state:'visible'});
