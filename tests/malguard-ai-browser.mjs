@@ -277,7 +277,7 @@ try{
   }
   return r.abort();
  });
- await workPage.goto(base+'/ai/');await workPage.waitForFunction(()=>!document.querySelector('#send').disabled);
+ await workPage.goto(base+'/ai/');await workPage.waitForFunction(()=>document.querySelector('#send').dataset.modelReady==='true');
  assert.equal(await workPage.locator('#model option[value="llama8b"]').count(),0,'unconfigured legacy models must stay hidden');assert.equal(await workPage.locator('#model option[value="chat_granite"]').count(),1,'configured Chat model stays visible');assert.equal(await workPage.locator('#model option[value="cf_gptoss120"]').count(),0,'Code models must never appear in Chat');
  assert.equal(desktopRequests.length,0,'Opening the site must not probe local services');
  await workPage.locator('#message').fill('Chat draft');await openModePicker(workPage);await workPage.locator('#workspace-tab').click();
