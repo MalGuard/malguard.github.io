@@ -23,6 +23,9 @@ const cfFixtures=[
 const isCFRoute=r=>new URL(r.request().url()).origin===CLOUD_ORIGIN;
 const isModelsRoute=r=>new URL(r.request().url()).origin===MODELS_ORIGIN;
 const gatewayModels=[
+ {id:'chat_auto',mode:'chat',label:'Auto · Chat',provider:'malguard_auto',available:true},
+ {id:'work_auto',mode:'work',label:'Auto · Work',provider:'malguard_auto',available:true},
+ {id:'code_auto',mode:'code',label:'Auto · Code',provider:'malguard_auto',available:true},
  {id:'chat_granite',mode:'chat',label:'Granite 4 Micro · Efficient',provider:'workers_ai_rest',available:true},
  {id:'chat_think',mode:'chat',label:'GPT-OSS 20B · Deep Chat',provider:'workers_ai_rest',available:true},
  {id:'chat_flash',mode:'chat',label:'Gemini 3.5 Flash-Lite',provider:'gemini',available:true},
@@ -35,7 +38,7 @@ function gatewayFixture(route){
  const req=route.request(),url=new URL(req.url());
  const headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Allow-Methods':'GET, POST, OPTIONS'};
  if(req.method()==='OPTIONS')return route.fulfill({status:204,headers});
- if(req.method()==='GET'&&url.pathname==='/api/public-models')return route.fulfill({contentType:'application/json',headers,body:JSON.stringify({models:gatewayModels,thinking:{available:true,provider:'workers_ai_rest',byMode:{chat:true,work:true,code:true}},accountQuota:{enabled:false}})});
+ if(req.method()==='GET'&&url.pathname==='/api/public-models')return route.fulfill({contentType:'application/json',headers,body:JSON.stringify({models:gatewayModels,thinking:{available:true,provider:'workers_ai_rest',byMode:{chat:true,work:true,code:true}},search:{available:true,provider:'tavily',modes:['web','research']},accountQuota:{enabled:false}})});
  if(req.method()!=='POST'||url.pathname!=='/api/public-model-chat')throw Error('unexpected gateway endpoint');
  assert.equal(req.headers().authorization,'Bearer synthetic-session-valid-user');
  const body=req.postDataJSON();
@@ -220,7 +223,7 @@ try{
   window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{generated:{text:'پاسخ محلی آزمایشی',provider:'on_device',model:data.model,securityAnalysis:false}}}),5);}terminate(){}};
  });
  const beforeLocal=requests,localExternal=[];await device.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();localExternal.push(r.request().url());return r.abort();});
- await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');assert.equal(await localPage.locator('#model').inputValue(),'chat_granite','Prefer the fast Cloudflare chat model without downloading');
+ await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');assert.equal(await localPage.locator('#model').inputValue(),'chat_auto','Prefer automatic available Chat model without downloading');
  await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
  assert.equal(await localPage.locator('#local-welcome').isVisible(),false,'local downloads must remain opt-in');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.locator('#model').selectOption('local_fast');
