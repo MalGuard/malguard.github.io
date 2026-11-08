@@ -19,15 +19,20 @@
   <link rel="preload" href="/assets/precision/stars.svg?v=20261028-4k" as="image" fetchpriority="high"><link rel="preload" href="/assets/precision/obsidian-space.webp?v=20261028-4k" as="image" fetchpriority="low">
   <link rel="icon" href="./malguard-ai-orbit.svg?v=20261028-mono" type="image/svg+xml"><link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261104-ai-png"><meta name="apple-mobile-web-app-title" content="MalGuard AI"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./style.css?v=thinking-new-20261108">
-  <script type="module" src="./app.js?v=experience-v2-20261108"></script>
-<link rel="stylesheet" href="/assets/precision/deep-space-global.css?v=20261102-soft-halo"><link rel="stylesheet" href="/assets/precision/mg-theme.css?v=20261105"><script src="/assets/precision/mg-theme.js?v=20261105" defer></script><link rel="stylesheet" href="./experience-v2.css?v=20261108-2"></head>
+  <script type="module" src="./app.js?v=experience-v3-20261108"></script>
+<link rel="stylesheet" href="/assets/precision/deep-space-global.css?v=20261102-soft-halo"><link rel="stylesheet" href="/assets/precision/mg-theme.css?v=20261105"><script src="/assets/precision/mg-theme.js?v=20261105" defer></script><link rel="stylesheet" href="./experience-v2.css?v=20261108-ux3"></head>
 <body class="mg-deep-space mg-ai-v2 auth-required">
   <main id="entry-gate" class="entry-gate" aria-labelledby="entry-title">
     <section class="entry-content">
       <img class="entry-mark" src="./malguard-ai-orbit.svg?v=20261028-mono" width="74" height="74" alt="">
       <p class="entry-brand">MalGuard AI</p>
       <h1 id="entry-title">Explore with MalGuard AI</h1>
-      <p class="entry-description">Sign in or create an account to start your conversation.</p>
+      <p class="entry-description">One secure place to think, investigate, and build. Sign in to begin.</p>
+      <div class="entry-capabilities" aria-label="MalGuard AI workspaces">
+        <div class="entry-capability"><span class="entry-capability-icon" aria-hidden="true">◎</span><strong>Chat</strong><span>Ask, learn, and create.</span></div>
+        <div class="entry-capability"><span class="entry-capability-icon" aria-hidden="true">◇</span><strong>Work</strong><span>Investigate with evidence.</span></div>
+        <div class="entry-capability"><span class="entry-capability-icon" aria-hidden="true">⌘</span><strong>Code</strong><span>Build, review, and preview.</span></div>
+      </div>
       <div class="entry-actions"><button id="entry-signin" type="button">Sign in</button><button id="entry-signup" type="button">Create account</button><button id="entry-retry" type="button" hidden>Retry saved session</button></div>
       <a href="/">Back to MalGuard</a>
     </section>
@@ -123,6 +128,7 @@
         <button id="build-files-toggle" class="build-files-toggle" type="button" aria-expanded="false" aria-controls="build-panel" data-i18n="showProject" hidden>Files and preview</button>
         <button id="open-downloads" class="download-entry" type="button" data-i18n="downloadEntry">↓ Download models · choose for your device</button>
         <div id="model-progress" class="model-progress" hidden><label for="download-progress" id="progress-label"></label><progress id="download-progress" max="100" value="0"></progress><button type="button" id="cancel-download" data-i18n="cancel">Cancel</button></div>
+        <button type="button" id="jump-latest" class="jump-latest" hidden aria-label="Jump to latest message"><span aria-hidden="true">↓</span><span id="jump-latest-label">Latest</span></button>
         <form id="composer">
           <div class="composer-shell">
             <label class="sr-only" for="message" data-i18n="input">Your message</label>
@@ -147,7 +153,7 @@
           </div>
           <div class="attachment"><label class="file-button sr-only" for="file" data-i18n="attach">Choose file · up to 1 MiB</label><input type="file" id="file" tabindex="-1"><span id="filename" dir="auto"></span><button type="button" id="remove-file" hidden data-i18n="remove">Remove</button></div>
         </form>
-        <p id="thinking-state" class="thinking-state" role="status" aria-live="polite" data-enabled="false">Thinking off · fast replies</p>
+        <div class="composer-hints"><p id="thinking-state" class="thinking-state" role="status" aria-live="polite" data-enabled="false">Thinking off · fast replies</p><span class="composer-keyboard-hint" id="composer-keyboard-hint" aria-hidden="true">Enter ↵ to send · Shift + Enter for a new line</span></div>
         <p id="cloud-alert" class="cloud-alert" role="status" hidden>Cloud models are temporarily unavailable. <button id="retry-cloud" type="button">Retry connection</button></p>
         <p id="disclaimer" class="footer-note" data-i18n="disclaimer">AI can make mistakes. Check important information.</p>
         <button id="stop-local" type="button" hidden data-i18n="stop">Stop</button>

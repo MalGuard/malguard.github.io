@@ -79,14 +79,14 @@ try{
    page.on('framenavigated',record);await link.click();await page.waitForURL(base+'/ai-product.html');
    assert.equal(await page.getByRole('heading',{name:'Android · Samsung'}).count(),1);assert.equal(await page.getByRole('heading',{name:'Windows'}).count(),1);
    await page.getByRole('link',{name:/Open web app/}).first().click();await page.waitForURL(base+'/ai/');
-   await page.waitForFunction(()=>!document.getElementById('send').disabled);page.off('framenavigated',record);
+   await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');page.off('framenavigated',record);
    assert.deepEqual(visited,['/ai-product.html','/ai/'],'Product card opens the platform guide, then the web app');
    assert.equal(await page.locator('#composer').isVisible(),true);assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
    assert.equal(await page.locator('.mg-card-hero--radar').count(),0);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Assistant must fit after navigation');
   }
   for(const path of ['/ai-intelligence.html','/malware-ai.html']){
-   await page.goto(base+path);await page.waitForURL(base+'/ai/');await page.waitForFunction(()=>!document.getElementById('send').disabled);
+   await page.goto(base+path);await page.waitForURL(base+'/ai/');await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
    assert.equal(await page.locator('#composer').isVisible(),true,'Legacy AI entry opens the current chat');
   }
   await page.goto(base+'/');await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true');
@@ -99,7 +99,7 @@ try{
   const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[],external=[];
   await skipWelcome(context);page.on('pageerror',e=>errors.push(e.message));
   await context.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
-  await page.goto(base+'/ai/');await page.locator('#send').waitFor({state:'visible'});await page.waitForFunction(()=>!document.getElementById('send').disabled);
+  await page.goto(base+'/ai/');await page.locator('#send').waitFor({state:'visible'});await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
   assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
   assert.equal(await page.locator('#model').isVisible(),true);assert.equal(await page.locator('#composer #model').count(),1);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);
@@ -112,16 +112,31 @@ try{
    assert.equal(await page.locator('#experience-worker').isVisible(),true);
    assert.equal(await page.locator('#experience-build').isVisible(),true);
    assert.equal(await page.locator('#model option[value="cf_gptoss120"]').count(),0,'Code model must not appear in Chat');
+   assert.equal(await page.locator('#send').isDisabled(),true,'Empty composer must never enable Send');
+   await page.locator('#message').fill('A safe test prompt');
+   assert.equal(await page.locator('#send').isDisabled(),false,'A nonempty composer enables Send');
+   await page.locator('#message').fill('');
+   assert.equal(await page.locator('#send').isDisabled(),true,'Clearing a draft disables Send again');
+   assert.equal(await page.locator('#jump-latest').isVisible(),false,'Jump-to-latest stays hidden in empty chats');
    const modePosts=modelPostRequests;
    await page.locator('#experience-worker').click();
    assert.equal(await page.locator('#mode').inputValue(),'worker');
    assert.equal(await page.locator('#experience-worker').getAttribute('aria-pressed'),'true');
+   assert.equal(await page.locator('.model-select-wrap').isVisible(),false,'Hidden Work selector must not leave an empty slot');
    await page.locator('#experience-build').click();
    assert.equal(await page.locator('#mode').inputValue(),'build');
    assert.equal(await page.locator('#model option[value="cf_gptoss120"]').count(),1,'Strong Code model belongs in Code');
    assert.equal(await page.locator('#model option[value="chat_granite"]').count(),0);
    await page.locator('#experience-chat').click();
    assert.equal(await page.locator('#mode').inputValue(),'chat');
+   await page.evaluate(()=>{
+     window.__modelSelectorMutations=0;
+     new MutationObserver(records=>{window.__modelSelectorMutations+=records.length;})
+       .observe(document.getElementById('model'),{childList:true});
+   });
+   await page.locator('#thinking-toggle').click();
+   await page.locator('#thinking-toggle').click();
+   assert.equal(await page.evaluate(()=>window.__modelSelectorMutations),0,'Thinking state changes must not rebuild the model picker');
    await page.locator('.quick-suggestion[data-quick-index="0"]').click();
    assert.ok((await page.locator('#message').inputValue()).length>10);
    assert.equal(modelPostRequests,modePosts,'Mode switching and suggested prompts must not send requests');
@@ -191,8 +206,8 @@ try{
  await context.route('https://malware-ai.malguard-security.workers.dev/**',r=>cfFixture(r));
   await context.route('https://models.malguard.site/**',r=>gatewayFixture(r));
  await page.goto(base+'/ai/');
- await page.waitForFunction(()=>document.getElementById('entry-gate')?.hidden&&document.getElementById('send')?.disabled===false);
- assert.equal(await page.locator('#send').isDisabled(),false,'Cloudflare chat remains available during a legacy Vercel backend outage');
+ await page.waitForFunction(()=>document.getElementById('entry-gate')?.hidden&&document.getElementById('send')?.dataset.modelReady==='true');
+ assert.equal(await page.locator('#send').isDisabled(),true,'An empty message must not be sent even when Cloudflare is available');
  await context.close();console.log('PASS backend outage does not disable Cloudflare-only chat.');
  // Cloudflare-only model rate/quota errors are tested in cloudflare-models.test.js.
  // The old Vercel NDJSON error fixture does not apply to the JSON Cloudflare model endpoint.
@@ -205,8 +220,8 @@ try{
   window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{generated:{text:'پاسخ محلی آزمایشی',provider:'on_device',model:data.model,securityAnalysis:false}}}),5);}terminate(){}};
  });
  const beforeLocal=requests,localExternal=[];await device.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();localExternal.push(r.request().url());return r.abort();});
- await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>!document.getElementById('send').disabled);assert.equal(await localPage.locator('#model').inputValue(),'chat_granite','Prefer the fast Cloudflare chat model without downloading');
- await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
+ await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');assert.equal(await localPage.locator('#model').inputValue(),'chat_granite','Prefer the fast Cloudflare chat model without downloading');
+ await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
  assert.equal(await localPage.locator('#local-welcome').isVisible(),false,'local downloads must remain opt-in');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.locator('#model').selectOption('local_fast');
  await localPage.locator('#model').selectOption('__downloads');
@@ -218,7 +233,7 @@ try{
  await localPage.waitForFunction(()=>!document.getElementById('local-offer').open&&document.getElementById('model').value==='local_fast');
  assert.equal(await localPage.locator('#model').inputValue(),'local_fast','Later preserves the current selection without a download');
  assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
- await localPage.reload();await localPage.waitForFunction(()=>!document.getElementById('send').disabled);
+ await localPage.reload();await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
  assert.equal(await localPage.locator('#local-offer').isVisible(),false,'do not repeat the offer in this tab');
  await localPage.locator('#model').selectOption('local_fast');
  await localPage.locator('#message').fill('سلام');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});
@@ -237,14 +252,14 @@ try{
   window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{prepared:true}}),5);}terminate(){}};
  });
  const downloadExternal=[];await downloadContext.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();downloadExternal.push(r.request().url());return r.abort();});
- await downloadPage.goto(base+'/ai/');await downloadPage.waitForFunction(()=>!document.getElementById('send').disabled);
+ await downloadPage.goto(base+'/ai/');await downloadPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
  assert.equal(await downloadPage.locator('#local-welcome').isVisible(),false,'Local downloads remain opt-in');await downloadPage.locator('#model').selectOption('__downloads');
  await downloadPage.locator('#local-offer').waitFor({state:'visible'});
  await downloadPage.locator('#offer-model').selectOption('local_medium');assert.match(await downloadPage.locator('#offer-size').innerText(),/2268 MB/);
  assert.equal(await downloadPage.evaluate(()=>localWorkerCalls.length),0);
  assert.ok(await downloadPage.evaluate(()=>document.querySelector('#local-offer').scrollWidth<=document.querySelector('#local-offer').clientWidth),'offer fits a narrow phone');
  const beforePrepare=requests;await downloadPage.locator('#local-offer button[value="download"]').click();
- await downloadPage.waitForFunction(()=>document.getElementById('model').value==='local_medium'&&!document.getElementById('send').disabled);
+ await downloadPage.waitForFunction(()=>document.getElementById('model').value==='local_medium'&&document.getElementById('send').dataset.modelReady==='true');
  assert.deepEqual(await downloadPage.evaluate(()=>localWorkerCalls),[{operation:'prepare',model:'local_medium'}]);
  assert.equal(requests,beforePrepare,'preparing a local model sends no conversation to the backend');
  assert.equal(await downloadPage.locator('#conversation').innerText(),'');assert.deepEqual(downloadExternal,[]);
@@ -262,7 +277,7 @@ try{
   }
   return r.abort();
  });
- await workPage.goto(base+'/ai/');await workPage.waitForFunction(()=>!document.querySelector('#send').disabled);
+ await workPage.goto(base+'/ai/');await workPage.waitForFunction(()=>document.querySelector('#send').dataset.modelReady==='true');
  assert.equal(await workPage.locator('#model option[value="llama8b"]').count(),0,'unconfigured legacy models must stay hidden');assert.equal(await workPage.locator('#model option[value="chat_granite"]').count(),1,'configured Chat model stays visible');assert.equal(await workPage.locator('#model option[value="cf_gptoss120"]').count(),0,'Code models must never appear in Chat');
  assert.equal(desktopRequests.length,0,'Opening the site must not probe local services');
  await workPage.locator('#message').fill('Chat draft');await openModePicker(workPage);await workPage.locator('#workspace-tab').click();

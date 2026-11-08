@@ -1,6 +1,6 @@
 import {createChatLibrary} from './library.mjs?v=sidebar-20261026';
-import {createNavigation} from './navigation.mjs?v=experience-v2-20261108';
-import {installExperienceV2,syncExperienceV2} from './experience-v2.mjs?v=20261108-2';
+import {createNavigation} from './navigation.mjs?v=ux-v3-20261108';
+import {installExperienceV2,syncExperienceV2} from './experience-v2.mjs?v=ux-v3-20261108';
 import {errorMessage} from './error-message.mjs?v=openrouter-routing-20261104';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=account-quota-20261030';
 import {apiUrl,readStream} from './client.mjs?v=vercel-auth-stable-20261103';
@@ -91,7 +91,7 @@ function switchMode(next,{carryDraft=false}={}){
  $('mode').value=next;$('message').value=carryDraft?previous.draft:conversations[next].draft;
  if(next!=='worker'){$('tool').value='auto';$('remove-file').click();$('model').value=conversations[next].model||(next==='build'?CF_DEFAULTS.code:CF_DEFAULTS.chat);}
  else $('tool').value=$('workspace-tool').value;
- $('isolation-consent').checked=false;$('mode-picker').open=false;closeAttach();translate();
+ $('isolation-consent').checked=false;$('mode-picker').open=false;closeAttach();translate();resizeComposerInput();
 }
 Object.assign(copy.en,{downloadEntry:'↓ Download models · choose for your device',downloadHubInfo:'Choose where the model should run. Opening this guide does not download anything.',browserRoute:'In this browser',browserRouteInfo:'Two small models · ~985 MB or ~2.3 GB · compatible WebGPU required',desktopRoute:'On your computer with Ollama',desktopRouteInfo:'Six larger models · ~5.2–404 GB · installation guide and commands',desktopSteps:'1. Install Ollama. 2. Run the download command below in your terminal. 3. Allow this site and restart Ollama, as explained below. 4. Press Connect, close this window and choose the installed model in Chat.',desktopSetup:'Site connection settings',copyCommand:'Copy download command',commandCopied:'Download command copied'});
 Object.assign(copy.fa,{downloadEntry:'↓ دانلود مدل‌ها · انتخاب مناسب دستگاهت',downloadHubInfo:'انتخاب کن مدل کجا اجرا شود. باز کردن این راهنما چیزی دانلود نمی‌کند.',browserRoute:'داخل همین مرورگر',browserRouteInfo:'دو مدل کم‌حجم · حدود ۹۸۵ مگابایت یا ۲٫۳ گیگابایت · نیازمند WebGPU سازگار',desktopRoute:'روی کامپیوتر با Ollama',desktopRouteInfo:'شش مدل بزرگ‌تر · حدود ۵٫۲ تا ۴۰۴ گیگابایت · همراه راهنما و دستور نصب',desktopSteps:'۱. Ollama را نصب کن. ۲. دستور دانلود زیر را در ترمینال اجرا کن. ۳. طبق توضیح پایین، دسترسی سایت را تنظیم و Ollama را دوباره اجرا کن. ۴. «اتصال» را بزن، این پنجره را ببند و مدل نصب‌شده را در چت انتخاب کن.',desktopSetup:'تنظیم دسترسی سایت',copyCommand:'کپی دستور دانلود',commandCopied:'دستور دانلود کپی شد'});
@@ -233,7 +233,7 @@ function endTurn(turn){
  if(activeTurn!==turn)return;
  if(turn.recordTiming){const timing={elapsedMs:turn.elapsedMs,label:turn.controller.signal.aborted?'stoppedAfter':turn.completed?'respondedIn':'elapsedTime'};history.push({timing});renderTiming(timing);}
  $('activity').hidden=true;delete $('activity').dataset.label;
- activeTurn=undefined;busy=false;library.capture();$('conversation').setAttribute('aria-busy','false');renderStatus();
+ activeTurn=undefined;busy=false;library.capture();$('conversation').setAttribute('aria-busy','false');resizeComposerInput();renderStatus();
 }
 function stopTurn(){
  if(!activeTurn||activeTurn.controller.signal.aborted)return;
@@ -289,6 +289,31 @@ function translate(){
  for(const item of history){if(item.response)renderResponse(item.response,false);else if(item.error)showError(item.error,false);else if(item.timing)renderTiming(item.timing);else $('conversation').append(el('div',item.bubble,'bubble'));}
 }
 const DESKTOP_MODEL_MODES=Object.freeze({native_qwen8:'chat',native_gpt20:'chat',native_qwen32:'work',native_qwen235:'work',native_deepseek671:'work',native_gpt120:'code'});
+function resizeComposerInput(){
+ const field=$('message');
+ field.style.height='auto';
+ field.style.height=Math.min(field.scrollHeight,185)+'px';
+}
+function refreshComposerInputState(){
+ const hasMessage=Boolean($('message').value.trim());
+ const hasWorkFile=activeMode==='worker'&&Boolean($('file').files?.[0]);
+ const ready=$('send').dataset.modelReady==='true';
+ $('send').disabled=activeTurn?activeTurn.controller.signal.aborted:busy||!ready||!(hasMessage||hasWorkFile);
+}
+function updateModelSelectIfChanged(select,choices){
+ const current=[...select.options];
+ const same=current.length===choices.length&&choices.every((entry,i)=>current[i].value===entry.value&&current[i].textContent===entry.label&&current[i].disabled===entry.disabled);
+ if(same)return false;
+ const fragment=document.createDocumentFragment();
+ for(const entry of choices){
+  const option=el('option',entry.label);
+  option.value=entry.value;option.disabled=entry.disabled;
+  if(entry.isNew)option.classList.add('mg-new-option');
+  fragment.append(option);
+ }
+ select.replaceChildren(fragment);
+ return true;
+}
 function renderStatus(){
  $('account').disabled=busy;
  // Catalog fetch errors must remain actionable even when the separate legacy status API is healthy.
@@ -299,7 +324,8 @@ function renderStatus(){
   const option=$('tool').querySelector(`[value="${id}"]`);if(option)option.disabled=state==='disabled';const workspaceOption=$('workspace-tool').querySelector(`[value="${id}"]`);if(workspaceOption)workspaceOption.disabled=state==='disabled';
  }
  const ready=activeMode==='worker'?service?.enabled===true||cfModels.some(m=>m.available&&m.mode==='work'):service?.enabled===true||cfModels.some(m=>m.available&&m.mode===(activeMode==='build'?'code':'chat'))||localReady||desktopChat.availability.installedIDs.length>0;
- $('send').disabled=activeTurn?activeTurn.controller.signal.aborted:!ready||busy;
+ $('send').dataset.modelReady=String(ready);
+ refreshComposerInputState();
  $('send').dataset.state=activeTurn?'stop':'send';$('send-arrow').toggleAttribute('hidden',!!activeTurn);$('send-stop').toggleAttribute('hidden',!activeTurn);
  $('send').ariaLabel=t(activeTurn?'stop':'send');$('send').title=t(activeTurn?'stop':'send');$('send-label').textContent=t(activeTurn?'stop':'send');
  for(const id of ['clear','mode','tool','file','remove-file','remove-models','attach-toggle','attach-file','attach-chat','attach-inspect','attach-web','chat-tab','workspace-tab','build-tab','workspace-tool','workspace-model','isolation-consent','open-downloads'])$(id).disabled=busy;
@@ -315,16 +341,14 @@ function renderStatus(){
   ...Object.values(desktopModels).filter(m=>DESKTOP_MODEL_MODES[m.id]===cfMode).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))
  ];
  if(models.length){
-  $('model').replaceChildren();
-  const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
+  const choices=[{value:'',label:t('chooseModel'),disabled:true}];
   for(const m of models){
    const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.label;
-   const option=el('option',isNewCloudModel(m.id)?label+' · NEW':label);option.value=m.id;if(isNewCloudModel(m.id))option.classList.add('mg-new-option');
-   option.disabled=m.state!=='configured'||activeMode==='build'&&m.mode!=='code'&&!Object.hasOwn(desktopModels,m.id);
-   $('model').append(option);
+   choices.push({value:m.id,label:isNewCloudModel(m.id)?label+' · NEW':label,disabled:m.state!=='configured'||activeMode==='build'&&m.mode!=='code'&&!Object.hasOwn(desktopModels,m.id),isNew:isNewCloudModel(m.id)});
   }
-  const downloads=el('option',t('modelDownloads'));downloads.value='__downloads';downloads.disabled=localOfferPending;$('model').append(downloads);
-  const desktop=el('option',t('desktopModels')+'…');desktop.value='__desktop';$('model').append(desktop);
+  choices.push({value:'__downloads',label:t('modelDownloads'),disabled:localOfferPending});
+  choices.push({value:'__desktop',label:t('desktopModels')+'…',disabled:false});
+  updateModelSelectIfChanged($('model'),choices);
   const preferred=cfMode==='code'?CF_DEFAULTS.code:cfMode==='work'?CF_DEFAULTS.work:CF_DEFAULTS.chat;
   const defaultId=cfAvailable.find(m=>m.id===preferred)?.id||cfAvailable[0]?.id||((activeMode!=='build'&&localReady)?preferredLocal:'')||desktopChat.availability.installedIDs[0]||'';
   const saved=conversations[activeMode].model;
@@ -344,6 +368,7 @@ function renderStatus(){
   control.value=workChoices.some(m=>m.id===old&&m.available)?old:workChoices.some(m=>m.id===CF_DEFAULTS.work&&m.available)?CF_DEFAULTS.work:workChoices.find(m=>m.available)?.id||'';
  }
  $('model').disabled=busy||activeMode==='worker';$('model').hidden=activeMode==='worker';
+ $('model').closest('.model-select-wrap').hidden=activeMode==='worker';
  $('build-tab').setAttribute('aria-pressed',String(activeMode==='build'));$('build-panel').hidden=activeMode!=='build'||!projectOpen;document.body.dataset.projectOpen=String(projectOpen);$('build-files-toggle').hidden=activeMode!=='build';$('build-files-toggle').setAttribute('aria-expanded',String(projectOpen));$('build-start-hint').hidden=activeMode!=='build'||projectOpen;$('build-files-toggle').textContent=t(projectOpen?'hideProject':'showProject');$('title').textContent=t(activeMode==='build'?'buildIntroTitle':'title');document.body.dataset.mode=activeMode;document.querySelector('section.workspace').setAttribute('aria-labelledby',activeMode==='build'&&projectOpen?'build-title':'title');$('mode-current').textContent=t(activeMode==='build'?'buildTab':activeMode==='worker'?'workspaceTab':'chatTab');$('message').placeholder=t(activeMode==='build'?'buildPlaceholder':$('tool').value==='ai_web'?'webPlaceholder':activeMode==='worker'?'inspectionPlaceholder':'placeholder');builder.refresh();
  $('chat-tab').setAttribute('aria-pressed',String(activeMode==='chat'));$('workspace-tab').setAttribute('aria-pressed',String(activeMode==='worker'));$('workspace-panel').hidden=activeMode!=='worker';$('toolbox').hidden=activeMode!=='worker';$('workspace-panel').ariaLabel=t('workspaceLabel');document.querySelector('.workspace-switch').ariaLabel=t('modeGroup');
  const sandbox=['file_sandbox','url_sandbox'].includes($('workspace-tool').value);$('isolation-consent').closest('label').hidden=!sandbox;
@@ -404,8 +429,8 @@ function renderResponse(response,remember=true){
 }
 async function fileData(file){const bytes=new Uint8Array(await file.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));return {name:file.name,base64:btoa(binary)};}
 $('language').onclick=()=>{};
-$('clear').onclick=()=>{if(!busy){library.capture();library.fresh();history.length=0;modelHistory.length=0;$('conversation').replaceChildren();}};
-$('remove-file').onclick=()=>{$('file').value='';$('filename').textContent='';$('remove-file').hidden=true;};
+$('clear').onclick=()=>{if(!busy){library.capture();library.fresh();history.length=0;modelHistory.length=0;$('conversation').replaceChildren();$('message').value='';resizeComposerInput();refreshComposerInputState();$('message').focus({preventScroll:true});}};
+$('remove-file').onclick=()=>{$('file').value='';$('filename').textContent='';$('remove-file').hidden=true;refreshComposerInputState();};
 $('file').onchange=()=>{const f=$('file').files[0];if(f&&(!f.size||f.size>1048576)){$('remove-file').click();showError('fileTooLarge');return;}$('filename').textContent=f?.name||'';$('remove-file').hidden=!f;if(f){$('isolation-consent').checked=false;switchMode('worker',{carryDraft:true});if(!['gta_guard','file_sandbox'].includes($('workspace-tool').value))$('workspace-tool').value='auto';$('tool').value=$('workspace-tool').value;renderStatus();}};
 function downloadInfo(model){
  const m=localModels[model];
@@ -512,8 +537,19 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape')$('settings-
 $('cancel-download').onclick=()=>{if(preparingModel){downloadPermissions.delete(preparingModel);stopTurn();}};
 $('remove-models').onclick=async()=>{if(busy)return;busy=true;renderStatus();try{await localChat.clear();downloadPermissions.clear();preparedModels.clear();$('local-status').textContent=t('localRemoved');}catch{$('local-status').textContent=t('localFailed');}finally{busy=false;renderStatus();}};
 addEventListener('pagehide',()=>{builder.stop();stopTurn();desktopDownloadController?.abort();localChat.stop();desktopChat.stop();});
+$('message').addEventListener('input',()=>{
+ resizeComposerInput();
+ refreshComposerInputState();
+});
 $('message').addEventListener('keydown',event=>{
- if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();if(!busy)$('composer').requestSubmit();}
+ // Soft-keyboard Enter inserts a newline; Ctrl/Cmd+Enter explicitly sends.
+ // Desktop plain Enter sends, while Shift+Enter always inserts a newline.
+ if(event.key!=='Enter'||event.isComposing||event.shiftKey||event.altKey)return;
+ const explicit=event.ctrlKey||event.metaKey;
+ const desktop=window.matchMedia('(pointer:fine) and (min-width: 761px)').matches;
+ if(!explicit&&!desktop)return;
+ event.preventDefault();
+ if(!busy&&($('message').value.trim()||(activeMode==='worker'&&$('file').files?.[0])))$('composer').requestSubmit();
 });
 $('composer').onsubmit=async event=>{
  event.preventDefault();if(busy){stopTurn();return;}

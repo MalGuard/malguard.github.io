@@ -3,9 +3,9 @@ export function createNavigation({account,onLanguage}){
  const $=id=>document.getElementById(id), make=(tag,text)=>{const n=document.createElement(tag);if(text)n.textContent=text;return n;};
  const rail=make('aside');rail.id='navigation';rail.className='navigation';rail.setAttribute('aria-label','MalGuard navigation');
  const head=make('div');head.className='navigation-heading';head.append($('mode-picker'));
- const collapse=make('button','☰');collapse.type='button';collapse.id='navigation-toggle';collapse.setAttribute('aria-label','Toggle sidebar');collapse.setAttribute('aria-expanded','true');
+ const collapse=make('button','☰');collapse.type='button';collapse.id='navigation-toggle';collapse.setAttribute('aria-label','Toggle sidebar');collapse.setAttribute('aria-expanded','true');collapse.setAttribute('aria-controls','navigation');
  const toggle=()=>{const closed=document.body.classList.toggle('navigation-closed');collapse.setAttribute('aria-expanded',String(!closed));};collapse.onclick=toggle;
- const hide=()=>{document.body.classList.add('navigation-closed');collapse.setAttribute('aria-expanded','false');collapse.focus();};
+ const hide=(restoreFocus=true)=>{document.body.classList.add('navigation-closed');collapse.setAttribute('aria-expanded','false');if(restoreFocus)collapse.focus();};
  const dismiss=make('button','×');dismiss.type='button';dismiss.className='navigation-dismiss';dismiss.setAttribute('aria-label','Close sidebar');dismiss.onclick=hide;head.append(dismiss);
  const backdrop=make('button');backdrop.type='button';backdrop.id='navigation-backdrop';backdrop.setAttribute('aria-label','Close navigation');backdrop.tabIndex=-1;backdrop.onclick=hide;document.body.prepend(backdrop);
  document.querySelector('.site-header').prepend(collapse);
@@ -21,7 +21,7 @@ export function createNavigation({account,onLanguage}){
   const icon=make('span',glyph);icon.className='shortcut-glyph';icon.setAttribute('aria-hidden','true');
   const name=make('span',title);name.className='shortcut-name';button.append(icon,name);
   button.setAttribute('aria-pressed',String(mode==='chat'));
-  button.onclick=()=>{if(button.disabled)return;$(target).click();if(innerWidth<=760)hide();};
+  button.onclick=()=>{if(button.disabled)return;$(target).click();if(innerWidth<=760){hide(false);$('message')?.focus({preventScroll:true});}};
   shortcuts.append(button);shortcutButtons.set(mode,{button,name});
  }
  const label=make('h2','Recent chats');label.className='navigation-label';const chats=make('div');chats.id='saved-chats';
@@ -37,8 +37,8 @@ export function createNavigation({account,onLanguage}){
  const select=make('select'); select.value='en';
  // Retain the existing accessible language action for compatibility, inside settings.
  $('language').hidden=true;general.append($('language'));settings.querySelector('.settings-content').prepend(general);
- const plugins=make('details');plugins.className='plugins-panel';plugins.append(make('summary','Plugins & connections'));plugins.append(make('p','Security tools are available in MalGuard Work. Each tool shows its actual connection status.'));
- for(const name of ['GitHub','Notion'])plugins.append(make('p',`${name} · Not connected`));settings.querySelector('.settings-content').append(plugins);
+ const plugins=make('details');plugins.className='plugins-panel';plugins.append(make('summary','Tools & connections'));
+ const pluginsNotice=make('p','Check tool availability in Work. Only the live service can confirm a connection.');plugins.append(pluginsNotice);settings.querySelector('.settings-content').append(plugins);
  footer.append(settings);
  const help=make('a','Help & shortcuts');help.href='/ai/help/';footer.append(help);
  const home=make('a','MalGuard home');home.href='/';footer.append(home);
@@ -46,7 +46,7 @@ export function createNavigation({account,onLanguage}){
  const signup=make('button','Sign up');signup.type='button';signup.id='sign-up';signup.onclick=()=>account.open(true);$('account').after(signup);
  document.querySelector('.mode-home')?.remove();
  document.querySelector('.mode-options').addEventListener('click',event=>{if(event.target.closest('button')&&innerWidth<=760){document.body.classList.add('navigation-closed');collapse.setAttribute('aria-expanded','false');}});
- document.addEventListener('keydown',event=>{if(event.key==='Escape'&&innerWidth<=760){document.body.classList.add('navigation-closed');collapse.setAttribute('aria-expanded','false');}});
+ document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;if(settings.open){settings.open=false;settings.querySelector('summary').focus();return;}if(innerWidth<=760&&!document.body.classList.contains('navigation-closed'))hide();});
  if(innerWidth<=760){document.body.classList.add('navigation-closed');collapse.setAttribute('aria-expanded','false');}
  return {
   profile(p){signup.hidden=!!p;empty.textContent=p?'Your chats are saved to your account.':'Sign in to save and revisit your chats.';},
@@ -60,6 +60,9 @@ export function createNavigation({account,onLanguage}){
       button.setAttribute('aria-label',name.textContent);
     }
     search.placeholder=fa?'جست‌وجوی گفتگوها':'Search chats';
+    search.setAttribute('aria-label',fa?'جست‌وجوی گفتگوها':'Search chats');
+    plugins.querySelector('summary').textContent=fa?'ابزارها و اتصال‌ها':'Tools & connections';
+    pluginsNotice.textContent=fa?'وضعیت واقعی اتصال ابزارها را در بخش کار بررسی کنید. فقط سرویس فعال می‌تواند اتصال را تأیید کند.':'Check tool availability in Work. Only the live service can confirm a connection.';
     label.textContent=fa?'گفتگوهای اخیر':'Recent chats';
     help.textContent=fa?'راهنما و میان‌برها':'Help & shortcuts';
     home.textContent=fa?'صفحه اصلی MalGuard':'MalGuard home';
