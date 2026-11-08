@@ -18,18 +18,18 @@ await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const base=`http://127.0.0.1:${server.address().port}`;
 const CF_ORIGIN='https://malware-ai.malguard-security.workers.dev';
 const CF_FIXTURES=[
- {id:'chat_granite',mode:'chat',label:'Granite 4 Micro',provider:'workers_ai',available:true},
+ {id:'chat_granite',mode:'chat',label:'Granite 4 Micro',provider:'workers_ai_rest',available:true},
  {id:'chat_flash',mode:'chat',label:'Gemini Flash-Lite',provider:'gemini',available:true},
- {id:'work_qwen',mode:'work',label:'Qwen3 30B',provider:'workers_ai',available:true},
+ {id:'work_qwen',mode:'work',label:'Qwen3 30B',provider:'openrouter',available:true},
  {id:'work_gemma',mode:'work',label:'Gemma 4 31B',provider:'gemini',available:true},
  {id:'code_ultra',mode:'code',label:'Nemotron Ultra 550B',provider:'openrouter',available:true},
- {id:'code_super',mode:'code',label:'Nemotron Super',provider:'workers_ai',available:true}
+ {id:'code_super',mode:'code',label:'Nemotron Super',provider:'openrouter',available:true}
 ];
 const cfResponse=(route,{enabled=false}={})=>{
- const url=new URL(route.request().url()),headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'POST, OPTIONS'};
+ const url=new URL(route.request().url()),headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Allow-Methods':'GET, POST, OPTIONS'};
  if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers});
- if(url.pathname==='/api/public-models')return route.fulfill({status:enabled?200:503,headers,contentType:'application/json',body:JSON.stringify(enabled?{models:CF_FIXTURES}:{error:'unavailable'})});
- if(url.pathname==='/api/public-model-chat')return route.fulfill({status:200,headers,contentType:'application/json',body:JSON.stringify({text:'سلام! آماده‌ام.',provider:'workers_ai',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:'chat_granite'})});
+ if(url.pathname==='/api/public-models')return route.fulfill({status:enabled?200:503,headers,contentType:'application/json',body:JSON.stringify(enabled?{models:CF_FIXTURES,thinking:{available:true,provider:'workers_ai_rest',byMode:{chat:true,work:true,code:true}}}:{error:'unavailable'})});
+ if(url.pathname==='/api/public-model-chat')return route.fulfill({status:200,headers,contentType:'application/json',body:JSON.stringify({text:'سلام! آماده‌ام.',provider:'workers_ai_rest',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:'chat_granite'})});
  return route.abort();
 };
 const isCF=r=>new URL(r.request().url()).origin===CF_ORIGIN;
