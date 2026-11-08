@@ -12,15 +12,19 @@ test('fast and efficient defaults are part of MalGuard AI, without dropping exis
 test('new Cloudflare models are shown only after real server catalog confirms them',async()=>{
  const fixtures=[
   ['chat_granite','chat','Granite 4 Micro · Efficient'],
+  ['chat_think','chat','GPT-OSS 20B · Deep Chat'],
   ['cf_gptoss20','work','GPT-OSS 20B · Efficient Work'],
   ['cf_gptoss120','code','GPT-OSS 120B · Strong Code'],
   ['cf_qwen3','work','Qwen3.8 27B · Multimodal Work'],
   ['cf_gemma4','work','Gemma 4 26B · Balanced Work']
  ];
- const models=await fetchCFModels({fetchImpl:async()=>Response.json({models:fixtures.map(([id,mode,label])=>({id,mode,label,provider:'workers_ai_rest',available:true})),thinking:{available:true,provider:'workers_ai_rest'},accountQuota:{enabled:false}})});
- assert.equal(models.filter(m=>m.available).length,5);
+ const models=await fetchCFModels({fetchImpl:async()=>Response.json({models:fixtures.map(([id,mode,label])=>({id,mode,label,provider:'workers_ai_rest',available:true})),thinking:{available:true,provider:'workers_ai_rest',byMode:{chat:true,work:true,code:true}},accountQuota:{enabled:false}})});
+ assert.equal(models.filter(m=>m.available).length,6);
  assert.ok(models.filter(m=>m.available).every(m=>isNewCloudModel(m.id)));
  assert.equal(models.thinkingAvailable,true);
+ assert.deepEqual(models.thinkingByMode,{chat:true,work:true,code:true});
+ assert.equal(models.find(m=>m.id==='cf_gptoss120').mode,'code');
+ assert.equal(models.find(m=>m.id==='chat_think').mode,'chat');
  assert.equal(models.find(m=>m.id==='chat_flash').available,false);
  const unconfigured=await fetchCFModels({fetchImpl:async()=>Response.json({models:[],thinking:{available:false}})});
  assert.equal(unconfigured.some(m=>m.available),false);
@@ -55,7 +59,9 @@ test('Thinking button is keyboard accessible, defaults off and links to a real r
  assert.match(html,/data-i18n="thinkingToggle"/);
  assert.match(app,/thinking:thinkingEnabled/g);
  assert.match(app,/thinkingEnabled=!thinkingEnabled/);
- assert.match(app,/thinkingAvailable===true/);
+ assert.match(app,/cfThinkingByMode\[cfMode\]/);
+ assert.match(app,/DESKTOP_MODEL_MODES/);
+ assert.match(app,/thinkingEnabled=false; \/\/ Explicit opt-in per mode/);
  assert.match(app,/isNewCloudModel\(m\.id\)/);
  assert.match(app,/thinking-new-20261108/);
  assert.match(css,/thinking-toggle:focus-visible/);
