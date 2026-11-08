@@ -66,3 +66,19 @@ test('visual tokens support both themes, mobile, keyboard and reduced motion',()
  assert.match(client,/event\.preventDefault\(\)/);
  assert.match(navigation,/id='chat-search'/);
 });
+
+test('NEW badges are tiny emerald text chips, with no emoji in model selectors',()=>{
+ const source=read('ai/app.js');
+ assert.doesNotMatch(source,/🆕/);
+ assert.match(source,/label\+' · NEW'/);
+ assert.match(source,/m\.label\+' · NEW'/);
+ assert.match(html,/id="composer-model-new"[^>]*class="mg-model-new"[^>]*>NEW</);
+ assert.match(html,/id="workspace-model-new"[^>]*class="mg-model-new"[^>]*>NEW</);
+ assert.match(html,/id="experience-new"[^>]*>NEW</);
+ assert.match(source,/\$\('composer-model-new'\)\.hidden=/);
+ assert.match(source,/\$\('workspace-model-new'\)\.hidden=/);
+ assert.match(styles,/#experience-new/);
+ assert.match(styles,/rgba\(34,197,94/);
+ assert.match(styles,/\.mg-model-new:not\(\[hidden\]\)/);
+ assert.match(styles,/html:is\(\.theme-light,\[data-theme=light\]\).*\.mg-model-new/);
+});
