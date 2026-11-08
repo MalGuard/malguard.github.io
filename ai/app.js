@@ -599,6 +599,93 @@ $('web-search-depth').onchange=()=>{
  webModeByMode[activeMode]=$('web-search-depth').value==='research'?'research':'web';
  renderStatus();
 };
+
+function clearMediaDraft(){
+ mediaAction='off';mediaFile=null;
+ $('media-file').value='';
+ $('media-draft').hidden=true;
+ $('media-draft-description').textContent='';
+ $('message').placeholder=t('placeholder');
+ renderStatus();
+}
+function showMediaDraft(){
+ $('media-draft').hidden=mediaAction==='off';
+ $('media-draft-description').textContent=mediaAction==='analyze'?
+   (locale==='fa'?'تحلیل تصویر: ':'Analyze image: ')+(mediaFile?.name||''):
+   mediaAction==='generate'?(locale==='fa'?'ایجاد تصویر با هوش مصنوعی':'Create image with AI'):'';
+ $('message').placeholder=mediaAction==='generate'?
+   (locale==='fa'?'تصویری که می‌خوای رو توصیف کن…':'Describe an image to create…'):
+   mediaAction==='analyze'?(locale==='fa'?'درباره تصویر چه می‌خوای بدونی؟':'What should I check in this image?'):t('placeholder');
+}
+async function confirmMediaShare(){
+ const dialog=$('media-consent');
+ dialog.returnValue='cancel';dialog.showModal();
+ return new Promise(resolve=>dialog.addEventListener('close',()=>resolve(dialog.returnValue==='allow'),{once:true}));
+}
+async function runMedia(message){
+ const action=mediaAction,file=mediaFile;
+ if(action==='off'||activeMode!=='chat'||action==='analyze'&&!file||action==='generate'&&!message)return;
+ if(action==='analyze'&&!mediaCaps.analyze||action==='generate'&&!mediaCaps.generate){showError('mediaUnavailable');return;}
+ if(!$('model-consent').checked){
+  if(!await requestModelShare()||activeMode!=='chat'||mediaAction!==action)return;
+ }
+ if(!await confirmMediaShare()||activeMode!=='chat'||mediaAction!==action)return;
+ if(busy)return;
+ const requestPrompt=message||(locale==='fa'?'محتوای تصویر را توضیح بده و عناصر مشکوک را به‌عنوان موارد تأییدنشده مشخص کن.':'Describe this image and flag suspicious elements as unverified.');
+ let image;
+ try{
+  if(action==='analyze')image=await toMediaPayload(file);
+ }catch{showError('mediaInvalid');return;}
+ const turn=beginTurn(action==='analyze'?'readingFile':'thinking');
+ history.push({bubble:message||file?.name||requestPrompt});
+ followReply(()=>$('conversation').append(el('div',message||file?.name||requestPrompt,'bubble')));
+ try{
+  const output=await callMedia({action,prompt:requestPrompt,...(image?{image}:{}),sessionToken:account.getToken(),
+   signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(57000)])});
+  turn.controller.signal.throwIfAborted();
+  const text=action==='analyze'?
+   output.text+'\n\n'+(locale==='fa'?'این تحلیل تصویری است، نه اسکن ضدبدافزار.':'Visual interpretation, not antivirus scanning.'):
+   (locale==='fa'?'تصویر ساخته شد.':'Image created.')+' · '+output.model;
+  const generated={text,model:output.model,provider:output.provider,securityAnalysis:false};
+  if(action==='analyze')await presentResponse({generated},turn);
+  else{
+   const card=renderResponse({generated},false);
+   const img=el('img',undefined,'media-generated-image');
+   img.src='data:image/jpeg;base64,'+output.image;
+   img.alt=(locale==='fa'?'تصویر ساخته‌شده: ':'Generated image: ')+requestPrompt.slice(0,130);
+   img.loading='lazy';img.decoding='async';
+   const download=el('a',locale==='fa'?'دریافت تصویر JPG':'Download JPG','media-download');
+   download.href=img.src;download.download='malguard-ai-image.jpg';download.rel='noopener';
+   card.append(img,download);
+   history.push({response:{generated}});
+   turn.completed=true;
+  }
+  if($('message').value.trim()===message)$('message').value='';
+  clearMediaDraft();
+ }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error?.message||'media_provider_unavailable'});}
+ finally{endTurn(turn);}
+}
+$('attach-media-analyze').onclick=()=>{
+ if(busy||!mediaCaps.analyze)return;
+ if(activeMode!=='chat')switchMode('chat',{carryDraft:true});
+ closeAttach();$('media-file').click();
+};
+$('attach-media-generate').onclick=()=>{
+ if(busy||!mediaCaps.generate)return;
+ if(activeMode!=='chat')switchMode('chat',{carryDraft:true});
+ mediaFile=null;mediaAction='generate';webModeByMode.chat='off';
+ showMediaDraft();closeAttach();renderStatus();$('message').focus();
+};
+$('media-file').onchange=()=>{
+ const f=$('media-file').files?.[0];
+ if(!f)return;
+ if(!['image/png','image/jpeg','image/webp'].includes(f.type)||!f.size||f.size>MEDIA_LIMIT_BYTES){
+  $('media-file').value='';showError('mediaInvalid');return;
+ }
+ mediaAction='analyze';mediaFile=f;webModeByMode.chat='off';
+ showMediaDraft();renderStatus();$('message').focus();
+};
+$('media-draft-remove').onclick=clearMediaDraft;
 function closeAttach(focus=false){$('attach-options').hidden=true;$('attach-toggle').setAttribute('aria-expanded','false');if(focus)$('attach-toggle').focus();}
 $('attach-toggle').onclick=()=>{if(busy)return;const opening=$('attach-options').hidden;$('attach-options').hidden=!opening;$('attach-toggle').setAttribute('aria-expanded',String(opening));};
 $('attach-file').onclick=()=>{closeAttach();$(activeMode==='build'?'build-import':'file').click();};
@@ -630,6 +717,7 @@ $('message').addEventListener('keydown',event=>{
 $('composer').onsubmit=async event=>{
  event.preventDefault();if(busy){stopTurn();return;}
  const message=$('message').value.trim(),mode=activeMode,file=mode==='worker'?$('file').files[0]:undefined,tool=mode==='worker'?$('workspace-tool').value:'auto';
+ if(mediaAction!=='off'&&mode==='chat'){await runMedia(message);return;}
  if(!message&&!file)return;
  if(mode==='build'){await runBuild(message);return;}
   if(mode==='chat'){
