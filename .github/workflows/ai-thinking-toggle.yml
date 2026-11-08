@@ -1,0 +1,31 @@
+name: MalGuard AI Thinking and NEW model contract
+on:
+  pull_request:
+    paths:
+      - 'ai/index.html'
+      - 'ai/app.js'
+      - 'ai/cloudflare-models.mjs'
+      - 'ai/style.css'
+      - 'tests/malguard-ai-thinking.test.mjs'
+      - '.github/workflows/ai-thinking-toggle.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ai/index.html'
+      - 'ai/app.js'
+      - 'ai/cloudflare-models.mjs'
+      - 'ai/style.css'
+      - 'tests/malguard-ai-thinking.test.mjs'
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Check JavaScript syntax
+        run: node --check ai/app.js && node --check ai/cloudflare-models.mjs
+      - name: Test Thinking privacy, NEW labels and client contract
+        run: node --test tests/malguard-ai-thinking.test.mjs
