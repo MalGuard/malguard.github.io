@@ -55,7 +55,7 @@ test('starter prompts are localized, mode-specific and never auto-submitted',()=
 test('visual tokens support both themes, mobile, keyboard and reduced motion',()=>{
  assert.match(html,/class="mg-deep-space mg-ai-v2 auth-required"/);
  assert.match(html,/experience-v2\.css\?v=/);
- assert.match(html,/app\.js\?v=experience-v2-/);
+ assert.match(html,/app\.js\?v=experience-v3-/);
  assert.ok(html.indexOf('mg-theme.css')<html.indexOf('experience-v2.css'));
  assert.match(styles,/html:is\(\.theme-light,\[data-theme=light\]\)/);
  assert.match(styles,/@media\(max-width:440px\)/);
