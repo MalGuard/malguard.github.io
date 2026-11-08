@@ -114,7 +114,7 @@
         <section id="workspace-panel" class="workspace-panel" aria-label="Security workspace" hidden>
           <div class="workspace-options">
             <div><label for="workspace-tool" data-i18n="workspaceTool">Tool</label><select id="workspace-tool"><option value="auto" data-i18n="auto">Choose automatically</option><option value="gta_guard">GTA Guard</option><option value="game_scam_guard">Game Scam Guard</option><option value="ai_web">AI Web</option><option value="malwarebazaar">MalwareBazaar</option><option value="urlhaus">URLhaus</option><option value="file_sandbox" data-i18n="fileSandbox">File sandbox</option><option value="url_sandbox" data-i18n="urlSandbox">Link sandbox</option></select></div>
-            <div><label for="workspace-model" data-i18n="workspaceModel">Model</label><select id="workspace-model"><option value="cf_gptoss20">GPT-OSS 20B · Work</option><option value="cf_qwen3">Qwen3.8 27B · Work</option></select></div>
+            <div><label for="workspace-model" data-i18n="workspaceModel">Model</label><select id="workspace-model"><option value="cf_gptoss20">GPT-OSS 20B · Work</option><option value="cf_qwen3">Qwen3.8 27B · Work</option></select><span id="workspace-model-new" class="mg-model-new" hidden aria-label="New model">NEW</span></div>
           </div>
           <p id="workspace-status" role="status"></p>
           <p class="muted" data-i18n="workspacePrivacy">Only conversation text is shared with the model; files and tool evidence are not.</p>
@@ -139,7 +139,7 @@
               </div>
               <div class="composer-actions">
                 <label class="sr-only" for="model" data-i18n="modelLabel">Chat model</label>
-                <select id="model" disabled aria-describedby="device-note"><option value="local_fast">Qwen3 1.7B</option></select>
+                <select id="model" disabled aria-describedby="device-note"><option value="local_fast">Qwen3 1.7B</option></select><span id="composer-model-new" class="mg-model-new" hidden aria-label="New model">NEW</span>
                 <button type="button" id="thinking-toggle" aria-pressed="false" aria-describedby="thinking-state" title="Optional deeper reasoning; may use more quota" disabled><span class="thinking-glyph" aria-hidden="true">✧</span><span data-i18n="thinkingToggle">Thinking</span></button>
                 <button type="submit" id="send" disabled aria-label="Send"><svg id="send-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><svg id="send-stop" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" hidden><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg><span id="send-label" class="sr-only">Send</span></button>
               </div>
