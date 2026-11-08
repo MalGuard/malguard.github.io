@@ -11,7 +11,19 @@ export function createNavigation({account,onLanguage}){
  document.querySelector('.site-header').prepend(collapse);
  const fresh=$('clear');fresh.replaceChildren(make('span','＋'),make('span','New chat'));fresh.className='navigation-new';
  fresh.addEventListener('click',()=>{if(innerWidth<=760){document.body.classList.add('navigation-closed');collapse.setAttribute('aria-expanded','false');}});
- const search=make('input');search.type='search';search.placeholder='Search chats';search.setAttribute('aria-label','Search chats');search.id='chat-search';
+ const search=make('input');search.type='search';search.placeholder='Search chats';search.setAttribute('aria-label','Search chats');search.id='chat-search';search.setAttribute('aria-keyshortcuts','Control+K Meta+K');search.title='Search chats · Ctrl/⌘ + K';
+ const shortcuts=make('nav');shortcuts.className='navigation-shortcuts';shortcuts.setAttribute('aria-label','MalGuard AI workspaces');
+ const shortcutsLabel=make('span','WORKSPACES');shortcutsLabel.className='navigation-shortcuts-label';shortcuts.append(shortcutsLabel);
+ const modes=[['chat','Chat','◎','chat-tab'],['worker','Work','◇','workspace-tab'],['build','Code','⌘','build-tab']];
+ const shortcutButtons=new Map();
+ for(const [mode,title,glyph,target] of modes){
+  const button=make('button');button.type='button';button.className='navigation-shortcut';button.dataset.mode=mode;button.id='navigation-mode-'+mode;
+  const icon=make('span',glyph);icon.className='shortcut-glyph';icon.setAttribute('aria-hidden','true');
+  const name=make('span',title);name.className='shortcut-name';button.append(icon,name);
+  button.setAttribute('aria-pressed',String(mode==='chat'));
+  button.onclick=()=>{if(button.disabled)return;$(target).click();if(innerWidth<=760)hide();};
+  shortcuts.append(button);shortcutButtons.set(mode,{button,name});
+ }
  const label=make('h2','Recent chats');label.className='navigation-label';const chats=make('div');chats.id='saved-chats';
  const empty=make('p','Sign in to save and revisit your chats.');empty.id='history-status';empty.className='navigation-note';
  const footer=make('div');footer.className='navigation-footer';
@@ -27,11 +39,31 @@ export function createNavigation({account,onLanguage}){
  $('language').hidden=true;general.append($('language'));settings.querySelector('.settings-content').prepend(general);
  const plugins=make('details');plugins.className='plugins-panel';plugins.append(make('summary','Plugins & connections'));plugins.append(make('p','Security tools are available in MalGuard Work. Each tool shows its actual connection status.'));
  for(const name of ['GitHub','Notion'])plugins.append(make('p',`${name} · Not connected`));settings.querySelector('.settings-content').append(plugins);
- footer.append(settings);const home=make('a','MalGuard home');home.href='/';footer.append(home);rail.append(head,fresh,search,label,chats,empty,footer);document.body.prepend(rail);
+ footer.append(settings);
+ const help=make('a','Help & shortcuts');help.href='/ai/help/';footer.append(help);
+ const home=make('a','MalGuard home');home.href='/';footer.append(home);
+ rail.append(head,fresh,shortcuts,search,label,chats,empty,footer);document.body.prepend(rail);
  const signup=make('button','Sign up');signup.type='button';signup.id='sign-up';signup.onclick=()=>account.open(true);$('account').after(signup);
  document.querySelector('.mode-home')?.remove();
  document.querySelector('.mode-options').addEventListener('click',event=>{if(event.target.closest('button')&&innerWidth<=760){document.body.classList.add('navigation-closed');collapse.setAttribute('aria-expanded','false');}});
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&innerWidth<=760){document.body.classList.add('navigation-closed');collapse.setAttribute('aria-expanded','false');}});
  if(innerWidth<=760){document.body.classList.add('navigation-closed');collapse.setAttribute('aria-expanded','false');}
- return {profile(p){signup.hidden=!!p;empty.textContent=p?'Your account is connected. Sign in again after reopening this page to retrieve saved chats.':'Sign in to save and revisit your chats.';},language(value){select.value=value;}};
+ return {
+  profile(p){signup.hidden=!!p;empty.textContent=p?'Your chats are saved to your account.':'Sign in to save and revisit your chats.';},
+  language(value){
+    select.value=value;
+    const fa=value==='fa';
+    shortcutsLabel.textContent=fa?'بخش‌ها':'WORKSPACES';
+    shortcuts.setAttribute('aria-label',fa?'بخش‌های مالگارد':'MalGuard AI workspaces');
+    for(const [mode,{name,button}] of shortcutButtons){
+      name.textContent=fa?({chat:'گفت‌وگو',worker:'کار',build:'کد'}[mode]):({chat:'Chat',worker:'Work',build:'Code'}[mode]);
+      button.setAttribute('aria-label',name.textContent);
+    }
+    search.placeholder=fa?'جست‌وجوی گفتگوها':'Search chats';
+    label.textContent=fa?'گفتگوهای اخیر':'Recent chats';
+    help.textContent=fa?'راهنما و میان‌برها':'Help & shortcuts';
+    home.textContent=fa?'صفحه اصلی MalGuard':'MalGuard home';
+    fresh.lastElementChild.textContent=fa?'گفتگوی جدید':'New chat';
+  }
+};
 }
