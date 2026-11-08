@@ -558,7 +558,13 @@ $('manage-models').onclick=offerLocalModels;
 function webOptions(message){
  const mode=activeWebMode();
  if(mode==='off')return {};
- if($('web-search-toggle').disabled)throw Object.assign(new Error('web_search_unavailable'),{code:'web_search_unavailable'});
+ const modelId=activeMode==='worker'?$('workspace-model').value:$('model').value;
+ const modelMode=activeMode==='build'?'code':activeMode==='worker'?'work':'chat';
+ const modelSupported=cfModels.some(m=>m.id===modelId&&m.available&&m.mode===modelMode);
+ const workSupported=activeMode!=='worker'||($('workspace-tool').value==='auto'&&!$('file').files?.[0]);
+ // Do not read the disabled attribute: submit intentionally disables controls while busy.
+ if(!cfSearchAvailable||!modelSupported||!workSupported)
+  throw Object.assign(new Error('web_search_unavailable'),{code:'web_search_unavailable'});
  // Only the bounded, user-authored first line goes to web search.
  const line=String(message).split('\n',1)[0].trim();
  if(!line||line.length>300||/[{}<>\\]/.test(line))
