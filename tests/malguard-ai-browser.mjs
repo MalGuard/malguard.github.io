@@ -205,7 +205,7 @@ try{
    await page.locator('#web-search-depth').selectOption('research');
    await page.locator('#message').fill('Public astronomy update');
    await page.locator('#send').click();
-   await page.getByText('Verified fixture: source',{exact:false}).waitFor();
+   try{await page.locator('.research-evidence').waitFor({timeout:15000});}catch(error){console.error('Research test diagnostic:',await page.locator('#conversation').innerText(), 'posts:',modelPostRequests,'search:',await page.locator('#web-search-toggle').getAttribute('aria-pressed'));throw error;}
    assert.equal(await page.locator('.research-evidence').count(),1);
    assert.equal(await page.locator('.research-citation').count(),1);
    assert.equal(await page.locator('.research-source').first().getAttribute('href'),'https://example.org/research');
