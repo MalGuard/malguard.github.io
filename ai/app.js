@@ -319,7 +319,7 @@ function renderStatus(){
   const placeholder=el('option',t('chooseModel'));placeholder.value='';placeholder.disabled=true;$('model').append(placeholder);
   for(const m of models){
    const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.label;
-   const option=el('option',isNewCloudModel(m.id)?'🆕 NEW · '+label:label);option.value=m.id;
+   const option=el('option',isNewCloudModel(m.id)?label+' · NEW':label);option.value=m.id;
    option.disabled=m.state!=='configured'||activeMode==='build'&&m.mode!=='code'&&!Object.hasOwn(desktopModels,m.id);
    $('model').append(option);
   }
@@ -339,7 +339,7 @@ function renderStatus(){
   const control=$('workspace-model'),old=control.value;
   if([...control.options].map(o=>o.value).join('|')!==workChoices.map(m=>m.id).join('|')){
    control.replaceChildren();
-   for(const m of workChoices){const opt=el('option',isNewCloudModel(m.id)?'🆕 NEW · '+m.label:m.label);opt.value=m.id;control.append(opt);}
+   for(const m of workChoices){const opt=el('option',isNewCloudModel(m.id)?m.label+' · NEW':m.label);opt.value=m.id;control.append(opt);}
   }
   control.value=workChoices.some(m=>m.id===old&&m.available)?old:workChoices.some(m=>m.id===CF_DEFAULTS.work&&m.available)?CF_DEFAULTS.work:workChoices.find(m=>m.available)?.id||'';
  }
@@ -362,6 +362,8 @@ function renderStatus(){
  const thinkingModelLabel=cfMode==='code'?'GPT-OSS 120B':'GPT-OSS 20B';
  $('thinking-toggle').title=t(!thinkingCloudReady?'thinkingUnavailable':thinkingEnabled?'thinkingActive':'thinkingInactive')+(thinkingCloudReady?' · '+thinkingModelLabel:'');
  $('model-status').dataset.new=String(isNewCloudModel(selectedIdForMode));
+  $('composer-model-new').hidden=activeMode==='worker'||!isNewCloudModel(selectedIdForMode);
+  $('workspace-model-new').hidden=activeMode!=='worker'||!isNewCloudModel(selectedIdForMode);
  const modelNotice=locale==='fa'?`مدل انتخاب‌شده: ${modelLabel}`:`Selected model: ${modelLabel}`;
  $('model-status').textContent=(cfAvailable.length?modelNotice:t('modelOff'))+(cfQuotaEnabled?(locale==='fa'?' · استفاده منصفانه با سقف ماهانه':' · Monthly fair-use limits apply'):'');
  if(cfAvailable.length)document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌ها از مسیر Vercel و ارائه‌دهندهٔ تنظیم‌شده اجرا می‌شن. مدل‌های غیرفعال از لیست حذف شدن.':'Models run through Vercel and the configured provider. Unavailable models are hidden.';
