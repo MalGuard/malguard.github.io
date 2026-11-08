@@ -521,16 +521,46 @@ async function runBuild(message){
  if(!selected){showError('buildNoModel');return;}
  if(!native&&!$('model-consent').checked){if(!await requestModelShare()||activeMode!=='build'||$('message').value.trim()!==message||$('model').value!==selected)return;}
  const contextHistory=modelHistory.slice(-6),revision=builder.revision;
- if(!native&&planChat(message,contextHistory).needsWeb&&!$('lookup-consent').checked){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
+ if(!native&&activeWebMode()!=='off'&&!$('lookup-consent').checked){if(!await requestSearchConsent()||activeMode!=='build'||$('message').value.trim()!==message)return;}
  builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
- else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled&&cfThinkingByMode[activeMode==='build'?'code':activeMode==='worker'?'work':'chat'],signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
+ else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled&&cfThinkingByMode.code,...webOptions(message),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
  if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn);if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
  }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error?.code|| (error.name==='TimeoutError'?'provider_timeout':'model_unavailable'),retryAfterSeconds:error?.retryAfterSeconds,retryAt:error?.retryAt});}finally{endTurn(turn);}
 }
 $('build-files-toggle').onclick=()=>setProjectOpen(!projectOpen);
 $('stop-local').onclick=stopTurn;
 $('manage-models').onclick=offerLocalModels;
+
+function webOptions(message){
+ const mode=activeWebMode();
+ if(mode==='off')return {};
+ // Only the bounded, user-authored first line goes to web search.
+ const line=String(message).split('\n',1)[0].trim();
+ if(!line||line.length>300||/[{}<>\\]/.test(line))
+  throw Object.assign(new Error('invalid_search_query'),{code:'invalid_search_query'});
+ return {webMode:mode,searchQuery:line,remoteLookup:$('lookup-consent').checked};
+}
+async function requestSearchConsent(){
+ if($('lookup-consent').checked)return true;
+ const dialog=$('web-search-consent');
+ dialog.returnValue='cancel';dialog.showModal();
+ const allowed=await new Promise(resolve=>dialog.addEventListener('close',()=>resolve(dialog.returnValue==='allow'),{once:true}));
+ if(allowed){$('lookup-consent').checked=true;$('lookup-consent').dispatchEvent(new Event('change'));}
+ return allowed;
+}
+$('web-search-toggle').onclick=async()=>{
+ if(busy||$('web-search-toggle').disabled)return;
+ const mode=activeMode,next=activeWebMode()==='off'?'web':'off';
+ if(next!=='off'&&!await requestSearchConsent())return;
+ if(activeMode!==mode||busy)return;
+ webModeByMode[mode]=next;renderStatus();
+};
+$('web-search-depth').onchange=()=>{
+ if(busy||activeWebMode()==='off')return;
+ webModeByMode[activeMode]=$('web-search-depth').value==='research'?'research':'web';
+ renderStatus();
+};
 function closeAttach(focus=false){$('attach-options').hidden=true;$('attach-toggle').setAttribute('aria-expanded','false');if(focus)$('attach-toggle').focus();}
 $('attach-toggle').onclick=()=>{if(busy)return;const opening=$('attach-options').hidden;$('attach-options').hidden=!opening;$('attach-toggle').setAttribute('aria-expanded',String(opening));};
 $('attach-file').onclick=()=>{closeAttach();$(activeMode==='build'?'build-import':'file').click();};
@@ -591,6 +621,7 @@ $('composer').onsubmit=async event=>{
  if(mode==='chat'&&Object.hasOwn(desktopModels,selected)){await runDesktop(selected,message);return;}
  const directMode=mode==='chat'?'chat':mode==='worker'&&effective==='model'?'work':null;
  if(directMode){
+  if(activeWebMode()!=='off'&&!$('lookup-consent').checked){if(!await requestSearchConsent()||activeMode!==mode||$('message').value.trim()!==message)return;}
   const chosen=directMode==='work'?$('workspace-model').value:selected;
   if(!cfModels.some(m=>m.id===chosen&&m.available&&m.mode===directMode)){showError('modelOff');return;}
   if(!consent.modelShare){
@@ -599,7 +630,7 @@ $('composer').onsubmit=async event=>{
   const turn=beginTurn('thinking');
   history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
   try{
-   const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled&&cfThinkingByMode[activeMode==='build'?'code':activeMode==='worker'?'work':'chat'],signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
+   const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled&&cfThinkingByMode[directMode],...webOptions(message),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
     if(generated.usage){accountUsage=generated.usage;renderStatus();}
    await presentResponse({generated},turn);
    modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});
