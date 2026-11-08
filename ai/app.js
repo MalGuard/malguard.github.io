@@ -5,7 +5,7 @@ import {publicFailure,retryDetails} from './service-errors.mjs?v=account-quota-2
 import {apiUrl,readStream} from './client.mjs?v=vercel-auth-stable-20261103';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs?v=free-fallback-20261030';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
-import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS,isNewCloudModel} from './cloudflare-models.mjs?v=flagships-20261104';
+import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS,isNewCloudModel} from './cloudflare-models.mjs?v=thinking-new-20261108';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
@@ -79,7 +79,7 @@ Object.assign(copy.fa,{retention:'گفت‌وگوی مهمان فقط در هم�
 Object.assign(copy.en,{navChat:'Chat',navCode:'Code',navWork:'Work',navChatHint:'Ask, write, and explore',navCodeHint:'Build, debug, and preview',navWorkHint:'Inspect files, links, and threats'});
 Object.assign(copy.fa,{navChat:'گفت‌وگو',navCode:'کد',navWork:'کار',navChatHint:'بپرس، بنویس و کشف کن',navCodeHint:'بساز، رفع اشکال کن و پیش‌نمایش بگیر',navWorkHint:'بررسی فایل، لینک و تهدیدها'});
 Object.assign(copy.en,{thinkingToggle:'Thinking',thinkingActive:'Deep reasoning enabled · GPT-OSS 120B (more quota)',thinkingInactive:'Enable deeper reasoning with GPT-OSS 120B (may use more quota)',thinkingUnavailable:'Thinking requires an available Cloudflare reasoning model'});
-Object.assign(copy.fa,{thinkingToggle:'تفکر',thinkingActive:'تفکر عمیق فعال · GPT-OSS 120B (مصرف سهمیه بیشتر)',thinkingInactive:'فعال‌سازی تفکر عمیق با GPT-OSS 120B (مصرف سهمیه بیشتر)',thinkingUnavailable:'تفکر عمیق به مدل استدلالی فعال در Cloudflare نیاز دارد'});
+Object.assign(copy.fa,{thinkingToggle:'Thinking',thinkingActive:'تفکر عمیق فعال · GPT-OSS 120B (مصرف سهمیه بیشتر)',thinkingInactive:'فعال‌سازی تفکر عمیق با GPT-OSS 120B (مصرف سهمیه بیشتر)',thinkingUnavailable:'تفکر عمیق به مدل استدلالی فعال در Cloudflare نیاز دارد'});
 function switchMode(next,{carryDraft=false}={}){
  if(busy||!['chat','worker','build'].includes(next)){$('mode').value=activeMode;return;}
  if(next===activeMode){$('mode-picker').open=false;$('mode').value=next;renderStatus();return;}
