@@ -1,0 +1,32 @@
+name: MalGuard AI model categories and Thinking
+on:
+  pull_request:
+    paths:
+      - 'ai/app.js'
+      - 'ai/index.html'
+      - 'ai/cloudflare-models.mjs'
+      - 'ai/style.css'
+      - 'tests/malguard-ai-thinking-modes.test.mjs'
+      - '.github/workflows/ai-thinking-models.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ai/app.js'
+      - 'ai/index.html'
+      - 'ai/cloudflare-models.mjs'
+      - 'ai/style.css'
+      - 'tests/malguard-ai-thinking-modes.test.mjs'
+      - '.github/workflows/ai-thinking-models.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Validate browser modules
+        run: node --check ai/app.js && node --check ai/cloudflare-models.mjs
+      - name: Validate mode isolation and Thinking
+        run: node --test tests/malguard-ai-thinking-modes.test.mjs

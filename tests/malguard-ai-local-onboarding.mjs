@@ -18,18 +18,18 @@ await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const base=`http://127.0.0.1:${server.address().port}`;
 const CF_ORIGIN='https://malware-ai.malguard-security.workers.dev';
 const CF_FIXTURES=[
- {id:'chat_granite',mode:'chat',label:'Granite 4 Micro',provider:'workers_ai',available:true},
+ {id:'chat_granite',mode:'chat',label:'Granite 4 Micro',provider:'workers_ai_rest',available:true},
  {id:'chat_flash',mode:'chat',label:'Gemini Flash-Lite',provider:'gemini',available:true},
- {id:'work_qwen',mode:'work',label:'Qwen3 30B',provider:'workers_ai',available:true},
+ {id:'work_qwen',mode:'work',label:'Qwen3 30B',provider:'openrouter',available:true},
  {id:'work_gemma',mode:'work',label:'Gemma 4 31B',provider:'gemini',available:true},
  {id:'code_ultra',mode:'code',label:'Nemotron Ultra 550B',provider:'openrouter',available:true},
- {id:'code_super',mode:'code',label:'Nemotron Super',provider:'workers_ai',available:true}
+ {id:'code_super',mode:'code',label:'Nemotron Super',provider:'openrouter',available:true}
 ];
 const cfResponse=(route,{enabled=false}={})=>{
- const url=new URL(route.request().url()),headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'POST, OPTIONS'};
+ const url=new URL(route.request().url()),headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Allow-Methods':'GET, POST, OPTIONS'};
  if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers});
- if(url.pathname==='/api/public-models')return route.fulfill({status:enabled?200:503,headers,contentType:'application/json',body:JSON.stringify(enabled?{models:CF_FIXTURES}:{error:'unavailable'})});
- if(url.pathname==='/api/public-model-chat')return route.fulfill({status:200,headers,contentType:'application/json',body:JSON.stringify({text:'سلام! آماده‌ام.',provider:'workers_ai',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:'chat_granite'})});
+ if(url.pathname==='/api/public-models')return route.fulfill({status:enabled?200:503,headers,contentType:'application/json',body:JSON.stringify(enabled?{models:CF_FIXTURES,thinking:{available:true,provider:'workers_ai_rest',byMode:{chat:true,work:true,code:true}}}:{error:'unavailable'})});
+ if(url.pathname==='/api/public-model-chat')return route.fulfill({status:200,headers,contentType:'application/json',body:JSON.stringify({text:'سلام! آماده‌ام.',provider:'workers_ai_rest',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:'chat_granite'})});
  return route.abort();
 };
 const isCF=r=>new URL(r.request().url()).origin===CF_ORIGIN;
@@ -39,7 +39,7 @@ try{
  for(const width of [360,390,768,1280]){
   const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
-  await context.route('**/*',r=>{if(isCF(r))return cfResponse(r);if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
+  await context.route('**/*',r=>{if(isCF(r))return cfResponse(r);if(new URL(r.request().url()).origin===base)return r.continue();external.push({url:r.request().url(),method:r.request().method()});return r.abort();});
   await context.addInitScript(()=>{
    localStorage.setItem('malguard.ai.language.v1','fa');
    Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});
@@ -138,5 +138,5 @@ try{
  await context.route('**/*',r=>isCF(r)?cfResponse(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
  await page.goto(base+'/ai/');await page.waitForFunction(()=>document.getElementById('device-note').textContent.includes('WebGPU'));
  assert.equal(await page.locator('#local-welcome').isVisible(),false);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);await page.locator('#open-downloads').click();await page.locator('#hub-browser').click();await page.locator('#local-offer').waitFor({state:'visible'});assert.equal(await page.locator('#offer-download-button').isDisabled(),true);assert.match(await page.locator('#offer-compatibility').innerText(),/WebGPU/);await page.locator('#local-offer').evaluate(dialog=>{window.offerClosed=new Promise(resolve=>dialog.addEventListener('close',()=>resolve(),{once:true}));});await page.keyboard.press('Escape');await page.evaluate(()=>window.offerClosed);assert.equal(await page.evaluate(()=>workerCalls.length),0);
- await context.close();assert.deepEqual(external,[]);console.log('PASS unsupported-device guidance and zero external downloads/uploads');
+ await context.close();assert.ok(external.every(row=>row.url==='https://models.malguard.site/api/public-models'&&row.method==='GET'),'Only public model-catalog reads may be attempted; no provider inference, uploads or downloads');console.log('PASS unsupported-device guidance: public catalog GET allowed, zero external inference/downloads/uploads');
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

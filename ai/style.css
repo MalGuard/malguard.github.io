@@ -334,3 +334,16 @@ body.auth-required .ai-account>*{width:min(100%,440px);margin-inline:auto}body.a
 .desktop-compat-state{margin:12px 0;padding:10px 12px;border:1px solid #615482;border-radius:9px;color:#d2c3ff;background:#281c37}
 .desktop-compat-state[data-status="blocked"]{color:#ffb6b6;border-color:#9c4c5c;background:#35191f}
 .desktop-compat-state[data-status="eligible"]{color:#c8efcc;border-color:#456b4e;background:#193020}
+
+/* Per-user, opt-in Thinking; off by default and never triggers on its own. */
+.composer-actions #thinking-toggle{flex:none;min-height:36px;min-width:83px;padding:6px 10px;border:1px solid #ffffff38;border-radius:999px;background:rgba(255,255,255,.06);color:#efefef;font-size:12px;font-weight:650;white-space:nowrap;transition:background-color .12s,border-color .12s}
+.composer-actions #thinking-toggle.active,.composer-actions #thinking-toggle[aria-pressed=true]{background:rgba(255,255,255,.24);border-color:#ffffffc0;color:#fff}
+.composer-actions #thinking-toggle:disabled{opacity:.45;cursor:not-allowed}
+.composer-actions #thinking-toggle:focus-visible{outline:2px solid #fff;outline-offset:2px}
+#model-status[data-new=true]::before{content:'NEW';display:inline-flex;align-items:center;padding:2px 7px;margin-inline-end:7px;border:1px solid #ffffff65;border-radius:999px;font:700 10px/1.6 system-ui,sans-serif;letter-spacing:.04em;color:#fff;background:#ffffff20}
+@media(max-width:440px){.composer-shell{grid-template-columns:40px minmax(0,1fr) 86px 40px}.composer-actions #thinking-toggle{grid-column:3;grid-row:2;min-width:0;padding-inline:6px}.composer-actions #send{grid-column:4;grid-row:2}.composer-actions #model{grid-column:2;grid-row:2;min-width:0;max-width:100%;font-size:11px}}
+@media(min-width:901px){body[data-mode=build] .composer-shell{grid-template-columns:40px minmax(0,1fr) 86px 40px}body[data-mode=build] .composer-actions #thinking-toggle{grid-column:3;grid-row:2;min-width:0;padding-inline:6px}body[data-mode=build] .composer-actions #send{grid-column:4;grid-row:2}}
+
+/* Prevent the global theme control from covering MalGuard AI's new-conversation/sidebar button. */
+body:has(#navigation-toggle) .mg-theme-toggle{top:78px;left:auto;right:16px;z-index:32}
+@media(max-width:760px){body:has(#navigation-toggle) .mg-theme-toggle{top:68px;left:auto;right:12px}}
