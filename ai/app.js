@@ -23,7 +23,7 @@ let locale='en',service,busy=false,serviceLoading=true;
 let activeTurn;
 let localReady=false,localCapabilityReason='checking',modelsInitialized=false;
 let lastSelectedModel='';
-let cloudDefaultApplied=false,modelChosen=false,cfModels=[],accountUsage=null,cfQuotaEnabled=false,cfThinkingAvailable=false,thinkingEnabled=false;
+let cloudDefaultApplied=false,modelChosen=false,cfModels=[],accountUsage=null,cfQuotaEnabled=false,cfThinkingByMode={chat:false,work:false,code:false},thinkingEnabled=false;
 let cfCatalogError=false,cfCatalogLoading=false,cfCatalogLastAttempt=0;
 let localOfferPending=false;
 let preferredLocal;try{preferredLocal=localStorage.getItem('malguard.ai.localModel.v1');}catch{}
@@ -78,11 +78,12 @@ Object.assign(copy.en,{retention:'Guests: chats stay on this page. Signed-in cha
 Object.assign(copy.fa,{retention:'گفت‌وگوی مهمان فقط در همین صفحه است. گفت‌وگوی حساب فقط پس از اتصال ذخیره می‌شود. فایل‌ها و پروژه همگام نمی‌شوند؛ نتیجه تضمین امنیت نیست.'});
 Object.assign(copy.en,{navChat:'Chat',navCode:'Code',navWork:'Work',navChatHint:'Ask, write, and explore',navCodeHint:'Build, debug, and preview',navWorkHint:'Inspect files, links, and threats'});
 Object.assign(copy.fa,{navChat:'گفت‌وگو',navCode:'کد',navWork:'کار',navChatHint:'بپرس، بنویس و کشف کن',navCodeHint:'بساز، رفع اشکال کن و پیش‌نمایش بگیر',navWorkHint:'بررسی فایل، لینک و تهدیدها'});
-Object.assign(copy.en,{thinkingToggle:'Thinking',thinkingActive:'Deep reasoning enabled · GPT-OSS 120B (more quota)',thinkingInactive:'Enable deeper reasoning with GPT-OSS 120B (may use more quota)',thinkingUnavailable:'Thinking requires an available Cloudflare reasoning model'});
-Object.assign(copy.fa,{thinkingToggle:'Thinking',thinkingActive:'تفکر عمیق فعال · GPT-OSS 120B (مصرف سهمیه بیشتر)',thinkingInactive:'فعال‌سازی تفکر عمیق با GPT-OSS 120B (مصرف سهمیه بیشتر)',thinkingUnavailable:'تفکر عمیق به مدل استدلالی فعال در Cloudflare نیاز دارد'});
+Object.assign(copy.en,{thinkingToggle:'Thinking',thinkingActive:'Deep reasoning enabled (more quota)',thinkingInactive:'Enable deeper reasoning (may use more quota)',thinkingUnavailable:'Thinking requires an available reasoning model for this section'});
+Object.assign(copy.fa,{thinkingToggle:'تفکر',thinkingActive:'تفکر عمیق فعال (مصرف سهمیه بیشتر)',thinkingInactive:'فعال‌سازی تفکر عمیق (مصرف سهمیه بیشتر)',thinkingUnavailable:'برای این بخش مدل استدلالی فعال در دسترس نیست'});
 function switchMode(next,{carryDraft=false}={}){
  if(busy||!['chat','worker','build'].includes(next)){$('mode').value=activeMode;return;}
  if(next===activeMode){$('mode-picker').open=false;$('mode').value=next;renderStatus();return;}
+ thinkingEnabled=false; // Explicit opt-in per mode, never carry Code reasoning into Chat.
  const previous=conversations[activeMode];previous.draft=$('message').value;previous.model=$('model').value;
  if(activeMode==='build')builder.stop();
  activeMode=next;history=conversations[next].history;modelHistory=conversations[next].modelHistory;
@@ -286,6 +287,7 @@ function translate(){
  $('conversation').replaceChildren();
  for(const item of history){if(item.response)renderResponse(item.response,false);else if(item.error)showError(item.error,false);else if(item.timing)renderTiming(item.timing);else $('conversation').append(el('div',item.bubble,'bubble'));}
 }
+const DESKTOP_MODEL_MODES=Object.freeze({native_qwen8:'chat',native_gpt20:'chat',native_qwen32:'work',native_qwen235:'work',native_deepseek671:'work',native_gpt120:'code'});
 function renderStatus(){
  $('account').disabled=busy;
  // Catalog fetch errors must remain actionable even when the separate legacy status API is healthy.
@@ -308,8 +310,8 @@ function renderStatus(){
  const cfChoices=cfModels.filter(m=>m.available&&m.mode===cfMode);
  const models=[
   ...cfChoices.map(m=>({...m,state:m.available?'configured':'disabled',label:m.label+(m.available?'':' · unavailable')})),
-  ...Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})),
-  ...Object.values(desktopModels).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))
+  ...(cfMode==='chat'?Object.values(localModels).map(m=>({...m,state:localReady?'configured':'disabled'})):[]),
+  ...Object.values(desktopModels).filter(m=>DESKTOP_MODEL_MODES[m.id]===cfMode).map(m=>({...m,label:m.label+' · Ollama',state:desktopChat.availability.installedIDs.includes(m.id)?'configured':'disabled'}))
  ];
  if(models.length){
   $('model').replaceChildren();
@@ -348,14 +350,17 @@ function renderStatus(){
  for(const option of $('workspace-model').options)option.disabled=!cfModels.some(m=>m.id===option.value&&m.available&&m.mode==='work');
  $('manage-desktop-models').disabled=busy||desktopConnecting;$('desktop-connect').disabled=busy||desktopConnecting;
  updateDesktopInfo();
- const selected=models.find(m=>m.id===$('model').value);
+ const selectedIdForMode=activeMode==='worker'?$('workspace-model').value:$('model').value;
+ const selected=models.find(m=>m.id===selectedIdForMode)||cfModels.find(m=>m.id===selectedIdForMode);
  const modelLabel=selected?.label||service?.model?.model||'';
- const thinkingCloudReady=cfThinkingAvailable&&(activeMode==='worker'||cfModels.some(m=>m.id===$('model').value&&m.available&&m.mode===(activeMode==='build'?'code':'chat')));
+ const modelTask=activeMode!=='worker'||($('workspace-tool').value==='auto'&&!$('file').files?.length);
+ const thinkingCloudReady=cfThinkingByMode[cfMode]===true&&cfModels.some(m=>m.id===selectedIdForMode&&m.available&&m.mode===cfMode)&&modelTask;
  $('thinking-toggle').disabled=busy||!thinkingCloudReady;
  $('thinking-toggle').setAttribute('aria-pressed',String(thinkingEnabled&&thinkingCloudReady));
  $('thinking-toggle').classList.toggle('active',thinkingEnabled&&thinkingCloudReady);
- $('thinking-toggle').title=t(!thinkingCloudReady?'thinkingUnavailable':thinkingEnabled?'thinkingActive':'thinkingInactive');
- $('model-status').dataset.new=String(isNewCloudModel($('model').value));
+ const thinkingModelLabel=cfMode==='code'?'GPT-OSS 120B':'GPT-OSS 20B';
+ $('thinking-toggle').title=t(!thinkingCloudReady?'thinkingUnavailable':thinkingEnabled?'thinkingActive':'thinkingInactive')+(thinkingCloudReady?' · '+thinkingModelLabel:'');
+ $('model-status').dataset.new=String(isNewCloudModel(selectedIdForMode));
  const modelNotice=locale==='fa'?`مدل انتخاب‌شده: ${modelLabel}`:`Selected model: ${modelLabel}`;
  $('model-status').textContent=(cfAvailable.length?modelNotice:t('modelOff'))+(cfQuotaEnabled?(locale==='fa'?' · استفاده منصفانه با سقف ماهانه':' · Monthly fair-use limits apply'):'');
  if(cfAvailable.length)document.querySelector('[data-i18n="modelNotice"]').textContent=locale==='fa'?'مدل‌ها از مسیر Vercel و ارائه‌دهندهٔ تنظیم‌شده اجرا می‌شن. مدل‌های غیرفعال از لیست حذف شدن.':'Models run through Vercel and the configured provider. Unavailable models are hidden.';
@@ -482,7 +487,7 @@ async function runBuild(message){
  if(!native&&planChat(message,contextHistory).needsWeb&&!$('lookup-consent').checked){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
- else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
+ else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled&&cfThinkingByMode[activeMode==='build'?'code':activeMode==='worker'?'work':'chat'],signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
  if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn);if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
  }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error?.code|| (error.name==='TimeoutError'?'provider_timeout':'model_unavailable'),retryAfterSeconds:error?.retryAfterSeconds,retryAt:error?.retryAt});}finally{endTurn(turn);}
 }
@@ -546,7 +551,7 @@ $('composer').onsubmit=async event=>{
   const turn=beginTurn('thinking');
   history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
   try{
-   const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled,signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
+   const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled&&cfThinkingByMode[activeMode==='build'?'code':activeMode==='worker'?'work':'chat'],signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
     if(generated.usage){accountUsage=generated.usage;renderStatus();}
    await presentResponse({generated},turn);
    modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});
@@ -597,11 +602,12 @@ $('mode-toggle').addEventListener('keydown',event=>{if(event.key==='ArrowDown'){
 for(const [index,id]of ['chat-tab','build-tab','workspace-tab'].entries())$(id).addEventListener('keydown',event=>{if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();const ids=['chat-tab','build-tab','workspace-tab'];$(ids[event.key==='Home'?0:event.key==='End'?2:(index+(event.key==='ArrowDown'?1:2))%3]).focus();}});
 $('chat-tab').onclick=()=>switchMode('chat');$('workspace-tab').onclick=()=>switchMode('worker');$('build-tab').onclick=()=>switchMode('build');
 document.addEventListener('pointerdown',event=>{if(!$('mode-picker').contains(event.target))$('mode-picker').open=false;});document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('mode-picker').open){$('mode-picker').open=false;$('mode-toggle').focus();}});
-$('workspace-tool').onchange=()=>{$('tool').value=$('workspace-tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
+$('workspace-tool').onchange=()=>{thinkingEnabled=false;$('tool').value=$('workspace-tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
 $('tool').onchange=()=>{$('workspace-tool').value=$('tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
 function rememberLocalModel(){const model=$('model').value;if(Object.hasOwn(localModels,model))try{localStorage.setItem('malguard.ai.localModel.v1',model);}catch{}}
 $('thinking-toggle').onclick=()=>{if($('thinking-toggle').disabled||busy)return;thinkingEnabled=!thinkingEnabled;renderStatus();};
-$('model').onchange=()=>{if($('model').value==='__desktop'){$('model').value=lastSelectedModel;openDesktopModels();return;}if($('model').value==='__downloads'){$('model').value=lastSelectedModel;void offerLocalModels();return;}modelChosen=true;rememberLocalModel();renderStatus();};
+$('workspace-model').onchange=()=>{thinkingEnabled=false;renderStatus();};
+$('model').onchange=()=>{if($('model').value==='__desktop'){$('model').value=lastSelectedModel;openDesktopModels();return;}if($('model').value==='__downloads'){$('model').value=lastSelectedModel;void offerLocalModels();return;}modelChosen=true;thinkingEnabled=false;rememberLocalModel();renderStatus();};
 for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()=>{
  if(busy)return;
  $('tool').value='auto';
@@ -641,11 +647,11 @@ async function loadCFModels(){
   for(let attempt=0;attempt<2;attempt++){
    try{
     const fresh=await fetchCFModels({signal:AbortSignal.timeout(8500)});
-    cfModels=fresh;cfQuotaEnabled=fresh.accountQuotaEnabled===true;cfThinkingAvailable=fresh.thinkingAvailable===true;cfCatalogError=false;
+    cfModels=fresh;cfQuotaEnabled=fresh.accountQuotaEnabled===true;cfThinkingByMode={chat:fresh.thinkingByMode?.chat===true,work:fresh.thinkingByMode?.work===true,code:fresh.thinkingByMode?.code===true};cfCatalogError=false;
     break;
    }catch{
     cfCatalogError=true;
-    if(attempt===1){cfModels=unavailableCFModels();cfQuotaEnabled=false;cfThinkingAvailable=false;}
+    if(attempt===1){cfModels=unavailableCFModels();cfQuotaEnabled=false;cfThinkingByMode={chat:false,work:false,code:false};thinkingEnabled=false;}
     else await new Promise(resolve=>setTimeout(resolve,400));
    }
   }
