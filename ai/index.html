@@ -139,7 +139,7 @@
               </div>
               <div class="composer-actions">
                 <label class="sr-only" for="model" data-i18n="modelLabel">Chat model</label>
-                <select id="model" disabled aria-describedby="device-note"><option value="local_fast">Qwen3 1.7B</option></select><span id="composer-model-new" class="mg-model-new" hidden aria-label="New model">NEW</span>
+                <span class="model-select-wrap"><select id="model" disabled aria-describedby="device-note"><option value="local_fast">Qwen3 1.7B</option></select><span id="composer-model-new" class="mg-model-new" hidden aria-label="New model">NEW</span></span>
                 <button type="button" id="thinking-toggle" aria-pressed="false" aria-describedby="thinking-state" title="Optional deeper reasoning; may use more quota" disabled><span class="thinking-glyph" aria-hidden="true">✧</span><span data-i18n="thinkingToggle">Thinking</span></button>
                 <button type="submit" id="send" disabled aria-label="Send"><svg id="send-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><svg id="send-stop" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" hidden><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg><span id="send-label" class="sr-only">Send</span></button>
               </div>
