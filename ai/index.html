@@ -18,8 +18,8 @@
   <title>MalGuard AI</title>
   <link rel="preload" href="/assets/precision/stars.svg?v=20261028-4k" as="image" fetchpriority="high"><link rel="preload" href="/assets/precision/obsidian-space.webp?v=20261028-4k" as="image" fetchpriority="low">
   <link rel="icon" href="./malguard-ai-orbit.svg?v=20261028-mono" type="image/svg+xml"><link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261104-ai-png"><meta name="apple-mobile-web-app-title" content="MalGuard AI"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="manifest" href="./manifest.webmanifest">
-  <link rel="stylesheet" href="./style.css?v=device-check-20261030">
-  <script type="module" src="./app.js?v=openrouter-routing-20261104"></script>
+  <link rel="stylesheet" href="./style.css?v=thinking-new-20261108">
+  <script type="module" src="./app.js?v=thinking-new-20261108"></script>
 <link rel="stylesheet" href="/assets/precision/deep-space-global.css?v=20261102-soft-halo"><link rel="stylesheet" href="/assets/precision/mg-theme.css?v=20261105"><script src="/assets/precision/mg-theme.js?v=20261105" defer></script></head>
 <body class="mg-deep-space auth-required">
   <main id="entry-gate" class="entry-gate" aria-labelledby="entry-title">
@@ -128,6 +128,7 @@
               <div class="composer-actions">
                 <label class="sr-only" for="model" data-i18n="modelLabel">Chat model</label>
                 <select id="model" disabled aria-describedby="device-note"><option value="local_fast">Qwen3 1.7B</option></select>
+                <button type="button" id="thinking-toggle" aria-pressed="false" data-i18n="thinkingToggle" title="Use GPT-OSS 120B for deeper reasoning; more quota may be used" disabled>Thinking</button>
                 <button type="submit" id="send" disabled aria-label="Send"><svg id="send-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><svg id="send-stop" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" hidden><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg><span id="send-label" class="sr-only">Send</span></button>
               </div>
             </div>
