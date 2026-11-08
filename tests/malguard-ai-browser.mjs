@@ -112,16 +112,31 @@ try{
    assert.equal(await page.locator('#experience-worker').isVisible(),true);
    assert.equal(await page.locator('#experience-build').isVisible(),true);
    assert.equal(await page.locator('#model option[value="cf_gptoss120"]').count(),0,'Code model must not appear in Chat');
+   assert.equal(await page.locator('#send').isDisabled(),true,'Empty composer must never enable Send');
+   await page.locator('#message').fill('A safe test prompt');
+   assert.equal(await page.locator('#send').isDisabled(),false,'A nonempty composer enables Send');
+   await page.locator('#message').fill('');
+   assert.equal(await page.locator('#send').isDisabled(),true,'Clearing a draft disables Send again');
+   assert.equal(await page.locator('#jump-latest').isVisible(),false,'Jump-to-latest stays hidden in empty chats');
    const modePosts=modelPostRequests;
    await page.locator('#experience-worker').click();
    assert.equal(await page.locator('#mode').inputValue(),'worker');
    assert.equal(await page.locator('#experience-worker').getAttribute('aria-pressed'),'true');
+   assert.equal(await page.locator('.model-select-wrap').isVisible(),false,'Hidden Work selector must not leave an empty slot');
    await page.locator('#experience-build').click();
    assert.equal(await page.locator('#mode').inputValue(),'build');
    assert.equal(await page.locator('#model option[value="cf_gptoss120"]').count(),1,'Strong Code model belongs in Code');
    assert.equal(await page.locator('#model option[value="chat_granite"]').count(),0);
    await page.locator('#experience-chat').click();
    assert.equal(await page.locator('#mode').inputValue(),'chat');
+   await page.evaluate(()=>{
+     window.__modelSelectorMutations=0;
+     new MutationObserver(records=>{window.__modelSelectorMutations+=records.length;})
+       .observe(document.getElementById('model'),{childList:true});
+   });
+   await page.locator('#thinking-toggle').click();
+   await page.locator('#thinking-toggle').click();
+   assert.equal(await page.evaluate(()=>window.__modelSelectorMutations),0,'Thinking state changes must not rebuild the model picker');
    await page.locator('.quick-suggestion[data-quick-index="0"]').click();
    assert.ok((await page.locator('#message').inputValue()).length>10);
    assert.equal(modelPostRequests,modePosts,'Mode switching and suggested prompts must not send requests');
