@@ -103,6 +103,31 @@ try{
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
   assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
   assert.equal(await page.locator('#model').isVisible(),true);assert.equal(await page.locator('#composer #model').count(),1);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);
+   // ChatGPT/Grok-inspired controls are visible and genuinely functional on each viewport.
+   assert.equal(await page.locator('#experience-tabs').isVisible(),true);
+   assert.equal(await page.locator('#thinking-toggle').isVisible(),true);
+   assert.equal(await page.locator('#thinking-toggle').getAttribute('aria-pressed'),'false');
+   assert.match(await page.locator('#thinking-state').innerText(),/Thinking off|Thinking unavailable/);
+   assert.equal(await page.locator('#experience-chat').getAttribute('aria-pressed'),'true');
+   assert.equal(await page.locator('#experience-worker').isVisible(),true);
+   assert.equal(await page.locator('#experience-build').isVisible(),true);
+   assert.equal(await page.locator('#model option[value="cf_gptoss120"]').count(),0,'Code model must not appear in Chat');
+   const modePosts=modelPostRequests;
+   await page.locator('#experience-worker').click();
+   assert.equal(await page.locator('#mode').inputValue(),'worker');
+   assert.equal(await page.locator('#experience-worker').getAttribute('aria-pressed'),'true');
+   await page.locator('#experience-build').click();
+   assert.equal(await page.locator('#mode').inputValue(),'build');
+   assert.equal(await page.locator('#model option[value="cf_gptoss120"]').count(),1,'Strong Code model belongs in Code');
+   assert.equal(await page.locator('#model option[value="chat_granite"]').count(),0);
+   await page.locator('#experience-chat').click();
+   assert.equal(await page.locator('#mode').inputValue(),'chat');
+   await page.locator('.quick-suggestion[data-quick-index="0"]').click();
+   assert.ok((await page.locator('#message').inputValue()).length>10);
+   assert.equal(modelPostRequests,modePosts,'Mode switching and suggested prompts must not send requests');
+   await page.locator('#message').fill('');
+   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'New composer and top tabs must not overflow the viewport');
+
   if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/quiet-empty-${width}.png`,fullPage:true});}
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   assert.equal(await page.locator('#language-select').count(),0);assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
