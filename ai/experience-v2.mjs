@@ -54,6 +54,8 @@ function applyUi({mode='chat',locale='en',busy=false,selectedId='',modelLabel=''
   b.disabled=busy;
  }
  const suggestions=$('quick-suggestions');if(suggestions)suggestions.setAttribute('aria-label',fa?'پیشنهادهای شروع':'Suggested prompts');
+ const jump=$('jump-latest'),jumpLabel=$('jump-latest-label');
+ if(jump){jump.setAttribute('aria-label',fa?'رفتن به آخرین پیام':'Jump to latest message');if(jumpLabel)jumpLabel.textContent=fa?'آخر گفتگو':'Latest';}
  const fieldLabel=document.querySelector('label[for="model"]');
  if(fieldLabel)fieldLabel.textContent=fa?'مدل '+translations[mode]:'Model · '+translations[mode];
 }
@@ -94,5 +96,29 @@ export function installExperienceV2(){
    openMode(({1:'chat',2:'worker',3:'build'})[event.key]);
   }
  });
+ const jump=$('jump-latest'),conversation=$('conversation');
+ if(jump&&conversation){
+  let scheduled=false;
+  const refreshJump=()=>{
+   if(scheduled)return;
+   scheduled=true;
+   requestAnimationFrame(()=>{
+    scheduled=false;
+    const scrolling=document.scrollingElement||document.documentElement;
+    const remaining=scrolling.scrollHeight-scrolling.scrollTop-window.innerHeight;
+    jump.hidden=conversation.children.length===0||remaining<220;
+   });
+  };
+  jump.addEventListener('click',()=>{
+   const newest=conversation.lastElementChild;
+   if(!newest)return;
+   newest.scrollIntoView({block:'end',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+   jump.hidden=true;
+  });
+  window.addEventListener('scroll',refreshJump,{passive:true});
+  window.addEventListener('resize',refreshJump,{passive:true});
+  new MutationObserver(refreshJump).observe(conversation,{childList:true});
+  refreshJump();
+ }
  applyUi(installed.state);
 }
