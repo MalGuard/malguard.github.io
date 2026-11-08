@@ -1,5 +1,6 @@
 import {createChatLibrary} from './library.mjs?v=sidebar-20261026';
 import {createNavigation} from './navigation.mjs?v=ux-v3-20261108';
+import {renderResearchEvidence,attachResearchCitations} from './research-ui.mjs?v=20261108-research1';
 import {installExperienceV2,syncExperienceV2} from './experience-v2.mjs?v=ux-v3-20261108';
 import {errorMessage} from './error-message.mjs?v=openrouter-routing-20261104';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=account-quota-20261030';
@@ -25,14 +26,16 @@ let activeTurn;
 let localReady=false,localCapabilityReason='checking',modelsInitialized=false;
 let lastSelectedModel='';
 let cloudDefaultApplied=false,modelChosen=false,cfModels=[],accountUsage=null,cfQuotaEnabled=false,cfThinkingByMode={chat:false,work:false,code:false},thinkingEnabled=false;
-let cfCatalogError=false,cfCatalogLoading=false,cfCatalogLastAttempt=0;
+let cfCatalogError=false,cfCatalogLoading=false,cfCatalogLastAttempt=0,cfSearchAvailable=false;
+const webModeByMode={chat:'off',worker:'off',build:'off'};
+const activeWebMode=()=>webModeByMode[activeMode];
 let localOfferPending=false;
 let preferredLocal;try{preferredLocal=localStorage.getItem('malguard.ai.localModel.v1');}catch{}
 const localChat=createLocalChat(),downloadPermissions=new Set();
 const preparedModels=new Set();
 let preparingModel;
 let welcomeSeen=false;try{welcomeSeen=localStorage.getItem('malguard.ai.welcome.v3')==='seen';}catch{}
-const conversations={chat:{history:[],modelHistory:[],draft:'',model:'chat_granite'},worker:{history:[],modelHistory:[],draft:'',model:'cf_gptoss20'},build:{history:[],modelHistory:[],draft:'',model:'cf_gptoss120'}};
+const conversations={chat:{history:[],modelHistory:[],draft:'',model:CF_DEFAULTS.chat},worker:{history:[],modelHistory:[],draft:'',model:CF_DEFAULTS.work},build:{history:[],modelHistory:[],draft:'',model:CF_DEFAULTS.code}};
 let projectOpen=false;
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
@@ -688,11 +691,11 @@ async function loadCFModels(){
   for(let attempt=0;attempt<2;attempt++){
    try{
     const fresh=await fetchCFModels({signal:AbortSignal.timeout(8500)});
-    cfModels=fresh;cfQuotaEnabled=fresh.accountQuotaEnabled===true;cfThinkingByMode={chat:fresh.thinkingByMode?.chat===true,work:fresh.thinkingByMode?.work===true,code:fresh.thinkingByMode?.code===true};cfCatalogError=false;
+    cfModels=fresh;cfQuotaEnabled=fresh.accountQuotaEnabled===true;cfSearchAvailable=fresh.searchAvailable===true;cfThinkingByMode={chat:fresh.thinkingByMode?.chat===true,work:fresh.thinkingByMode?.work===true,code:fresh.thinkingByMode?.code===true};cfCatalogError=false;
     break;
    }catch{
     cfCatalogError=true;
-    if(attempt===1){cfModels=unavailableCFModels();cfQuotaEnabled=false;cfThinkingByMode={chat:false,work:false,code:false};thinkingEnabled=false;}
+    if(attempt===1){cfModels=unavailableCFModels();cfQuotaEnabled=false;cfSearchAvailable=false;cfThinkingByMode={chat:false,work:false,code:false};thinkingEnabled=false;}
     else await new Promise(resolve=>setTimeout(resolve,400));
    }
   }
