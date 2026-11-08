@@ -546,7 +546,7 @@ $('message').addEventListener('keydown',event=>{
  // Desktop plain Enter sends, while Shift+Enter always inserts a newline.
  if(event.key!=='Enter'||event.isComposing||event.shiftKey||event.altKey)return;
  const explicit=event.ctrlKey||event.metaKey;
- const desktop=window.matchMedia('(pointer:fine)').matches;
+ const desktop=window.matchMedia('(pointer:fine) and (min-width: 761px)').matches;
  if(!explicit&&!desktop)return;
  event.preventDefault();
  if(!busy&&($('message').value.trim()||(activeMode==='worker'&&$('file').files?.[0])))$('composer').requestSubmit();
