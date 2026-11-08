@@ -40,7 +40,7 @@ export async function callMedia({action,prompt,image,sessionToken,signal,fetchIm
   if(typeof data.text!=='string'||!data.text.trim())throw new Error('media_provider_unavailable');
   return {action,provider:data.provider,model:data.model,text:data.text.slice(0,8000),disclaimer:String(data.disclaimer||'').slice(0,300)};
  }
- if(data.mime!=='image/jpeg'||typeof data.image!=='string'||!/^\/9j\/[A-Za-z0-9+/=]+$/.test(data.image)||data.image.length>2900000)
+ if(data.mime!=='image/jpeg'||typeof data.image!=='string'||!/^\/9[A-Za-z0-9+/=]+$/.test(data.image)||data.image.length>2900000)
   throw new Error('media_provider_unavailable');
  return {action,provider:data.provider,model:data.model,mime:data.mime,image:data.image};
 }
