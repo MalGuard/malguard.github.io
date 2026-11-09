@@ -17,17 +17,17 @@ export const EXPERIENCE_PROMPTS=Object.freeze({
 export const MODE_LINKS=Object.freeze({chat:'chat-tab',worker:'workspace-tab',build:'build-tab'});
 let installed;
 const $=id=>document.getElementById(id);
-function applyUi({mode='chat',locale='en',busy=false,selectedId='',modelLabel='',isNew=false,thinkingReady=false,thinkingOn=false,thinkingModel=''}={}){
+function applyUi({mode='chat',view=mode,locale='en',busy=false,selectedId='',modelLabel='',isNew=false,thinkingReady=false,thinkingOn=false,thinkingModel=''}={}){
  if(!EXPERIENCE_PROMPTS[mode])return;
  const fa=locale==='fa';
- const translations=fa?{chat:'گفت‌وگو',worker:'کار',build:'کد'}:{chat:'Chat',worker:'Work',build:'Code'};
- for(const [id,target] of Object.entries({chat:'experience-chat',worker:'experience-worker',build:'experience-build'})){
+ const translations=fa?{home:'خانه',chat:'گفت‌وگو',worker:'کار',build:'کد'}:{home:'Home',chat:'Chat',worker:'Work',build:'Code'};
+ for(const [id,target] of Object.entries({home:'experience-home',chat:'experience-chat',worker:'experience-worker',build:'experience-build'})){
   const button=$(target);if(!button)continue;
-  button.setAttribute('aria-pressed',String(mode===id));
+  button.setAttribute('aria-pressed',String(view===id));
   button.setAttribute('aria-label',translations[id]);
   button.disabled=busy;
   const shortcut=$('navigation-mode-'+id);
-  if(shortcut){shortcut.setAttribute('aria-pressed',String(mode===id));shortcut.disabled=busy;}
+  if(shortcut){shortcut.setAttribute('aria-pressed',String(view===id));shortcut.disabled=busy;}
  }
  const modelNode=$('experience-current-model');
  if(modelNode)modelNode.textContent=modelLabel||(fa?'انتخاب مدل':'Choose model');
@@ -42,9 +42,22 @@ function applyUi({mode='chat',locale='en',busy=false,selectedId='',modelLabel=''
   note.dataset.enabled=String(!!thinkingOn);
  }
  const thinking=$('thinking-toggle');if(thinking)thinking.setAttribute('aria-label',fa?'تفکر عمیق':'Thinking');
- const kicker=$('experience-kicker');if(kicker)kicker.textContent='MALGUARD / '+translations[mode].toUpperCase();
+ const kicker=$('experience-kicker');if(kicker)kicker.textContent='MALGUARD / '+translations[view].toUpperCase();
  const title=$('title');
- if(title)title.textContent=(fa?{chat:'چطور می‌تونم کمکت کنم؟',worker:'چی رو می‌خوای بررسی کنیم؟',build:'چی می‌خوای بسازیم؟'}:{chat:'What can I help with?',worker:'What should we inspect?',build:'What shall we build?'})[mode];
+ if(title)title.textContent=(fa?{home:'چطور می‌تونم کمکت کنم؟',chat:'گفت‌وگو',worker:'فضای کار',build:'فضای کدنویسی'}:{home:'What can I help with?',chat:'Chat',worker:'Work',build:'Code'})[view];
+ const description=$('flagship-description');
+ if(description)description.textContent=(fa?{
+  home:'برای تحقیق، گفت‌وگو و ساختن یک فضا انتخاب کن.',
+  chat:'برای پرسیدن، نوشتن و فکر کردن.',
+  worker:'تحقیق کن، برنامه بساز و فایل‌ها یا لینک‌ها را با شواهد بررسی کن.',
+  build:'فایل‌های پروژه را ویرایش کن، پیشنهادها را مرور کن و پیش‌نمایش بگیر.'
+ }:{
+  home:'One place to research, talk things through, and build.',
+  chat:'A space to ask, write, and think things through.',
+  worker:'Research with sources, turn ideas into plans, and inspect files or links.',
+  build:'Edit project files, review AI proposals, and preview web projects.'
+ })[view];
+ for(const button of document.querySelectorAll('[data-workspace]'))button.disabled=busy;
  const prompts=EXPERIENCE_PROMPTS[mode][fa?'fa':'en'];
  for(const b of document.querySelectorAll('[data-quick-index]')){
   const entry=prompts[Number(b.dataset.quickIndex)];
@@ -66,10 +79,13 @@ export function installExperienceV2(){
  const openMode=mode=>{
   if(installed.state.busy||!MODE_LINKS[mode])return;
   $(MODE_LINKS[mode])?.click();
-  $('message')?.focus({preventScroll:true});
+  $('title')?.focus({preventScroll:true});
  };
  for(const [mode,id] of [['chat','experience-chat'],['worker','experience-worker'],['build','experience-build']]){
   const button=$(id);if(button)button.addEventListener('click',()=>openMode(mode));
+ }
+ for(const button of document.querySelectorAll('[data-workspace]')){
+  button.addEventListener('click',()=>openMode(button.dataset.workspace));
  }
  for(const b of document.querySelectorAll('[data-quick-index]')){
   b.addEventListener('click',()=>{
@@ -119,6 +135,15 @@ export function installExperienceV2(){
   window.addEventListener('resize',refreshJump,{passive:true});
   new MutationObserver(refreshJump).observe(conversation,{childList:true});
   refreshJump();
+ }
+ const viewport=window.visualViewport;
+ if(viewport){
+  const syncKeyboard=()=>{
+   const editing=['message','build-editor'].includes(document.activeElement?.id);
+   document.body.dataset.keyboardOpen=String(editing&&Math.abs(viewport.scale-1)<0.05&&innerHeight-viewport.height>120);
+  };
+  viewport.addEventListener('resize',syncKeyboard,{passive:true});
+  document.addEventListener('focusout',()=>requestAnimationFrame(syncKeyboard));
  }
  applyUi(installed.state);
 }

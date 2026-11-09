@@ -14,14 +14,14 @@ export function createNavigation({account,onLanguage}){
  const search=make('input');search.type='search';search.placeholder='Search chats';search.setAttribute('aria-label','Search chats');search.id='chat-search';search.setAttribute('aria-keyshortcuts','Control+K Meta+K');search.title='Search chats · Ctrl/⌘ + K';
  const shortcuts=make('nav');shortcuts.className='navigation-shortcuts';shortcuts.setAttribute('aria-label','MalGuard AI workspaces');
  const shortcutsLabel=make('span','WORKSPACES');shortcutsLabel.className='navigation-shortcuts-label';shortcuts.append(shortcutsLabel);
- const modes=[['chat','Chat','◎','chat-tab'],['worker','Work','◇','workspace-tab'],['build','Code','⌘','build-tab']];
+ const modes=[['home','Home','⌂','experience-home'],['worker','Work','◇','workspace-tab'],['chat','Chat','◎','chat-tab'],['build','Code','⌘','build-tab']];
  const shortcutButtons=new Map();
  for(const [mode,title,glyph,target] of modes){
   const button=make('button');button.type='button';button.className='navigation-shortcut';button.dataset.mode=mode;button.id='navigation-mode-'+mode;
   const icon=make('span',glyph);icon.className='shortcut-glyph';icon.setAttribute('aria-hidden','true');
   const name=make('span',title);name.className='shortcut-name';button.append(icon,name);
-  button.setAttribute('aria-pressed',String(mode==='chat'));
-  button.onclick=()=>{if(button.disabled)return;$(target).click();if(innerWidth<=760){hide(false);$('message')?.focus({preventScroll:true});}};
+  button.setAttribute('aria-pressed',String(mode==='home'));
+  button.onclick=()=>{if(button.disabled)return;$(target).click();if(innerWidth<=760)hide(false);$('title').focus({preventScroll:true});};
   shortcuts.append(button);shortcutButtons.set(mode,{button,name});
  }
  const label=make('h2','Recent chats');label.className='navigation-label';const chats=make('div');chats.id='saved-chats';
@@ -56,7 +56,7 @@ export function createNavigation({account,onLanguage}){
     shortcutsLabel.textContent=fa?'بخش‌ها':'WORKSPACES';
     shortcuts.setAttribute('aria-label',fa?'بخش‌های مالگارد':'MalGuard AI workspaces');
     for(const [mode,{name,button}] of shortcutButtons){
-      name.textContent=fa?({chat:'گفت‌وگو',worker:'کار',build:'کد'}[mode]):({chat:'Chat',worker:'Work',build:'Code'}[mode]);
+      name.textContent=fa?({home:'خانه',chat:'گفت‌وگو',worker:'کار',build:'کد'}[mode]):({home:'Home',chat:'Chat',worker:'Work',build:'Code'}[mode]);
       button.setAttribute('aria-label',name.textContent);
     }
     search.placeholder=fa?'جست‌وجوی گفتگوها':'Search chats';
