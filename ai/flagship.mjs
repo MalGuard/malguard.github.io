@@ -20,9 +20,9 @@ export function installFlagship({navigate}){
  const intro=document.querySelector('.intro');
  const mark=make('img',null,'flagship-mark');mark.src='./malguard-ai-orbit.svg';mark.width=72;mark.height=72;mark.alt='';intro.prepend(mark);
  const subtitle=make('p',null,'flagship-subtitle');subtitle.id='flagship-subtitle';$('title').after(subtitle);
- const modeCards=make('nav',null,'flagship-modes');modeCards.setAttribute('aria-label','Choose your workspace');
+ const modeCards=$('experience-tabs');modeCards.replaceChildren();modeCards.className='flagship-modes';modeCards.setAttribute('aria-label','Choose your workspace');
  for(const mode of ['worker','chat','build']){
-  const b=button(VIEWS[mode][0],()=>navigate(mode),mode);b.dataset.flagshipView=mode;
+  const b=button(VIEWS[mode][0],()=>navigate(mode),mode);b.dataset.flagshipView=mode;b.id='experience-'+mode;b.setAttribute('aria-label',VIEWS[mode][0]);
   b.append(make('small',({worker:'For research, analysis, and productivity.',chat:'For conversation, ideas, and everyday help.',build:'For coding, debugging, and technical building.'})[mode]));modeCards.append(b);
  }
  intro.after(modeCards);

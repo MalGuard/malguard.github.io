@@ -73,6 +73,17 @@ jobs:
       - name: Validate email authentication with synthetic accounts
         run: node --test services/game-scam-guard/server/ai-library.test.js services/game-scam-guard/server/email-auth.test.js services/game-scam-guard/src/email-account.test.js
 
+      - name: Preserve MalGuard AI visual QA evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: malguard-ai-visual-qa
+          path: |
+            test-results/malguard-ai/
+            test-results/malguard-ai-builder/
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Validate optional MalGuard AI report guidance
         run: node --test tests/site-report-ai.test.mjs
 

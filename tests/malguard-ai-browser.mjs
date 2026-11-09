@@ -111,6 +111,9 @@ try{
   assert.equal(await page.locator('#model').isVisible(),true);assert.equal(await page.locator('#composer #model').count(),1);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);
    // ChatGPT/Grok-inspired controls are visible and genuinely functional on each viewport.
    assert.equal(await page.locator('#experience-tabs').isVisible(),true);
+   assert.equal(await page.locator('body').getAttribute('data-view'),'home');
+   if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/flagship-home-${width}.png`,fullPage:true});}
+   await page.locator('#experience-chat').click();
    assert.equal(await page.locator('#thinking-toggle').isVisible(),false,'Thinking stays in the collapsed + menu');
    await page.locator('#attach-toggle').click();
    assert.equal(await page.locator('#thinking-toggle').isVisible(),true);
@@ -132,9 +135,12 @@ try{
    await page.locator('#experience-worker').click();
    assert.equal(await page.locator('#mode').inputValue(),'worker');
    assert.equal(await page.locator('#experience-worker').getAttribute('aria-pressed'),'true');
+   if([390,1280].includes(width))await page.screenshot({path:`test-results/malguard-ai/flagship-work-${width}.png`,fullPage:true});
    assert.equal(await page.locator('.model-select-wrap').isVisible(),false,'Hidden Work selector must not leave an empty slot');
    await page.locator('#experience-build').click();
    assert.equal(await page.locator('#mode').inputValue(),'build');
+   assert.equal(await page.locator('#build-panel').isVisible(),true);
+   if([390,1280].includes(width))await page.screenshot({path:`test-results/malguard-ai/flagship-code-${width}.png`,fullPage:true});
    assert.equal(await page.locator('#model option[value="cf_gptoss120"]').count(),1,'Strong Code model belongs in Code');
    assert.equal(await page.locator('#model option[value="chat_granite"]').count(),0);
    await page.locator('#experience-chat').click();
