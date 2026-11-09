@@ -118,7 +118,8 @@ try{
    await page.locator('#attach-toggle').click();
    assert.equal(await page.locator('#thinking-toggle').getAttribute('aria-pressed'),'false');
    assert.match(await page.locator('#thinking-state').innerText(),/Thinking off|Thinking unavailable/);
-   assert.equal(await page.locator('#experience-chat').getAttribute('aria-pressed'),'true');
+   assert.equal(await page.locator('#experience-home').getAttribute('aria-pressed'),'true');
+   assert.equal(await page.locator('#flagship-modes button').count(),3);
    assert.equal(await page.locator('#experience-worker').isVisible(),true);
    assert.equal(await page.locator('#experience-build').isVisible(),true);
    assert.equal(await page.locator('#model option[value="cf_gptoss120"]').count(),0,'Code model must not appear in Chat');
@@ -129,16 +130,38 @@ try{
    assert.equal(await page.locator('#send').isDisabled(),true,'Clearing a draft disables Send again');
    assert.equal(await page.locator('#jump-latest').isVisible(),false,'Jump-to-latest stays hidden in empty chats');
    const modePosts=modelPostRequests;
-   await page.locator('#experience-worker').click();
+   await page.locator('#message').fill('Draft retained across workspaces');
+   await page.locator('#flagship-modes [data-workspace=worker]').click();
    assert.equal(await page.locator('#mode').inputValue(),'worker');
+   assert.equal(await page.locator('#work-actions').isVisible(),true);
+   await page.locator('#work-plan').click();
+   assert.match(await page.locator('#message').inputValue(),/milestones/);
+   await page.locator('#experience-home').click();
+   assert.equal(await page.locator('#message').inputValue(),'Draft retained across workspaces');
+   await page.locator('#message').fill('');
+   await page.locator('#experience-worker').click();
    assert.equal(await page.locator('#experience-worker').getAttribute('aria-pressed'),'true');
    assert.equal(await page.locator('.model-select-wrap').isVisible(),false,'Hidden Work selector must not leave an empty slot');
    await page.locator('#experience-build').click();
    assert.equal(await page.locator('#mode').inputValue(),'build');
+   assert.equal(await page.locator('#build-panel').isVisible(),true);
+   assert.equal(await page.locator('#build-file-tabs button').count(),3);
+   assert.equal(await page.locator('#code-actions').isVisible(),true);
+   await page.locator('#code-actions [data-code-task=explain]').click();
+   assert.match(await page.locator('#message').inputValue(),/Explain the selected file/);
+   assert.equal(await page.locator('#build-share-code').isChecked(),false,'Prompt shortcuts never opt in to sharing project contents');
+   await page.locator('#message').fill('');
    assert.equal(await page.locator('#model option[value="cf_gptoss120"]').count(),1,'Strong Code model belongs in Code');
    assert.equal(await page.locator('#model option[value="chat_granite"]').count(),0);
    await page.locator('#experience-chat').click();
    assert.equal(await page.locator('#mode').inputValue(),'chat');
+   const rich=await page.evaluate(async()=>{
+    const {renderRichText}=await import('/ai/code-view.mjs?v=flagship-1');
+    const output=document.createElement('div');
+    renderRichText(output,['## Review','- **Source**','| Name | Result |','| --- | --- |','| <img src=x onerror=alert(1)> | [1] |'].join('\n'));
+    return {heading:output.querySelector('h3')?.textContent,table:output.querySelector('td')?.textContent,images:output.querySelectorAll('img').length,list:output.querySelector('li strong')?.textContent};
+   });
+   assert.deepEqual(rich,{heading:'Review',table:'<img src=x onerror=alert(1)>',images:0,list:'Source'});
    await page.evaluate(()=>{
      window.__modelSelectorMutations=0;
      new MutationObserver(records=>{window.__modelSelectorMutations+=records.length;})

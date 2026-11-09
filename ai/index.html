@@ -16,12 +16,12 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; frame-src 'self'; style-src 'self'; connect-src 'self' http://127.0.0.1:11434 https://game-scam-guard-connected.vercel.app https://models.malguard.site https://huggingface.co https://*.hf.co https://raw.githubusercontent.com; img-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="theme-color" content="#050507">
   <title>MalGuard AI</title>
-  <link rel="preload" href="/assets/precision/stars.svg?v=20261028-4k" as="image" fetchpriority="high"><link rel="preload" href="/assets/precision/obsidian-space.webp?v=20261028-4k" as="image" fetchpriority="low">
+  
   <link rel="icon" href="./malguard-ai-orbit.svg?v=20261028-mono" type="image/svg+xml"><link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261104-ai-png"><meta name="apple-mobile-web-app-title" content="MalGuard AI"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./style.css?v=thinking-new-20261108">
-  <script type="module" src="./app.js?v=media-v5-20261108"></script>
-<link rel="stylesheet" href="/assets/precision/deep-space-global.css?v=20261102-soft-halo"><link rel="stylesheet" href="/assets/precision/mg-theme.css?v=20261105"><script src="/assets/precision/mg-theme.js?v=20261105" defer></script><link rel="stylesheet" href="./experience-v2.css?v=20261108-media5"><link rel="stylesheet" href="./polish-20261109.css?v=1"><script type="module" src="./polish-20261109.mjs?v=1"></script></head>
-<body class="mg-deep-space mg-ai-v2 auth-required">
+  <script type="module" src="./app.js?v=flagship-1"></script>
+<link rel="stylesheet" href="/assets/precision/deep-space-global.css?v=20261102-soft-halo"><link rel="stylesheet" href="/assets/precision/mg-theme.css?v=20261105"><script src="/assets/precision/mg-theme.js?v=20261105" defer></script><link rel="stylesheet" href="./experience-v2.css?v=20261108-media5"><link rel="stylesheet" href="./polish-20261109.css?v=1"><script type="module" src="./polish-20261109.mjs?v=1"></script><link rel="stylesheet" href="./flagship.css?v=1"></head>
+<body class="mg-deep-space mg-ai-v2 auth-required" data-view="home">
   <main id="entry-gate" class="entry-gate" aria-labelledby="entry-title">
     <section class="entry-content">
       <img class="entry-mark" src="./malguard-ai-orbit.svg?v=20261028-mono" width="74" height="74" alt="">
@@ -39,14 +39,16 @@
   </main>
   <a class="skip" href="#message" data-i18n="skip">Skip to conversation</a>
   <header class="site-header">
+    <span class="flagship-mobile-brand"><img src="./malguard-ai-orbit.svg?v=20261028-mono" width="24" height="24" alt="">MalGuard AI</span>
     <nav id="experience-tabs" class="experience-tabs" role="group" aria-label="MalGuard AI modes">
+      <button id="experience-home" class="experience-tab" type="button" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m3 10 9-7 9 7v10h-6v-6H9v6H3Z" stroke-linejoin="round"/></svg><span data-i18n="navHome">Home</span></button>
       <button id="experience-chat" class="experience-tab" type="button" aria-pressed="true" aria-label="Chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5c-1.2 0-2.4-.3-3.4-.8L4 20l1.7-4.5A7.5 7.5 0 1 1 20 11.5Z" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="navChat">Chat</span></button>
       <button id="experience-worker" class="experience-tab" type="button" aria-pressed="false" aria-label="Work"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 10h16M9 5v14" stroke-linecap="round"/></svg><span data-i18n="navWork">Work</span></button>
       <button id="experience-build" class="experience-tab" type="button" aria-pressed="false" aria-label="Code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m8 8-4 4 4 4m8-8 4 4-4 4m-3-11-2 14" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="navCode">Code</span></button>
     </nav>
     <div class="experience-current" aria-live="off"><span id="experience-current-model">MalGuard AI</span><span id="experience-new" hidden>NEW</span></div>
        <details id="mode-picker" class="mode-picker">
-        <summary id="mode-toggle" dir="ltr"><img class="ai-product-mark" src="./malguard-ai-orbit.svg?v=20261028-mono" width="26" height="26" alt=""><strong>MalGuard</strong><span id="mode-current" class="sr-only">Chat</span><svg class="mode-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <summary id="mode-toggle" dir="ltr"><img class="ai-product-mark" src="./malguard-ai-orbit.svg?v=20261028-mono" width="26" height="26" alt=""><strong>MalGuard AI</strong><span id="mode-current" class="sr-only">Chat</span><svg class="mode-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
         <div class="mode-options workspace-switch" role="group" aria-label="Conversation mode">
           <button id="chat-tab" type="button" aria-pressed="true"><strong data-i18n="navChat">Chat</strong><span data-i18n="navChatHint">Ask, write, and explore</span></button>
           <button id="build-tab" type="button" aria-pressed="false" aria-controls="build-panel"><strong data-i18n="navCode">Code</strong><span data-i18n="navCodeHint">Build, debug, and preview</span></button>
@@ -98,17 +100,30 @@
   <main>
     <section class="workspace" aria-labelledby="title">
 
-      <div class="intro"><p id="experience-kicker" class="experience-eyebrow">MALGUARD / CHAT</p><h1 id="title" data-i18n="title">What can I help with?</h1><p id="build-start-hint" hidden data-i18n="buildStartHint">Talk through an idea, then ask me to build it.</p>
+      <div class="intro"><p id="experience-kicker" class="experience-eyebrow">MALGUARD / CHAT</p><img class="flagship-mark" src="./malguard-ai-orbit.svg?v=20261028-mono" width="64" height="64" alt="">
+        <h1 id="title" tabindex="-1" data-i18n="title">What can I help with?</h1>
+        <p id="flagship-description" class="flagship-description"></p>
+        <nav id="flagship-modes" class="flagship-modes" aria-label="Choose a workspace">
+          <button type="button" data-workspace="worker"><span class="flagship-index" aria-hidden="true">01 /</span><strong data-i18n="navWork">Work</strong><span data-i18n="homeWorkHint">Research, plan, and inspect.</span></button>
+          <button type="button" data-workspace="chat"><span class="flagship-index" aria-hidden="true">02 /</span><strong data-i18n="navChat">Chat</strong><span data-i18n="homeChatHint">Ask, write, and explore.</span></button>
+          <button type="button" data-workspace="build"><span class="flagship-index" aria-hidden="true">03 /</span><strong data-i18n="navCode">Code</strong><span data-i18n="homeCodeHint">Edit, review, and preview.</span></button>
+        </nav><p id="build-start-hint" hidden data-i18n="buildStartHint">Talk through an idea, then ask me to build it.</p>
         <div class="quick-suggestions" id="quick-suggestions" role="group" aria-label="Suggested prompts">
           <button class="quick-suggestion" type="button" data-quick-index="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M12 3 9.7 9.7 3 12l6.7 2.3L12 21l2.3-6.7L21 12l-6.7-2.3L12 3Z"/></svg><span>Explain something clearly</span></button>
           <button class="quick-suggestion" type="button" data-quick-index="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14m-7-7 7 7-7 7"/></svg><span>Help me write</span></button>
           <button class="quick-suggestion" type="button" data-quick-index="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="m9 10-3 2 3 2m6-4 3 2-3 2"/></svg><span>Explore a task</span></button>
         </div>
       </div>
+      <section class="flagship-actions" id="work-actions" aria-label="Work actions" hidden>
+        <button type="button" id="work-research" data-i18n="workResearch">Web research</button>
+        <button type="button" id="work-plan" data-i18n="workPlanAction">Plan a project</button>
+        <button type="button" id="work-inspect" data-i18n="workInspect">Inspect a file</button>
+      </section>
       <section id="build-panel" class="build-panel" hidden aria-labelledby="build-title">
         <div class="build-heading"><div><h2 id="build-title" data-i18n="projectTitle">Build and code</h2><p class="muted" data-i18n="buildHint">Describe what to build below, review the proposed files, then apply and preview.</p></div><button id="build-export" type="button" data-i18n="exportProject">Download ZIP</button></div>
         <div class="build-toolbar"><label class="sr-only" for="build-file" data-i18n="projectFile">Project file</label><select id="build-file" dir="ltr"></select><label class="sr-only" for="build-name" data-i18n="newFile">New file</label><input id="build-name" dir="ltr" maxlength="100" placeholder="src/helper.js"><button id="build-add" type="button" data-i18n="addFile">Add file</button><input id="build-import" type="file" accept=".html,.css,.js,.json,.md,.txt,.py,.ts,.tsx,.jsx" multiple hidden><button id="build-import-button" type="button" data-i18n="importCode">Import files</button><button id="build-undo" type="button" data-i18n="undoProject" disabled>Undo apply</button><span id="build-size" class="muted" dir="ltr"></span></div>
-        <div class="build-view-bar"><div class="build-view-tabs"><button id="build-code-view" type="button" aria-pressed="true" data-i18n="codeEditor">Code</button><button id="build-preview-view" type="button" aria-pressed="false" data-i18n="projectPreview">Preview</button></div><button id="build-run" type="button" data-i18n="runPreview">Run preview</button><button id="build-stop" type="button" data-i18n="stopPreview" disabled>Stop</button></div><div id="build-columns" class="build-columns" data-view="code"><div class="editor-pane"><label for="build-editor" data-i18n="codeEditor">Code editor</label><textarea id="build-editor" spellcheck="false" autocomplete="off" autocapitalize="off" dir="ltr" maxlength="262144"></textarea></div><div class="preview-pane"><div><span data-i18n="projectPreview">Project preview</span></div><div id="build-preview" data-i18n="previewEmpty">Run preview to see your project.</div></div></div>
+        <div class="build-file-tabs" id="build-file-tabs" role="group" aria-label="Project files"></div>
+        <div class="build-view-bar"><div class="build-view-tabs"><button id="build-code-view" type="button" aria-pressed="true" data-i18n="codeEditor">Code</button><button id="build-preview-view" type="button" aria-pressed="false" data-i18n="projectPreview">Preview</button></div><button id="build-run" type="button" data-i18n="runPreview">Run preview</button><button id="build-stop" type="button" data-i18n="stopPreview" disabled>Stop</button></div><div id="build-columns" class="build-columns" data-view="code"><div class="editor-pane"><label for="build-editor" data-i18n="codeEditor">Code editor</label><div class="build-editor-stack"><pre id="build-highlight" aria-hidden="true"></pre><textarea id="build-editor" spellcheck="false" autocomplete="off" autocapitalize="off" dir="ltr" maxlength="262144"></textarea></div></div><div class="preview-pane"><div><span data-i18n="projectPreview">Project preview</span></div><div id="build-preview" data-i18n="previewEmpty">Run preview to see your project.</div></div></div>
         <label class="build-share"><input id="build-auto-run" type="checkbox" checked><span data-i18n="autoBuild">Apply and preview explicit build requests automatically, with Undo.</span></label><label class="build-share"><input id="build-share-code" type="checkbox"><span data-i18n="shareCode">Include the currently selected file in my next model request.</span></label>
         <p id="build-status" role="status"></p><details class="build-console"><summary data-i18n="previewOutput">Preview output</summary><pre id="build-console" dir="ltr" aria-live="polite"></pre></details><p class="muted build-limit" data-i18n="buildLimit">Files stay in page memory; export before leaving. Web preview supports local HTML/CSS/JS without network access. Backend code and packages run after export in your own development environment.</p>
       </section>
@@ -126,6 +141,12 @@
           <label class="isolation-permission"><input id="isolation-consent" type="checkbox"><span data-i18n="isolationConsent">I separately allow the selected file to run in an isolated sandbox or the selected link to receive a passive preview. These checks do not guarantee safety.</span></label>
         </section>
         <button id="build-files-toggle" class="build-files-toggle" type="button" aria-expanded="false" aria-controls="build-panel" data-i18n="showProject" hidden>Files and preview</button>
+        <div class="flagship-actions" id="code-actions" role="group" aria-label="Coding prompts" hidden>
+          <button type="button" data-code-task="explain" data-i18n="codeExplain">Explain</button>
+          <button type="button" data-code-task="debug" data-i18n="codeDebug">Debug</button>
+          <button type="button" data-code-task="refactor" data-i18n="codeRefactor">Refactor</button>
+          <button type="button" data-code-task="tests" data-i18n="codeTests">Generate tests</button>
+        </div>
         <button id="open-downloads" class="download-entry" type="button" data-i18n="downloadEntry">↓ Download models · choose for your device</button>
         <div id="model-progress" class="model-progress" hidden><label for="download-progress" id="progress-label"></label><progress id="download-progress" max="100" value="0"></progress><button type="button" id="cancel-download" data-i18n="cancel">Cancel</button></div>
         <button type="button" id="jump-latest" class="jump-latest" hidden aria-label="Jump to latest message"><span aria-hidden="true">↓</span><span id="jump-latest-label">Latest</span></button>
