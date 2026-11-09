@@ -396,7 +396,7 @@ body.mg-ai-v4 .composer-active-tools>button:not([hidden]){
   padding:4px 7px;
   background:var(--ai-raised);
   color:var(--ai-fg);
-  font:650 11px/1.25 inherit;
+  font:650 11px/1.25 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
   cursor:pointer;
 }
 body.mg-ai-v4 .composer-active-tools>button span:first-child {
