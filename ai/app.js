@@ -414,17 +414,30 @@ function renderStatus(){
   const workCapable=activeMode!=='worker'||($('workspace-tool').value==='auto'&&!$('file').files?.[0]);
   const canSearch=cfSearchAvailable&&modelCapable&&workCapable&&mediaAction==='off';
   $('web-search-toggle').disabled=busy||!canSearch;
-  $('web-search-toggle').setAttribute('aria-pressed',String(webOn&&canSearch));
-  $('web-search-toggle').setAttribute('aria-label',locale==='fa'?'جست‌وجوی اینترنتی':'Search the web');
-  $('web-search-label').textContent=locale==='fa'?
-    (webMode==='research'?'تحقیق':webOn&&canSearch?'وب روشن':'جست‌وجو'):
-    (webMode==='research'?'Research':webOn&&canSearch?'Web on':'Search');
-  $('web-search-depth').hidden=!webOn||!canSearch;
+  $('web-research-toggle').disabled=busy||!canSearch;
+  $('web-search-toggle').setAttribute('aria-pressed',String(webMode==='web'&&canSearch));
+  $('web-research-toggle').setAttribute('aria-pressed',String(webMode==='research'&&canSearch));
+  $('web-search-toggle').setAttribute('aria-label',locale==='fa'?'جست‌وجوی وب':'Search the web');
+  $('web-research-toggle').setAttribute('aria-label',locale==='fa'?'تحقیق عمیق در وب':'Deep web research');
+  $('web-search-label').textContent=locale==='fa'?'جست‌وجوی وب':'Web search';
+  $('web-research-label').textContent=locale==='fa'?'تحقیق عمیق':'Deep research';
+  $('web-search-state').textContent=webMode==='web'&&canSearch?(locale==='fa'?'فعال':'On'):'';
+  $('web-research-state').textContent=webMode==='research'&&canSearch?(locale==='fa'?'فعال':'On'):'';
+  $('thinking-menu-state').textContent=thinkingCloudReady?(thinkingEnabled?(locale==='fa'?'فعال':'On'):''):(locale==='fa'?'ناموجود':'Unavailable');
+  $('tool-menu-caption').textContent=locale==='fa'?'ابزارهای مالگارد':'MALGUARD TOOLS';
+  $('media-analyze-menu-label').textContent=locale==='fa'?'تحلیل عکس':'Analyze an image';
+  $('media-generate-menu-label').textContent=locale==='fa'?'ساخت تصویر':'Create an image';
+  $('web-search-depth').hidden=true;
   $('web-search-depth').disabled=busy||!canSearch;
   $('web-search-depth').value=webMode==='research'?'research':'web';
-  $('web-search-depth').setAttribute('aria-label',locale==='fa'?'عمق جست‌وجو':'Search depth');
-  $('web-search-depth').options[0].textContent=locale==='fa'?'وب':'Web';
-  $('web-search-depth').options[1].textContent=locale==='fa'?'تحقیق':'Research';
+  const activeFeatures=[
+    ...(thinkingEnabled&&thinkingCloudReady?[locale==='fa'?'تفکر':'Thinking']:[]),
+    ...(webOn&&canSearch?[webMode==='research'?(locale==='fa'?'تحقیق':'Research'):(locale==='fa'?'وب':'Web')]:[]),
+    ...(mediaAction!=='off'?[mediaAction==='generate'?(locale==='fa'?'تصویر':'Image'):(locale==='fa'?'تحلیل عکس':'Image check')]:[])
+  ];
+  $('active-tools-chip').hidden=activeFeatures.length===0;
+  $('active-tools-label').textContent=activeFeatures.join(' · ');
+  $('active-tools-chip').setAttribute('aria-label',locale==='fa'?'مدیریت ابزارهای فعال: '+activeFeatures.join('، '):'Manage active tools: '+activeFeatures.join(', '));
   $('attach-media-analyze').hidden=!mediaCaps.analyze;
   $('attach-media-generate').hidden=!mediaCaps.generate;
   $('attach-media-analyze').disabled=busy||!mediaCaps.analyze;
@@ -587,13 +600,19 @@ async function requestSearchConsent(){
  if(allowed){$('lookup-consent').checked=true;$('lookup-consent').dispatchEvent(new Event('change'));}
  return allowed;
 }
-$('web-search-toggle').onclick=async()=>{
- if(busy||$('web-search-toggle').disabled)return;
- const mode=activeMode,next=activeWebMode()==='off'?'web':'off';
+async function selectWebTool(requested){
+ const control=$(requested==='research'?'web-research-toggle':'web-search-toggle');
+ if(busy||control.disabled)return;
+ const section=activeMode,next=activeWebMode()===requested?'off':requested;
  if(next!=='off'&&!await requestSearchConsent())return;
- if(activeMode!==mode||busy)return;
- webModeByMode[mode]=next;renderStatus();
-};
+ if(activeMode!==section||busy)return;
+ webModeByMode[section]=next;
+ closeAttach();
+ renderStatus();
+ $('message').focus({preventScroll:true});
+}
+$('web-search-toggle').onclick=()=>{void selectWebTool('web');};
+$('web-research-toggle').onclick=()=>{void selectWebTool('research');};
 $('web-search-depth').onchange=()=>{
  if(busy||activeWebMode()==='off')return;
  webModeByMode[activeMode]=$('web-search-depth').value==='research'?'research':'web';
@@ -688,6 +707,11 @@ $('media-file').onchange=()=>{
 $('media-draft-remove').onclick=clearMediaDraft;
 function closeAttach(focus=false){$('attach-options').hidden=true;$('attach-toggle').setAttribute('aria-expanded','false');if(focus)$('attach-toggle').focus();}
 $('attach-toggle').onclick=()=>{if(busy)return;const opening=$('attach-options').hidden;$('attach-options').hidden=!opening;$('attach-toggle').setAttribute('aria-expanded',String(opening));};
+$('active-tools-chip').onclick=()=>{
+ if(busy)return;
+ $('attach-toggle').click();
+ if(!$('attach-options').hidden)$('thinking-toggle').focus({preventScroll:true});
+};
 $('attach-file').onclick=()=>{closeAttach();$(activeMode==='build'?'build-import':'file').click();};
 function chooseAction(mode,tool){if(busy)return;switchMode(mode,{carryDraft:true});$('tool').value=tool;$('workspace-tool').value=tool;closeAttach();translate();$('message').placeholder=t(tool==='ai_web'?'webPlaceholder':mode==='worker'?'inspectionPlaceholder':'placeholder');$('message').focus();}
 $('attach-chat').onclick=()=>chooseAction('chat','auto');
@@ -810,7 +834,7 @@ document.addEventListener('pointerdown',event=>{if(!$('mode-picker').contains(ev
 $('workspace-tool').onchange=()=>{thinkingEnabled=false;$('tool').value=$('workspace-tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
 $('tool').onchange=()=>{$('workspace-tool').value=$('tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
 function rememberLocalModel(){const model=$('model').value;if(Object.hasOwn(localModels,model))try{localStorage.setItem('malguard.ai.localModel.v1',model);}catch{}}
-$('thinking-toggle').onclick=()=>{if($('thinking-toggle').disabled||busy)return;thinkingEnabled=!thinkingEnabled;renderStatus();};
+$('thinking-toggle').onclick=()=>{if($('thinking-toggle').disabled||busy)return;thinkingEnabled=!thinkingEnabled;closeAttach();renderStatus();$('message').focus({preventScroll:true});};
 $('workspace-model').onchange=()=>{thinkingEnabled=false;renderStatus();};
 $('model').onchange=()=>{if($('model').value==='__desktop'){$('model').value=lastSelectedModel;openDesktopModels();return;}if($('model').value==='__downloads'){$('model').value=lastSelectedModel;void offerLocalModels();return;}modelChosen=true;thinkingEnabled=false;rememberLocalModel();renderStatus();};
 for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()=>{
@@ -824,7 +848,7 @@ for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()
 for(const m of Object.values(desktopModels)){const option=el('option',`${m.label} · ~${m.downloadGB} GB`);option.value=m.id;$('desktop-model').append(option);}
 async function checkLocalDevice(){localCapabilityReason='checking';localReady=false;renderStatus();const result=await localCapabilityDetails();localReady=result.ready;localCapabilityReason=result.reason;renderStatus();}
 $('retry-local-capability').onclick=()=>{void checkLocalDevice();};
-$('open-downloads').onclick=()=>{if(!busy)$('download-hub').showModal();};$('hub-browser').onclick=()=>{$('download-hub').close();void offerLocalModels();};$('hub-desktop').onclick=()=>{$('download-hub').close();openDesktopModels();};$('copy-desktop-command').onclick=async()=>{try{await navigator.clipboard.writeText(desktopModels[$('desktop-model').value].command);$('copy-desktop-command').textContent=t('commandCopied');}catch{$('desktop-command').focus();}};
+$('open-downloads').onclick=()=>{if(!busy){closeAttach();$('download-hub').showModal();}};$('hub-browser').onclick=()=>{$('download-hub').close();void offerLocalModels();};$('hub-desktop').onclick=()=>{$('download-hub').close();openDesktopModels();};$('copy-desktop-command').onclick=async()=>{try{await navigator.clipboard.writeText(desktopModels[$('desktop-model').value].command);$('copy-desktop-command').textContent=t('commandCopied');}catch{$('desktop-command').focus();}};
 $('desktop-model').onchange=updateDesktopInfo;for(const field of ['desktop-ram-gb','desktop-free-gb','desktop-gpu-gb'])$(field).addEventListener('input',updateDesktopInfo);$('manage-desktop-models').onclick=openDesktopModels;$('desktop-connect').onclick=connectDesktop;
 $('desktop-download').onclick=downloadDesktop;
 $('desktop-cancel-download').onclick=()=>{desktopDownloadController?.abort(new DOMException('Cancelled by user','AbortError'));desktopChat.stop();};
