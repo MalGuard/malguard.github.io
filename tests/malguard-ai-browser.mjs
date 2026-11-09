@@ -346,4 +346,50 @@ try{
  await samsungContext.close();console.log('PASS Samsung Android Ollama incompatibility and visible small-model alternative');
 
 
+
+ // WCAG readability and interactive small-screen controls in explicit Day mode.
+ for(const width of [320,390,768,1280]){
+  const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
+  await skipWelcome(context);
+  await context.addInitScript(()=>localStorage.setItem('malguard-theme','light'));
+  page.on('pageerror',e=>errors.push(e.message));
+  await context.route('**/*',r=>isModelsRoute(r)?gatewayFixture(r):isCFRoute(r)?cfFixture(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
+  await page.goto(base+'/ai/');
+  await page.waitForFunction(()=>document.querySelector('#send')?.dataset.modelReady==='true'&&document.documentElement.dataset.theme==='light');
+  assert.equal(await page.locator('body').evaluate(n=>n.classList.contains('mg-ai-v4')),true,'Horizon v4 shell');
+  assert.equal(await page.locator('#thinking-toggle').isVisible(),false,'Hidden tools must not crowd the composer');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Light page horizontal overflow at '+width+'px');
+  await page.locator('#attach-toggle').click();
+  assert.equal(await page.locator('#thinking-toggle').isVisible(),true);
+  assert.equal(await page.locator('#web-search-toggle').isVisible(),true);
+  const result=await page.evaluate(()=>{
+   const srgb=x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4;};
+   const rgb=x=>{const m=String(x).match(/rgba?\(([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/);return m?[+m[1],+m[2],+m[3]]:null;};
+   const lum=x=>{const v=rgb(x);return v?v.reduce((sum,c,i)=>sum+srgb(c)*[.2126,.7152,.0722][i],0):null;};
+   const ratio=(a,b)=>{const x=lum(a),y=lum(b);return x===null||y===null?0:(Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+   const pair=(fg,bg)=>{const a=document.querySelector(fg),b=document.querySelector(bg);return {text:fg,surface:bg,ratio:ratio(getComputedStyle(a).color,getComputedStyle(b).backgroundColor),foreground:getComputedStyle(a).color,background:getComputedStyle(b).backgroundColor};};
+   const rect=id=>{const r=document.querySelector(id).getBoundingClientRect();return {id,left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
+   return {
+    theme:document.documentElement.dataset.theme,
+    surfaces:['.navigation','.composer-shell','#attach-options'].map(sel=>({sel,color:getComputedStyle(document.querySelector(sel)).backgroundColor})),
+    pairs:[pair('#message','.composer-shell'),pair('#model','.composer-shell'),pair('.intro h1','body'),pair('.navigation .navigation-new','.navigation'),pair('#web-search-toggle','#attach-options'),pair('#thinking-toggle','#attach-options')],
+    rects:['#attach-toggle','#model','#send'].map(rect),
+    drawer:rect('#attach-options')
+   };
+  });
+  assert.equal(result.theme,'light');
+  for(const v of result.pairs)assert.ok(v.ratio>=4.5,'Day contrast below 4.5 at '+width+'px: '+JSON.stringify(v));
+  for(const v of result.surfaces)assert.ok(v.sel==='.composer-shell'||v.color==='rgb(255, 255, 255)','Day navigation/menu remained dark: '+JSON.stringify(v));
+  for(const r of result.rects)assert.ok(r.left>=-1&&r.right<=width+1,'Composer control clipped at '+width+'px: '+JSON.stringify(r));
+  assert.ok(result.drawer.left>=0&&result.drawer.right<=width+1&&result.drawer.top>=0,'Tools drawer clipped at '+width+'px: '+JSON.stringify(result.drawer));
+  if([320,390,1280].includes(width)){
+   await mkdir('test-results/malguard-ai',{recursive:true});
+   await page.screenshot({path:'test-results/malguard-ai/horizon-light-tools-'+width+'.png',fullPage:true});
+   await page.keyboard.press('Escape');
+   await page.screenshot({path:'test-results/malguard-ai/horizon-light-'+width+'.png',fullPage:true});
+  }
+  assert.deepEqual(errors,[]);
+  await context.close();
+  console.log('PASS Horizon v4 daylight contrast and tools at '+width+'px');
+ }
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
