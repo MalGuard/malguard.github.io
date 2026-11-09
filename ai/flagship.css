@@ -1,0 +1,209 @@
+/* Scoped to MalGuard AI. Existing application and security controls stay intact. */
+body.mg-ai-v2.mg-flagship {
+ --ai-surface:#101c2c;--ai-rail:#07101e;--ai-raised:#18273b;--ai-raised-hover:#203a58;
+ --ai-fg:#f4f8ff;--ai-secondary:#c2cee0;--ai-faint:#a9bad0;
+ --ai-stroke:#42556e;--ai-stroke-hover:#7494b9;--ai-focus:#68c9ff;
+ --ink:var(--ai-fg);--muted:var(--ai-secondary);--line:var(--ai-stroke);
+ --flagship-blue:#0079ed;--flagship-selected:#12385c;--flagship-canvas:#040b17;
+ font-family:Arial,system-ui,sans-serif;color:var(--ai-fg);overflow-x:clip;
+}
+html:root body.mg-deep-space.mg-ai-v2.mg-flagship.mg-flagship {background:var(--flagship-canvas)!important}
+html:root body.mg-deep-space.mg-ai-v2.mg-flagship::before {
+ background:linear-gradient(#02091880,#02091888),url('./milky-way-background.webp') center/cover no-repeat!important;
+ opacity:.9!important;
+}
+html:root body.mg-deep-space.mg-ai-v2.mg-flagship::after {
+ inset:auto 0 0 0!important;height:180px!important;
+ background:linear-gradient(to bottom,transparent,#040b1770),url('/assets/malguard-earth-background.png') center top/100% auto no-repeat!important;
+ opacity:.85!important;
+}
+body.mg-flagship [hidden]{display:none!important}
+body.mg-flagship button,body.mg-flagship summary,body.mg-flagship select {touch-action:manipulation}
+body.mg-flagship :is(button,a,summary,select,input,textarea):focus-visible {outline:2px solid var(--ai-focus);outline-offset:3px}
+body.mg-flagship button:disabled{opacity:.5;cursor:not-allowed}
+body.mg-ai-v2.mg-flagship .navigation {width:248px;background:var(--ai-rail);padding:20px 14px;border-right:1px solid #27405a;gap:14px}
+body.mg-ai-v2.mg-flagship:not(.navigation-closed):not(.auth-required){padding-left:248px}
+body.mg-ai-v2.mg-flagship .navigation-heading {margin-bottom:12px}
+body.mg-ai-v2.mg-flagship .navigation #mode-toggle {gap:6px;padding:0}
+body.mg-ai-v2.mg-flagship .navigation #mode-toggle strong {font-size:19px;letter-spacing:-.5px}
+body.mg-ai-v2.mg-flagship .navigation #mode-toggle img {width:32px;height:32px}
+body.mg-ai-v2.mg-flagship .navigation-new {background:linear-gradient(#0872d3,#0058c7);border:1px solid #53baff;box-shadow:0 0 14px #008cff30;color:#fff;justify-content:center}
+body.mg-flagship .navigation-shortcuts-label{display:none}
+body.mg-ai-v2.mg-flagship .navigation-shortcut{min-height:44px;border-radius:9px;gap:12px}
+body.mg-flagship .navigation-shortcut svg{height:20px;width:20px;flex-shrink:0}
+body.mg-ai-v2.mg-flagship .navigation-shortcut[aria-pressed=true]{background:var(--flagship-selected);box-shadow:inset 0 0 0 1px #3188dc;color:var(--ai-fg)}
+body.mg-ai-v2.mg-flagship .site-header {height:64px;min-height:64px;padding:10px 24px;border-bottom:0;background:transparent;gap:12px}
+body.mg-flagship #experience-tabs,body.mg-flagship .experience-current {display:none}
+body.mg-flagship .flagship-mobile-brand {display:flex;align-items:center;gap:8px;color:var(--ai-fg);text-decoration:none;font-size:17px}
+body.mg-flagship .flagship-mobile-brand img{width:32px;height:32px}
+body.mg-ai-v2.mg-flagship main:not(#entry-gate){width:min(100% - 48px,1140px)}
+body.mg-ai-v2.mg-flagship .workspace,
+body.mg-ai-v2.mg-flagship .workspace:has(.conversation:empty),
+body.mg-ai-v2.mg-flagship .workspace:has(.conversation:not(:empty)){
+ display:flex;flex-direction:column;justify-content:flex-start;height:auto;min-height:calc(100dvh - 64px);padding:20px 0 90px;gap:0;
+}
+body.mg-ai-v2.mg-flagship .intro {display:block;max-width:900px;margin:0 auto 24px;text-align:center}
+body.mg-flagship .flagship-mark {display:block;width:70px;height:70px;margin:0 auto 14px;filter:drop-shadow(0 4px 18px #38b6ff55)}
+body.mg-ai-v2.mg-flagship .intro h1 {font-size:clamp(28px,3.4vw,43px);line-height:1.15;font-weight:700;letter-spacing:-1.2px;color:var(--ai-fg)}
+body.mg-ai-v2.mg-flagship .intro .flagship-subtitle {font-size:16px;line-height:1.55;max-width:660px;margin:14px auto 0;color:var(--ai-secondary)}
+body.mg-flagship #experience-kicker,body.mg-flagship #quick-suggestions,body.mg-flagship #build-start-hint {display:none!important}
+body.mg-flagship .flagship-modes {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;width:min(100%,920px);margin:0 auto 28px}
+body.mg-flagship .flagship-modes button {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:128px;padding:15px 18px;background:linear-gradient(150deg,var(--ai-raised),var(--ai-rail));border:1px solid var(--ai-stroke);border-radius:17px;color:var(--ai-fg);box-shadow:inset 0 1px 0 #ffffff12}
+body.mg-flagship .flagship-modes svg {width:28px;height:28px;color:var(--ai-secondary)}
+body.mg-flagship .flagship-modes span {font-size:20px;font-weight:700}
+body.mg-flagship .flagship-modes small {font-size:12px;line-height:1.5;color:var(--ai-secondary);max-width:220px;font-weight:400}
+body.mg-flagship .flagship-modes button[aria-pressed=true] {background:linear-gradient(135deg,var(--flagship-selected),var(--ai-rail));border-color:#63bcff;box-shadow:inset 0 0 18px #008dff22,0 0 0 1px #158fff,0 0 17px #008dff35}
+body.mg-ai-v2.mg-flagship .composer-area {max-width:980px;margin:0 auto;padding-top:12px}
+body.mg-ai-v2.mg-flagship .composer-shell {display:flex;flex-direction:column;min-height:124px;padding:14px 16px;border:1px solid var(--ai-stroke-hover);border-radius:20px;background:linear-gradient(145deg,var(--ai-raised),var(--ai-surface));box-shadow:inset 0 1px 0 #c2dfff25,0 4px 24px #0003}
+body.mg-ai-v2.mg-flagship .composer-shell:focus-within {border-color:#6ac5ff;box-shadow:0 0 0 2px #168aff35}
+body.mg-ai-v2.mg-flagship #message {padding:7px 8px;min-height:48px;font-size:16px;line-height:1.5;color:var(--ai-fg);background:transparent}
+body.mg-ai-v2.mg-flagship #message::placeholder {color:var(--ai-faint)}
+body.mg-ai-v2.mg-flagship .composer-footer {display:flex;gap:10px;align-items:center;width:100%;min-width:0}
+body.mg-ai-v2.mg-flagship .composer-actions {display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+body.mg-ai-v2.mg-flagship :is(#attach-toggle,#flagship-attach) {display:flex;align-items:center;gap:7px;min-height:44px;width:auto;padding:8px 12px;background:var(--ai-raised);border:1px solid var(--ai-stroke);border-radius:11px;font-size:13px;color:var(--ai-fg)}
+body.mg-flagship :is(#attach-toggle,#flagship-attach) svg{width:19px;height:19px}
+body.mg-ai-v2.mg-flagship #model {max-width:100%;min-height:44px;font-size:12px;background:var(--ai-raised);color:var(--ai-fg);border:1px solid var(--ai-stroke);border-radius:10px}
+body.mg-ai-v2.mg-flagship .model-select-wrap {max-width:280px;min-width:0;flex:1}
+body.mg-ai-v2.mg-flagship #send {width:46px;min-width:46px;height:44px;border-radius:12px;color:white;background:linear-gradient(#0872d3,#0064e5);border:1px solid #63bcff;box-shadow:0 0 16px #008cff40;margin-inline-start:auto}
+body.mg-ai-v2.mg-flagship .composer-hints {padding-inline:3px}
+body.mg-ai-v2.mg-flagship:has(.conversation:not(:empty)) .composer-area {position:sticky;bottom:0;z-index:9;padding-top:10px;background:linear-gradient(transparent,var(--flagship-canvas) 40%)}
+body.mg-ai-v2.mg-flagship[data-view=home] .composer-area {position:static;background:none}
+body.mg-flagship .flagship-actions {display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:22px 0 28px}
+body.mg-flagship .flagship-actions button,body.mg-flagship .flagship-code-actions button {display:flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 18px;border:1px solid var(--ai-stroke);border-radius:24px;background:var(--ai-surface);color:var(--ai-fg);font-size:13px}
+body.mg-flagship .flagship-actions svg,body.mg-flagship .flagship-code-actions svg {width:20px;height:20px;color:var(--ai-focus)}
+body.mg-flagship .flagship-work {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 16px}
+body.mg-flagship .flagship-work button {display:grid;grid-template-columns:26px 1fr;align-content:start;align-items:center;gap:10px;padding:19px 16px;text-align:start;min-height:150px;border:1px solid var(--ai-stroke);border-radius:16px;background:linear-gradient(145deg,var(--ai-raised),var(--ai-surface));color:var(--ai-fg)}
+body.mg-flagship .flagship-work svg {width:25px;height:25px;color:var(--ai-focus)}
+body.mg-flagship .flagship-work span{font-weight:700;font-size:16px}
+body.mg-flagship .flagship-work p{grid-column:1/-1;font-size:12px;line-height:1.6;color:var(--ai-secondary);margin:0}
+body.mg-ai-v2.mg-flagship .workspace-panel {padding:14px;margin-bottom:12px;background:var(--ai-surface)}
+body.mg-ai-v2.mg-flagship .conversation {width:100%;max-width:980px;margin:0 auto;gap:20px;padding:10px 0 22px;max-height:none;overflow:visible}
+body.mg-ai-v2.mg-flagship .conversation:empty{padding:0}
+body.mg-ai-v2.mg-flagship .bubble {background:linear-gradient(135deg,var(--flagship-selected),var(--ai-surface));border-color:var(--ai-stroke);border-radius:17px 17px 5px 17px;font-size:15px}
+body.mg-ai-v2.mg-flagship .result {background:var(--ai-surface);border:1px solid var(--ai-stroke);border-radius:17px;padding:20px}
+body.mg-ai-v2.mg-flagship .result .answer {font-size:15px;line-height:1.7}
+body.mg-flagship .answer :is(h2,h3,h4){font-size:1.15em;line-height:1.4;margin:1.2em 0 .5em;color:var(--ai-fg)}
+body.mg-flagship .answer :is(ul,ol){padding-inline-start:24px}
+body.mg-flagship .answer li{margin:6px 0}
+body.mg-flagship .answer p{margin:.65em 0;white-space:pre-wrap}
+body.mg-flagship .answer code{background:var(--ai-raised);border-radius:4px;padding:2px 5px;font-size:.9em}
+body.mg-flagship .answer-table-wrap{overflow:auto;max-width:100%;border:1px solid var(--ai-stroke);border-radius:10px}
+body.mg-flagship .answer table{border-collapse:collapse;width:100%;font-size:13px}
+body.mg-flagship .answer :is(th,td){padding:10px 12px;text-align:start;border-bottom:1px solid var(--ai-stroke);min-width:90px}
+body.mg-flagship .answer th{background:var(--ai-raised)}
+body.mg-flagship .flagship-network{padding:12px;border:1px solid var(--ai-stroke);border-radius:10px;background:var(--ai-raised);font-size:13px}
+body.mg-flagship[data-view=home] .conversation {display:none}
+body.mg-flagship[data-view=chat]:has(.conversation:not(:empty)) .intro {display:none}
+body.mg-flagship[data-view=chat]:has(.conversation:not(:empty)) .flagship-modes {margin-bottom:14px}
+body.mg-flagship[data-view=chat]:has(.conversation:not(:empty)) .flagship-modes button{min-height:85px;flex-direction:row;flex-wrap:wrap;gap:7px;padding:10px}
+body.mg-flagship[data-view=chat]:has(.conversation:not(:empty)) .flagship-modes small{display:none}
+body.mg-flagship .flagship-dock{display:none}
+
+/* Code uses the real project and isolated web preview; no terminal imitation. */
+body.mg-ai-v2.mg-flagship .build-panel {background:var(--ai-surface);border:1px solid var(--ai-stroke);border-radius:16px;padding:16px;margin:0 0 16px;max-height:none;overflow:visible}
+body.mg-ai-v2.mg-flagship .build-heading h2{font-size:18px}
+body.mg-ai-v2.mg-flagship .build-toolbar :is(button,select,input),body.mg-ai-v2.mg-flagship .build-view-bar button{min-height:44px}
+body.mg-ai-v2.mg-flagship .build-columns {display:grid;grid-template-columns:1fr}
+body.mg-ai-v2.mg-flagship .build-view-tabs {display:flex}
+body.mg-flagship .build-columns[data-view=code] .preview-pane,body.mg-flagship .build-columns[data-view=preview] .editor-pane{display:none}
+body.mg-flagship .flagship-file-tabs{display:flex;gap:3px;overflow:auto;max-width:100%;padding:5px;background:var(--ai-raised);border-bottom:1px solid var(--ai-stroke)}
+body.mg-flagship .flagship-file-tabs button{min-height:44px;border:0;border-radius:6px;white-space:nowrap;padding:8px 12px;background:transparent;color:var(--ai-secondary);font:12px monospace}
+body.mg-flagship .flagship-file-tabs button[aria-pressed=true]{background:var(--ai-surface);color:var(--ai-fg);box-shadow:inset 0 -2px #40baff}
+body.mg-flagship .flagship-editor{position:relative;background:#091421}
+body.mg-ai-v2.mg-flagship #build-editor,body.mg-flagship .flagship-syntax {box-sizing:border-box;margin:0;border:0;border-radius:0;padding:16px;font:13px/1.8 Consolas,monospace;letter-spacing:normal;tab-size:2;white-space:pre;overflow:auto;overflow-wrap:normal;width:100%;height:320px;min-height:320px}
+body.mg-ai-v2.mg-flagship #build-editor{position:relative;background:transparent;color:transparent;caret-color:#f4f8ff;resize:none;-webkit-text-fill-color:transparent}
+body.mg-flagship .flagship-syntax {position:absolute;inset:0;pointer-events:none;background:transparent;color:#e7f0ff;scrollbar-width:none}
+body.mg-flagship .flagship-syntax::-webkit-scrollbar{display:none}
+body.mg-flagship #build-editor::selection{background:#4676ae88}
+body.mg-flagship .flagship-code-actions {display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 14px}
+body.mg-flagship #flagship-code-notice {width:100%;margin:0;font-size:12px;text-align:center;line-height:1.5}
+body.mg-flagship .entry-content{max-width:740px;background:linear-gradient(145deg,var(--ai-raised),var(--ai-rail));border-color:var(--ai-stroke);color:var(--ai-fg)}
+body.mg-flagship .entry-actions #entry-signin{background:#086ac6;color:white;border-color:#63bcff;min-height:44px}
+body.mg-flagship.auth-required .flagship-dock{display:none}
+@media(min-width:1100px){
+ body.mg-ai-v2.mg-flagship[data-view=build][data-project-open=true] .workspace{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);grid-template-rows:auto auto auto auto auto;gap:14px 18px;align-content:start;grid-template-areas:'intro intro' 'modes modes' 'editor conversation' 'code-actions activity' 'composer composer' }
+ body.mg-flagship[data-view=build] .intro{grid-area:intro;margin-bottom:0}
+ body.mg-flagship[data-view=build] .flagship-mark{width:46px;height:46px;margin-bottom:8px}
+ body.mg-flagship[data-view=build] .intro h1{font-size:30px}
+ body.mg-flagship[data-view=build] .flagship-modes{grid-area:modes;margin-bottom:4px}
+ body.mg-flagship[data-view=build] .flagship-modes button{min-height:88px}
+ body.mg-flagship[data-view=build] .flagship-modes small{display:none}
+ body.mg-ai-v2.mg-flagship[data-view=build] #build-panel{grid-area:editor;max-height:none;overflow:visible;padding:14px}
+ body.mg-ai-v2.mg-flagship[data-view=build] .conversation{grid-area:conversation;max-height:620px;overflow:auto;padding:0 4px 10px;align-self:stretch}
+ body.mg-flagship[data-view=build] .conversation:empty::before{content:'MalGuard AI Assistant\A\AAsk about your code below. Choose Explain, Debug, Refactor, or Generate tests to start.\A\AYour project stays in this page. Share a file only when you choose.';white-space:pre-line;display:block;padding:22px;background:var(--ai-surface);border:1px solid var(--ai-stroke);border-radius:16px;font-size:14px;line-height:1.7;color:var(--ai-secondary)}
+ body.mg-flagship[data-view=build] .flagship-code-actions{grid-area:code-actions}
+ body.mg-ai-v2.mg-flagship[data-view=build] .composer-area{grid-area:composer;width:100%;max-width:none;position:static;background:none}
+}
+@media(max-width:1000px){body.mg-flagship .flagship-work{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){
+ body.mg-ai-v2.mg-flagship:not(.auth-required){padding-left:0;padding-bottom:78px}
+ body.mg-ai-v2.mg-flagship:not(.navigation-closed):not(.auth-required){padding-left:0}
+ body.mg-ai-v2.mg-flagship .site-header{padding:8px 12px;height:64px;gap:8px}
+ body.mg-flagship .header-actions a[href='/ai/help/']{display:none}
+ body.mg-flagship .flagship-mobile-brand{font-size:16px}
+ body.mg-ai-v2.mg-flagship .header-actions{gap:4px}
+ body.mg-ai-v2.mg-flagship main:not(#entry-gate){width:calc(100% - 28px)}
+ body.mg-ai-v2.mg-flagship .workspace,body.mg-ai-v2.mg-flagship .workspace:has(.conversation:empty),body.mg-ai-v2.mg-flagship .workspace:has(.conversation:not(:empty)){padding:22px 0 40px;min-height:calc(100svh - 150px)}
+ body.mg-flagship .flagship-mark{width:58px;height:58px;margin-bottom:13px}
+ body.mg-ai-v2.mg-flagship .intro{margin-bottom:22px}
+ body.mg-ai-v2.mg-flagship .intro h1{font-size:clamp(27px,7.5vw,36px);letter-spacing:-.8px}
+ body.mg-ai-v2.mg-flagship .intro .flagship-subtitle{font-size:14px;line-height:1.5;margin-top:10px}
+ body.mg-flagship .flagship-modes{gap:8px;margin-bottom:20px}
+ body.mg-flagship .flagship-modes button{min-height:126px;padding:12px 7px;gap:6px;border-radius:15px}
+ body.mg-flagship .flagship-modes span{font-size:17px}
+ body.mg-flagship .flagship-modes small{font-size:11px;line-height:1.35}
+ body.mg-flagship .flagship-modes svg{width:26px;height:26px}
+ body.mg-ai-v2.mg-flagship .composer-shell{padding:12px 10px;min-height:120px;border-radius:18px}
+ body.mg-ai-v2.mg-flagship .composer-footer{gap:6px;flex-wrap:wrap}
+ body.mg-ai-v2.mg-flagship .composer-actions{gap:6px;flex-wrap:wrap;flex:1 1 190px}
+ body.mg-ai-v2.mg-flagship :is(#attach-toggle,#flagship-attach){padding:8px;font-size:12px;min-height:44px}
+ body.mg-ai-v2.mg-flagship .model-select-wrap{max-width:none;flex:1 1 90px;min-width:72px}
+ body.mg-ai-v2.mg-flagship #model{font-size:11px;width:100%}
+ body.mg-flagship #flagship-attach span{display:none}
+ body.mg-flagship .composer-keyboard-hint{display:none}
+ body.mg-flagship .flagship-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:18px 0 22px}
+ body.mg-flagship .flagship-actions button{font-size:12px;padding:8px;gap:7px}
+ body.mg-flagship .flagship-work{gap:10px}
+ body.mg-flagship .flagship-work button{padding:14px 11px;min-height:144px;gap:8px;grid-template-columns:22px 1fr}
+ body.mg-flagship .flagship-work span{font-size:14px}
+ body.mg-flagship .flagship-work p{font-size:12px}
+ body.mg-ai-v2.mg-flagship .result{padding:15px}
+ body.mg-ai-v2.mg-flagship .result .answer,body.mg-ai-v2.mg-flagship .bubble{font-size:14px}
+ body.mg-flagship .flagship-dock{position:fixed;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));bottom:0;inset-inline:0;z-index:20;gap:2px;padding:8px 10px max(8px,env(safe-area-inset-bottom));border:1px solid var(--ai-stroke);border-bottom:0;border-radius:24px 24px 0 0;background:var(--ai-rail)}
+ body.mg-flagship .flagship-dock button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:54px;background:transparent;border:1px solid transparent;border-radius:13px;color:var(--ai-secondary);font-size:11px;padding:5px}
+ body.mg-flagship .flagship-dock svg{width:23px;height:23px}
+ body.mg-flagship .flagship-dock button[aria-pressed=true]{background:var(--flagship-selected);color:var(--ai-fg);border-color:#288fec;box-shadow:inset 0 1px 12px #078eff33}
+ body.mg-ai-v2.mg-flagship:has(.conversation:not(:empty)) .composer-area{bottom:calc(72px + env(safe-area-inset-bottom))}
+ body.mg-ai-v2.mg-flagship[data-view=home] .composer-area{position:static}
+ body.mg-flagship:has(#message:focus) .flagship-dock{display:none}
+ body.mg-ai-v2.mg-flagship:has(#message:focus) .composer-area{bottom:0}
+ body.mg-ai-v2.mg-flagship .build-toolbar{gap:7px}
+ body.mg-ai-v2.mg-flagship .build-toolbar input{flex:1;min-width:90px;width:120px}
+ body.mg-ai-v2.mg-flagship .build-panel{padding:12px}
+ body.mg-flagship .flagship-code-actions button{padding:8px 11px;font-size:12px}
+ body.mg-flagship .flagship-code-actions svg{display:none}
+ body.mg-flagship .entry-content{padding:25px 18px}
+ body.mg-flagship .entry-capabilities{gap:8px}
+}
+/* Light mode is a complete surface palette, not an inversion of the background. */
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2.mg-flagship {
+ --ai-surface:#ffffff;--ai-rail:#edf3fb;--ai-raised:#e9f1fb;--ai-raised-hover:#d8e7f9;
+ --ai-fg:#152b46;--ai-secondary:#354e6b;--ai-faint:#48617d;--ai-stroke:#a8bad0;
+ --ai-stroke-hover:#6c8bab;--ai-focus:#0062b8;--flagship-selected:#d4e8ff;--flagship-canvas:#f4f8ff;
+ --ink:var(--ai-fg);--muted:var(--ai-secondary);--line:var(--ai-stroke);color-scheme:light;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-deep-space.mg-ai-v2.mg-flagship::before{opacity:.05!important}
+html:is(.theme-light,[data-theme=light]) body.mg-deep-space.mg-ai-v2.mg-flagship::after{opacity:.1!important}
+html:is(.theme-light,[data-theme=light]) body.mg-flagship :is(.flagship-mark,.flagship-mobile-brand img,.ai-product-mark,.entry-mark){filter:brightness(.25)}
+html:is(.theme-light,[data-theme=light]) body.mg-flagship .flagship-editor{background:#f6f9ff}
+html:is(.theme-light,[data-theme=light]) body.mg-flagship .flagship-syntax{color:#142a43}
+html:is(.theme-light,[data-theme=light]) body.mg-flagship #build-editor{caret-color:#142a43}
+html:is(.theme-light,[data-theme=light]) body.mg-flagship .tok-comment{color:#536478}
+html:is(.theme-light,[data-theme=light]) body.mg-flagship .tok-string{color:#166534}
+html:is(.theme-light,[data-theme=light]) body.mg-flagship .tok-keyword{color:#075cbb}
+html:is(.theme-light,[data-theme=light]) body.mg-flagship .tok-number{color:#903b08}
+@media(prefers-reduced-motion:reduce){body.mg-flagship *,body.mg-flagship *::before,body.mg-flagship *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(forced-colors:active){body.mg-flagship .flagship-syntax{display:none}body.mg-ai-v2.mg-flagship #build-editor{-webkit-text-fill-color:CanvasText;color:CanvasText;caret-color:CanvasText}body.mg-flagship button[aria-pressed=true]{outline:2px solid Highlight}}
+
+body.mg-flagship .help-entry{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:7px 10px;text-decoration:none;font-size:13px}
+body.mg-flagship #flagship-action-status{margin:0;text-align:center;font-size:12px;line-height:1.5}
