@@ -23,6 +23,9 @@ const cfFixtures=[
 const isCFRoute=r=>new URL(r.request().url()).origin===CLOUD_ORIGIN;
 const isModelsRoute=r=>new URL(r.request().url()).origin===MODELS_ORIGIN;
 const gatewayModels=[
+ {id:'chat_auto',mode:'chat',label:'Auto · Chat',provider:'malguard_auto',available:true},
+ {id:'work_auto',mode:'work',label:'Auto · Work',provider:'malguard_auto',available:true},
+ {id:'code_auto',mode:'code',label:'Auto · Code',provider:'malguard_auto',available:true},
  {id:'chat_granite',mode:'chat',label:'Granite 4 Micro · Efficient',provider:'workers_ai_rest',available:true},
  {id:'chat_think',mode:'chat',label:'GPT-OSS 20B · Deep Chat',provider:'workers_ai_rest',available:true},
  {id:'chat_flash',mode:'chat',label:'Gemini 3.5 Flash-Lite',provider:'gemini',available:true},
@@ -35,7 +38,7 @@ function gatewayFixture(route){
  const req=route.request(),url=new URL(req.url());
  const headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Allow-Methods':'GET, POST, OPTIONS'};
  if(req.method()==='OPTIONS')return route.fulfill({status:204,headers});
- if(req.method()==='GET'&&url.pathname==='/api/public-models')return route.fulfill({contentType:'application/json',headers,body:JSON.stringify({models:gatewayModels,thinking:{available:true,provider:'workers_ai_rest',byMode:{chat:true,work:true,code:true}},accountQuota:{enabled:false}})});
+ if(req.method()==='GET'&&url.pathname==='/api/public-models')return route.fulfill({contentType:'application/json',headers,body:JSON.stringify({models:gatewayModels,thinking:{available:true,provider:'workers_ai_rest',byMode:{chat:true,work:true,code:true}},search:{available:true,provider:'tavily',modes:['web','research']},accountQuota:{enabled:false}})});
  if(req.method()!=='POST'||url.pathname!=='/api/public-model-chat')throw Error('unexpected gateway endpoint');
  assert.equal(req.headers().authorization,'Bearer synthetic-session-valid-user');
  const body=req.postDataJSON();
@@ -43,9 +46,12 @@ function gatewayFixture(route){
  const selected=gatewayModels.find(m=>m.id===body.model&&m.mode===body.mode);
  assert.ok(selected,'models from another section must never reach inference');
  modelPostRequests++;
- const provider=selected.provider,model=provider==='gemini'?'gemini-3.5-flash-lite':body.thinking?'@cf/openai/gpt-oss-20b':'@cf/ibm-granite/granite-4.0-h-micro';
- const message=body.message==='سلام'?'پاسخ فارسی آزمایشی':`Benign test reply ${body.history.length}`;
- return route.fulfill({contentType:'application/json',headers,body:JSON.stringify({text:message,provider,model,modelId:body.model,thinking:body.thinking===true})});
+ const provider=selected.provider==='malguard_auto'?'workers_ai_rest':selected.provider,model=provider==='gemini'?'gemini-3.5-flash-lite':body.thinking?'@cf/openai/gpt-oss-20b':'@cf/ibm-granite/granite-4.0-h-micro';
+ const message=body.webMode?'Verified fixture: source [1].':body.message==='سلام'?'پاسخ فارسی آزمایشی':`Benign test reply ${body.history.length}`;
+ return route.fulfill({contentType:'application/json',headers,body:JSON.stringify({text:message,provider,model,modelId:body.model,thinking:body.thinking===true,
+   ...(selected.provider==='malguard_auto'?{auto:{selectedModelId:body.mode==='chat'?'chat_granite':body.mode==='work'?'cf_gptoss20':'cf_gptoss120',selectedLabel:'Automatic model'}}:{}),
+   ...(body.webMode?{webSearch:{state:'completed',provider:'tavily',mode:body.webMode,query:body.searchQuery,checkedAt:'2026-11-08T12:00:00.000Z',
+    sources:[{citation:1,title:'Example public source',url:'https://example.org/research',excerpt:'Public research information',checkedAt:'2026-11-08T12:00:00.000Z'}]}}:{})})});
 }
 
 function cfFixture(r){
@@ -191,6 +197,21 @@ try{
    await page.locator('.response-details summary').first().click();
    await page.screenshot({path:'test-results/malguard-ai/quiet-reply-1280.png',fullPage:true});
    await page.locator('#message').fill('Continue');await page.locator('#send').click();await page.getByText('Benign test reply 2',{exact:true}).waitFor();
+   // Opt-in research is never sent before the user approves external lookup.
+   assert.equal(await page.locator('#web-search-toggle').isEnabled(),true);
+   await page.locator('#web-search-toggle').click();
+   assert.equal(await page.locator('#web-search-consent').isVisible(),true);
+   await page.locator('#web-search-consent button[value="allow"]').click();
+   await page.locator('#web-search-depth').selectOption('research');
+   await page.locator('#message').fill('Public astronomy update');
+   await page.locator('#send').click();
+   try{await page.locator('.research-evidence').waitFor({timeout:15000});}catch(error){console.error('Research test diagnostic:',await page.locator('#conversation').innerText(), 'posts:',modelPostRequests,'search:',await page.locator('#web-search-toggle').getAttribute('aria-pressed'));throw error;}
+   assert.equal(await page.locator('.research-evidence').count(),1);
+   assert.equal(await page.locator('.research-citation').count(),1);
+   assert.equal(await page.locator('.research-source').first().getAttribute('href'),'https://example.org/research');
+   assert.equal(await page.locator('#web-search-toggle').getAttribute('aria-pressed'),'true');
+   await page.locator('#web-search-toggle').click();
+
    assert.equal(await page.locator('html').getAttribute('lang'),'en');
    await page.locator('#model').selectOption('chat_flash');await page.locator('#message').fill('سلام');await page.locator('#send').click();await page.getByText('پاسخ فارسی آزمایشی',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
    await toggleSettings(page);await page.locator('#mode').selectOption('worker');await toggleSettings(page);await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
@@ -220,7 +241,7 @@ try{
   window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{generated:{text:'پاسخ محلی آزمایشی',provider:'on_device',model:data.model,securityAnalysis:false}}}),5);}terminate(){}};
  });
  const beforeLocal=requests,localExternal=[];await device.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();localExternal.push(r.request().url());return r.abort();});
- await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');assert.equal(await localPage.locator('#model').inputValue(),'chat_granite','Prefer the fast Cloudflare chat model without downloading');
+ await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');assert.equal(await localPage.locator('#model').inputValue(),'chat_auto','Prefer automatic available Chat model without downloading');
  await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
  assert.equal(await localPage.locator('#local-welcome').isVisible(),false,'local downloads must remain opt-in');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.locator('#model').selectOption('local_fast');

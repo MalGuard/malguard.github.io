@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {CF_DEFAULTS,fetchCFModels,isNewCloudModel,callCFModel} from '../ai/cloudflare-models.mjs';
 
 test('fast and efficient defaults are part of MalGuard AI, without dropping existing models',()=>{
- assert.deepEqual(CF_DEFAULTS,{chat:'chat_granite',work:'cf_gptoss20',code:'cf_gptoss120'});
+ assert.deepEqual(CF_DEFAULTS,{chat:'chat_auto',work:'work_auto',code:'code_auto'});
  for(const id of ['chat_granite','cf_gptoss20','cf_gptoss120','cf_qwen3','cf_gemma4'])assert.equal(isNewCloudModel(id),true);
  assert.equal(isNewCloudModel('chat_flash'),false);
 });
@@ -63,7 +63,7 @@ test('Thinking button is keyboard accessible, defaults off and links to a real r
  assert.match(app,/DESKTOP_MODEL_MODES/);
  assert.match(app,/thinkingEnabled=false; \/\/ Explicit opt-in per mode/);
  assert.match(app,/isNewCloudModel\(m\.id\)/);
- assert.match(app,/thinking-new-20261108/);
+ assert.match(app,/search-auto-20261108/);
  assert.match(css,/thinking-toggle:focus-visible/);
  assert.match(css,/model-status\[data-new=true\]/);
 });

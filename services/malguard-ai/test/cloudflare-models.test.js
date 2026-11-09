@@ -22,7 +22,7 @@ test('catalog loads ONLY verified gateway advertisements from Vercel, never from
  assert.equal(count,1);
  assert.deepEqual(found.filter(m=>m.available).sort((a,b)=>a.id.localeCompare(b.id)),expected.slice().sort((a,b)=>a.id.localeCompare(b.id)));
  assert.equal(found.accountQuotaEnabled,false);
- assert.deepEqual(CF_DEFAULTS,{chat:'chat_granite',work:'cf_gptoss20',code:'cf_gptoss120'});
+ assert.deepEqual(CF_DEFAULTS,{chat:'chat_auto',work:'work_auto',code:'code_auto'});
  assert.ok(found.filter(m=>!m.available).every(x=>!expected.some(y=>y.id===x.id)));
 });
 
@@ -76,7 +76,7 @@ test('standalone Safari app has its own identity and no overlay report button',(
  assert.match(html,/name="apple-mobile-web-app-capable" content="yes"/);
  assert.match(html,/rel="manifest" href="\.\/manifest\.webmanifest"/);
  assert.match(html,/connect-src[^\"]+https:\/\/game-scam-guard-connected\.vercel\.app https:\/\/models\.malguard\.site/);
- assert.match(html,/app\.js\?v=experience-v3-20261108/);
+ assert.match(html,/app\.js\?v=media-v5-20261108/);
  assert.doesNotMatch(html,/report-launcher\.js/);
 });
 test('model reconnection refreshes the catalog when Safari app resumes',()=>{
