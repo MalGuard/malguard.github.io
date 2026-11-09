@@ -111,6 +111,8 @@ body.mg-ai-v2 :is(.flagship-actions,.build-file-tabs) button {
   font-size:12px;
 }
 body.mg-ai-v2 #work-actions { margin-inline:auto; }
+body.mg-ai-v2 #work-document-status { width:100%;text-align:center;color:var(--ai-secondary);font-size:12px;margin:0; }
+body.mg-ai-v2 #work-document-status:empty { display:none; }
 body.mg-ai-v2 #work-research[aria-pressed=true] { background:var(--flagship-selected);color:var(--flagship-accent); }
 body.mg-ai-v2[data-view=worker] .intro .quick-suggestions { margin-top:17px; }
 body.mg-ai-v2[data-view=build] .intro { display:block;grid-area:mode;margin-bottom:16px; }

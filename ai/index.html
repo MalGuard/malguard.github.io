@@ -19,8 +19,8 @@
   
   <link rel="icon" href="./malguard-ai-orbit.svg?v=20261028-mono" type="image/svg+xml"><link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261104-ai-png"><meta name="apple-mobile-web-app-title" content="MalGuard AI"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./style.css?v=thinking-new-20261108">
-  <script type="module" src="./app.js?v=media-v5-20261108-flagship-1"></script>
-<link rel="stylesheet" href="/assets/precision/deep-space-global.css?v=20261102-soft-halo"><link rel="stylesheet" href="/assets/precision/mg-theme.css?v=20261105"><script src="/assets/precision/mg-theme.js?v=20261105" defer></script><link rel="stylesheet" href="./experience-v2.css?v=20261108-media5"><link rel="stylesheet" href="./polish-20261109.css?v=1"><script type="module" src="./polish-20261109.mjs?v=1"></script><link rel="stylesheet" href="./flagship.css?v=2"></head>
+  <script type="module" src="./app.js?v=media-v5-20261108-flagship-2"></script>
+<link rel="stylesheet" href="/assets/precision/deep-space-global.css?v=20261102-soft-halo"><link rel="stylesheet" href="/assets/precision/mg-theme.css?v=20261105"><script src="/assets/precision/mg-theme.js?v=20261105" defer></script><link rel="stylesheet" href="./experience-v2.css?v=20261108-media5"><link rel="stylesheet" href="./polish-20261109.css?v=1"><script type="module" src="./polish-20261109.mjs?v=1"></script><link rel="stylesheet" href="./flagship.css?v=3"></head>
 <body class="mg-deep-space mg-ai-v2 auth-required" data-view="home">
   <main id="entry-gate" class="entry-gate" aria-labelledby="entry-title">
     <section class="entry-content">
@@ -81,7 +81,7 @@
         <aside aria-labelledby="tools-title">
           <div class="toolbox-heading"><h2 id="tools-title" data-i18n="tools">Security tools</h2><p class="muted" data-i18n="toolsHint">Every check, with sources and clear limits.</p></div>
           <div id="tools" aria-live="polite"></div>
-          <div class="tool-choice"><label for="tool" data-i18n="choose">Tool</label><select id="tool"><option value="auto" data-i18n="auto">Choose automatically</option><option value="gta_guard">GTA Guard</option><option value="game_scam_guard">Game Scam Guard</option><option value="ai_web">AI Web</option><option value="malwarebazaar">MalwareBazaar</option><option value="urlhaus">URLhaus</option><option value="file_sandbox" data-i18n="fileSandbox">File sandbox</option><option value="url_sandbox" data-i18n="urlSandbox">Link sandbox</option></select></div>
+          <div class="tool-choice"><label for="tool" data-i18n="choose">Tool</label><select id="tool"><option value="auto" data-i18n="auto">Choose automatically</option><option value="text_analysis" data-i18n="workTextAnalysis">Text analysis</option><option value="gta_guard">GTA Guard</option><option value="game_scam_guard">Game Scam Guard</option><option value="ai_web">AI Web</option><option value="malwarebazaar">MalwareBazaar</option><option value="urlhaus">URLhaus</option><option value="file_sandbox" data-i18n="fileSandbox">File sandbox</option><option value="url_sandbox" data-i18n="urlSandbox">Link sandbox</option></select></div>
           <p class="muted small" data-i18n="scope">Only the selected checks run. Isolated execution needs a separate permission.</p>
         </aside>
       </details>
@@ -118,6 +118,9 @@
         <button type="button" id="work-research" data-i18n="workResearch">Web research</button>
         <button type="button" id="work-plan" data-i18n="workPlanAction">Plan a project</button>
         <button type="button" id="work-inspect" data-i18n="workInspect">Inspect a file</button>
+        <button type="button" id="work-document" data-i18n="workDocument" aria-describedby="work-document-status">Add text document</button>
+        <input type="file" id="work-document-file" accept=".txt,.md,.csv,.json" hidden>
+        <p id="work-document-status" role="status"></p>
       </section>
       <section id="build-panel" class="build-panel" hidden aria-labelledby="build-title">
         <div class="build-heading"><div><h2 id="build-title" data-i18n="projectTitle">Build and code</h2><p class="muted" data-i18n="buildHint">Describe what to build below, review the proposed files, then apply and preview.</p></div><button id="build-export" type="button" data-i18n="exportProject">Download ZIP</button></div>
@@ -134,7 +137,7 @@
 
         <section id="workspace-panel" class="workspace-panel" aria-label="Security workspace" hidden>
           <div class="workspace-options">
-            <div><label for="workspace-tool" data-i18n="workspaceTool">Tool</label><select id="workspace-tool"><option value="auto" data-i18n="auto">Choose automatically</option><option value="gta_guard">GTA Guard</option><option value="game_scam_guard">Game Scam Guard</option><option value="ai_web">AI Web</option><option value="malwarebazaar">MalwareBazaar</option><option value="urlhaus">URLhaus</option><option value="file_sandbox" data-i18n="fileSandbox">File sandbox</option><option value="url_sandbox" data-i18n="urlSandbox">Link sandbox</option></select></div>
+            <div><label for="workspace-tool" data-i18n="workspaceTool">Tool</label><select id="workspace-tool"><option value="auto" data-i18n="auto">Choose automatically</option><option value="text_analysis" data-i18n="workTextAnalysis">Text analysis</option><option value="gta_guard">GTA Guard</option><option value="game_scam_guard">Game Scam Guard</option><option value="ai_web">AI Web</option><option value="malwarebazaar">MalwareBazaar</option><option value="urlhaus">URLhaus</option><option value="file_sandbox" data-i18n="fileSandbox">File sandbox</option><option value="url_sandbox" data-i18n="urlSandbox">Link sandbox</option></select></div>
             <div><label for="workspace-model" data-i18n="workspaceModel">Model</label><select id="workspace-model"><option value="cf_gptoss20">GPT-OSS 20B · Work</option><option value="cf_qwen3">Qwen3.8 27B · Work</option></select><span id="workspace-model-new" class="mg-model-new" hidden aria-label="New model">NEW</span></div>
           </div>
           <p id="workspace-status" role="status"></p>

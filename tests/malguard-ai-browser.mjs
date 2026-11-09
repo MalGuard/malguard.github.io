@@ -136,6 +136,13 @@ try{
    assert.equal(await page.locator('#work-actions').isVisible(),true);
    await page.locator('#work-plan').click();
    assert.match(await page.locator('#message').inputValue(),/milestones/);
+   await page.locator('#message').fill('');
+   await page.locator('#work-document-file').setInputFiles({name:'brief.txt',mimeType:'text/plain',buffer:Buffer.from('References include https://example.org/')});
+   await page.waitForFunction(()=>document.querySelector('#workspace-tool').value==='text_analysis');
+   assert.match(await page.locator('#message').inputValue(),/Summarize this document[\s\S]+https:\/\/example.org/);
+   assert.equal(modelPostRequests,modePosts,'Document import only prepares a local draft');
+   await page.locator('#message').fill('');
+   await page.locator('#workspace-tool').selectOption('auto');
    await page.locator('#experience-home').click();
    assert.equal(await page.locator('#message').inputValue(),'Draft retained across workspaces');
    await page.locator('#message').fill('');

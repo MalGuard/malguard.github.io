@@ -375,7 +375,7 @@ function renderStatus(){
  const selectedIdForMode=activeMode==='worker'?$('workspace-model').value:$('model').value;
  const selected=models.find(m=>m.id===selectedIdForMode)||cfModels.find(m=>m.id===selectedIdForMode);
  const modelLabel=selected?.label||service?.model?.model||'';
- const modelTask=activeMode!=='worker'||($('workspace-tool').value==='auto'&&!$('file').files?.length);
+ const modelTask=activeMode!=='worker'||(['auto','text_analysis'].includes($('workspace-tool').value)&&!$('file').files?.length);
  const thinkingCloudReady=cfThinkingByMode[cfMode]===true&&cfModels.some(m=>m.id===selectedIdForMode&&m.available&&m.mode===cfMode)&&modelTask;
  $('thinking-toggle').disabled=busy||!thinkingCloudReady;
  $('thinking-toggle').setAttribute('aria-pressed',String(thinkingEnabled&&thinkingCloudReady));
@@ -400,7 +400,7 @@ function renderStatus(){
   $('flagship-modes').hidden=!homeOpen;
   $('work-actions').hidden=view!=='worker';
   $('code-actions').hidden=view!=='build';
-  for(const id of ['work-plan','work-inspect'])$(id).disabled=busy;
+  for(const id of ['work-plan','work-inspect','work-document'])$(id).disabled=busy;
   for(const button of document.querySelectorAll('[data-code-task]'))button.disabled=busy;
   syncExperienceV2({view,mode:activeMode,locale,busy,selectedId:selectedIdForMode,modelLabel,isNew:isNewCloudModel(selectedIdForMode),thinkingReady:thinkingCloudReady,thinkingOn:thinkingCloudReady&&thinkingEnabled,thinkingModel:thinkingModelLabel});
 
@@ -575,7 +575,7 @@ $('manage-models').onclick=offerLocalModels;
 
 function webOptions(message){
  const mode=activeWebMode();
- if(mode==='off')return {};
+ if(mode==='off'||(activeMode==='worker'&&$('workspace-tool').value==='text_analysis'))return {};
  const modelId=activeMode==='worker'?$('workspace-model').value:$('model').value;
  const modelMode=activeMode==='build'?'code':activeMode==='worker'?'work':'chat';
  const modelSupported=cfModels.some(m=>m.id===modelId&&m.available&&m.mode===modelMode);
@@ -752,7 +752,7 @@ $('composer').onsubmit=async event=>{
  if(file&&!consent.fileUpload){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  if(tool==='ai_web')input.query=message.slice(0,500);
  // URL/hash routing is validated again on the server before any tool starts.
- const effective=mode==='chat'?'model':tool==='auto'?(file?'gta_guard':/(?:^|\s)[a-f\d]{64}(?=$|\s)/i.test(message)?'malwarebazaar':/https?:\/\//i.test(message)?'game_scam_guard':'model'):tool;
+ const effective=mode==='chat'||tool==='text_analysis'?'model':tool==='auto'?(file?'gta_guard':activeWebMode()!=='off'?'model':/(?:^|\s)[a-f\d]{64}(?=$|\s)/i.test(message)?'malwarebazaar':/https?:\/\//i.test(message)?'game_scam_guard':'model'):tool;
  const selected=mode==='worker'?$('workspace-model').value:$('model').value,cloudAuto=selected==='auto'&&service?.model?.models?.some(m=>m.id==='auto'&&m.state==='configured'),plan=selected==='auto'?(cloudAuto?planCloudChat(message,modelHistory,{models:service.model.models,mode:activeMode}):planChat(message,modelHistory)):null;
  if(effective==='model'&&mode==='chat'&&(selected.startsWith('local_')||!cloudAuto&&plan?.model?.startsWith('local_'))){await runLocal(plan?.model||selected,message,consent);return;}
  if(mode==='chat'&&Object.hasOwn(desktopModels,selected)){await runDesktop(selected,message);return;}
@@ -828,6 +828,37 @@ const fillPrompt=prompt=>{
 };
 $('work-plan').onclick=()=>fillPrompt(locale==='fa'?'یک برنامه برای پروژه با مراحل، ریسک‌ها و قدم بعدی بساز.':'Help me plan a project with milestones, risks, and next steps.');
 $('work-inspect').onclick=()=>$('attach-file').click();
+const documentInput=$('work-document-file'),documentStatus=$('work-document-status');
+const textDocumentStatus=(en,fa)=>{documentStatus.textContent=locale==='fa'?fa:en;};
+$('work-document').onclick=()=>{
+ if(busy||activeMode!=='worker')return;
+ if($('message').value.trim()||$('file').files?.length){
+  textDocumentStatus('Clear the current draft or attachment before adding a text document.','قبل از افزودن سند متنی، پیش‌نویس یا فایل فعلی را پاک کن.');
+  return;
+ }
+ documentInput.click();
+};
+documentInput.onchange=async()=>{
+ const file=documentInput.files?.[0];
+ documentInput.value='';
+ if(!file||busy||activeMode!=='worker')return;
+ const authToken=account.getToken();
+ try{
+  if(!/\.(txt|md|csv|json)$/i.test(file.name)||!file.size||file.size>16384)throw Error('unsupported_text');
+  const text=new TextDecoder('utf-8',{fatal:true}).decode(await file.arrayBuffer()).trim();
+  const instruction=locale==='fa'?'این سند را خلاصه کن و نکات و محدودیت‌ها را بگو.':'Summarize this document. Identify key points and limitations.';
+  const draft=instruction+'\n\n'+text;
+  if(!text||draft.length>$('message').maxLength||/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(text))throw Error('unsupported_text');
+  if(busy||activeMode!=='worker'||account.getToken()!==authToken||$('message').value.trim()||$('file').files?.length)return;
+  webModeByMode.worker='off';
+  $('workspace-tool').value='text_analysis';
+  $('workspace-tool').dispatchEvent(new Event('change',{bubbles:true}));
+  fillPrompt(draft);
+  textDocumentStatus('Text added to your draft. Review it before sending it to the selected model.','متن به پیش‌نویس اضافه شد. قبل از ارسال به مدل انتخابی آن را مرور کن.');
+ }catch{
+  if(activeMode==='worker'&&account.getToken()===authToken)textDocumentStatus('Use a UTF-8 TXT, Markdown, CSV, or JSON excerpt that fits the 4,000-character draft. PDF and Office files are unavailable here.','یک بخش متنی UTF-8 در قالب TXT، Markdown، CSV یا JSON وارد کن که در پیش‌نویس ۴۰۰۰ نویسه‌ای جا شود. PDF و فایل‌های آفیس اینجا پشتیبانی نمی‌شوند.');
+ }
+};
 $('work-research').onclick=async()=>{
  const mode=activeMode, draft=$('message').value;
  if(busy||mode!=='worker'||$('work-research').disabled)return;
@@ -855,7 +886,7 @@ $('mode-toggle').addEventListener('keydown',event=>{if(event.key==='ArrowDown'){
 for(const [index,id]of ['chat-tab','build-tab','workspace-tab'].entries())$(id).addEventListener('keydown',event=>{if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();const ids=['chat-tab','build-tab','workspace-tab'];$(ids[event.key==='Home'?0:event.key==='End'?2:(index+(event.key==='ArrowDown'?1:2))%3]).focus();}});
 $('chat-tab').onclick=()=>switchMode('chat');$('workspace-tab').onclick=()=>switchMode('worker');$('build-tab').onclick=()=>switchMode('build');
 document.addEventListener('pointerdown',event=>{if(!$('mode-picker').contains(event.target))$('mode-picker').open=false;});document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('mode-picker').open){$('mode-picker').open=false;$('mode-toggle').focus();}});
-$('workspace-tool').onchange=()=>{thinkingEnabled=false;$('tool').value=$('workspace-tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
+$('workspace-tool').onchange=()=>{if($('workspace-tool').value==='text_analysis')webModeByMode.worker='off';thinkingEnabled=false;$('tool').value=$('workspace-tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
 $('tool').onchange=()=>{$('workspace-tool').value=$('tool').value;if(!['auto','gta_guard','file_sandbox'].includes($('tool').value))$('remove-file').click();$('isolation-consent').checked=false;translate();};
 function rememberLocalModel(){const model=$('model').value;if(Object.hasOwn(localModels,model))try{localStorage.setItem('malguard.ai.localModel.v1',model);}catch{}}
 $('thinking-toggle').onclick=()=>{if($('thinking-toggle').disabled||busy)return;thinkingEnabled=!thinkingEnabled;renderStatus();};
@@ -876,8 +907,8 @@ $('open-downloads').onclick=()=>{if(!busy)$('download-hub').showModal();};$('hub
 $('desktop-model').onchange=updateDesktopInfo;for(const field of ['desktop-ram-gb','desktop-free-gb','desktop-gpu-gb'])$(field).addEventListener('input',updateDesktopInfo);$('manage-desktop-models').onclick=openDesktopModels;$('desktop-connect').onclick=connectDesktop;
 $('desktop-download').onclick=downloadDesktop;
 $('desktop-cancel-download').onclick=()=>{desktopDownloadController?.abort(new DOMException('Cancelled by user','AbortError'));desktopChat.stop();};
-Object.assign(copy.en,{navHome:'Home',homeWorkHint:'Research, plan, and inspect.',homeChatHint:'Ask, write, and explore.',homeCodeHint:'Edit, review, and preview.',workResearch:'Web research',workPlanAction:'Plan a project',workInspect:'Inspect a file',codeExplain:'Explain',codeDebug:'Debug',codeRefactor:'Refactor',codeTests:'Generate tests',codeAssistant:'Coding assistant',codeEmpty:'Ask a question below. To share the selected file with the model, first enable file context in the editor.'});
-Object.assign(copy.fa,{navHome:'خانه',homeWorkHint:'تحقیق، برنامه‌ریزی و بررسی',homeChatHint:'پرسیدن، نوشتن و کشف',homeCodeHint:'ویرایش، مرور و پیش‌نمایش',workResearch:'تحقیق وب',workPlanAction:'برنامه‌ریزی پروژه',workInspect:'بررسی فایل',codeExplain:'توضیح',codeDebug:'رفع اشکال',codeRefactor:'بازآرایی',codeTests:'تولید تست',codeAssistant:'دستیار کدنویسی',codeEmpty:'سؤالت را پایین بنویس. برای اشتراک فایل انتخابی با مدل، اول اجازهٔ اشتراک را در ویرایشگر فعال کن.'});
+Object.assign(copy.en,{navHome:'Home',homeWorkHint:'Research, plan, and inspect.',homeChatHint:'Ask, write, and explore.',homeCodeHint:'Edit, review, and preview.',workResearch:'Web research',workPlanAction:'Plan a project',workInspect:'Inspect a file',workDocument:'Add text document',workTextAnalysis:'Text analysis',codeExplain:'Explain',codeDebug:'Debug',codeRefactor:'Refactor',codeTests:'Generate tests',codeAssistant:'Coding assistant',codeEmpty:'Ask a question below. To share the selected file with the model, first enable file context in the editor.'});
+Object.assign(copy.fa,{navHome:'خانه',homeWorkHint:'تحقیق، برنامه‌ریزی و بررسی',homeChatHint:'پرسیدن، نوشتن و کشف',homeCodeHint:'ویرایش، مرور و پیش‌نمایش',workResearch:'تحقیق وب',workPlanAction:'برنامه‌ریزی پروژه',workInspect:'بررسی فایل',workDocument:'افزودن سند متنی',workTextAnalysis:'تحلیل متن',codeExplain:'توضیح',codeDebug:'رفع اشکال',codeRefactor:'بازآرایی',codeTests:'تولید تست',codeAssistant:'دستیار کدنویسی',codeEmpty:'سؤالت را پایین بنویس. برای اشتراک فایل انتخابی با مدل، اول اجازهٔ اشتراک را در ویرایشگر فعال کن.'});
 installExperienceV2();
 translate();
 renderStatus();
