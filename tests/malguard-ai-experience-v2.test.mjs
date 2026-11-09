@@ -8,6 +8,7 @@ const html=read('ai/index.html');
 const app=read('ai/app.js');
 const navigation=read('ai/navigation.mjs');
 const styles=read('ai/experience-v2.css');
+const horizon=read('ai/experience-v4.css');
 const client=read('ai/experience-v2.mjs');
 
 test('three modes remain separate with an always-visible accessible switcher',()=>{
@@ -53,9 +54,9 @@ test('starter prompts are localized, mode-specific and never auto-submitted',()=
 });
 
 test('visual tokens support both themes, mobile, keyboard and reduced motion',()=>{
- assert.match(html,/class="mg-deep-space mg-ai-v2 auth-required"/);
+ assert.match(html,/class="mg-deep-space mg-ai-v2 mg-ai-v4 auth-required"/);
  assert.match(html,/experience-v2\.css\?v=/);
- assert.match(html,/app\.js\?v=media-v5-/);
+ assert.match(html,/app\.js\?v=calm-v4-/);
  assert.ok(html.indexOf('mg-theme.css')<html.indexOf('experience-v2.css'));
  assert.match(styles,/html:is\(\.theme-light,\[data-theme=light\]\)/);
  assert.match(styles,/@media\(max-width:440px\)/);
@@ -114,5 +115,40 @@ test('UX v3 labels connections accurately and provides accessible sidebar dismis
  assert.match(client,/new MutationObserver\(refreshJump\)/);
  assert.match(client,/Jump to latest message/);
  assert.match(client,/prefers-reduced-motion/);
- assert.match(html,/app\.js\?v=media-v5-20261108/);
+ assert.match(html,/app\.js\?v=calm-v4-20261109/);
+});
+
+
+test('Horizon v4 keeps the composer calm while preserving consent and live tool controls',()=>{
+ assert.match(html,/class="mg-deep-space mg-ai-v2 mg-ai-v4 auth-required"/);
+ assert.match(html,/id="attach-options"[^>]*hidden/);
+ assert.match(html,/id="thinking-toggle"[^>]*aria-pressed="false"/);
+ assert.match(html,/id="web-search-toggle"[^>]*aria-pressed="false"/);
+ assert.match(html,/id="composer-thinking-chip"[^>]*hidden/);
+ assert.match(html,/id="composer-web-chip"[^>]*hidden/);
+ assert.match(app,/function syncCalmComposer/);
+ assert.match(app,/composer-thinking-chip'\)\.onclick/);
+ assert.match(app,/composer-web-chip'\)\.onclick/);
+ assert.match(app,/thinkingEnabled=!thinkingEnabled/);
+ assert.match(app,/if\(next!=='off'&&!await requestSearchConsent\(\)\)return/);
+ assert.match(horizon,/body\.mg-ai-v4 #attach-options\[hidden\]\{display:none!important\}/);
+ assert.match(horizon,/\.composer-active-tools/);
+ assert.match(horizon,/\.composer-footer/);
+});
+
+test('Day palette has independent surfaces and text contrast on every AI surface',()=>{
+ assert.match(horizon,/--ai-rail:#ffffff/);
+ assert.match(horizon,/--ai-raised:#eef4f8/);
+ assert.match(horizon,/--ai-fg:#172435/);
+ assert.match(horizon,/--ai-secondary:#40546b/);
+ assert.match(horizon,/--ai-faint:#50657a/);
+ assert.match(horizon,/background-color:#f3f7fb!important/);
+ assert.match(horizon,/body\.mg-ai-v4 \.navigation/);
+ assert.match(horizon,/body\.mg-ai-v4 \.navigation \.settings-content/);
+ assert.match(horizon,/body\.mg-ai-v4 \.result/);
+ assert.match(horizon,/body\.mg-ai-v4 #attach-options/);
+ assert.match(horizon,/body\.mg-ai-v4 \.entry-content/);
+ assert.match(horizon,/@media\(max-width:355px\)/);
+ assert.match(horizon,/@media \(forced-colors:active\)/);
+ assert.match(horizon,/@media\(prefers-reduced-motion:reduce\)/);
 });
