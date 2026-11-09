@@ -684,3 +684,17 @@ html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 .entry-content .entry-act
   body.mg-ai-v4 .composer-shell *,
   body.mg-ai-v4 #attach-options {transition:none!important;animation:none!important}
 }
+
+
+/* Native select menus use OS controls, but their option colors must not
+   inherit the old dark-only global style in Day mode. */
+body.mg-ai-v4 :is(#model,#workspace-model,#web-search-depth,#mode,#tool) option{
+  background:#182633!important;color:#f2f7fa!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 :is(#model,#workspace-model,#web-search-depth,#mode,#tool) option{
+  background:#ffffff!important;color:#172435!important;
+}
+body.mg-ai-v4 :is(#model,#workspace-model,#web-search-depth) option.mg-new-option{color:#86efac!important}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 :is(#model,#workspace-model,#web-search-depth) option.mg-new-option{color:#166534!important}
+body.mg-ai-v4 .experience-current{display:none}
+body.mg-ai-v4 #attach-toggle svg{pointer-events:none}
