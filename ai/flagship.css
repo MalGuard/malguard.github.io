@@ -202,6 +202,13 @@ body.mg-ai-v2 .answer-prose { overflow-wrap:anywhere; }
     padding-top:24px;
   }
 }
+@media(max-width:980px) {
+  body.mg-ai-v2 .experience-current,
+  body.mg-ai-v2 .header-actions #sign-up { display:none!important; }
+}
+@media(min-width:761px) and (max-width:900px) {
+  body.mg-ai-v2 .experience-tab { min-width:56px;gap:4px;padding-inline:6px; }
+}
 @media(max-width:760px) {
   body.mg-ai-v2:not(.auth-required) { --flagship-nav-height:calc(56px + env(safe-area-inset-bottom)); }
   body.mg-ai-v2 .flagship-mobile-brand { display:flex;align-items:center;gap:7px;color:var(--flagship-ink);font-weight:680;font-size:13px;white-space:nowrap; }
