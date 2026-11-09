@@ -1,0 +1,243 @@
+/* MalGuard AI — focused composer & accessible theme (2026-11-09).
+   Presentation only. Does not modify routing, authentication, tool consent, or requests. */
+body.mg-ai-v2 {
+  --ai-surface:#14161b;
+  --ai-rail:#101217;
+  --ai-raised:#20242c;
+  --ai-raised-hover:#2b313b;
+  --ai-fg:#f5f7fa;
+  --ai-secondary:#c5cad3;
+  --ai-faint:#b0b8c5;
+  --ai-stroke:rgba(230,237,247,.2);
+  --ai-stroke-hover:rgba(230,237,247,.38);
+  --ai-focus:#a4dbff;
+  --ink:var(--ai-fg);
+  --muted:var(--ai-secondary);
+  --line:var(--ai-stroke);
+}
+body.mg-ai-v2 .result { background:var(--ai-surface); color:var(--ai-fg); }
+body.mg-ai-v2 .result :is(p,li,small,time,.muted) { color:var(--ai-secondary); }
+body.mg-ai-v2 .result :is(a,.research-citation) { color:var(--ai-fg); }
+body.mg-ai-v2 .composer-shell {
+  border-radius:22px;
+  border-color:var(--ai-stroke-hover);
+  box-shadow:0 10px 28px rgba(0,0,0,.22);
+}
+body.mg-ai-v2 .composer-shell:focus-within {
+  border-color:var(--ai-focus);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--ai-focus) 28%,transparent);
+}
+body.mg-ai-v2 .composer-hints { color:var(--ai-secondary); }
+body.mg-ai-v2 .composer-hints .thinking-state { color:var(--ai-secondary); }
+body.mg-ai-v2 .composer-keyboard-hint { color:var(--ai-secondary); }
+body.mg-ai-v2 .research-source p { color:var(--ai-secondary); }
+body.mg-ai-v2 .research-source-host { color:var(--ai-secondary); }
+body.mg-ai-v2 .research-source { overflow-wrap:anywhere; }
+body.mg-ai-v2 .research-source:focus-visible,
+body.mg-ai-v2 .composer-shell :is(button,select):focus-visible,
+body.mg-ai-v2 .attach-menu :is(button,select):focus-visible {
+  outline:2px solid var(--ai-focus);
+  outline-offset:2px;
+}
+body.mg-ai-v2 .composer-shell #message:focus-visible { outline:0; }
+body.mg-ai-v2 #attach-options {
+  width:min(310px,calc(100vw - 32px));
+  max-height:min(68dvh,480px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding:8px;
+  border-radius:16px;
+  border:1px solid var(--ai-stroke-hover);
+  background:var(--ai-surface);
+  color:var(--ai-fg);
+  box-shadow:0 18px 54px rgba(0,0,0,.34);
+  z-index:50;
+}
+body.mg-ai-v2 #attach-options :is(button,select) {
+  min-height:44px;
+  font-size:13px;
+  text-align:start;
+  color:var(--ai-fg);
+}
+body.mg-ai-v2 #attach-options > button {
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  border-radius:10px;
+  padding:9px 12px;
+  white-space:normal;
+}
+body.mg-ai-v2 #attach-options :is(button,select):hover:not(:disabled) {
+  background:var(--ai-raised-hover);
+}
+body.mg-ai-v2 .ai-menu-capabilities {
+  display:grid;
+  gap:4px;
+  padding:8px 0;
+  margin:6px 0 0;
+  border-top:1px solid var(--ai-stroke);
+}
+body.mg-ai-v2 .ai-menu-capabilities .web-search-controls {
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  flex-wrap:wrap;
+  grid-area:auto;
+}
+body.mg-ai-v2 .ai-menu-capabilities #web-search-toggle {
+  flex:1 1 145px;
+  min-height:44px;
+  justify-content:flex-start;
+  border:1px solid transparent;
+  border-radius:10px;
+  padding:8px 11px;
+  background:transparent;
+  color:var(--ai-fg);
+  text-align:start;
+}
+body.mg-ai-v2 .ai-menu-capabilities #web-search-toggle[aria-pressed=true] {
+  background:var(--ai-raised-hover);
+  border-color:var(--ai-stroke-hover);
+}
+body.mg-ai-v2 .ai-menu-capabilities #web-search-depth {
+  flex:0 1 95px;
+  min-height:40px;
+  background:var(--ai-raised);
+  color:var(--ai-fg);
+  border-color:var(--ai-stroke-hover);
+}
+body.mg-ai-v2 .ai-menu-capabilities #thinking-toggle {
+  width:100%;
+  min-height:44px;
+  justify-content:flex-start;
+  border:1px solid transparent;
+  border-radius:10px;
+  padding:9px 11px;
+  background:transparent;
+  color:var(--ai-fg);
+}
+body.mg-ai-v2 .ai-menu-capabilities #thinking-toggle[aria-pressed=true] {
+  background:var(--ai-raised-hover);
+  border-color:var(--ai-stroke-hover);
+  color:var(--ai-fg);
+}
+body.mg-ai-v2 .ai-menu-capabilities :is(button,select):disabled { opacity:.55; }
+body.mg-ai-v2 #attach-web[hidden] { display:none!important; }
+body.mg-ai-v2.ai-composer-enhanced .composer-actions {
+  display:flex;
+  flex:1;
+  align-items:center;
+  justify-content:flex-end;
+  min-width:0;
+  gap:7px;
+}
+body.mg-ai-v2.ai-composer-enhanced .composer-footer {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+body.mg-ai-v2.ai-composer-enhanced .composer-actions .model-select-wrap {
+  flex:0 1 220px;
+  min-width:0;
+}
+body.mg-ai-v2.ai-composer-enhanced .composer-actions #model {
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+body.mg-ai-v2.ai-composer-enhanced #send { flex:none; }
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 {
+  --ai-surface:#ffffff;
+  --ai-rail:#f5f7fa;
+  --ai-raised:#edf1f6;
+  --ai-raised-hover:#e3e9f1;
+  --ai-fg:#18212f;
+  --ai-secondary:#414e60;
+  --ai-faint:#57657a;
+  --ai-stroke:rgba(24,33,47,.22);
+  --ai-stroke-hover:rgba(24,33,47,.38);
+  --ai-focus:#005a9c;
+  --ink:var(--ai-fg);
+  --muted:var(--ai-secondary);
+  --line:var(--ai-stroke);
+  color:var(--ai-fg);
+  color-scheme:light;
+}
+html:is(.theme-light,[data-theme=light]):root body.mg-deep-space.mg-deep-space.mg-deep-space.mg-deep-space.mg-ai-v2 {
+  background:#f8fafc!important;
+  background-image:none!important;
+  color:var(--ai-fg)!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 :is(.navigation,.settings-content,#attach-options,.workspace-panel,.build-panel) {
+  background-color:var(--ai-surface);
+  color:var(--ai-fg);
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 :is(.result,.entry-content,.composer-shell) {
+  background:var(--ai-surface);
+  color:var(--ai-fg);
+  border-color:var(--ai-stroke-hover);
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 :is(.result p,.result li,.result .muted,.result small,.result time,.research-source p,.research-source-host,.thinking-state,.footer-note,.muted,.notice) {
+  color:var(--ai-secondary);
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 :is(.entry-description,.entry-capability,.quick-suggestion,.navigation-shortcut,.experience-tab) {
+  color:var(--ai-secondary);
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 :is(.result a,.result .answer,.entry-content h1,.entry-capability strong,.research-source strong) {
+  color:var(--ai-fg);
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 .navigation .mode-options,
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 .navigation .settings-content {
+  background:var(--ai-surface);
+  color:var(--ai-fg);
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 :is(#attach-toggle,#model,#thinking-toggle,#web-search-toggle,#web-search-depth) {
+  color:var(--ai-fg);
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 .ai-menu-capabilities #thinking-toggle[aria-pressed=true] {
+  color:var(--ai-fg);
+  background:var(--ai-raised-hover);
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 .research-source,
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 a.research-citation {
+  background:var(--ai-raised);
+  color:var(--ai-fg);
+  border-color:var(--ai-stroke);
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 .composer-shell:focus-within {
+  border-color:var(--ai-focus);
+}
+@media(max-width:760px) {
+  body.mg-ai-v2.ai-composer-enhanced .composer-footer,
+  body.mg-ai-v2.ai-composer-enhanced .composer-actions {
+    display:flex;
+    grid-template-columns:none;
+    grid-template-areas:none;
+    flex-wrap:nowrap;
+  }
+  body.mg-ai-v2.ai-composer-enhanced .composer-actions #model {
+    max-width:min(52vw,225px);
+    min-width:0;
+    font-size:12px;
+  }
+  body.mg-ai-v2 .site-header .header-actions { gap:5px; }
+  body.mg-ai-v2 .composer-shell { border-radius:19px; }
+}
+@media(max-width:440px) {
+  body.mg-ai-v2.ai-composer-enhanced .composer-actions { gap:6px; }
+  body.mg-ai-v2.ai-composer-enhanced .composer-actions #model { max-width:47vw; }
+  body.mg-ai-v2 .composer-shell #message { font-size:16px; }
+  body.mg-ai-v2 .research-sources { grid-template-columns:1fr; }
+}
+@media(prefers-reduced-motion:reduce) {
+  body.mg-ai-v2 :is(.result,.research-source,.quick-suggestion) {
+    animation:none!important;
+    transition:none!important;
+    transform:none!important;
+  }
+}
