@@ -19,8 +19,8 @@
   
   <link rel="icon" href="./malguard-ai-orbit.svg?v=20261028-mono" type="image/svg+xml"><link rel="apple-touch-icon" href="./apple-touch-icon.png?v=20261104-ai-png"><meta name="apple-mobile-web-app-title" content="MalGuard AI"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./style.css?v=thinking-new-20261108">
-  <script type="module" src="./app.js?v=flagship-1"></script>
-<link rel="stylesheet" href="/assets/precision/deep-space-global.css?v=20261102-soft-halo"><link rel="stylesheet" href="/assets/precision/mg-theme.css?v=20261105"><script src="/assets/precision/mg-theme.js?v=20261105" defer></script><link rel="stylesheet" href="./experience-v2.css?v=20261108-media5"><link rel="stylesheet" href="./polish-20261109.css?v=1"><script type="module" src="./polish-20261109.mjs?v=1"></script><link rel="stylesheet" href="./flagship.css?v=1"></head>
+  <script type="module" src="./app.js?v=media-v5-20261108-flagship-1"></script>
+<link rel="stylesheet" href="/assets/precision/deep-space-global.css?v=20261102-soft-halo"><link rel="stylesheet" href="/assets/precision/mg-theme.css?v=20261105"><script src="/assets/precision/mg-theme.js?v=20261105" defer></script><link rel="stylesheet" href="./experience-v2.css?v=20261108-media5"><link rel="stylesheet" href="./polish-20261109.css?v=1"><script type="module" src="./polish-20261109.mjs?v=1"></script><link rel="stylesheet" href="./flagship.css?v=2"></head>
 <body class="mg-deep-space mg-ai-v2 auth-required" data-view="home">
   <main id="entry-gate" class="entry-gate" aria-labelledby="entry-title">
     <section class="entry-content">
@@ -127,6 +127,7 @@
         <label class="build-share"><input id="build-auto-run" type="checkbox" checked><span data-i18n="autoBuild">Apply and preview explicit build requests automatically, with Undo.</span></label><label class="build-share"><input id="build-share-code" type="checkbox"><span data-i18n="shareCode">Include the currently selected file in my next model request.</span></label>
         <p id="build-status" role="status"></p><details class="build-console"><summary data-i18n="previewOutput">Preview output</summary><pre id="build-console" dir="ltr" aria-live="polite"></pre></details><p class="muted build-limit" data-i18n="buildLimit">Files stay in page memory; export before leaving. Web preview supports local HTML/CSS/JS without network access. Backend code and packages run after export in your own development environment.</p>
       </section>
+      <div id="code-empty"><strong data-i18n="codeAssistant">Coding assistant</strong><span data-i18n="codeEmpty">Ask a question below. To share the selected file with the model, first enable file context in the editor.</span></div>
       <div class="conversation" id="conversation" role="log" aria-label="Conversation" aria-live="polite"></div>
       <div id="activity" class="reply-activity" role="status" aria-live="polite" aria-atomic="false" hidden><span class="activity-orbit" aria-hidden="true"><span></span><span></span><span></span></span><span id="activity-label" aria-hidden="true"></span><span id="activity-elapsed" aria-hidden="true"></span><span id="activity-announcement" class="sr-only"></span></div>
       <div class="composer-area">

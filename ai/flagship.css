@@ -25,6 +25,7 @@ body.mg-ai-v2 .account-product-mark {
 }
 body.mg-ai-v2 .entry-mark,
 body.mg-ai-v2 .flagship-mark { padding:9px; }
+body.mg-ai-v2 :is(.cloud-alert,.navigation-note) { color:var(--ai-secondary); }
 body.mg-ai-v2 .entry-brand { color:var(--flagship-accent); }
 body.mg-ai-v2 .entry-content { box-shadow:0 18px 44px #07132520; }
 body.mg-ai-v2 .entry-content a[href="/"] { color:var(--flagship-accent); }
@@ -153,6 +154,12 @@ body.mg-ai-v2 .has-highlight #build-editor {
   caret-color:#f3f5ff;
 }
 body.mg-ai-v2 .has-highlight #build-editor::selection { color:#fff;background:#315980; }
+html[data-theme=light] body.mg-ai-v2 :is(.editor-pane,.preview-pane,.build-toolbar input,.build-toolbar select,#build-console) {
+  background:var(--ai-raised);
+  color:var(--ai-fg);
+  border-color:var(--ai-stroke-hover);
+}
+html[data-theme=light] body.mg-ai-v2 #build-editor { color:var(--ai-fg);background:#f4f7fb; }
 html[data-theme=light] body.mg-ai-v2 .build-editor-stack { background:#f4f7fb; }
 html[data-theme=light] body.mg-ai-v2 #build-highlight { color:#152439; }
 html[data-theme=light] body.mg-ai-v2 .has-highlight #build-editor { caret-color:#152439; }
@@ -161,6 +168,21 @@ html[data-theme=light] body.mg-ai-v2 #build-highlight .tok-tag { color:#194e88; 
 html[data-theme=light] body.mg-ai-v2 #build-highlight .tok-keyword { color:#603194; }
 html[data-theme=light] body.mg-ai-v2 #build-highlight .tok-number { color:#943c1c; }
 html[data-theme=light] body.mg-ai-v2 #build-highlight .tok-string { color:#28562b; }
+body.mg-ai-v2 #code-empty {
+  display:none;
+  grid-area:conversation;
+  align-self:start;
+  background:var(--flagship-paper);
+  color:var(--ai-secondary);
+  border:1px solid var(--flagship-line);
+  border-radius:14px;
+  padding:15px;
+  margin:10px 0;
+  font-size:13px;
+  line-height:1.6;
+}
+body.mg-ai-v2[data-view=build]:has(#conversation:empty) #code-empty { display:block; }
+body.mg-ai-v2 #code-empty strong { display:block;color:var(--flagship-ink); }
 body.mg-ai-v2 .answer-table { max-width:100%;overflow:auto;margin:12px 0; }
 body.mg-ai-v2 .work-download { min-height:36px;padding:4px 9px;color:var(--flagship-accent);font-size:12px; }
 body.mg-ai-v2 .answer-table table { border-collapse:collapse;width:100%;text-align:start; }
@@ -171,6 +193,7 @@ body.mg-ai-v2 .answer-prose { overflow-wrap:anywhere; }
 @media(min-width:901px) {
   body.mg-ai-v2[data-view=build][data-project-open=true] .workspace {
     grid-template-columns:minmax(0,1.16fr) minmax(290px,1fr);
+    grid-template-rows:auto minmax(150px,1fr) auto auto;
     grid-template-areas:"mode mode" "editor conversation" "editor activity" "editor composer";
     height:auto;
     min-height:0;
