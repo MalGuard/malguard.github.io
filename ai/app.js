@@ -351,7 +351,7 @@ function renderStatus(){
  if(models.length){
   const choices=[{value:'',label:t('chooseModel'),disabled:true}];
   for(const m of models){
-   const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.label;
+   const label=m.id.endsWith('_auto')?(locale==='fa'?'خودکار · Auto':'Auto'):m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.label;
    choices.push({value:m.id,label:isNewCloudModel(m.id)?label+' · NEW':label,disabled:m.state!=='configured'||activeMode==='build'&&m.mode!=='code'&&!Object.hasOwn(desktopModels,m.id),isNew:isNewCloudModel(m.id)});
   }
   choices.push({value:'__downloads',label:t('modelDownloads'),disabled:localOfferPending});
@@ -363,6 +363,7 @@ function renderStatus(){
   const isValid=id=>models.some(m=>m.id===id&&m.state==='configured'&&(activeMode!=='build'||m.mode==='code'||Object.hasOwn(desktopModels,m.id)));
   $('model').value=isValid(selectedId)?selectedId:isValid(saved)?saved:isValid(defaultId)?defaultId:'';
   lastSelectedModel=$('model').value;
+  $('model').title=models.find(m=>m.id===lastSelectedModel)?.label||t('chooseModel');
   if(cfAvailable.length)cloudDefaultApplied=true;
   if(service||localReady||cfAvailable.length)modelsInitialized=true;
  }
@@ -434,7 +435,31 @@ function renderStatus(){
   webHint.textContent=!canSearch?(locale==='fa'?'جست‌وجو با این مدل یا ابزار در دسترس نیست.':'Search is unavailable for the selected model or tool.'):
     locale==='fa'?'جست‌وجوی '+(webMode==='research'?'عمیق':'وب')+' با اجازه شما · همراه منابع':
     (webMode==='research'?'Research':'Web search')+' is on · sourced answers';
+  syncCalmComposer({webMode,webOn,canSearch,thinkingCloudReady});
 
+}
+// Project only the current, permission-checked modes into the quiet toolbar.
+// Tool chips never grant consent or make their own remote requests.
+function syncCalmComposer({webMode,webOn,canSearch,thinkingCloudReady}){
+ const fa=locale==='fa',open=!$('attach-options').hidden;
+ $('attach-toggle').setAttribute('aria-label',fa?(open?'بستن منوی ابزارها':'باز کردن ابزارها و فایل‌ها'):(open?'Close tools and attachments':'Open tools and attachments'));
+ $('attach-toggle').title=fa?'ابزارها':'Tools';
+ $('attach-options').setAttribute('aria-label',fa?'ابزارهای MalGuard':'MalGuard tools');
+ $('composer-menu-heading').textContent=fa?'ابزارها و قابلیت‌ها':'Tools and actions';
+ const webChip=$('composer-web-chip');
+ webChip.hidden=!webOn;
+ webChip.disabled=busy||!canSearch;
+ webChip.setAttribute('aria-pressed',String(webOn&&canSearch));
+ webChip.setAttribute('aria-label',fa?
+  'خاموش‌کردن '+(webMode==='research'?'تحقیق وب':'جست‌وجوی وب'):
+  'Disable '+(webMode==='research'?'web research':'web search'));
+ $('composer-web-chip-label').textContent=webMode==='research'?(fa?'تحقیق':'Research'):(fa?'وب':'Web');
+ const thinkingChip=$('composer-thinking-chip'),thinkingOn=thinkingEnabled&&thinkingCloudReady;
+ thinkingChip.hidden=!thinkingOn;
+ thinkingChip.disabled=busy;
+ thinkingChip.setAttribute('aria-pressed',String(thinkingOn));
+ thinkingChip.setAttribute('aria-label',fa?'خاموش کردن تفکر عمیق':'Disable Thinking');
+ $('composer-thinking-chip-label').textContent=fa?'تفکر':'Thinking';
 }
 function showError(key,remember=true){if(remember)history.push({error:key});const card=el('article',undefined,'result error'),text=typeof key==='object'?errorMessage(key,locale):t(key),heading=el('h3',text,'outcome');card.append(heading);card.setAttribute('role','alert');$('conversation').append(card);if(remember&&!matchMedia('(prefers-reduced-motion: reduce)').matches){heading.setAttribute('aria-label',text);const ink=el('span',text);ink.setAttribute('aria-hidden','true');heading.replaceChildren(ink);typeText(text,value=>{ink.textContent=value;},{charactersPerSecond:130}).catch(()=>{ink.textContent=text;});}}
 function renderResponse(response,remember=true){
@@ -687,12 +712,15 @@ $('media-file').onchange=()=>{
 };
 $('media-draft-remove').onclick=clearMediaDraft;
 function closeAttach(focus=false){$('attach-options').hidden=true;$('attach-toggle').setAttribute('aria-expanded','false');if(focus)$('attach-toggle').focus();}
-$('attach-toggle').onclick=()=>{if(busy)return;const opening=$('attach-options').hidden;$('attach-options').hidden=!opening;$('attach-toggle').setAttribute('aria-expanded',String(opening));};
+$('attach-toggle').onclick=()=>{if(busy)return;const opening=$('attach-options').hidden;$('attach-options').hidden=!opening;$('attach-toggle').setAttribute('aria-expanded',String(opening));$('attach-toggle').setAttribute('aria-label',locale==='fa'?(opening?'بستن منوی ابزارها':'باز کردن ابزارها و فایل‌ها'):(opening?'Close tools and attachments':'Open tools and attachments'));};
+$('attach-toggle').addEventListener('keydown',event=>{if(event.key!=='ArrowDown'||busy)return;event.preventDefault();if($('attach-options').hidden)$('attach-toggle').click();$('attach-file').focus();});
 $('attach-file').onclick=()=>{closeAttach();$(activeMode==='build'?'build-import':'file').click();};
 function chooseAction(mode,tool){if(busy)return;switchMode(mode,{carryDraft:true});$('tool').value=tool;$('workspace-tool').value=tool;closeAttach();translate();$('message').placeholder=t(tool==='ai_web'?'webPlaceholder':mode==='worker'?'inspectionPlaceholder':'placeholder');$('message').focus();}
 $('attach-chat').onclick=()=>chooseAction('chat','auto');
 $('attach-inspect').onclick=()=>chooseAction('worker','auto');
 $('attach-web').onclick=()=>{if(cfSearchAvailable&&cfModels.some(m=>m.available&&m.mode==='chat')){switchMode('chat',{carryDraft:true});closeAttach();if(activeWebMode()==='off')$('web-search-toggle').click();$('message').focus();}else chooseAction('worker','ai_web');};
+$('composer-web-chip').onclick=()=>{if(busy||$('web-search-toggle').disabled)return;$('web-search-toggle').click();};
+$('composer-thinking-chip').onclick=()=>{if(busy||$('thinking-toggle').disabled)return;$('thinking-toggle').click();};
 document.addEventListener('pointerdown',event=>{if(!event.target.closest('.attach-menu'))closeAttach();});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('attach-options').hidden){closeAttach(true);event.preventDefault();}});
 document.addEventListener('pointerdown',event=>{const panel=$('settings-panel');if(panel.open&&!panel.contains(event.target))panel.open=false;});

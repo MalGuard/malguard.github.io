@@ -111,7 +111,10 @@ try{
   assert.equal(await page.locator('#model').isVisible(),true);assert.equal(await page.locator('#composer #model').count(),1);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);
    // ChatGPT/Grok-inspired controls are visible and genuinely functional on each viewport.
    assert.equal(await page.locator('#experience-tabs').isVisible(),true);
-   assert.equal(await page.locator('#thinking-toggle').isVisible(),true);
+   assert.equal(await page.locator('#thinking-toggle').isVisible(),false,'Thinking stays in the plus menu until opened');
+   assert.equal(await page.locator('#composer-thinking-chip').isVisible(),false,'No inactive Thinking chip');
+   assert.equal(await page.locator('#web-search-toggle').isVisible(),false,'Search stays in the plus menu');
+   assert.equal(await page.locator('#composer-web-chip').isVisible(),false,'No inactive Search chip');
    assert.equal(await page.locator('#thinking-toggle').getAttribute('aria-pressed'),'false');
    assert.match(await page.locator('#thinking-state').innerText(),/Thinking off|Thinking unavailable/);
    assert.equal(await page.locator('#experience-chat').getAttribute('aria-pressed'),'true');
@@ -140,8 +143,13 @@ try{
      new MutationObserver(records=>{window.__modelSelectorMutations+=records.length;})
        .observe(document.getElementById('model'),{childList:true});
    });
+   await page.locator('#attach-toggle').click();
+   assert.equal(await page.locator('#thinking-toggle').isVisible(),true,'Thinking reachable through +');
    await page.locator('#thinking-toggle').click();
-   await page.locator('#thinking-toggle').click();
+   assert.equal(await page.locator('#composer-thinking-chip').isVisible(),true,'Active Thinking displays its chip');
+   await page.locator('#composer-thinking-chip').click();
+   assert.equal(await page.locator('#composer-thinking-chip').isVisible(),false,'Thinking chip disables Thinking');
+   await page.keyboard.press('Escape');
    assert.equal(await page.evaluate(()=>window.__modelSelectorMutations),0,'Thinking state changes must not rebuild the model picker');
    await page.locator('.quick-suggestion[data-quick-index="0"]').click();
    assert.ok((await page.locator('#message').inputValue()).length>10);
@@ -198,11 +206,17 @@ try{
    await page.screenshot({path:'test-results/malguard-ai/quiet-reply-1280.png',fullPage:true});
    await page.locator('#message').fill('Continue');await page.locator('#send').click();await page.getByText('Benign test reply 2',{exact:true}).waitFor();
    // Opt-in research is never sent before the user approves external lookup.
+   await page.locator('#attach-toggle').click();
+   assert.equal(await page.locator('#web-search-toggle').isVisible(),true);
    assert.equal(await page.locator('#web-search-toggle').isEnabled(),true);
    await page.locator('#web-search-toggle').click();
    assert.equal(await page.locator('#web-search-consent').isVisible(),true);
    await page.locator('#web-search-consent button[value="allow"]').click();
+   if(!(await page.locator('#attach-options').isVisible()))await page.locator('#attach-toggle').click();
    await page.locator('#web-search-depth').selectOption('research');
+   assert.equal(await page.locator('#composer-web-chip').isVisible(),true);
+   assert.equal(await page.locator('#composer-web-chip-label').innerText(),'Research');
+   await page.keyboard.press('Escape');
    await page.locator('#message').fill('Public astronomy update');
    await page.locator('#send').click();
    try{await page.locator('.research-evidence').waitFor({timeout:15000});}catch(error){console.error('Research test diagnostic:',await page.locator('#conversation').innerText(), 'posts:',modelPostRequests,'search:',await page.locator('#web-search-toggle').getAttribute('aria-pressed'));throw error;}
@@ -210,7 +224,8 @@ try{
    assert.equal(await page.locator('.research-citation').count(),1);
    assert.equal(await page.locator('.research-source').first().getAttribute('href'),'https://example.org/research');
    assert.equal(await page.locator('#web-search-toggle').getAttribute('aria-pressed'),'true');
-   await page.locator('#web-search-toggle').click();
+   await page.locator('#composer-web-chip').click();
+   assert.equal(await page.locator('#composer-web-chip').isVisible(),false,'The active chip disables web search');
 
    assert.equal(await page.locator('html').getAttribute('lang'),'en');
    await page.locator('#model').selectOption('chat_flash');await page.locator('#message').fill('سلام');await page.locator('#send').click();await page.getByText('پاسخ فارسی آزمایشی',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
@@ -331,4 +346,50 @@ try{
  await samsungContext.close();console.log('PASS Samsung Android Ollama incompatibility and visible small-model alternative');
 
 
+
+ // WCAG readability and interactive small-screen controls in explicit Day mode.
+ for(const width of [320,390,768,1280]){
+  const context=await browser.newContext({viewport:{width,height:900},reducedMotion:'reduce'}),page=await context.newPage(),errors=[];
+  await skipWelcome(context);
+  await context.addInitScript(()=>localStorage.setItem('malguard-theme','light'));
+  page.on('pageerror',e=>errors.push(e.message));
+  await context.route('**/*',r=>isModelsRoute(r)?gatewayFixture(r):isCFRoute(r)?cfFixture(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
+  await page.goto(base+'/ai/');
+  await page.waitForFunction(()=>document.querySelector('#send')?.dataset.modelReady==='true'&&document.documentElement.dataset.theme==='light');
+  assert.equal(await page.locator('body').evaluate(n=>n.classList.contains('mg-ai-v4')),true,'Horizon v4 shell');
+  assert.equal(await page.locator('#thinking-toggle').isVisible(),false,'Hidden tools must not crowd the composer');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Light page horizontal overflow at '+width+'px');
+  await page.locator('#attach-toggle').click();
+  assert.equal(await page.locator('#thinking-toggle').isVisible(),true);
+  assert.equal(await page.locator('#web-search-toggle').isVisible(),true);
+  const result=await page.evaluate(()=>{
+   const srgb=x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4;};
+   const rgb=x=>{const m=String(x).match(/rgba?\(([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/);return m?[+m[1],+m[2],+m[3]]:null;};
+   const lum=x=>{const v=rgb(x);return v?v.reduce((sum,c,i)=>sum+srgb(c)*[.2126,.7152,.0722][i],0):null;};
+   const ratio=(a,b)=>{const x=lum(a),y=lum(b);return x===null||y===null?0:(Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+   const pair=(fg,bg)=>{const a=document.querySelector(fg),b=document.querySelector(bg);return {text:fg,surface:bg,ratio:ratio(getComputedStyle(a).color,getComputedStyle(b).backgroundColor),foreground:getComputedStyle(a).color,background:getComputedStyle(b).backgroundColor};};
+   const rect=id=>{const r=document.querySelector(id).getBoundingClientRect();return {id,left:r.left,right:r.right,top:r.top,bottom:r.bottom};};
+   return {
+    theme:document.documentElement.dataset.theme,
+    surfaces:['.navigation','.composer-shell','#attach-options'].map(sel=>({sel,color:getComputedStyle(document.querySelector(sel)).backgroundColor})),
+    pairs:[pair('#message','.composer-shell'),pair('#model','.composer-shell'),pair('.intro h1','body'),pair('.navigation .navigation-new','.navigation'),pair('#web-search-toggle','#attach-options'),pair('#thinking-toggle','#attach-options')],
+    rects:['#attach-toggle','#model','#send'].map(rect),
+    drawer:rect('#attach-options')
+   };
+  });
+  assert.equal(result.theme,'light');
+  for(const v of result.pairs)assert.ok(v.ratio>=4.5,'Day contrast below 4.5 at '+width+'px: '+JSON.stringify(v));
+  for(const v of result.surfaces)assert.ok(v.sel==='.composer-shell'||v.color==='rgb(255, 255, 255)','Day navigation/menu remained dark: '+JSON.stringify(v));
+  for(const r of result.rects)assert.ok(r.left>=-1&&r.right<=width+1,'Composer control clipped at '+width+'px: '+JSON.stringify(r));
+  assert.ok(result.drawer.left>=0&&result.drawer.right<=width+1&&result.drawer.top>=0,'Tools drawer clipped at '+width+'px: '+JSON.stringify(result.drawer));
+  if([320,390,1280].includes(width)){
+   await mkdir('test-results/malguard-ai',{recursive:true});
+   await page.screenshot({path:'test-results/malguard-ai/horizon-light-tools-'+width+'.png',fullPage:true});
+   await page.keyboard.press('Escape');
+   await page.screenshot({path:'test-results/malguard-ai/horizon-light-'+width+'.png',fullPage:true});
+  }
+  assert.deepEqual(errors,[]);
+  await context.close();
+  console.log('PASS Horizon v4 daylight contrast and tools at '+width+'px');
+ }
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

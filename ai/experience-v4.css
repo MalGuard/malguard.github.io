@@ -1,0 +1,700 @@
+/* MalGuard AI / Horizon v4
+   A quieter, original MalGuard composer. Functional controls remain in the DOM;
+   optional tools live behind the + action and surface only while active.
+   The light palette is fully tokenized, not dark surfaces with dark copy. */
+
+body.mg-ai-v2.mg-ai-v4 {
+  --ai-rail:#101922;
+  --ai-surface:#101721;
+  --ai-raised:#1c2731;
+  --ai-raised-hover:#263540;
+  --ai-fg:#f2f7fa;
+  --ai-secondary:#b9c9d4;
+  --ai-faint:#9aaebc;
+  --ai-stroke:rgba(187,221,234,.15);
+  --ai-stroke-hover:rgba(187,221,234,.34);
+  --ai-focus:#8ad8e6;
+  --ai-accent:#8bd9e5;
+  --ai-canvas:#090f16;
+  --ai-panel:#14202b;
+  --ai-menu:#15212d;
+  --ai-contrast:#f6fbff;
+  --ai-contrast-ink:#14212e;
+  --bg:#090f16;
+  --panel:#14202b;
+  --ink:#f2f7fa;
+  --muted:#b9c9d4;
+  --line:#3d5060;
+  accent-color:#8bd9e5;
+  color:var(--ai-fg);
+  font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+}
+
+/* Daylight gets quiet pearl reading surfaces, not a blue sky behind black
+   buttons or a dark sidebar with black text. Never affect other pages. */
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v2.mg-ai-v4 {
+  --ai-rail:#ffffff;
+  --ai-surface:#ffffff;
+  --ai-raised:#eef4f8;
+  --ai-raised-hover:#e2edf5;
+  --ai-fg:#172435;
+  --ai-secondary:#40546b;
+  --ai-faint:#50657a;
+  --ai-stroke:rgba(33,65,95,.16);
+  --ai-stroke-hover:rgba(33,65,95,.3);
+  --ai-focus:#17618c;
+  --ai-accent:#11618a;
+  --ai-canvas:#f3f7fb;
+  --ai-panel:#ffffff;
+  --ai-menu:#ffffff;
+  --ai-contrast:#182b3c;
+  --ai-contrast-ink:#ffffff;
+  --bg:#f3f7fb;
+  --panel:#ffffff;
+  --ink:#172435;
+  --muted:#40546b;
+  --line:#c8d6e2;
+  accent-color:#17618c;
+  color:var(--ai-fg)!important;
+  color-scheme:light;
+}
+html:is(.theme-light,[data-theme=light]):root body.mg-deep-space.mg-deep-space.mg-deep-space.mg-deep-space.mg-deep-space.mg-ai-v4 {
+  background-color:#f3f7fb!important;
+  background-image:radial-gradient(ellipse 65% 50% at 82% 8%,rgba(171,210,233,.24),transparent 75%),linear-gradient(180deg,#f8fbfe 0%,#f2f7fb 58%,#edf3f9 100%)!important;
+  background-size:auto!important;
+  background-attachment:scroll!important;
+  color:#172435!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4:before,
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4:after {
+  opacity:0!important;
+  pointer-events:none!important;
+}
+body.mg-ai-v4 .navigation {
+  background:var(--ai-rail)!important;
+  color:var(--ai-fg)!important;
+  border-color:var(--ai-stroke)!important;
+}
+body.mg-ai-v4 .navigation :is(.navigation-heading,.navigation-shortcuts,.navigation-footer,.history-row),
+body.mg-ai-v4 .navigation :is(a,button,summary,label,strong,span) {
+  color:inherit;
+}
+body.mg-ai-v4 .navigation :is(.navigation-shortcut,.history-row button,.navigation-footer a,.navigation-footer button,.settings-panel>summary) {
+  color:var(--ai-secondary);
+}
+body.mg-ai-v4 .navigation :is(.navigation-shortcut,.history-row button,.navigation-footer a,.navigation-footer button,.settings-panel>summary):hover,
+body.mg-ai-v4 .navigation .navigation-shortcut[aria-pressed=true] {
+  background:var(--ai-raised)!important;
+  color:var(--ai-fg)!important;
+}
+body.mg-ai-v4 .navigation #chat-search,
+body.mg-ai-v4 .navigation .navigation-new {
+  background:var(--ai-raised);
+  border-color:var(--ai-stroke);
+  color:var(--ai-fg);
+}
+body.mg-ai-v4 .navigation #chat-search::placeholder{color:var(--ai-faint)}
+body.mg-ai-v4 .navigation .mode-options,
+body.mg-ai-v4 .navigation .settings-content,
+body.mg-ai-v4 .site-header .mode-options {
+  background:var(--ai-menu)!important;
+  color:var(--ai-fg)!important;
+  border-color:var(--ai-stroke-hover)!important;
+}
+body.mg-ai-v4 .navigation .mode-options button[aria-pressed=true]{background:var(--ai-raised)!important}
+body.mg-ai-v4 .navigation .settings-content :is(h2,h3,h4,strong,summary,legend,label){color:var(--ai-fg)}
+body.mg-ai-v4 .navigation .settings-content :is(p,li,span,.muted,.footer-note,.device-note,.notice){color:var(--ai-secondary)}
+body.mg-ai-v4 .navigation .settings-content :is(select,input:not([type=checkbox]),textarea,button) {
+  border-color:var(--ai-stroke-hover);
+  color:var(--ai-fg);
+  background:var(--ai-raised);
+}
+body.mg-ai-v4 .navigation .settings-content input[type=checkbox]{accent-color:var(--ai-accent)}
+body.mg-ai-v4 .navigation .settings-content .tool-card,
+body.mg-ai-v4 .navigation .settings-content .notice {
+  background:var(--ai-raised);
+  color:var(--ai-fg);
+  border-color:var(--ai-stroke);
+}
+body.mg-ai-v4 .site-header {
+  border-color:var(--ai-stroke)!important;
+  background:rgba(13,21,30,.94)!important;
+  color:var(--ai-fg)!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 .site-header {
+  background:rgba(255,255,255,.94)!important;
+  color:#172435!important;
+  box-shadow:0 1px 0 rgba(39,69,98,.06);
+}
+body.mg-ai-v4 .site-header :is(.experience-tab,.experience-current,#navigation-toggle,.mode-picker>summary,.header-actions button,.header-actions a){
+  color:var(--ai-fg)!important;
+}
+body.mg-ai-v4 .site-header .experience-tab[aria-pressed=true] {
+  background:var(--ai-raised-hover)!important;
+  color:var(--ai-fg)!important;
+}
+body.mg-ai-v4 .site-header .experience-tab:hover{background:var(--ai-raised)}
+body.mg-ai-v4 .header-actions #sign-up {
+  background:var(--ai-contrast)!important;
+  color:var(--ai-contrast-ink)!important;
+}
+body.mg-ai-v4 .site-header .header-actions a[href="/ai/help/"] {
+  color:var(--ai-secondary)!important;
+  border-color:var(--ai-stroke-hover)!important;
+}
+body.mg-ai-v4 .intro h1 {font-weight:680;letter-spacing:-.046em}
+body.mg-ai-v4 .intro .experience-eyebrow {color:var(--ai-secondary)}
+body.mg-ai-v4 .intro p {color:var(--ai-secondary)}
+body.mg-ai-v4 .quick-suggestions {
+  width:min(100%,680px);
+  gap:8px;
+  margin-top:17px;
+}
+body.mg-ai-v4 .quick-suggestion {
+  min-height:42px;
+  padding:8px 11px;
+  border-radius:12px;
+  background:transparent;
+  color:var(--ai-secondary);
+  border:1px solid var(--ai-stroke);
+  font-size:11px;
+  font-weight:520;
+}
+body.mg-ai-v4 .quick-suggestion:hover {
+  color:var(--ai-fg);
+  border-color:var(--ai-stroke-hover);
+  background:var(--ai-raised);
+}
+body.mg-ai-v4 .result.assistant-message {
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+body.mg-ai-v4 .result:not(.assistant-message) {
+  background:var(--ai-surface);
+  border-color:var(--ai-stroke);
+}
+body.mg-ai-v4 .result :is(.answer,p,li,.outcome,h2,h3,h4) {color:var(--ai-fg)}
+body.mg-ai-v4 .result :is(.response-details p,.response-actions,.inspection-details,.muted,time){color:var(--ai-secondary)}
+body.mg-ai-v4 .result :is(.response-details>summary,.copy-response,.inspection-details>summary) {
+  color:var(--ai-secondary);
+}
+body.mg-ai-v4 .result :is(.response-details>summary,.copy-response):hover {
+  background:var(--ai-raised);
+  color:var(--ai-fg);
+}
+body.mg-ai-v4 .bubble {
+  background:var(--ai-raised);
+  color:var(--ai-fg);
+  border-color:var(--ai-stroke);
+  border-radius:19px 19px 7px 19px;
+}
+body.mg-ai-v4 .research-source,
+body.mg-ai-v4 .research-evidence {
+  color:var(--ai-fg);
+  border-color:var(--ai-stroke);
+}
+body.mg-ai-v4 .research-source p,
+body.mg-ai-v4 .research-disclaimer {color:var(--ai-secondary)}
+body.mg-ai-v4 .research-source-host,
+body.mg-ai-v4 .research-heading time {color:var(--ai-faint)}
+
+/* Original MalGuard signature: restrained cyan pinstripe; zero decorative motion. */
+body.mg-ai-v4 .composer-shell,
+body.mg-ai-v4[data-mode=build] .composer-shell {
+  position:relative;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+  gap:0!important;
+  width:100%;
+  min-width:0;
+  min-height:106px;
+  padding:12px 13px 11px!important;
+  border:1px solid var(--ai-stroke-hover)!important;
+  border-radius:23px!important;
+  background:var(--ai-panel)!important;
+  color:var(--ai-fg)!important;
+  box-shadow:0 12px 40px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.05)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  direction:ltr;
+}
+body.mg-ai-v4 .composer-shell:before{
+  content:"";
+  position:absolute;
+  top:-1px;left:23px;
+  width:56px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--ai-accent),transparent);
+  opacity:.85;
+  pointer-events:none;
+}
+body.mg-ai-v4 .composer-shell:focus-within {
+  border-color:var(--ai-focus)!important;
+  box-shadow:0 10px 35px rgba(0,0,0,.10),0 0 0 2px rgba(83,173,207,.14)!important;
+}
+body.mg-ai-v4 .composer-shell #message {
+  flex:none!important;
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  min-height:45px;
+  max-height:185px;
+  padding:4px 5px 13px!important;
+  margin:0!important;
+  border:0!important;
+  background:transparent!important;
+  color:var(--ai-fg)!important;
+  font-size:15px;
+  font-family:inherit;
+  line-height:1.65;
+  box-shadow:none!important;
+  outline:none;
+  resize:none;
+}
+body.mg-ai-v4 .composer-shell #message::placeholder {
+  color:var(--ai-faint)!important;
+  opacity:1;
+}
+body.mg-ai-v4 .composer-shell #message:focus-visible {outline:none}
+body.mg-ai-v4 .composer-footer,
+body.mg-ai-v4[data-mode=build] .composer-footer {
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr) auto!important;
+  grid-template-rows:auto!important;
+  gap:7px!important;
+  min-width:0;
+  width:100%;
+  align-items:center!important;
+  justify-items:stretch;
+  justify-content:stretch!important;
+  padding:0!important;
+  margin:0!important;
+}
+body.mg-ai-v4 .composer-shell .attach-menu {
+  position:relative;
+  grid-column:1!important;
+  grid-row:1!important;
+  order:0!important;
+  width:40px;
+  height:40px;
+  min-width:40px;
+  z-index:30;
+}
+body.mg-ai-v4 .composer-shell #attach-toggle {
+  width:40px;
+  height:40px;
+  min-height:40px;
+  padding:0;
+  border:1px solid var(--ai-stroke)!important;
+  border-radius:13px!important;
+  background:var(--ai-raised)!important;
+  color:var(--ai-fg)!important;
+  display:grid;
+  place-items:center;
+}
+body.mg-ai-v4 .composer-shell #attach-toggle:hover,
+body.mg-ai-v4 .composer-shell #attach-toggle[aria-expanded=true]{
+  background:var(--ai-raised-hover)!important;
+  border-color:var(--ai-stroke-hover)!important;
+}
+body.mg-ai-v4 .composer-shell .composer-actions,
+body.mg-ai-v4[data-mode=build] .composer-shell .composer-actions {
+  display:flex!important;
+  grid-column:3!important;
+  grid-row:1!important;
+  flex:none!important;
+  width:auto!important;
+  min-width:0;
+  justify-content:flex-end!important;
+  align-items:center!important;
+  gap:7px!important;
+}
+body.mg-ai-v4 .composer-shell .model-select-wrap {
+  width:auto;
+  max-width:min(35vw,170px)!important;
+  min-width:0;
+  flex:0 1 auto;
+  gap:4px;
+}
+body.mg-ai-v4 .composer-shell .model-select-wrap[hidden] {display:none!important}
+body.mg-ai-v4 .composer-shell #model {
+  display:block;
+  width:auto;
+  min-width:75px!important;
+  max-width:min(30vw,142px)!important;
+  min-height:39px;
+  padding:6px 8px;
+  border-radius:12px;
+  border:1px solid var(--ai-stroke)!important;
+  background:transparent!important;
+  color:var(--ai-fg)!important;
+  font-size:11px;
+  font-weight:650;
+  line-height:1.25;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  cursor:pointer;
+  color-scheme:inherit;
+}
+body.mg-ai-v4 .composer-shell #model:disabled{opacity:.65}
+body.mg-ai-v4 .composer-shell #send {
+  grid-area:auto!important;
+  flex:none!important;
+  display:grid!important;
+  place-items:center;
+  width:40px!important;
+  min-width:40px!important;
+  height:40px!important;
+  min-height:40px!important;
+  padding:0!important;
+  border:1px solid var(--ai-stroke-hover)!important;
+  border-radius:13px!important;
+  background:var(--ai-contrast)!important;
+  color:var(--ai-contrast-ink)!important;
+}
+body.mg-ai-v4 .composer-shell #send:not(:disabled):hover {
+  filter:brightness(.93);
+  transform:none;
+}
+body.mg-ai-v4 .composer-shell #send:disabled {
+  background:var(--ai-raised)!important;
+  color:var(--ai-faint)!important;
+  border-color:var(--ai-stroke)!important;
+  cursor:not-allowed;
+}
+body.mg-ai-v4 .composer-shell #send[data-state=stop] {
+  background:var(--ai-contrast)!important;
+  color:var(--ai-contrast-ink)!important;
+  border-color:var(--ai-stroke-hover)!important;
+}
+body.mg-ai-v4 .composer-shell .composer-active-tools {
+  display:flex;
+  grid-column:2!important;
+  grid-row:1!important;
+  align-items:center;
+  justify-content:flex-start;
+  gap:5px;
+  min-width:0;
+  overflow-x:auto;
+  scrollbar-width:none;
+  white-space:nowrap;
+}
+body.mg-ai-v4 .composer-active-tools::-webkit-scrollbar{display:none}
+body.mg-ai-v4 .composer-active-tools>button:not([hidden]){
+  display:inline-flex;
+  flex:none;
+  gap:5px;
+  min-height:32px;
+  max-width:145px;
+  align-items:center;
+  border:1px solid var(--ai-stroke);
+  border-radius:10px;
+  padding:4px 7px;
+  background:var(--ai-raised);
+  color:var(--ai-fg);
+  font:650 11px/1.25 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  cursor:pointer;
+}
+body.mg-ai-v4 .composer-active-tools>button span:first-child {
+  color:var(--ai-accent);
+  font-size:15px;
+}
+body.mg-ai-v4 .composer-active-tools>button:disabled{opacity:.5;cursor:not-allowed}
+body.mg-ai-v4 .composer-active-tools>button[hidden] {display:none!important}
+body.mg-ai-v4 .composer-active-tools>button:hover:not(:disabled) {background:var(--ai-raised-hover)}
+body.mg-ai-v4 .composer-hints,
+body.mg-ai-v4 #web-search-hint {
+  position:absolute!important;
+  width:1px!important;height:1px!important;
+  margin:-1px!important;padding:0!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  clip-path:inset(50%)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+body.mg-ai-v4 .footer-note#disclaimer {
+  color:var(--ai-faint)!important;
+  font-size:11px;
+  line-height:1.5;
+}
+body.mg-ai-v4 .attachment{color:var(--ai-secondary)}
+body.mg-ai-v4 .media-draft{background:var(--ai-raised);color:var(--ai-fg);border-color:var(--ai-stroke)}
+body.mg-ai-v4 .composer-area{
+  max-width:840px;
+}
+body.mg-ai-v4:has(.conversation:not(:empty)) .composer-area {
+  background:linear-gradient(to top,var(--ai-canvas) 60%,transparent)!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4:has(.conversation:not(:empty)) .composer-area {
+  background:linear-gradient(to top,rgba(243,247,251,.98) 58%,rgba(243,247,251,0))!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 .composer-shell {
+  box-shadow:0 7px 32px rgba(22,51,78,.08),inset 0 1px 0 #fff!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 .composer-shell:focus-within {
+  box-shadow:0 7px 30px rgba(22,51,78,.08),0 0 0 2px rgba(23,97,140,.12)!important;
+}
+
+/* Tool drawer opens above the single + control. These are the real controls
+   already connected to consent, model availability and server routing. */
+body.mg-ai-v4 #attach-options {
+  display:grid;
+  position:absolute;
+  inset-inline-start:0;
+  inset-inline-end:auto;
+  left:auto;
+  right:auto;
+  top:auto;
+  bottom:calc(100% + 11px);
+  z-index:100;
+  width:min(300px,calc(100vw - 28px));
+  max-width:calc(100vw - 28px);
+  max-height:min(480px,calc(100dvh - 150px));
+  padding:9px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  gap:3px;
+  scrollbar-width:thin;
+  border:1px solid var(--ai-stroke-hover);
+  border-radius:17px;
+  background:var(--ai-menu)!important;
+  color:var(--ai-fg)!important;
+  box-shadow:0 20px 55px rgba(0,0,0,.26);
+  direction:inherit;
+}
+body.mg-ai-v4 #attach-options[hidden]{display:none!important}
+body.mg-ai-v4 .composer-menu-heading {
+  margin:5px 10px 7px;
+  color:var(--ai-secondary);
+  font-size:10px;
+  line-height:1.5;
+  font-weight:750;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+}
+body.mg-ai-v4 .composer-menu-divider{
+  border-top:1px solid var(--ai-stroke);
+  margin:6px 4px;
+}
+body.mg-ai-v4 #attach-options>button,
+body.mg-ai-v4 #attach-options .web-search-controls #web-search-toggle {
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  width:100%;
+  min-width:0;
+  min-height:42px!important;
+  gap:11px!important;
+  border:1px solid transparent!important;
+  border-radius:11px!important;
+  padding:9px 11px!important;
+  background:transparent!important;
+  color:var(--ai-fg)!important;
+  text-align:start!important;
+  font-size:12px!important;
+  font-weight:590;
+  line-height:1.35;
+  letter-spacing:0;
+}
+body.mg-ai-v4 #attach-options>button[hidden] {display:none!important}
+body.mg-ai-v4 #attach-options button:disabled{
+  cursor:not-allowed;
+  color:var(--ai-faint)!important;
+  opacity:.56;
+}
+body.mg-ai-v4 #attach-options button:not(:disabled):hover,
+body.mg-ai-v4 #attach-options button[aria-pressed=true] {
+  border-color:var(--ai-stroke)!important;
+  background:var(--ai-raised)!important;
+}
+body.mg-ai-v4 #attach-options button:focus-visible,
+body.mg-ai-v4 #attach-toggle:focus-visible,
+body.mg-ai-v4 .composer-active-tools button:focus-visible,
+body.mg-ai-v4 #model:focus-visible,
+body.mg-ai-v4 #send:focus-visible {
+  outline:2px solid var(--ai-focus)!important;
+  outline-offset:2px;
+}
+body.mg-ai-v4 #attach-options .tool-menu-icon {
+  min-width:18px;
+  font-size:18px;
+  line-height:1;
+  color:var(--ai-accent);
+}
+body.mg-ai-v4 #attach-options .web-search-controls {
+  display:grid!important;
+  grid-area:auto!important;
+  width:100%!important;
+  min-width:0;
+  grid-template-columns:minmax(0,1fr) auto;
+  column-gap:4px;
+  align-items:center;
+}
+body.mg-ai-v4 #attach-options #web-search-toggle {
+  grid-area:auto!important;
+  max-width:none;
+  min-width:0;
+  justify-content:flex-start!important;
+  gap:10px;
+}
+body.mg-ai-v4 #attach-options #web-search-toggle svg {flex:none;color:var(--ai-accent)}
+body.mg-ai-v4 #attach-options #web-search-toggle[aria-pressed=true]::after {
+  content:"";
+  width:6px;height:6px;
+  margin-inline-start:auto;
+  border-radius:50%;
+  background:var(--ai-accent);
+}
+body.mg-ai-v4 #attach-options #web-search-depth {
+  grid-area:auto!important;
+  min-height:35px;
+  max-width:100px;
+  border:1px solid var(--ai-stroke);
+  border-radius:9px;
+  background:var(--ai-raised);
+  color:var(--ai-fg);
+  font-size:11px;
+  font-weight:640;
+  padding:5px 7px;
+}
+body.mg-ai-v4 #attach-options #web-search-depth[hidden]{display:none!important}
+body.mg-ai-v4 #attach-options #thinking-toggle .thinking-glyph {
+  color:var(--ai-accent);
+  line-height:1;
+}
+body.mg-ai-v4 #attach-options #thinking-toggle[aria-pressed=true]::after {
+  content:"";
+  display:block;
+  width:6px;height:6px;
+  margin-inline-start:auto;
+  border-radius:50%;
+  background:var(--ai-accent);
+}
+body.mg-ai-v4 #attach-options #thinking-toggle {
+  grid-area:auto!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  border-radius:11px!important;
+}
+body.mg-ai-v4 .media-generated-image {border-color:var(--ai-stroke)}
+
+/* Day-mode audit: dialogs, permission labels, tool status, model option lists. */
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 :is(.ai-account,dialog,#local-welcome,.settings-content) {
+  background:var(--ai-surface)!important;
+  color:var(--ai-fg)!important;
+  border-color:var(--ai-stroke-hover)!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 :is(dialog,.ai-account,#local-welcome,.settings-content) :is(h1,h2,h3,h4,strong,summary,legend,label) {
+  color:var(--ai-fg)!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 :is(dialog,.ai-account,#local-welcome,.settings-content) :is(p,li,.muted,.footer-note,span:not(.mg-model-new),small) {
+  color:var(--ai-secondary);
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 :is(dialog,.ai-account,#local-welcome,.settings-content) :is(input:not([type=checkbox]),select,textarea) {
+  background:var(--ai-raised)!important;
+  color:var(--ai-fg)!important;
+  border-color:var(--ai-stroke-hover)!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 :is(dialog,.ai-account,#local-welcome,.settings-content) :is(button:not(.primary-action),a:not(.primary-action)) {
+  color:var(--ai-fg)!important;
+  border-color:var(--ai-stroke)!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 :is(dialog,.ai-account,#local-welcome) .primary-action {
+  color:#fff!important;
+  background:#182b3c!important;
+  border-color:#182b3c!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 .entry-content {
+  background:#fff!important;
+  color:var(--ai-fg)!important;
+  border-color:var(--ai-stroke)!important;
+  box-shadow:0 20px 70px rgba(25,59,87,.09);
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 .entry-content :is(h1,strong,.entry-brand){color:var(--ai-fg)!important}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 .entry-content :is(p,.entry-capability span,.entry-description){color:var(--ai-secondary)!important}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 .entry-content .entry-actions button:first-child{
+  background:#172b3a!important;color:#fff!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 .entry-content .entry-actions button:last-child{
+  background:var(--ai-raised)!important;color:var(--ai-fg)!important;
+}
+
+/* Protect wide Code workspace and keep compact controls readable at 320px. */
+@media (max-width:760px){
+  body.mg-ai-v4 .composer-shell,
+  body.mg-ai-v4[data-mode=build] .composer-shell {
+    min-height:104px;padding:10px 10px 9px!important;border-radius:19px!important;
+  }
+  body.mg-ai-v4 .composer-shell #message{font-size:16px;min-height:46px;padding:3px 5px 9px!important}
+  body.mg-ai-v4 .composer-footer,
+  body.mg-ai-v4[data-mode=build] .composer-footer {
+    display:grid!important;
+    grid-template-columns:40px minmax(0,1fr) auto!important;
+    grid-template-rows:auto!important;
+    gap:5px!important;
+    justify-content:stretch!important;
+    align-items:center!important;
+  }
+  body.mg-ai-v4 .composer-shell .composer-actions{display:flex!important;width:auto!important;min-width:0}
+  body.mg-ai-v4 .composer-shell .model-select-wrap{max-width:min(33vw,130px)!important}
+  body.mg-ai-v4 .composer-shell #model {
+    max-width:min(31vw,118px)!important;
+    min-width:67px!important;
+    min-height:39px;
+    padding:6px 6px;
+    font-size:10px;
+  }
+  body.mg-ai-v4 .composer-active-tools>button:not([hidden]) {font-size:10px;padding:4px 6px}
+  body.mg-ai-v4 .quick-suggestions {gap:5px;grid-template-columns:repeat(3,minmax(0,1fr))}
+  body.mg-ai-v4 .quick-suggestion {min-height:44px;padding:7px 8px;font-size:10px}
+  body.mg-ai-v4 #attach-options{max-height:min(410px,calc(100dvh - 145px))}
+}
+@media(max-width:440px) {
+  body.mg-ai-v4 .quick-suggestions {grid-template-columns:1fr 1fr}
+  body.mg-ai-v4 .quick-suggestion:last-child {grid-column:1/-1}
+  body.mg-ai-v4 .composer-active-tools button span:last-child {display:none}
+  body.mg-ai-v4 .composer-active-tools button span[id$="-label"] {display:none}
+  body.mg-ai-v4 .composer-active-tools>button:not([hidden]){
+    width:31px;min-width:31px;height:32px;
+    justify-content:center;padding:3px;
+  }
+}
+@media(max-width:355px){
+  body.mg-ai-v4 .composer-shell .model-select-wrap{max-width:97px!important}
+  body.mg-ai-v4 .composer-shell #model{max-width:88px!important;min-width:59px!important}
+  body.mg-ai-v4 #attach-options{width:min(288px,calc(100vw - 24px))}
+}
+@media (forced-colors:active) {
+  body.mg-ai-v4 .composer-shell,
+  body.mg-ai-v4 #attach-options {
+    border:1px solid CanvasText!important;
+    background:Canvas!important;
+    color:CanvasText!important;
+  }
+  body.mg-ai-v4 .composer-shell:before{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  body.mg-ai-v4 .composer-shell,
+  body.mg-ai-v4 .composer-shell *,
+  body.mg-ai-v4 #attach-options {transition:none!important;animation:none!important}
+}
+
+
+/* Native select menus use OS controls, but their option colors must not
+   inherit the old dark-only global style in Day mode. */
+body.mg-ai-v4 :is(#model,#workspace-model,#web-search-depth,#mode,#tool) option{
+  background:#182633!important;color:#f2f7fa!important;
+}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 :is(#model,#workspace-model,#web-search-depth,#mode,#tool) option{
+  background:#ffffff!important;color:#172435!important;
+}
+body.mg-ai-v4 :is(#model,#workspace-model,#web-search-depth) option.mg-new-option{color:#86efac!important}
+html:is(.theme-light,[data-theme=light]) body.mg-ai-v4 :is(#model,#workspace-model,#web-search-depth) option.mg-new-option{color:#166534!important}
+body.mg-ai-v4 .experience-current{display:none}
+body.mg-ai-v4 #attach-toggle svg{pointer-events:none}
