@@ -1,17 +1,16 @@
 export async function openSettings(page,tab){
- const pro=page.locator('#pro-settings');
- if(!(await pro.isVisible().catch(()=>false))){
+ const already=await page.evaluate(()=>!!document.getElementById('pro-settings')?.open);
+ if(!already){
   if(!(await page.locator('#settings-panel > summary').isVisible()))await page.locator('#navigation-toggle').click();
   await page.locator('#settings-panel > summary').click();
-  await pro.waitFor({state:'visible'});
+  await page.waitForFunction(()=>document.getElementById('pro-settings')?.open);
  }
  if(tab)await page.evaluate(id=>document.getElementById('pro-tab-'+id)?.click(),tab);
 }
 export async function closeSettings(page){
- const pro=page.locator('#pro-settings');
- if(await pro.isVisible().catch(()=>false)){
-  await page.locator('#pro-settings .pro-settings-close').click();
-  await pro.waitFor({state:'hidden'});
+ if(await page.evaluate(()=>!!document.getElementById('pro-settings')?.open)){
+  await page.evaluate(()=>document.getElementById('pro-settings')?.close());
+  await page.waitForFunction(()=>!document.getElementById('pro-settings')?.open);
  }else if(await page.locator('#settings-panel').getAttribute('open')!==null){
   await page.locator('#settings-panel').evaluate(n=>{n.open=false;});
  }
@@ -26,7 +25,7 @@ export async function closeSettings(page){
  });
 }
 export async function toggleSettings(page){
- if(await page.locator('#pro-settings').isVisible().catch(()=>false) || await page.locator('#settings-panel').getAttribute('open')!==null){
+ if(await page.evaluate(()=>!!document.getElementById('pro-settings')?.open || !!document.getElementById('settings-panel')?.open)){
   await closeSettings(page);
   return;
  }
