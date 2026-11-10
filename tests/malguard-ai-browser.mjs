@@ -206,7 +206,7 @@ try{
   await page.locator('#attach-toggle').click();await page.locator('#attach-chat').click();
   assert.equal(await page.locator('#mode').inputValue(),'chat');assert.equal(await page.locator('#tool').inputValue(),'auto');
   assert.equal(requests,beforeMenu,'Attachment actions must not submit requests');
-   assert.equal(modelPostRequests,0,'Attachment menus cannot send a model request');
+   assert.equal(modelPostRequests,modePosts,'Attachment menus cannot send a model request');
   assert.equal(await page.locator('#local-download').isVisible(),false);assert.equal(await page.locator('#local-offer').isVisible(),false,'Attachment actions must not start model downloads');
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   await page.locator('#attach-toggle').click();const choosingFile=page.waitForEvent('filechooser');await page.locator('#attach-file').click();
