@@ -15,10 +15,11 @@ import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
 import {typeText,formatElapsed} from './reply-motion.mjs';
 import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=desktop-pull-20261030';
 import {detectDevice,assessDesktopModel} from './model-compatibility.mjs?v=hardware-check-20261030';
-import {renderRichText} from './code-view.mjs?v=codex-chat-20261025';
+import {renderRichText} from './code-view.mjs?v=flagship-20261109';
 import {createAccount} from './account.mjs?v=vercel-auth-stable-20261103';
-import {createBuilder} from './builder.mjs?v=qwen-coder-restored-20261026';
+import {createBuilder} from './builder.mjs?v=flagship-20261109';
 import {parseProposal} from './build-project.mjs?v=codex-chat-20261025';
+import {installFlagship,syncFlagship} from './flagship.mjs?v=20261109';
 const $=id=>document.getElementById(id);
 const names={gta_guard:'GTA Guard',game_scam_guard:'Game Scam Guard',ai_web:'AI Web',malwarebazaar:'MalwareBazaar',urlhaus:'URLhaus',file_sandbox:'File sandbox',url_sandbox:'Link sandbox'};
 let locale='en',service,busy=false,serviceLoading=true;
@@ -38,12 +39,12 @@ const preparedModels=new Set();
 let preparingModel;
 let welcomeSeen=false;try{welcomeSeen=localStorage.getItem('malguard.ai.welcome.v3')==='seen';}catch{}
 const conversations={chat:{history:[],modelHistory:[],draft:'',model:CF_DEFAULTS.chat},worker:{history:[],modelHistory:[],draft:'',model:CF_DEFAULTS.work},build:{history:[],modelHistory:[],draft:'',model:CF_DEFAULTS.code}};
-let projectOpen=false;
+let projectOpen=false,homeView=true;
 let activeMode='chat',history=conversations.chat.history,modelHistory=conversations.chat.modelHistory;
 const desktopChat=createDesktopChat();
 const desktopDevice=detectDevice({userAgent:navigator.userAgent,platform:navigator.userAgentData?.platform||navigator.platform,maxTouchPoints:navigator.maxTouchPoints,mobileHint:navigator.userAgentData?.mobile});
 const builder=createBuilder({locale:()=>locale});
-const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{accountUsage=null;navigation.profile(profile);library.profile(profile);document.body.classList.toggle('auth-required',!profile);$('entry-gate').hidden=!!profile;$('entry-retry').hidden=!!profile||!account.hasSavedSession();if(profile){void loadAccountUsage();$('message').focus();return;}for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
+const account=createAccount({button:$('account'),locale:()=>locale,onChange:profile=>{accountUsage=null;navigation.profile(profile);library.profile(profile);document.body.classList.toggle('auth-required',!profile);$('entry-gate').hidden=!!profile;$('entry-retry').hidden=!!profile||!account.hasSavedSession();if(profile){void loadAccountUsage();if(!homeView)$('message').focus();return;}for(const state of Object.values(conversations)){state.history.length=0;state.modelHistory.length=0;state.draft='';}builder.reset();projectOpen=false;$('message').value='';$('conversation').replaceChildren();$('remove-file').click();$('revoke-permissions').click();renderStatus();}});
 const navigation=createNavigation({account,onLanguage:()=>{locale='en';translate();}});
 $('entry-signin').onclick=()=>account.open(false);$('entry-signup').onclick=()=>account.open(true);
 $('entry-retry').onclick=async()=>{$('entry-retry').disabled=true;try{const restored=await account.restore();$('entry-retry').hidden=restored||!account.hasSavedSession();}finally{$('entry-retry').disabled=false;}};
@@ -88,6 +89,8 @@ Object.assign(copy.en,{thinkingToggle:'Thinking',thinkingActive:'Deep reasoning 
 Object.assign(copy.fa,{thinkingToggle:'تفکر',thinkingActive:'تفکر عمیق فعال (مصرف سهمیه بیشتر)',thinkingInactive:'فعال‌سازی تفکر عمیق (مصرف سهمیه بیشتر)',thinkingUnavailable:'برای این بخش مدل استدلالی فعال در دسترس نیست'});
 function switchMode(next,{carryDraft=false}={}){
  if(busy||!['chat','worker','build'].includes(next)){$('mode').value=activeMode;return;}
+ homeView=false;
+ if(next==='build')projectOpen=true;
  if(next===activeMode){$('mode-picker').open=false;$('mode').value=next;renderStatus();return;}
  thinkingEnabled=false; // Explicit opt-in per mode, never carry Code reasoning into Chat.
  const previous=conversations[activeMode];previous.draft=$('message').value;previous.model=$('model').value;
@@ -408,6 +411,7 @@ function renderStatus(){
  for(const option of $('offer-model').options){const m=localModels[option.value];option.textContent=`${t(option.value==='local_fast'?'lightModel':'strongModel')} · ~${m.downloadMB} MB`;}
  $('local-status').textContent=localReady?(locale==='fa'?'اجرای روی دستگاه ممکن است؛ سرعت و حافظه باید هنگام بارگذاری بررسی شوند.':'On-device inference may be supported; loading still depends on memory and device capabilities.'):t('localOff');
   syncExperienceV2({mode:activeMode,locale,busy,selectedId:selectedIdForMode,modelLabel,isNew:isNewCloudModel(selectedIdForMode),thinkingReady:thinkingCloudReady,thinkingOn:thinkingCloudReady&&thinkingEnabled,thinkingModel:thinkingModelLabel});
+  syncFlagship({view:homeView?'home':activeMode,busy});
 
   const webMode=activeWebMode(),webOn=webMode!=='off';
   const modelCapable=cfModels.some(m=>m.id===selectedIdForMode&&m.available&&m.mode===cfMode);
@@ -436,7 +440,7 @@ function renderStatus(){
     (webMode==='research'?'Research':'Web search')+' is on · sourced answers';
 
 }
-function showError(key,remember=true){if(remember)history.push({error:key});const card=el('article',undefined,'result error'),text=typeof key==='object'?errorMessage(key,locale):t(key),heading=el('h3',text,'outcome');card.append(heading);card.setAttribute('role','alert');$('conversation').append(card);if(remember&&!matchMedia('(prefers-reduced-motion: reduce)').matches){heading.setAttribute('aria-label',text);const ink=el('span',text);ink.setAttribute('aria-hidden','true');heading.replaceChildren(ink);typeText(text,value=>{ink.textContent=value;},{charactersPerSecond:130}).catch(()=>{ink.textContent=text;});}}
+function showError(key,remember=true){homeView=false;syncFlagship({view:activeMode,busy});if(remember)history.push({error:key});const card=el('article',undefined,'result error'),text=typeof key==='object'?errorMessage(key,locale):t(key),heading=el('h3',text,'outcome');card.append(heading);card.setAttribute('role','alert');$('conversation').append(card);if(remember&&!matchMedia('(prefers-reduced-motion: reduce)').matches){heading.setAttribute('aria-label',text);const ink=el('span',text);ink.setAttribute('aria-hidden','true');heading.replaceChildren(ink);typeText(text,value=>{ink.textContent=value;},{charactersPerSecond:130}).catch(()=>{ink.textContent=text;});}}
 function renderResponse(response,remember=true){
  if(remember)history.push({response});
  if(response.error){showError(publicFailure(response),false);return;}
@@ -453,7 +457,9 @@ function renderResponse(response,remember=true){
    const evidence=renderResearchEvidence(response.generated.webSearch,locale);
    if(evidence)n.append(evidence);
    attachResearchCitations(answer,response.generated.webSearch);
-   actions.append(copy,details);n.append(answer,actions);if(response.interrupted)n.append(el('p',t('stopped'),'reply-stopped'));$('conversation').append(n);return n;
+   const download=el('button',locale==='fa'?'دانلود پاسخ':'Download');download.type='button';download.title='Download response as Markdown';
+   download.onclick=()=>{const url=URL.createObjectURL(new Blob([response.generated.text],{type:'text/markdown;charset=utf-8'})),link=el('a');link.href=url;link.download='malguard-response.md';link.click();setTimeout(()=>URL.revokeObjectURL(url),10000);};
+   actions.append(copy,download,details);n.append(answer,actions);if(response.interrupted)n.append(el('p',t('stopped'),'reply-stopped'));$('conversation').append(n);return n;
  }
  const r=response.result;if(!r){showError('streamError',false);return;}
  const card=el('article',undefined,`result ${r.outcome}`);card.append(el('div',names[r.tool],'eyebrow'),el('h3',t(r.outcome),'outcome'));
@@ -716,6 +722,7 @@ $('message').addEventListener('keydown',event=>{
 });
 $('composer').onsubmit=async event=>{
  event.preventDefault();if(busy){stopTurn();return;}
+ homeView=false;syncFlagship({view:activeMode,busy});
  const message=$('message').value.trim(),mode=activeMode,file=mode==='worker'?$('file').files[0]:undefined,tool=mode==='worker'?$('workspace-tool').value:'auto';
  if(mediaAction!=='off'&&mode==='chat'){await runMedia(message);return;}
  if(!message&&!file)return;
@@ -829,6 +836,7 @@ $('desktop-model').onchange=updateDesktopInfo;for(const field of ['desktop-ram-g
 $('desktop-download').onclick=downloadDesktop;
 $('desktop-cancel-download').onclick=()=>{desktopDownloadController?.abort(new DOMException('Cancelled by user','AbortError'));desktopChat.stop();};
 installExperienceV2();
+installFlagship({navigate:view=>{if(busy)return;if(view==='home'){switchMode('chat');homeView=true;renderStatus();}else switchMode(view);if(innerWidth<=760&&!document.body.classList.contains('navigation-closed'))$('navigation-toggle').click();}});
 translate();
 renderStatus();
 void bootAssistant();

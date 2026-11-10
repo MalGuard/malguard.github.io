@@ -1,10 +1,11 @@
-import {highlightCode,codeLanguage} from './code-view.mjs?v=codex-chat-20261025';
+import {highlightCode,codeLanguage} from './code-view.mjs?v=flagship-20261109';
 import {starterFiles,validateFiles,codingPrompt,projectZip,MAX_FILES,MAX_FILE_BYTES} from './build-project.mjs?v=codex-chat-20261025';
 export function createBuilder({locale=()=> 'en'}={}){
  const $=id=>document.getElementById(id),text=(fa,en)=>locale()==='fa'?fa:en;
- let files=validateFiles(starterFiles),selected='index.html',previous,invalid=false,run=0,outputCount=0,revision=0;
+ let files=validateFiles(starterFiles),selected='index.html',previous,invalid=false,run=0,outputCount=0,revision=0,exportedRevision=0;
  const status=message=>{$('build-status').textContent=message;};
  const clone=value=>Object.assign(Object.create(null),value);
+ addEventListener('beforeunload',event=>{if(revision===exportedRevision)return;event.preventDefault();event.returnValue='';});
  function view(next){$('build-columns').dataset.view=next;$('build-code-view').setAttribute('aria-pressed',String(next==='code'));$('build-preview-view').setAttribute('aria-pressed',String(next==='preview'));}
  $('build-code-view').onclick=()=>view('code');$('build-preview-view').onclick=()=>view('preview');
  function draw(){view('code');
@@ -16,7 +17,7 @@ export function createBuilder({locale=()=> 'en'}={}){
  $('build-import-button').onclick=()=>$('build-import').click();
  $('build-import').onchange=async()=>{try{const imported=Object.create(null),items=[...$('build-import').files];if(!items.length)return;if(items.length>MAX_FILES||items.some(file=>file.size>MAX_FILE_BYTES))throw new Error();for(const file of items)imported[file.name]=await file.text();replace({...files,...imported});selected=Object.keys(imported)[0];draw();status(text('فایل‌ها فقط به پروژهٔ محلی وارد شدند؛ به مدل ارسال نشدند.','Files imported into the local project only; nothing was sent to a model.'));}catch{status(text('ورود انجام نشد؛ نام، قالب و حجم فایل‌ها را بررسی کن.','Import failed. Check file names, formats and size.'));}finally{$('build-import').value='';}};
  $('build-file').onchange=()=>{selected=$('build-file').value;draw();};
- $('build-editor').addEventListener('keydown',event=>{if(event.key==='Tab'&&!event.shiftKey){event.preventDefault();$('build-editor').setRangeText('  ',$('build-editor').selectionStart,$('build-editor').selectionEnd,'end');$('build-editor').dispatchEvent(new Event('input'));}});
+
  $('build-editor').oninput=()=>{try{files=validateFiles({...files,[selected]:$('build-editor').value});revision++;invalid=false;status(text('تغییرات در حافظهٔ همین صفحه است.','Changes are in this page’s memory.'));}catch{invalid=true;status(text('فایل باید حداکثر ۲۵۶ کیلوبایت و پروژه حداکثر ۲ مگابایت باشد.','Limit: 256 KB per file and 2 MB per project.'));}controls();};
  $('build-add').onclick=()=>{const name=$('build-name').value.trim();try{if(Object.hasOwn(files,name))throw new Error();replace({...files,[name]:''});selected=name;draw();$('build-name').value='';status(text('فایل ساخته شد.','File created.'));}catch{status(text('نامی مثل helper.js یا src/main.py بنویس؛ حداکثر ۳۲ فایل.','Use a name such as helper.js or src/main.py; at most 32 files.'));}};
  $('build-undo').onclick=()=>{if(previous){files=previous;previous=undefined;revision++;if(!Object.hasOwn(files,selected))selected=Object.keys(files)[0];draw();status(text('نسخهٔ پیش از آخرین اعمال پیشنهاد یا افزودن فایل بازیابی شد.','Restored the version before the last proposal or added file.'));}};
@@ -24,10 +25,10 @@ export function createBuilder({locale=()=> 'en'}={}){
  $('build-stop').onclick=()=>{halt();status(text('پیش‌نمایش متوقف شد.','Preview stopped.'));};
  addEventListener('message',event=>{if(event.source!==$('build-preview').contentWindow)return;if(event.data?.type==='malguard-preview-ready'){$('build-preview').dataset.ready='true';status(text('بارگذاری پیش‌نمایش پایان یافت.','Preview finished loading.'));return;}if(event.data?.type!=='malguard-preview-output'||typeof event.data.text!=='string'||outputCount>=40)return;outputCount++;const output=$('build-console');output.textContent=(output.textContent+'['+(event.data.level==='error'?'error':'log')+'] '+event.data.text.slice(0,1000)+'\n').slice(-6000);});
  $('build-run').onclick=()=>{if(invalid||!files['index.html'])return;$('build-console').textContent='';outputCount=0;const project=clone(files),old=$('build-preview'),frame=document.createElement('iframe');frame.id='build-preview';frame.dataset.ready='false';frame.title=text('پیش‌نمایش ایزولهٔ پروژه','Isolated project preview');frame.setAttribute('sandbox','allow-scripts');frame.referrerPolicy='no-referrer';frame.allow="camera 'none'; microphone 'none'; geolocation 'none'; clipboard-read 'none'; clipboard-write 'none'";frame.onload=()=>{frame.contentWindow.postMessage({type:'malguard-project-preview',files:project},'*');status(text('پروژه به پیش‌نمایش ایزوله فرستاده شد.','Project sent to the isolated preview.'));};frame.src=`/code-preview/?v=builder-ready-20261025&run=${++run}`;old.replaceWith(frame);view('preview');controls();};
- $('build-export').onclick=()=>{try{const url=URL.createObjectURL(projectZip(files)),a=document.createElement('a');a.href=url;a.download='malguard-project.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);status(text('خروجی ZIP آماده شد.','ZIP export prepared.'));}catch{status(text('خروجی ساخته نشد؛ حجم و فایل‌ها را بررسی کن.','Export failed. Check project files and size.'));}};
+ $('build-export').onclick=()=>{try{const url=URL.createObjectURL(projectZip(files)),a=document.createElement('a');a.href=url;a.download='malguard-project.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);exportedRevision=revision;status(text('خروجی ZIP آماده شد.','ZIP export prepared.'));}catch{status(text('خروجی ساخته نشد؛ حجم و فایل‌ها را بررسی کن.','Export failed. Check project files and size.'));}};
  draw();
  return {
-  reset(){halt();files=validateFiles(starterFiles);selected='index.html';previous=undefined;revision++;draw();$('build-console').textContent='';$('build-status').textContent='';$('build-share-code').checked=false;},
+  reset(){halt();files=validateFiles(starterFiles);selected='index.html';previous=undefined;revision++;exportedRevision=revision;draw();$('build-console').textContent='';$('build-status').textContent='';$('build-share-code').checked=false;},
   get revision(){return revision;},
   apply(value){if(invalid)return false;try{replace({...files,...value.files});selected=Object.keys(value.files)[0];draw();status(text('فایل‌های پروژه ساخته شدند؛ نسخهٔ قبل قابل برگرداندن است.','Project files created. Undo restores the previous version.'));return true;}catch{return false;}},
   run(){$('build-run').click();},

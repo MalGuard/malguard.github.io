@@ -7,7 +7,7 @@
     "test:ai": "node --test services/malguard-ai/test/*.test.js",
     "test:ai:browser": "node tests/malguard-ai-browser.mjs",
     "test:ai:local": "node tests/malguard-ai-local-onboarding.mjs",
-    "check:ai": "node tools/check-malguard-ai.mjs && node --test tests/ai-composer-polish.test.mjs",
+    "check:ai": "node tools/check-malguard-ai.mjs && node --test tests/ai-composer-polish.test.mjs && npm run test:ai:flagship",
     "build:opening": "node tools/build-home-opening.mjs",
     "build:forms": "node tools/build-secure-forms.mjs",
     "test:static": "python3 tests/validate-site.py",
@@ -17,7 +17,8 @@
     "build:game-scam-guard": "node tools/build-gamescam-guide.mjs && vite build --config services/game-scam-guard/vite.config.js",
     "test:game-scam-guard": "node tests/game-scam-integration.test.mjs && npm --prefix services/game-scam-guard test",
     "build:ai": "node tools/build-ai-local.mjs",
-    "test:ai:builder": "node tests/malguard-ai-builder.mjs"
+    "test:ai:builder": "node tests/malguard-ai-builder.mjs",
+    "test:ai:flagship": "node --test tests/ai-flagship.test.mjs"
   },
   "devDependencies": {
     "@noble/hashes": "1.8.0",
@@ -25,6 +26,7 @@
     "country-flag-icons": "1.6.20",
     "earcut": "3.0.2",
     "esbuild": "0.25.10",
+    "jsdom": "26.1.0",
     "libphonenumber-js": "1.13.15",
     "playwright": "1.62.1",
     "three": "0.180.0",
