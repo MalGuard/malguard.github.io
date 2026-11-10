@@ -32,7 +32,7 @@ test('quick actions fill real composer without enabling sharing or submitting',(
  document.querySelector('.flagship-actions button:last-child').click();
  assert.equal(route,'worker');assert.match($('message').value,/milestones/);assert.equal(submitted,0);
  document.querySelector('.flagship-code-actions button').click();
- assert.match($('message').value,/Explain/);assert.equal($('build-share-code').checked,false);
+ assert.match($('message').value,/Explain/);assert.match($('message').value,/milestones/,'choosing a template must preserve an existing draft');assert.equal($('build-share-code').checked,false);
  assert.equal($('model-consent').checked,false);assert.equal($('lookup-consent').checked,false);
  assert.match($('flagship-code-notice').textContent,/enable/);
 });

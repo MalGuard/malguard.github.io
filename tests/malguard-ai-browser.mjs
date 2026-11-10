@@ -11,6 +11,34 @@ const server=web.listen(0,'127.0.0.1');await new Promise(r=>server.once('listeni
 const base=`http://127.0.0.1:${server.address().port}`;
 const CLOUD_ORIGIN='https://malware-ai.malguard-security.workers.dev';
 const MODELS_ORIGIN='https://models.malguard.site';
+async function captureThemes(page,name,width){
+ await mkdir('test-results/malguard-ai',{recursive:true});
+ for(const theme of ['dark','light']){
+  await page.evaluate(theme=>{document.documentElement.dataset.theme=theme;document.documentElement.classList.toggle('theme-light',theme==='light');},theme);
+  const controls=await page.locator('#composer').evaluate(form=>[...form.querySelectorAll('#attach-toggle,#flagship-attach,#model,#send')].filter(n=>n.getClientRects().length).map(n=>{const r=n.getBoundingClientRect();return {id:n.id,left:r.left,right:r.right,top:r.top,bottom:r.bottom};}));
+  for(let i=0;i<controls.length;i++)for(let j=i+1;j<controls.length;j++){
+   const a=controls[i],b=controls[j];assert.ok(Math.min(a.right,b.right)-Math.max(a.left,b.left)<=1||Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)<=1,`${theme} ${width}px: ${a.id} overlaps ${b.id}`);
+  }
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${theme} ${width}px horizontal overflow`);
+  const contrast=await page.evaluate(()=>{
+   const rgba=value=>{const n=value.match(/[\d.]+/g)?.map(Number)||[];return n.length>=3?[...n.slice(0,3),n[3]??1]:[0,0,0,0];};
+   const blend=(a,b)=>a.slice(0,3).map((v,i)=>v*a[3]+b[i]*(1-a[3]));
+   const background=node=>{const chain=[];for(let n=node;n;n=n.parentElement)chain.unshift(n);let bg=[255,255,255];for(const n of chain)bg=blend(rgba(getComputedStyle(n).backgroundColor),bg);return bg;};
+   const lum=rgb=>{const [r,g,b]=rgb.map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return .2126*r+.7152*g+.0722*b;};
+   const failures=[];
+   for(const node of document.querySelectorAll('#message,#attach-toggle,#flagship-attach,#model,#workspace-model,.flagship-subtitle,.navigation-shortcut,.navigation-new')){
+    if(!node.getClientRects().length||node.disabled)continue;
+    const bg=background(node),style=getComputedStyle(node),colors=[['text',style.color]];
+    if(node.id==='message')colors.push(['placeholder',getComputedStyle(node,'::placeholder').color]);
+    for(const [kind,color]of colors){const a=lum(blend(rgba(color),bg)),b=lum(bg),ratio=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);if(ratio<4.5)failures.push({id:node.id,kind,ratio:Math.round(ratio*100)/100});}
+   }
+   return failures;
+  });
+  assert.deepEqual(contrast,[],`${theme} ${width}px computed text contrast below 4.5:1`);
+  await page.screenshot({path:`test-results/malguard-ai/${name}-${theme}-${width}.png`,fullPage:true});
+ }
+ await page.evaluate(()=>{document.documentElement.dataset.theme='dark';document.documentElement.classList.remove('theme-light');});
+}
 let modelPostRequests=0;
 const cfFixtures=[
  {id:'chat_granite',mode:'chat',label:'Granite 4 Micro',provider:'workers_ai',available:true},
@@ -101,7 +129,7 @@ try{
    assert.equal(modelPostRequests,0,'Fetching the model catalog must never submit an inference');
   await context.close();console.log(`PASS platform guide, web app, shared menu and legacy AI URLs at ${width}px`);
  }
- for(const width of [360,390,768,1280]){
+ for(const width of [360,390,768,1024,1280,1440]){
   const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[],external=[];
   await skipWelcome(context);page.on('pageerror',e=>errors.push(e.message));
   await context.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
@@ -112,7 +140,7 @@ try{
    // ChatGPT/Grok-inspired controls are visible and genuinely functional on each viewport.
    assert.equal(await page.locator('#experience-tabs').isVisible(),true);
    assert.equal(await page.locator('body').getAttribute('data-view'),'home');
-   if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/flagship-home-${width}.png`,fullPage:true});}
+   if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await captureThemes(page,'flagship-home',width);}
    await page.locator('#experience-chat').click();
    assert.equal(await page.locator('#thinking-toggle').isVisible(),false,'Thinking stays in the collapsed + menu');
    await page.locator('#attach-toggle').click();
@@ -135,12 +163,12 @@ try{
    await page.locator('#experience-worker').click();
    assert.equal(await page.locator('#mode').inputValue(),'worker');
    assert.equal(await page.locator('#experience-worker').getAttribute('aria-pressed'),'true');
-   if([390,1280].includes(width))await page.screenshot({path:`test-results/malguard-ai/flagship-work-${width}.png`,fullPage:true});
+   if([390,1280].includes(width))await captureThemes(page,'flagship-work',width);
    assert.equal(await page.locator('.model-select-wrap').isVisible(),false,'Hidden Work selector must not leave an empty slot');
    await page.locator('#experience-build').click();
    assert.equal(await page.locator('#mode').inputValue(),'build');
    assert.equal(await page.locator('#build-panel').isVisible(),true);
-   if([390,1280].includes(width))await page.screenshot({path:`test-results/malguard-ai/flagship-code-${width}.png`,fullPage:true});
+   if([390,1280].includes(width))await captureThemes(page,'flagship-code',width);
    assert.equal(await page.locator('#model option[value="cf_gptoss120"]').count(),1,'Strong Code model belongs in Code');
    assert.equal(await page.locator('#model option[value="chat_granite"]').count(),0);
    await page.locator('#experience-chat').click();
@@ -161,7 +189,7 @@ try{
    await page.locator('#message').fill('');
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'New composer and top tabs must not overflow the viewport');
 
-  if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/quiet-empty-${width}.png`,fullPage:true});}
+  if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await captureThemes(page,'quiet-empty',width);}
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   assert.equal(await page.locator('#language-select').count(),0);assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   const beforeMenu=requests;

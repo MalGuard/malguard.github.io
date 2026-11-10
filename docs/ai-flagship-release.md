@@ -74,3 +74,24 @@ The local-model onboarding test then exposed a hidden download error while Home
 was active. The follow-up changes reveal the conversation on error and correct
 the Tools width. The full CI gate remains pending until that regression passes.
 Real authenticated provider testing and full reference fidelity are still outstanding.
+
+### Design refinement — 2026-11-10
+
+User requested a calmer, more coherent interface, stronger typography, standard
+button placement and complete light-theme readability. Exa research of official
+ChatGPT/Grok/Claude documentation and W3C guidance is recorded in
+`ai-ux-standards-20261110.md`; scoped manual security review is in
+`ai-refinement-review.md`. Three collaborating agents handled research, CSS and
+review. No claim of live signed-in competitor testing is made.
+
+The refinement replaces the flagship stylesheet with a coherent design layer,
+standardizes composer geometry and responsive controls, tightens navigation and
+preserves drafts when choosing templates. Browser CI now captures both themes,
+checks actual visible composer rectangles for overlap, and computes text and
+placeholder contrast from rendered styles. Those new checks must pass on the
+new commit before claiming this refinement visually verified.
+
+All five workflows on the preceding commit `74d8bed9f2b6a3cb41af2fc3debbe9bfba94ee79`
+passed, including browser Code, local models, accounts and library fixtures.
+Those results establish the earlier implementation baseline, not a passing result
+for subsequent styling changes. Real authenticated provider testing remains outstanding.

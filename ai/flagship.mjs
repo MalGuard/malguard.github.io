@@ -1,12 +1,12 @@
 import {highlightCode,codeLanguage} from './code-view.mjs?v=flagship-20261109';
 
 export const VIEWS = {
- home: ['Home','How can MalGuard AI help today?','Your all-in-one AI assistant for work, conversation, and building.'],
+ home: ['Home','How can I help today?','Your all-in-one AI assistant for work, conversation, and building.'],
  worker: ['Work','Work faster with AI','Analyze information, research with sources, and turn ideas into action.'],
  chat: ['Chat','Chat','A natural conversation for ideas, answers, and everyday help.'],
  build: ['Code','Code with MalGuard AI','Build, debug, and improve code with your AI coding assistant.']
 };
-const paths={home:'m3 10 9-7 9 7v11h-6v-7H9v7H3Z',worker:'M9 6V3h6v3M3 10h18M3 6h18v15H3ZM10 10v3h4v-3',chat:'M21 11a8 8 0 0 1-8 8H8l-5 3 1-7a8 8 0 1 1 17-4Z',build:'m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18',library:'m12 3 10 5-10 5L2 8Zm-10 9 10 5 10-5M2 16l10 5 10-5',file:'M14 2H5v20h14V7Zm0 0v6h5M8 12h8M8 16h8',search:'M21 21l-6-6M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0',plan:'M3 5h18v17H3ZM7 2v6m10-6v6M3 11h18',image:'M3 3h18v18H3Zm0 14 5-5 4 4 4-6 5 7M7 7h1',attach:'m8 13 7-7a3 3 0 0 1 4 4l-9 9a5 5 0 0 1-7-7L13 2',tools:'M3 3h6v6H3Zm12 0h6v6h-6ZM3 15h6v6H3Zm12 0h6v6h-6Z'};
+const paths={plus:'M12 5v14M5 12h14',home:'m3 10 9-7 9 7v11h-6v-7H9v7H3Z',worker:'M9 6V3h6v3M3 10h18M3 6h18v15H3ZM10 10v3h4v-3',chat:'M21 11a8 8 0 0 1-8 8H8l-5 3 1-7a8 8 0 1 1 17-4Z',build:'m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18',library:'m12 3 10 5-10 5L2 8Zm-10 9 10 5 10-5M2 16l10 5 10-5',file:'M14 2H5v20h14V7Zm0 0v6h5M8 12h8M8 16h8',search:'M21 21l-6-6M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0',plan:'M3 5h18v17H3ZM7 2v6m10-6v6M3 11h18',image:'M3 3h18v18H3Zm0 14 5-5 4 4 4-6 5 7M7 7h1',attach:'m8 13 7-7a3 3 0 0 1 4 4l-9 9a5 5 0 0 1-7-7L13 2',tools:'M3 3h6v6H3Zm12 0h6v6h-6ZM3 15h6v6H3Zm12 0h6v6h-6Z'};
 const $=id=>document.getElementById(id);
 const make=(tag,text,cls)=>{const n=document.createElement(tag);if(text)n.textContent=text;if(cls)n.className=cls;return n;};
 function icon(name){const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');for(const [k,v] of Object.entries({viewBox:'0 0 24 24',fill:'none',stroke:'currentColor','stroke-width':'1.6','stroke-linecap':'round','stroke-linejoin':'round','aria-hidden':'true'}))svg.setAttribute(k,v);const p=document.createElementNS(svg.namespaceURI,'path');p.setAttribute('d',paths[name]||paths.chat);svg.append(p);return svg;}
@@ -28,6 +28,8 @@ export function installFlagship({navigate}){
  intro.after(modeCards);
  const home=button('Home',()=>navigate('home'),'home');home.id='navigation-mode-home';home.className='navigation-shortcut';home.dataset.flagshipView='home';
  document.querySelector('.navigation-shortcuts-label').after(home);
+ home.after($('navigation-mode-worker'),$('navigation-mode-chat'),$('navigation-mode-build'));
+ $('clear').firstElementChild.replaceChildren(icon('plus'));
  for(const mode of ['worker','chat','build']){const b=$('navigation-mode-'+mode);b.querySelector('.shortcut-glyph').replaceChildren(icon(mode));b.dataset.flagshipView=mode;}
  const brand=$('mode-toggle').querySelector('strong');brand.textContent='MalGuard AI';
  const mobileBrand=make('a',null,'flagship-mobile-brand');mobileBrand.href='#home';mobileBrand.setAttribute('aria-label','MalGuard AI Home');mobileBrand.onclick=e=>{e.preventDefault();navigate('home');};
@@ -37,7 +39,7 @@ export function installFlagship({navigate}){
  const openLibrary=()=>{if(document.body.classList.contains('navigation-closed'))$('navigation-toggle').click();$('chat-search').focus();};
  dock.append(button('Library',openLibrary,'library'));document.body.append(dock);
 
- const fill=(value,mode)=>{if(ui.busy)return;if(mode)navigate(mode);$('message').value=value;$('message').dispatchEvent(new Event('input',{bubbles:true}));$('message').focus();};
+ const fill=(value,mode)=>{if(ui.busy)return;if(mode)navigate(mode);const current=$('message').value;$('message').value=current.trim()?current+'\n\n'+value:value;$('message').dispatchEvent(new Event('input',{bubbles:true}));$('message').focus();};
  const actions=make('div',null,'flagship-actions');actions.id='flagship-actions';
  actions.append(button('Analyze a file',()=>{navigate('worker');$('attach-file').click();},'file'));
  const research=button('Web research',()=>{navigate('worker');if(!$('web-search-toggle').disabled){if($('web-search-toggle').getAttribute('aria-pressed')!=='true')$('web-search-toggle').click();fill('Research the following topic and cite your sources: ');}else if(!$('workspace-tool').querySelector('[value="ai_web"]').disabled){$('workspace-tool').value='ai_web';$('workspace-tool').dispatchEvent(new Event('change'));fill('Research: ');}else{$('flagship-action-status').textContent='Web research is unavailable for the current connection. Check tool availability in Settings.';}},'search');actions.append(research);
