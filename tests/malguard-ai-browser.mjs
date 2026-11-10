@@ -1,4 +1,4 @@
-import {toggleSettings,newConversation,openModePicker} from './ai-navigation-helpers.mjs';
+import {toggleSettings,newConversation,openModePicker,selectModel,grantModelConsent} from './ai-navigation-helpers.mjs';
 import assert from 'node:assert/strict';
 import express from 'express';
 import {fileURLToPath} from 'node:url';
@@ -108,9 +108,9 @@ try{
   await page.goto(base+'/ai/');await page.locator('#send').waitFor({state:'visible'});await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
   assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
-  assert.equal(await page.locator('#model').isVisible(),true);assert.equal(await page.locator('#composer #model').count(),1);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);
+  assert.equal(await page.locator('#composer #model').count(),1);assert.equal(await page.locator('.pro-model-slot .pro-select-button').first().isVisible(),true,'Custom model picker is the visible control');assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);
    // ChatGPT/Grok-inspired controls are visible and genuinely functional on each viewport.
-   assert.equal(await page.locator('#experience-tabs').isVisible(),true);
+   if(width>760)assert.equal(await page.locator('#experience-tabs').isVisible(),true);else{assert.equal(await page.locator('#experience-tabs').isVisible(),false);if(await page.locator('body.navigation-closed').count())await page.locator('#navigation-toggle').click();}
    assert.equal(await page.locator('#thinking-toggle').isVisible(),false,'Thinking stays in the collapsed + menu');
    await page.locator('#attach-toggle').click();
    assert.equal(await page.locator('#thinking-toggle').isVisible(),true);
@@ -129,15 +129,15 @@ try{
    assert.equal(await page.locator('#send').isDisabled(),true,'Clearing a draft disables Send again');
    assert.equal(await page.locator('#jump-latest').isVisible(),false,'Jump-to-latest stays hidden in empty chats');
    const modePosts=modelPostRequests;
-   await page.locator('#experience-worker').click();
+   if(width>760)await page.locator('#experience-worker').click();else await page.locator('#navigation-mode-worker').click({force:true});
    assert.equal(await page.locator('#mode').inputValue(),'worker');
    assert.equal(await page.locator('#experience-worker').getAttribute('aria-pressed'),'true');
    assert.equal(await page.locator('.model-select-wrap').isVisible(),false,'Hidden Work selector must not leave an empty slot');
-   await page.locator('#experience-build').click();
+   if(width>760)await page.locator('#experience-build').click();else await page.locator('#navigation-mode-build').click({force:true});
    assert.equal(await page.locator('#mode').inputValue(),'build');
    assert.equal(await page.locator('#model option[value="cf_gptoss120"]').count(),1,'Strong Code model belongs in Code');
    assert.equal(await page.locator('#model option[value="chat_granite"]').count(),0);
-   await page.locator('#experience-chat').click();
+   if(width>760)await page.locator('#experience-chat').click();else await page.locator('#navigation-mode-chat').click({force:true});
    assert.equal(await page.locator('#mode').inputValue(),'chat');
    await page.evaluate(()=>{
      window.__modelSelectorMutations=0;
@@ -195,7 +195,7 @@ try{
   await newConversation(page);assert.equal(await page.locator('#conversation').innerText(),'');
   if(width===1280){
    if(!(await page.locator('#mode-toggle').isVisible()))await page.locator('#navigation-toggle').click();await openModePicker(page);await page.locator('#chat-tab').click();assert.equal(await page.locator('#workspace-panel').isVisible(),false);
-   await toggleSettings(page);if(await page.locator('#permissions').getAttribute('open')===null)await page.locator('#permissions summary').click();await page.locator('#model-consent').check();await toggleSettings(page);
+   await grantModelConsent(page);
    await page.locator('#message').fill('Hello');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
    assert.equal(await page.locator('.assistant-message h3').count(),0);
    assert.equal(await page.getByText('workers_ai_rest · @cf/ibm-granite/granite-4.0-h-micro',{exact:true}).isVisible(),false);
@@ -211,7 +211,7 @@ try{
    assert.equal(await page.locator('#web-search-consent').isVisible(),true);
    await page.locator('#web-search-consent button[value="allow"]').click();
    await page.locator('#attach-toggle').click();
-   await page.locator('#web-search-depth').selectOption('research');
+   await page.locator('#web-search-depth').selectOption('research',{force:true});
    await page.locator('#message').fill('Public astronomy update');
    await page.locator('#send').click();
    try{await page.locator('.research-evidence').waitFor({timeout:15000});}catch(error){console.error('Research test diagnostic:',await page.locator('#conversation').innerText(), 'posts:',modelPostRequests,'search:',await page.locator('#web-search-toggle').getAttribute('aria-pressed'));throw error;}
@@ -224,7 +224,7 @@ try{
    await page.locator('#attach-toggle').click();
 
    assert.equal(await page.locator('html').getAttribute('lang'),'en');
-   await page.locator('#model').selectOption('chat_flash');await page.locator('#message').fill('سلام');await page.locator('#send').click();await page.getByText('پاسخ فارسی آزمایشی',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
+   await selectModel(page,'chat_flash');await page.locator('#message').fill('سلام');await page.locator('#send').click();await page.getByText('پاسخ فارسی آزمایشی',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
    await toggleSettings(page);await page.locator('#mode').selectOption('worker');await toggleSettings(page);await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
    await newConversation(page);
    console.log('PASS Chat multi-turn context and inspection-only mode (injected benign model fixture).');
@@ -255,8 +255,8 @@ try{
  await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');assert.equal(await localPage.locator('#model').inputValue(),'chat_auto','Prefer automatic available Chat model without downloading');
  await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
  assert.equal(await localPage.locator('#local-welcome').isVisible(),false,'local downloads must remain opt-in');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
- await localPage.locator('#model').selectOption('local_fast');
- await localPage.locator('#model').selectOption('__downloads');
+ await selectModel(localPage,'local_fast');
+ await selectModel(localPage,'__downloads');
  await localPage.locator('#local-offer').waitFor({state:'visible'});
  assert.match(await localPage.locator('#offer-info').innerText(),/no provider daily message quota/);
  assert.equal(await localPage.locator('#offer-model option').count(),2);
@@ -267,13 +267,13 @@ try{
  assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.reload();await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
  assert.equal(await localPage.locator('#local-offer').isVisible(),false,'do not repeat the offer in this tab');
- await localPage.locator('#model').selectOption('local_fast');
+ await selectModel(localPage,'local_fast');
  await localPage.locator('#message').fill('سلام');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});
  assert.match(await localPage.locator('#download-info').innerText(),/985 MB/);assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);assert.equal(requests,beforeLocal);
  await localPage.locator('#local-download button[value="cancel"]').click();assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await localPage.locator('#send').click();await localPage.locator('#local-download button[value="download"]').click();await localPage.getByText('پاسخ محلی آزمایشی',{exact:true}).waitFor();
  assert.equal(requests,beforeLocal);assert.equal(await localPage.evaluate(()=>localWorkerCalls[0].model),'local_fast');assert.match(await localPage.evaluate(()=>localWorkerCalls[0].messages[0].content),/فارسی/);
- await localPage.locator('#model').selectOption('local_medium');
+ await selectModel(localPage,'local_medium');
  await localPage.locator('#message').fill('Explain DNS');await localPage.locator('#send').click();await localPage.locator('#local-download').waitFor({state:'visible'});assert.match(await localPage.locator('#download-info').innerText(),/2268 MB/);
  await localPage.keyboard.press('Escape');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),1,'Escape must not reuse previous download approval');
  assert.equal(requests,beforeLocal);assert.deepEqual(localExternal,[]);await device.close();console.log('PASS on-device download/cancel consent, local-only text and separate model download approval (mock Worker).');
@@ -285,7 +285,7 @@ try{
  });
  const downloadExternal=[];await downloadContext.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();downloadExternal.push(r.request().url());return r.abort();});
  await downloadPage.goto(base+'/ai/');await downloadPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
- assert.equal(await downloadPage.locator('#local-welcome').isVisible(),false,'Local downloads remain opt-in');await downloadPage.locator('#model').selectOption('__downloads');
+ assert.equal(await downloadPage.locator('#local-welcome').isVisible(),false,'Local downloads remain opt-in');await selectModel(downloadPage,'__downloads');
  await downloadPage.locator('#local-offer').waitFor({state:'visible'});
  await downloadPage.locator('#offer-model').selectOption('local_medium');assert.match(await downloadPage.locator('#offer-size').innerText(),/2268 MB/);
  assert.equal(await downloadPage.evaluate(()=>localWorkerCalls.length),0);

@@ -1,4 +1,4 @@
-import {toggleSettings,newConversation} from './ai-navigation-helpers.mjs';
+import {toggleSettings,selectModel,newConversation} from './ai-navigation-helpers.mjs';
 import assert from 'node:assert/strict';
 import express from 'express';
 import {fileURLToPath} from 'node:url';
@@ -144,7 +144,7 @@ try{
  });
  await local.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
  await page.goto(base+'/ai/');await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
- await page.locator('#model').selectOption('local_fast');
+ await selectModel(page,'local_fast');
  const beforeLocal=jobs.length;await page.locator('#message').fill('Hello');await page.locator('#send').click();await page.locator('#local-download button[value="download"]').click();
  await page.waitForFunction(()=>window.workerCalls.length===1);
  await page.evaluate(()=>window.localWorker.onmessage({data:{progress:75}}));
