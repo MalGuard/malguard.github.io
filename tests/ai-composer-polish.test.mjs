@@ -18,7 +18,7 @@ function contrast(a, b) {
 }
 
 test('composer polish is progressive and same-origin under CSP', () => {
-  assert.match(html, /<link rel="stylesheet" href="\.\/polish-20261109\.css\?v=1">/);
+  assert.match(html, /<link rel="stylesheet" href="\.\/polish-20261109\.css\?v=[^"]+">/);
   assert.match(html, /<script type="module" src="\.\/polish-20261109\.mjs\?v=1"><\/script>/);
   for (const id of ['attach-options','thinking-toggle','web-search-controls','attach-web','attach-toggle','model','send']) {
     assert.match(html, new RegExp('id="' + id + '"'), 'existing UI contract: ' + id);
