@@ -27,6 +27,17 @@ test('all four navigation destinations select consistently without sending reque
  syncFlagship({view:'home',busy:false});
 });
 
+test('one model position and one tools menu serve all workspaces',()=>{
+ assert.equal($('flagship-attach').hidden,true,'duplicate attachment trigger is hidden');
+ assert.ok($('composer').contains($('workspace-model')),'Work uses the composer model position');
+ assert.ok($('attach-options').contains($('open-downloads')),'local model management is progressively disclosed');
+ for(const view of ['home','chat','worker','build']){
+  syncFlagship({view,busy:false});
+  assert.equal(document.querySelector('.workspace-model-select-wrap').hidden,view!=='worker');
+ }
+ syncFlagship({view:'home',busy:false});
+});
+
 test('quick actions fill real composer without enabling sharing or submitting',()=>{
  let submitted=0;$('composer').addEventListener('submit',e=>{e.preventDefault();submitted++;});
  document.querySelector('.flagship-actions button:last-child').click();

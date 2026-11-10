@@ -15,7 +15,7 @@ async function captureThemes(page,name,width){
  await mkdir('test-results/malguard-ai',{recursive:true});
  for(const theme of ['dark','light']){
   await page.evaluate(theme=>{document.documentElement.dataset.theme=theme;document.documentElement.classList.toggle('theme-light',theme==='light');},theme);
-  const controls=await page.locator('#composer').evaluate(form=>[...form.querySelectorAll('#attach-toggle,#flagship-attach,#model,#send')].filter(n=>n.getClientRects().length).map(n=>{const r=n.getBoundingClientRect();return {id:n.id,left:r.left,right:r.right,top:r.top,bottom:r.bottom};}));
+  const controls=await page.locator('#composer').evaluate(form=>[...form.querySelectorAll('#attach-toggle,#flagship-attach,#model,#workspace-model,#send')].filter(n=>n.getClientRects().length).map(n=>{const r=n.getBoundingClientRect();return {id:n.id,left:r.left,right:r.right,top:r.top,bottom:r.bottom};}));
   for(let i=0;i<controls.length;i++)for(let j=i+1;j<controls.length;j++){
    const a=controls[i],b=controls[j];assert.ok(Math.min(a.right,b.right)-Math.max(a.left,b.left)<=1||Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)<=1,`${theme} ${width}px: ${a.id} overlaps ${b.id}`);
   }
@@ -350,7 +350,7 @@ try{
  assert.equal(await workPage.locator('#workspace-tab').getAttribute('aria-pressed'),'true');assert.equal(await workPage.locator('#workspace-panel').isVisible(),true);assert.equal(await workPage.locator('#model').isVisible(),false);assert.equal(await workPage.locator('#message').inputValue(),'');
  await workPage.locator('#message').fill('Work draft');await openModePicker(workPage);await workPage.locator('#chat-tab').click();assert.equal(await workPage.locator('#message').inputValue(),'Chat draft');assert.equal(await workPage.locator('#workspace-panel').isVisible(),false);assert.equal(await workPage.locator('#toolbox').isVisible(),false);
  await openModePicker(workPage);await workPage.locator('#workspace-tab').click();assert.equal(await workPage.locator('#message').inputValue(),'Work draft');await openModePicker(workPage);await workPage.locator('#chat-tab').click();
- await workPage.locator('#open-downloads').click();assert.equal(await workPage.locator('#download-hub').isVisible(),true);await workPage.locator('#hub-desktop').click();await workPage.locator('#desktop-models').waitFor({state:'visible'});await workPage.locator('.desktop-setup > summary').click();
+ await workPage.locator('#attach-toggle').click();await workPage.locator('#open-downloads').click();assert.equal(await workPage.locator('#download-hub').isVisible(),true);await workPage.locator('#hub-desktop').click();await workPage.locator('#desktop-models').waitFor({state:'visible'});await workPage.locator('.desktop-setup > summary').click();
  assert.equal(await workPage.locator('#desktop-model option').count(),6);assert.match(await workPage.locator('#desktop-origin').innerText(),/OLLAMA_ORIGINS=https:\/\/malguard.site/);assert.equal(desktopRequests.length,0,'Opening catalog must not connect or download');
  await workPage.locator('#desktop-model').selectOption('native_deepseek671');assert.match(await workPage.locator('#desktop-command').innerText(),/ollama pull deepseek-r1:671b/);assert.match(await workPage.locator('#desktop-model-info').innerText(),/404 GB/);
  assert.equal(await workPage.locator('#desktop-download').isDisabled(),true,'require specs before desktop download');
@@ -366,7 +366,7 @@ try{
  const samsungContext=await browser.newContext({viewport:{width:390,height:844},userAgent:'Mozilla/5.0 (Linux; Android 16; SM-S928B) AppleWebKit/537.36 SamsungBrowser/29.0 Mobile Safari/537.36'});
  await skipWelcome(samsungContext);
  await samsungContext.route('**/*',r=>isModelsRoute(r)?gatewayFixture(r):isCFRoute(r)?cfFixture(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
- const samsungPage=await samsungContext.newPage();await samsungPage.goto(base+'/ai/');await samsungPage.locator('#open-downloads').click();await samsungPage.locator('#hub-desktop').click();
+ const samsungPage=await samsungContext.newPage();await samsungPage.goto(base+'/ai/');await samsungPage.locator('#attach-toggle').click();await samsungPage.locator('#open-downloads').click();await samsungPage.locator('#hub-desktop').click();
  await samsungPage.locator('#desktop-models').waitFor({state:'visible'});
  assert.equal(await samsungPage.locator('#desktop-model option').count(),6);
  await samsungPage.locator('#desktop-ram-gb').fill('512');await samsungPage.locator('#desktop-free-gb').fill('1000');

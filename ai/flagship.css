@@ -69,26 +69,26 @@ body.mg-flagship .flagship-modes svg{width:24px;height:24px;color:var(--ai-secon
 body.mg-flagship .flagship-modes span{font-size:17px;font-weight:650}
 body.mg-flagship .flagship-modes small{font-size:12px;line-height:1.5;color:var(--ai-secondary);max-width:220px;font-weight:400}
 body.mg-flagship .flagship-modes button[aria-pressed=true]{background:var(--flagship-selected);border-color:var(--ai-focus);box-shadow:none}
-/* Composer: a stable four-column action row. No focus-driven layout changes. */
+/* Composer: one tools entry, one model selector, one primary send action. */
 body.mg-ai-v2.mg-flagship .composer-area{width:100%;max-width:840px;margin:0 auto;padding-top:8px}
 body.mg-ai-v2.mg-flagship .composer-shell{display:flex;flex-direction:column;min-height:122px;gap:12px;padding:14px;border:1px solid var(--ai-stroke-hover);border-radius:18px;background:var(--ai-surface);box-shadow:0 8px 28px #00000012;backdrop-filter:none;-webkit-backdrop-filter:none}
 body.mg-ai-v2.mg-flagship .composer-shell:focus-within{border-color:var(--ai-focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--ai-focus) 16%,transparent)}
 body.mg-ai-v2.mg-flagship #message{display:block;min-height:44px;padding:4px 6px;margin:0;background:transparent;color:var(--ai-fg);font-family:inherit;font-size:16px;font-weight:400;line-height:1.6;border:0;box-shadow:none}
 body.mg-ai-v2.mg-flagship #message::placeholder{color:var(--ai-faint);opacity:1}
-body.mg-ai-v2.mg-flagship .composer-footer{display:grid;grid-template-columns:auto auto minmax(90px,1fr) 44px;align-items:center;gap:8px;width:100%;min-width:0;flex-wrap:nowrap;grid-template-areas:none}
+body.mg-ai-v2.mg-flagship .composer-footer{display:grid;grid-template-columns:44px minmax(90px,1fr) 44px;align-items:center;gap:8px;width:100%;min-width:0;flex-wrap:nowrap;grid-template-areas:none}
 body.mg-ai-v2.mg-flagship .composer-footer>.attach-menu{grid-area:1/1;position:relative;min-width:0;width:auto;flex:none}
 body.mg-ai-v2.mg-flagship .composer-footer>.composer-actions{display:contents;grid-template-areas:none}
-body.mg-ai-v2.mg-flagship .composer-footer #flagship-attach{grid-area:1/2}
-body.mg-ai-v2.mg-flagship .composer-footer .model-select-wrap{grid-area:1/3;display:flex;min-width:0;width:100%;max-width:240px;justify-self:start;margin:0}
-body.mg-ai-v2.mg-flagship .composer-footer #send{grid-area:1/4;justify-self:end}
+body.mg-ai-v2.mg-flagship .composer-footer #flagship-attach{display:none!important}
+body.mg-ai-v2.mg-flagship .composer-footer :is(.model-select-wrap,.workspace-model-select-wrap){grid-area:1/2;display:flex;min-width:0;width:100%;max-width:240px;justify-self:start;margin:0}
+body.mg-ai-v2.mg-flagship .composer-footer #send{grid-area:1/3;justify-self:end}
 body.mg-ai-v2.mg-flagship :is(#attach-toggle,#flagship-attach){display:flex;align-items:center;justify-content:center;gap:7px;min-height:44px;width:auto;padding:9px 11px;margin:0;background:var(--ai-surface);border:1px solid var(--ai-control-border);border-radius:10px;color:var(--ai-secondary);font-size:13px;line-height:1.2}
 body.mg-flagship :is(#attach-toggle,#flagship-attach) svg{width:18px;height:18px;flex:none}
-body.mg-ai-v2.mg-flagship .composer-footer #model{flex:1;min-width:0;max-width:100%;width:100%;min-height:44px;margin:0;padding:9px 28px 9px 10px;background:var(--ai-raised);border:1px solid var(--ai-control-border);border-radius:10px;color:var(--ai-fg);font-size:12px;line-height:1.3}
+body.mg-ai-v2.mg-flagship .composer-footer :is(#model,#workspace-model){flex:1;min-width:0;max-width:100%;width:100%;min-height:44px;margin:0;padding:9px 28px 9px 10px;background:var(--ai-raised);border:1px solid var(--ai-control-border);border-radius:10px;color:var(--ai-fg);font-size:12px;line-height:1.3}
 body.mg-ai-v2.mg-flagship #send{display:grid;place-items:center;width:44px;min-width:44px;height:44px;min-height:44px;margin:0;padding:10px;border:1px solid var(--flagship-blue);border-radius:12px;background:var(--flagship-blue);color:#fff;box-shadow:none}
 body.mg-ai-v2.mg-flagship #send:disabled{background:var(--ai-raised);border-color:var(--ai-stroke);color:var(--ai-faint);opacity:1}
 body.mg-ai-v2.mg-flagship .composer-hints{padding:0 4px;margin-top:4px;gap:6px}
 body.mg-ai-v2.mg-flagship :is(.thinking-state,.composer-keyboard-hint,#disclaimer,#save-state){font-size:11px;line-height:1.6;color:var(--ai-faint)}
-body.mg-ai-v2.mg-flagship #open-downloads{display:block;width:max-content;max-width:100%;margin:0 auto 12px;font-size:12px;color:var(--ai-secondary)}
+body.mg-ai-v2.mg-flagship #attach-options #open-downloads{display:flex;width:100%;max-width:none;margin:0;font-size:13px;color:var(--ai-fg)}
 body.mg-ai-v2.mg-flagship:has(.conversation:not(:empty)) .composer-area{position:sticky;bottom:0;z-index:9;padding-top:12px;background:var(--flagship-canvas)}
 body.mg-ai-v2.mg-flagship:is([data-view=home],[data-view=worker]) .composer-area{position:static;background:none}
 /* Action hierarchy: compact starts, quiet advanced tools. */
@@ -128,9 +128,7 @@ body.mg-flagship .flagship-network{padding:12px;border:1px solid var(--ai-stroke
 body.mg-flagship .conversation :is(button,summary,a){scroll-margin-block:90px 230px}
 body.mg-flagship[data-view=home] .conversation{display:none}
 body.mg-flagship[data-view=chat]:has(.conversation:not(:empty)) .intro{display:none}
-body.mg-flagship[data-view=chat]:has(.conversation:not(:empty)) .flagship-modes{margin-bottom:20px}
-body.mg-flagship[data-view=chat]:has(.conversation:not(:empty)) .flagship-modes button{min-height:60px;flex-direction:row;gap:9px;padding:10px}
-body.mg-flagship[data-view=chat]:has(.conversation:not(:empty)) .flagship-modes small{display:none}
+body.mg-flagship:has(.conversation:not(:empty)) .flagship-modes{display:none}
 body.mg-flagship:not([data-view=chat]) #quick-suggestions{display:none}
 /* Code: compact chrome and one scrollable project surface, preserving every control. */
 body.mg-ai-v2.mg-flagship .build-panel{min-width:0;padding:16px;margin:0 0 16px;border:1px solid var(--ai-stroke);border-radius:14px;background:var(--ai-surface);max-height:none;overflow:visible}
@@ -215,11 +213,11 @@ body.mg-flagship.auth-required .flagship-dock{display:none}
  body.mg-flagship .flagship-modes small{font-size:11px;line-height:1.4}
  body.mg-flagship .flagship-modes svg{width:23px;height:23px}
  body.mg-ai-v2.mg-flagship .composer-shell{padding:12px;gap:10px;min-height:122px;border-radius:16px}
- body.mg-ai-v2.mg-flagship .composer-footer{grid-template-columns:44px 44px minmax(0,1fr) 44px;gap:6px}
+ body.mg-ai-v2.mg-flagship .composer-footer{grid-template-columns:44px minmax(0,1fr) 44px;gap:6px}
  body.mg-ai-v2.mg-flagship :is(#attach-toggle,#flagship-attach){width:44px;padding:10px;border-radius:10px}
  body.mg-flagship :is(.flagship-tools-label,#flagship-attach span){display:none}
- body.mg-ai-v2.mg-flagship .composer-footer .model-select-wrap{width:100%;max-width:none;min-width:0}
- body.mg-ai-v2.mg-flagship .composer-footer #model{width:100%;font-size:11px;padding-inline:8px 18px}
+ body.mg-ai-v2.mg-flagship .composer-footer :is(.model-select-wrap,.workspace-model-select-wrap){width:100%;max-width:none;min-width:0}
+ body.mg-ai-v2.mg-flagship .composer-footer :is(#model,#workspace-model){width:100%;font-size:11px;padding-inline:8px 18px}
  body.mg-flagship .composer-keyboard-hint{display:none}
  body.mg-flagship .flagship-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:18px 0}
  body.mg-flagship .flagship-actions button{padding:9px;font-size:12px}
@@ -249,6 +247,24 @@ body.mg-flagship.auth-required .flagship-dock{display:none}
  body.mg-ai-v2.mg-flagship .entry-content{padding:24px 18px}
  body.mg-flagship .entry-capabilities{gap:8px}
 }
+/* Focused work pages use a small mode strip; Home retains the introductory cards. */
+body.mg-ai-v2.mg-flagship:not([data-view=home]) .flagship-modes{width:min(100%,560px);gap:4px;margin:0 auto 22px;padding:4px;border:1px solid var(--ai-stroke);border-radius:13px;background:var(--ai-surface)}
+body.mg-ai-v2.mg-flagship:not([data-view=home]) .flagship-modes button{min-height:44px;padding:9px 12px;flex-direction:row;gap:8px;border:1px solid transparent;border-radius:9px;background:transparent}
+body.mg-ai-v2.mg-flagship:not([data-view=home]) .flagship-modes button[aria-pressed=true]{background:var(--flagship-selected);color:var(--ai-fg)}
+body.mg-ai-v2.mg-flagship:not([data-view=home]) .flagship-modes :is(small){display:none}
+body.mg-ai-v2.mg-flagship:not([data-view=home]) .flagship-modes svg{width:18px;height:18px}
+body.mg-ai-v2.mg-flagship:not([data-view=home]) .flagship-modes span{font-size:13px;font-weight:600}
+body.mg-ai-v2.mg-flagship .composer-footer .workspace-model-select-wrap{display:none}
+body.mg-ai-v2.mg-flagship[data-mode=worker] .composer-footer .workspace-model-select-wrap{display:flex}
+body.mg-ai-v2.mg-flagship #attach-toggle{width:44px;padding:10px;border-color:transparent;background:transparent;color:var(--ai-secondary)}
+body.mg-ai-v2.mg-flagship #attach-toggle:hover{background:var(--ai-raised);border-color:transparent}
+body.mg-ai-v2.mg-flagship #attach-toggle .flagship-tools-label{display:none}
+body.mg-ai-v2.mg-flagship #attach-options{width:min(300px,calc(100vw - 40px));padding:6px;max-height:min(440px,65dvh);overflow:auto;overscroll-behavior:contain;border:1px solid var(--ai-stroke);border-radius:14px;background:var(--ai-surface);color:var(--ai-fg)}
+body.mg-ai-v2.mg-flagship #attach-options>button{display:flex;align-items:center;justify-content:flex-start;min-height:44px;width:100%;padding:10px 12px;margin:0;border:0;border-radius:8px;background:transparent;color:var(--ai-fg);font-size:13px;font-weight:500;text-align:start;line-height:1.5}
+body.mg-ai-v2.mg-flagship #attach-options>button:hover:not(:disabled){background:var(--ai-raised)}
+body.mg-ai-v2.mg-flagship #attach-options .ai-menu-capabilities{padding:6px 0 0;margin:5px 0 0;border-top:1px solid var(--ai-stroke)}
+body.mg-ai-v2.mg-flagship #attach-options :is(#thinking-toggle,#web-search-toggle){min-height:44px;width:100%;justify-content:flex-start;padding:10px 12px;border:0;border-radius:8px;background:transparent;color:var(--ai-fg);font-size:13px}
+body.mg-ai-v2.mg-flagship #attach-options :is(#thinking-toggle,#web-search-toggle)[aria-pressed=true]{background:var(--flagship-selected);color:var(--ai-fg)}
 /* Light mode supplies every surface and native control with an explicit palette. */
 html:is(.theme-light,[data-theme=light]) body.mg-ai-v2.mg-flagship{
  --ai-surface:#ffffff;--ai-rail:#f3f6fa;--ai-raised:#edf2f8;--ai-raised-hover:#e0e9f4;
@@ -273,3 +289,4 @@ html:is(.theme-light,[data-theme=light]) body.mg-ai-v2.mg-flagship :is(.ai-accou
 html:is(.theme-light,[data-theme=light]) body.mg-ai-v2.mg-flagship :is(.account-strength .valid,.ai-account small[data-state=available]){color:#14652e}
 @media(prefers-reduced-motion:reduce){body.mg-flagship *,body.mg-flagship *::before,body.mg-flagship *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @media(forced-colors:active){body.mg-flagship .flagship-syntax{display:none}body.mg-ai-v2.mg-flagship #build-editor{-webkit-text-fill-color:CanvasText;color:CanvasText;caret-color:CanvasText}body.mg-flagship button[aria-pressed=true]{outline:2px solid Highlight}}
+body.mg-ai-v2.mg-flagship:has(.conversation:not(:empty)) #quick-suggestions{display:none}

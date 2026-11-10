@@ -61,9 +61,14 @@ export function installFlagship({navigate}){
   codeActions.append(button(name,()=>{fill(prompt);$('flagship-code-notice').textContent='To share the selected file, enable “Include the currently selected file” below the editor, then send.';},'build'));
  }
  const notice=make('p',null,'muted');notice.id='flagship-code-notice';notice.setAttribute('role','status');codeActions.append(notice);$('build-panel').after(codeActions);
- const attach=button('Attach',()=>$('attach-file').click(),'attach');attach.id='flagship-attach';attach.setAttribute('aria-label','Attach a file');document.querySelector('.composer-actions').prepend(attach);
+ const attach=button('Attach',()=>$('attach-file').click(),'attach');attach.id='flagship-attach';attach.hidden=true;attach.setAttribute('aria-label','Attach a file');document.querySelector('.composer-actions').prepend(attach);
  const tools=make('span','Tools');tools.className='flagship-tools-label';$('attach-toggle').append(tools);
- $('attach-toggle').querySelector('svg').replaceWith(icon('tools'));
+ $('attach-toggle').querySelector('svg').replaceWith(icon('plus'));
+ const workModel=$('workspace-model').parentElement;workModel.className='workspace-model-select-wrap';workModel.querySelector('label').classList.add('sr-only');document.querySelector('.composer-actions').append(workModel);
+ $('attach-options').append($('open-downloads'));
+ $('open-downloads').addEventListener('click',()=>{if(!$('attach-options').hidden)$('attach-toggle').click();});
+ document.querySelector('.composer-area').after($('quick-suggestions'));
+ ui.workModel=workModel;
  installEditor();
  const updateMedia=()=>{generate.disabled=ui.busy||$('attach-media-generate').hidden||$('attach-media-generate').disabled;generate.title=generate.disabled?'Image generation is unavailable for the current connection.':'Create an image with the connected provider';};
  new MutationObserver(updateMedia).observe($('attach-media-generate'),{attributes:true,attributeFilter:['hidden','disabled']});ui.updateMedia=updateMedia;
@@ -75,7 +80,7 @@ export function installFlagship({navigate}){
 
 export function syncFlagship({view,busy}){
  if(!ui)return;ui.view=Object.hasOwn(VIEWS,view)?view:'chat';ui.busy=busy;
- document.body.dataset.view=ui.view;
+ document.body.dataset.view=ui.view;ui.workModel.hidden=ui.view!=='worker';
  $('title').textContent=VIEWS[ui.view][1];$('flagship-subtitle').textContent=VIEWS[ui.view][2];
  for(const b of document.querySelectorAll('[data-flagship-view]')){b.setAttribute('aria-pressed',String(b.dataset.flagshipView===ui.view));b.disabled=busy;}
  for(const b of document.querySelectorAll('.flagship-actions button,.flagship-work button,.flagship-code-actions button,.flagship-dock button'))b.disabled=busy;
