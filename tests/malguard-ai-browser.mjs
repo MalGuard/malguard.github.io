@@ -204,7 +204,7 @@ try{
   await page.locator('#attach-toggle').click();await page.locator('#attach-inspect').click();
   assert.equal(await page.locator('#mode').inputValue(),'worker');assert.equal(await page.locator('#tool').inputValue(),'auto');
   assert.equal(await page.locator('#attach-options').isVisible(),false);
-  await page.locator('#attach-toggle').click();await page.locator('#attach-chat').click();
+  await page.locator('#experience-chat').click();
   assert.equal(await page.locator('#mode').inputValue(),'chat');assert.equal(await page.locator('#tool').inputValue(),'auto');
   assert.equal(requests,beforeMenu,'Attachment actions must not submit requests');
    assert.equal(modelPostRequests,modePosts,'Attachment menus cannot send a model request');

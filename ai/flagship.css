@@ -290,3 +290,9 @@ html:is(.theme-light,[data-theme=light]) body.mg-ai-v2.mg-flagship :is(.account-
 @media(prefers-reduced-motion:reduce){body.mg-flagship *,body.mg-flagship *::before,body.mg-flagship *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @media(forced-colors:active){body.mg-flagship .flagship-syntax{display:none}body.mg-ai-v2.mg-flagship #build-editor{-webkit-text-fill-color:CanvasText;color:CanvasText;caret-color:CanvasText}body.mg-flagship button[aria-pressed=true]{outline:2px solid Highlight}}
 body.mg-ai-v2.mg-flagship:has(.conversation:not(:empty)) #quick-suggestions{display:none}
+/* Menu items share one alignment at every breakpoint. Mode navigation stays in the rail/dock. */
+body.mg-ai-v2.mg-flagship #attach-chat{display:none!important}
+body.mg-ai-v2.mg-flagship #attach-options .ai-menu-capabilities{display:flex;flex-direction:column;align-items:stretch;gap:4px}
+body.mg-ai-v2.mg-flagship #attach-options :is(#thinking-toggle,#web-search-toggle,#open-downloads){width:100%;justify-content:flex-start;text-align:start;grid-area:auto}
+body.mg-ai-v2.mg-flagship #attach-options .web-search-controls{display:flex;width:100%;justify-content:flex-start;align-items:center;flex-wrap:wrap;grid-area:auto}
+body.mg-ai-v2.mg-flagship #attach-options #thinking-toggle .thinking-glyph{display:inline}
