@@ -203,3 +203,81 @@ html[data-theme=light] body.mg-pro :is(.ai-product-mark,.entry-mark,.account-pro
 }
 html.theme-light body.mg-pro .entry-brand,
 html[data-theme=light] body.mg-pro .entry-brand{color:#0f1b2a!important}
+
+/* Hide the old settings dropdown; the pro modal replaces it. */
+body.mg-pro #settings-panel>.settings-content{display:none!important}
+body.mg-pro .navigation-footer .settings-panel>summary{width:100%;height:auto;min-height:44px;justify-content:flex-start;gap:10px;border-radius:10px!important;padding:8px 10px!important;color:var(--p-text)!important}
+
+/* Settings modal */
+body.mg-pro #pro-settings{width:min(720px,calc(100vw - 24px));max-height:min(760px,calc(100svh - 24px));padding:0;border:1px solid var(--p-border);border-radius:22px;background:var(--p-raised);color:var(--p-text);box-shadow:var(--p-shadow);overflow:hidden;display:flex;flex-direction:column}
+body.mg-pro #pro-settings:not([open]){display:none}
+.pro-settings-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 8px}
+.pro-settings-title{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--p-text)!important}
+.pro-settings-close{width:40px;height:40px;border:0!important;border-radius:12px!important;background:transparent!important;color:var(--p-text)!important;display:grid;place-items:center;flex:none}
+.pro-settings-close:hover{background:var(--p-hover)!important}
+.pro-settings-tabs{display:flex;gap:4px;padding:4px 12px 0;overflow:auto;scrollbar-width:thin;border-bottom:1px solid var(--p-border)}
+.pro-settings-tab{flex:none;min-height:44px;padding:8px 14px!important;border:0!important;border-radius:0!important;background:transparent!important;color:var(--p-muted)!important;font-weight:600;font-size:14px;box-shadow:none!important;border-bottom:2px solid transparent!important}
+.pro-settings-tab.is-active{color:var(--p-text)!important;border-bottom-color:var(--p-accent)!important}
+.pro-settings-tab:hover{background:var(--p-hover)!important}
+.pro-settings-body{padding:16px 20px 22px;overflow:auto;min-height:0}
+.pro-settings-pane{display:grid;gap:14px}
+.pro-settings-pane[hidden]{display:none!important}
+.pro-set-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--p-border)}
+.pro-set-meta{min-width:0;flex:1}
+.pro-set-label{font-weight:650;font-size:15px}
+.pro-set-hint{margin:4px 0 0;color:var(--p-muted)!important;font-size:13px;line-height:1.55}
+.pro-seg{display:inline-flex;flex:none;padding:3px;border-radius:12px;background:var(--p-hover);border:1px solid var(--p-border);gap:2px}
+.pro-seg-btn{min-height:36px;min-width:64px;padding:6px 12px!important;border:0!important;border-radius:10px!important;background:transparent!important;color:var(--p-muted)!important;font-weight:600;font-size:13px}
+.pro-seg-btn.is-active{background:var(--p-raised)!important;color:var(--p-text)!important;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.pro-set-actions{display:flex;flex-wrap:wrap;gap:8px}
+.pro-set-btn,body.mg-pro #pro-settings .pro-set-btn{min-height:44px;padding:8px 14px!important;border-radius:12px!important;border:1px solid var(--p-border)!important;background:var(--p-surface)!important;color:var(--p-text)!important;font-weight:600}
+.pro-set-btn:hover{background:var(--p-hover)!important}
+.pro-set-btn.danger,body.mg-pro #pro-settings .pro-set-btn.danger{color:#e35d5d!important;border-color:#e35d5d55!important}
+body.mg-pro #pro-settings .composer-controls{display:grid;gap:8px;grid-template-columns:1fr}
+body.mg-pro #pro-settings .composer-controls label{font-weight:650}
+body.mg-pro #pro-settings :is(#device-note,#connection,#mode-hint,#model-status,#local-status,.notice,.footer-note){color:var(--p-muted)!important;font-size:13px;margin:0}
+body.mg-pro #pro-settings .privacy-link{color:var(--p-accent)!important;font-weight:600}
+body.mg-pro #pro-settings :is(.toolbox,.plugins-panel,.desktop-setup){border:1px solid var(--p-border);border-radius:14px;padding:8px 12px;background:var(--p-surface)}
+body.mg-pro #pro-settings details>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:650;list-style:none}
+body.mg-pro #pro-settings details>summary::-webkit-details-marker{display:none}
+
+/* Custom switches (no browser-default checkboxes) */
+body.mg-pro .pro-switch{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:10px 0;cursor:pointer;color:var(--p-text)}
+body.mg-pro .pro-switch span{flex:1;font-size:13.5px;line-height:1.55}
+body.mg-pro .pro-switch input[type=checkbox]{-webkit-appearance:none;appearance:none;width:44px;height:26px;flex:none;margin:2px 0 0;border:0;border-radius:999px;background:color-mix(in srgb,var(--p-muted) 45%,transparent);position:relative;cursor:pointer;transition:background .15s}
+body.mg-pro .pro-switch input[type=checkbox]::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+body.mg-pro .pro-switch input[type=checkbox]:checked{background:var(--p-accent)}
+body.mg-pro .pro-switch input[type=checkbox]:checked::after{transform:translateX(18px)}
+html[dir=rtl] body.mg-pro .pro-switch input[type=checkbox]:checked::after{transform:translateX(-18px)}
+body.mg-pro .pro-switch input[type=checkbox]:focus-visible{outline:2px solid var(--p-accent);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){body.mg-pro .pro-switch input[type=checkbox],body.mg-pro .pro-switch input[type=checkbox]::after{transition:none}}
+
+/* Pro dialogs: account, consent, downloads, memory */
+body.mg-pro dialog{width:min(520px,calc(100vw - 24px));max-height:min(88svh,820px);padding:22px 22px 18px;overflow:auto;color:var(--p-text)}
+body.mg-pro dialog#pro-settings{width:min(720px,calc(100vw - 24px))}
+body.mg-pro dialog h2{margin:0 0 12px;font-size:22px;font-weight:700;color:var(--p-text)!important}
+body.mg-pro dialog p,body.mg-pro dialog label{color:var(--p-text)}
+body.mg-pro dialog .muted,body.mg-pro dialog .account-note{color:var(--p-muted)!important}
+body.mg-pro dialog :is(input:not([type=checkbox]):not([type=file]):not([type=radio]),textarea,select){width:100%;min-height:44px;border-radius:12px!important;border:1px solid var(--p-border)!important;background:var(--p-surface)!important;color:var(--p-text)!important;padding:10px 12px;font:inherit}
+body.mg-pro dialog textarea{min-height:90px}
+body.mg-pro dialog .download-actions,body.mg-pro .ai-account .account-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:16px}
+body.mg-pro dialog .download-actions button,body.mg-pro dialog .primary-action,body.mg-pro .ai-account button{min-height:44px;border-radius:12px!important;border:1px solid var(--p-border)!important;background:var(--p-surface)!important;color:var(--p-text)!important;padding:8px 14px;font-weight:600}
+body.mg-pro dialog .primary-action,body.mg-pro .ai-account .account-submit{background:var(--p-text)!important;color:var(--p-bg)!important;border-color:transparent!important}
+body.mg-pro .ai-account{width:min(460px,calc(100vw - 24px))}
+body.mg-pro .ai-account .account-close{margin-inline-start:auto;display:block}
+body.mg-pro dialog .download-route{display:grid;gap:4px;width:100%;text-align:start;margin:8px 0;padding:14px!important;border-radius:14px!important;border:1px solid var(--p-border)!important;background:var(--p-surface)!important;color:var(--p-text)!important}
+body.mg-pro dialog .download-route:hover{background:var(--p-hover)!important}
+body.mg-pro dialog .desktop-compat-form{display:grid;gap:10px;margin:12px 0}
+body.mg-pro #desktop-command,body.mg-pro dialog pre{background:#0d0f14;color:#e6e8ee;border-radius:12px;padding:12px;overflow:auto;direction:ltr;text-align:left}
+body.mg-pro .history-rename{width:100%;min-height:32px;border-radius:8px;border:1px solid var(--p-border);background:var(--p-surface);color:var(--p-text);padding:4px 8px}
+html.theme-light body.mg-pro dialog,html[data-theme=light] body.mg-pro dialog{background:var(--p-raised)}
+html.theme-light body.mg-pro #desktop-command,html.theme-light body.mg-pro dialog pre{background:#0f1720}
+
+@media (max-width:760px){
+ .pro-settings-tab{padding:8px 10px!important;font-size:13px}
+ body.mg-pro #pro-settings{width:calc(100vw - 12px);max-height:calc(100svh - 12px);border-radius:18px}
+ .pro-set-row{flex-direction:column;align-items:stretch}
+ .pro-seg{width:100%;display:flex}
+ .pro-seg-btn{flex:1}
+ .pro-settings-tabs{padding-inline:8px}
+}

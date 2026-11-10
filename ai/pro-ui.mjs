@@ -60,6 +60,89 @@ export function enhanceSelect(select,{variant='plain',mount}={}){
  (mount||select.parentElement).insertBefore(root,mount?null:select.nextSibling);
  sync();return api;
 }
+function t(en,faText){return fa()?faText:en;}
+function move(node,into){if(node)into.append(node);return node;}
+function asSwitch(label){if(!label||label.dataset.proSwitch)return label;label.dataset.proSwitch='1';label.classList.add('pro-switch');return label;}
+function enhanceSettings(){
+ const panel=$('settings-panel'),content=panel?.querySelector('.settings-content');
+ if(!panel||!content)return;
+ if(panel.dataset.proSettings){const dlg=$('pro-settings');const g=dlg&&$('pro-pane-general');const plugins=content.querySelector('.plugins-panel');if(g&&plugins)g.append(plugins);content.querySelector('.settings-general')?.setAttribute('hidden','');return;}
+ panel.dataset.proSettings='1';
+ const dlg=make('dialog','pro-settings');dlg.id='pro-settings';dlg.setAttribute('aria-modal','true');dlg.setAttribute('aria-labelledby','pro-settings-title');
+ const head=make('div','pro-settings-head');
+ const title=make('h2','pro-settings-title');title.id='pro-settings-title';
+ const close=make('button','pro-settings-close');close.type='button';
+ close.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+ close.onclick=()=>dlg.close();head.append(title,close);
+ const tabs=make('div','pro-settings-tabs');tabs.setAttribute('role','tablist');
+ const body=make('div','pro-settings-body');
+ const IDS=['general','appearance','models','account','data'];
+ const NAMES={general:['General','عمومی'],appearance:['Appearance','ظاهر'],models:['Models','مدل‌ها'],account:['Account','حساب'],data:['Data','داده‌ها']};
+ const tabBtn={},paneEl={};let current='general';
+ const showTab=id=>{current=id;IDS.forEach(k=>{tabBtn[k].classList.toggle('is-active',k===id);tabBtn[k].setAttribute('aria-selected',String(k===id));tabBtn[k].tabIndex=k===id?0:-1;paneEl[k].hidden=k!==id;});};
+ for(const id of IDS){
+  const b=make('button','pro-settings-tab');b.type='button';b.setAttribute('role','tab');b.id='pro-tab-'+id;b.onclick=()=>showTab(id);tabs.append(b);tabBtn[id]=b;
+  const p=make('section','pro-settings-pane');p.id='pro-pane-'+id;p.setAttribute('role','tabpanel');p.setAttribute('aria-labelledby','pro-tab-'+id);body.append(p);paneEl[id]=p;
+ }
+ const g=paneEl.general;move($('device-note'),g);move($('connection'),g);
+ const modeBox=content.querySelector('.composer-controls')||$('mode')?.closest('.composer-controls');if(modeBox)g.append(modeBox);
+ move($('mode-hint'),g);move($('toolbox'),g);const plugins=content.querySelector('.plugins-panel');if(plugins)g.append(plugins);
+ const a=paneEl.appearance;
+ const themeOpts=[['auto','Auto','خودکار'],['light','Day','روز'],['dark','Night','شب']];
+ const themeSeg=make('div','pro-seg');themeSeg.id='pro-theme-seg';themeSeg.setAttribute('role','radiogroup');
+ const themeBtns=[];
+ const themeMode=()=>{try{return localStorage.getItem('malguard-theme')||'auto';}catch{return 'auto';}};
+ const syncThemeSeg=()=>{const cur=themeMode();themeBtns.forEach(b=>{const on=b.dataset.value===cur;b.setAttribute('aria-checked',String(on));b.classList.toggle('is-active',on);});};
+ const applyTheme=mode=>{const btn=$('mgThemeToggle');if(btn){let n=0;while((btn.dataset.mode||'auto')!==mode&&n++<4)btn.click();}else{try{localStorage.setItem('malguard-theme',mode);}catch{}}syncThemeSeg();};
+ for(const [value] of themeOpts){const b=make('button','pro-seg-btn');b.type='button';b.dataset.value=value;b.setAttribute('role','radio');b.onclick=()=>applyTheme(value);themeSeg.append(b);themeBtns.push(b);}
+ const themeMeta=make('div','pro-set-meta');themeMeta.append(make('div','pro-set-label'),make('p','pro-set-hint'));
+ const themeRow=make('div','pro-set-row');themeRow.append(themeMeta,themeSeg);a.append(themeRow);
+ const langSeg=make('div','pro-seg');langSeg.setAttribute('role','radiogroup');
+ const langEn=make('button','pro-seg-btn');langEn.type='button';langEn.dataset.value='en';langEn.setAttribute('role','radio');
+ const langFa=make('button','pro-seg-btn');langFa.type='button';langFa.dataset.value='fa';langFa.setAttribute('role','radio');
+ const syncLangSeg=()=>{const cur=fa()?'fa':'en';[langEn,langFa].forEach(b=>{const on=b.dataset.value===cur;b.setAttribute('aria-checked',String(on));b.classList.toggle('is-active',on);});};
+ const setLang=v=>{if((v==='fa')!==fa())$('language')?.click();syncLangSeg();};
+ langEn.onclick=()=>setLang('en');langFa.onclick=()=>setLang('fa');langSeg.append(langEn,langFa);
+ const langMeta=make('div','pro-set-meta');langMeta.append(make('div','pro-set-label'),make('p','pro-set-hint'));
+ const langRow=make('div','pro-set-row');langRow.append(langMeta,langSeg);a.append(langRow);move($('language'),a);
+ const mo=paneEl.models;move($('model-status'),mo);move($('local-status'),mo);
+ const modelActions=make('div','pro-set-actions');move($('manage-models'),modelActions);move($('manage-desktop-models'),modelActions);move($('remove-models'),modelActions);mo.append(modelActions);move(content.querySelector('.notice'),mo);
+ const acc=paneEl.account;const accStatus=make('p','pro-set-hint');accStatus.id='pro-account-status';
+ const accActions=make('div','pro-set-actions');const accIn=make('button','pro-set-btn');accIn.type='button';const accUp=make('button','pro-set-btn');accUp.type='button';
+ accIn.onclick=()=>{dlg.close();$('account')?.click();};accUp.onclick=()=>{dlg.close();($('sign-up')||$('account'))?.click();};
+ accActions.append(accIn,accUp);acc.append(accStatus,accActions);
+ const d=paneEl.data;const perm=$('permissions');
+ if(perm){const intro=make('p','pro-set-hint');intro.id='pro-perm-intro';d.append(intro);perm.querySelectorAll('label').forEach(asSwitch);move(perm.querySelector('fieldset'),d);move($('revoke-permissions'),d);perm.hidden=true;}
+ move(content.querySelector('.footer-note'),d);move(content.querySelector('.privacy-link'),d);
+ content.querySelector('.settings-general')?.setAttribute('hidden','');
+ $('revoke-permissions')?.classList.add('pro-set-btn','danger');
+ for(const id of ['manage-models','manage-desktop-models','remove-models'])$(id)?.classList.add('pro-set-btn');
+ dlg.append(head,tabs,body);document.body.append(dlg);
+ const relabel=()=>{
+  title.textContent=t('Settings','تنظیمات');close.setAttribute('aria-label',t('Close settings','بستن تنظیمات'));
+  IDS.forEach(id=>tabBtn[id].textContent=t(...NAMES[id]));
+  themeMeta.querySelector('.pro-set-label').textContent=t('Theme','تم');
+  themeMeta.querySelector('.pro-set-hint').textContent=t('Day, night, or automatic by local sunrise.','روز، شب، یا خودکار بر اساس طلوع محلی.');
+  themeBtns.forEach((b,i)=>b.textContent=t(themeOpts[i][1],themeOpts[i][2]));
+  langMeta.querySelector('.pro-set-label').textContent=t('Language','زبان');
+  langMeta.querySelector('.pro-set-hint').textContent=t('Applies to the MalGuard AI interface.','روی رابط MalGuard AI اعمال می‌شود.');
+  langEn.textContent='English';langFa.textContent='فارسی';
+  const signed=($('account')?.textContent||'').trim();
+  const isIn=!!signed&&!/sign in|ورود/i.test(signed);
+  accStatus.textContent=isIn?t('Signed in as '+signed,'وارد شده‌اید: '+signed):t('You are signed out. Sign in to save chats to your account.','خارج هستید. برای ذخیرهٔ گفتگوها وارد حساب شوید.');
+  accIn.textContent=isIn?t('Manage account','مدیریت حساب'):t('Sign in','ورود');
+  accUp.textContent=t('Create account','ساخت حساب');accUp.hidden=!!isIn;
+  const intro=$('pro-perm-intro');if(intro)intro.textContent=t('Permissions are saved on this device and can be revoked at any time.','مجوزها روی همین دستگاه ذخیره می‌شوند و هر زمان قابل لغو هستند.');
+  syncThemeSeg();syncLangSeg();
+ };
+ const openPro=tab=>{relabel();showTab(tab||($('permissions')?.open?'data':'general'));if(!dlg.open)dlg.showModal();tabBtn[current]?.focus();};
+ panel.addEventListener('toggle',()=>{if(panel.open)openPro($('permissions')?.open?'data':undefined);else if(dlg.open)dlg.close();});
+ dlg.addEventListener('close',()=>{if(panel.open)panel.open=false;});
+ document.addEventListener('pointerdown',e=>{if(e.target.closest('#pro-settings'))e.stopPropagation();},true);
+ if(panel.open)openPro();
+ new MutationObserver(relabel).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+}
+
 function init(){
  document.body.classList.add('mg-pro');
  const header=document.querySelector('.site-header');
@@ -83,5 +166,7 @@ function init(){
  moveTheme();new MutationObserver(moveTheme).observe(document.body,{childList:true});
  // Auto-grow composer.
  const msg=$('message');if(msg){const grow=()=>{msg.style.height='auto';msg.style.height=Math.min(msg.scrollHeight,240)+'px';};msg.addEventListener('input',grow);}
+ document.querySelectorAll('.isolation-permission,.build-share,#permissions label').forEach(asSwitch);
+ enhanceSettings();setTimeout(enhanceSettings,0);setTimeout(enhanceSettings,120);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0));else setTimeout(init,0);
