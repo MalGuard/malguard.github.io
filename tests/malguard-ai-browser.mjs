@@ -1,4 +1,4 @@
-import {toggleSettings,newConversation,openModePicker,selectModel,grantModelConsent} from './ai-navigation-helpers.mjs';
+import {toggleSettings,newConversation,openModePicker,selectModel,selectMode,grantModelConsent} from './ai-navigation-helpers.mjs';
 import assert from 'node:assert/strict';
 import express from 'express';
 import {fileURLToPath} from 'node:url';
@@ -129,15 +129,15 @@ try{
    assert.equal(await page.locator('#send').isDisabled(),true,'Clearing a draft disables Send again');
    assert.equal(await page.locator('#jump-latest').isVisible(),false,'Jump-to-latest stays hidden in empty chats');
    const modePosts=modelPostRequests;
-   if(width>760)await page.locator('#experience-worker').click();else await page.locator('#navigation-mode-worker').click({force:true});
+   await selectMode(page,'worker');
    assert.equal(await page.locator('#mode').inputValue(),'worker');
    assert.equal(await page.locator('#experience-worker').getAttribute('aria-pressed'),'true');
    assert.equal(await page.locator('.model-select-wrap').isVisible(),false,'Hidden Work selector must not leave an empty slot');
-   if(width>760)await page.locator('#experience-build').click();else await page.locator('#navigation-mode-build').click({force:true});
+   await selectMode(page,'build');
    assert.equal(await page.locator('#mode').inputValue(),'build');
    assert.equal(await page.locator('#model option[value="cf_gptoss120"]').count(),1,'Strong Code model belongs in Code');
    assert.equal(await page.locator('#model option[value="chat_granite"]').count(),0);
-   if(width>760)await page.locator('#experience-chat').click();else await page.locator('#navigation-mode-chat').click({force:true});
+   await selectMode(page,'chat');
    assert.equal(await page.locator('#mode').inputValue(),'chat');
    await page.evaluate(()=>{
      window.__modelSelectorMutations=0;

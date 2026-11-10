@@ -35,6 +35,16 @@ export async function openModePicker(page){
  if(!(await page.locator('#mode-toggle').isVisible()))await page.locator('#navigation-toggle').click();
  await page.locator('#mode-toggle').click();
 }
+export async function selectMode(page,mode){
+ const experience=page.locator('#experience-'+(mode==='worker'?'worker':mode));
+ if(await experience.isVisible()){await experience.click();return;}
+ const shortcut=page.locator('#navigation-mode-'+mode);
+ if(!(await shortcut.isVisible()) && await page.locator('body.navigation-closed').count())await page.locator('#navigation-toggle').click();
+ if(await shortcut.isVisible()){await shortcut.click();return;}
+ await openModePicker(page);
+ const tab={chat:'#chat-tab',worker:'#workspace-tab',build:'#build-tab'}[mode];
+ await page.locator(tab).click();
+}
 export async function selectModel(page,value){
  await page.locator('#model').selectOption(value,{force:true});
 }
