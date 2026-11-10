@@ -22,6 +22,7 @@ import {parseProposal} from './build-project.mjs?v=codex-chat-20261025';
 const $=id=>document.getElementById(id);
 const names={gta_guard:'GTA Guard',game_scam_guard:'Game Scam Guard',ai_web:'AI Web',malwarebazaar:'MalwareBazaar',urlhaus:'URLhaus',file_sandbox:'File sandbox',url_sandbox:'Link sandbox'};
 let locale='en',service,busy=false,serviceLoading=true;
+try{if(localStorage.getItem('malguard.ai.locale.v1')==='fa')locale='fa';}catch{}
 
 let activeTurn;
 let localReady=false,localCapabilityReason='checking',modelsInitialized=false;
@@ -261,7 +262,7 @@ async function presentResponse(response,turn){
  const display={...response,generated:{...response.generated,text:''}},card=renderResponse(display,false),answer=card.querySelector('.answer'),actions=card.querySelector('.response-actions');
  card.classList.add('is-typing');actions.hidden=true;setActivity('typing');
  try{
-  await typeText(response.generated.text,text=>followReply(()=>{display.generated.text=text;answer.textContent=text;}),{signal:turn.controller.signal});
+  await typeText(response.generated.text,text=>followReply(()=>{display.generated.text=text;renderRichText(answer,text,locale);}),{signal:turn.controller.signal});
   turn.completed=true;
  }finally{
   card.classList.remove('is-typing');actions.hidden=false;
@@ -467,7 +468,7 @@ function renderResponse(response,remember=true){
  info.append(el('h4',t('limits')));const limits=el('ul');for(const v of r.limitations)limits.append(el('li',v));info.append(limits);card.append(info);$('conversation').append(card);
 }
 async function fileData(file){const bytes=new Uint8Array(await file.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));return {name:file.name,base64:btoa(binary)};}
-$('language').onclick=()=>{};
+$('language').onclick=()=>{if(busy)return;locale=locale==='fa'?'en':'fa';try{localStorage.setItem('malguard.ai.locale.v1',locale);}catch{}translate();};
 $('clear').onclick=()=>{if(!busy){library.capture();library.fresh();history.length=0;modelHistory.length=0;$('conversation').replaceChildren();$('message').value='';resizeComposerInput();refreshComposerInputState();$('message').focus({preventScroll:true});}};
 $('remove-file').onclick=()=>{$('file').value='';$('filename').textContent='';$('remove-file').hidden=true;refreshComposerInputState();};
 $('file').onchange=()=>{const f=$('file').files[0];if(f&&(!f.size||f.size>1048576)){$('remove-file').click();showError('fileTooLarge');return;}$('filename').textContent=f?.name||'';$('remove-file').hidden=!f;if(f){$('isolation-consent').checked=false;switchMode('worker',{carryDraft:true});if(!['gta_guard','file_sandbox'].includes($('workspace-tool').value))$('workspace-tool').value='auto';$('tool').value=$('workspace-tool').value;renderStatus();}};

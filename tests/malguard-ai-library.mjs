@@ -1,4 +1,4 @@
-import {openModePicker} from './ai-navigation-helpers.mjs';
+import {openModePicker,grantModelConsent} from './ai-navigation-helpers.mjs';
 import assert from 'node:assert/strict';
 import express from 'express';
 import {mkdir} from 'node:fs/promises';
@@ -32,7 +32,7 @@ try{for(const width of [390,1280]){
  async function rail(){if(!(await page.locator('#mode-toggle').isVisible()))await page.locator('#navigation-toggle').click();}
  async function login(email){if(await page.locator('#entry-signin').isVisible())await page.locator('#entry-signin').click();else{if(await page.locator('.navigation-dismiss').isVisible())await page.locator('.navigation-dismiss').click();await page.locator('#account').click();}await page.getByLabel('Email address',{exact:true}).fill(email);await page.getByLabel('Password',{exact:true}).fill('SyntheticPassword1');await page.locator('dialog.ai-account').getByRole('button',{name:'Sign in',exact:true}).click();await page.locator('#message').waitFor();await page.locator('#save-state').filter({hasText:'Chats are saved to your account.'}).waitFor();}
  await login(`a-${width}@example.com`);await rail();await openModePicker(page);assert.equal(await page.locator('#build-tab').isVisible(),true);await page.keyboard.press('Escape');await page.keyboard.press('Escape');if(width>760&&await page.locator('#mode-picker').getAttribute('open')!==null)await openModePicker(page);
- await rail();if(await page.locator('#settings-panel').getAttribute('open')!==null)await page.locator('#settings-close').click();else await page.locator('#settings-panel > summary').click();await page.locator('#permissions > summary').click();await page.locator('#model-consent').check();if(await page.locator('#settings-panel').getAttribute('open')!==null)await page.locator('#settings-close').click();else await page.locator('#settings-panel > summary').click();
+ await grantModelConsent(page);
  await page.locator('#message').fill('Explain synthetic persistence');await page.locator('#send').click();await page.getByText('Synthetic saved answer',{exact:true}).waitFor();await page.locator('#save-state').filter({hasText:'Saved to your account'}).waitFor();
  await rail();assert.equal(await page.locator('.history-row').count(),1);await page.locator('#manage-memory').click();await page.getByLabel('New memory').fill('Synthetic preference');await page.getByRole('button',{name:'Save memory',exact:true}).click();await page.getByRole('button',{name:'Close',exact:true}).click();await page.locator('#save-state').filter({hasText:'Saved to your account'}).waitFor();
  await page.reload();await page.waitForFunction(()=>document.querySelector('#send').dataset.modelReady==='true');
