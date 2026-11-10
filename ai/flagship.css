@@ -175,8 +175,6 @@ body.mg-flagship.auth-required .flagship-dock{display:none}
  body.mg-flagship .flagship-dock button[aria-pressed=true]{background:var(--flagship-selected);color:var(--ai-fg);border-color:#288fec;box-shadow:inset 0 1px 12px #078eff33}
  body.mg-ai-v2.mg-flagship:has(.conversation:not(:empty)) .composer-area{bottom:calc(72px + env(safe-area-inset-bottom))}
  body.mg-ai-v2.mg-flagship[data-view=home] .composer-area{position:static}
- body.mg-flagship:has(#message:focus) .flagship-dock{display:none}
- body.mg-ai-v2.mg-flagship:has(#message:focus) .composer-area{bottom:0}
  body.mg-ai-v2.mg-flagship .build-toolbar{gap:7px}
  body.mg-ai-v2.mg-flagship .build-toolbar input{flex:1;min-width:90px;width:120px}
  body.mg-ai-v2.mg-flagship .build-panel{padding:12px}
