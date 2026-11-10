@@ -146,6 +146,7 @@ try{
    await page.locator('#attach-toggle').click();
    assert.equal(await page.locator('#thinking-toggle').isVisible(),true);
    assert.equal(await page.locator('#web-search-toggle').isVisible(),true,'Web Search is in the same menu');
+   if([390,1280].includes(width))await captureThemes(page,'composer-tools',width);
    await page.locator('#attach-toggle').click();
    assert.equal(await page.locator('#thinking-toggle').getAttribute('aria-pressed'),'false');
    assert.match(await page.locator('#thinking-state').innerText(),/Thinking off|Thinking unavailable/);
