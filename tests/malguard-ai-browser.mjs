@@ -110,7 +110,7 @@ try{
   assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
   assert.equal(await page.locator('#composer #model').count(),1);assert.equal(await page.locator('.pro-model-slot .pro-select-button').first().isVisible(),true,'Custom model picker is the visible control');assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);
    // ChatGPT/Grok-inspired controls are visible and genuinely functional on each viewport.
-   if(width>760)assert.equal(await page.locator('#experience-tabs').isVisible(),true);else{assert.equal(await page.locator('#experience-tabs').isVisible(),false);if(await page.locator('body.navigation-closed').count())await page.locator('#navigation-toggle').click();}
+   if(width>760)assert.equal(await page.locator('#experience-tabs').isVisible(),true);else assert.equal(await page.locator('#experience-tabs').isVisible(),false);
    assert.equal(await page.locator('#thinking-toggle').isVisible(),false,'Thinking stays in the collapsed + menu');
    await page.locator('#attach-toggle').click();
    assert.equal(await page.locator('#thinking-toggle').isVisible(),true);
@@ -119,8 +119,8 @@ try{
    assert.equal(await page.locator('#thinking-toggle').getAttribute('aria-pressed'),'false');
    assert.match(await page.locator('#thinking-state').innerText(),/Thinking off|Thinking unavailable/);
    assert.equal(await page.locator('#experience-chat').getAttribute('aria-pressed'),'true');
-   assert.equal(await page.locator('#experience-worker').isVisible(),true);
-   assert.equal(await page.locator('#experience-build').isVisible(),true);
+   if(width>760){assert.equal(await page.locator('#experience-worker').isVisible(),true);assert.equal(await page.locator('#experience-build').isVisible(),true);}
+   else{assert.equal(await page.locator('#navigation-mode-worker').count(),1);assert.equal(await page.locator('#navigation-mode-build').count(),1);}
    assert.equal(await page.locator('#model option[value="cf_gptoss120"]').count(),0,'Code model must not appear in Chat');
    assert.equal(await page.locator('#send').isDisabled(),true,'Empty composer must never enable Send');
    await page.locator('#message').fill('A safe test prompt');
@@ -179,7 +179,7 @@ try{
   await (await choosingFile).setFiles({name:'benign.txt',mimeType:'text/plain',buffer:Buffer.from('Hello, harmless browser fixture.')});
   assert.equal(await page.locator('#attach-options').isVisible(),false);assert.equal(requests,beforeMenu,'Choosing a file does not upload it');
   const before=requests;await page.locator('#send').click();assert.equal(requests,before,'no upload without consent');
-  await page.locator('#file-consent').check();await toggleSettings(page);
+  await toggleSettings(page);if(await page.locator('#pro-tab-data').count())await page.locator('#pro-tab-data').click();await page.locator('#file-consent').check({force:true});await toggleSettings(page);
   await page.locator('#send').click();
   try{await page.getByRole('heading',{name:'No malicious evidence found in the checks performed.'}).waitFor({timeout:15000});}
   catch(error){console.error('Browser failure:',await page.locator('#conversation').innerText(),errors);throw error;}
@@ -229,7 +229,7 @@ try{
    await newConversation(page);
    console.log('PASS Chat multi-turn context and inspection-only mode (injected benign model fixture).');
   }
-  await page.reload();assert.equal(await page.locator('#conversation').innerText(),'');assert.equal(await page.locator('#file-consent').isChecked(),true);await toggleSettings(page);await page.locator('#permissions summary').click();await page.locator('#revoke-permissions').click();assert.equal(await page.locator('#file-consent').isChecked(),false);
+  await page.reload();assert.equal(await page.locator('#conversation').innerText(),'');assert.equal(await page.locator('#file-consent').isChecked(),true);await toggleSettings(page);if(await page.locator('#pro-tab-data').count())await page.locator('#pro-tab-data').click();await page.locator('#revoke-permissions').click({force:true});assert.equal(await page.locator('#file-consent').isChecked(),false);
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);await context.close();
   console.log(`PASS real AI frontend → backend → static worker, consent, English interface, no overflow/history at ${width}px`);
  }

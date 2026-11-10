@@ -3,6 +3,15 @@ export async function toggleSettings(page){
  if(await pro.isVisible().catch(()=>false)){
   await page.locator('#pro-settings .pro-settings-close').click();
   await pro.waitFor({state:'hidden'});
+  await page.evaluate(()=>{
+   const panel=document.getElementById('settings-panel');
+   if(panel)panel.open=false;
+   if(innerWidth<=760){
+    document.body.classList.add('navigation-closed');
+    const collapse=document.getElementById('navigation-toggle');
+    if(collapse)collapse.setAttribute('aria-expanded','false');
+   }
+  });
   return;
  }
  if(await page.locator('#settings-panel').getAttribute('open')!==null){

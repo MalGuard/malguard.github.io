@@ -1,4 +1,4 @@
-import {toggleSettings,selectModel,newConversation} from './ai-navigation-helpers.mjs';
+import {toggleSettings,selectModel,newConversation,grantModelConsent} from './ai-navigation-helpers.mjs';
 import assert from 'node:assert/strict';
 import express from 'express';
 import {fileURLToPath} from 'node:url';
@@ -32,7 +32,7 @@ try{
   assert.equal(await page.locator('#attach-options').isVisible(),false);assert.equal(jobs.length,beforeActions,'Selecting web search does not submit a request');
   await page.locator('#attach-toggle').click();await page.locator('#attach-chat').click();
   assert.equal(await page.locator('#tool').inputValue(),'auto');assert.equal(jobs.length,beforeActions);
-  if(await page.locator('#settings-panel').getAttribute('open')!==null)await page.locator('#settings-close').click();else await toggleSettings(page);await page.locator('#permissions > summary').click();await page.locator('#model-consent').check();if(await page.locator('#settings-panel').getAttribute('open')!==null)await page.locator('#settings-close').click();else await toggleSettings(page);
+  await grantModelConsent(page);
   const send=async text=>{
    const count=jobs.length;await page.locator('#message').fill(text);if(width===390){await page.locator('#message').press('Enter');assert.equal(jobs.length,count,'Mobile Enter inserts a line break without submitting');await page.locator('#message').fill(text);await page.locator('#message').press('Control+Enter');}else await page.locator('#message').press('Enter');
    await page.waitForFunction(()=>document.getElementById('activity').dataset.label==='Thinking');assert.equal(jobs.length,count+1);return jobs.at(-1);
