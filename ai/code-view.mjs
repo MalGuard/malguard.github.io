@@ -59,7 +59,7 @@ function renderMarkdown(node,source){
     const li=make('li');if(x[1].length>=2)li.className='md-nested';const task=x[3].match(/^\[([ xX])\]\s+(.*)$/);if(task){li.classList.add('md-task');const box=make('span','md-check');box.textContent=task[1]===' '?'☐':'☑';li.append(box,document.createTextNode(' '));renderInline(li,task[2]);}else renderInline(li,x[3]);list.append(li);i++;}
    node.append(list);continue;
   }
-  const buf=[];
+  const buf=[lines[i]];i++;
   while(i<lines.length&&lines[i].trim()&&!/^(#{1,6})\s+/.test(lines[i])&&!/^\s*>/.test(lines[i])&&!listItem.test(lines[i])&&!isTable(lines[i],lines[i+1])&&!/^\s*([-*_])(\s*\1){2,}\s*$/.test(lines[i])){buf.push(lines[i]);i++;}
   const p=make('p','answer-prose');renderInline(p,buf.join('\n'));node.append(p);
  }

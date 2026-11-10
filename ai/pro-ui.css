@@ -157,3 +157,41 @@ html[dir=rtl] body.mg-pro{font-family:"Vazirmatn",Tahoma,system-ui,sans-serif}
 html.theme-light body.mg-pro::before,html.theme-light body.mg-pro::after{background:none!important;opacity:0!important}
 html.theme-light body.mg-pro :is(main,.workspace,.site-header){background:transparent!important}
 html.theme-light:has(body.mg-pro){background:#bfe0f6!important}
+
+/* Pass 2: day sky (beats experience-v2/mg-theme body paints) */
+html.theme-light body.mg-pro.mg-ai-v2.mg-deep-space,html[data-theme=light] body.mg-pro.mg-ai-v2.mg-deep-space{
+ background-color:#bfe0f6!important;
+ background-image:radial-gradient(120% 60% at 80% -10%,rgba(255,244,214,.85) 0%,rgba(255,244,214,0) 45%),linear-gradient(180deg,#6fb6e6 0%,#9fd1f1 28%,#cde8f8 60%,#eef7fd 100%)!important;
+ background-attachment:fixed!important;color:#0f1b2a!important}
+html.theme-light body.mg-pro.mg-ai-v2.mg-deep-space::before,html.theme-light body.mg-pro.mg-ai-v2.mg-deep-space::after,
+html[data-theme=light] body.mg-pro.mg-ai-v2.mg-deep-space::before,html[data-theme=light] body.mg-pro.mg-ai-v2.mg-deep-space::after{background:none!important;opacity:0!important;display:none!important}
+html.theme-light body.mg-pro.mg-ai-v2 #navigation{background:rgba(255,255,255,.62)!important}
+html.theme-light body.mg-pro.mg-ai-v2 :is(.intro h1,.answer,.bubble,#message,.history-open,.navigation-new){color:#0f1b2a!important}
+html.theme-light body.mg-pro.mg-ai-v2 :is(.composer-hints,.footer-note,.download-entry,.experience-eyebrow,.navigation-note){color:#33475e!important}
+
+/* Pass 2: RTL shell mirroring */
+html[dir=rtl] body.mg-pro{direction:rtl}
+html[dir=rtl] body.mg-pro.mg-ai-v2 #navigation{left:auto!important;right:0!important;direction:rtl;border-right:0!important;border-left:1px solid var(--p-border)!important}
+html[dir=rtl] body.mg-pro.mg-ai-v2:not(.navigation-closed):not(.auth-required){padding-left:0!important;padding-right:270px!important}
+html[dir=rtl] body.mg-pro.mg-ai-v2.navigation-closed{padding-right:0!important}
+html[dir=rtl] body.mg-pro .site-header{direction:rtl}
+html[dir=rtl] body.mg-pro .pro-select-model,html[dir=rtl] body.mg-pro .experience-tabs{direction:rtl}
+html[dir=rtl] body.mg-pro .navigation-heading #mode-toggle{direction:ltr}
+html[dir=rtl] body.mg-pro .history-open{text-align:right}
+@media (max-width:760px){html[dir=rtl] body.mg-pro.mg-ai-v2:not(.navigation-closed):not(.auth-required){padding-right:0!important}}
+.pro-demo-badge{position:fixed;bottom:10px;inset-inline-end:12px;z-index:3000;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:#f59e0b;color:#1a1200;box-shadow:0 6px 18px #0004;pointer-events:none}
+/* Pass 2 fixes */
+body.mg-pro .pro-model-slot:not([data-mode=worker]) .pro-work-picker{display:none!important}
+body.mg-pro .pro-model-slot[data-mode=worker] .pro-select:not(.pro-work-picker){display:none!important}
+body.mg-pro .site-header{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--p-bg) 72%,transparent)!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important}
+html.theme-light body.mg-pro .site-header{background:rgba(160,210,240,.55)!important}
+body.mg-pro .answer code.md-inline-code{display:inline!important;white-space:normal;width:auto!important;margin:0!important}
+body.mg-pro .answer li{margin:3px 0}
+body.mg-pro .md-table-wrap{overflow-x:auto;margin:10px 0;border:1px solid var(--p-border);border-radius:12px}
+body.mg-pro .md-table{border-collapse:collapse;width:100%;font-size:14px}
+body.mg-pro .md-table :is(th,td){padding:8px 12px;border-bottom:1px solid var(--p-border);text-align:start}
+body.mg-pro .md-table th{background:var(--p-hover);font-weight:650}
+body.mg-pro .md-table tr:last-child td{border-bottom:0}
+html.theme-light body.mg-pro.mg-ai-v2 #navigation{background:rgba(255,255,255,.55)!important}
+html.theme-light body.mg-pro.mg-ai-v2 .composer-shell{background:rgba(255,255,255,.9)!important}
+html.theme-light body.mg-pro .composer-area{background:linear-gradient(180deg,transparent,rgba(220,238,250,.85) 40%)!important}

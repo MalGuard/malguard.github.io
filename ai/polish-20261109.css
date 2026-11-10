@@ -169,9 +169,10 @@ html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 {
   color-scheme:light;
 }
 html:is(.theme-light,[data-theme=light]):root body.mg-deep-space.mg-deep-space.mg-deep-space.mg-deep-space.mg-ai-v2 {
-  background:#f8fafc!important;
-  background-image:none!important;
-  color:var(--ai-fg)!important;
+  background-color:#bfe0f6!important;
+  background-image:radial-gradient(120% 60% at 80% -10%,rgba(255,244,214,.85) 0%,rgba(255,244,214,0) 45%),linear-gradient(180deg,#6fb6e6 0%,#9fd1f1 28%,#cde8f8 60%,#eef7fd 100%)!important;
+  background-attachment:fixed!important;
+  color:#0f1b2a!important;
 }
 html:is(.theme-light,[data-theme=light]) body.mg-ai-v2 :is(.navigation,.settings-content,#attach-options,.workspace-panel,.build-panel) {
   background-color:var(--ai-surface);
