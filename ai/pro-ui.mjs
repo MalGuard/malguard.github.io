@@ -138,15 +138,17 @@ function enhanceSettings(){
   syncThemeSeg();syncLangSeg();
  };
  const openPro=tab=>{relabel();showTab(tab||($('permissions')?.open?'data':'general'));if(!dlg.open)dlg.showModal();tabBtn[current]?.focus();};
- panel.addEventListener('toggle',()=>{if(panel.open)openPro($('permissions')?.open?'data':undefined);else if(dlg.open)dlg.close();});
- dlg.addEventListener('close',()=>{
-  if(panel.open)panel.open=false;
-  if(innerWidth<=760){
-   document.body.classList.add('navigation-closed');
-   const collapse=$('navigation-toggle');
-   if(collapse)collapse.setAttribute('aria-expanded','false');
-  }
+ const hideMobileNav=()=>{
+  if(innerWidth>760)return;
+  document.body.classList.add('navigation-closed');
+  const collapse=$('navigation-toggle');
+  if(collapse)collapse.setAttribute('aria-expanded','false');
+ };
+ panel.addEventListener('toggle',()=>{
+  if(panel.open)openPro($('permissions')?.open?'data':undefined);
+  else{if(dlg.open)dlg.close();hideMobileNav();}
  });
+ dlg.addEventListener('close',()=>{if(panel.open)panel.open=false;hideMobileNav();});
  document.addEventListener('pointerdown',e=>{if(e.target.closest('#pro-settings'))e.stopPropagation();},true);
  if(panel.open)openPro();
  new MutationObserver(relabel).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
