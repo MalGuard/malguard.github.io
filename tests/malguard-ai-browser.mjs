@@ -15,7 +15,7 @@ async function captureThemes(page,name,width){
  await mkdir('test-results/malguard-ai',{recursive:true});
  for(const theme of ['dark','light']){
   await page.evaluate(theme=>{document.documentElement.dataset.theme=theme;document.documentElement.classList.toggle('theme-light',theme==='light');},theme);
-  const controls=await page.locator('#composer').evaluate(form=>[...form.querySelectorAll('#attach-toggle,#flagship-attach,#model,#workspace-model,#send')].filter(n=>n.getClientRects().length).map(n=>{const r=n.getBoundingClientRect();return {id:n.id,left:r.left,right:r.right,top:r.top,bottom:r.bottom};}));
+  const controls=await page.locator('#composer').evaluate(form=>[...form.querySelectorAll('#attach-toggle,#flagship-attach,#model-picker-trigger,#workspace-model-picker-trigger,#send')].filter(n=>n.getClientRects().length).map(n=>{const r=n.getBoundingClientRect();return {id:n.id,left:r.left,right:r.right,top:r.top,bottom:r.bottom};}));
   for(let i=0;i<controls.length;i++)for(let j=i+1;j<controls.length;j++){
    const a=controls[i],b=controls[j];assert.ok(Math.min(a.right,b.right)-Math.max(a.left,b.left)<=1||Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)<=1,`${theme} ${width}px: ${a.id} overlaps ${b.id}`);
   }
@@ -26,7 +26,7 @@ async function captureThemes(page,name,width){
    const background=node=>{const chain=[];for(let n=node;n;n=n.parentElement)chain.unshift(n);let bg=[255,255,255];for(const n of chain)bg=blend(rgba(getComputedStyle(n).backgroundColor),bg);return bg;};
    const lum=rgb=>{const [r,g,b]=rgb.map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return .2126*r+.7152*g+.0722*b;};
    const failures=[];
-   for(const node of document.querySelectorAll('#message,#attach-toggle,#flagship-attach,#model,#workspace-model,.flagship-subtitle,.navigation-shortcut,.navigation-new')){
+   for(const node of document.querySelectorAll('#message,#attach-toggle,#flagship-attach,#model-picker-trigger,#workspace-model-picker-trigger,.model-picker-option:not(:disabled),.model-option-copy small,.flagship-subtitle,.navigation-shortcut,.navigation-new')){
     if(!node.getClientRects().length||node.disabled)continue;
     const bg=background(node),style=getComputedStyle(node),colors=[['text',style.color]];
     if(node.id==='message')colors.push(['placeholder',getComputedStyle(node,'::placeholder').color]);
@@ -140,6 +140,17 @@ try{
    // ChatGPT/Grok-inspired controls are visible and genuinely functional on each viewport.
    assert.equal(await page.locator('#experience-tabs').isVisible(),true);
    assert.equal(await page.locator('body').getAttribute('data-view'),'home');
+   await page.locator('#model-picker-trigger').click();
+   await page.locator('#model-picker-dialog[open]').waitFor();
+   assert.ok(await page.locator('.model-picker-option').count()>0);
+   if([390,1280].includes(width))await captureThemes(page,'model-picker',width);
+   const beforePickerPosts=modelPostRequests;
+   await page.locator('.model-picker-option[aria-pressed=true]').click();
+   assert.equal(modelPostRequests,beforePickerPosts,'Choosing a model never sends inference');
+   await page.locator('#model-picker-trigger').click();
+   await page.keyboard.press('Escape');
+   assert.equal(await page.locator('#model-picker-trigger').evaluate(n=>n===document.activeElement),true);
+
    if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await captureThemes(page,'flagship-home',width);}
    await page.locator('#experience-chat').click();
    assert.equal(await page.locator('#thinking-toggle').isVisible(),false,'Thinking stays in the collapsed + menu');

@@ -1,3 +1,4 @@
+import {installModelPicker,refreshModelPicker} from './model-picker.mjs?v=20261110';
 import {highlightCode,codeLanguage} from './code-view.mjs?v=flagship-20261109';
 
 export const VIEWS = {
@@ -70,6 +71,7 @@ export function installFlagship({navigate}){
  document.querySelector('.composer-area').after($('quick-suggestions'));
  ui.workModel=workModel;
  installEditor();
+ installModelPicker();
  const updateMedia=()=>{generate.disabled=ui.busy||$('attach-media-generate').hidden||$('attach-media-generate').disabled;generate.title=generate.disabled?'Image generation is unavailable for the current connection.':'Create an image with the connected provider';};
  new MutationObserver(updateMedia).observe($('attach-media-generate'),{attributes:true,attributeFilter:['hidden','disabled']});ui.updateMedia=updateMedia;
  const online=make('p',null,'flagship-network');online.id='flagship-network';online.setAttribute('role','status');document.querySelector('.composer-area').prepend(online);
@@ -85,7 +87,7 @@ export function syncFlagship({view,busy}){
  for(const b of document.querySelectorAll('[data-flagship-view]')){b.setAttribute('aria-pressed',String(b.dataset.flagshipView===ui.view));b.disabled=busy;}
  for(const b of document.querySelectorAll('.flagship-actions button,.flagship-work button,.flagship-code-actions button,.flagship-dock button'))b.disabled=busy;
  $('flagship-attach').disabled=busy;$('flagship-work').hidden=ui.view!=='worker';$('flagship-actions').hidden=!['home','worker'].includes(ui.view);$('flagship-code-actions').hidden=ui.view!=='build';
- ui.updateMedia();
+ ui.updateMedia();refreshModelPicker({busy,mode:ui.view==='home'?'Chat':VIEWS[ui.view][0]});
 }
 
 function installEditor(){

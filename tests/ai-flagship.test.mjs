@@ -6,6 +6,7 @@ import {renderRichText,safeMarkdownUrl} from '../ai/code-view.mjs';
 import {createBuilder} from '../ai/builder.mjs';
 import {createNavigation} from '../ai/navigation.mjs';
 import {installFlagship,syncFlagship} from '../ai/flagship.mjs';
+import {refreshModelPicker} from '../ai/model-picker.mjs?v=20261110';
 
 const dom=new JSDOM(readFileSync(new URL('../ai/index.html',import.meta.url),'utf8'),{url:'https://malguard.site/ai/'});
 for(const name of ['document','navigator','Element','Event','MutationObserver'])Object.defineProperty(globalThis,name,{value:dom.window[name],configurable:true});
@@ -36,6 +37,19 @@ test('one model position and one tools menu serve all workspaces',()=>{
   assert.equal(document.querySelector('.workspace-model-select-wrap').hidden,view!=='worker');
  }
  syncFlagship({view:'home',busy:false});
+});
+
+test('custom model picker reflects real options and routes exactly one native change',()=>{
+ const select=$('model'),dialog=$('model-picker-dialog');
+ dialog.showModal=()=>dialog.setAttribute('open','');dialog.close=()=>{dialog.removeAttribute('open');dialog.dispatchEvent(new Event('close'));};
+ select.replaceChildren();for(const [id,label,disabled]of [['chat_auto','Auto · Chat',false],['chat_test','Fixture model · Cloud',false],['chat_off','Unavailable fixture',true]]){const option=document.createElement('option');option.value=id;option.textContent=label;option.disabled=disabled;select.append(option);}
+ select.disabled=false;select.value='chat_auto';refreshModelPicker({busy:false,mode:'Chat'});let changes=0;select.addEventListener('change',()=>changes++);
+ assert.equal($('model-picker-trigger').disabled,false,'trigger must be enabled');$('model-picker-trigger').click();assert.equal(dialog.open,true);assert.equal($('model-picker-trigger').getAttribute('aria-expanded'),'true');
+ assert.equal(dialog.querySelector('[data-model-id="chat_off"]').disabled,true);
+ dialog.querySelector('.model-picker-search').value='Fixture model';dialog.querySelector('.model-picker-search').dispatchEvent(new Event('input'));assert.equal(dialog.querySelectorAll('.model-picker-option').length,1);
+ dialog.querySelector('[data-model-id="chat_test"]').click();assert.equal(select.value,'chat_test');assert.equal(changes,1);assert.equal(dialog.open,false);assert.match($('model-picker-trigger').textContent,/Fixture model/);
+ refreshModelPicker({busy:true});assert.equal($('model-picker-trigger').disabled,true);refreshModelPicker({busy:false});
+ select.replaceChildren();refreshModelPicker();$('model-picker-trigger').click();assert.match(dialog.querySelector('.model-picker-empty').textContent,/could not be loaded/);assert.equal(dialog.querySelector('.model-picker-retry').hidden,false);dialog.close();
 });
 
 test('quick actions fill real composer without enabling sharing or submitting',()=>{
