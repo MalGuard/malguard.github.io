@@ -195,3 +195,11 @@ body.mg-pro .md-table tr:last-child td{border-bottom:0}
 html.theme-light body.mg-pro.mg-ai-v2 #navigation{background:rgba(255,255,255,.55)!important}
 html.theme-light body.mg-pro.mg-ai-v2 .composer-shell{background:rgba(255,255,255,.9)!important}
 html.theme-light body.mg-pro .composer-area{background:linear-gradient(180deg,transparent,rgba(220,238,250,.85) 40%)!important}
+
+/* Day: white mono orbit marks are invisible on the bright sky. Recolor to day ink/navy. Night is unchanged. */
+html.theme-light body.mg-pro :is(.ai-product-mark,.entry-mark,.account-product-mark),
+html[data-theme=light] body.mg-pro :is(.ai-product-mark,.entry-mark,.account-product-mark){
+  filter:invert(1) brightness(.18) sepia(1) saturate(2.8) hue-rotate(180deg);
+}
+html.theme-light body.mg-pro .entry-brand,
+html[data-theme=light] body.mg-pro .entry-brand{color:#0f1b2a!important}
