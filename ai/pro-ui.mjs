@@ -15,7 +15,8 @@ export function enhanceSelect(select,{variant='plain',mount}={}){
  const root=make('div','pro-select pro-select-'+variant);
  const button=make('button','pro-select-button');button.type='button';button.setAttribute('aria-haspopup','listbox');button.setAttribute('aria-expanded','false');
  const label=make('span','pro-select-label'),sub=make('span','pro-select-sub'),badge=make('span','pro-new','NEW');badge.hidden=true;
- const chev=document.createElementNS('http://www.w3.org/2000/svg','svg');chev.setAttribute('viewBox','0 0 24 24');chev.setAttribute('class','pro-chev');chev.innerHTML='<path d="m7 10 5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>';
+ const chev=document.createElementNS('http://www.w3.org/2000/svg','svg');chev.setAttribute('viewBox','0 0 24 24');chev.setAttribute('class','pro-chev');
+ const chevPath=document.createElementNS('http://www.w3.org/2000/svg','path');chevPath.setAttribute('d','m7 10 5 5 5-5');chevPath.setAttribute('fill','none');chevPath.setAttribute('stroke','currentColor');chevPath.setAttribute('stroke-width','1.8');chevPath.setAttribute('stroke-linecap','round');chevPath.setAttribute('stroke-linejoin','round');chev.append(chevPath);
  button.append(label,badge,sub,chev);
  const list=make('div','pro-select-list');list.setAttribute('role','listbox');list.hidden=true;list.tabIndex=-1;
  root.append(button,list);
@@ -72,7 +73,8 @@ function enhanceSettings(){
  const head=make('div','pro-settings-head');
  const title=make('h2','pro-settings-title');title.id='pro-settings-title';
  const close=make('button','pro-settings-close');close.type='button';
- close.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+ const x=document.createElementNS('http://www.w3.org/2000/svg','svg');x.setAttribute('width','20');x.setAttribute('height','20');x.setAttribute('viewBox','0 0 24 24');x.setAttribute('fill','none');x.setAttribute('aria-hidden','true');
+ const xp=document.createElementNS('http://www.w3.org/2000/svg','path');xp.setAttribute('d','M6 6l12 12M18 6 6 18');xp.setAttribute('stroke','currentColor');xp.setAttribute('stroke-width','1.8');xp.setAttribute('stroke-linecap','round');x.append(xp);close.append(x);
  close.onclick=()=>dlg.close();head.append(title,close);
  const tabs=make('div','pro-settings-tabs');tabs.setAttribute('role','tablist');
  const body=make('div','pro-settings-body');
