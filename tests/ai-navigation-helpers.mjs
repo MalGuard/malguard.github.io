@@ -1,12 +1,20 @@
 export async function openSettings(page,tab){
+ await page.locator('#pro-settings').waitFor({state:'attached'});
+ if(tab)await page.locator('#pro-tab-'+tab).waitFor({state:'attached'});
  await page.evaluate(tab=>{
   const panel=document.getElementById('settings-panel');
   const dlg=document.getElementById('pro-settings');
   if(panel&&!panel.open)panel.open=true;
   if(dlg&&!dlg.open)dlg.showModal();
-  if(tab)document.getElementById('pro-tab-'+tab)?.click();
+  if(!tab)return;
+  for(const id of ['general','appearance','models','account','data']){
+   const t=document.getElementById('pro-tab-'+id),p=document.getElementById('pro-pane-'+id);
+   if(t){t.classList.toggle('is-active',id===tab);t.setAttribute('aria-selected',String(id===tab));}
+   if(p)p.hidden=id!==tab;
+  }
+  const pane=document.getElementById('pro-pane-'+tab);
+  if(!dlg?.open||!pane||pane.hidden)throw new Error('settings pane did not open');
  },tab);
- await page.waitForFunction(()=>document.getElementById('pro-settings')?.open);
 }
 export async function closeSettings(page){
  if(await page.evaluate(()=>!!document.getElementById('pro-settings')?.open)){
@@ -58,13 +66,30 @@ export async function selectMode(page,mode){
 export async function selectModel(page,value){
  await page.locator('#model').selectOption(value,{force:true});
 }
+export async function checkControl(page,id,on=true){
+ await page.evaluate(({id,on})=>{
+  const el=document.getElementById(id);
+  if(!el)throw new Error('missing '+id);
+  if(el.type==='checkbox'||el.type==='radio'){
+   if(el.checked!==on){
+    el.checked=on;
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+    el.dispatchEvent(new Event('change',{bubbles:true}));
+   }
+  }else el.click();
+ },{id,on});
+}
 export async function grantModelConsent(page){
  await openSettings(page,'data');
- await page.locator('#model-consent').check({force:true});
+ await checkControl(page,'model-consent',true);
  await closeSettings(page);
 }
 export async function grantFileConsent(page){
  await openSettings(page,'data');
- await page.locator('#file-consent').check({force:true});
+ await checkControl(page,'file-consent',true);
  await closeSettings(page);
+}
+export async function revokePermissions(page){
+ await openSettings(page,'data');
+ await checkControl(page,'revoke-permissions');
 }

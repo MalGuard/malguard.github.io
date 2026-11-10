@@ -156,8 +156,18 @@ html[dir=rtl] body.mg-pro{font-family:"Vazirmatn",Tahoma,system-ui,sans-serif}
  /* Overlay the drawer; do not shift the page 270px (that squeezed the header and overflowed at 360px). */
  body.mg-pro.mg-ai-v2:not(.navigation-closed):not(.auth-required),
  body.mg-pro.mg-ai-v2:not(.navigation-closed){padding-left:0!important;padding-right:0!important}
- body.mg-pro .site-header{max-width:100%;min-width:0}
+ body.mg-pro .account-entry{max-width:56px!important}
+ body.mg-pro .pro-lang{min-width:32px;padding-inline:6px}
 }
+@media (max-width:400px){
+ /* Language remains in Settings; the compact header must fit a signed-in name. */
+ body.mg-pro .pro-lang{display:none!important}
+ body.mg-pro .account-entry{max-width:64px!important}
+}
+/* Contain header chrome at all widths, including 768px with the 270px sidebar. */
+body.mg-pro .site-header{max-width:100%;min-width:0;overflow:hidden;box-sizing:border-box}
+body.mg-pro .pro-model-slot,body.mg-pro .pro-select-model{min-width:0;flex:1 1 auto;max-width:100%;overflow:hidden}
+body.mg-pro .header-actions{min-width:0;flex:0 1 auto;max-width:100%}
 html.theme-light body.mg-pro::before,html.theme-light body.mg-pro::after{background:none!important;opacity:0!important}
 html.theme-light body.mg-pro :is(main,.workspace,.site-header){background:transparent!important}
 html.theme-light:has(body.mg-pro){background:#bfe0f6!important}

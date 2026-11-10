@@ -1,4 +1,4 @@
-import {toggleSettings,newConversation,selectModel} from './ai-navigation-helpers.mjs';
+import {toggleSettings,newConversation,selectModel,grantModelConsent} from './ai-navigation-helpers.mjs';
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {readFile,mkdir} from 'node:fs/promises';
@@ -129,7 +129,7 @@ try{
  await autoContext.route('**/api/public-models',r=>cfResponse(r,{enabled:true}));
  await autoContext.route('**/api/public-model-chat',r=>{if(r.request().method()==='POST')autoPosts.push(r.request().postDataJSON());return cfResponse(r,{enabled:true});});
  await autoPage.goto(base+'/ai/');await autoPage.waitForFunction(()=>document.getElementById('model').value==='chat_granite');
- await autoPage.locator('#settings-panel > summary').click();await autoPage.locator('#permissions > summary').click();await autoPage.locator('#model-consent').check();await autoPage.locator('#settings-panel > summary').click();
+ await grantModelConsent(autoPage);
  await autoPage.locator('#message').fill('سلام');await autoPage.locator('#send').click();await autoPage.locator('.answer').filter({hasText:'سلام! آماده‌ام.'}).waitFor();
  assert.equal(autoPosts.length,1);assert.equal(autoPosts[0].model,'chat_granite');assert.equal(await autoPage.evaluate(()=>autoWorkerCalls.length),0,'Cloudflare Chat must not run a local model');assert.equal(await autoPage.locator('#local-download').isVisible(),false);
  await autoContext.close();console.log('PASS default Cloudflare fast chat reaches the Worker without local downloads');

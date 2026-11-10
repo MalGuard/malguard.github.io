@@ -1,4 +1,4 @@
-import {toggleSettings,openSettings,closeSettings,newConversation,openModePicker,selectModel,selectMode,grantModelConsent,grantFileConsent} from './ai-navigation-helpers.mjs';
+import {toggleSettings,openSettings,closeSettings,newConversation,openModePicker,selectModel,selectMode,grantModelConsent,grantFileConsent,revokePermissions} from './ai-navigation-helpers.mjs';
 import assert from 'node:assert/strict';
 import express from 'express';
 import {fileURLToPath} from 'node:url';
@@ -229,7 +229,7 @@ try{
    await newConversation(page);
    console.log('PASS Chat multi-turn context and inspection-only mode (injected benign model fixture).');
   }
-  await page.reload();assert.equal(await page.locator('#conversation').innerText(),'');assert.equal(await page.locator('#file-consent').isChecked(),true);await openSettings(page,'data');await page.locator('#revoke-permissions').click({force:true});assert.equal(await page.locator('#file-consent').isChecked(),false);await closeSettings(page);
+  await page.reload();assert.equal(await page.locator('#conversation').innerText(),'');assert.equal(await page.locator('#file-consent').isChecked(),true);await revokePermissions(page);assert.equal(await page.locator('#file-consent').isChecked(),false);await closeSettings(page);
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);await context.close();
   console.log(`PASS real AI frontend → backend → static worker, consent, English interface, no overflow/history at ${width}px`);
  }
