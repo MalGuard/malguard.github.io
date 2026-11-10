@@ -1,26 +1,36 @@
-export async function toggleSettings(page){
+export async function openSettings(page,tab){
+ const pro=page.locator('#pro-settings');
+ if(!(await pro.isVisible().catch(()=>false))){
+  if(!(await page.locator('#settings-panel > summary').isVisible()))await page.locator('#navigation-toggle').click();
+  await page.locator('#settings-panel > summary').click();
+  await pro.waitFor({state:'visible'});
+ }
+ if(tab)await page.evaluate(id=>document.getElementById('pro-tab-'+id)?.click(),tab);
+}
+export async function closeSettings(page){
  const pro=page.locator('#pro-settings');
  if(await pro.isVisible().catch(()=>false)){
   await page.locator('#pro-settings .pro-settings-close').click();
   await pro.waitFor({state:'hidden'});
-  await page.evaluate(()=>{
-   const panel=document.getElementById('settings-panel');
-   if(panel)panel.open=false;
-   if(innerWidth<=760){
-    document.body.classList.add('navigation-closed');
-    const collapse=document.getElementById('navigation-toggle');
-    if(collapse)collapse.setAttribute('aria-expanded','false');
-   }
-  });
-  return;
- }
- if(await page.locator('#settings-panel').getAttribute('open')!==null){
+ }else if(await page.locator('#settings-panel').getAttribute('open')!==null){
   await page.locator('#settings-panel').evaluate(n=>{n.open=false;});
+ }
+ await page.evaluate(()=>{
+  const panel=document.getElementById('settings-panel');
+  if(panel)panel.open=false;
+  if(innerWidth<=760){
+   document.body.classList.add('navigation-closed');
+   const collapse=document.getElementById('navigation-toggle');
+   if(collapse)collapse.setAttribute('aria-expanded','false');
+  }
+ });
+}
+export async function toggleSettings(page){
+ if(await page.locator('#pro-settings').isVisible().catch(()=>false) || await page.locator('#settings-panel').getAttribute('open')!==null){
+  await closeSettings(page);
   return;
  }
- if(!(await page.locator('#settings-panel > summary').isVisible()))await page.locator('#navigation-toggle').click();
- await page.locator('#settings-panel > summary').click();
- await page.locator('#pro-settings').waitFor({state:'visible'});
+ await openSettings(page);
 }
 export async function toggleLanguage(page){
  if(await page.locator('#settings-panel').getAttribute('open')===null && !(await page.locator('#pro-settings').isVisible().catch(()=>false)))await toggleSettings(page);
@@ -49,10 +59,12 @@ export async function selectModel(page,value){
  await page.locator('#model').selectOption(value,{force:true});
 }
 export async function grantModelConsent(page){
- await toggleSettings(page);
- const dataTab=page.locator('#pro-tab-data');
- if(await dataTab.count())await dataTab.click();
- else if(await page.locator('#permissions').getAttribute('open')===null)await page.locator('#permissions summary').click({force:true});
+ await openSettings(page,'data');
  await page.locator('#model-consent').check({force:true});
- await toggleSettings(page);
+ await closeSettings(page);
+}
+export async function grantFileConsent(page){
+ await openSettings(page,'data');
+ await page.locator('#file-consent').check({force:true});
+ await closeSettings(page);
 }

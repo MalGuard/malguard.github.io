@@ -1,4 +1,4 @@
-import {toggleSettings,newConversation,openModePicker,selectModel,selectMode,grantModelConsent} from './ai-navigation-helpers.mjs';
+import {toggleSettings,openSettings,closeSettings,newConversation,openModePicker,selectModel,selectMode,grantModelConsent,grantFileConsent} from './ai-navigation-helpers.mjs';
 import assert from 'node:assert/strict';
 import express from 'express';
 import {fileURLToPath} from 'node:url';
@@ -179,7 +179,7 @@ try{
   await (await choosingFile).setFiles({name:'benign.txt',mimeType:'text/plain',buffer:Buffer.from('Hello, harmless browser fixture.')});
   assert.equal(await page.locator('#attach-options').isVisible(),false);assert.equal(requests,beforeMenu,'Choosing a file does not upload it');
   const before=requests;await page.locator('#send').click();assert.equal(requests,before,'no upload without consent');
-  await toggleSettings(page);if(await page.locator('#pro-tab-data').count())await page.locator('#pro-tab-data').click();await page.locator('#file-consent').check({force:true});await toggleSettings(page);
+  await grantFileConsent(page);
   await page.locator('#send').click();
   try{await page.getByRole('heading',{name:'No malicious evidence found in the checks performed.'}).waitFor({timeout:15000});}
   catch(error){console.error('Browser failure:',await page.locator('#conversation').innerText(),errors);throw error;}
@@ -225,11 +225,11 @@ try{
 
    assert.equal(await page.locator('html').getAttribute('lang'),'en');
    await selectModel(page,'chat_flash');await page.locator('#message').fill('سلام');await page.locator('#send').click();await page.getByText('پاسخ فارسی آزمایشی',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('lang'),'en');
-   await toggleSettings(page);await page.locator('#mode').selectOption('worker');await toggleSettings(page);await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
+   await selectMode(page,'worker');await page.locator('#message').fill('Explain a technical function');await page.locator('#send').click();await page.getByText('Benign test reply 0',{exact:true}).waitFor();
    await newConversation(page);
    console.log('PASS Chat multi-turn context and inspection-only mode (injected benign model fixture).');
   }
-  await page.reload();assert.equal(await page.locator('#conversation').innerText(),'');assert.equal(await page.locator('#file-consent').isChecked(),true);await toggleSettings(page);if(await page.locator('#pro-tab-data').count())await page.locator('#pro-tab-data').click();await page.locator('#revoke-permissions').click({force:true});assert.equal(await page.locator('#file-consent').isChecked(),false);
+  await page.reload();assert.equal(await page.locator('#conversation').innerText(),'');assert.equal(await page.locator('#file-consent').isChecked(),true);await openSettings(page,'data');await page.locator('#revoke-permissions').click({force:true});assert.equal(await page.locator('#file-consent').isChecked(),false);await closeSettings(page);
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);await context.close();
   console.log(`PASS real AI frontend → backend → static worker, consent, English interface, no overflow/history at ${width}px`);
  }
