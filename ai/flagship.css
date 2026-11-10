@@ -213,3 +213,5 @@ body.mg-flagship:not([data-view=chat]) #quick-suggestions{display:none}
 /* Work configuration must not become part of the sticky message composer. */
 body.mg-ai-v2.mg-flagship[data-view=worker] .composer-area{position:static;background:none}
 body.mg-flagship .conversation :is(button,summary,a){scroll-margin-block:100px 260px}
+body.mg-ai-v2.mg-flagship .composer-footer>.attach-menu{width:auto;min-width:80px;flex:0 0 auto}
+body.mg-ai-v2.mg-flagship .editor-pane>label{background:var(--ai-raised);color:var(--ai-secondary)}

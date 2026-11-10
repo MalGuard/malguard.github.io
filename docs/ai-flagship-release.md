@@ -62,3 +62,15 @@ deployment `dpl_27SgLA7RqVZ229YDnVgzgsSphdjV` at https://malguard.site/ai/.
 Keep this deployment for rollback. Do not merge/promote this preview candidate
 until the outstanding acceptance checks pass. Preview/PR identifiers are recorded
 in the task handoff after creation.
+
+### Follow-up verification — 2026-11-10
+
+CI run 42749247691 passed the primary browser suite at 360, 390, 768 and
+1280 px and produced 11 screenshots (artifact 13732922376). Home desktop,
+Work mobile and Code desktop screenshots were inspected. They show the official
+logo and consistent surfaces; Code is still taller than the reference and the
+composer Tools group needed an explicit width to avoid overlapping Attach.
+The local-model onboarding test then exposed a hidden download error while Home
+was active. The follow-up changes reveal the conversation on error and correct
+the Tools width. The full CI gate remains pending until that regression passes.
+Real authenticated provider testing and full reference fidelity are still outstanding.
