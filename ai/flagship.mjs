@@ -53,6 +53,7 @@ export function installFlagship({navigate}){
   ['Security analysis','Inspect a file, URL, or hash. Review evidence and limitations.','library',()=>{$('workspace-panel').scrollIntoView({block:'center'});$('workspace-tool').focus();}]
  ]){const b=button(name,action,glyph);b.append(make('p',desc));work.append(b);}
  modeCards.after(work);
+ $('conversation').before($('workspace-panel'));
  const codeActions=make('div',null,'flagship-code-actions');codeActions.id='flagship-code-actions';
  for(const [name,prompt] of [['Explain','Explain this code, including inputs, outputs, and edge cases.'],['Debug','Review this code for bugs. Explain each issue and propose a fix.'],['Refactor','Suggest a refactoring of this code, preserving its behavior. Show changes for review.'],['Generate tests','Generate meaningful tests for this code, including edge cases. Do not claim they have run.']]){
   codeActions.append(button(name,()=>{fill(prompt);$('flagship-code-notice').textContent='To share the selected file, enable “Include the currently selected file” below the editor, then send.';},'build'));
