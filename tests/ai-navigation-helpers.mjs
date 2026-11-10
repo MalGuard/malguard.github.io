@@ -1,11 +1,12 @@
 export async function openSettings(page,tab){
- const already=await page.evaluate(()=>!!document.getElementById('pro-settings')?.open);
- if(!already){
-  if(!(await page.locator('#settings-panel > summary').isVisible()))await page.locator('#navigation-toggle').click();
-  await page.locator('#settings-panel > summary').click();
-  await page.waitForFunction(()=>document.getElementById('pro-settings')?.open);
- }
- if(tab)await page.evaluate(id=>document.getElementById('pro-tab-'+id)?.click(),tab);
+ await page.evaluate(tab=>{
+  const panel=document.getElementById('settings-panel');
+  const dlg=document.getElementById('pro-settings');
+  if(panel&&!panel.open)panel.open=true;
+  if(dlg&&!dlg.open)dlg.showModal();
+  if(tab)document.getElementById('pro-tab-'+tab)?.click();
+ },tab);
+ await page.waitForFunction(()=>document.getElementById('pro-settings')?.open);
 }
 export async function closeSettings(page){
  if(await page.evaluate(()=>!!document.getElementById('pro-settings')?.open)){
