@@ -234,3 +234,27 @@ html:root body.mg-pro .composer-shell.pro-compact :is(.media-draft,.attachment){
 html:root body.mg-pro .composer-shell.pro-compact .composer-actions{flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:none!important;margin:0!important;grid-column:auto!important}
 html:root body.mg-pro .composer-shell.pro-compact #message{flex:1 1 0!important;width:auto!important;text-overflow:ellipsis}
 html:root body.mg-pro .composer-shell.pro-compact .pro-in-composer{margin-inline-start:0}
+
+/* ===== Power: Grok-deep night, confident welcome, refined chips + type ===== */
+html:root body.mg-pro{--s-bg:#000;--s-side:#0a0a0b;--s-surface:#111112;--s-raised:#18181a;--s-border:rgba(255,255,255,.1);--s-text:#fff;--s-muted:#9d9da3;--s-user:#1c1c1f;--s-accent:#fff;--s-accent-ink:#000}
+html.theme-light:root body.mg-pro,html[data-theme=light]:root body.mg-pro{--s-bg:#faf9f5;--s-side:#f3f1ea;--s-surface:#fff;--s-raised:#fff;--s-border:rgba(20,20,19,.12);--s-text:#141413;--s-muted:#5c5a55;--s-user:#efece3;--s-accent:#141413;--s-accent-ink:#faf9f5}
+html:root:has(body.mg-pro){background:#000!important}
+html.theme-light:root:has(body.mg-pro),html[data-theme=light]:root:has(body.mg-pro){background:#faf9f5!important}
+/* Welcome: logo mark + large centered greeting */
+html:root body.mg-pro:not([data-mode=build]):not(:has(.conversation:not(:empty))) .intro{display:flex!important;flex-direction:column;align-items:center;text-align:center}
+html:root body.mg-pro .intro::before{content:"";display:block;width:44px;height:44px;margin:0 auto 18px;background:url(/assets/fusion/assets/malguard-logo.svg) center/contain no-repeat;opacity:.96}
+html:root body.mg-pro .intro .experience-eyebrow{font-size:12px!important;letter-spacing:.06em!important;color:var(--s-muted)!important;margin:0 0 10px!important;font-weight:500!important}
+html:root body.mg-pro .intro h1{font-size:clamp(30px,3.2vw + 12px,44px)!important;line-height:1.12!important;font-weight:600!important;letter-spacing:-.035em!important;color:var(--s-text)!important;margin:0 0 28px!important}
+html[dir=rtl]:root body.mg-pro .intro h1{letter-spacing:0!important;font-weight:650!important}
+/* Suggestion chips: quiet pills, crisp hover, press */
+html:root body.mg-pro .quick-suggestions{justify-content:center!important;gap:8px!important}
+html:root body.mg-pro .quick-suggestion{border:1px solid var(--s-border)!important;background:transparent!important;color:var(--s-muted)!important;border-radius:999px!important;min-height:38px;padding:0 14px!important;font-size:14px!important;font-weight:450!important;
+ transition:background-color 200ms cubic-bezier(.2,0,0,1),color 200ms cubic-bezier(.2,0,0,1),border-color 200ms cubic-bezier(.2,0,0,1),transform 200ms cubic-bezier(.2,0,0,1)!important}
+html:root body.mg-pro .quick-suggestion:hover{background:var(--s-hover)!important;color:var(--s-text)!important;border-color:color-mix(in srgb,var(--s-text) 22%,transparent)!important}
+html:root body.mg-pro :is(.quick-suggestion,#send,.navigation-new,button):active{transform:scale(.98)}
+html:root body.mg-pro .quick-suggestion svg{opacity:.7;width:15px;height:15px}
+/* Messages + sidebar type */
+html:root body.mg-pro :is(.answer,.bubble){font-size:15.5px!important;line-height:1.7!important;letter-spacing:-.003em}
+html:root body.mg-pro .answer :is(h1,h2,h3){letter-spacing:-.02em!important;font-weight:600!important}
+html:root body.mg-pro :focus-visible{outline:2px solid color-mix(in srgb,var(--s-text) 55%,transparent)!important;outline-offset:2px!important}
+@media (max-width:760px){html:root body.mg-pro .intro::before{width:38px;height:38px;margin-bottom:14px}html:root body.mg-pro .intro h1{font-size:30px!important;margin-bottom:22px!important}}

@@ -1,0 +1,168 @@
+/* MalGuard calm layer: one quiet system for the public site (matches /ai standard-ui).
+   Presentation only. Loads last; `html:not(#_):not(#_)` lifts specificity over older layers. */
+html:not(#_):not(#_){
+ --c-bg:#0e0e0f;--c-surface:#161617;--c-raised:#1b1b1d;--c-hover:rgba(255,255,255,.06);
+ --c-border:rgba(255,255,255,.09);--c-border-strong:rgba(255,255,255,.16);
+ --c-text:#ececec;--c-muted:#a0a0a5;--c-faint:#76767c;--c-accent:#5b8cff;--c-ink:#0e0e0f;
+ --c-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.22);
+ --c-r-sm:8px;--c-r:12px;--c-r-lg:16px;--c-r-xl:20px;--c-ease:cubic-bezier(.2,0,0,1);--c-t:200ms;
+ --c-sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Vazirmatn",sans-serif;
+ --c-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+ background:var(--c-bg)!important;color-scheme:dark;
+}
+html[data-theme=light]:not(#_):not(#_){
+ --c-bg:#faf9f5;--c-surface:#ffffff;--c-raised:#ffffff;--c-hover:rgba(31,30,29,.05);
+ --c-border:rgba(31,30,29,.11);--c-border-strong:rgba(31,30,29,.2);
+ --c-text:#1f1e1d;--c-muted:#5f5c56;--c-faint:#8a867e;--c-accent:#2f6bff;--c-ink:#faf9f5;
+ --c-shadow:0 1px 2px rgba(31,30,29,.05),0 6px 20px rgba(31,30,29,.06);color-scheme:light;
+}
+html[dir=rtl]:not(#_):not(#_){--c-sans:"Vazirmatn",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif}
+
+/* Flat, quiet canvas: no starfields, particles, halos or page gradients */
+html:not(#_):not(#_) body:not(.mg-pro){background:var(--c-bg)!important;background-image:none!important;color:var(--c-text)!important;font-family:var(--c-sans)!important;
+ -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+html:not(#_):not(#_) body:not(.mg-pro)::before,html:not(#_):not(#_) body:not(.mg-pro)::after,
+html:not(#_):not(#_) body:not(.mg-pro) :is(.particle-atmosphere,.mg-starfield,.stars,.mg-stars,.halo,.mg-halo,.deep-space-stars){display:none!important}
+html:not(#_):not(#_) body:not(.mg-pro) :is(main,section,footer,.hero,.shell,.page-hero){background-image:none!important}
+html:not(#_):not(#_) body:not(.mg-pro) .orbit-stage{background:none!important}
+
+/* One type system */
+html:not(#_):not(#_) body:not(.mg-pro) :is(*):not(code,pre,kbd,samp,code *,pre *,svg,svg *){font-family:var(--c-sans)!important;text-shadow:none!important}
+html:not(#_):not(#_) body:not(.mg-pro) :is(code,pre,kbd,samp){font-family:var(--c-mono)!important;font-size:.92em}
+html:not(#_):not(#_) body:not(.mg-pro) :is(h1,h2,h3,h4){letter-spacing:-.022em!important;font-weight:600!important;-webkit-text-fill-color:currentColor!important;text-wrap:balance}
+html:not(#_):not(#_) body:not(.mg-pro) h1{font-size:clamp(2.4rem,1.6rem + 3.6vw,4.25rem)!important;line-height:1.05!important;letter-spacing:-.035em!important}
+html:not(#_):not(#_) body:not(.mg-pro) h2{font-size:clamp(1.6rem,1.25rem + 1.5vw,2.5rem)!important;line-height:1.15!important}
+html:not(#_):not(#_) body:not(.mg-pro) h3{font-size:clamp(1.1rem,1rem + .4vw,1.3rem)!important;line-height:1.3!important;letter-spacing:-.012em!important}
+html:not(#_):not(#_) body:not(.mg-pro) :is(p,li,dd){line-height:1.65;letter-spacing:0!important;text-wrap:pretty}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(h1,h2):not([class*=card] *,[class*=gallery] *,[class*=stage] *){color:var(--c-text)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero,.shell,section) > :is(p,div > p):not([class*=card] *,[class*=stage] *,.eyebrow,[class*=kicker]){color:var(--c-muted)}
+/* Quiet labels instead of shouty mono eyebrows */
+html:not(#_):not(#_) body:not(.mg-pro) :is(.eyebrow,[class*=kicker],[class*=-tag],.limits-key){font-size:12.5px!important;font-weight:500!important;letter-spacing:.04em!important;text-transform:none!important;color:var(--c-muted)!important;background:none!important;border:0!important;padding-inline:0!important;box-shadow:none!important}
+html:not(#_):not(#_) body:not(.mg-pro) .eyebrow::before{background:var(--c-accent)!important;box-shadow:none!important;opacity:.9}
+html:not(#_):not(#_) body:not(.mg-pro) ::selection{background:color-mix(in srgb,var(--c-accent) 28%,transparent)}
+
+/* Header: one calm bar */
+html:not(#_):not(#_) body:not(.mg-pro) header#navbar{background:color-mix(in srgb,var(--c-bg) 82%,transparent)!important;backdrop-filter:saturate(1.4) blur(14px)!important;-webkit-backdrop-filter:saturate(1.4) blur(14px)!important;
+ border:1px solid var(--c-border)!important;box-shadow:none!important;background-image:none!important}
+html:not(#_):not(#_) body:not(.mg-pro) header#navbar :is(.mg-brand){color:var(--c-text)!important;font-weight:600!important;letter-spacing:-.01em!important;font-size:15px!important}
+html:not(#_):not(#_) body:not(.mg-pro) header#navbar :is(.nav-links a,.mg-menu-label){color:var(--c-muted)!important;font-size:14px!important;font-weight:450!important;letter-spacing:0!important;text-transform:none!important;transition:color var(--c-t) var(--c-ease)}
+html:not(#_):not(#_) body:not(.mg-pro) header#navbar .nav-links a:hover{color:var(--c-text)!important}
+html:not(#_):not(#_) body:not(.mg-pro) header#navbar :is(.nav-icon,.menu-btn,.nav-download){background:transparent!important;border:1px solid var(--c-border)!important;color:var(--c-text)!important;box-shadow:none!important;transition:background var(--c-t) var(--c-ease),border-color var(--c-t) var(--c-ease)}
+html:not(#_):not(#_) body:not(.mg-pro) header#navbar .nav-download{font-size:13.5px!important;font-weight:500!important;letter-spacing:0!important;padding-inline:14px!important}
+html:not(#_):not(#_) body:not(.mg-pro) header#navbar :is(.nav-icon,.menu-btn,.nav-download):hover{background:var(--c-hover)!important}
+html:not(#_):not(#_) body:not(.mg-pro) header#navbar .menu-glyph span{background:var(--c-text)!important}
+html:not(#_):not(#_) body:not(.mg-pro) :is(#navLinks,.site-search):is(.open,[open],:not([hidden])) {--x:0}
+html:not(#_):not(#_) body:not(.mg-pro) .site-search{background:var(--c-surface)!important;border:1px solid var(--c-border)!important;box-shadow:var(--c-shadow)!important}
+
+/* Buttons: one primary (ink), one quiet secondary */
+html:not(#_):not(#_) body:not(.mg-pro) main :is(a,button):is(.button,.btn,[class*=btn-],[class*=-cta],.cta,.hero-primary,.hero-secondary){
+ border-radius:var(--c-r)!important;font-weight:500!important;font-size:15px!important;letter-spacing:0!important;text-transform:none!important;box-shadow:none!important;background-image:none!important;
+ transition:background-color var(--c-t) var(--c-ease),border-color var(--c-t) var(--c-ease),color var(--c-t) var(--c-ease),transform var(--c-t) var(--c-ease)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(a,button):is(.button.primary,.btn-primary,.primary-cta,.hero-primary,.button-primary){background:var(--c-text)!important;color:var(--c-ink)!important;border:1px solid var(--c-text)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(a,button):is(.button.secondary,.btn-secondary,.secondary-cta,.hero-secondary,.button-secondary,.button.ghost){background:transparent!important;color:var(--c-text)!important;border:1px solid var(--c-border-strong)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(a,button):is(.button,.btn,.cta):hover{transform:translateY(-1px)}
+html:not(#_):not(#_) body:not(.mg-pro) :focus-visible{outline:2px solid var(--c-accent)!important;outline-offset:2px!important;box-shadow:none!important}
+
+/* Surfaces: soft border, soft shadow, one radius family */
+html:not(#_):not(#_) body:not(.mg-pro) main :is([class*=card]:not([class*=cards]):not([class*=card-]):not(:has(video,picture,img,canvas)),[class*=panel]:not([class*=panels]),.gta6-home-notice,.limits-panel,.result-panel,.analysis-trace,.scanner-app){
+ background:var(--c-surface)!important;background-image:none!important;border:1px solid var(--c-border)!important;border-radius:var(--c-r-xl)!important;box-shadow:var(--c-shadow)!important;color:var(--c-text)}
+html:not(#_):not(#_) body:not(.mg-pro) main :is([class*=card]:has(video,picture,img,canvas)){border-radius:var(--c-r-xl)!important;box-shadow:var(--c-shadow)!important;border-color:var(--c-border)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.gta6-home-notice) :is(h2){font-size:clamp(1.25rem,1.1rem + .8vw,1.6rem)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main .gta6-home-notice a{border-radius:var(--c-r)!important;background:var(--c-text)!important;color:var(--c-ink)!important;border:0!important;box-shadow:none!important;font-weight:500!important}
+
+/* Neutral chips instead of colored badges */
+html:not(#_):not(#_) body:not(.mg-pro) main :is([class*=badge],[class*=chip],[class*=pill]:not(button),.platform-release-state,.app-badge){background:transparent!important;background-image:none!important;color:var(--c-muted)!important;border:1px solid var(--c-border)!important;box-shadow:none!important;border-radius:999px!important;font-weight:500!important;letter-spacing:0!important;text-transform:none!important}
+
+/* Motion: slow and subtle, no looping decoration */
+html:not(#_):not(#_) body:not(.mg-pro) :is([class*=orbit],[class*=particle],[class*=star],[class*=halo],[class*=glow],[class*=sweep],[class*=pulse],[class*=shimmer],.mg-art-scan,.tiny-dot){animation:none!important}
+html:not(#_):not(#_) body:not(.mg-pro) a{transition:color var(--c-t) var(--c-ease),opacity var(--c-t) var(--c-ease)}
+@media (prefers-reduced-motion:reduce){html:not(#_):not(#_) body:not(.mg-pro) *{transition-duration:0s!important;animation:none!important}}
+
+/* Floating controls: quiet, out of the header's way */
+html:not(#_):not(#_) body:not(.mg-pro) .mg-theme-toggle{background:var(--c-surface)!important;color:var(--c-muted)!important;border:1px solid var(--c-border)!important;box-shadow:none!important;backdrop-filter:none!important}
+html:not(#_):not(#_) body:not(.mg-pro) .mg-theme-toggle:hover{color:var(--c-text)!important}
+html:not(#_):not(#_) body:not(.mg-pro) #mg-report-launcher{background:var(--c-surface)!important;border:1px solid var(--c-border)!important;box-shadow:var(--c-shadow)!important;border-radius:999px!important;backdrop-filter:none!important}
+html:not(#_):not(#_) body:not(.mg-pro) #mg-report-launcher :is(button,a){background:transparent!important;color:var(--c-text)!important;border:0!important;box-shadow:none!important;background-image:none!important;font-weight:500!important;font-size:13.5px!important}
+html:not(#_):not(#_) body:not(.mg-pro) #mg-report-launcher :is(button,a):hover{background:var(--c-hover)!important}
+html:not(#_):not(#_) body:not(.mg-pro) .mg-motion-toggle{display:none!important}
+@media (max-width:760px){
+ html:not(#_):not(#_) body:not(.mg-pro) header#navbar{top:0!important;margin-top:12px!important;margin-left:60px!important;margin-right:12px!important;width:calc(100% - 72px)!important;height:56px!important;min-height:56px!important;box-sizing:border-box}
+ html:not(#_):not(#_) body:not(.mg-pro) header#navbar .nav-inner{height:100%!important;min-height:0!important;padding-inline:10px 6px!important}
+ html:not(#_):not(#_) body:not(.mg-pro) .mg-theme-toggle{top:20px!important;bottom:auto!important;left:12px!important;width:40px!important;height:40px!important}
+ html:not(#_):not(#_) body:not(.mg-pro) header#navbar .nav-download{display:none!important}
+ html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero,.shell){padding-inline:20px}
+}
+
+/* Footer */
+html:not(#_):not(#_) body:not(.mg-pro) footer{background:transparent!important;border-top:1px solid var(--c-border)!important;color:var(--c-muted)!important}
+html:not(#_):not(#_) body:not(.mg-pro) footer a{color:var(--c-muted)!important}
+html:not(#_):not(#_) body:not(.mg-pro) footer a:hover{color:var(--c-text)!important}
+html:not(#_):not(#_) body:not(.mg-pro) hr{border:0;border-top:1px solid var(--c-border)}
+html:not(#_):not(#_) body:not(.mg-pro) .type-source{font:inherit!important;letter-spacing:inherit!important;color:inherit!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero-description,.hero-copy > p:not(.eyebrow),[class*=lead],[class*=subtitle]){color:var(--c-muted)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main .hero-copy h2,html:not(#_):not(#_) body:not(.mg-pro) main .hero-copy [data-type=subtitle]{font-weight:500!important;letter-spacing:-.015em!important;color:var(--c-text)!important}
+/* Product tiles + notices: readable muted copy on both themes */
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,.compare-card){background:var(--c-surface)!important;background-image:none!important;border:1px solid var(--c-border)!important;border-radius:var(--c-r-xl)!important;box-shadow:var(--c-shadow)!important;color:var(--c-text)!important;overflow:hidden}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,.compare-card,.gta6-home-notice) :is(h2,h3){color:var(--c-text)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,.compare-card,.gta6-home-notice,section) p:not(.eyebrow,[class*=kicker]){color:var(--c-muted)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main article.product a{color:var(--c-text)!important;font-weight:500!important}
+html:not(#_):not(#_) body:not(.mg-pro) footer :is(h2,h3,h4){font-size:13px!important;line-height:1.4!important;letter-spacing:0!important;font-weight:600!important;color:var(--c-text)!important;margin-bottom:12px}
+html:not(#_):not(#_) body:not(.mg-pro) footer :is(p,li,a){font-size:14px}
+/* Photo-backed heroes stay dark in both themes so copy keeps its contrast */
+html:not(#_):not(#_) body:not(.mg-pro) :is(.gta-hero,.mg-card-hero,.radar-ai-hero){
+ --c-surface:#161617;--c-raised:#1b1b1d;--c-hover:rgba(255,255,255,.08);--c-border:rgba(255,255,255,.12);--c-border-strong:rgba(255,255,255,.22);
+ --c-text:#f2f2f2;--c-muted:#b4b4ba;--c-ink:#0e0e0f;color:var(--c-text)!important;color-scheme:dark}
+html:not(#_):not(#_) body:not(.mg-pro) :is(.gta-hero,.mg-card-hero,.radar-ai-hero) :is(h1,h2,h3,strong,.gta-static-lead){color:var(--c-text)!important}
+html:not(#_):not(#_) body:not(.mg-pro) :is(.gta-hero,.mg-card-hero,.radar-ai-hero) :is(p,small,.eyebrow){color:var(--c-muted)!important}
+html:not(#_):not(#_) body:not(.mg-pro) :is(.gta-static-description,.gta-static-note){font-size:14.5px!important;line-height:1.6!important}
+/* AI product page: same bar + one ink primary */
+html:not(#_):not(#_) body.ai-product-page header#navbar.ai-product-header{border-radius:999px!important;max-width:1100px;margin-inline:auto!important;margin-top:12px!important;width:calc(100% - 24px)!important;height:56px!important;padding-inline:20px 8px!important;box-sizing:border-box;border-color:var(--c-border)!important}
+html:not(#_):not(#_) body.ai-product-page header#navbar a:not(.mg-brand,.ai-product-header-cta){color:var(--c-muted)!important;font-size:14px!important}
+html:not(#_):not(#_) body.ai-product-page header#navbar .ai-product-header-cta{background:var(--c-text)!important;color:var(--c-ink)!important;border:0!important;border-radius:999px!important;font-size:13.5px!important;font-weight:500!important}
+html:not(#_):not(#_) body:not(.mg-pro) main a.ai-product-primary{background:var(--c-text)!important;color:var(--c-ink)!important;border:1px solid var(--c-text)!important;border-radius:var(--c-r)!important;box-shadow:none!important;font-weight:500!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(h1,h2) ~ p:not(.eyebrow,[class*=note],[class*=caption],[class*=limit],[class*=kicker]){font-size:max(15.5px,1em)!important;line-height:1.6!important}
+html:not(#_):not(#_) body:not(.mg-pro) main hr,html:not(#_):not(#_) body:not(.mg-pro) main [class*=divider],html:not(#_):not(#_) body:not(.mg-pro) main [class*=rule]{border-color:var(--c-border)!important;background-color:var(--c-border)!important}
+/* Long-form content pages (guides): calm sections + one link color */
+html:not(#_):not(#_) body.mg-content-page:not(:has(#navbar)) main > section:not([class]){background:var(--c-surface)!important;border:1px solid var(--c-border)!important;border-radius:var(--c-r-xl)!important;box-shadow:var(--c-shadow)!important;color:var(--c-text)!important}
+html:not(#_):not(#_) body.mg-content-page main :is(li,p,strong,td,th){color:var(--c-muted)}
+html:not(#_):not(#_) body.mg-content-page main :is(strong,th,h2,h3){color:var(--c-text)!important}
+html:not(#_):not(#_) body.mg-content-page main a,html:not(#_):not(#_) body.mg-content-page header:not(#navbar) a{color:var(--c-accent)!important;text-underline-offset:3px}
+html:not(#_):not(#_) body.mg-content-page header:not(#navbar) nav a{border-color:var(--c-border)!important;border-radius:999px}
+html:not(#_):not(#_) body.mg-content-page main nav a{border-color:var(--c-border-strong)!important;border-radius:999px!important;text-decoration:none!important}
+
+/* ===== Power layer: confident display type, deep black night, crisp contrast ===== */
+html:not(#_):not(#_){--c-bg:#000;--c-surface:#0c0c0d;--c-raised:#141415;--c-border:rgba(255,255,255,.1);--c-border-strong:rgba(255,255,255,.2);--c-text:#fff;--c-muted:#9d9da3;--c-faint:#6e6e74;--c-ink:#000;
+ --c-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 12px 32px rgba(0,0,0,.5);--c-lift:0 1px 0 rgba(255,255,255,.06) inset,0 20px 48px rgba(0,0,0,.6)}
+html[data-theme=light]:not(#_):not(#_){--c-text:#141413;--c-muted:#5c5a55;--c-ink:#faf9f5;--c-lift:0 2px 4px rgba(20,20,19,.04),0 18px 40px rgba(20,20,19,.10)}
+html:not(#_):not(#_) body:not(.mg-pro) main h1{font-size:clamp(3rem,1.4rem + 6.2vw,6.25rem)!important;line-height:.98!important;letter-spacing:-.05em!important;font-weight:650!important}
+html:not(#_):not(#_) body:not(.mg-pro) main h2{font-weight:620!important;letter-spacing:-.035em!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero-copy,.mg-page-copy,.ai-product-hero-copy) h2,
+html:not(#_):not(#_) body:not(.mg-pro) main .hero-copy [data-type=subtitle]{font-size:clamp(1.35rem,1.1rem + 1.1vw,2rem)!important;font-weight:500!important;letter-spacing:-.025em!important;color:var(--c-text)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero-description,.hero-copy > p:not(.eyebrow),.mg-page-copy > p:not(.eyebrow),.ai-product-hero-copy > p:not(.eyebrow)){font-size:clamp(1.02rem,.95rem + .3vw,1.18rem)!important;line-height:1.6!important;color:var(--c-muted)!important;max-width:36em}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero,.product-hero,.ai-product-hero){padding-block:clamp(56px,9vw,120px) clamp(40px,6vw,88px)!important}
+/* One prominent primary CTA */
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero-actions,.hero-copy,.ai-product-hero-copy,.mg-page-copy) :is(a,button):is(.button.primary,.btn.primary,.btn-primary,.hero-primary,.ai-product-primary,.primary){min-height:50px!important;padding-inline:24px!important;font-size:16px!important;font-weight:600!important;border-radius:999px!important;display:inline-flex;align-items:center;gap:10px}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero-actions,.hero-copy,.mg-page-copy) :is(a,button):is(.button.secondary,.btn.secondary,.secondary,.text-link){min-height:50px;border-radius:999px!important;padding-inline:20px!important}
+/* Precise micro-interactions */
+html:not(#_):not(#_) body:not(.mg-pro) :is(a,button):is(.button,.btn,.cta,.ai-product-primary,.nav-download,.nav-icon,.menu-btn,.mg-theme-toggle,.ai-product-header-cta,.quick-suggestion){transition:transform var(--c-t) var(--c-ease),background-color var(--c-t) var(--c-ease),border-color var(--c-t) var(--c-ease),color var(--c-t) var(--c-ease),box-shadow var(--c-t) var(--c-ease)!important}
+html:not(#_):not(#_) body:not(.mg-pro) :is(a,button):is(.button,.btn,.cta,.ai-product-primary,.nav-download,.nav-icon,.menu-btn,.mg-theme-toggle,.ai-product-header-cta):active{transform:scale(.98)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(a,button):is(.button.primary,.ai-product-primary,.btn-primary):hover{opacity:.92}
+html:not(#_):not(#_) body:not(.mg-pro) :focus-visible{outline:2px solid var(--c-accent)!important;outline-offset:3px!important;border-radius:inherit}
+/* Premium product cards: bigger art, clear hierarchy, subtle lift */
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product,.ai-platform-card){background:var(--c-surface)!important;border:1px solid var(--c-border)!important;border-radius:24px!important;box-shadow:var(--c-shadow)!important;overflow:hidden;
+ transition:transform 220ms var(--c-ease),box-shadow 220ms var(--c-ease),border-color 220ms var(--c-ease)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product,.ai-platform-card):hover{transform:translateY(-4px)!important;box-shadow:var(--c-lift)!important;border-color:var(--c-border-strong)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.product-art,.mg-home-product-art){aspect-ratio:16/10;min-height:0!important;height:auto!important;overflow:hidden}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.product-art,.mg-home-product-art) :is(video,img){width:100%!important;height:100%!important;object-fit:cover;transition:transform 400ms var(--c-ease)}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product):hover :is(.product-art,.mg-home-product-art) :is(video,img){transform:scale(1.025)}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product) :is(h2,h3){font-size:clamp(1.45rem,1.2rem + .8vw,1.85rem)!important;font-weight:620!important;letter-spacing:-.03em!important;color:var(--c-text)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product) :is(.status,.mg-home-product-status){font-size:12px!important;font-weight:500!important;letter-spacing:.04em!important;color:var(--c-faint)!important;font-family:var(--c-sans)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product) p{font-size:15.5px!important;line-height:1.6!important;color:var(--c-muted)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product) :is(.product-symbol,.mg-home-product-symbol){transform:scale(1.15);transform-origin:left center}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product) .text-link{color:var(--c-text)!important;font-weight:600!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product,.ai-platform-card) :is(.status,.index,.mg-home-product-number){opacity:.9}
+@media (hover:none){html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product,.ai-platform-card):hover{transform:none!important}}
+@media (max-width:760px){html:not(#_):not(#_) body:not(.mg-pro) main h1{font-size:clamp(2.75rem,11vw,3.6rem)!important}}
+html:not(#_):not(#_) body:not(.mg-pro) main a.mg-home-product-link{background:transparent!important;color:var(--c-text)!important;font-weight:600!important;border:0!important;border-top:1px solid var(--c-border)!important;border-radius:0!important;box-shadow:none!important}
+html:not(#_):not(#_) body:not(.mg-pro) main a.mg-home-product-link:hover{color:var(--c-muted)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main section.compare{background:var(--c-surface)!important;border:1px solid var(--c-border)!important;border-radius:24px!important;box-shadow:var(--c-shadow)!important}

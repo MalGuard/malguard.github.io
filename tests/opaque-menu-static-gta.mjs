@@ -37,8 +37,8 @@ try{
      bg:getComputedStyle(el).backgroundColor,
      border:getComputedStyle(el).borderColor,
      action:getComputedStyle(el.querySelector('a')).backgroundColor}));
-    assert.equal(promo.bg,'rgb(17, 21, 27)','GTA VI promo remains blue');
-    assert.equal(promo.action,'rgb(233, 235, 239)','GTA VI action is not neutral');
+    assert.ok(['rgb(12, 12, 13)','rgb(255, 255, 255)'].includes(promo.bg),'GTA VI promo is not a calm neutral surface: '+promo.bg);
+    assert.ok(['rgb(255, 255, 255)','rgb(20, 20, 19)'].includes(promo.action),'GTA VI action is not neutral ink: '+promo.action);
    }else{
     assert.equal(await page.locator('body.gta-static').count(),1,'old animated GTA story still enabled');
     assert.equal(await page.locator('#gta-scene,.gate-perspective,.journey-copy,.journey-rail').count(),0,
