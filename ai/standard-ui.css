@@ -85,3 +85,139 @@ html:root body.mg-pro :is(.navigation-footer a,.navigation-footer button,.naviga
 html:root body.mg-pro #navigation .history-open[aria-current=true]{background:var(--s-hover)!important;font-weight:600!important}
 html:root body.mg-pro .history-group{font-size:12px!important;font-weight:600!important;margin:12px 10px 4px!important}
 @media (max-width:760px){html:root body.mg-pro #account.pro-avatar{display:block!important;line-height:40px!important;text-align:center}html:root body.mg-pro #account.pro-avatar::before{display:block;line-height:40px;text-align:center}}
+
+/* ===== v2 detail pass: type scale, 4/8 grid, composer, menus, messages ===== */
+html:root body.mg-pro{font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;letter-spacing:0}
+html:root body.mg-pro{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,"Vazirmatn",sans-serif}
+html[lang=fa]:root body.mg-pro,html[lang=fa]:root body.mg-pro :is(button,input,textarea,select){font-family:"Vazirmatn",-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif}
+/* Persian script must never be letter-spaced (it breaks joining) */
+html[lang=fa]:root body.mg-pro *{letter-spacing:normal!important}
+html:root body.mg-pro :is(button,input,textarea,select){font-family:inherit}
+/* Thin, equal icons */
+html:root body.mg-pro svg[stroke-width],html:root body.mg-pro svg :is(path,circle,rect,line,polyline)[stroke-width]{stroke-width:1.5}
+html:root body.mg-pro :focus-visible{outline:2px solid color-mix(in srgb,var(--s-text) 45%,transparent)!important;outline-offset:2px}
+html:root body.mg-pro #message:focus-visible{outline:0!important}
+
+/* Messages */
+html:root body.mg-pro .conversation{gap:24px!important;padding-block:24px 8px!important}
+html:root body.mg-pro .answer{font-size:16px!important;line-height:1.65!important}
+html[lang=fa]:root body.mg-pro .answer,html[lang=fa]:root body.mg-pro .conversation .bubble{line-height:1.85!important}
+html:root body.mg-pro .conversation .bubble{font-size:16px!important;line-height:1.6!important;padding:10px 16px!important;max-width:min(80%,600px)!important}
+html:root body.mg-pro .answer :is(p,ul,ol,pre,blockquote,.md-table-wrap,.code-block){margin:0 0 16px!important}
+html:root body.mg-pro .answer>:last-child{margin-bottom:0!important}
+html:root body.mg-pro .answer :is(h1,h2,h3,h4){font-weight:600!important;line-height:1.35!important;letter-spacing:-.01em;margin:24px 0 8px!important;color:var(--s-text)!important}
+html:root body.mg-pro .answer h1{font-size:22px!important}html:root body.mg-pro .answer h2{font-size:20px!important}html:root body.mg-pro .answer h3{font-size:17px!important}html:root body.mg-pro .answer h4{font-size:16px!important}
+html:root body.mg-pro .answer>:first-child{margin-top:0!important}
+html:root body.mg-pro .answer :is(ul,ol){padding-inline-start:24px!important}
+html:root body.mg-pro .answer li{margin:4px 0!important}
+html:root body.mg-pro .answer li::marker{color:var(--s-muted)}
+html:root body.mg-pro .answer .md-quote,html:root body.mg-pro .answer blockquote{border-inline-start:3px solid var(--s-border)!important;padding:0 0 0 0!important;padding-inline-start:16px!important;color:var(--s-muted)!important;margin:0 0 16px!important}
+html:root body.mg-pro .answer .md-inline-code{font-size:.875em!important;padding:2px 6px!important;border-radius:6px!important;background:var(--s-hover)!important;border:1px solid var(--s-border)}
+html:root body.mg-pro .code-block{border-radius:12px!important;border:1px solid var(--s-border)!important;background:#1a1a1c!important}
+html:root body.mg-pro .code-block-header{min-height:36px;padding:0 12px!important;background:#222225!important;color:#a8a8ad!important;font-size:12px!important;font-family:-apple-system,"Segoe UI",sans-serif}
+html:root body.mg-pro .code-copy{font-size:12px!important;min-height:28px;padding:0 8px!important;border-radius:6px!important}
+html:root body.mg-pro .code-copy:hover{background:rgba(255,255,255,.08)!important;color:#ececec!important}
+html:root body.mg-pro .code-block pre{font:13.5px/1.6 ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace!important;padding:12px 16px!important}
+html:root body.mg-pro .md-table-wrap{border-radius:12px!important;border:1px solid var(--s-border)!important}
+html:root body.mg-pro .md-table{font-size:14px!important;line-height:1.5}
+html:root body.mg-pro .md-table :is(th,td){padding:8px 12px!important;border-color:var(--s-border)!important}
+html:root body.mg-pro .md-table th{background:var(--s-hover)!important;font-weight:600!important;color:var(--s-text)!important}
+html:root body.mg-pro .response-actions{gap:4px!important;margin-top:8px!important;color:var(--s-muted)}
+html:root body.mg-pro .response-actions :is(button,summary){width:32px!important;height:32px!important;border-radius:8px!important}
+html:root body.mg-pro .response-actions svg{width:16px;height:16px}
+html:root body.mg-pro .response-actions :is(button,summary):hover{background:var(--s-hover)!important;color:var(--s-text)!important}
+html:root body.mg-pro :is(.reply-meta,.response-time,.answer-meta,.assistant-message>.muted,.assistant-message small){font-size:12px!important;color:var(--s-muted)!important;font-weight:400!important}
+html:root body.mg-pro .answer hr,html:root body.mg-pro .assistant-message hr{border:0;border-top:1px solid var(--s-border)}
+
+/* Empty state */
+html:root body.mg-pro .intro{padding-top:0!important}
+html:root body.mg-pro .intro h1{font-size:32px!important;line-height:1.25!important;font-weight:500!important;margin:0 0 24px!important}
+html:root body.mg-pro .experience-eyebrow{font-size:12px!important;font-weight:500!important;margin:0 0 8px!important}
+html:root body.mg-pro .quick-suggestions{gap:8px!important;margin-top:16px!important}
+html:root body.mg-pro .quick-suggestion{min-height:36px!important;padding:6px 14px!important;font-size:14px!important;font-weight:500!important;gap:8px!important}
+html:root body.mg-pro .quick-suggestion svg{width:16px!important;height:16px!important;color:var(--s-muted)}
+
+/* Composer (Claude proportions) */
+html:root body.mg-pro .composer-shell{min-height:104px;display:flex!important;flex-direction:column;justify-content:space-between;gap:8px;padding:12px!important;border-radius:24px!important}
+html:root body.mg-pro #message{font-size:16px!important;line-height:1.5!important;min-height:48px!important;padding:4px 8px!important;color:var(--s-text)!important}
+html:root body.mg-pro #message::placeholder{color:var(--s-muted)!important;opacity:.85}
+html:root body.mg-pro .composer-footer{min-height:32px;gap:8px!important}
+html:root body.mg-pro .composer-actions{gap:8px!important}
+html:root body.mg-pro #attach-toggle{width:32px!important;height:32px!important;min-height:32px!important;border-radius:10px!important}
+html:root body.mg-pro #attach-toggle svg{width:18px;height:18px}
+html:root body.mg-pro .attach-menu{width:32px!important;height:32px!important}
+html:root body.mg-pro #send{width:32px!important;height:32px!important;border-radius:10px!important}
+html:root body.mg-pro #send svg{width:18px;height:18px}
+html:root body.mg-pro #send:disabled{opacity:.3!important;cursor:default}
+html:root body.mg-pro .pro-in-composer .pro-select-model .pro-select-button{min-height:32px!important;padding:4px 8px!important;font-size:13px!important;font-weight:500!important;border-radius:8px!important}
+html:root body.mg-pro .pro-in-composer .pro-chev{width:14px;height:14px}
+/* One subtle line under the composer (Claude style) */
+html:root body.mg-pro .composer-hints .thinking-state,html:root body.mg-pro #save-state{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important;margin:0!important;padding:0!important}
+html:root body.mg-pro .composer-keyboard-hint{display:none!important}
+html:root body.mg-pro .composer-hints{margin:0!important;min-height:0!important;padding:0!important}
+html:root body.mg-pro #disclaimer{font-size:12px!important;line-height:1.5!important;margin:8px 0 0!important;text-align:center;color:var(--s-muted)!important}
+html:root body.mg-pro .download-entry{font-size:13px!important;min-height:32px;padding:4px 12px!important;border-radius:8px!important;margin:0 auto 8px!important;display:flex!important;align-items:center;width:max-content;max-width:100%}
+html:root body.mg-pro .download-entry:hover{background:var(--s-hover)!important;color:var(--s-text)!important}
+html:root body.mg-pro .composer-area{padding-bottom:12px!important}
+
+/* Menus, lists, sheets, dialogs */
+html:root body.mg-pro :is(.pro-select-list,#attach-options,.history-menu){border-radius:12px!important;box-shadow:0 8px 24px rgba(0,0,0,.18),0 0 0 1px var(--s-border)!important;border:0!important;padding:4px!important}
+html:root body.mg-pro .pro-option{min-height:36px!important;padding:6px 10px!important;border-radius:8px!important;font-size:14px!important;gap:8px}
+html:root body.mg-pro .pro-option-title{font-weight:500!important}
+html:root body.mg-pro .pro-option-sub{font-size:12px!important}
+html:root body.mg-pro .pro-group{padding:8px 10px 4px!important;font-size:12px!important;font-weight:500!important;letter-spacing:0!important}
+html:root body.mg-pro .pro-option:hover,html:root body.mg-pro .pro-option.is-active{background:var(--s-hover)!important;outline:0!important}
+html:root body.mg-pro .pro-check{color:var(--s-text)!important}
+html:root body.mg-pro #attach-options .pro-menu-row{min-height:36px!important;padding:6px 10px!important;border-radius:8px!important;font-size:14px!important;font-weight:400!important;gap:10px!important}
+html:root body.mg-pro #attach-options .pro-menu-row::before{width:18px!important;height:18px!important}
+html:root body.mg-pro #attach-options .ai-menu-capabilities{margin:4px 0!important;padding:4px 0!important}
+html:root body.mg-pro #attach-options .pro-menu-switch::after{width:32px;height:20px;background-size:18px 18px}
+html:root body.mg-pro .history-menu button{min-height:36px!important;padding:6px 10px!important;border-radius:8px!important;font-size:14px!important}
+html:root body.mg-pro dialog,html:root body.mg-pro #pro-settings,html:root body.mg-pro .ai-account{border-radius:16px!important;box-shadow:0 16px 48px rgba(0,0,0,.24)!important;border:1px solid var(--s-border)!important}
+html:root body.mg-pro dialog h2,html:root body.mg-pro .pro-settings-title{font-size:18px!important;font-weight:600!important;letter-spacing:-.01em}
+html:root body.mg-pro dialog p{font-size:14px;line-height:1.6}
+html:root body.mg-pro .pro-settings-tab{font-size:14px!important;font-weight:500!important;min-height:40px!important}
+html:root body.mg-pro .pro-set-label{font-size:14px!important;font-weight:500!important}
+html:root body.mg-pro .pro-set-hint{font-size:13px!important}
+html:root body.mg-pro :is(.pro-set-btn,dialog .download-actions button,dialog .primary-action){min-height:36px!important;border-radius:10px!important;font-size:14px!important;font-weight:500!important;padding:6px 14px!important}
+
+/* Sidebar rhythm */
+html:root body.mg-pro #navigation{padding:8px!important;gap:2px!important}
+html:root body.mg-pro :is(#navigation .history-open,#navigation .navigation-shortcut,.navigation-footer a,.navigation-footer .settings-panel>summary,.navigation-footer button){min-height:36px!important;padding:6px 10px!important;font-size:14px!important;font-weight:400!important;border-radius:8px!important;line-height:1.5!important;display:flex;align-items:center;gap:10px}
+html:root body.mg-pro .navigation-new{min-height:36px!important;padding:6px 10px!important;font-size:14px!important;font-weight:500!important}
+html:root body.mg-pro :is(.navigation-label,.navigation-shortcuts-label,.history-group){font-size:12px!important;font-weight:500!important;margin:16px 10px 4px!important;text-transform:none!important}
+html:root body.mg-pro .navigation-note{font-size:12px!important;line-height:1.5;padding:4px 10px!important}
+html:root body.mg-pro #chat-search{min-height:36px!important;font-size:14px!important;padding:6px 10px!important}
+html:root body.mg-pro #navigation svg{width:18px;height:18px;flex:none}
+html:root body.mg-pro :is(#navigation .history-open,#navigation .navigation-shortcut,.navigation-footer a):hover{background:var(--s-hover)!important}
+
+/* Header */
+html:root body.mg-pro .header-actions>:is(a,button):not(.pro-theme){font-size:14px!important;font-weight:500!important;min-height:36px}
+html:root body.mg-pro .experience-tab{font-size:14px!important;font-weight:500!important;min-height:32px}
+.pro-brand{display:none}
+@media (max-width:760px){
+ html:root body.mg-pro .site-header{position:sticky;min-height:52px!important}
+ html:root body.mg-pro .pro-brand{display:flex;align-items:center;gap:6px;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:16px;font-weight:600;color:var(--s-text);white-space:nowrap;pointer-events:none;direction:ltr}
+ html:root body.mg-pro .pro-brand img{width:22px;height:22px}
+ html:root body.mg-pro .pro-brand-demo{font-size:10px;font-weight:600;padding:1px 6px;border-radius:999px;background:#f59e0b;color:#1a1200;line-height:16px}
+ html:root body.mg-pro .pro-brand-demo[hidden]{display:none}
+ .pro-demo-badge{display:none!important}
+ html:root body.mg-pro .answer{font-size:16px!important}
+ html:root body.mg-pro .composer-shell{min-height:96px}
+ html:root body.mg-pro #attach-toggle,html:root body.mg-pro #send{width:44px!important;height:44px!important;min-height:44px!important;border-radius:12px!important}
+ html:root body.mg-pro .attach-menu{width:44px!important;height:44px!important}
+ html:root body.mg-pro .pro-in-composer .pro-select-model .pro-select-button{min-height:44px!important}
+ html:root body.mg-pro #attach-options .pro-menu-row,html:root body.mg-pro .pro-sheet .pro-option{min-height:44px!important;font-size:15px!important;padding:8px 12px!important}
+ html:root body.mg-pro .response-actions :is(button,summary){width:40px!important;height:40px!important}
+ html:root body.mg-pro .intro h1{font-size:26px!important}
+ html:root body.mg-pro :is(#navigation .history-open,#navigation .navigation-shortcut,.navigation-footer a,.navigation-footer .settings-panel>summary,.navigation-new){min-height:44px!important}
+}
+@media (min-width:761px){.pro-demo-badge{font-size:11px;padding:2px 8px;bottom:12px;opacity:.9}}
+html:root body.mg-pro .conversation .response-duration{font-size:12px!important;font-weight:400!important;color:var(--s-muted)!important;margin:-16px 0 0!important}
+html:root body.mg-pro .code-block pre{margin:0!important}
+@media (max-width:760px){
+ html:root body.mg-pro .header-actions{margin-inline-start:auto!important;margin-inline-end:0!important}
+ html[dir=rtl]:root body.mg-pro .header-actions{margin-left:0!important;margin-right:auto!important}
+}
+@media (max-width:380px){html:root body.mg-pro .pro-brand{font-size:15px;gap:4px}html:root body.mg-pro .pro-brand img{width:20px;height:20px}}
+@media (max-width:760px){html:root body.mg-pro .header-actions>:is(a,button){min-height:44px!important}}

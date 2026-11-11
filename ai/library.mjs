@@ -2,7 +2,9 @@ export function createChatLibrary({account,restore,snapshot}){
  const $=id=>document.getElementById(id),make=(tag,text)=>{const n=document.createElement(tag);if(text)n.textContent=text;return n;};
  let data={chats:[],notes:[]},generation=0,connected=false,showArchived=false,ids={chat:crypto.randomUUID(),worker:crypto.randomUUID(),build:crypto.randomUUID()},activeId=ids.chat,queue=Promise.resolve();
  const saveState=make('p');saveState.id='save-state';saveState.className='muted small';saveState.setAttribute('role','status');document.querySelector('.composer-area').append(saveState);
- const status=text=>{$('history-status').textContent=text;saveState.textContent=text;};
+ const STATUS_FA={'Saving…':'در حال ذخیره…','Saved to your account':'در حساب شما ذخیره شد','Loading your chats…':'در حال بارگذاری گفتگوها…','Sign in to save and revisit your chats.':'برای ذخیره و دیدن دوبارهٔ گفتگوها وارد شوید.','Chats are saved to your account. Sign in again after reopening this page.':'گفتگوها در حساب شما ذخیره می‌شوند. پس از بازکردن دوبارهٔ صفحه دوباره وارد شوید.','Not saved. Check your connection and sign in again if needed.':'ذخیره نشد. اتصال را بررسی کنید و در صورت نیاز دوباره وارد شوید.','Account storage is unavailable. This chat is not saved.':'فضای حساب در دسترس نیست. این گفتگو ذخیره نشد.','30-chat limit reached. Export or reuse a saved chat.':'به سقف ۳۰ گفتگو رسیدید. یک گفتگوی ذخیره‌شده را خروجی بگیرید یا دوباره استفاده کنید.'};
+ let lastStatus='';const status=text=>{lastStatus=text;const shown=fa()?(STATUS_FA[text]||text):text;$('history-status').textContent=shown;saveState.textContent=shown;};
+ new MutationObserver(()=>{if(lastStatus)status(lastStatus);}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
  async function request(value){
   const token=account.getToken();if(!token)throw Error('sign_in_required');
   const base=['malguard.site','malguard.github.io'].includes(location.hostname)?'https://game-scam-guard-connected.vercel.app':'';

@@ -236,6 +236,8 @@ function init(){
  document.querySelectorAll('.isolation-permission,.build-share,#permissions label').forEach(asSwitch);
  enhanceSettings();setTimeout(enhanceSettings,0);setTimeout(enhanceSettings,120);
  enhanceAccount();
+ // Phones: centered brand in the top bar (logo + name), with a tiny Demo chip in demo mode.
+ if(header&&!header.querySelector('.pro-brand')){const brand=make('div','pro-brand');brand.setAttribute('aria-hidden','true');const img=make('img','ai-product-mark');img.src='./malguard-ai-orbit.svg?v=20261028-mono';img.alt='';img.width=22;img.height=22;const chip=make('span','pro-brand-demo','Demo');chip.hidden=!window.MG_AI_DEMO;brand.append(img,make('span','pro-brand-name','MalGuard AI'),chip);header.append(brand);}
 }
 // Account: avatar initial in the header when signed in; tidy profile card in the account dialog. Presentation only.
 function enhanceAccount(){
