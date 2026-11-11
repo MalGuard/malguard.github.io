@@ -114,5 +114,5 @@ test('UX v3 labels connections accurately and provides accessible sidebar dismis
  assert.match(client,/new MutationObserver\(refreshJump\)/);
  assert.match(client,/Jump to latest message/);
  assert.match(client,/prefers-reduced-motion/);
- assert.match(html,/app\.js\?v=media-v5-20261108/);
+ assert.match(html,/app\.js\?v=media-v5-20261111/);
 });
