@@ -30,9 +30,9 @@ try {
     };
    });
    assert.equal(result.shared,true,'Design opt-in missing on '+route);
-   assert.ok(['rgb(5, 7, 12)','rgb(5, 5, 7)'].includes(result.bg),'Dark palette missing on '+route);
-   assert.match(result.background,/radial-gradient/,'Space background missing on '+route);
-   assert.match(result.heading,/MGPrecisionMono|JetBrains/i,'Heading coding font differs on '+route);
+   assert.ok(['rgb(14, 14, 15)','rgb(250, 249, 245)'].includes(result.bg),'Calm neutral palette missing on '+route+': '+result.bg);
+   assert.equal(result.background,'none','Calm page must not paint a busy background on '+route);
+   assert.match(result.heading,/^ui-sans-serif|Vazirmatn/i,'Heading must use the shared calm type stack on '+route);
    assert.equal(result.overflow,false,'Horizontal overflow on '+route+' @'+width);
    assert.equal(result.typed,0,'Reduced motion must show all text on '+route);
    assert.ok(await page.locator('main h1').count(),'Semantic heading missing on '+route);
