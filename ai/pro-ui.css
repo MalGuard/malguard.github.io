@@ -385,3 +385,22 @@ body.mg-pro #attach-options .pro-depth-seg .pro-seg-btn{flex:1;min-height:36px}
 }
 /* Latin model names inside RTL: truncate at the end, not the start */
 body.mg-pro .pro-select-label,body.mg-pro .pro-option-title{unicode-bidi:plaintext}
+/* Account: profile card + avatar (all widths), bottom sheet + avatar header button on phones */
+body.mg-pro .ai-account .account-close{position:absolute;top:12px;inset-inline-end:12px;margin:0!important;width:40px;height:40px;min-height:40px!important;padding:0!important;border-radius:999px!important;font-size:0!important;display:grid!important;place-items:center}
+body.mg-pro .ai-account .account-close::before{content:"✕";font-size:16px;line-height:40px;width:40px;text-align:center;color:var(--p-text)}
+body.mg-pro .ai-account{position:fixed}
+body.mg-pro .ai-account.pro-acct-profile .account-product-mark{width:32px;height:32px}
+body.mg-pro .ai-account.pro-acct-profile h2{font-size:20px;margin:8px 0 14px}
+body.mg-pro .ai-account .pro-acct-name,body.mg-pro .ai-account .pro-acct-email{position:relative;margin:0;padding-inline:68px 16px;background:var(--p-surface);border:1px solid var(--p-border);overflow-wrap:anywhere}
+body.mg-pro .ai-account .pro-acct-name{z-index:1;overflow:visible!important;padding-top:14px;padding-bottom:2px;border-bottom:0;border-radius:16px 16px 0 0;font-weight:700;font-size:16px;color:var(--p-text)}
+body.mg-pro .ai-account .pro-acct-email{padding-top:0;padding-bottom:14px;border-top:0;border-radius:0 0 16px 16px;font-size:13.5px;color:var(--p-muted)!important;direction:ltr;text-align:start}
+html[dir=rtl] body.mg-pro .ai-account .pro-acct-email,body.mg-pro .ai-account[dir=rtl] .pro-acct-email{text-align:right}
+body.mg-pro .ai-account .pro-acct-name::before{content:attr(data-initial);position:absolute;inset-inline-start:14px;top:13px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--p-accent);color:var(--p-accent-ink);font-weight:700;font-size:17px}
+body.mg-pro .ai-account.pro-acct-profile .account-note{margin:14px 0 0;font-size:12.5px;line-height:1.7}
+body.mg-pro .ai-account.pro-acct-profile>button:not(.account-close){margin-top:14px;color:#e35d5d!important;border-color:#e35d5d55!important;background:transparent!important}
+@media (max-width:760px){
+ body.mg-pro #account.pro-avatar{width:40px!important;min-width:40px!important;max-width:40px!important;height:40px!important;min-height:40px!important;padding:0!important;border-radius:50%!important;font-size:0!important;display:inline-grid!important;place-items:center;background:var(--p-accent)!important;color:var(--p-accent-ink)!important;border:2px solid color-mix(in srgb,var(--p-text) 18%,transparent)!important;box-sizing:content-box}
+ body.mg-pro #account.pro-avatar::before{content:attr(data-initial);font-size:16px;font-weight:700;line-height:1}
+ body.mg-pro .ai-account{inset:auto 0 0 0!important;margin:0!important;width:100%!important;max-width:none!important;max-height:min(88dvh,760px)!important;border-radius:22px 22px 0 0!important;border-bottom:0!important;padding:22px 18px calc(18px + env(safe-area-inset-bottom))!important;animation:pro-sheet-up .22s cubic-bezier(.2,.8,.2,1)}
+}
+@media (prefers-reduced-motion:reduce){body.mg-pro .ai-account{animation:none!important}}

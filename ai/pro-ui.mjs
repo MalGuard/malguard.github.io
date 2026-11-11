@@ -234,5 +234,16 @@ function init(){
  const msg=$('message');if(msg){const grow=()=>{msg.style.height='auto';msg.style.height=Math.min(msg.scrollHeight,240)+'px';};msg.addEventListener('input',grow);}
  document.querySelectorAll('.isolation-permission,.build-share,#permissions label').forEach(asSwitch);
  enhanceSettings();setTimeout(enhanceSettings,0);setTimeout(enhanceSettings,120);
+ enhanceAccount();
+}
+// Account: avatar initial in the header when signed in; tidy profile card in the account dialog. Presentation only.
+function enhanceAccount(){
+ const acct=$('account');if(!acct||acct.dataset.proAvatar)return;acct.dataset.proAvatar='1';
+ const initial=s=>([...s.trim()][0]||'?').toUpperCase();
+ const sync=()=>{const s=(acct.textContent||'').trim();const signed=!!s&&!/^(sign in|ورود)$/i.test(s);acct.classList.toggle('pro-avatar',signed);acct.dataset.initial=signed?initial(s):'';if(signed)acct.title=s;else acct.removeAttribute('title');};
+ new MutationObserver(sync).observe(acct,{childList:true,characterData:true,subtree:true});sync();
+ const decorate=d=>{if(!d.matches?.('dialog.ai-account')||d.querySelector('form'))return;const h=d.querySelector('h2'),name=h?.nextElementSibling,email=name?.nextElementSibling;
+  if(name?.tagName!=='P'||email?.tagName!=='P'||name.className||email.className)return;d.classList.add('pro-acct-profile');name.classList.add('pro-acct-name');email.classList.add('pro-acct-email');name.dataset.initial=initial(name.textContent||'');};
+ new MutationObserver(ms=>{for(const m of ms){m.addedNodes.forEach(n=>{if(n.nodeType===1){decorate(n);}});if(m.target.matches?.('dialog.ai-account'))decorate(m.target);}}).observe(document.body,{childList:true,subtree:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0));else setTimeout(init,0);
