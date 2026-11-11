@@ -59,7 +59,7 @@ export function enhanceSelect(select,{variant='plain',mount}={}){
   const rtl=getComputedStyle(button).direction==='rtl';
   let left=rtl?r.right-w:r.left;left=Math.min(Math.max(m,left),vw-w-m);list.style.left=left+'px';list.style.right='auto';
   const below=vh-r.bottom-gap-m,above=r.top-gap-m;
-  if(below>=Math.min(260,list.scrollHeight)||below>=above){list.style.top=(r.bottom+gap)+'px';list.style.bottom='auto';list.style.maxHeight=Math.min(420,below)+'px';}
+  const up=!!button.closest('#composer')&&above>=Math.min(260,list.scrollHeight);if(!up&&(below>=Math.min(260,list.scrollHeight)||below>=above)){list.style.top=(r.bottom+gap)+'px';list.style.bottom='auto';list.style.maxHeight=Math.min(420,below)+'px';}
   else{list.style.top='auto';list.style.bottom=(vh-r.top+gap)+'px';list.style.maxHeight=Math.min(420,above)+'px';}
  };
  const open=()=>{if(button.disabled)return;closeAll();
@@ -213,7 +213,8 @@ function init(){
  const header=document.querySelector('.site-header');
  // Header model picker (ChatGPT style). Chat/Code use #model, Work uses #workspace-model.
  const slot=make('div','pro-model-slot');
- const toggle=$('navigation-toggle');if(toggle&&toggle.parentElement===header)toggle.after(slot);else header.prepend(slot);
+ // Standard layout: the model picker lives inside the composer, just before Send.
+ const send=$('send');if(send&&send.parentElement){slot.classList.add('pro-in-composer');send.before(slot);}else{const toggle=$('navigation-toggle');if(toggle&&toggle.parentElement===header)toggle.after(slot);else header.prepend(slot);}
  enhanceSelect($('model'),{variant:'model',mount:slot});
  enhanceSelect($('workspace-model'),{variant:'model',mount:slot});
  const wsPicker=slot.lastElementChild;wsPicker.classList.add('pro-work-picker');

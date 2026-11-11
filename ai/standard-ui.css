@@ -1,0 +1,87 @@
+/* MalGuard AI — standard chat look (Grok night / Claude day). Loads last; presentation only. */
+html:root body.mg-pro{
+ --s-bg:#0e0e0f;--s-side:#161617;--s-surface:#1b1b1d;--s-raised:#212124;--s-hover:rgba(255,255,255,.06);--s-border:rgba(255,255,255,.09);
+ --s-text:#ececec;--s-muted:#a0a0a5;--s-user:#26262a;--s-accent:#ececec;--s-accent-ink:#0e0e0f;--s-shadow:0 8px 28px rgba(0,0,0,.35);
+}
+html.theme-light:root body.mg-pro,html[data-theme=light]:root body.mg-pro{
+ --s-bg:#faf9f5;--s-side:#f3f1ea;--s-surface:#ffffff;--s-raised:#ffffff;--s-hover:rgba(31,30,29,.05);--s-border:rgba(31,30,29,.12);
+ --s-text:#1f1e1d;--s-muted:#6b6862;--s-user:#efece3;--s-accent:#1f1e1d;--s-accent-ink:#faf9f5;--s-shadow:0 4px 20px rgba(31,30,29,.08);
+}
+html:root body.mg-pro{
+ --p-bg:var(--s-bg);--p-side:var(--s-side);--p-surface:var(--s-surface);--p-raised:var(--s-raised);--p-hover:var(--s-hover);--p-border:var(--s-border);
+ --p-text:var(--s-text);--p-muted:var(--s-muted);--p-user:var(--s-user);--p-accent:var(--s-accent);--p-accent-ink:var(--s-accent-ink);--p-shadow:var(--s-shadow);--p-radius:12px;
+ --ai-surface:var(--s-surface);--ai-raised:var(--s-raised);--ai-raised-hover:var(--s-hover);--ai-stroke:var(--s-border);--ai-stroke-hover:var(--s-border);
+ --ai-fg:var(--s-text);--ai-secondary:var(--s-muted);--ai-faint:var(--s-muted);--ai-rail:var(--s-side);--ai-focus:var(--s-muted);--ai-glow:transparent;
+ --bg:var(--s-bg);--ink:var(--s-text);--line:var(--s-border);
+ font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Vazirmatn",sans-serif;
+}
+html[dir=rtl]:root body.mg-pro{font-family:"Vazirmatn",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif}
+/* Flat neutral page: no galaxy, stars or gradients */
+html:root:has(body.mg-pro){background:var(--s-bg,#0e0e0f)!important}
+html.theme-light:root:has(body.mg-pro),html[data-theme=light]:root:has(body.mg-pro){background:#faf9f5!important}
+html:root body.mg-deep-space.mg-deep-space.mg-deep-space.mg-deep-space.mg-pro.mg-ai-v2,
+html.theme-light:root body.mg-deep-space.mg-deep-space.mg-deep-space.mg-deep-space.mg-pro.mg-ai-v2,
+html[data-theme=light]:root body.mg-deep-space.mg-deep-space.mg-deep-space.mg-deep-space.mg-pro.mg-ai-v2{background:var(--s-bg)!important;background-image:none!important;color:var(--s-text)!important}
+html:root body.mg-deep-space.mg-deep-space.mg-deep-space.mg-pro::before,html:root body.mg-deep-space.mg-deep-space.mg-deep-space.mg-pro::after,
+html:root body.mg-pro::before,html:root body.mg-pro::after{display:none!important;background:none!important}
+html:root body.mg-pro :is(main,.workspace){background:transparent!important}
+/* Header: quiet, flat */
+html:root body.mg-pro .site-header{background:var(--s-bg)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:0!important;box-shadow:none!important;min-height:56px;padding:8px 16px!important}
+html:root body.mg-pro .header-actions>:is(a,button):not(.pro-theme),html:root body.mg-pro .mg-theme-toggle.pro-theme{background:transparent!important;border-color:transparent!important;color:var(--s-text)!important;border-radius:8px!important}
+html:root body.mg-pro .header-actions>:is(a,button):hover,html:root body.mg-pro .mg-theme-toggle.pro-theme:hover{background:var(--s-hover)!important}
+html:root body.mg-pro #account{background:var(--s-accent)!important;color:var(--s-accent-ink)!important;border-radius:999px!important}
+html:root body.mg-pro .experience-tabs{background:transparent!important;border:1px solid var(--s-border)!important;border-radius:10px!important}
+html:root body.mg-pro .experience-tab{border-radius:8px!important}
+html:root body.mg-pro .experience-tab[aria-pressed=true]{background:var(--s-hover)!important;color:var(--s-text)!important}
+/* Sidebar */
+html:root body.mg-pro #navigation{background:var(--s-side)!important;backdrop-filter:none!important;border-inline-end:1px solid var(--s-border)!important;box-shadow:none!important}
+html:root body.mg-pro .navigation-new{background:transparent!important;border:1px solid var(--s-border)!important;border-radius:10px!important;box-shadow:none!important}
+html:root body.mg-pro :is(.navigation-shortcut,.history-open,.navigation-footer a,.navigation-footer .settings-panel>summary){border-radius:8px!important}
+html:root body.mg-pro :is(.history-open,.navigation-shortcut,.navigation-new,.navigation-footer a,#navigation button){color:var(--s-text)!important}
+html:root body.mg-pro :is(.history-group,.navigation-label,.navigation-shortcuts-label,.navigation-note){color:var(--s-muted)!important}
+html:root body.mg-pro #chat-search{background:var(--s-surface)!important;border-color:var(--s-border)!important;border-radius:10px!important}
+html.theme-light:root body.mg-pro.mg-ai-v2 #navigation{background:var(--s-side)!important}
+/* Empty state + column */
+html:root body.mg-pro :is(.conversation,.composer-area,.intro){max-width:768px!important;margin-inline:auto!important}
+html:root body.mg-pro .intro h1{font-weight:500!important;letter-spacing:-.02em;color:var(--s-text)!important;font-size:clamp(26px,4vw,34px)!important}
+html:root body.mg-pro .experience-eyebrow{color:var(--s-muted)!important;letter-spacing:.08em}
+html:root body.mg-pro .quick-suggestion{background:transparent!important;border:1px solid var(--s-border)!important;border-radius:999px!important;color:var(--s-text)!important;box-shadow:none!important;backdrop-filter:none!important}
+html:root body.mg-pro .quick-suggestion:hover{background:var(--s-hover)!important}
+/* Messages: plain assistant, subtle user bubble */
+html:root body.mg-pro .conversation .bubble{background:var(--s-user)!important;color:var(--s-text)!important;border-radius:18px!important;box-shadow:none!important}
+html:root body.mg-pro :is(.answer,.assistant-message){color:var(--s-text)!important}
+html.theme-light:root body.mg-pro.mg-ai-v2 :is(.intro h1,.answer,.bubble,#message,.history-open,.navigation-new){color:var(--s-text)!important}
+html:root body.mg-pro .conversation .result:not(.assistant-message){background:var(--s-surface)!important;border-color:var(--s-border)!important;border-radius:12px!important}
+/* Composer: large rounded card */
+html:root body.mg-pro .composer-shell,html.theme-light:root body.mg-pro.mg-ai-v2 .composer-shell{background:var(--s-surface)!important;border:1px solid var(--s-border)!important;border-radius:24px!important;box-shadow:var(--s-shadow)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;padding:12px 12px 10px 16px!important}
+html[dir=rtl]:root body.mg-pro .composer-shell{padding:12px 16px 10px 12px!important}
+html:root body.mg-pro .composer-shell:focus-within{border-color:color-mix(in srgb,var(--s-text) 28%,transparent)!important}
+html:root body.mg-pro .composer-area,html.theme-light:root body.mg-pro .composer-area,html:root body.mg-pro.mg-ai-v2:has(.conversation:not(:empty)) .composer-area{background:linear-gradient(180deg,transparent,var(--s-bg) 28px)!important}
+html:root body.mg-pro #send{background:var(--s-accent)!important;color:var(--s-accent-ink)!important;border-radius:999px!important}
+html:root body.mg-pro #attach-toggle{border:1px solid var(--s-border)!important;background:transparent!important;color:var(--s-text)!important}
+html:root body.mg-pro :is(.composer-hints,.footer-note,.download-entry,.web-search-hint){color:var(--s-muted)!important}
+/* Model picker inside the composer (left of send) */
+html:root body.mg-pro .pro-model-slot.pro-in-composer{flex:0 1 auto;min-width:0;overflow:visible;margin-inline-start:auto}
+html:root body.mg-pro .pro-in-composer .pro-select-model{flex:0 1 auto;overflow:visible}
+html:root body.mg-pro .pro-in-composer .pro-select-model .pro-select-button{font-size:13.5px;font-weight:600;min-height:36px;padding:6px 8px 6px 10px;border-radius:10px;color:var(--s-muted)}
+html:root body.mg-pro .pro-in-composer .pro-select-model .pro-select-button:hover{color:var(--s-text);background:var(--s-hover)}
+html:root body.mg-pro .pro-in-composer .pro-select-sub,html:root body.mg-pro .pro-in-composer .pro-new{display:none!important}
+html:root body.mg-pro .pro-in-composer .pro-select-label{max-width:160px}
+html:root body.mg-pro .composer-actions{flex:1;justify-content:flex-end;min-width:0}
+/* Menus, dialogs */
+html:root body.mg-pro :is(.pro-select-list,#attach-options,.history-menu,dialog,#pro-settings){background:var(--s-raised)!important;border-color:var(--s-border)!important}
+html:root body.mg-pro dialog::backdrop{background:rgba(0,0,0,.4);backdrop-filter:none}
+html:root body.mg-pro .pro-sheet-head{background:var(--s-raised)}
+@media (max-width:760px){
+ html:root body.mg-pro .site-header{padding:6px 8px!important}
+ html:root body.mg-pro .pro-in-composer .pro-select-label{max-width:120px}
+ html:root body.mg-pro .pro-in-composer .pro-select-model .pro-select-button{min-height:44px}
+ html:root body.mg-pro :is(.conversation,.composer-area,.intro){width:calc(100% - 24px)!important}
+}
+/* Sidebar scrolls as one column: the history list was squeezed to ~128px, hiding chats under their date headings */
+html:root body.mg-pro #navigation{overflow-y:auto!important;overscroll-behavior:contain}
+html:root body.mg-pro #saved-chats{flex:1 0 auto!important;max-height:none!important;overflow:visible!important}
+html:root body.mg-pro :is(.navigation-footer a,.navigation-footer button,.navigation-footer summary,.navigation-footer .settings-panel>summary,#navigation .history-open,#navigation .navigation-shortcut){font-size:14px!important;font-weight:500!important;min-height:38px;padding:8px 10px!important;line-height:1.35}
+html:root body.mg-pro #navigation .history-open[aria-current=true]{background:var(--s-hover)!important;font-weight:600!important}
+html:root body.mg-pro .history-group{font-size:12px!important;font-weight:600!important;margin:12px 10px 4px!important}
+@media (max-width:760px){html:root body.mg-pro #account.pro-avatar{display:block!important;line-height:40px!important;text-align:center}html:root body.mg-pro #account.pro-avatar::before{display:block;line-height:40px;text-align:center}}
