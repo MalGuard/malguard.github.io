@@ -123,9 +123,46 @@ html:not(#_):not(#_) body:not(.mg-pro) main a.ai-product-primary{background:var(
 html:not(#_):not(#_) body:not(.mg-pro) main :is(h1,h2) ~ p:not(.eyebrow,[class*=note],[class*=caption],[class*=limit],[class*=kicker]){font-size:max(15.5px,1em)!important;line-height:1.6!important}
 html:not(#_):not(#_) body:not(.mg-pro) main hr,html:not(#_):not(#_) body:not(.mg-pro) main [class*=divider],html:not(#_):not(#_) body:not(.mg-pro) main [class*=rule]{border-color:var(--c-border)!important;background-color:var(--c-border)!important}
 /* Long-form content pages (guides): calm sections + one link color */
-html:not(#_):not(#_) body.mg-content-page main > section:not([class]){background:var(--c-surface)!important;border:1px solid var(--c-border)!important;border-radius:var(--c-r-xl)!important;box-shadow:var(--c-shadow)!important;color:var(--c-text)!important}
+html:not(#_):not(#_) body.mg-content-page:not(:has(#navbar)) main > section:not([class]){background:var(--c-surface)!important;border:1px solid var(--c-border)!important;border-radius:var(--c-r-xl)!important;box-shadow:var(--c-shadow)!important;color:var(--c-text)!important}
 html:not(#_):not(#_) body.mg-content-page main :is(li,p,strong,td,th){color:var(--c-muted)}
 html:not(#_):not(#_) body.mg-content-page main :is(strong,th,h2,h3){color:var(--c-text)!important}
-html:not(#_):not(#_) body.mg-content-page main a,html:not(#_):not(#_) body.mg-content-page header a{color:var(--c-accent)!important;text-underline-offset:3px}
-html:not(#_):not(#_) body.mg-content-page header nav a{border-color:var(--c-border)!important;border-radius:999px}
+html:not(#_):not(#_) body.mg-content-page main a,html:not(#_):not(#_) body.mg-content-page header:not(#navbar) a{color:var(--c-accent)!important;text-underline-offset:3px}
+html:not(#_):not(#_) body.mg-content-page header:not(#navbar) nav a{border-color:var(--c-border)!important;border-radius:999px}
 html:not(#_):not(#_) body.mg-content-page main nav a{border-color:var(--c-border-strong)!important;border-radius:999px!important;text-decoration:none!important}
+
+/* ===== Power layer: confident display type, deep black night, crisp contrast ===== */
+html:not(#_):not(#_){--c-bg:#000;--c-surface:#0c0c0d;--c-raised:#141415;--c-border:rgba(255,255,255,.1);--c-border-strong:rgba(255,255,255,.2);--c-text:#fff;--c-muted:#9d9da3;--c-faint:#6e6e74;--c-ink:#000;
+ --c-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 12px 32px rgba(0,0,0,.5);--c-lift:0 1px 0 rgba(255,255,255,.06) inset,0 20px 48px rgba(0,0,0,.6)}
+html[data-theme=light]:not(#_):not(#_){--c-text:#141413;--c-muted:#5c5a55;--c-ink:#faf9f5;--c-lift:0 2px 4px rgba(20,20,19,.04),0 18px 40px rgba(20,20,19,.10)}
+html:not(#_):not(#_) body:not(.mg-pro) main h1{font-size:clamp(3rem,1.4rem + 6.2vw,6.25rem)!important;line-height:.98!important;letter-spacing:-.05em!important;font-weight:650!important}
+html:not(#_):not(#_) body:not(.mg-pro) main h2{font-weight:620!important;letter-spacing:-.035em!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero-copy,.mg-page-copy,.ai-product-hero-copy) h2,
+html:not(#_):not(#_) body:not(.mg-pro) main .hero-copy [data-type=subtitle]{font-size:clamp(1.35rem,1.1rem + 1.1vw,2rem)!important;font-weight:500!important;letter-spacing:-.025em!important;color:var(--c-text)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero-description,.hero-copy > p:not(.eyebrow),.mg-page-copy > p:not(.eyebrow),.ai-product-hero-copy > p:not(.eyebrow)){font-size:clamp(1.02rem,.95rem + .3vw,1.18rem)!important;line-height:1.6!important;color:var(--c-muted)!important;max-width:36em}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero,.product-hero,.ai-product-hero){padding-block:clamp(56px,9vw,120px) clamp(40px,6vw,88px)!important}
+/* One prominent primary CTA */
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero-actions,.hero-copy,.ai-product-hero-copy,.mg-page-copy) :is(a,button):is(.button.primary,.btn.primary,.btn-primary,.hero-primary,.ai-product-primary,.primary){min-height:50px!important;padding-inline:24px!important;font-size:16px!important;font-weight:600!important;border-radius:999px!important;display:inline-flex;align-items:center;gap:10px}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero-actions,.hero-copy,.mg-page-copy) :is(a,button):is(.button.secondary,.btn.secondary,.secondary,.text-link){min-height:50px;border-radius:999px!important;padding-inline:20px!important}
+/* Precise micro-interactions */
+html:not(#_):not(#_) body:not(.mg-pro) :is(a,button):is(.button,.btn,.cta,.ai-product-primary,.nav-download,.nav-icon,.menu-btn,.mg-theme-toggle,.ai-product-header-cta,.quick-suggestion){transition:transform var(--c-t) var(--c-ease),background-color var(--c-t) var(--c-ease),border-color var(--c-t) var(--c-ease),color var(--c-t) var(--c-ease),box-shadow var(--c-t) var(--c-ease)!important}
+html:not(#_):not(#_) body:not(.mg-pro) :is(a,button):is(.button,.btn,.cta,.ai-product-primary,.nav-download,.nav-icon,.menu-btn,.mg-theme-toggle,.ai-product-header-cta):active{transform:scale(.98)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(a,button):is(.button.primary,.ai-product-primary,.btn-primary):hover{opacity:.92}
+html:not(#_):not(#_) body:not(.mg-pro) :focus-visible{outline:2px solid var(--c-accent)!important;outline-offset:3px!important;border-radius:inherit}
+/* Premium product cards: bigger art, clear hierarchy, subtle lift */
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product,.ai-platform-card){background:var(--c-surface)!important;border:1px solid var(--c-border)!important;border-radius:24px!important;box-shadow:var(--c-shadow)!important;overflow:hidden;
+ transition:transform 220ms var(--c-ease),box-shadow 220ms var(--c-ease),border-color 220ms var(--c-ease)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product,.ai-platform-card):hover{transform:translateY(-4px)!important;box-shadow:var(--c-lift)!important;border-color:var(--c-border-strong)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.product-art,.mg-home-product-art){aspect-ratio:16/10;min-height:0!important;height:auto!important;overflow:hidden}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(.product-art,.mg-home-product-art) :is(video,img){width:100%!important;height:100%!important;object-fit:cover;transition:transform 400ms var(--c-ease)}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product):hover :is(.product-art,.mg-home-product-art) :is(video,img){transform:scale(1.025)}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product) :is(h2,h3){font-size:clamp(1.45rem,1.2rem + .8vw,1.85rem)!important;font-weight:620!important;letter-spacing:-.03em!important;color:var(--c-text)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product) :is(.status,.mg-home-product-status){font-size:12px!important;font-weight:500!important;letter-spacing:.04em!important;color:var(--c-faint)!important;font-family:var(--c-sans)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product) p{font-size:15.5px!important;line-height:1.6!important;color:var(--c-muted)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product) :is(.product-symbol,.mg-home-product-symbol){transform:scale(1.15);transform-origin:left center}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product) .text-link{color:var(--c-text)!important;font-weight:600!important}
+html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product,.ai-platform-card) :is(.status,.index,.mg-home-product-number){opacity:.9}
+@media (hover:none){html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product,.ai-platform-card):hover{transform:none!important}}
+@media (max-width:760px){html:not(#_):not(#_) body:not(.mg-pro) main h1{font-size:clamp(2.75rem,11vw,3.6rem)!important}}
+html:not(#_):not(#_) body:not(.mg-pro) main a.mg-home-product-link{background:transparent!important;color:var(--c-text)!important;font-weight:600!important;border:0!important;border-top:1px solid var(--c-border)!important;border-radius:0!important;box-shadow:none!important}
+html:not(#_):not(#_) body:not(.mg-pro) main a.mg-home-product-link:hover{color:var(--c-muted)!important}
+html:not(#_):not(#_) body:not(.mg-pro) main section.compare{background:var(--c-surface)!important;border:1px solid var(--c-border)!important;border-radius:24px!important;box-shadow:var(--c-shadow)!important}
