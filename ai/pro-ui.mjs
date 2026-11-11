@@ -208,6 +208,27 @@ function enhanceAttachMenu(){
  addEventListener('resize',()=>{if(!menu.hidden)sync();});
  new MutationObserver(sync).observe(menu,{attributes:true,attributeFilter:['hidden']});sheetMQ.addEventListener?.('change',sync);
 }
+// Compact composer: a thin one-line pill while idle and empty; expands on focus, text, attachments or open menus.
+function enhanceComposerCompact(){
+ const form=$('composer'),shell=form?.querySelector('.composer-shell'),msg=$('message');if(!shell||!msg||shell.dataset.proCompact)return;shell.dataset.proCompact='1';
+ let lastUser=0,engaged=false;for(const ev of ['pointerdown','keydown'])document.addEventListener(ev,()=>{lastUser=Date.now();},true);
+ const menus=()=>!$('attach-options')?.hidden||!!document.querySelector('.pro-in-composer .pro-select.is-open');
+ const busy=()=>document.body.dataset.mode==='build'||engaged&&document.activeElement===msg||!!msg.value.trim()||($('media-draft')&&!$('media-draft').hidden)||!!($('filename')?.textContent||'').trim();
+ // Open menus never change the size (no layout jump under the finger); they only keep it as it is.
+ let t;const sync=()=>{clearTimeout(t);t=setTimeout(()=>{const compact=busy()?false:(menus()?shell.classList.contains('pro-compact'):true);shell.classList.toggle('pro-compact',compact);},0);};
+ // Programmatic autofocus on load does not expand it; a real tap/click/keypress does.
+ form.addEventListener('focusin',e=>{if(e.target===msg&&Date.now()-lastUser<1500){engaged=true;clearTimeout(t);shell.classList.remove('pro-compact');}});
+ form.addEventListener('focusout',()=>{setTimeout(()=>{if(document.activeElement!==msg)engaged=false;sync();},0);});msg.addEventListener('input',sync);
+ // Expand only after the gesture lands (focus), so nothing moves under the finger mid-tap.
+ shell.addEventListener('click',e=>{if(e.target.closest('button,select,.pro-select,textarea'))return;if(shell.classList.contains('pro-compact')){lastUser=Date.now();msg.focus();}});
+ msg.addEventListener('click',()=>{if(shell.classList.contains('pro-compact')){engaged=true;clearTimeout(t);shell.classList.remove('pro-compact');}});
+ const mo=new MutationObserver(sync);for(const n of [$('attach-options'),$('media-draft'),$('filename')].filter(Boolean))mo.observe(n,{attributes:true,childList:true,characterData:true,subtree:true});
+ document.querySelectorAll('.pro-in-composer .pro-select').forEach(n=>mo.observe(n,{attributes:true,attributeFilter:['class']}));
+ mo.observe(document.body,{attributes:true,attributeFilter:['data-mode']});
+ // Programmatic value changes (new chat, restore, send) do not fire input events.
+ const d=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value');Object.defineProperty(msg,'value',{configurable:true,get(){return d.get.call(this);},set(v){d.set.call(this,v);sync();}});
+ sync();
+}
 function init(){
  document.body.classList.add('mg-pro');
  const header=document.querySelector('.site-header');
@@ -236,6 +257,7 @@ function init(){
  document.querySelectorAll('.isolation-permission,.build-share,#permissions label').forEach(asSwitch);
  enhanceSettings();setTimeout(enhanceSettings,0);setTimeout(enhanceSettings,120);
  enhanceAccount();
+ enhanceComposerCompact();
  // Phones: centered brand in the top bar (logo + name), with a tiny Demo chip in demo mode.
  if(header&&!header.querySelector('.pro-brand')){const brand=make('div','pro-brand');brand.setAttribute('aria-hidden','true');const img=make('img','ai-product-mark');img.src='./malguard-ai-orbit.svg?v=20261028-mono';img.alt='';img.width=22;img.height=22;const chip=make('span','pro-brand-demo','Demo');chip.hidden=!window.MG_AI_DEMO;brand.append(img,make('span','pro-brand-name','MalGuard AI'),chip);header.append(brand);}
 }

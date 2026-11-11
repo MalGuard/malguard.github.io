@@ -76,7 +76,7 @@ test('standalone Safari app has its own identity and no overlay report button',(
  assert.match(html,/name="apple-mobile-web-app-capable" content="yes"/);
  assert.match(html,/rel="manifest" href="\.\/manifest\.webmanifest"/);
  assert.match(html,/connect-src[^\"]+https:\/\/game-scam-guard-connected\.vercel\.app https:\/\/models\.malguard\.site/);
- assert.match(html,/app\.js\?v=media-v5-20261108/);
+ assert.match(html,/app\.js\?v=media-v5-20261111/);
  assert.doesNotMatch(html,/report-launcher\.js/);
 });
 test('model reconnection refreshes the catalog when Safari app resumes',()=>{
