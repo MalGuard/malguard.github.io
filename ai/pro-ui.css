@@ -295,3 +295,112 @@ html.theme-light body.mg-pro #desktop-command,html.theme-light body.mg-pro dialo
  .pro-seg-btn{flex:1}
  .pro-settings-tabs{padding-inline:8px}
 }
+
+/* ===== Mobile polish 2026-11-11: floating pickers, bottom sheets, ordered "+" menu ===== */
+@keyframes pro-sheet-up{from{transform:translateY(100%)}to{transform:none}}
+@keyframes pro-fade{from{opacity:0}to{opacity:1}}
+/* Picker lists are moved to <body> (or their dialog) while open so the header's overflow/blur can't clip them. */
+body.mg-pro .pro-select-list.pro-floating{position:fixed;z-index:2147482000;min-width:0;max-width:none;margin:0;overscroll-behavior:contain}
+body.mg-pro .pro-select-list.pro-sheet{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;width:auto!important;max-width:none!important;min-width:0!important;max-height:min(80dvh,640px)!important;padding:0 10px calc(12px + env(safe-area-inset-bottom))!important;border-radius:22px 22px 0 0!important;border-bottom:0!important;z-index:2147483001;animation:pro-sheet-up .22s cubic-bezier(.2,.8,.2,1)}
+body.mg-pro .pro-sheet-head{position:sticky;top:0;z-index:1;display:grid;justify-items:center;gap:8px;padding:8px 6px 10px;background:var(--p-raised)}
+body.mg-pro .pro-sheet-grip{width:38px;height:4px;border-radius:99px;background:color-mix(in srgb,var(--p-muted) 55%,transparent)}
+body.mg-pro .pro-sheet-title{justify-self:stretch;text-align:center;font-weight:700;font-size:16px;color:var(--p-text)}
+body.mg-pro .pro-sheet .pro-option{min-height:52px;padding:10px 12px;font-size:15px;border-radius:12px}
+body.mg-pro .pro-sheet .pro-option-sub{font-size:13px}
+body.mg-pro .pro-sheet .pro-group{padding:12px 12px 6px;font-size:12px}
+body.mg-pro .pro-sheet .pro-check{font-size:17px}
+.pro-sheet-backdrop{position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.48);animation:pro-fade .18s ease-out;-webkit-tap-highlight-color:transparent}
+html.pro-sheet-open,html.pro-attach-open{overflow:hidden}
+
+/* "+" menu: one clean column, icon + label, toggles with switches, fixed order */
+body.mg-pro #attach-options.pro-attach{display:flex;flex-direction:column;gap:2px}
+body.mg-pro #attach-options.pro-attach[hidden]{display:none!important}
+body.mg-pro .pro-attach-head{display:none;order:0}
+body.mg-pro #attach-file{order:1}
+body.mg-pro #attach-media-analyze{order:2}
+body.mg-pro #attach-media-generate{order:3}
+body.mg-pro #attach-options .ai-menu-capabilities{order:4;display:flex;flex-direction:column;gap:2px;margin:4px 0;padding:4px 0;border-top:1px solid var(--p-border);border-bottom:1px solid var(--p-border)}
+body.mg-pro #attach-chat{order:5}
+body.mg-pro #attach-inspect{order:6}
+body.mg-pro #attach-web{order:7}
+body.mg-pro #attach-options .web-search-controls{display:flex;flex-direction:column;align-items:stretch;gap:4px;width:100%;margin:0!important;padding:0!important;border:0!important;background:transparent!important}
+body.mg-pro #attach-options .pro-menu-row{display:flex!important;align-items:center;justify-content:flex-start;gap:12px;width:100%;min-height:46px;margin:0;padding:10px 12px!important;border-radius:12px!important;border:0!important;background:transparent!important;color:var(--p-text)!important;font-size:14.5px;font-weight:500;line-height:1.35;text-align:start;box-shadow:none!important;flex:none}
+body.mg-pro #attach-options .pro-menu-row[hidden]{display:none!important}
+body.mg-pro #attach-options .pro-menu-row:hover:not(:disabled),body.mg-pro #attach-options .pro-menu-row:active:not(:disabled){background:var(--p-hover)!important}
+body.mg-pro #attach-options .pro-menu-row:disabled{opacity:.5}
+body.mg-pro #attach-options .pro-menu-row::before{content:"";flex:none;width:20px;height:20px;background:currentColor;-webkit-mask:var(--pro-icon) center/contain no-repeat;mask:var(--pro-icon) center/contain no-repeat;opacity:.88}
+body.mg-pro #attach-options .pro-menu-row>svg,body.mg-pro #attach-options .pro-menu-row .thinking-glyph{display:none!important}
+body.mg-pro #attach-options .pro-menu-row>span{flex:1;min-width:0;color:inherit!important}
+body.mg-pro [data-icon=clip]{--pro-icon:url(./icons/clip.svg)}
+body.mg-pro [data-icon=image]{--pro-icon:url(./icons/image.svg)}
+body.mg-pro [data-icon=wand]{--pro-icon:url(./icons/wand.svg)}
+body.mg-pro [data-icon=chat]{--pro-icon:url(./icons/chat.svg)}
+body.mg-pro [data-icon=shield]{--pro-icon:url(./icons/shield.svg)}
+body.mg-pro [data-icon=globe]{--pro-icon:url(./icons/globe.svg)}
+body.mg-pro [data-icon=spark]{--pro-icon:url(./icons/spark.svg)}
+/* Toggle rows: a switch at the end instead of a coloured pill */
+body.mg-pro #attach-options .pro-menu-switch[aria-pressed]{color:var(--p-text)!important}
+body.mg-pro #attach-options .pro-menu-switch::after{content:"";flex:none;margin-inline-start:auto;width:40px;height:24px;border-radius:999px;background:radial-gradient(circle,#fff 0 8.5px,transparent 9.5px) no-repeat left 1px center/22px 22px,color-mix(in srgb,var(--p-muted) 42%,transparent);transition:background-position .15s,background-color .15s}
+body.mg-pro #attach-options .pro-menu-switch[aria-pressed=true]::after{background:radial-gradient(circle,#fff 0 8.5px,transparent 9.5px) no-repeat right 1px center/22px 22px,var(--p-accent)}
+html[dir=rtl] body.mg-pro #attach-options .pro-menu-switch::after{background-position:right 1px center,0 0}
+html[dir=rtl] body.mg-pro #attach-options .pro-menu-switch[aria-pressed=true]::after{background-position:left 1px center,0 0}
+body.mg-pro #attach-options .pro-depth-seg{display:flex;margin:0 12px 6px;margin-inline-start:44px}
+body.mg-pro #attach-options .pro-depth-seg[hidden]{display:none}
+body.mg-pro #attach-options .pro-depth-seg .pro-seg-btn{flex:1;min-height:36px}
+.pro-attach-backdrop{display:none}
+@media (prefers-reduced-motion:reduce){body.mg-pro .pro-select-list.pro-sheet,.pro-sheet-backdrop,body.mg-pro #attach-options{animation:none!important}body.mg-pro #attach-options .pro-menu-switch::after{transition:none}}
+
+@media (max-width:760px){
+ /* "+" menu becomes a bottom sheet. The composer's blur would trap position:fixed, so drop it on phones. */
+ body.mg-pro .composer-shell{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ body.mg-pro #attach-options.pro-attach{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;width:auto!important;min-width:0!important;max-width:none!important;max-height:min(84dvh,660px)!important;overflow-y:auto;overscroll-behavior:contain;margin:0;padding:0 10px calc(12px + env(safe-area-inset-bottom))!important;border-radius:22px 22px 0 0!important;border-bottom:0!important;z-index:2!important;animation:pro-sheet-up .22s cubic-bezier(.2,.8,.2,1)}
+ body.mg-pro #attach-options.pro-attach:not(.pro-attach-sheet){left:8px!important;right:8px!important;bottom:var(--pro-attach-bottom,8px)!important;max-height:calc(100dvh - var(--pro-attach-bottom,8px) - 12px)!important;padding:0 8px 8px!important;border-radius:20px!important;border-bottom:1px solid var(--p-border)!important;animation:pro-fade .16s ease-out}
+ body.mg-pro #attach-options.pro-attach:not(.pro-attach-sheet) .pro-sheet-grip{display:none}
+ body.mg-pro .pro-attach-head{display:grid}
+ html.pro-attach-open body.mg-pro #attach-toggle{position:relative;z-index:3;background:var(--p-raised)!important}
+ body.mg-pro #attach-toggle svg{transition:transform .18s}
+ body.mg-pro #attach-toggle[aria-expanded=true] svg{transform:rotate(45deg)}
+ html.pro-attach-open body.mg-pro .pro-attach-backdrop{display:block;position:fixed;inset:0;z-index:1;background:rgba(0,0,0,.48);animation:pro-fade .18s ease-out;-webkit-tap-highlight-color:transparent}
+ html.pro-attach-open body.mg-pro .composer-area{z-index:2147482500!important}
+ html.pro-attach-open body.mg-pro .composer-area:not([style*=position]){position:relative}
+ body.mg-pro #attach-options .pro-menu-row{min-height:52px;font-size:15.5px}
+ body.mg-pro #attach-options .pro-menu-row::before{width:22px;height:22px}
+ body.mg-pro #attach-options .pro-depth-seg{margin-inline-start:46px}
+ /* Tap targets >= 44px */
+ body.mg-pro #navigation-toggle{min-width:44px!important;min-height:44px!important;width:44px;height:44px;display:inline-grid;place-items:center;padding:0!important}
+ body.mg-pro .mg-theme-toggle.pro-theme{width:44px!important;height:44px!important}
+ body.mg-pro .header-actions>:is(a,button):not(.pro-theme){min-height:44px}
+ body.mg-pro .pro-select-model .pro-select-button{min-height:44px}
+ body.mg-pro .pro-lang{min-width:44px!important}
+ body.mg-pro #attach-toggle{width:44px!important;height:44px!important;min-height:44px!important}
+ body.mg-pro .attach-menu{width:44px;height:44px}
+ body.mg-pro #send{width:44px!important;height:44px!important}
+ body.mg-pro .response-actions :is(button,summary){width:40px;height:40px}
+ /* The open drawer's dimmer covers the sticky header too. */
+ body.mg-pro:not(.navigation-closed) #navigation-backdrop{z-index:45!important}
+ body.mg-pro #navigation{z-index:46!important}
+ /* Demo badge must never sit on top of drawers or sheets. */
+ body.mg-pro:not(.navigation-closed) .pro-demo-badge,html:is(.pro-sheet-open,.pro-attach-open) .pro-demo-badge{display:none}
+ .pro-demo-badge{bottom:auto;top:calc(64px + env(safe-area-inset-top));font-size:11px;padding:3px 8px;opacity:.92}
+}
+/* Latin model names inside RTL: truncate at the end, not the start */
+body.mg-pro .pro-select-label,body.mg-pro .pro-option-title{unicode-bidi:plaintext}
+/* Account: profile card + avatar (all widths), bottom sheet + avatar header button on phones */
+body.mg-pro .ai-account .account-close{position:absolute;top:12px;inset-inline-end:12px;margin:0!important;width:40px;height:40px;min-height:40px!important;padding:0!important;border-radius:999px!important;font-size:0!important;display:grid!important;place-items:center}
+body.mg-pro .ai-account .account-close::before{content:"✕";font-size:16px;line-height:40px;width:40px;text-align:center;color:var(--p-text)}
+body.mg-pro .ai-account{position:fixed}
+body.mg-pro .ai-account.pro-acct-profile .account-product-mark{width:32px;height:32px}
+body.mg-pro .ai-account.pro-acct-profile h2{font-size:20px;margin:8px 0 14px}
+body.mg-pro .ai-account .pro-acct-name,body.mg-pro .ai-account .pro-acct-email{position:relative;margin:0;padding-inline:68px 16px;background:var(--p-surface);border:1px solid var(--p-border);overflow-wrap:anywhere}
+body.mg-pro .ai-account .pro-acct-name{z-index:1;overflow:visible!important;padding-top:14px;padding-bottom:2px;border-bottom:0;border-radius:16px 16px 0 0;font-weight:700;font-size:16px;color:var(--p-text)}
+body.mg-pro .ai-account .pro-acct-email{padding-top:0;padding-bottom:14px;border-top:0;border-radius:0 0 16px 16px;font-size:13.5px;color:var(--p-muted)!important;direction:ltr;text-align:start}
+html[dir=rtl] body.mg-pro .ai-account .pro-acct-email,body.mg-pro .ai-account[dir=rtl] .pro-acct-email{text-align:right}
+body.mg-pro .ai-account .pro-acct-name::before{content:attr(data-initial);position:absolute;inset-inline-start:14px;top:13px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--p-accent);color:var(--p-accent-ink);font-weight:700;font-size:17px}
+body.mg-pro .ai-account.pro-acct-profile .account-note{margin:14px 0 0;font-size:12.5px;line-height:1.7}
+body.mg-pro .ai-account.pro-acct-profile>button:not(.account-close){margin-top:14px;color:#e35d5d!important;border-color:#e35d5d55!important;background:transparent!important}
+@media (max-width:760px){
+ body.mg-pro #account.pro-avatar{width:40px!important;min-width:40px!important;max-width:40px!important;height:40px!important;min-height:40px!important;padding:0!important;border-radius:50%!important;font-size:0!important;display:inline-grid!important;place-items:center;background:var(--p-accent)!important;color:var(--p-accent-ink)!important;border:2px solid color-mix(in srgb,var(--p-text) 18%,transparent)!important;box-sizing:content-box}
+ body.mg-pro #account.pro-avatar::before{content:attr(data-initial);font-size:16px;font-weight:700;line-height:1}
+ body.mg-pro .ai-account{inset:auto 0 0 0!important;margin:0!important;width:100%!important;max-width:none!important;max-height:min(88dvh,760px)!important;border-radius:22px 22px 0 0!important;border-bottom:0!important;padding:22px 18px calc(18px + env(safe-area-inset-bottom))!important;animation:pro-sheet-up .22s cubic-bezier(.2,.8,.2,1)}
+}
+@media (prefers-reduced-motion:reduce){body.mg-pro .ai-account{animation:none!important}}

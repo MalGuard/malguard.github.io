@@ -1,4 +1,4 @@
-import {createChatLibrary} from './library.mjs?v=sidebar-20261026';
+import {createChatLibrary} from './library.mjs?v=status-fa-20261111';
 import {createNavigation} from './navigation.mjs?v=ux-v3-20261108';
 import {renderResearchEvidence,attachResearchCitations} from './research-ui.mjs?v=20261108-research1';
 import {mediaFromCatalog,toMediaPayload,callMedia,MEDIA_LIMIT_BYTES} from './media-client.mjs?v=20261108-media1';

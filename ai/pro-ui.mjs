@@ -6,7 +6,12 @@ const fa=()=>document.documentElement.lang==='fa';
 const desc={value:Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value'),selectedIndex:Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'selectedIndex')};
 let openPicker=null;
 function closeAll(){if(openPicker){openPicker.close();openPicker=null;}}
-document.addEventListener('pointerdown',e=>{if(openPicker&&!openPicker.root.contains(e.target))closeAll();});
+const sheetMQ=matchMedia('(max-width:760px)');
+let sheetBackdrop=null;
+function backdropFor(host){if(!sheetBackdrop){sheetBackdrop=make('div','pro-sheet-backdrop');sheetBackdrop.setAttribute('aria-hidden','true');sheetBackdrop.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();closeAll();});}host.append(sheetBackdrop);return sheetBackdrop;}
+document.addEventListener('pointerdown',e=>{if(openPicker&&!openPicker.root.contains(e.target)&&!openPicker.list.contains(e.target)&&e.target!==sheetBackdrop)closeAll();});
+addEventListener('resize',()=>{if(openPicker)openPicker.place();});
+document.addEventListener('scroll',e=>{if(openPicker&&!openPicker.list.contains(e.target))openPicker.place();},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&openPicker){const p=openPicker;closeAll();p.button.focus();}});
 function groupOf(o){const v=o.value,l=o.textContent;if(v.startsWith('__'))return 'actions';if(v.startsWith('local_'))return 'device';if(/Ollama/.test(l))return 'desktop';return 'cloud';}
 const GROUPS={cloud:['Cloud models','مدل‌های ابری'],device:['On this device','روی همین دستگاه'],desktop:['Your computer · Ollama','کامپیوتر شما · Ollama'],actions:['More','بیشتر']};
@@ -28,8 +33,10 @@ export function enhanceSelect(select,{variant='plain',mount}={}){
   button.disabled=select.disabled;root.hidden=select.hidden||!!select.closest('[hidden]')&&!mount;
   button.setAttribute('aria-label',(select.getAttribute('aria-label')||document.querySelector(`label[for="${select.id}"]`)?.textContent||'')+': '+(o?.textContent||''));
  };
+ const sheetTitle=()=>variant==='model'?t('Choose a model','انتخاب مدل'):((select.getAttribute('aria-label')||document.querySelector(`label[for="${select.id}"]`)?.textContent||'').trim()||t('Choose','انتخاب'));
  const build=()=>{
   list.replaceChildren();items=[];let last='';
+  if(list.classList.contains('pro-sheet')){const head=make('div','pro-sheet-head');head.append(make('span','pro-sheet-grip'),make('span','pro-sheet-title',sheetTitle()));list.append(head);}
   [...select.options].forEach((o,i)=>{
    if(o.disabled&&o.value==='')return;
    if(variant==='model'){const g=groupOf(o);if(g!==last){last=g;list.append(make('div','pro-group',GROUPS[g][fa()?1:0]));}}
@@ -41,11 +48,30 @@ export function enhanceSelect(select,{variant='plain',mount}={}){
    list.append(it);items.push(it);
   });
  };
- const setActive=n=>{items.forEach(x=>x.classList.remove('is-active'));active=n;if(items[n]){items[n].classList.add('is-active');items[n].scrollIntoView({block:'nearest'});}};
+ const setActive=n=>{items.forEach(x=>x.classList.remove('is-active'));active=n;const it=items[n];if(it){it.classList.add('is-active');const top=it.offsetTop,bottom=top+it.offsetHeight,head=list.querySelector('.pro-sheet-head')?.offsetHeight||0;if(top-head<list.scrollTop)list.scrollTop=Math.max(0,top-head-6);else if(bottom>list.scrollTop+list.clientHeight)list.scrollTop=bottom-list.clientHeight+6;}};
  const choose=i=>{const o=select.options[i];if(!o||o.disabled)return;close();openPicker=null;if(select.selectedIndex!==i){desc.selectedIndex.set.call(select,i);select.dispatchEvent(new Event('input',{bubbles:true}));select.dispatchEvent(new Event('change',{bubbles:true}));}sync();button.focus();};
- const open=()=>{if(button.disabled)return;closeAll();build();list.hidden=false;root.classList.add('is-open');button.setAttribute('aria-expanded','true');openPicker=api;setActive(items.findIndex(x=>x.getAttribute('aria-selected')==='true'));list.focus({preventScroll:true});};
- const close=()=>{list.hidden=true;root.classList.remove('is-open');button.setAttribute('aria-expanded','false');};
- const api={root,button,close};
+ const host=()=>select.closest('dialog')||button.closest('dialog')||document.body;
+ const place=()=>{
+  if(list.hidden)return;
+  if(list.classList.contains('pro-sheet')){for(const k of ['top','left','right','bottom','width'])list.style[k]='';return;}
+  const r=button.getBoundingClientRect(),vw=document.documentElement.clientWidth,vh=innerHeight,gap=6,m=8;
+  const w=Math.min(Math.max(r.width,280),380,vw-2*m);list.style.width=w+'px';
+  const rtl=getComputedStyle(button).direction==='rtl';
+  let left=rtl?r.right-w:r.left;left=Math.min(Math.max(m,left),vw-w-m);list.style.left=left+'px';list.style.right='auto';
+  const below=vh-r.bottom-gap-m,above=r.top-gap-m;
+  const up=!!button.closest('#composer')&&above>=Math.min(260,list.scrollHeight);if(!up&&(below>=Math.min(260,list.scrollHeight)||below>=above)){list.style.top=(r.bottom+gap)+'px';list.style.bottom='auto';list.style.maxHeight=Math.min(420,below)+'px';}
+  else{list.style.top='auto';list.style.bottom=(vh-r.top+gap)+'px';list.style.maxHeight=Math.min(420,above)+'px';}
+ };
+ const open=()=>{if(button.disabled)return;closeAll();
+  const sheet=sheetMQ.matches;list.classList.toggle('pro-sheet',sheet);list.classList.add('pro-floating');list.dataset.variant=variant;
+  list.setAttribute('aria-label',sheetTitle());list.dir=document.documentElement.dir||'ltr';
+  const h=host();if(sheet){backdropFor(h);document.documentElement.classList.add('pro-sheet-open');}
+  h.append(list);build();list.hidden=false;root.classList.add('is-open');button.setAttribute('aria-expanded','true');openPicker=api;place();
+  setActive(items.findIndex(x=>x.getAttribute('aria-selected')==='true'));list.focus({preventScroll:true});};
+ const close=()=>{list.hidden=true;root.classList.remove('is-open');button.setAttribute('aria-expanded','false');
+  if(list.parentElement!==root){root.append(list);}list.classList.remove('pro-sheet','pro-floating');for(const k of ['top','left','right','bottom','width','maxHeight'])list.style[k]='';
+  sheetBackdrop?.remove();document.documentElement.classList.remove('pro-sheet-open');};
+ const api={root,button,list,close,place};
  button.onclick=()=>{list.hidden?open():(closeAll());};
  button.onkeydown=e=>{if(['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();open();}};
  list.onkeydown=e=>{const enabled=items.filter(x=>!x.hasAttribute('aria-disabled'));let at=enabled.indexOf(items[active]);
@@ -154,18 +180,69 @@ function enhanceSettings(){
  new MutationObserver(relabel).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 }
 
+// "+" menu: ordered rows with icons (Grok/Claude style); a bottom sheet with backdrop on phones.
+function enhanceAttachMenu(){
+ const menu=$('attach-options'),toggle=$('attach-toggle'),wrap=menu?.closest('.attach-menu');
+ if(!menu||!toggle||!wrap||menu.dataset.proMenu)return;menu.dataset.proMenu='1';menu.classList.add('pro-attach');
+ const head=make('div','pro-sheet-head pro-attach-head');const grip=make('span','pro-sheet-grip'),title=make('span','pro-sheet-title');head.append(grip,title);head.setAttribute('aria-hidden','true');menu.prepend(head);
+ const backdrop=make('div','pro-attach-backdrop');backdrop.setAttribute('aria-hidden','true');wrap.insertBefore(backdrop,menu);
+ backdrop.addEventListener('click',e=>{e.preventDefault();if(!menu.hidden)toggle.click();});
+ for(const [id,icon] of [['attach-file','clip'],['attach-media-analyze','image'],['attach-media-generate','wand'],['attach-chat','chat'],['attach-inspect','shield'],['attach-web','globe'],['web-search-toggle','globe'],['thinking-toggle','spark']]){const b=$(id);if(b){b.dataset.icon=icon;b.classList.add('pro-menu-row');}}
+ for(const id of ['web-search-toggle','thinking-toggle']){const b=$(id);if(b)b.classList.add('pro-menu-switch');}
+ // Search depth: inline segmented control instead of a nested dropdown inside the menu.
+ const depth=$('web-search-depth');
+ if(depth&&!depth.dataset.proSeg){depth.dataset.proSeg='1';depth.classList.add('pro-native');depth.tabIndex=-1;depth.setAttribute('aria-hidden','true');
+  const seg=make('div','pro-seg pro-depth-seg');seg.setAttribute('role','radiogroup');const btns=[...depth.options].map(o=>{const b=make('button','pro-seg-btn');b.type='button';b.setAttribute('role','radio');b.dataset.value=o.value;b.onclick=()=>{if(depth.disabled||depth.value===o.value)return;depth.value=o.value;depth.dispatchEvent(new Event('change',{bubbles:true}));syncSeg();};seg.append(b);return b;});
+  const syncSeg=()=>{seg.hidden=depth.hidden;seg.setAttribute('aria-label',depth.getAttribute('aria-label')||'');btns.forEach((b,i)=>{const o=depth.options[i];b.textContent=o?.textContent||'';const on=depth.value===b.dataset.value;b.classList.toggle('is-active',on);b.setAttribute('aria-checked',String(on));b.disabled=depth.disabled;});};
+  depth.after(seg);syncSeg();depth.addEventListener('change',syncSeg);new MutationObserver(syncSeg).observe(depth,{attributes:true,childList:true,subtree:true,characterData:true});}
+ const relabel=()=>{title.textContent=t('Add to chat','افزودن به گفتگو');};relabel();
+ new MutationObserver(relabel).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+ // Phones: a full-width panel just above the composer (the + stays tappable as a close button);
+ // falls back to a bottom sheet when there is not enough room above the composer.
+ const shell=menu.closest('.composer-shell')||wrap;
+ const sync=()=>{const open=!menu.hidden&&sheetMQ.matches;document.documentElement.classList.toggle('pro-attach-open',open);
+  if(!open){menu.classList.remove('pro-attach-sheet');menu.style.removeProperty('--pro-attach-bottom');return;}
+  const top=shell.getBoundingClientRect().top,room=top-12;
+  if(room<300){menu.classList.add('pro-attach-sheet');menu.style.removeProperty('--pro-attach-bottom');}
+  else{menu.classList.remove('pro-attach-sheet');menu.style.setProperty('--pro-attach-bottom',Math.round(innerHeight-top+8)+'px');}};
+ addEventListener('resize',()=>{if(!menu.hidden)sync();});
+ new MutationObserver(sync).observe(menu,{attributes:true,attributeFilter:['hidden']});sheetMQ.addEventListener?.('change',sync);
+}
+// Compact composer: a thin one-line pill while idle and empty; expands on focus, text, attachments or open menus.
+function enhanceComposerCompact(){
+ const form=$('composer'),shell=form?.querySelector('.composer-shell'),msg=$('message');if(!shell||!msg||shell.dataset.proCompact)return;shell.dataset.proCompact='1';
+ let lastUser=0,engaged=false;for(const ev of ['pointerdown','keydown'])document.addEventListener(ev,()=>{lastUser=Date.now();},true);
+ const menus=()=>!$('attach-options')?.hidden||!!document.querySelector('.pro-in-composer .pro-select.is-open');
+ const busy=()=>document.body.dataset.mode==='build'||engaged&&document.activeElement===msg||!!msg.value.trim()||($('media-draft')&&!$('media-draft').hidden)||!!($('filename')?.textContent||'').trim();
+ // Open menus never change the size (no layout jump under the finger); they only keep it as it is.
+ let t;const sync=()=>{clearTimeout(t);t=setTimeout(()=>{const compact=busy()?false:(menus()?shell.classList.contains('pro-compact'):true);shell.classList.toggle('pro-compact',compact);},0);};
+ // Programmatic autofocus on load does not expand it; a real tap/click/keypress does.
+ form.addEventListener('focusin',e=>{if(e.target===msg&&Date.now()-lastUser<1500){engaged=true;clearTimeout(t);shell.classList.remove('pro-compact');}});
+ form.addEventListener('focusout',()=>{setTimeout(()=>{if(document.activeElement!==msg)engaged=false;sync();},0);});msg.addEventListener('input',sync);
+ // Expand only after the gesture lands (focus), so nothing moves under the finger mid-tap.
+ shell.addEventListener('click',e=>{if(e.target.closest('button,select,.pro-select,textarea'))return;if(shell.classList.contains('pro-compact')){lastUser=Date.now();msg.focus();}});
+ msg.addEventListener('click',()=>{if(shell.classList.contains('pro-compact')){engaged=true;clearTimeout(t);shell.classList.remove('pro-compact');}});
+ const mo=new MutationObserver(sync);for(const n of [$('attach-options'),$('media-draft'),$('filename')].filter(Boolean))mo.observe(n,{attributes:true,childList:true,characterData:true,subtree:true});
+ document.querySelectorAll('.pro-in-composer .pro-select').forEach(n=>mo.observe(n,{attributes:true,attributeFilter:['class']}));
+ mo.observe(document.body,{attributes:true,attributeFilter:['data-mode']});
+ // Programmatic value changes (new chat, restore, send) do not fire input events.
+ const d=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value');Object.defineProperty(msg,'value',{configurable:true,get(){return d.get.call(this);},set(v){d.set.call(this,v);sync();}});
+ sync();
+}
 function init(){
  document.body.classList.add('mg-pro');
  const header=document.querySelector('.site-header');
  // Header model picker (ChatGPT style). Chat/Code use #model, Work uses #workspace-model.
  const slot=make('div','pro-model-slot');
- const toggle=$('navigation-toggle');if(toggle&&toggle.parentElement===header)toggle.after(slot);else header.prepend(slot);
+ // Standard layout: the model picker lives inside the composer, just before Send.
+ const send=$('send');if(send&&send.parentElement){slot.classList.add('pro-in-composer');send.before(slot);}else{const toggle=$('navigation-toggle');if(toggle&&toggle.parentElement===header)toggle.after(slot);else header.prepend(slot);}
  enhanceSelect($('model'),{variant:'model',mount:slot});
  enhanceSelect($('workspace-model'),{variant:'model',mount:slot});
  const wsPicker=slot.lastElementChild;wsPicker.classList.add('pro-work-picker');
  const syncMode=()=>{const m=document.body.dataset.mode||'chat';slot.dataset.mode=m;wsPicker.hidden=m!=='worker';slot.firstElementChild.hidden=m==='worker'||$('model').hidden;};
  new MutationObserver(syncMode).observe(document.body,{attributes:true,attributeFilter:['data-mode']});syncMode();
- for(const id of ['workspace-tool','tool','web-search-depth','build-file','mode','offer-model','desktop-model'])enhanceSelect($(id));
+ for(const id of ['workspace-tool','tool','build-file','mode','offer-model','desktop-model'])enhanceSelect($(id));
+ enhanceAttachMenu();
  // Theme toggle and language switch live in the header actions.
  const actions=document.querySelector('.header-actions');
  const lang=make('button','pro-lang');lang.type='button';lang.id='pro-language';
@@ -179,5 +256,19 @@ function init(){
  const msg=$('message');if(msg){const grow=()=>{msg.style.height='auto';msg.style.height=Math.min(msg.scrollHeight,240)+'px';};msg.addEventListener('input',grow);}
  document.querySelectorAll('.isolation-permission,.build-share,#permissions label').forEach(asSwitch);
  enhanceSettings();setTimeout(enhanceSettings,0);setTimeout(enhanceSettings,120);
+ enhanceAccount();
+ enhanceComposerCompact();
+ // Phones: centered brand in the top bar (logo + name), with a tiny Demo chip in demo mode.
+ if(header&&!header.querySelector('.pro-brand')){const brand=make('div','pro-brand');brand.setAttribute('aria-hidden','true');const img=make('img','ai-product-mark');img.src='./malguard-ai-orbit.svg?v=20261028-mono';img.alt='';img.width=22;img.height=22;const chip=make('span','pro-brand-demo','Demo');chip.hidden=!window.MG_AI_DEMO;brand.append(img,make('span','pro-brand-name','MalGuard AI'),chip);header.append(brand);}
+}
+// Account: avatar initial in the header when signed in; tidy profile card in the account dialog. Presentation only.
+function enhanceAccount(){
+ const acct=$('account');if(!acct||acct.dataset.proAvatar)return;acct.dataset.proAvatar='1';
+ const initial=s=>([...s.trim()][0]||'?').toUpperCase();
+ const sync=()=>{const s=(acct.textContent||'').trim();const signed=!!s&&!/^(sign in|ورود)$/i.test(s);acct.classList.toggle('pro-avatar',signed);acct.dataset.initial=signed?initial(s):'';if(signed)acct.title=s;else acct.removeAttribute('title');};
+ new MutationObserver(sync).observe(acct,{childList:true,characterData:true,subtree:true});sync();
+ const decorate=d=>{if(!d.matches?.('dialog.ai-account')||d.querySelector('form'))return;const h=d.querySelector('h2'),name=h?.nextElementSibling,email=name?.nextElementSibling;
+  if(name?.tagName!=='P'||email?.tagName!=='P'||name.className||email.className)return;d.classList.add('pro-acct-profile');name.classList.add('pro-acct-name');email.classList.add('pro-acct-email');name.dataset.initial=initial(name.textContent||'');};
+ new MutationObserver(ms=>{for(const m of ms){m.addedNodes.forEach(n=>{if(n.nodeType===1){decorate(n);}});if(m.target.matches?.('dialog.ai-account'))decorate(m.target);}}).observe(document.body,{childList:true,subtree:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0));else setTimeout(init,0);
