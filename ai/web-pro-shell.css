@@ -1,0 +1,270 @@
+/* Web Pro shell — calm Claude/Grok-like chat. 8px grid, one PRO purple accent. */
+html:root body.mg-ai-v2{
+  --wp-bg:#0b0b0e;
+  --wp-side:#0e0e12;
+  --wp-surface:#16161c;
+  --wp-raised:#1c1c24;
+  --wp-border:rgba(255,255,255,.08);
+  --wp-text:#f4f4f7;
+  --wp-muted:#9a9aa8;
+  --wp-accent:#8b5cf6;
+  --wp-accent-ink:#f6edff;
+  --wp-radius:24px;
+  --wp-pad:16px;
+  --wp-gap:8px;
+  --wp-measure:42rem;
+  --s-bg:var(--wp-bg);
+  --s-side:var(--wp-side);
+  --s-surface:var(--wp-surface);
+  --s-raised:var(--wp-raised);
+  --s-border:var(--wp-border);
+  --s-text:var(--wp-text);
+  --s-muted:var(--wp-muted);
+  --s-accent:var(--wp-accent);
+  --s-accent-ink:var(--wp-accent-ink);
+  background:var(--wp-bg);
+  color:var(--wp-text);
+}
+html:root:has(body.mg-ai-v2){background:var(--wp-bg,#0b0b0e)!important}
+html:root body.mg-ai-v2{
+  font-family:Inter,system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.6;
+}
+html[lang=fa]:root body.mg-ai-v2,
+html[lang=fa]:root body.mg-ai-v2 :is(button,input,select,textarea,.conversation,.intro,a,label,summary){
+  font-family:Vazirmatn,MalGuardPersian,Inter,Arial,system-ui,sans-serif;
+}
+html[lang=fa]:root body.mg-ai-v2 .intro h1{
+  font-family:Vazirmatn,MalGuardPersian,Arial,sans-serif;
+  letter-spacing:0!important;
+  font-weight:650;
+}
+
+/* Remove clutter: extra chips, "7 TOOLS", download caption */
+html:root body.mg-ai-v2 .quick-suggestions,
+html:root body.mg-ai-v2 .toolbox-caption,
+html:root body.mg-ai-v2 #open-downloads{
+  display:none!important;
+}
+
+/* Welcome typography */
+html:root body.mg-ai-v2 .intro .experience-eyebrow{
+  font-size:12px!important;
+  letter-spacing:.08em;
+  text-transform:none;
+  color:var(--wp-muted)!important;
+  margin:0 0 16px!important;
+}
+html:root body.mg-ai-v2 .intro h1{
+  font-size:clamp(32px,4vw,48px)!important;
+  line-height:1.15!important;
+  font-weight:600!important;
+  letter-spacing:-.03em!important;
+  margin:0!important;
+}
+
+/* Composer stays a single large rounded box; controls live inside it */
+html:root body.mg-ai-v2 #composer{
+  max-width:min(52rem,100%);
+  margin-inline:auto;
+}
+html:root body.mg-ai-v2 .composer-shell,
+html:root body.mg-ai-v2 .composer-shell.pro-compact{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  min-height:112px!important;
+  height:auto!important;
+  padding:16px!important;
+  gap:8px!important;
+  border-radius:24px!important;
+  background:var(--wp-surface)!important;
+  border:1px solid var(--wp-border)!important;
+  box-shadow:0 0 0 1px rgba(139,92,246,.06),0 16px 40px rgba(0,0,0,.28);
+  transition:none!important;
+  cursor:auto;
+}
+html:root body.mg-ai-v2 .composer-shell:focus-within{
+  border-color:color-mix(in srgb,var(--wp-accent) 45%,var(--wp-border))!important;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--wp-accent) 35%,transparent),0 16px 40px rgba(0,0,0,.28);
+}
+html:root body.mg-ai-v2 .composer-shell #message,
+html:root body.mg-ai-v2 .composer-shell.pro-compact #message{
+  order:0;
+  flex:0 1 auto;
+  min-height:40px!important;
+  height:auto!important;
+  max-height:185px;
+  margin:0!important;
+  padding:0!important;
+  overflow:auto;
+  white-space:pre-wrap;
+  resize:none;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  font-size:16px!important;
+  line-height:1.55;
+  color:var(--wp-text)!important;
+}
+html:root body.mg-ai-v2 .composer-footer,
+html:root body.mg-ai-v2 .composer-shell.pro-compact .composer-footer{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+  min-width:0;
+}
+html:root body.mg-ai-v2 .composer-shell.pro-compact .composer-footer{display:flex!important}
+html:root body.mg-ai-v2 .attach-menu,
+html:root body.mg-ai-v2 .composer-shell.pro-compact .attach-menu{
+  width:auto!important;
+  height:auto!important;
+  flex:none;
+}
+html:root body.mg-ai-v2 .composer-actions,
+html:root body.mg-ai-v2 .composer-shell.pro-compact .composer-actions,
+html:root body.mg-ai-v2 .composer-shell .composer-actions{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  flex:1 1 auto!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+}
+html:root body.mg-ai-v2 :is(#attach-toggle,#send,#thinking-toggle,#web-search-toggle){
+  transform:none!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  flex:none!important;
+}
+html:root body.mg-ai-v2 #attach-toggle,
+html:root body.mg-ai-v2 #send{
+  width:36px!important;
+  height:36px!important;
+  min-width:36px!important;
+  min-height:36px!important;
+  padding:0!important;
+  border-radius:12px!important;
+  border:1px solid var(--wp-border)!important;
+  background:var(--wp-raised)!important;
+  color:var(--wp-text)!important;
+}
+html:root body.mg-ai-v2 #send{
+  background:var(--wp-accent)!important;
+  border-color:transparent!important;
+  color:var(--wp-accent-ink)!important;
+}
+html:root body.mg-ai-v2 #send:disabled,
+html:root body.mg-ai-v2 #send:disabled:hover{
+  background:color-mix(in srgb,var(--wp-accent) 35%,var(--wp-raised))!important;
+  color:color-mix(in srgb,var(--wp-accent-ink) 55%,transparent)!important;
+  opacity:1;
+}
+html:root body.mg-ai-v2 #send:not(:disabled):hover,
+html:root body.mg-ai-v2 #attach-toggle:hover{
+  transform:none!important;
+  filter:brightness(1.08);
+}
+html:root body.mg-ai-v2 :is(#send,#attach-toggle,.navigation-new,button):active{
+  transform:scale(.98);
+}
+@media (prefers-reduced-motion:reduce){
+  html:root body.mg-ai-v2 :is(#send,#attach-toggle,.navigation-new,button):active{transform:none}
+}
+
+/* Messages: no bubble on the model's reply, readable measure, soft stream */
+html:root body.mg-ai-v2 .conversation{
+  width:100%;
+  max-width:var(--wp-measure);
+  margin-inline:auto;
+  padding-inline:16px;
+  box-sizing:border-box;
+}
+html:root body.mg-ai-v2 .conversation .bubble{
+  max-width:min(36rem,100%);
+  margin-inline-start:auto;
+  margin-inline-end:0;
+  margin-block:8px;
+  padding:12px 16px!important;
+  border-radius:16px!important;
+  background:var(--wp-raised)!important;
+  border:1px solid var(--wp-border)!important;
+  box-shadow:none!important;
+  font-size:16px!important;
+  line-height:1.65!important;
+}
+html:root body.mg-ai-v2 .conversation :is(.result,.answer,.assistant-message){
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  max-width:100%;
+  margin-inline:0;
+  padding-inline:8px!important;
+  padding-block:8px!important;
+  font-size:16.5px!important;
+  line-height:1.75!important;
+}
+html:root body.mg-ai-v2 .conversation .result.is-streaming .answer,
+html:root body.mg-ai-v2 .conversation .result.is-typing .answer{
+  animation:wp-stream-in .28s ease;
+}
+@keyframes wp-stream-in{
+  from{opacity:.55}
+  to{opacity:1}
+}
+@media (prefers-reduced-motion:reduce){
+  html:root body.mg-ai-v2 .conversation .result.is-streaming .answer,
+  html:root body.mg-ai-v2 .conversation .result.is-typing .answer{animation:none}
+}
+
+/* Accent only: PRO badge already uses the same purple; unify links and focus */
+html:root body.mg-ai-v2 :focus-visible{
+  outline:2px solid color-mix(in srgb,var(--wp-accent) 80%,white)!important;
+  outline-offset:2px!important;
+}
+html:root body.mg-ai-v2 .web-pro-badge{
+  background:var(--wp-accent)!important;
+  color:var(--wp-accent-ink)!important;
+  box-shadow:none!important;
+}
+
+/* Footer hint stays quiet and in the same measure */
+html:root body.mg-ai-v2 .footer-note,
+html:root body.mg-ai-v2 .composer-hints{
+  max-width:min(52rem,100%);
+  margin-inline:auto;
+  text-align:center;
+  color:var(--wp-muted);
+  font-size:12px;
+}
+
+@media (max-width:760px){
+  html:root body.mg-ai-v2 .composer-shell,
+  html:root body.mg-ai-v2 .composer-shell.pro-compact{
+    min-height:120px!important;
+    padding:16px!important;
+    border-radius:24px!important;
+  }
+  html:root body.mg-ai-v2 #attach-toggle,
+  html:root body.mg-ai-v2 #send{
+    width:36px!important;
+    height:36px!important;
+    min-width:36px!important;
+    min-height:36px!important;
+    border-radius:12px!important;
+  }
+}

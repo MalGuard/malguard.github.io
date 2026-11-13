@@ -56,8 +56,8 @@ const copy={
  fa:{skip:'رفتن به گفت‌وگو',private:'حریم خصوصی، پیش‌فرض',workspace:'فضای بررسی',tools:'ابزارهای امنیتی',toolsHint:'هر بررسی، با منبع و محدودیت روشن.',scope:'تحلیل ایستا؛ بدون اجرای نمونه یا دانلود بدافزار.',privacy:'سیاست حریم خصوصی',title:'از شواهد شروع کنیم.',subtitle:'فایل، هش یا لینک را بررسی کنید. نتیجهٔ هر ابزار، همراه با منبع، زمان و محدودیت‌های واقعی نمایش داده می‌شود.',modelNotice:'مدل زبانی متصل نیست. درخواست‌ها با قواعد مشخص به ابزارها هدایت می‌شوند؛ این رابط گفت‌وگوی مولد ندارد.',choose:'انتخاب ابزار',auto:'انتخاب خودکار',input:'لینک، هش یا درخواست شما',placeholder:'یک لینک عمومی یا هش SHA-256 وارد کنید…',attach:'＋ انتخاب فایل · حداکثر ۱ MiB',remove:'حذف',consent:'رضایت برای همین درخواست',fileConsent:'ارسال فایل به سرور MalGuard برای تحلیل ایستا در حافظه؛ بدون ذخیره یا ارسال به پایگاه‌های تهدید.',websiteConsent:'دریافت HTML از سایت عمومی و مسیر انتقال آن؛ آدرس برای DNS و مقصدهای مشاهده‌شده قابل مشاهده خواهد بود.',lookupConsent:'ارسال هش به MalwareBazaar، URL به URLhaus یا عبارت جست‌وجو به Tavily، متناسب با ابزار؛ بررسی OpenPhish در صورت فعال بودن سرور.',modelConsent:'ارسال متن همین پیام به Gemini یا Workers AI، فقط در صورت اتصال مدل. شواهد فایل و ابزار به مدل ارسال نمی‌شوند.',clear:'پاک‌کردن گفت‌وگو',send:'شروع بررسی ↗',retention:'تاریخچه فقط در حافظهٔ همین صفحه است؛ با بستن یا تازه‌کردن پاک می‌شود. نبود یافته تضمین امنیت نیست. اطلاعات محرمانه ارسال نکنید.',available:'آمادهٔ بررسی',configured:'تنظیم‌شده؛ اتصال تأیید نشده',disabled:'غیرفعال',offline:'ارتباط با بک‌اند برقرار نشد. بررسی انجام نشده است.',connected:'متصل به بک‌اند · آمادهٔ درخواست',serviceDisabled:'بک‌اند هنوز برای استفاده فعال نشده است.',working:'در حال بررسی',suspicious:'شواهد مخرب یا مشکوک شناسایی شد.',no_evidence:'شواهد مخرب در بررسی‌های انجام‌شده یافت نشد.',insufficient:'اطلاعات کافی برای نتیجه‌گیری وجود ندارد.',error:'بررسی به دلیل خطای سرویس تکمیل نشد.',evidence:'شواهد و مشاهدات',sources:'منابع',limits:'محدودیت‌ها',metadata:'جزئیات بررسی',fileTooLarge:'حجم فایل باید بین ۱ بایت و ۱ MiB باشد.',consentMissing:'پیش از ارسال، رضایت مربوط به فایل، سایت، پایگاه تهدید یا مدل را انتخاب کنید.',invalid:'درخواست پذیرفته نشد؛ ورودی و رضایت مربوط به ابزار را بررسی کنید.',rate:'تعداد درخواست‌ها به سقف مجاز رسید.',generated:'پاسخ مدل · تحلیل امنیتی نیست',modelReady:'مدل تنظیم‌شده: Gemini؛ اتصال زنده هنوز تأیید نشده است.',modelOff:'مدل زبانی: غیرفعال',streamError:'پاسخ کامل دریافت نشد؛ نتیجه‌ای برای تأیید وجود ندارد.'},
  en:{skip:'Skip to conversation',private:'Private by default',workspace:'INSPECTION WORKSPACE',tools:'Security tools',toolsHint:'Every check, with sources and clear limits.',scope:'Static analysis. No sample execution or malware downloads.',privacy:'Privacy policy',title:'Start with the evidence.',subtitle:'Inspect a file, hash or link. Each tool reports its evidence, sources, check time and real limitations.',modelNotice:'A language model is not connected. Explicit rules route requests to tools; generative chat is unavailable.',choose:'Tool',auto:'Choose automatically',input:'Your URL, hash or request',placeholder:'Enter a public URL or SHA-256 hash…',attach:'＋ Choose file · up to 1 MiB',remove:'Remove',consent:'Consent for this request',fileConsent:'Send the file to MalGuard for static analysis in memory, without storage or submission to threat databases.',websiteConsent:'Retrieve public HTML and observed redirects; DNS resolvers and destinations will see the address.',lookupConsent:'Send the hash to MalwareBazaar, URL to URLhaus or search query to Tavily as appropriate; check OpenPhish if enabled on the server.',modelConsent:'Send this message to Gemini or Workers AI only if a model is connected. File/tool evidence is never sent to the model.',clear:'Clear conversation',send:'Start inspection ↗',retention:'History stays in this page’s memory and disappears on close or refresh. No findings do not guarantee safety. Do not submit secrets.',available:'Ready to check',configured:'Configured · unverified',disabled:'Disabled',offline:'Backend unavailable. No checks were performed.',connected:'Backend connected · ready',serviceDisabled:'The backend is not enabled for use yet.',working:'Checking',suspicious:'Malicious or suspicious evidence identified.',no_evidence:'No malicious evidence found in the checks performed.',insufficient:'Insufficient information to draw a conclusion.',error:'Inspection incomplete because of a service error.',evidence:'Evidence and observations',sources:'Sources',limits:'Limitations',metadata:'Inspection details',fileTooLarge:'File size must be between 1 byte and 1 MiB.',consentMissing:'Select the relevant file, website, lookup or model consent before submitting.',invalid:'Request rejected. Check the input and consent for the selected tool.',rate:'The request limit was reached.',generated:'Model response · not a security analysis',modelReady:'Gemini configured; live connection not yet verified.',modelOff:'Language model: disabled',streamError:'The full response was not received; no result can be confirmed.'}
 };
-Object.assign(copy.fa,{modeLabel:'حالت',chatMode:'چت',workerMode:'بررسی خودکار',permissionSettings:'دسترسی‌ها و حریم خصوصی',revoke:'لغو همهٔ مجوزها',consent:'مجوزها یک‌بار ذخیره می‌شوند و هر زمان قابل لغو هستند.',title:'سلام، از کجا شروع کنیم؟',subtitle:'گفت‌وگو کنیم، جست‌وجو کنیم یا چیزی را بررسی کنیم.',placeholder:'پیام بده، سؤال بپرس یا لینک بفرست…',send:'ارسال',modelNotice:'در حالت چت با مدل گفت‌وگو می‌کنی؛ در حالت بررسی خودکار، فایل و سایت با ابزارها بررسی می‌شوند.',chatHint:'گفت‌وگوی عادی و فنی، همراه با بررسی خودکار فایل و سایت.',workerHint:'فقط بررسی فایل، هش و سایت؛ برای پرسش‌های عمومی از چت استفاده کن.'});
-Object.assign(copy.en,{modeLabel:'Mode',chatMode:'Chat',workerMode:'Automatic inspection',permissionSettings:'Permissions and privacy',revoke:'Revoke all permissions',consent:'Permissions are saved once and can be revoked at any time.',title:'Hello. Where shall we start?',subtitle:'Talk it through, explore the web or inspect a file or link.',placeholder:'Send a message, ask a question or paste a link…',send:'Send',modelNotice:'Chat supports conversation. Automatic inspection focuses on files and websites with security tools.',chatHint:'General and technical conversation, with automatic file and URL inspection.',workerHint:'File, hash and website inspection only. Use Chat for general questions.'});
+Object.assign(copy.fa,{helpCenter:'راهنما',modeLabel:'حالت',chatMode:'چت',workerMode:'بررسی خودکار',permissionSettings:'دسترسی‌ها و حریم خصوصی',revoke:'لغو همهٔ مجوزها',consent:'مجوزها یک‌بار ذخیره می‌شوند و هر زمان قابل لغو هستند.',title:'سلام، از کجا شروع کنیم؟',subtitle:'گفت‌وگو کنیم، جست‌وجو کنیم یا چیزی را بررسی کنیم.',placeholder:'پیام بده، سؤال بپرس یا لینک بفرست…',send:'ارسال',modelNotice:'در حالت چت با مدل گفت‌وگو می‌کنی؛ در حالت بررسی خودکار، فایل و سایت با ابزارها بررسی می‌شوند.',chatHint:'گفت‌وگوی عادی و فنی، همراه با بررسی خودکار فایل و سایت.',workerHint:'فقط بررسی فایل، هش و سایت؛ برای پرسش‌های عمومی از چت استفاده کن.'});
+Object.assign(copy.en,{helpCenter:'Help',modeLabel:'Mode',chatMode:'Chat',workerMode:'Automatic inspection',permissionSettings:'Permissions and privacy',revoke:'Revoke all permissions',consent:'Permissions are saved once and can be revoked at any time.',title:'Hello. Where shall we start?',subtitle:'Talk it through, explore the web or inspect a file or link.',placeholder:'Send a message, ask a question or paste a link…',send:'Send',modelNotice:'Chat supports conversation. Automatic inspection focuses on files and websites with security tools.',chatHint:'General and technical conversation, with automatic file and URL inspection.',workerHint:'File, hash and website inspection only. Use Chat for general questions.'});
 Object.assign(copy.fa,{modelLabel:'مدل گفت‌وگو',modelConsent:'ارسال متن گفت‌وگو به ارائه‌دهندهٔ مدل انتخاب‌شده؛ فایل و شواهد ابزارها ارسال نمی‌شوند.',placeholder:'هرچه می‌خواهی بپرس…',home:'سایت اصلی',suggestChat:'گفت‌وگو کنیم',suggestWebsite:'بررسی یک سایت',suggestFile:'بررسی یک فایل',websitePrompt:'این سایت را بررسی کن: ',chatPrompt:'سلام!',clear:'گفت‌وگوی تازه',modelNotice:'وضعیت واقعی اتصال مدل و ابزارها از سرور دریافت می‌شود.'});
 Object.assign(copy.en,{modelLabel:'Chat model',modelConsent:'Send conversation text to the selected model provider. Files and tool evidence are never sent to the model.',placeholder:'Ask anything…',home:'Main site',suggestChat:'Let’s talk',suggestWebsite:'Check a website',suggestFile:'Inspect a file',websitePrompt:'Check this website: ',chatPrompt:'Hello!',clear:'New conversation',modelNotice:'Model and tool availability are reported by the server.'});
 Object.assign(copy.en,{localChecking:'Checking this device…',localSecure:'Open MalGuard over HTTPS to use local models.',localNoWebGPU:'This browser does not expose WebGPU. Try an up-to-date supported browser on a compatible device.',localNoAdapter:'A compatible GPU could not be started. Close other apps or try a supported browser and device.',localNoF16:'This device does not support the GPU feature required by these models. Use an available cloud model or a different device.',retryLocal:'Check device again',localTooLong:'This device model accepts short requests (up to 600 characters). Choose a cloud model for longer text.',localDownload:'Download on-device model',download:'Download',cancel:'Cancel',stop:'Stop',chooseLocal:'On-device models',clearModels:'Remove downloaded models',localOff:'On-device models require compatible WebGPU and sufficient GPU memory.',localFailed:'On-device response could not finish. Check device support, memory and network. No cloud fallback was used.',localLoading:'Loading on-device model',localWorking:'Generating on your device',localRemoved:'Downloaded models removed.',researchLimit:'Search excerpts are not independently verified source pages.'});
@@ -193,8 +193,8 @@ async function connectDesktop(){
  finally{desktopConnecting=false;renderStatus();}
 }
 async function runDesktop(model,message){
- const turn=beginTurn('thinking');history.push({bubble:message});$('conversation').append(el('div',message,'bubble'));
- try{const generated=await desktopChat.respond({model,message,locale:replyLanguage(message,locale,modelHistory),history:modelHistory.slice(-8),signal:turn.controller.signal});await presentResponse({generated},turn);modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-8));if($('message').value.trim()===message)$('message').value='';}
+ const turn=beginTurn('thinking');consumeComposer(message);history.push({bubble:message});$('conversation').append(el('div',message,'bubble'));
+ try{const generated=await desktopChat.respond({model,message,locale:replyLanguage(message,locale,modelHistory),history:modelHistory.slice(-8),signal:turn.controller.signal});await presentResponse({generated},turn);modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-8));}
  catch{if(turn.controller.signal.aborted)stopped(turn);else showError('desktopFailed');}finally{endTurn(turn);}
 }
 Object.assign(copy.en,{hideProject:'Back to conversation',buildIntroTitle:'What shall we build?',showProject:'Files and preview',buildStartHint:'Talk through an idea, then say “build it”. I will create project files and run the web preview.',autoBuild:'Apply and preview explicit build requests automatically, with Undo.',buildTab:'Build and code',projectTitle:'My project',chatChoice:'Questions and conversation',workChoice:'File, link and web tools',buildChoice:'Edit files, preview and export',buildHint:'Talk or plan here, then ask me to build. Review the proposed code, apply it to files, then run the preview.',exportProject:'Download ZIP',projectFile:'Project file',newFile:'New file',addFile:'Add file',importCode:'Import files',undoProject:'Undo apply',codeEditor:'Code editor',projectPreview:'Project preview',runPreview:'Run preview',stopPreview:'Stop preview',previewOutput:'Preview output',previewEmpty:'Run preview to see your project.',shareCode:'Include the currently selected file in my next model request.',buildLimit:'Files stay in page memory; export before leaving. Local HTML/CSS/JS preview has no network access. Run backend code and packages in your own development environment after export.',buildPlaceholder:'Describe what to build or change…',buildTooLarge:'This request and shared file exceed the coding model input budget. Shorten the request or share a smaller file.',buildNoModel:'Choose an enabled coding model or connect an installed desktop model.',buildUnstructured:'The model returned a text answer. No project files were changed; ask for a smaller, complete file proposal.'});
@@ -489,7 +489,21 @@ function renderStatus(){
     (webMode==='research'?'Research':'Web search')+' is on · sourced answers';
 
 }
-function showError(key,remember=true){if(remember)history.push({error:key});const card=el('article',undefined,'result error'),text=typeof key==='object'?errorMessage(key,locale):t(key),heading=el('h3',text,'outcome');card.append(heading);card.setAttribute('role','alert');$('conversation').append(card);if(remember&&!matchMedia('(prefers-reduced-motion: reduce)').matches){heading.setAttribute('aria-label',text);const ink=el('span',text);ink.setAttribute('aria-hidden','true');heading.replaceChildren(ink);typeText(text,value=>{ink.textContent=value;},{charactersPerSecond:130}).catch(()=>{ink.textContent=text;});}}
+let lastUserMessage='';
+function errorLocale(){
+ if(locale==='fa')return 'fa';
+ const sample=String(lastUserMessage||lastCloudPrompt||$('message')?.value||'');
+ return /[\u0600-\u06FF]/.test(sample)?'fa':'en';
+}
+function showError(key,remember=true){if(remember)history.push({error:key});const loc=errorLocale();const card=el('article',undefined,'result error'),text=typeof key==='object'?errorMessage(key,loc):(copy[loc]?.[key]||copy.en[key]||key),heading=el('h3',text,'outcome');card.append(heading);card.setAttribute('role','alert');$('conversation').append(card);if(remember&&!matchMedia('(prefers-reduced-motion: reduce)').matches){heading.setAttribute('aria-label',text);const ink=el('span',text);ink.setAttribute('aria-hidden','true');heading.replaceChildren(ink);typeText(text,value=>{ink.textContent=value;},{charactersPerSecond:130}).catch(()=>{ink.textContent=text;});}}
+function consumeComposer(sent){
+ const field=$('message');
+ if(!field||field.value.trim()!==String(sent||'').trim())return;
+ field.value='';
+ field.dispatchEvent(new Event('input',{bubbles:true}));
+ resizeComposerInput();
+ refreshComposerInputState();
+}
 function renderResponse(response,remember=true){
  if(remember)history.push({response});
  if(response.error){showError(publicFailure(response),false);return;}
@@ -571,6 +585,7 @@ async function runLocal(model,message,consent){
  if(research&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  if(!await allowDownload(model))return;
  const turn=beginTurn(research?'searching':'thinking');
+ consumeComposer(message);
  history.push({bubble:message});$('conversation').append(el('div',message,'bubble'));
  try{
   let search,sources=[],prompt=message;
@@ -586,7 +601,7 @@ async function runLocal(model,message,consent){
   const generated=await localChat.respond({model,message:prompt,locale:language,history:modelHistory},percent=>setActivity('localLoading',`${percent}%`),()=>setActivity('thinking'));
   preparedModels.add(model);
   if(sources.length)generated.webSearch={state:'completed',provider:'tavily',sources};
-  await presentResponse({generated},turn);modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-8));if($('message').value.trim()===message)$('message').value='';
+  await presentResponse({generated},turn);modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-8));
  }catch{if(turn.controller.signal.aborted)stopped(turn);else showError('localFailed');}finally{endTurn(turn);}
 }
 let modelSharePromptPending=false;
@@ -607,10 +622,10 @@ async function runBuild(message){
  if(!native&&!$('model-consent').checked){if(!await requestModelShare()||activeMode!=='build'||$('message').value.trim()!==message||$('model').value!==selected)return;}
  const contextHistory=modelHistory.slice(-6),revision=builder.revision;
  if(!native&&activeWebMode()!=='off'&&!$('lookup-consent').checked){if(!await requestSearchConsent()||activeMode!=='build'||$('message').value.trim()!==message)return;}
- builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
+ builder.consumeShare();const turn=beginTurn('thinking');consumeComposer(message);history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
  else{lastCloudPrompt=message;generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled&&cfThinkingByMode.code,...webOptions(message),...cloudStreamOptions(turn),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
- if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn,{streamed:!native&&!proposal});if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
+ if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn,{streamed:!native&&!proposal});if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));
  }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error?.code|| (error.name==='TimeoutError'?'provider_timeout':'model_unavailable'),retryAfterSeconds:error?.retryAfterSeconds,retryAt:error?.retryAt});}finally{endTurn(turn);}
 }
 $('build-files-toggle').onclick=()=>setProjectOpen(!projectOpen);
@@ -690,6 +705,7 @@ async function runMedia(message){
   if(action==='analyze')image=await toMediaPayload(file);
  }catch{showError('mediaInvalid');return;}
  const turn=beginTurn(action==='analyze'?'readingFile':'thinking');
+ consumeComposer(message);
  history.push({bubble:message||file?.name||requestPrompt});
  followReply(()=>$('conversation').append(el('div',message||file?.name||requestPrompt,'bubble')));
  try{
@@ -713,7 +729,7 @@ async function runMedia(message){
    history.push({response:{generated}});
    turn.completed=true;
   }
-  if($('message').value.trim()===message)$('message').value='';
+  
   clearMediaDraft();
  }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error?.message||'media_provider_unavailable'});}
  finally{endTurn(turn);}
@@ -771,6 +787,7 @@ $('message').addEventListener('keydown',event=>{
 $('composer').onsubmit=async event=>{
  event.preventDefault();if(busy){showBusyHint();return;}
  const message=$('message').value.trim(),mode=activeMode,file=mode==='worker'?$('file').files[0]:undefined,tool=mode==='worker'?$('workspace-tool').value:'auto';
+ lastUserMessage=message;
  if(mediaAction!=='off'&&mode==='chat'){await runMedia(message);return;}
  if(!message&&!file)return;
  if(mode==='build'){await runBuild(message);return;}
@@ -778,6 +795,7 @@ $('composer').onsubmit=async event=>{
     const identity=answerIdentityQuestion(message,modelHistory);
     if(identity){
       const turn=beginTurn('thinking');
+      consumeComposer(message);
       history.push({bubble:message});
       followReply(()=>$('conversation').append(el('div',message,'bubble')));
       try{
@@ -785,7 +803,6 @@ $('composer').onsubmit=async event=>{
         await presentResponse({generated},turn);
         modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text});
         modelHistory.splice(0,Math.max(0,modelHistory.length-8));
-        if($('message').value.trim()===message)$('message').value='';
       }finally{endTurn(turn);}
       return;
     }
@@ -808,6 +825,7 @@ $('composer').onsubmit=async event=>{
    if(!await requestModelShare()||activeMode!==mode||$('message').value.trim()!==message)return;
   }
   const turn=beginTurn('thinking');
+  consumeComposer(message);
   history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
   try{
    lastCloudPrompt=message;const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled&&cfThinkingByMode[directMode],...webOptions(message),...cloudStreamOptions(turn),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
@@ -815,7 +833,6 @@ $('composer').onsubmit=async event=>{
    await presentResponse({generated},turn,{streamed:true});
    modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});
    while(modelHistory.length>8)modelHistory.shift();
-   if($('message').value.trim()===message)$('message').value='';
   }catch(e){if(turn.controller.signal.aborted)stopped(turn);else showError({error:e?.code||'provider_unavailable',retryAfterSeconds:e?.retryAfterSeconds,retryAt:e?.retryAt});}
   finally{endTurn(turn);}
   return;
@@ -825,7 +842,7 @@ $('composer').onsubmit=async event=>{
  if(effective==='model'&&(plan?.needsWeb||['gemini_flash','groq_qwen','groq_gptoss'].includes(selected)&&planChat(message,modelHistory).needsWeb)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  if(['game_scam_guard','url_sandbox'].includes(effective)&&!consent.websiteFetch||['malwarebazaar','urlhaus','ai_web'].includes(effective)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  if(effective==='model'&&mode==='chat'&&service.model.state==='configured'&&!consent.modelShare){if(!await requestModelShare()||activeMode!==mode||$('message').value.trim()!==message||$('model').value!==selected)return;consent.modelShare=true;}
- const turn=beginTurn('connecting');history.push({bubble:message||file.name});followReply(()=>$('conversation').append(el('div',message||file.name,'bubble')));
+ const turn=beginTurn('connecting');consumeComposer(message);history.push({bubble:message||file.name});followReply(()=>$('conversation').append(el('div',message||file.name,'bubble')));
  try{
   if(file){setActivity('readingFile');input={file:await fileData(file)};setActivity('connecting');}
   turn.controller.signal.throwIfAborted();
@@ -847,7 +864,6 @@ $('composer').onsubmit=async event=>{
   });
   if(result){
    await presentResponse(result,turn);
-   if(!result.error&&$('message').value.trim()===message)$('message').value='';
    if(result.generated){modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:result.generated.text.slice(0,2000)});while(modelHistory.length>8||modelHistory.reduce((n,m)=>n+m.content.length,0)>10000)modelHistory.shift();}
   }
  }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error.name==='TimeoutError'||error.name==='AbortError'?'provider_timeout':'network_error'});}finally{endTurn(turn);$('remove-file').click();$('isolation-consent').checked=false;}

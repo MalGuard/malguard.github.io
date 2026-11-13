@@ -42,7 +42,7 @@ function applyUi({mode='chat',locale='en',busy=false,selectedId='',modelLabel=''
   note.dataset.enabled=String(!!thinkingOn);
  }
  const thinking=$('thinking-toggle');if(thinking)thinking.setAttribute('aria-label',fa?'تفکر عمیق':'Thinking');
- const kicker=$('experience-kicker');if(kicker)kicker.textContent='MALGUARD / '+translations[mode].toUpperCase();
+ const kicker=$('experience-kicker');if(kicker)kicker.textContent=fa?'مالگارد / '+translations[mode]:'MALGUARD / '+translations[mode].toUpperCase();
  const title=$('title');
  if(title)title.textContent=(fa?{chat:'چطور می‌تونم کمکت کنم؟',worker:'چی رو می‌خوای بررسی کنیم؟',build:'چی می‌خوای بسازیم؟'}:{chat:'What can I help with?',worker:'What should we inspect?',build:'What shall we build?'})[mode];
  const prompts=EXPERIENCE_PROMPTS[mode][fa?'fa':'en'];
