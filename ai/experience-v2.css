@@ -711,6 +711,8 @@ body.mg-ai-v2 .composer-area>.jump-latest{
   position:absolute;
   bottom:calc(100% + 12px);
   left:50%;
+  right:auto;
+  inset-inline:auto;
   transform:translateX(-50%);
   z-index:12;
   display:inline-flex;
@@ -736,6 +738,7 @@ body.mg-ai-v2 .composer-area>.jump-latest:focus-visible{
   outline-offset:3px;
 }
 body.mg-ai-v2 .composer-area>.jump-latest span:first-child{font-size:17px;line-height:1}
+html[dir=rtl] body.mg-ai-v2 .composer-area>.jump-latest{left:50%;right:auto;inset-inline:auto;transform:translateX(-50%)}
 @media(max-width:760px){
  body.mg-ai-v2 .composer-area>.jump-latest{min-height:42px;padding:9px 16px}
 }

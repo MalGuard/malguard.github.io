@@ -1,3 +1,4 @@
+@font-face{font-family:Vazirmatn;src:url('/assets/fonts/vazirmatn-arabic.woff2') format('woff2');font-weight:100 900;font-display:swap}
 /* MalGuard AI — pro chat UI layer (loads last). Night = deep space, Day = bright sky. */
 body.mg-pro{
  --p-bg:#07080c;--p-side:rgba(14,15,20,.92);--p-surface:rgba(24,26,33,.86);--p-raised:#1b1d25;--p-hover:rgba(255,255,255,.07);
@@ -404,3 +405,14 @@ body.mg-pro .ai-account.pro-acct-profile>button:not(.account-close){margin-top:1
  body.mg-pro .ai-account{inset:auto 0 0 0!important;margin:0!important;width:100%!important;max-width:none!important;max-height:min(88dvh,760px)!important;border-radius:22px 22px 0 0!important;border-bottom:0!important;padding:22px 18px calc(18px + env(safe-area-inset-bottom))!important;animation:pro-sheet-up .22s cubic-bezier(.2,.8,.2,1)}
 }
 @media (prefers-reduced-motion:reduce){body.mg-pro .ai-account{animation:none!important}}
+
+.web-pro-badge{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:8px;padding:2px 7px;border-radius:999px;font:800 10px/1.2 Inter,Vazirmatn,system-ui,sans-serif;letter-spacing:.08em;color:#f6edff;background:linear-gradient(180deg,#9b6dff,#6d28d9);box-shadow:0 0 0 1px rgba(139,92,246,.5);vertical-align:middle}
+body.mg-pro .model-select-wrap{position:relative;display:inline-flex;align-items:center;gap:8px}
+body.mg-pro #stop-generation{display:inline-flex;align-items:center;justify-content:center;min-width:42px;min-height:42px;padding:0 12px;border-radius:12px;border:1px solid var(--p-border);background:var(--p-raised);color:var(--p-text);font-weight:650;cursor:pointer}
+body.mg-pro #stop-generation[hidden]{display:none!important}
+body.mg-pro #stop-generation:hover{background:var(--p-hover)}
+body.mg-pro .result.is-streaming .answer,body.mg-pro .result.is-typing .answer{min-height:6.5rem}
+body.mg-pro .result.is-streaming .code-block{min-height:4.5rem}
+body.mg-pro .result.is-streaming table{min-height:3rem}
+body.mg-pro .regenerate-response{display:inline-flex;align-items:center;gap:6px}
+body.mg-pro .composer-busy-hint{color:var(--p-muted);font-size:12px}
