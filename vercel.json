@@ -54,7 +54,7 @@
       ]
     },
     {
-      "source": "/game-scam-guard/:path*",
+      "source": "/game-scam-guard/(.*)",
       "headers": [
         {
           "key": "X-Content-Type-Options",
@@ -84,7 +84,7 @@
       ]
     },
     {
-      "source": "/ai/:path*",
+      "source": "/ai/(.*)",
       "headers": [
         {
           "key": "X-Content-Type-Options",
@@ -109,7 +109,7 @@
       ]
     },
     {
-      "source": "/code-preview/:path*",
+      "source": "/code-preview/(.*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
