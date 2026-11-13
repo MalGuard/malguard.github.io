@@ -68,7 +68,7 @@ web.post('/api/game-scam-guard/auth/session',express.json(),(req,res)=>{
  if(req.body?.sessionToken!=='synthetic-session-valid-user')return res.status(401).json({error:'invalid_session'});
  res.json({email:'synthetic@example.com',username:'fixture_user',expiresAt:Date.now()+600000});
 });
-web.use('/api/malguard-ai',(req,res,next)=>{if(req.method==='POST')requests++;next();},createApp({orchestrator:createOrchestrator(undefined,testModel),enabled:true,publicOrigin:base,log:()=>{}}));web.use(express.static(root));
+web.use('/api/malguard-ai',(req,res,next)=>{if(req.method==='POST')requests++;next();},createApp({orchestrator:createOrchestrator(undefined,testModel),enabled:true,publicOrigin:base,log:()=>{},authorize:async()=>true}));web.use(express.static(root));
 const browser=await chromium.launch(launchOptions('chromium'));
 const skipWelcome=async context=>{await context.setExtraHTTPHeaders({'x-test-synthetic-login':'yes'});await context.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');localStorage.setItem('malguard.ai.session.v1','synthetic-session-valid-user');});};
 try{
