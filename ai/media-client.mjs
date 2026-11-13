@@ -1,5 +1,6 @@
 // Opt-in media client. Provider keys and media quota enforcement stay on Vercel.
-const ROOT='https://models.malguard.site';
+import {modelsApiRoot} from './api-root.mjs';
+const ROOT=modelsApiRoot();
 export const MEDIA_LIMIT_BYTES=1024*1024;
 export function mediaFromCatalog(models){
  const m=models?.mediaCapabilities;

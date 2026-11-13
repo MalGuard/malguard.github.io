@@ -11,6 +11,9 @@
     "api/malguard-ai.js": {
       "maxDuration": 120,
       "includeFiles": "services/game-scam-guard/server/{preview-worker.mjs,preview-renderer.mjs,artifact-worker.mjs,artifact-engine.js,cloud-execution-worker.py,vendor/**}"
+    },
+    "api/preview-backend.js": {
+      "maxDuration": 120
     }
   },
   "rewrites": [
@@ -25,6 +28,22 @@
     {
       "source": "/api/malguard-ai/:endpoint",
       "destination": "/api/malguard-ai?endpoint=:endpoint"
+    },
+    {
+      "source": "/api/public-models",
+      "destination": "/api/preview-backend?path=public-models"
+    },
+    {
+      "source": "/api/public-model-chat",
+      "destination": "/api/preview-backend?path=public-model-chat"
+    },
+    {
+      "source": "/api/account-usage",
+      "destination": "/api/preview-backend?path=account-usage"
+    },
+    {
+      "source": "/api/public-media",
+      "destination": "/api/preview-backend?path=public-media"
     }
   ],
   "headers": [
