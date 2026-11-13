@@ -2,6 +2,10 @@ let library;
 const origins=new Set(['https://malguard.site','https://www.malguard.site','https://malguard.github.io']);
 const limits=new Map();
 module.exports=async(req,res)=>{
+ if(process.env.VERCEL_ENV==='preview'){
+  const {handlePreviewBackendProxy}=await import('../services/malguard-ai/server/preview-backend-proxy.mjs');
+  return handlePreviewBackendProxy(req,res);
+ }
  res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Vary','Origin');
  const origin=req.headers.origin;if(!origins.has(origin))return res.status(403).json({error:'origin_denied'});
  res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');

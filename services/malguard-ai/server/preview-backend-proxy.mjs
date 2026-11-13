@@ -16,7 +16,9 @@ export const ALLOWED_ROUTES=Object.freeze({
   'auth-verify':Object.freeze({method:'POST',path:'/api/game-scam-guard/auth/verify',target:'account'}),
   'auth-password':Object.freeze({method:'POST',path:'/api/game-scam-guard/auth/password',target:'account'}),
   'auth-session':Object.freeze({method:'POST',path:'/api/game-scam-guard/auth/session',target:'account'}),
-  'auth-availability':Object.freeze({method:'POST',path:'/api/game-scam-guard/auth/availability',target:'account'})
+  'auth-availability':Object.freeze({method:'POST',path:'/api/game-scam-guard/auth/availability',target:'account'}),
+  'malguard-library-get':Object.freeze({method:'GET',path:'/api/malguard-library',target:'account'}),
+  'malguard-library-post':Object.freeze({method:'POST',path:'/api/malguard-library',target:'account'})
 });
 
 const SAFE_RESPONSE_HEADERS=['content-type','cache-control','retry-after','x-ratelimit-remaining-requests','x-ratelimit-remaining-tokens'];
@@ -38,6 +40,10 @@ export function resolveRoute(req={}){
     if(models)key=models[1];
     const auth=url.pathname.match(/^\/api\/(game-scam-guard)\/auth\/(status|start|verify|password|session|availability)\/?$/);
     if(auth)key=`auth-${auth[2]}`;
+    if(/^\/api\/malguard-library\/?$/.test(url.pathname)){
+      const method=String(req.method||'GET').toUpperCase();
+      key=method==='POST'?'malguard-library-post':'malguard-library-get';
+    }
   }
   const route=ALLOWED_ROUTES[key];
   if(!route)return null;
@@ -70,6 +76,11 @@ function requestHeaders(req,route,bypass){
     headers['X-Vercel-Protection-Bypass']=bypass;
     const authorization=req.headers?.authorization;
     if(typeof authorization==='string'&&authorization)headers.Authorization=authorization;
+  }
+  if(route.path==='/api/malguard-library'){
+    const authorization=req.headers?.authorization;
+    if(typeof authorization==='string'&&authorization)headers.Authorization=authorization;
+    headers.Origin='https://malguard.site';
   }
   return headers;
 }

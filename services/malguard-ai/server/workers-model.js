@@ -1,6 +1,6 @@
 import {httpFailure} from '../../../ai/service-errors.mjs';
 import {fetchPublic} from '../../game-scam-guard/server/network.js';
-import {PRODUCT_IDENTITY_POLICY} from '../../../ai/identity.mjs';
+import {PRODUCT_IDENTITY_POLICY} from '../../../ai/identity-policy.mjs';
 // Contract discovered from the owner's existing Worker health/API, not a new
 // account or copied private implementation. Credentials come only from runtime.
 const models={fast:'@cf/meta/llama-3.2-3b-instruct',strong:'@cf/meta/llama-3.3-70b-instruct-fp8-fast',fallback:'@cf/meta/llama-3.1-8b-instruct-fp8'};

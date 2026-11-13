@@ -2,7 +2,7 @@ import {httpFailure} from '../../../ai/service-errors.mjs';
 import {fetchPublic} from '../../game-scam-guard/server/network.js';
 import {createWorkersModel} from './workers-model.js';
 import {remoteModel} from './provider-gateway.js';
-import {PRODUCT_IDENTITY_POLICY} from '../../../ai/identity.mjs';
+import {PRODUCT_IDENTITY_POLICY} from '../../../ai/identity-policy.mjs';
 // Reuses the existing Vercel variable name. Never enable OpenAI or paid fallback.
 export function createModel({env=process.env,transport=fetchPublic}={}) {
   if(env.VERCEL&&!env.MALGUARD_WORKER_PROXY_TOKEN&&(!env.MALGUARD_AI_MODEL_PROVIDER||env.MALGUARD_AI_MODEL_PROVIDER==='workers_ai'))return remoteModel;
