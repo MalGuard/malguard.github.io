@@ -81,3 +81,17 @@ test('preview CSP and Web Pro badge are present on the AI shell',()=>{
   assert.match(html,/id="stop-generation"/);
   assert.match(html,/alt="MalGuard AI"/);
 });
+test('sidebar Settings is translated in fa and /ai/ CSP still overrides ACAO without dropping connect-src',()=>{
+  const nav=readFileSync(new URL('../../../ai/navigation.mjs',import.meta.url),'utf8');
+  assert.match(nav,/settingsLabel/);
+  assert.match(nav,/const settingsWord=fa\?'تنظیمات':'Settings'/);
+  assert.match(nav,/settingsSummary.setAttribute\('aria-label',settingsWord\)/);
+  const vercel=JSON.parse(readFileSync(new URL('../../../vercel.json',import.meta.url),'utf8'));
+  const ai=vercel.headers.find(h=>h.source==='/ai/(.*)');
+  assert.ok(ai);
+  const acao=ai.headers.find(h=>h.key==='Access-Control-Allow-Origin');
+  assert.equal(acao?.value,'');
+  const csp=ai.headers.find(h=>h.key==='Content-Security-Policy')?.value||'';
+  assert.match(csp,/https:\/\/models\.malguard\.site/);
+  assert.match(csp,/malware-ai-git-web-pro-p0-mcazarderakhsh-4187\.vercel\.app/);
+});
