@@ -51,24 +51,34 @@ test('explicit model preparation downloads only a validated model and carries no
  worker.onmessage({data:{progress:40}});worker.onmessage({data:{prepared:true}});
  assert.equal(await ready,true);assert.deepEqual(progress,[40]);chat.stop();
 });
+async function waitForWorker(workers,match=()=>true,timeout=1000){
+ const start=Date.now();
+ while(!workers[0]?.payload||!match(workers[0])){
+  if(Date.now()-start>timeout)throw new Error('worker was not started');
+  await new Promise(r=>setTimeout(r,0));
+ }
+ return workers[0];
+}
 test('local work stays in a worker, allows cancellation and preserves response metadata',async()=>{
  const workers=[],progress=[],phases=[];
  const chat=createLocalChat({workerFactory:()=>{const w={terminated:false,postMessage(payload){this.payload=payload;},terminate(){this.terminated=true;}};workers.push(w);return w;}});
  await assert.rejects(chat.respond({model:'arbitrary',message:'hello'}),/invalid_local_model/);assert.equal(workers.length,0);
  const first=chat.respond({model:'local_fast',message:'سلام',locale:'fa',history:[]},p=>progress.push(p),()=>phases.push('thinking'));
- assert.equal(workers[0].payload.model,'local_fast');assert.match(workers[0].payload.messages[0].content,/فارسی/);
- workers[0].onmessage({data:{progress:25}});assert.deepEqual(progress,[25]);
- workers[0].onmessage({data:{phase:'model_started'}});assert.deepEqual(phases,['thinking']);assert.deepEqual(progress,[25]);
- workers[0].onmessage({data:{generated:{text:'سلام',provider:'on_device'}}});assert.equal((await first).provider,'on_device');
+ const worker=await waitForWorker(workers,w=>w.payload.model==='local_fast');
+ assert.equal(worker.payload.model,'local_fast');assert.match(worker.payload.messages[0].content,/فارسی/);
+ worker.onmessage({data:{progress:25}});assert.deepEqual(progress,[25]);
+ worker.onmessage({data:{phase:'model_started'}});assert.deepEqual(phases,['thinking']);assert.deepEqual(progress,[25]);
+ worker.onmessage({data:{generated:{text:'سلام',provider:'on_device'}}});assert.equal((await first).provider,'on_device');
  const second=chat.respond({model:'local_medium',message:'Explain DNS',locale:'en',history:[]},p=>progress.push(p*2));
- workers[0].onmessage({data:{progress:30}});assert.deepEqual(progress,[25,60]);chat.stop();await assert.rejects(second,/local_cancelled/);assert.equal(workers[0].terminated,true);
+ const next=await waitForWorker(workers,w=>w.payload.model==='local_medium');
+ next.onmessage({data:{progress:30}});assert.deepEqual(progress,[25,60]);chat.stop();await assert.rejects(second,/local_cancelled/);assert.equal(next.terminated,true);
 });
 test('local input is bounded and timeout releases worker resources without a cloud fallback',async()=>{
  let terminated=0;
  const chat=createLocalChat({timeout:5,workerFactory:()=>({postMessage(){},terminate(){terminated++;}})});
  await assert.rejects(chat.respond({model:'local_fast',message:'a'.repeat(1201),history:[]}),/local_input_too_long/);
  await assert.rejects(chat.respond({model:'local_fast',message:'Hello',locale:'en',history:[]}),/local_cancelled/);assert.equal(terminated,1);
- const messages=localMessages('Hello','en',Array.from({length:8},()=>({role:'user',content:'a'.repeat(500)})));assert.equal(messages.length,4);assert.equal(messages[1].content.length,100);
+ const messages=await localMessages('Hello','en',Array.from({length:8},()=>({role:'user',content:'a'.repeat(500)})));assert.equal(messages.length,4);assert.equal(messages[1].content.length,100);
 });
 test('automatic research checks lookup and model consent before emitting events or calling providers',async()=>{
  let calls=0,events=0;

@@ -224,3 +224,46 @@ test('preview auth proxy forwards allowlisted account paths to the production ac
  assert.equal(sessionForward.headers.Cookie,undefined);
  assert.equal(session.headers['set-cookie'],undefined);
 });
+
+test('preview library proxy forwards GET and POST to the production account host with Origin and Authorization, never the bypass',async()=>{
+ const secret='unit-test-bypass-secret-value-32ch';
+ const env={VERCEL_ENV:'preview',[PREVIEW_BYPASS_ENV]:secret};
+ const sent=[];
+ const get=mockRes();
+ await handlePreviewBackendProxy({
+  method:'GET',url:'/api/malguard-library',headers:{accept:'application/json',authorization:'Bearer session-token-placeholder'}
+ },get,{env,fetchImpl:async(url,options)=>{
+  sent.push({url,headers:options.headers,method:options.method,body:options.body});
+  return new Response(JSON.stringify({chats:[]}),{status:200,headers:{'Content-Type':'application/json'}});
+ }});
+ assert.equal(get.statusCode,200);
+ assert.equal(sent[0].url,PRODUCTION_ACCOUNT_ORIGIN+'/api/malguard-library');
+ assert.equal(sent[0].headers['X-Vercel-Protection-Bypass'],undefined);
+ assert.equal(sent[0].headers.Authorization,'Bearer session-token-placeholder');
+ assert.equal(sent[0].headers.Origin,'https://malguard.site');
+ assert.equal(sent[0].headers.Cookie,undefined);
+
+ const post=mockRes();
+ await handlePreviewBackendProxy({
+  method:'POST',url:'/api/malguard-library',headers:{'content-type':'application/json',authorization:'Bearer session-token-placeholder'},body:{chats:[{id:'c1'}]}
+ },post,{env,fetchImpl:async(url,options)=>{
+  sent.push({url,headers:options.headers,method:options.method,body:String(options.body)});
+  return new Response(JSON.stringify({ok:true}),{status:200,headers:{'Content-Type':'application/json'}});
+ }});
+ assert.equal(post.statusCode,200);
+ assert.equal(sent[1].url,PRODUCTION_ACCOUNT_ORIGIN+'/api/malguard-library');
+ assert.equal(sent[1].headers['X-Vercel-Protection-Bypass'],undefined);
+ assert.equal(sent[1].headers.Authorization,'Bearer session-token-placeholder');
+ assert.equal(sent[1].headers.Origin,'https://malguard.site');
+ assert.match(sent[1].body,/c1/);
+
+ const blocked=mockRes();
+ await handlePreviewBackendProxy({method:'DELETE',url:'/api/malguard-library',headers:{}},blocked,{env,fetchImpl:async()=>{throw new Error('should_not_fetch');}});
+ assert.equal(blocked.statusCode,404);
+
+ const production=mockRes();
+ let called=false;
+ await handlePreviewBackendProxy({method:'GET',url:'/api/malguard-library',headers:{}},production,{env:{VERCEL_ENV:'production',[PREVIEW_BYPASS_ENV]:secret},fetchImpl:async()=>{called=true;throw new Error('should_not_fetch');}});
+ assert.equal(production.statusCode,404);
+ assert.equal(called,false);
+});

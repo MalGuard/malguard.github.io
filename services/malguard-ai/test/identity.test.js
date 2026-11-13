@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {answerIdentityQuestion,PRODUCT_IDENTITY_POLICY} from '../../../ai/identity.mjs';
+import {answerIdentityQuestion} from '../../../ai/identity.mjs';
+import {PRODUCT_IDENTITY_POLICY} from '../../../ai/identity-policy.mjs';
 
 const assertIdentity=(query,kind)=>assert.equal(answerIdentityQuestion(query)?.kind,kind,query);
 
