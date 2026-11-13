@@ -44,7 +44,9 @@ test('search query uses the full question and recent conversation, not only the 
     {role:'assistant',content:'Sure.'}
   ]);
   assert.match(query,/capital of France/);
-  assert.match(query,/European cities/);
+  // Round 9: a full question is sent as is; unrelated earlier turns are not prepended.
+  assert.doesNotMatch(query,/European cities/);
+  assert.match(buildSearchQuery('And the fix?',[{role:'user',content:'What is CVE-2024-3094?'}]),/CVE-2024-3094.*And the fix\?/);
   assert.ok(!/[{}<>]/.test(query));
   const punct=buildSearchQuery('قیمت دلار امروز چند است؟');
   assert.match(punct,/دلار/);
@@ -283,4 +285,19 @@ test('round 8: sidebar navigation a11y labels switch to Persian',()=>{
  const nav=readFileSync(new URL('../../../ai/navigation.mjs',import.meta.url),'utf8');
  for(const [en,fa] of [['MalGuard navigation','ناوبری مالگارد'],['Toggle sidebar','باز و بسته کردن نوار کناری'],['Close sidebar','بستن نوار کناری'],['Close navigation','بستن ناوبری']])
   assert.ok(nav.includes(`fa?'${fa}':'${en}'`),en);
+});
+
+test('round 9: theme and language tooltips are Persian in Persian mode, and the collapsed auto choice names the real model', () => {
+  const read = (f) => readFileSync(new URL('../../../ai/' + f, import.meta.url), 'utf8');
+  const pro = read('pro-ui.mjs');
+  assert.match(pro, /تغییر زبان به انگلیسی/);
+  assert.match(pro, /پوسته: خودکار/);
+  assert.match(pro, /attributeFilter:\['lang'\]/);
+  const app = read('app.js');
+  assert.match(app, /function autoChoiceLabel\(/);
+  assert.match(app, /autoChoiceLabel\(m\.id,m\.label\)/);
+  const errors = read('error-message.mjs');
+  assert.match(errors, /web_search_untrusted_only:'نتوانستم/);
+  assert.match(errors, /web_search_untrusted_only:'I could not confirm/);
+  assert.match(read('index.html'), /app\.js\?v=web-pro-p0-20261113-r9/);
 });
