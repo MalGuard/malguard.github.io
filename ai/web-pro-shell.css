@@ -268,3 +268,76 @@ html:root body.mg-ai-v2 .composer-hints{
     border-radius:12px!important;
   }
 }
+
+/* Higher specificity so the send button cannot be pushed outside the shell. */
+html:root body.mg-pro.mg-ai-v2 .composer-shell,
+html:root body.mg-pro.mg-ai-v2 .composer-shell.pro-compact{
+  direction:inherit!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  padding:16px!important;
+  gap:8px!important;
+  border-radius:24px!important;
+  min-height:112px!important;
+}
+html:root body.mg-pro.mg-ai-v2 .composer-footer,
+html:root body.mg-pro.mg-ai-v2 .composer-shell.pro-compact .composer-footer,
+html:root body.mg-pro.mg-ai-v2 .composer-shell .composer-footer{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  direction:inherit!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  gap:8px!important;
+  box-sizing:border-box!important;
+}
+html:root body.mg-pro.mg-ai-v2 .composer-actions,
+html:root body.mg-pro.mg-ai-v2 .composer-shell .composer-actions,
+html:root body.mg-pro.mg-ai-v2 .composer-shell.pro-compact .composer-actions{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  direction:inherit!important;
+  flex:1 1 auto!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+}
+html:root body.mg-pro.mg-ai-v2 #send,
+html:root body.mg-pro.mg-ai-v2 #attach-toggle,
+html:root body.mg-pro.mg-ai-v2 .composer-shell #send,
+html:root body.mg-pro.mg-ai-v2 .composer-shell #attach-toggle{
+  width:36px!important;
+  height:36px!important;
+  min-width:36px!important;
+  min-height:36px!important;
+  margin:0!important;
+  transform:none!important;
+  opacity:1!important;
+  flex:0 0 36px!important;
+  box-sizing:border-box!important;
+}
+html:root body.mg-pro.mg-ai-v2 #send:disabled,
+html:root body.mg-pro.mg-ai-v2 #send:disabled:hover{
+  opacity:1!important;
+  background:color-mix(in srgb,var(--wp-accent,#8b5cf6) 40%,var(--wp-raised,#1c1c24))!important;
+  color:color-mix(in srgb,var(--wp-accent-ink,#f6edff) 70%,transparent)!important;
+}
+@media (max-width:760px){
+  html:root body.mg-pro.mg-ai-v2 .composer-shell,
+  html:root body.mg-pro.mg-ai-v2 .composer-shell.pro-compact{
+    padding:16px!important;
+    min-height:120px!important;
+  }
+}
