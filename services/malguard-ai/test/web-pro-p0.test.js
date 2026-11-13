@@ -267,3 +267,14 @@ test('preview library proxy forwards GET and POST to the production account host
  assert.equal(production.statusCode,404);
  assert.equal(called,false);
 });
+
+test('round 7: no getter-only dataset assignment that throws in module code before a streamed reply starts',()=>{
+ for(const file of ['app.js','research-ui.mjs','pro-ui.mjs','experience-v2.mjs','cloudflare-models.mjs']){
+  const source=readFileSync(new URL('../../../ai/'+file,import.meta.url),'utf8');
+  assert.doesNotMatch(source,/Object\.assign\([^;]*\{\s*dataset\s*:/,file+' assigns dataset via Object.assign');
+ }
+ const app=readFileSync(new URL('../../../ai/app.js',import.meta.url),'utf8');
+ assert.match(app,/function roleNode\(node,role\)\{node\.dataset\.role=role;return node;\}/);
+ assert.match(app,/'Search depth':'عمق جست‌وجو'/);
+ assert.match(app,/function noteAutoModel\(generated\)/);
+});

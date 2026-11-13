@@ -296,7 +296,7 @@ function paintResponseMeta(card,generated){
   const lines=[...details.querySelectorAll('p')];
   const target=lines.find(p=>p.dataset.role==='model')||lines[1]||null;
   if(target)target.textContent=caption;
-  else details.append(Object.assign(el('p',caption),{dataset:{role:'model'}}));
+  else details.append(roleNode(el('p',caption),'model'));
  }
  const existing=card.querySelector('.research-evidence');
  if(existing)existing.remove();
@@ -363,6 +363,27 @@ async function presentResponse(response,turn,{streamed=false}={}){
  }
 }
 function el(tag,value,className){const node=document.createElement(tag);if(value!==undefined)node.textContent=value;if(className)node.className=className;return node;}
+// dataset is a getter-only DOM property: set keys on it, never assign the object (throws in module code).
+function roleNode(node,role){node.dataset.role=role;return node;}
+const ARIA_FA=Object.freeze({'MalGuard AI workspaces':'فضاهای کاری مل‌گارد','MalGuard AI modes':'حالت‌های مل‌گارد','Chat':'گفت‌وگو','Work':'کار','Code':'کد','Conversation mode':'حالت گفت‌وگو','MalGuard AI Help Center':'مرکز راهنمای مل‌گارد','Settings':'تنظیمات','Suggested prompts':'پیشنهادها','Conversation':'گفت‌وگو','Security workspace':'فضای امنیتی','New model':'مدل جدید','Jump to latest message':'رفتن به آخرین پیام','Remove image action':'حذف کار تصویر','Search depth':'عمق جست‌وجو','Send':'ارسال','Stop':'توقف','Device hardware check':'بررسی سخت‌افزار دستگاه','Search the web':'جست‌وجوی اینترنتی','MalGuard AI':'هوش مصنوعی مل‌گارد'});
+function localizeAria(ui){
+ for(const node of document.querySelectorAll('[aria-label]')){
+  const en=node.dataset.ariaEn||node.getAttribute('aria-label');
+  if(!Object.hasOwn(ARIA_FA,en))continue;
+  node.dataset.ariaEn=en;node.setAttribute('aria-label',ui==='fa'?ARIA_FA[en]:en);
+ }
+ const depthLabel=document.querySelector('label[for="web-search-depth"]');if(depthLabel)depthLabel.textContent=ui==='fa'?'عمق جست‌وجو':'Search depth';
+}
+// Auto picks a real model per turn; show that model next to Auto instead of a bare "Auto · Chat".
+function noteAutoModel(generated){
+ const select=$('model'),opt=select?.selectedOptions?.[0];
+ if(!opt||!/_auto$/.test(opt.value)||!generated)return;
+ const label=String(generated.auto?.selectedLabel||generated.modelLabel||generated.model||'').slice(0,80);
+ if(!label)return;
+ autoRealModel[opt.value]=label;opt.dataset.realModel=label;opt.textContent=(chromeLocale()==='fa'?'خودکار':'Auto')+' · '+label;
+}
+const autoRealModel={};
+
 function responseIcon(kind){
  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
  for(const [name,value]of Object.entries({width:'16',height:'16',viewBox:'0 0 24 24',fill:'none','aria-hidden':'true'}))svg.setAttribute(name,value);
@@ -374,6 +395,7 @@ function applyChromeLocale(){
  const ui=chromeLocale();
  document.documentElement.lang=ui;document.documentElement.dir=ui==='fa'?'rtl':'ltr';
  document.body.classList.toggle('is-persian-chrome',ui==='fa');
+ localizeAria(ui);
  $('language').textContent=locale==='fa'?'English':'فارسی';
  navigation.language(ui);
  const hint=$('composer-keyboard-hint');if(hint)hint.textContent=t('keyboardHint');
@@ -458,7 +480,7 @@ function renderStatus(){
  if(models.length){
   const choices=[{value:'',label:t('chooseModel'),disabled:true}];
   for(const m of models){
-   const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):m.label;
+   const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):/_auto$/.test(m.id)&&autoRealModel[m.id]?(chromeLocale()==='fa'?'خودکار':'Auto')+' · '+autoRealModel[m.id]:m.label;
    choices.push({value:m.id,label:isNewCloudModel(m.id)?label+' · NEW':label,disabled:m.state!=='configured'||activeMode==='build'&&m.mode!=='code'&&!Object.hasOwn(desktopModels,m.id),isNew:isNewCloudModel(m.id)});
   }
   choices.push({value:'__downloads',label:t('modelDownloads'),disabled:localOfferPending});
@@ -567,7 +589,7 @@ function renderResponse(response,remember=true){
  if(response.message){const n=el('article',undefined,response.interrupted?'reply-stopped':'result');n.append(el('p',response.interrupted?t('stopped'):response.message));$('conversation').append(n);return;}
  if(response.generated){
   const n=el('article',undefined,'result assistant-message'),answer=el('div',undefined,'answer');renderRichText(answer,response.generated.text,chromeLocale());answer.dir='auto';n.ariaLabel='MalGuard AI';
-  const actions=el('div',undefined,'response-actions'),details=el('details',undefined,'response-details'),summary=el('summary'),detailLabel=el('span',t('responseDetails'),'sr-only');detailLabel.dataset.i18n='responseDetails';summary.title=t('responseDetails');summary.append(responseIcon('details'),detailLabel);details.append(summary,el('p',t('generated')),Object.assign(el('p',modelCaption(response.generated)||''),{dataset:{role:'model'}}));
+  const actions=el('div',undefined,'response-actions'),details=el('details',undefined,'response-details'),summary=el('summary'),detailLabel=el('span',t('responseDetails'),'sr-only');detailLabel.dataset.i18n='responseDetails';summary.title=t('responseDetails');summary.append(responseIcon('details'),detailLabel);details.append(summary,el('p',t('generated')),roleNode(el('p',modelCaption(response.generated)||''),'model'));
    if(response.generated.webSearch?.sources?.length)details.append(el('p',t('researchLimit')));
    if(response.generated.auto?.selectedModelId)details.append(el('p',(locale==='fa'?'مدل خودکار: ':'Auto model: ')+(response.generated.auto.selectedLabel||response.generated.auto.selectedModelId)));
   const copy=el('button',undefined,'copy-response'),copyLabel=el('span',t('copy'),'sr-only');copyLabel.dataset.i18n='copy';copy.type='button';copy.title=t('copy');copy.append(responseIcon('copy'),copyLabel);copy.onclick=async()=>{try{await navigator.clipboard.writeText(response.generated.text);copyLabel.textContent=t('copied');copy.title=t('copied');setTimeout(()=>{copyLabel.textContent=t('copy');copy.title=t('copy');},1800);}catch{copyLabel.textContent=t('copy');}};
@@ -678,7 +700,7 @@ async function runBuild(message){
  if(!native&&activeWebMode()!=='off'&&!$('lookup-consent').checked){if(!await requestSearchConsent()||activeMode!=='build'||$('message').value.trim()!==message)return;}
  builder.consumeShare();const turn=beginTurn('thinking');consumeComposer(message);history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
- else{lastCloudPrompt=message;generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled&&cfThinkingByMode.code,...webOptions(message),...cloudStreamOptions(turn),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
+ else{lastCloudPrompt=message;generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled&&cfThinkingByMode.code,...webOptions(message),...cloudStreamOptions(turn),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});noteAutoModel(generated);if(generated.usage){accountUsage=generated.usage;renderStatus();}}
  if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn,{streamed:!native&&!proposal});if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));
  }catch(error){if(turn.controller.signal.aborted)stopped(turn);else showError({error:error?.code|| (error.name==='TimeoutError'?'provider_timeout':'model_unavailable'),retryAfterSeconds:error?.retryAfterSeconds,retryAt:error?.retryAt});}finally{endTurn(turn);}
 }
@@ -886,6 +908,7 @@ $('composer').onsubmit=async event=>{
   history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
   try{
    lastCloudPrompt=message;const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled&&cfThinkingByMode[directMode],...webOptions(message),...cloudStreamOptions(turn),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
+    noteAutoModel(generated);
     if(generated.usage){accountUsage=generated.usage;renderStatus();}
    await presentResponse({generated},turn,{streamed:true});
    modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});
