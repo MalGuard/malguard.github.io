@@ -296,8 +296,9 @@ test('round 9: theme and language tooltips are Persian in Persian mode, and the 
   const app = read('app.js');
   assert.match(app, /function autoChoiceLabel\(/);
   assert.match(app, /autoChoiceLabel\(m\.id,m\.label\)/);
+  assert.match(app, /خودکار \(انتخاب هوشمند\) · کار/);
   const errors = read('error-message.mjs');
   assert.match(errors, /web_search_untrusted_only:'نتوانستم/);
   assert.match(errors, /web_search_untrusted_only:'I could not confirm/);
-  assert.match(read('index.html'), /app\.js\?v=web-pro-p0-20261113-r9/);
+  assert.match(read('index.html'), /app\.js\?v=web-pro-p0-20261113-r9b/);
 });

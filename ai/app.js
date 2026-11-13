@@ -517,6 +517,7 @@ function renderStatus(){
    control.replaceChildren();
    for(const m of workChoices){const opt=el('option',isNewCloudModel(m.id)?m.label+' · NEW':m.label);opt.value=m.id;if(isNewCloudModel(m.id))opt.classList.add('mg-new-option');control.append(opt);}
   }
+  for(const opt of control.options)if(/_auto$/.test(opt.value)){const want=autoRealModel[opt.value]?autoChoiceLabel(opt.value,opt.textContent):(chromeLocale()==='fa'?'خودکار (انتخاب هوشمند) · کار':'Auto (smart selection) · Work');if(opt.textContent!==want)opt.textContent=want;}
   control.value=workChoices.some(m=>m.id===old&&m.available)?old:workChoices.some(m=>m.id===CF_DEFAULTS.work&&m.available)?CF_DEFAULTS.work:workChoices.find(m=>m.available)?.id||'';
  }
  $('model').disabled=busy||activeMode==='worker';$('model').hidden=activeMode==='worker';
