@@ -1,10 +1,20 @@
 // Reuse the existing first-party account API. No provider keys or credentials in storage.
+import {isFrontendPreviewHost} from './api-root.mjs';
 const PRODUCTION_HOSTS=['malguard.site','www.malguard.site','malguard.github.io'];
+export const PRODUCTION_ACCOUNT_ORIGIN='https://game-scam-guard-connected.vercel.app';
 const SESSION_KEY='malguard.ai.session.v1';
 const savedSession=()=>{try{const token=localStorage.getItem(SESSION_KEY);if(token)return token;}catch{}try{return sessionStorage.getItem(SESSION_KEY);}catch{return null;}};
 const saveSession=token=>{let persisted=false;try{if(token){localStorage.setItem(SESSION_KEY,token);persisted=true;}else localStorage.removeItem(SESSION_KEY);}catch{}try{if(token&&!persisted)sessionStorage.setItem(SESSION_KEY,token);else sessionStorage.removeItem(SESSION_KEY);}catch{}};
+export function usesProductionAccountHost(hostname=globalThis.location?.hostname||''){
+ return PRODUCTION_HOSTS.includes(hostname)||isFrontendPreviewHost(hostname);
+}
 export function accountApiBase(hostname=globalThis.location?.hostname||''){
- return PRODUCTION_HOSTS.includes(hostname)?'https://game-scam-guard-connected.vercel.app':'';
+ // Production stays on the account host. Preview browsers cannot call it directly
+ // (CORS 403), so they use same-origin /api/game-scam-guard/auth/* which the
+ // preview-only proxy forwards to PRODUCTION_ACCOUNT_ORIGIN.
+ if(PRODUCTION_HOSTS.includes(hostname))return PRODUCTION_ACCOUNT_ORIGIN;
+ if(isFrontendPreviewHost(hostname))return '';
+ return '';
 }
 export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
  let sessionToken=null,profile=null,dialog,controller,pendingSignup,resendTimer,expiryTimer;
@@ -85,6 +95,6 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
   const pane=shell(text('Preparing sign-in…','در حال آماده‌سازی ورود…'));try{const status=await request('status');if(status.configured!==true||status.persistentAccounts!==true)throw Error('unavailable');if(controller)authForm();}catch(e){if(controller&&!controller.signal.aborted){const err=feedback(pane);failure(e,err);action(pane,'Retry','تلاش دوباره',()=>{close();button.click();});}}
  };addEventListener('storage',event=>{if(event.key===SESSION_KEY&&!event.newValue&&sessionToken){sessionToken=null;profile=null;refresh();onChange(null);}});refresh();
  async function authStatus(){const response=await fetch(`${accountApiBase()}/api/game-scam-guard/auth/status`,{credentials:'omit',signal:AbortSignal.timeout(4000)});const raw=await response.text();if(!response.ok||raw.length>65536)throw Error('unavailable');let data;try{data=JSON.parse(raw);}catch{throw Error('unavailable');}return data;}
- return {refresh,restore,getToken:()=>sessionToken,hasSavedSession:()=>!!savedSession(),authStatus,usesProductionAuth:()=>PRODUCTION_HOSTS.includes(location.hostname),open(signup=false){if(dialog)return;controller=new AbortController();if(signup)authForm(true);else button.click();}};
+ return {refresh,restore,getToken:()=>sessionToken,hasSavedSession:()=>!!savedSession(),authStatus,usesProductionAuth:()=>usesProductionAccountHost(location.hostname),open(signup=false){if(dialog)return;controller=new AbortController();if(signup)authForm(true);else button.click();}};
 }
 

@@ -1,17 +1,27 @@
-// Preview-only same-origin proxy to the malware-ai Preview backend.
-// The bypass secret stays on the server and is never written to logs or responses.
+// Preview-only same-origin proxy.
+// Backend routes forward to the malware-ai Preview and add the protection bypass.
+// Account routes forward to the production account host and never send that bypass.
+// The bypass secret, tokens, codes and cookies are never written to logs or responses.
 export const PREVIEW_BACKEND_ORIGIN='https://malware-ai-git-web-pro-p0-mcazarderakhsh-4187.vercel.app';
+export const PRODUCTION_ACCOUNT_ORIGIN='https://game-scam-guard-connected.vercel.app';
 export const PREVIEW_BYPASS_ENV='MALWARE_AI_PREVIEW_BYPASS';
 
 export const ALLOWED_ROUTES=Object.freeze({
-  'public-models':Object.freeze({method:'GET',path:'/api/public-models'}),
-  'public-model-chat':Object.freeze({method:'POST',path:'/api/public-model-chat'}),
-  'account-usage':Object.freeze({method:'GET',path:'/api/account-usage'}),
-  'public-media':Object.freeze({method:'POST',path:'/api/public-media'})
+  'public-models':Object.freeze({method:'GET',path:'/api/public-models',target:'backend'}),
+  'public-model-chat':Object.freeze({method:'POST',path:'/api/public-model-chat',target:'backend'}),
+  'account-usage':Object.freeze({method:'GET',path:'/api/account-usage',target:'backend'}),
+  'public-media':Object.freeze({method:'POST',path:'/api/public-media',target:'backend'}),
+  'auth-status':Object.freeze({method:'GET',path:'/api/game-scam-guard/auth/status',target:'account'}),
+  'auth-start':Object.freeze({method:'POST',path:'/api/game-scam-guard/auth/start',target:'account'}),
+  'auth-verify':Object.freeze({method:'POST',path:'/api/game-scam-guard/auth/verify',target:'account'}),
+  'auth-password':Object.freeze({method:'POST',path:'/api/game-scam-guard/auth/password',target:'account'}),
+  'auth-session':Object.freeze({method:'POST',path:'/api/game-scam-guard/auth/session',target:'account'}),
+  'auth-availability':Object.freeze({method:'POST',path:'/api/game-scam-guard/auth/availability',target:'account'})
 });
 
 const SAFE_RESPONSE_HEADERS=['content-type','cache-control','retry-after','x-ratelimit-remaining-requests','x-ratelimit-remaining-tokens'];
 const MAX_BODY=150000;
+const AUTH_PATHS=new Set(['status','start','verify','password','session','availability']);
 
 export function isPreviewEnv(env=process.env){
   return env?.VERCEL_ENV==='preview';
@@ -20,9 +30,14 @@ export function isPreviewEnv(env=process.env){
 export function resolveRoute(req={}){
   const url=new URL(req.url||'/','http://preview.local');
   let key=String(url.searchParams.get('path')||'').trim();
+  if(!AUTH_PATHS.has(key.replace(/^auth-/,'')) && !ALLOWED_ROUTES[key]){
+    key='';
+  }
   if(!key){
-    const match=url.pathname.match(/^\/api\/(public-models|public-model-chat|account-usage|public-media)\/?$/);
-    if(match)key=match[1];
+    const models=url.pathname.match(/^\/api\/(public-models|public-model-chat|account-usage|public-media)\/?$/);
+    if(models)key=models[1];
+    const auth=url.pathname.match(/^\/api\/(game-scam-guard)\/auth\/(status|start|verify|password|session|availability)\/?$/);
+    if(auth)key=`auth-${auth[2]}`;
   }
   const route=ALLOWED_ROUTES[key];
   if(!route)return null;
@@ -46,14 +61,16 @@ function readBody(req){
   }
 }
 
-function requestHeaders(req,bypass){
+function requestHeaders(req,route,bypass){
   const headers={
-    'X-Vercel-Protection-Bypass':bypass,
     Accept:String(req.headers?.accept||'application/json')
   };
-  const authorization=req.headers?.authorization;
-  if(typeof authorization==='string'&&authorization)headers.Authorization=authorization;
   if(req.method==='POST')headers['Content-Type']=String(req.headers?.['content-type']||'application/json');
+  if(route.target==='backend'){
+    headers['X-Vercel-Protection-Bypass']=bypass;
+    const authorization=req.headers?.authorization;
+    if(typeof authorization==='string'&&authorization)headers.Authorization=authorization;
+  }
   return headers;
 }
 
@@ -106,15 +123,18 @@ export async function handlePreviewBackendProxy(req,res,{env=process.env,fetchIm
     res.setHeader('Cache-Control','no-store');
     return res.end();
   }
+  const targetOrigin=resolved.route.target==='account'?PRODUCTION_ACCOUNT_ORIGIN:PREVIEW_BACKEND_ORIGIN;
   const bypass=env[PREVIEW_BYPASS_ENV];
-  if(typeof bypass!=='string'||bypass.length<16)return sendJson(res,503,{error:'preview_proxy_unconfigured'});
+  if(resolved.route.target==='backend'&&(typeof bypass!=='string'||bypass.length<16)){
+    return sendJson(res,503,{error:'preview_proxy_unconfigured'});
+  }
   const body=resolved.method==='POST'?readBody(req):undefined;
   if(resolved.method==='POST'&&body===undefined&&req.body!=null)return sendJson(res,413,{error:'request_too_large'});
   let upstream;
   try{
-    upstream=await fetchImpl(`${PREVIEW_BACKEND_ORIGIN}${resolved.route.path}`,{
+    upstream=await fetchImpl(`${targetOrigin}${resolved.route.path}`,{
       method:resolved.method,
-      headers:requestHeaders(req,bypass),
+      headers:requestHeaders(req,resolved.route,bypass),
       body,
       redirect:'manual'
     });

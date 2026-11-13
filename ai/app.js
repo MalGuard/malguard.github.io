@@ -17,7 +17,7 @@ import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=desktop-pu
 import {detectDevice,assessDesktopModel} from './model-compatibility.mjs?v=hardware-check-20261030';
 import {renderRichText} from './code-view.mjs?v=web-pro-p0-20261113';
 import {buildSearchQuery} from './search-query.mjs';
-import {createAccount} from './account.mjs?v=vercel-auth-stable-20261103';
+import {createAccount} from './account.mjs?v=web-pro-p0-20261113-auth';
 import {createBuilder} from './builder.mjs?v=qwen-coder-restored-20261026';
 import {parseProposal} from './build-project.mjs?v=codex-chat-20261025';
 const $=id=>document.getElementById(id);

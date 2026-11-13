@@ -22,6 +22,30 @@
       "destination": "/ai-product.html"
     },
     {
+      "source": "/api/game-scam-guard/auth/status",
+      "destination": "/api/preview-backend?path=auth-status"
+    },
+    {
+      "source": "/api/game-scam-guard/auth/start",
+      "destination": "/api/preview-backend?path=auth-start"
+    },
+    {
+      "source": "/api/game-scam-guard/auth/verify",
+      "destination": "/api/preview-backend?path=auth-verify"
+    },
+    {
+      "source": "/api/game-scam-guard/auth/password",
+      "destination": "/api/preview-backend?path=auth-password"
+    },
+    {
+      "source": "/api/game-scam-guard/auth/session",
+      "destination": "/api/preview-backend?path=auth-session"
+    },
+    {
+      "source": "/api/game-scam-guard/auth/availability",
+      "destination": "/api/preview-backend?path=auth-availability"
+    },
+    {
       "source": "/api/game-scam-guard/:endpoint*",
       "destination": "/api/game-scam-guard?endpoint=:endpoint*"
     },
