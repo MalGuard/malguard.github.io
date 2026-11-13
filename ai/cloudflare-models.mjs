@@ -87,7 +87,7 @@ function normalizeWebSearch(data){
 function finishModelResult(data,model){
  if(typeof data.text!=="string"||!data.text.trim()||typeof data.model!=="string"||typeof data.provider!=="string")throw Object.assign(new Error("provider_unavailable"),{code:"provider_unavailable"});
  const webSearch=normalizeWebSearch(data);
- return {text:data.text,model:data.model,selectedModel:data.modelId,provider:data.provider,fallbackUsed:!!data.fallback,thinkingUsed:data.thinking===true,thinkingModelId:typeof data.thinkingModelId==="string"?data.thinkingModelId:undefined,securityAnalysis:false,
+ return {text:data.text,model:data.model,modelLabel:typeof data.modelLabel==="string"?data.modelLabel:data.model,selectedModel:data.modelId,provider:data.provider,fallbackUsed:!!data.fallback,thinkingUsed:data.thinking===true,thinkingModelId:typeof data.thinkingModelId==="string"?data.thinkingModelId:undefined,securityAnalysis:false,
   ...(data.auto?.selectedModelId&&typeof data.auto.selectedModelId==="string"?{auto:{selectedModelId:data.auto.selectedModelId,selectedLabel:String(data.auto.selectedLabel||"").slice(0,100)}}:{}),
   ...(webSearch?{webSearch}:{}),...(data.usage&&typeof data.usage.remainingTokens==="number"?{usage:data.usage}:{})};
 }
@@ -102,6 +102,7 @@ async function readModelStream(response,model,{onToken,onStatus}={}){
   else if(typeof payload.text==="string")text+=payload.text;
   else if(typeof payload.delta==="string")text+=payload.delta;
   if(payload.model)meta.model=payload.model;
+  if(payload.modelLabel)meta.modelLabel=payload.modelLabel;
   if(payload.provider)meta.provider=payload.provider;
   if(payload.modelId)meta.modelId=payload.modelId;
   if(payload.webSearch)meta.webSearch=payload.webSearch;
@@ -120,7 +121,11 @@ async function readModelStream(response,model,{onToken,onStatus}={}){
   if(!data||data==="[DONE]"){event="message";return;}
   let payload={};
   try{payload=JSON.parse(data);}catch{payload={text:data};}
-  if(event==="status"||payload.phase){if(typeof onStatus==="function")onStatus(payload);event="message";return;}
+  if(event==="sources"||event==="status"||payload.phase){
+   apply(payload);
+   if(typeof onStatus==="function")onStatus(payload);
+   event="message";return;
+  }
   if(event==="error"||payload.error){
    throw Object.assign(new Error(payload.error||"provider_unavailable"),{code:payload.error||"provider_unavailable",status:payload.status||500,retryAfterSeconds:payload.retryAfterSeconds,retryAt:payload.resetAt});
   }

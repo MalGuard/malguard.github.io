@@ -1,14 +1,14 @@
 import {createChatLibrary} from './library.mjs?v=web-pro-p0-20261113';
 import {createNavigation} from './navigation.mjs?v=web-pro-p0-20261113';
-import {renderResearchEvidence,attachResearchCitations} from './research-ui.mjs?v=20261108-research1';
+import {renderResearchEvidence,attachResearchCitations} from './research-ui.mjs?v=web-pro-p0-20261113-r6';
 import {mediaFromCatalog,toMediaPayload,callMedia,MEDIA_LIMIT_BYTES} from './media-client.mjs?v=web-pro-p0-20261113-proxy';
 import {installExperienceV2,syncExperienceV2} from './experience-v2.mjs?v=ux-v3-20261108';
-import {errorMessage} from './error-message.mjs?v=openrouter-routing-20261104';
-import {publicFailure,retryDetails} from './service-errors.mjs?v=account-quota-20261030';
+import {errorMessage} from './error-message.mjs?v=web-pro-p0-20261113-r6';
+import {publicFailure,retryDetails} from './service-errors.mjs?v=web-pro-p0-20261113-r6';
 import {apiUrl,readStream} from './client.mjs?v=vercel-auth-stable-20261103';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs?v=free-fallback-20261030';
 import {planChat,planCloudChat,cloudModelOffered} from './routing.mjs?v=smart-router-tiers-20261028';
-import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS,isNewCloudModel} from './cloudflare-models.mjs?v=web-pro-p0-20261113-proxy';
+import {fetchCFModels,unavailableCFModels,fetchCFUsage,callCFModel,CF_DEFAULTS,isNewCloudModel} from './cloudflare-models.mjs?v=web-pro-p0-20261113-r6';
 import {localModels,localCapabilityDetails,createLocalChat} from './local-models.mjs?v=instant-20261028';
 import {replyLanguage} from './language.mjs';
 import {answerIdentityQuestion} from './identity.mjs?v=founder-name-20261029';
@@ -64,7 +64,15 @@ Object.assign(copy.en,{localChecking:'Checking this device…',localSecure:'Open
 Object.assign(copy.fa,{localChecking:'در حال بررسی دستگاه…',localSecure:'برای اجرای مدل محلی سایت را با HTTPS باز کنید.',localNoWebGPU:'این مرورگر WebGPU را ارائه نمی‌کند؛ مرورگر به‌روز و دستگاه سازگار را امتحان کنید.',localNoAdapter:'پردازندهٔ گرافیکی سازگار در دسترس نیست؛ برنامه‌های دیگر را ببندید یا دستگاه دیگری را امتحان کنید.',localNoF16:'دستگاه قابلیت گرافیکی موردنیاز این مدل‌ها را ندارد؛ مدل ابری یا دستگاه دیگری را انتخاب کنید.',retryLocal:'بررسی دوبارهٔ دستگاه',localTooLong:'مدل روی دستگاه درخواست کوتاه، حداکثر ۶۰۰ نویسه، می‌پذیرد. برای متن طولانی مدل ابری را انتخاب کن.',localDownload:'دانلود مدل روی دستگاه',download:'دانلود',cancel:'انصراف',stop:'توقف',chooseLocal:'مدل‌های روی دستگاه',clearModels:'حذف مدل‌های دانلودشده',localOff:'مدل‌های روی دستگاه به WebGPU سازگار و حافظهٔ گرافیکی کافی نیاز دارند.',localFailed:'پاسخ روی دستگاه کامل نشد؛ پشتیبانی مرورگر، حافظه و اینترنت را بررسی کن. به مدل ابری منتقل نشد.',localLoading:'در حال بارگذاری مدل روی دستگاه',localWorking:'در حال پاسخ‌گویی روی دستگاه شما',localRemoved:'مدل‌های دانلودشده حذف شدند.',researchLimit:'صفحهٔ منابع جست‌وجو مستقلاً تأیید نشده است.'});
 Object.assign(copy.en,{offerTitle:'Two optional on-device models',offerInfo:"Download a model to chat without a provider's daily message quota. Speed and capacity depend on your device. You can keep using available cloud models without downloading.",offerChoose:'Choose a model',later:'Later',localPrepared:'Selected model is ready on this device.'});
 Object.assign(copy.fa,{offerTitle:'دو مدل اختیاری روی دستگاه شما',offerInfo:'با دانلود مدل، بدون سقف پیام روزانهٔ سرویس‌دهنده گفت‌وگو کنید. سرعت و ظرفیت به دستگاه شما بستگی دارد. بدون دانلود هم می‌توانید از مدل‌های ابریِ در دسترس استفاده کنید.',offerChoose:'انتخاب مدل',later:'بعداً',localPrepared:'مدل انتخاب‌شده روی این دستگاه آماده است.'});
-const t=k=>copy[locale][k]||k;
+function hasPersianScript(value){return /[\u0600-\u06FF]/.test(String(value||''));}
+function chromeLocale(){
+ if(locale==='fa')return 'fa';
+ if(typeof document!=='undefined'&&hasPersianScript(document.getElementById('message')?.value))return 'fa';
+ const last=(typeof history!=='undefined'?history:[]).findLast?.(item=>item?.bubble)||[...((typeof history!=='undefined'?history:[]) )].reverse().find(item=>item?.bubble);
+ if(last&&hasPersianScript(last.bubble))return 'fa';
+ return 'en';
+}
+const t=k=>copy[chromeLocale()]?.[k]||copy[locale]?.[k]||copy.en?.[k]||k;
 Object.assign(copy.en,{onDevice:'ON YOUR DEVICE',welcomeTitle:'Your device. Your conversation.',welcomeInfo:"Choose a light or stronger model and chat without a provider's daily message quota. A one-time download is required; speed and capacity depend on your device.",welcomePrivacy:'Downloads are optional. Local replies run on this device; online search and security tools need a connection and separate permission.',chooseDownload:'Choose a model',cacheNote:'Model files are cached in this browser. Clearing browser data may require another download. Device support does not guarantee enough free memory.',offerInfo:'Choose one model to download. Local chat has no provider daily message quota. Speed, context and capacity depend on your device.',localAvailable:'Local chat is available. Online security tools are unavailable.',downloadNeeded:'Download required before local chat',readyDevice:'Ready on this device',lightModel:'Light · Qwen3 1.7B',strongModel:'Strong · Qwen3 4B',deviceUnsupported:'Local chat needs a WebGPU browser with shader-f16 support. Try an updated compatible browser; downloading is unavailable on this device.',downloadCancelled:'Download stopped. You can retry from On-device models.'});
 Object.assign(copy.fa,{onDevice:'روی دستگاه شما',welcomeTitle:'دستگاه شما؛ گفت‌وگوی شما.',welcomeInfo:'یک مدل سبک‌تر یا قوی‌تر انتخاب کنید و بدون سقف پیام روزانهٔ سرویس‌دهنده گفت‌وگو کنید. دریافت اولیهٔ مدل لازم است؛ سرعت و ظرفیت به دستگاه شما بستگی دارد.',welcomePrivacy:'دانلود اختیاری است. پاسخ محلی روی همین دستگاه تولید می‌شود؛ جست‌وجوی آنلاین و ابزارهای امنیتی به اینترنت و مجوز جداگانه نیاز دارند.',chooseDownload:'انتخاب و دانلود مدل',cacheNote:'فایل‌های مدل در این مرورگر ذخیره می‌شوند. پاک کردن داده‌های مرورگر ممکن است به دانلود دوباره نیاز داشته باشد. سازگاری دستگاه، کافی بودن حافظهٔ آزاد را تضمین نمی‌کند.',offerInfo:'یکی از دو مدل را برای دانلود انتخاب کنید. چت محلی سقف پیام روزانهٔ سرویس‌دهنده ندارد؛ سرعت، طول متن و ظرفیت به دستگاه شما بستگی دارد.',localAvailable:'چت محلی در دسترس است؛ ابزارهای امنیتی آنلاین در دسترس نیستند.',downloadNeeded:'برای چت محلی ابتدا مدل را دانلود کنید',readyDevice:'آماده روی این دستگاه',lightModel:'سبک‌تر · Qwen3 1.7B',strongModel:'قوی‌تر · Qwen3 4B',deviceUnsupported:'چت محلی به مرورگر سازگار با WebGPU و shader-f16 نیاز دارد. مرورگر سازگار و به‌روز را امتحان کنید؛ دانلود در این دستگاه در دسترس نیست.',downloadCancelled:'دانلود متوقف شد؛ از بخش مدل‌های روی دستگاه دوباره تلاش کنید.'});
 Object.assign(copy.fa,{title:'چطور می‌تونم کمکت کنم؟',settings:'تنظیمات',disclaimer:'هوش مصنوعی ممکن است اشتباه کند؛ اطلاعات مهم را بررسی کن.',responseDetails:'جزئیات پاسخ',copy:'کپی پاسخ',copied:'کپی شد',technical:'اطلاعات فنی'});
@@ -75,8 +83,8 @@ Object.assign(copy.en,{thinking:'Thinking',readingFile:'Reading file',readingWeb
 Object.assign(copy.fa,{thinking:'در حال فکر کردن',readingFile:'در حال خواندن فایل',readingWebsite:'در حال خواندن سایت',checkingFile:'در حال بررسی فایل',typing:'در حال نوشتن',connecting:'در حال اتصال',preparing:'در حال آماده‌سازی نتیجه',searching:'در حال جست‌وجوی وب',checking:'در حال بررسی',stopped:'پاسخ متوقف شد',stop:'توقف پاسخ',regenerate:'تولید دوباره',busyHint:'پاسخ هنوز در حال تولید است. برای لغو از توقف استفاده کن، یا صبر کن تا تمام شود.',webPro:'وب پرو'});
 Object.assign(copy.en,{attachMenu:'Add files or tools',attachFile:'Upload a file',actionChat:'Chat',actionInspect:'Inspect file or link',actionWeb:'Search the web',inspectionPlaceholder:'Add a file, URL or hash to inspect…',webPlaceholder:'What would you like to search for?',autoCloud:'Auto',autoLocal:'Auto · on device'});
 Object.assign(copy.fa,{attachMenu:'افزودن فایل یا ابزار',attachFile:'بارگذاری فایل',actionChat:'گفت‌وگو',actionInspect:'بررسی فایل یا لینک',actionWeb:'جست‌وجوی وب',inspectionPlaceholder:'فایل، لینک یا هش برای بررسی…',webPlaceholder:'چه چیزی را در وب جست‌وجو کنیم؟',autoCloud:'خودکار',autoLocal:'خودکار · روی دستگاه'});
-Object.assign(copy.en,{respondedIn:'Responded in',stoppedAfter:'Stopped after',elapsedTime:'Time elapsed:'});
-Object.assign(copy.fa,{respondedIn:'پاسخ در',stoppedAfter:'توقف پس از',elapsedTime:'زمان سپری‌شده:'});
+Object.assign(copy.en,{respondedIn:'Responded in',stoppedAfter:'Stopped after',elapsedTime:'Time elapsed:',keyboardHint:'Enter ↵ to send · Shift + Enter for a new line',webSearchConsentTitle:'Allow web search?',webSearchConsentBody:'Your search question is sent to the external search provider. Attached files and project code are not sent to search. Sources may be incomplete or incorrect. You can revoke this permission in Settings.',webSearchAllow:'Allow web search',webSearchCancel:'Cancel',generated:'Generated by'});
+Object.assign(copy.fa,{respondedIn:'پاسخ در',stoppedAfter:'توقف پس از',elapsedTime:'زمان سپری‌شده:',keyboardHint:'Enter ↵ برای ارسال · Shift + Enter خط جدید',webSearchConsentTitle:'اجازهٔ جست‌وجوی وب؟',webSearchConsentBody:'سؤال جست‌وجوی شما برای ارائه‌دهندهٔ خارجی ارسال می‌شود. فایل‌های پیوست و کد پروژه ارسال نمی‌شوند. منابع ممکن است ناقص یا نادرست باشند. این مجوز را در تنظیمات می‌توانید لغو کنید.',webSearchAllow:'اجازهٔ جست‌وجوی وب',webSearchCancel:'لغو',generated:'تولیدشده توسط'});
 Object.assign(copy.en,{desktopModels:'Desktop models',chatTab:'Chat',workspaceTab:'Workspace',workspaceTool:'Tool',workspaceModel:'Model',workspaceLight:'Light · Qwen3',workspaceStrong:'Strong · GPT-OSS 120B',fileSandbox:'File sandbox',urlSandbox:'Link sandbox',workspacePrivacy:'Only your request text is shared with the model; files and tool evidence are not.',isolationConsent:'I separately allow the selected file to run in an isolated sandbox or the selected link to receive a passive preview. These checks do not guarantee safety.',desktopChoose:'Choose an Ollama model',desktopGuide:'Install Ollama',close:'Close',desktopConnect:'Connect',desktopConnecting:'Connecting to Ollama…',desktopReady:'Connected. Installed models are available in the chat model picker.',desktopUnavailable:'Could not connect to Ollama. Start Ollama, install the selected model, and allow this site in its origin settings. Browser access may require local-network permission.',desktopMissing:'Connected, but this model is not installed. Run the command in your terminal, then connect again.',desktopFailed:'The desktop model could not complete its response. No cloud fallback was used.',desktopHardware:'Approximate model-file download; extra RAM/VRAM is needed for runtime and context. Large models may need workstation or server hardware.',desktopLocal:'Connect checks the local Ollama service only. This page never installs or downloads desktop models automatically.',workPlan:'Inspection plan · model text, not tool evidence',workPlanUnavailable:'The inspection plan is unavailable. Tool results remain below.',workspaceStatus:'Choose a tool and add a file, URL, hash or search request.',isolationMissing:'Allow isolated execution or passive preview separately before using the sandbox.',modeGroup:'Conversation mode',workspaceLabel:'Security workspace'});
 Object.assign(copy.fa,{desktopModels:'مدل‌های دسکتاپ',chatTab:'گفت‌وگو',workspaceTab:'فضای کار',workspaceTool:'ابزار',workspaceModel:'مدل',workspaceLight:'سبک · Qwen3',workspaceStrong:'قوی · GPT-OSS 120B',fileSandbox:'محیط ایزولهٔ فایل',urlSandbox:'پیش‌نمایش ایزولهٔ لینک',workspacePrivacy:'فقط متن درخواست به مدل ارسال می‌شود؛ فایل و شواهد ابزارها ارسال نمی‌شوند.',isolationConsent:'جداگانه اجازه می‌دهم فایل انتخاب‌شده در محیط ایزوله اجرا شود یا لینک انتخاب‌شده پیش‌نمایش غیرفعال دریافت کند. این بررسی‌ها تضمین امنیت نیستند.',desktopChoose:'انتخاب مدل Ollama',desktopGuide:'نصب Ollama',close:'بستن',desktopConnect:'اتصال',desktopConnecting:'در حال اتصال به Ollama…',desktopReady:'متصل شد. مدل‌های نصب‌شده در انتخاب‌گر مدل گفت‌وگو در دسترس‌اند.',desktopUnavailable:'اتصال به Ollama برقرار نشد. Ollama را اجرا و مدل را نصب کنید و مبدأ این سایت را در تنظیمات آن مجاز کنید. مرورگر ممکن است مجوز شبکهٔ محلی بخواهد.',desktopMissing:'متصل شد، اما این مدل نصب نیست. دستور را در ترمینال اجرا کنید و دوباره متصل شوید.',desktopFailed:'پاسخ مدل دسکتاپ کامل نشد؛ به مدل ابری منتقل نشد.',desktopHardware:'حجم تقریبی فایل مدل است؛ برای اجرا و متن، RAM یا VRAM بیشتری لازم است. مدل‌های بزرگ ممکن است به سخت‌افزار ورک‌استیشن یا سرور نیاز داشته باشند.',desktopLocal:'اتصال فقط سرویس محلی Ollama را بررسی می‌کند. این صفحه مدل دسکتاپ را خودکار نصب یا دانلود نمی‌کند.',workPlan:'برنامهٔ بررسی · متن مدل، نه شواهد ابزار',workPlanUnavailable:'برنامهٔ بررسی در دسترس نیست؛ نتایج ابزارها در ادامه آمده‌اند.',workspaceStatus:'ابزار را انتخاب کنید و فایل، لینک، هش یا درخواست جست‌وجو را وارد کنید.',isolationMissing:'پیش از استفاده از محیط ایزوله، مجوز اجرای جداگانه یا پیش‌نمایش غیرفعال را بدهید.',modeGroup:'حالت گفت‌وگو',workspaceLabel:'فضای بررسی امنیتی'});
 Object.assign(copy.en,{scope:'Only selected checks run. Isolated execution requires separate permission.',fileConsent:'Send the file to MalGuard for in-memory static analysis, or isolated execution only with its separate permission. Files are not stored or submitted to threat databases.',workspaceLight:'Light · Qwen3 30B',workspaceStrong:'Strong · GPT-OSS 120B'});
@@ -274,6 +282,30 @@ function followReply(update){
  const follow=innerHeight+scrollY>=document.documentElement.scrollHeight-160;
  update();if(follow)scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'});
 }
+function modelCaption(generated={}){
+ const model=generated.modelLabel||generated.model||generated.selectedModel||'';
+ const provider=generated.provider||'';
+ if(provider&&model&&provider!==model)return `${provider} · ${model}`;
+ return model||provider||'';
+}
+function paintResponseMeta(card,generated){
+ if(!card||!generated)return;
+ const details=card.querySelector('.response-details');
+ const caption=modelCaption(generated);
+ if(details&&caption){
+  const lines=[...details.querySelectorAll('p')];
+  const target=lines.find(p=>p.dataset.role==='model')||lines[1]||null;
+  if(target)target.textContent=caption;
+  else details.append(Object.assign(el('p',caption),{dataset:{role:'model'}}));
+ }
+ const existing=card.querySelector('.research-evidence');
+ if(existing)existing.remove();
+ const evidence=renderResearchEvidence(generated.webSearch,chromeLocale());
+ if(evidence){
+  const actions=card.querySelector('.response-actions');
+  if(actions)actions.before(evidence);else card.append(evidence);
+ }
+}
 function beginStreamCard(turn){
  const display={generated:{text:''}},card=renderResponse(display,false),answer=card.querySelector('.answer'),actions=card.querySelector('.response-actions');
  card.classList.add('is-streaming');if(actions)actions.hidden=true;turn.streamCard={display,card,answer,actions};return turn.streamCard;
@@ -282,7 +314,10 @@ function paintStream(turn,text,webSearch){
  const stream=turn.streamCard;if(!stream)return;
  stream.display.generated.text=text;
  if(webSearch)stream.display.generated.webSearch=webSearch;
- followReply(()=>renderRichText(stream.answer,text,locale,{streaming:true}));
+ followReply(()=>{
+  renderRichText(stream.answer,text,chromeLocale(),{streaming:true});
+  paintResponseMeta(stream.card,stream.display.generated);
+ });
 }
 function cloudStreamOptions(turn){
  beginStreamCard(turn);
@@ -290,7 +325,7 @@ function cloudStreamOptions(turn){
   const phase=payload?.phase;
   if(phase==='search')setActivity('searching');
   else if(phase==='retry')setActivity('checking');
-  else setActivity('typing');
+  else if(phase!=='search')setActivity('typing');
   if(payload?.webSearch)paintStream(turn,turn.streamCard?.display?.generated?.text||'',payload.webSearch);
  },onToken:text=>paintStream(turn,text)};
 }
@@ -300,7 +335,8 @@ async function presentResponse(response,turn,{streamed=false}={}){
  if(streamed&&turn.streamCard){
   const {display,card,answer,actions}=turn.streamCard;
   Object.assign(display.generated,response.generated);
-  renderRichText(answer,display.generated.text,locale);
+  renderRichText(answer,display.generated.text,chromeLocale());
+  paintResponseMeta(card,display.generated);
   attachResearchCitations(answer,display.generated.webSearch);
   card.classList.remove('is-streaming','is-typing');
   if(actions)actions.hidden=false;
@@ -312,12 +348,13 @@ async function presentResponse(response,turn,{streamed=false}={}){
  const display={...response,generated:{...response.generated,text:''}},card=renderResponse(display,false),answer=card.querySelector('.answer'),actions=card.querySelector('.response-actions');
  card.classList.add('is-typing');if(actions)actions.hidden=true;setActivity('typing');
  try{
-  await typeText(response.generated.text,text=>followReply(()=>{display.generated.text=text;renderRichText(answer,text,locale,{streaming:true});}),{signal:turn.controller.signal});
+  await typeText(response.generated.text,text=>followReply(()=>{display.generated.text=text;renderRichText(answer,text,chromeLocale(),{streaming:true});}),{signal:turn.controller.signal});
   turn.completed=true;
  }finally{
   card.classList.remove('is-typing','is-streaming');if(actions)actions.hidden=false;
   if(display.generated.text){
-   renderRichText(answer,display.generated.text,locale);
+   renderRichText(answer,display.generated.text,chromeLocale());
+   paintResponseMeta(card,display.generated);
    attachResearchCitations(answer,display.generated.webSearch);
    display.interrupted=turn.controller.signal.aborted;
    if(display.interrupted){turn.partial=true;card.append(el('p',t('stopped'),'reply-stopped'));}
@@ -333,11 +370,25 @@ function responseIcon(kind){
  path.setAttribute('d',kind==='copy'?'M9 9h11v11H9zM15 9V4H4v11h5':kind==='regen'?'M21 12a9 9 0 1 1-3-6.7M21 3v6h-6':'M5 12h.01M12 12h.01M19 12h.01');
  path.setAttribute('stroke','currentColor');path.setAttribute('stroke-width',kind==='copy'?'1.5':'3');path.setAttribute('stroke-linecap','round');path.setAttribute('stroke-linejoin','round');svg.append(path);return svg;
 }
+function applyChromeLocale(){
+ const ui=chromeLocale();
+ document.documentElement.lang=ui;document.documentElement.dir=ui==='fa'?'rtl':'ltr';
+ document.body.classList.toggle('is-persian-chrome',ui==='fa');
+ $('language').textContent=locale==='fa'?'English':'فارسی';
+ navigation.language(ui);
+ const hint=$('composer-keyboard-hint');if(hint)hint.textContent=t('keyboardHint');
+ const consentTitle=$('web-search-consent-title');if(consentTitle)consentTitle.textContent=t('webSearchConsentTitle');
+ const consentBody=$('web-search-consent-description');if(consentBody)consentBody.textContent=t('webSearchConsentBody');
+ const consentForm=$('web-search-consent')?.querySelector('form');
+ if(consentForm){
+  const cancel=consentForm.querySelector('button[value=cancel]');if(cancel)cancel.textContent=t('webSearchCancel');
+  const allow=consentForm.querySelector('button[value=allow]');if(allow)allow.textContent=t('webSearchAllow');
+ }
+}
 function translate(){
- navigation.language(locale);
+ applyChromeLocale();
  account.refresh();
- document.documentElement.lang=locale;document.documentElement.dir=locale==='fa'?'rtl':'ltr';$('language').textContent=locale==='fa'?'English':'فارسی';
- library.language?.();document.querySelectorAll('[data-i18n]').forEach(n=>n.textContent=t(n.dataset.i18n));const settingsSummary=document.querySelector('#settings-panel>summary');if(settingsSummary)settingsSummary.setAttribute('aria-label',t('settings'));const stopGen=$('stop-generation');if(stopGen){stopGen.setAttribute('aria-label',t('stop'));stopGen.title=t('stop');}$('message').placeholder=t($('tool').value==='ai_web'?'webPlaceholder':$('mode').value==='worker'?'inspectionPlaceholder':'placeholder');$('conversation').ariaLabel=locale==='fa'?'گفت‌وگو':'Conversation';renderStatus();$('mode-hint').textContent=t($('mode').value==='chat'?'chatHint':'workerHint');
+ library.language?.();document.querySelectorAll('[data-i18n]').forEach(n=>n.textContent=t(n.dataset.i18n));const settingsSummary=document.querySelector('#settings-panel>summary');if(settingsSummary)settingsSummary.setAttribute('aria-label',t('settings'));const stopGen=$('stop-generation');if(stopGen){stopGen.setAttribute('aria-label',t('stop'));stopGen.title=t('stop');}$('message').placeholder=t($('tool').value==='ai_web'?'webPlaceholder':$('mode').value==='worker'?'inspectionPlaceholder':'placeholder');$('conversation').ariaLabel=chromeLocale()==='fa'?'گفت‌وگو':'Conversation';renderStatus();$('mode-hint').textContent=t($('mode').value==='chat'?'chatHint':'workerHint');
  if(activeTurn){
   updateElapsed(activeTurn);const {key,detail}=activeTurn.stage;setActivity(key,detail);
   for(const node of document.querySelectorAll('.response-duration'))node.textContent=timingText({elapsedMs:Number(node.dataset.elapsedMs),label:node.dataset.label});
@@ -357,7 +408,7 @@ function refreshComposerInputState(){
  const hasWorkFile=activeMode==='worker'&&Boolean($('file').files?.[0]);
  const hasMediaImage=activeMode==='chat'&&mediaAction==='analyze'&&Boolean(mediaFile);
  const ready=$('send').dataset.modelReady==='true';
- $('send').disabled=activeTurn?activeTurn.controller.signal.aborted:busy||!ready||!(hasMessage||hasWorkFile||hasMediaImage);
+ const stopping=$('send').dataset.state==='stop'&&!!activeTurn&&!activeTurn.controller.signal.aborted;$('send').disabled=stopping?false:(activeTurn?activeTurn.controller.signal.aborted:busy||!ready||!(hasMessage||hasWorkFile||hasMediaImage));
 }
 function updateModelSelectIfChanged(select,choices){
  const current=[...select.options];
@@ -384,11 +435,14 @@ function renderStatus(){
  }
  const ready=activeMode==='worker'?service?.enabled===true||cfModels.some(m=>m.available&&m.mode==='work'):service?.enabled===true||cfModels.some(m=>m.available&&m.mode===(activeMode==='build'?'code':'chat'))||localReady||desktopChat.availability.installedIDs.length>0;
  $('send').dataset.modelReady=String(ready||(activeMode==='chat'&&mediaAction==='analyze'&&mediaCaps.analyze)||(activeMode==='chat'&&mediaAction==='generate'&&mediaCaps.generate));
- refreshComposerInputState();
- $('send').dataset.state='send';$('send-arrow').toggleAttribute('hidden',false);$('send-stop').toggleAttribute('hidden',true);
- $('send').ariaLabel=t('send');$('send').title=t('send');$('send-label').textContent=t('send');
+ const stopping=!!activeTurn&&!activeTurn.controller.signal.aborted;
+ $('send').dataset.state=stopping?'stop':'send';
+ $('send-arrow').toggleAttribute('hidden',stopping);
+ $('send-stop').toggleAttribute('hidden',!stopping);
+ $('send').ariaLabel=t(stopping?'stop':'send');$('send').title=t(stopping?'stop':'send');$('send-label').textContent=t(stopping?'stop':'send');
  const stopGen=$('stop-generation');
- if(stopGen){const stopping=!!activeTurn;stopGen.hidden=!stopping;stopGen.disabled=!stopping||activeTurn.controller.signal.aborted;stopGen.setAttribute('aria-label',t('stop'));stopGen.title=t('stop');}
+ if(stopGen){stopGen.hidden=true;stopGen.disabled=true;stopGen.setAttribute('aria-label',t('stop'));stopGen.title=t('stop');}
+ refreshComposerInputState();
  for(const id of ['clear','mode','tool','file','remove-file','remove-models','attach-toggle','attach-file','attach-chat','attach-inspect','attach-web','chat-tab','workspace-tab','build-tab','workspace-tool','workspace-model','isolation-consent','open-downloads'])$(id).disabled=busy;
  $('connection').textContent=!service?(localReady?t('localAvailable'):t('offline')):!ready?t('serviceDisabled'):'';
  const selectedId=$('model').value;
@@ -460,7 +514,7 @@ function renderStatus(){
  $('device-note').textContent=!localReady?t('deviceUnsupported'):$('model').value.startsWith('local_')?t(preparedModels.has($('model').value)?'readyDevice':'downloadNeeded'):'';
  for(const option of $('offer-model').options){const m=localModels[option.value];option.textContent=`${t(option.value==='local_fast'?'lightModel':'strongModel')} · ~${m.downloadMB} MB`;}
  $('local-status').textContent=localReady?(locale==='fa'?'اجرای روی دستگاه ممکن است؛ سرعت و حافظه باید هنگام بارگذاری بررسی شوند.':'On-device inference may be supported; loading still depends on memory and device capabilities.'):t('localOff');
-  syncExperienceV2({mode:activeMode,locale,busy,selectedId:selectedIdForMode,modelLabel,isNew:isNewCloudModel(selectedIdForMode),thinkingReady:thinkingCloudReady,thinkingOn:thinkingCloudReady&&thinkingEnabled,thinkingModel:thinkingModelLabel});
+  syncExperienceV2({mode:activeMode,locale:chromeLocale(),busy,selectedId:selectedIdForMode,modelLabel,isNew:isNewCloudModel(selectedIdForMode),thinkingReady:thinkingCloudReady,thinkingOn:thinkingCloudReady&&thinkingEnabled,thinkingModel:thinkingModelLabel});
 
   const webMode=activeWebMode(),webOn=webMode!=='off';
   const modelCapable=cfModels.some(m=>m.id===selectedIdForMode&&m.available&&m.mode===cfMode);
@@ -468,16 +522,16 @@ function renderStatus(){
   const canSearch=cfSearchAvailable&&modelCapable&&workCapable&&mediaAction==='off';
   $('web-search-toggle').disabled=busy||!canSearch;
   $('web-search-toggle').setAttribute('aria-pressed',String(webOn&&canSearch));
-  $('web-search-toggle').setAttribute('aria-label',locale==='fa'?'جست‌وجوی اینترنتی':'Search the web');
-  $('web-search-label').textContent=locale==='fa'?
+  $('web-search-toggle').setAttribute('aria-label',chromeLocale()==='fa'?'جست‌وجوی اینترنتی':'Search the web');
+  $('web-search-label').textContent=chromeLocale()==='fa'?
     (webMode==='research'?'تحقیق':webOn&&canSearch?'وب روشن':'جست‌وجو'):
     (webMode==='research'?'Research':webOn&&canSearch?'Web on':'Search');
   $('web-search-depth').hidden=!webOn||!canSearch;
   $('web-search-depth').disabled=busy||!canSearch;
   $('web-search-depth').value=webMode==='research'?'research':'web';
-  $('web-search-depth').setAttribute('aria-label',locale==='fa'?'عمق جست‌وجو':'Search depth');
-  $('web-search-depth').options[0].textContent=locale==='fa'?'وب':'Web';
-  $('web-search-depth').options[1].textContent=locale==='fa'?'تحقیق':'Research';
+  $('web-search-depth').setAttribute('aria-label',chromeLocale()==='fa'?'عمق جست‌وجو':'Search depth');
+  $('web-search-depth').options[0].textContent=chromeLocale()==='fa'?'وب':'Web';
+  $('web-search-depth').options[1].textContent=chromeLocale()==='fa'?'تحقیق':'Research';
   $('attach-media-analyze').hidden=!mediaCaps.analyze;
   $('attach-media-generate').hidden=!mediaCaps.generate;
   $('attach-media-analyze').disabled=busy||!mediaCaps.analyze;
@@ -512,12 +566,12 @@ function renderResponse(response,remember=true){
  if(response.results){for(const result of response.results)renderResponse({result},false);if(response.message){const n=el('article',undefined,'result');n.append(el('p',response.message));$('conversation').append(n);}return;}
  if(response.message){const n=el('article',undefined,response.interrupted?'reply-stopped':'result');n.append(el('p',response.interrupted?t('stopped'):response.message));$('conversation').append(n);return;}
  if(response.generated){
-  const n=el('article',undefined,'result assistant-message'),answer=el('div',undefined,'answer');renderRichText(answer,response.generated.text,locale);answer.dir='auto';n.ariaLabel='MalGuard AI';
-  const actions=el('div',undefined,'response-actions'),details=el('details',undefined,'response-details'),summary=el('summary'),detailLabel=el('span',t('responseDetails'),'sr-only');detailLabel.dataset.i18n='responseDetails';summary.title=t('responseDetails');summary.append(responseIcon('details'),detailLabel);details.append(summary,el('p',t('generated')),el('p',`${response.generated.provider} · ${response.generated.model}`));
+  const n=el('article',undefined,'result assistant-message'),answer=el('div',undefined,'answer');renderRichText(answer,response.generated.text,chromeLocale());answer.dir='auto';n.ariaLabel='MalGuard AI';
+  const actions=el('div',undefined,'response-actions'),details=el('details',undefined,'response-details'),summary=el('summary'),detailLabel=el('span',t('responseDetails'),'sr-only');detailLabel.dataset.i18n='responseDetails';summary.title=t('responseDetails');summary.append(responseIcon('details'),detailLabel);details.append(summary,el('p',t('generated')),Object.assign(el('p',modelCaption(response.generated)||''),{dataset:{role:'model'}}));
    if(response.generated.webSearch?.sources?.length)details.append(el('p',t('researchLimit')));
    if(response.generated.auto?.selectedModelId)details.append(el('p',(locale==='fa'?'مدل خودکار: ':'Auto model: ')+(response.generated.auto.selectedLabel||response.generated.auto.selectedModelId)));
   const copy=el('button',undefined,'copy-response'),copyLabel=el('span',t('copy'),'sr-only');copyLabel.dataset.i18n='copy';copy.type='button';copy.title=t('copy');copy.append(responseIcon('copy'),copyLabel);copy.onclick=async()=>{try{await navigator.clipboard.writeText(response.generated.text);copyLabel.textContent=t('copied');copy.title=t('copied');setTimeout(()=>{copyLabel.textContent=t('copy');copy.title=t('copy');},1800);}catch{copyLabel.textContent=t('copy');}};
-   const evidence=renderResearchEvidence(response.generated.webSearch,locale);
+   const evidence=renderResearchEvidence(response.generated.webSearch,chromeLocale());
    if(evidence)n.append(evidence);
    attachResearchCitations(answer,response.generated.webSearch);
    const regen=el('button',undefined,'regenerate-response'),regenLabel=el('span',t('regenerate'),'sr-only');regenLabel.dataset.i18n='regenerate';regen.type='button';regen.title=t('regenerate');regen.setAttribute('aria-label',t('regenerate'));regen.append(responseIcon('regen'),regenLabel);regen.onclick=()=>{if(busy){showBusyHint();return;}regenerateLast();};
@@ -772,6 +826,8 @@ addEventListener('pagehide',()=>{builder.stop();stopTurn();desktopDownloadContro
 $('message').addEventListener('input',()=>{
  resizeComposerInput();
  refreshComposerInputState();
+ const ui=chromeLocale();
+ if(document.documentElement.lang!==ui)applyChromeLocale(),renderStatus();
 });
 $('message').addEventListener('keydown',event=>{
  // Soft-keyboard Enter inserts a newline; Ctrl/Cmd+Enter explicitly sends.
@@ -781,11 +837,12 @@ $('message').addEventListener('keydown',event=>{
  const desktop=window.matchMedia('(pointer:fine) and (min-width: 761px)').matches;
  if(!explicit&&!desktop)return;
  event.preventDefault();
+ if($('send').dataset.state==='stop'){event.preventDefault();stopTurn();return;}
  if(busy){event.preventDefault();showBusyHint();return;}
  if($('message').value.trim()||(activeMode==='worker'&&$('file').files?.[0]))$('composer').requestSubmit();
 });
 $('composer').onsubmit=async event=>{
- event.preventDefault();if(busy){showBusyHint();return;}
+ event.preventDefault();if($('send').dataset.state==='stop'){stopTurn();return;}if(busy){showBusyHint();return;}
  const message=$('message').value.trim(),mode=activeMode,file=mode==='worker'?$('file').files[0]:undefined,tool=mode==='worker'?$('workspace-tool').value:'auto';
  lastUserMessage=message;
  if(mediaAction!=='off'&&mode==='chat'){await runMedia(message);return;}
