@@ -285,7 +285,8 @@ function followReply(update){
 function modelCaption(generated={}){
  const model=generated.modelLabel||generated.model||generated.selectedModel||'';
  const provider=generated.provider||'';
- if(provider&&model&&provider!==model)return `${provider} · ${model}`;
+ // Labels such as "GPT-OSS 120B · Groq" already name the provider; do not repeat it.
+ if(provider&&model&&provider!==model&&!model.toLowerCase().includes(provider.toLowerCase()))return `${provider} · ${model}`;
  return model||provider||'';
 }
 function paintResponseMeta(card,generated){
