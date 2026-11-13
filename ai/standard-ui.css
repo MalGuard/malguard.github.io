@@ -261,7 +261,7 @@ html:root body.mg-pro :focus-visible{outline:2px solid color-mix(in srgb,var(--s
 
 /* web-pro: reserved welcome slot, fade without layout change */
 html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .workspace{
-  position:relative;
+  position:relative!important;
   justify-content:flex-start!important;
   padding-top:28px!important;
   padding-bottom:max(24px,env(safe-area-inset-bottom))!important;
@@ -289,35 +289,65 @@ html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .intro{
   justify-content:center;
   text-align:center;
   position:absolute;
-  left:50%;
-  right:auto;
-  inset-inline:auto;
+  left:0;
+  right:0;
   top:28px;
-  width:min(780px,calc(100% - 32px))!important;
-  margin:0!important;
+  width:100%!important;
+  max-width:min(780px,calc(100% - 32px));
+  margin-inline:auto!important;
   height:calc(100% - 28px - 11.5rem);
   min-height:12rem;
   z-index:3;
   opacity:1;
   visibility:visible;
-  transform:translateX(-50%);
+  transform:none;
   pointer-events:auto;
   transition:opacity .2s ease,transform .2s ease,visibility 0s linear 0s;
-}
-html[dir=rtl]:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .intro{
-  left:50%;
-  right:auto;
-  transform:translateX(-50%);
 }
 html:root body.mg-pro.mg-ai-v2:not([data-mode=build]):has(.conversation:not(:empty)) .intro{
   display:flex!important;
   opacity:0;
   visibility:hidden;
   pointer-events:none;
-  transform:translateX(-50%) translateY(-12px);
+  transform:translateY(-12px);
   transition:opacity .2s ease,transform .2s ease,visibility 0s linear .2s;
+}
+/* Keep the expanded composer reserved so compact/idle toggles do not shift the turn. */
+html:root body.mg-pro.mg-ai-v2 .composer-shell,
+html:root body.mg-pro.mg-ai-v2 .composer-shell.pro-compact{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  justify-content:space-between!important;
+  min-height:104px!important;
+  height:auto!important;
+  padding:12px!important;
+  gap:8px!important;
+  border-radius:24px!important;
+  cursor:auto;
+  transition:none!important;
+}
+html:root body.mg-pro.mg-ai-v2 .composer-shell.pro-compact #message,
+html:root body.mg-pro.mg-ai-v2 .composer-shell #message{
+  order:0;
+  flex:0 1 auto;
+  min-height:48px!important;
+  height:auto!important;
+  max-height:185px;
+  overflow:auto;
+  white-space:pre-wrap;
+  resize:none;
+}
+html:root body.mg-pro.mg-ai-v2 .composer-shell.pro-compact .composer-actions,
+html:root body.mg-pro.mg-ai-v2 .composer-shell .composer-actions{
+  flex:0 0 auto!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
 }
 @media (max-width:760px){
   html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .conversation{min-height:min(46dvh,26rem)}
   html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .intro{height:calc(100% - 28px - 13rem)}
+  html:root body.mg-pro.mg-ai-v2 .composer-shell,
+  html:root body.mg-pro.mg-ai-v2 .composer-shell.pro-compact{min-height:112px!important}
 }
