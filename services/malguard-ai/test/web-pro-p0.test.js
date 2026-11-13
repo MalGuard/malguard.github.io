@@ -278,3 +278,9 @@ test('round 7: no getter-only dataset assignment that throws in module code befo
  assert.match(app,/'Search depth':'عمق جست‌وجو'/);
  assert.match(app,/function noteAutoModel\(generated\)/);
 });
+
+test('round 8: sidebar navigation a11y labels switch to Persian',()=>{
+ const nav=readFileSync(new URL('../../../ai/navigation.mjs',import.meta.url),'utf8');
+ for(const [en,fa] of [['MalGuard navigation','ناوبری مالگارد'],['Toggle sidebar','باز و بسته کردن نوار کناری'],['Close sidebar','بستن نوار کناری'],['Close navigation','بستن ناوبری']])
+  assert.ok(nav.includes(`fa?'${fa}':'${en}'`),en);
+});

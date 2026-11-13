@@ -55,6 +55,10 @@ export function createNavigation({account,onLanguage}){
     const fa=value==='fa';
     shortcutsLabel.textContent=fa?'بخش‌ها':'WORKSPACES';
     shortcuts.setAttribute('aria-label',fa?'بخش‌های مالگارد':'MalGuard AI workspaces');
+    rail.setAttribute('aria-label',fa?'ناوبری مالگارد':'MalGuard navigation');
+    collapse.setAttribute('aria-label',fa?'باز و بسته کردن نوار کناری':'Toggle sidebar');
+    dismiss.setAttribute('aria-label',fa?'بستن نوار کناری':'Close sidebar');
+    backdrop.setAttribute('aria-label',fa?'بستن ناوبری':'Close navigation');
     for(const [mode,{name,button}] of shortcutButtons){
       name.textContent=fa?({chat:'گفت‌وگو',worker:'کار',build:'کد'}[mode]):({chat:'Chat',worker:'Work',build:'Code'}[mode]);
       button.setAttribute('aria-label',name.textContent);
