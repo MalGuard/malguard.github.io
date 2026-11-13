@@ -64,8 +64,25 @@ function renderMarkdown(node,source){
   const p=make('p','answer-prose');renderInline(p,buf.join('\n'));node.append(p);
  }
 }
-export function renderRichText(node,text,locale='en'){
- node.replaceChildren();const pattern=/```([\w+-]*)[^\n]*\n([\s\S]*?)```/g;let at=0;
+export function prepareStreamingMarkdown(text){
+ const src=String(text??'').replace(/\r\n?/g,'\n');
+ const ticks=(src.match(/```/g)||[]).length;
+ let out=ticks%2===1?src+'\n```':src;
+ const lines=out.split('\n');
+ let i=lines.length-1;
+ while(i>=0&&!lines[i].trim())i--;
+ if(i>=0&&/^\s*\|.*\|\s*$/.test(lines[i])){
+  const sep=/^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/;
+  if(!sep.test(lines[i])&&!sep.test(lines[i-1]||'')){
+   const cols=lines[i].trim().replace(/^\|/,'').replace(/\|$/,'').split('|').length;
+   lines.push('| '+Array.from({length:Math.max(1,cols)},()=>'---').join(' | ')+' |');
+   out=lines.join('\n');
+  }
+ }
+ return out;
+}
+export function renderRichText(node,text,locale='en',{streaming=false}={}){
+ node.replaceChildren();const source=streaming?prepareStreamingMarkdown(text):text;const pattern=/```([\w+-]*)[^\n]*\n([\s\S]*?)```/g;let at=0;
  const prose=value=>{if(!value||!value.trim())return;renderMarkdown(node,value);};
- for(const match of text.matchAll(pattern)){prose(text.slice(at,match.index));const box=document.createElement('div'),head=document.createElement('div'),label=document.createElement('span'),copy=document.createElement('button'),pre=document.createElement('pre');box.className='code-block';box.dir='ltr';head.className='code-block-header';label.textContent=codeLanguage(match[1]);copy.type='button';copy.className='code-copy';const idle=locale==='fa'?'کپی کد':'Copy code',done=locale==='fa'?'کپی شد':'Copied';copy.textContent=idle;copy.onclick=async()=>{try{await navigator.clipboard.writeText(match[2]);copy.textContent=done;copy.dataset.copied='true';setTimeout(()=>{copy.textContent=idle;delete copy.dataset.copied;},1800);}catch{}};head.append(label,copy);highlightCode(pre,match[2],label.textContent);box.append(head,pre);node.append(box);at=match.index+match[0].length;}prose(text.slice(at));
+ for(const match of source.matchAll(pattern)){prose(source.slice(at,match.index));const box=document.createElement('div'),head=document.createElement('div'),label=document.createElement('span'),copy=document.createElement('button'),pre=document.createElement('pre');box.className='code-block';box.dir='ltr';head.className='code-block-header';label.textContent=codeLanguage(match[1]);copy.type='button';copy.className='code-copy';const idle=locale==='fa'?'کپی کد':'Copy code',done=locale==='fa'?'کپی شد':'Copied';copy.textContent=idle;copy.onclick=async()=>{try{await navigator.clipboard.writeText(match[2]);copy.textContent=done;copy.dataset.copied='true';setTimeout(()=>{copy.textContent=idle;delete copy.dataset.copied;},1800);}catch{}};head.append(label,copy);highlightCode(pre,match[2],label.textContent);box.append(head,pre);node.append(box);at=match.index+match[0].length;}prose(source.slice(at));
 }

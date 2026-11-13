@@ -1,5 +1,7 @@
 // Vercel-only model client. Never exposes provider credentials to the browser.
-const ROOT="https://models.malguard.site";
+import {modelsApiRoot,PRODUCTION_MODELS_ORIGIN} from './api-root.mjs';
+const ROOT=modelsApiRoot();
+export {modelsApiRoot,PRODUCTION_MODELS_ORIGIN};
 export const CF_DEFAULTS=Object.freeze({chat:"chat_auto",work:"work_auto",code:"code_auto"});
 const NEW_MODEL_IDS=new Set(["chat_granite","chat_think","cf_gptoss20","cf_gptoss120","cf_qwen3","cf_gemma4"]);
 export const isNewCloudModel=id=>NEW_MODEL_IDS.has(id);
@@ -33,6 +35,8 @@ const CATALOG=Object.freeze([
  ['cf_gemma4','work','Gemma 4 26B · Balanced Work','workers_ai_rest'],
  ['gemini_flash','chat','Gemini Flash · Classic','gemini'],
  ['groq_qwen','work','Qwen 3.8 27B · Groq','groq'],
+ ['groq_gptoss20','chat','GPT-OSS 20B · Groq','groq'],
+ ['groq_gptoss20','work','GPT-OSS 20B · Groq · Work','groq'],
  ['groq_gptoss','code','GPT-OSS 120B · Groq','groq']
 ]);
 const IDS=new Set(CATALOG.map(([id])=>id));
@@ -61,27 +65,12 @@ export async function fetchCFModels({fetchImpl=fetch,signal}={}){
  Object.defineProperty(models,"thinkingAvailable",{value:Object.values(thinkingByMode).some(Boolean),enumerable:false});
  return models;
 }
-export async function callCFModel({mode,model,message,history=[],sessionToken,quotaEnabled=false,freeFallback=false,thinking=false,webMode="off",searchQuery,remoteLookup=false,signal,fetchImpl=fetch}){
- if(!["chat","work","code"].includes(mode)||!IDS.has(model)||MODES.get(model)!==mode||typeof message!=="string"||!message.trim()||message.length>5000)throw new Error("invalid_model_request");
- if(typeof sessionToken!=="string"||sessionToken.length<12)throw Object.assign(new Error("sign_in_required"),{code:"sign_in_required",status:401});
- if(typeof freeFallback!=="boolean"||typeof thinking!=="boolean")throw new Error("invalid_model_request");
- if(!["off","web","research"].includes(webMode)||typeof remoteLookup!=="boolean")throw new Error("invalid_model_request");
- if(webMode!=="off"&&(!remoteLookup||typeof searchQuery!=="string"||!searchQuery.trim()||searchQuery.length>500))throw new Error("web_consent_required");
- const body={mode,model,message,history:history.slice(-6).map(m=>({role:m.role,content:m.content})),consent:{modelShare:true,...(webMode!=="off"?{remoteLookup:true}:{})},...(freeFallback?{freeFallback:true}:{}),...(thinking?{thinking:true}:{}),...(webMode!=="off"?{webMode,searchQuery:searchQuery.trim()}:{})};
- let response;
- try{
-  response=await fetchImpl(ROOT+"/api/public-model-chat",{method:"POST",credentials:"omit",cache:"no-store",mode:"cors",signal,headers:{"Content-Type":"application/json",Authorization:"Bearer "+sessionToken},body:JSON.stringify(body)});
- }catch(error){
-  if(error?.name==="AbortError")throw error;
-  if(error?.name==="TimeoutError")throw Object.assign(new Error("provider_timeout"),{code:"provider_timeout",status:504});
-  throw Object.assign(new Error("network_error"),{code:"network_error"});
- }
- let data;try{data=await response.json();}catch{throw new Error("provider_invalid_response");}
- if(!response.ok){const code=typeof data?.error==="string"?data.error:response.status===401?"sign_in_required":"provider_unavailable";
-  throw Object.assign(new Error(code),{code,status:response.status,retryAfterSeconds:data?.retryAfterSeconds,retryAt:typeof data?.resetAt==="string"?data.resetAt:undefined});}
- if(typeof data.text!=="string"||!data.text.trim()||typeof data.model!=="string"||typeof data.provider!=="string")throw Object.assign(new Error("provider_unavailable"),{code:"provider_unavailable"});
+function catalogAllows(model,mode){
+ return CATALOG.some(([id,itemMode])=>id===model&&itemMode===mode);
+}
+function normalizeWebSearch(data){
  let webSearch;
- if(data.webSearch?.state==="completed"&&Array.isArray(data.webSearch.sources)&&["web","research"].includes(data.webSearch.mode)){
+ if(data?.webSearch?.state==="completed"&&Array.isArray(data.webSearch.sources)&&["web","research"].includes(data.webSearch.mode)){
   const sources=data.webSearch.sources.slice(0,8).map(item=>{
    try{
     const url=new URL(item.url);
@@ -93,9 +82,88 @@ export async function callCFModel({mode,model,message,history=[],sessionToken,qu
   if(sources.length)webSearch={state:"completed",provider:"tavily",mode:data.webSearch.mode,query:String(data.webSearch.query||"").slice(0,500),
    checkedAt:data.webSearch.checkedAt,sources};
  }
+ return webSearch;
+}
+function finishModelResult(data,model){
+ if(typeof data.text!=="string"||!data.text.trim()||typeof data.model!=="string"||typeof data.provider!=="string")throw Object.assign(new Error("provider_unavailable"),{code:"provider_unavailable"});
+ const webSearch=normalizeWebSearch(data);
  return {text:data.text,model:data.model,selectedModel:data.modelId,provider:data.provider,fallbackUsed:!!data.fallback,thinkingUsed:data.thinking===true,thinkingModelId:typeof data.thinkingModelId==="string"?data.thinkingModelId:undefined,securityAnalysis:false,
   ...(data.auto?.selectedModelId&&typeof data.auto.selectedModelId==="string"?{auto:{selectedModelId:data.auto.selectedModelId,selectedLabel:String(data.auto.selectedLabel||"").slice(0,100)}}:{}),
   ...(webSearch?{webSearch}:{}),...(data.usage&&typeof data.usage.remainingTokens==="number"?{usage:data.usage}:{})};
+}
+async function readModelStream(response,model,{onToken,onStatus}={}){
+ const reader=response.body.getReader();
+ const decoder=new TextDecoder();
+ let buffer="",text="",event="message",meta={};
+ const apply=(payload,replace=false)=>{
+  if(!payload||typeof payload!=="object")return;
+  if(typeof payload.full==="string")text=payload.full;
+  else if(replace&&typeof payload.text==="string")text=payload.text;
+  else if(typeof payload.text==="string")text+=payload.text;
+  else if(typeof payload.delta==="string")text+=payload.delta;
+  if(payload.model)meta.model=payload.model;
+  if(payload.provider)meta.provider=payload.provider;
+  if(payload.modelId)meta.modelId=payload.modelId;
+  if(payload.webSearch)meta.webSearch=payload.webSearch;
+  if(payload.usage)meta.usage=payload.usage;
+  if(payload.auto)meta.auto=payload.auto;
+  if(payload.fallback!=null)meta.fallback=payload.fallback;
+  if(payload.thinking!=null)meta.thinking=payload.thinking;
+  if(payload.thinkingModelId)meta.thinkingModelId=payload.thinkingModelId;
+ };
+ const flush=block=>{
+  let data="";
+  for(const line of block.split(/\r?\n/)){
+   if(line.startsWith("event:"))event=line.slice(6).trim()||"message";
+   else if(line.startsWith("data:"))data+=(data?"\n":"")+line.slice(5).trimStart();
+  }
+  if(!data||data==="[DONE]"){event="message";return;}
+  let payload={};
+  try{payload=JSON.parse(data);}catch{payload={text:data};}
+  if(event==="status"||payload.phase){if(typeof onStatus==="function")onStatus(payload);event="message";return;}
+  if(event==="error"||payload.error){
+   throw Object.assign(new Error(payload.error||"provider_unavailable"),{code:payload.error||"provider_unavailable",status:payload.status||500,retryAfterSeconds:payload.retryAfterSeconds,retryAt:payload.resetAt});
+  }
+  const previous=text;
+  apply(payload,event==="done");
+  if(typeof onToken==="function"&&text&&text!==previous)onToken(text);
+  event="message";
+ };
+ while(true){
+  const {value,done}=await reader.read();
+  buffer+=decoder.decode(value||new Uint8Array(),{stream:!done});
+  const parts=buffer.split(/\r?\n\r?\n/);
+  buffer=parts.pop()||"";
+  for(const block of parts)if(block.trim())flush(block);
+  if(done){if(buffer.trim())flush(buffer);break;}
+ }
+ return finishModelResult({text,...meta,model:meta.model||model,provider:meta.provider||"unknown"},model);
+}
+export async function callCFModel({mode,model,message,history=[],sessionToken,quotaEnabled=false,freeFallback=false,thinking=false,webMode="off",searchQuery,remoteLookup=false,signal,fetchImpl=fetch,stream=false,onToken,onStatus}={}){
+ if(!["chat","work","code"].includes(mode)||!IDS.has(model)||!catalogAllows(model,mode)||typeof message!=="string"||!message.trim()||message.length>5000)throw new Error("invalid_model_request");
+ if(typeof sessionToken!=="string"||sessionToken.length<12)throw Object.assign(new Error("sign_in_required"),{code:"sign_in_required",status:401});
+ if(typeof freeFallback!=="boolean"||typeof thinking!=="boolean")throw new Error("invalid_model_request");
+ if(!["off","web","research"].includes(webMode)||typeof remoteLookup!=="boolean")throw new Error("invalid_model_request");
+ if(webMode!=="off"&&(!remoteLookup||typeof searchQuery!=="string"||!searchQuery.trim()||searchQuery.length>500))throw new Error("web_consent_required");
+ const body={mode,model,message,history:history.slice(-6).map(m=>({role:m.role,content:m.content})),consent:{modelShare:true,...(webMode!=="off"?{remoteLookup:true}:{})},...(freeFallback?{freeFallback:true}:{}),...(thinking?{thinking:true}:{}),...(webMode!=="off"?{webMode,searchQuery:searchQuery.trim()}:{}),...(stream?{stream:true}:{})};
+ let response;
+ try{
+  response=await fetchImpl(ROOT+"/api/public-model-chat",{method:"POST",credentials:"omit",cache:"no-store",mode:"cors",signal,headers:{"Content-Type":"application/json",Accept:stream?"text/event-stream":"application/json",Authorization:"Bearer "+sessionToken},body:JSON.stringify(body)});
+ }catch(error){
+  if(error?.name==="AbortError")throw error;
+  if(error?.name==="TimeoutError")throw Object.assign(new Error("provider_timeout"),{code:"provider_timeout",status:504});
+  throw Object.assign(new Error("network_error"),{code:"network_error"});
+ }
+ const type=String(response.headers.get("content-type")||"");
+ if(stream&&response.ok&&response.body&&/event-stream|ndjson|x-ndjson/i.test(type)){
+  return readModelStream(response,model,{onToken,onStatus});
+ }
+ let data;try{data=await response.json();}catch{throw new Error("provider_invalid_response");}
+ if(!response.ok){const code=typeof data?.error==="string"?data.error:response.status===401?"sign_in_required":"provider_unavailable";
+  throw Object.assign(new Error(code),{code,status:response.status,retryAfterSeconds:data?.retryAfterSeconds,retryAt:typeof data?.resetAt==="string"?data.resetAt:undefined});}
+ const result=finishModelResult(data,model);
+ if(typeof onToken==="function")onToken(result.text);
+ return result;
 }
 
 export async function fetchCFUsage({sessionToken,signal,fetchImpl=fetch}={}){
