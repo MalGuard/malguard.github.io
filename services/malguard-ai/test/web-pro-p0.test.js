@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {modelsApiRoot,PRODUCTION_MODELS_ORIGIN} from '../../../ai/api-root.mjs';
+import {accountApiBase,usesProductionAccountHost,PRODUCTION_ACCOUNT_ORIGIN as ACCOUNT_ORIGIN} from '../../../ai/account.mjs';
 import {buildSearchQuery} from '../../../ai/search-query.mjs';
 import {prepareStreamingMarkdown} from '../../../ai/code-view.mjs';
 import {callCFModel} from '../../../ai/cloudflare-models.mjs';
 import {createApp} from '../server/app.js';
 import {readFileSync} from 'node:fs';
-import {handlePreviewBackendProxy,isPreviewEnv,PREVIEW_BACKEND_ORIGIN,PREVIEW_BYPASS_ENV} from '../server/preview-backend-proxy.mjs';
+import {handlePreviewBackendProxy,isPreviewEnv,PREVIEW_BACKEND_ORIGIN,PRODUCTION_ACCOUNT_ORIGIN,PREVIEW_BYPASS_ENV} from '../server/preview-backend-proxy.mjs';
 
 test('preview frontend hosts talk to the matching malware-ai preview, production stays on models.malguard.site',()=>{
   assert.equal(modelsApiRoot('malguard.site'),PRODUCTION_MODELS_ORIGIN);
@@ -23,6 +24,19 @@ test('preview frontend hosts talk to the matching malware-ai preview, production
   );
   assert.equal(modelsApiRoot('unrelated.vercel.app'),PRODUCTION_MODELS_ORIGIN);
 });
+
+test('preview sign-in uses the production account host via the same-origin proxy',()=>{
+  assert.equal(accountApiBase('malguard.site'),ACCOUNT_ORIGIN);
+  assert.equal(accountApiBase('www.malguard.site'),ACCOUNT_ORIGIN);
+  assert.equal(accountApiBase('malguard.github.io'),ACCOUNT_ORIGIN);
+  assert.equal(accountApiBase('malguard-galaxy-mobile-test-git-web-pro-p0-mcazarderakhsh-4187.vercel.app'),'');
+  assert.equal(accountApiBase('malguard-galaxy-mobile-test-abc12def-mcazarderakhsh-4187.vercel.app'),'');
+  assert.equal(accountApiBase('localhost'),'');
+  assert.equal(usesProductionAccountHost('malguard.site'),true);
+  assert.equal(usesProductionAccountHost('malguard-galaxy-mobile-test-git-web-pro-p0-mcazarderakhsh-4187.vercel.app'),true);
+  assert.equal(usesProductionAccountHost('localhost'),false);
+});
+
 
 test('search query uses the full question and recent conversation, not only the first clipped line',()=>{
   const query=buildSearchQuery('What is the capital of France?\nPlease cite sources.',[
@@ -168,4 +182,45 @@ test('preview proxy forwards Authorization and streams SSE tokens',async()=>{
  assert.match(res.headers['content-type'],/event-stream/);
  assert.match(res.text,/Hello/);
  assert.ok(!res.text.includes(secret));
+});
+
+test('preview auth proxy forwards allowlisted account paths to the production account host without the bypass header',async()=>{
+ const secret='unit-test-bypass-secret-value-32ch';
+ const env={VERCEL_ENV:'preview',[PREVIEW_BYPASS_ENV]:secret};
+ const blocked=mockRes();
+ await handlePreviewBackendProxy({method:'POST',url:'/api/game-scam-guard/auth/logout',headers:{}},blocked,{env,fetchImpl:async()=>{throw new Error('should_not_fetch');}});
+ assert.equal(blocked.statusCode,404);
+
+ const production=mockRes();
+ let called=false;
+ await handlePreviewBackendProxy({method:'GET',url:'/api/preview-backend?path=auth-status',headers:{}},production,{env:{VERCEL_ENV:'production',[PREVIEW_BYPASS_ENV]:secret},fetchImpl:async()=>{called=true;throw new Error('should_not_fetch');}});
+ assert.equal(production.statusCode,404);
+ assert.equal(called,false);
+
+ const sent=[];
+ const ok=mockRes();
+ await handlePreviewBackendProxy({method:'GET',url:'/api/game-scam-guard/auth/status',headers:{accept:'application/json'}},ok,{env,fetchImpl:async(url,options)=>{
+  sent.push({url,headers:options.headers});
+  return new Response(JSON.stringify({provider:'first-party-email',configured:true,persistentAccounts:true}),{status:200,headers:{'Content-Type':'application/json'}});
+ }});
+ assert.equal(ok.statusCode,200);
+ assert.equal(sent[0].url,PRODUCTION_ACCOUNT_ORIGIN+'/api/game-scam-guard/auth/status');
+ assert.equal(sent[0].headers['X-Vercel-Protection-Bypass'],undefined);
+ assert.equal(sent[0].headers.Authorization,undefined);
+ assert.equal(ok.body.configured,true);
+ assert.ok(!JSON.stringify(ok.body).includes(secret));
+
+ const session=mockRes();
+ let sessionForward;
+ await handlePreviewBackendProxy({
+  method:'POST',url:'/api/preview-backend?path=auth-session',headers:{'content-type':'application/json',cookie:'should-not-forward=1',authorization:'Bearer should-not-forward'},body:{sessionToken:'placeholder-session-token'}
+ },session,{env,fetchImpl:async(url,options)=>{
+  sessionForward={url,headers:options.headers,body:String(options.body)};
+  return new Response(JSON.stringify({email:'user@example.com',username:'user',expiresAt:1}),{status:200,headers:{'Content-Type':'application/json','Set-Cookie':'session=abc'}});
+ }});
+ assert.equal(sessionForward.url,PRODUCTION_ACCOUNT_ORIGIN+'/api/game-scam-guard/auth/session');
+ assert.equal(sessionForward.headers['X-Vercel-Protection-Bypass'],undefined);
+ assert.equal(sessionForward.headers.Authorization,undefined);
+ assert.equal(sessionForward.headers.Cookie,undefined);
+ assert.equal(session.headers['set-cookie'],undefined);
 });
