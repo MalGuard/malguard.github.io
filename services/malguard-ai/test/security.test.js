@@ -101,7 +101,7 @@ test('Gemini receives only user text and fixed instructions, no file/tool eviden
 });
 
 async function serve(t,options={}){
- const server=createApp({enabled:true,log:()=>{},...options}).listen(0,'127.0.0.1');await new Promise(resolve=>server.once('listening',resolve));t.after(()=>new Promise(resolve=>{server.closeAllConnections();server.close(resolve);}));return `http://127.0.0.1:${server.address().port}`;
+ const server=createApp({enabled:true,log:()=>{},authorize:async()=>true,...options}).listen(0,'127.0.0.1');await new Promise(resolve=>server.once('listening',resolve));t.after(()=>new Promise(resolve=>{server.closeAllConnections();server.close(resolve);}));return `http://127.0.0.1:${server.address().port}`;
 }
 const post=(base,body,headers={})=>fetch(base+'/chat',{method:'POST',headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(body)});
 test('HTTP API validates JSON, content type, CORS, disabled switch and request limit',async t=>{
@@ -130,4 +130,11 @@ test('concurrency slots remain occupied until running operations settle',async t
  const orchestrator={status:()=>({tools:{},model:{state:'disabled'}}),run:()=>new Promise(resolve=>{releases.push(()=>resolve({result:null,message:'fixture'}));if(releases.length===2)signalStarted();})};
  const base=await serve(t,{orchestrator});const first=post(base,{}),second=post(base,{});await started;
  assert.equal((await post(base,{})).status,503);releases.forEach(release=>release());await Promise.all([first,second]);
+});
+test('chat without a session returns 401 sign_in_required instead of model consent',async t=>{
+ const base=await serve(t,{authorize:undefined});
+ const r=await post(base,{message:'hello',mode:'chat',consent:{modelShare:true}},{Origin:'https://malguard.github.io'});
+ assert.equal(r.status,401);
+ const body=await r.json();
+ assert.equal(body.error,'sign_in_required');
 });

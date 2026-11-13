@@ -20,7 +20,7 @@ test('provider failures distinguish rate, quota, credit, credentials and outage;
 });
 test('gateway -> orchestrator -> HTTP stream preserves the exact safe reset metadata',async t=>{
  const orchestrator=createOrchestrator({},{status:()=>({state:'configured'}),respond:()=>gatewayRequest({}, {transport:async()=>({status:429,headers:{},bytes:Buffer.from(JSON.stringify({error:'provider_quota_exhausted',retryAt:reset,retryAfterSeconds:90,message:'private-secret'}))})})});
- const server=createApp({orchestrator,log:()=>{}}).listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>{server.closeAllConnections();return new Promise(r=>server.close(r));});
+ const server=createApp({orchestrator,log:()=>{},authorize:async()=>true}).listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>{server.closeAllConnections();return new Promise(r=>server.close(r));});
  const r=await fetch(`http://127.0.0.1:${server.address().port}/chat`,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify({message:'hello',consent:{modelShare:true}})});
  const raw=await r.text(),terminal=JSON.parse(raw.trim().split('\n').at(-1)).result;
  assert.equal(terminal.error,'provider_quota_exhausted');assert.equal(terminal.retryAt,reset);assert.ok(!raw.includes('private-secret'));assert.equal(terminal.generated,undefined);
@@ -30,7 +30,7 @@ test('search failures retain safe provider timing on the security result without
  const r=await o.run({mode:'worker',tool:'ai_web',message:'benign',consent:{remoteLookup:true}});assert.equal(r.result.outcome,'error');assert.equal(r.result.failure.retryAt,reset);
 });
 test('local rate window reports its actual remaining time, independent of browser timezone',async t=>{
- let clock=now;const server=createApp({now:()=>clock,log:()=>{},orchestrator:{run:async()=>({message:'fixture'})}}).listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>{server.closeAllConnections();return new Promise(r=>server.close(r));});
+ let clock=now;const server=createApp({now:()=>clock,log:()=>{},authorize:async()=>true,orchestrator:{run:async()=>({message:'fixture'})}}).listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>{server.closeAllConnections();return new Promise(r=>server.close(r));});
  const send=()=>fetch(`http://127.0.0.1:${server.address().port}/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
  for(let i=0;i<10;i++)await send();clock+=45000;const r=await send();assert.equal(r.status,429);assert.equal(r.headers.get('retry-after'),'15');assert.equal((await r.json()).retryAt,new Date(now+60000).toISOString());
  clock+=15001;assert.equal((await send()).status,200);

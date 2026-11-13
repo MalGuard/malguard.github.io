@@ -4,7 +4,19 @@ import {randomUUID} from 'node:crypto';
 import {createOrchestrator} from './orchestrator.js';
 import {InputError,MAX_BODY_BYTES} from './contracts.js';
 
-export function createApp({orchestrator=createOrchestrator(),enabled=process.env.MALGUARD_AI_ENABLED!=='false',publicOrigin=process.env.MALGUARD_AI_PUBLIC_ORIGIN,now=Date.now,log=entry=>console.info(JSON.stringify(entry))}={}) {
+async function defaultAuthorize(req,fetchImpl=fetch){
+  const token=String(req.headers.authorization||'');
+  if(!/^Bearer [a-zA-Z0-9._-]{12,16000}$/.test(token)){
+    const error=new Error('sign_in_required');
+    error.code='sign_in_required';error.status=401;throw error;
+  }
+  const response=await fetchImpl('https://api.malguard.site/api/game-scam-guard/auth/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionToken:token.slice(7)}),redirect:'error',signal:AbortSignal.timeout(6000)});
+  if(!response.ok){
+    const error=new Error('sign_in_required');
+    error.code='sign_in_required';error.status=401;throw error;
+  }
+}
+export function createApp({orchestrator=createOrchestrator(),enabled=process.env.MALGUARD_AI_ENABLED!=='false',publicOrigin=process.env.MALGUARD_AI_PUBLIC_ORIGIN,now=Date.now,log=entry=>console.info(JSON.stringify(entry)),authorize=defaultAuthorize}={}) {
   const app=express(),rates=new Map();let active=0;
   app.disable('x-powered-by');
   const allowed=new Set(['https://malguard.site','https://www.malguard.site','https://malguard.github.io','https://game-scam-guard-connected.vercel.app','https://api.malguard.site']);
@@ -17,8 +29,8 @@ export function createApp({orchestrator=createOrchestrator(),enabled=process.env
     if(origin)res.set('Access-Control-Allow-Origin',origin);
     if(req.method==='OPTIONS'){
       const headers=String(req.headers['access-control-request-headers']||'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean);
-      if(!origin||!['GET','POST'].includes(req.headers['access-control-request-method'])||headers.some(h=>h!=='content-type'))return res.status(403).end();
-      return res.set({'Access-Control-Allow-Methods':'GET, POST','Access-Control-Allow-Headers':'Content-Type','Access-Control-Max-Age':'600'}).status(204).end();
+      if(!origin||!['GET','POST'].includes(req.headers['access-control-request-method'])||headers.some(h=>h!=='content-type'&&h!=='authorization'))return res.status(403).end();
+      return res.set({'Access-Control-Allow-Methods':'GET, POST','Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Max-Age':'600'}).status(204).end();
     }
     // Never trust caller-supplied X-Forwarded-For. Behind a proxy the socket
     // bucket is intentionally conservative; edge-wide quotas are a launch gate.
@@ -42,6 +54,9 @@ export function createApp({orchestrator=createOrchestrator(),enabled=process.env
   });
   app.post('/chat',async(req,res,next)=>{
     if(!enabled)return res.status(503).json({error:'service_disabled'});
+    try{if(authorize)await authorize(req);}catch(error){
+      return res.status(error.status||401).json({error:error.code||'sign_in_required'});
+    }
     if(active>=2)return res.status(503).json({error:'service_busy'});
     active++;const id=randomUUID();let started=false;
     // Validation and consent complete before the first stream event.
