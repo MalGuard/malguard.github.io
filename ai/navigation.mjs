@@ -27,9 +27,9 @@ export function createNavigation({account,onLanguage}){
  const label=make('h2','Recent chats');label.className='navigation-label';const chats=make('div');chats.id='saved-chats';
  const empty=make('p','Sign in to save and revisit your chats.');empty.id='history-status';empty.className='navigation-note';
  const footer=make('div');footer.className='navigation-footer';
- const settings=$('settings-panel');settings.querySelector('summary').append(make('span','Settings'));
+ const settings=$('settings-panel');const settingsLabel=make('span','Settings');settingsLabel.dataset.i18n='settings';settings.querySelector('summary').append(settingsLabel);const settingsSummary=settings.querySelector('summary');settingsSummary.setAttribute('aria-label','Settings');
  settings.addEventListener('toggle',()=>{if(settings.open){document.body.classList.remove('navigation-closed');collapse.setAttribute('aria-expanded','true');}});
- const general=make('section');general.className='settings-general';general.append(make('h2','Settings'));
+ const general=make('section');general.className='settings-general';const settingsHeading=make('h2','Settings');general.append(settingsHeading);
  const settingsClose=make('button','Close settings');settingsClose.type='button';settingsClose.id='settings-close';settingsClose.onclick=()=>{settings.open=false;if(innerWidth<=760)hide();else collapse.focus();};general.prepend(settingsClose);
  const settingsContent=settings.querySelector('.settings-content');settingsContent.setAttribute('role','dialog');settingsContent.setAttribute('aria-modal','true');settingsContent.setAttribute('aria-label','Settings');
  settings.addEventListener('toggle',()=>{if(settings.open)settingsClose.focus();});
@@ -67,6 +67,12 @@ export function createNavigation({account,onLanguage}){
     help.textContent=fa?'راهنما و میان‌برها':'Help & shortcuts';
     home.textContent=fa?'صفحه اصلی MalGuard':'MalGuard home';
     fresh.lastElementChild.textContent=fa?'گفتگوی جدید':'New chat';
+    const settingsWord=fa?'تنظیمات':'Settings';
+    settingsLabel.textContent=settingsWord;
+    settingsSummary.setAttribute('aria-label',settingsWord);
+    settingsHeading.textContent=settingsWord;
+    settingsClose.textContent=fa?'بستن تنظیمات':'Close settings';
+    settingsContent.setAttribute('aria-label',settingsWord);
   }
 };
 }

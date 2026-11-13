@@ -1,5 +1,5 @@
 import {createChatLibrary} from './library.mjs?v=web-pro-p0-20261113';
-import {createNavigation} from './navigation.mjs?v=ux-v3-20261108';
+import {createNavigation} from './navigation.mjs?v=web-pro-p0-20261113';
 import {renderResearchEvidence,attachResearchCitations} from './research-ui.mjs?v=20261108-research1';
 import {mediaFromCatalog,toMediaPayload,callMedia,MEDIA_LIMIT_BYTES} from './media-client.mjs?v=20261108-media1';
 import {installExperienceV2,syncExperienceV2} from './experience-v2.mjs?v=ux-v3-20261108';
