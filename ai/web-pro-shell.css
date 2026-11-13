@@ -153,10 +153,10 @@ html:root body.mg-ai-v2 :is(#attach-toggle,#send,#thinking-toggle,#web-search-to
 }
 html:root body.mg-ai-v2 #attach-toggle,
 html:root body.mg-ai-v2 #send{
-  width:36px!important;
-  height:36px!important;
-  min-width:36px!important;
-  min-height:36px!important;
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  min-height:40px!important;
   padding:0!important;
   border-radius:12px!important;
   border:1px solid var(--wp-border)!important;
@@ -261,10 +261,10 @@ html:root body.mg-ai-v2 .composer-hints{
   }
   html:root body.mg-ai-v2 #attach-toggle,
   html:root body.mg-ai-v2 #send{
-    width:36px!important;
-    height:36px!important;
-    min-width:36px!important;
-    min-height:36px!important;
+    width:40px!important;
+    height:40px!important;
+    min-width:40px!important;
+    min-height:40px!important;
     border-radius:12px!important;
   }
 }
@@ -318,10 +318,10 @@ html:root body.mg-pro.mg-ai-v2 #send,
 html:root body.mg-pro.mg-ai-v2 #attach-toggle,
 html:root body.mg-pro.mg-ai-v2 .composer-shell #send,
 html:root body.mg-pro.mg-ai-v2 .composer-shell #attach-toggle{
-  width:36px!important;
-  height:36px!important;
-  min-width:36px!important;
-  min-height:36px!important;
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  min-height:40px!important;
   margin:0!important;
   transform:none!important;
   opacity:1!important;
@@ -346,6 +346,14 @@ html:root body.mg-pro.mg-ai-v2 .composer-footer,
 html:root body.mg-pro.mg-ai-v2 .composer-shell .composer-footer,
 html:root body.mg-pro.mg-ai-v2 .composer-shell.pro-compact .composer-footer,
 html:root body.mg-pro.mg-ai-v2 .attach-menu{
-  min-height:36px!important;
-  height:36px!important;
+  min-height:40px!important;
+  height:40px!important;
 }
+
+html:root body.mg-ai-v2 #stop-generation{display:none!important}
+html:root body.mg-ai-v2 #send[data-state=stop]{
+  background:#ececec!important;
+  color:#161616!important;
+  border-color:transparent!important;
+}
+html:root body.mg-ai-v2 .web-search-controls{position:relative;z-index:12}

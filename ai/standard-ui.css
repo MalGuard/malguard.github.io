@@ -270,6 +270,14 @@ html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .conversation{
   flex:1 1 auto;
   min-height:min(52dvh,32rem);
 }
+html:root body.mg-pro.mg-ai-v2:not([data-mode=build]):has(.conversation:not(:empty)) .conversation{
+  flex:0 1 auto;
+  min-height:0;
+  padding-bottom:8px;
+}
+html:root body.mg-pro.mg-ai-v2:not([data-mode=build]):has(.conversation:not(:empty)) .composer-area{
+  margin-top:8px;
+}
 html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .composer-area{
   position:sticky;
   bottom:0;
@@ -295,14 +303,23 @@ html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .intro{
   width:100%!important;
   max-width:min(780px,calc(100% - 32px));
   margin-inline:auto!important;
-  height:calc(100% - 28px - 11.5rem);
+  height:calc(100% - 28px - 13rem);
   min-height:12rem;
-  z-index:3;
+  z-index:1;
   opacity:1;
   visibility:visible;
   transform:none;
-  pointer-events:auto;
+  pointer-events:none;
   transition:opacity .2s ease,transform .2s ease,visibility 0s linear 0s;
+}
+html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .intro > *{pointer-events:auto}
+html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .composer-area,
+html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .web-search-controls,
+html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) #web-search-toggle,
+html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) #web-search-depth,
+html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) #attach-options{
+  position:relative;
+  z-index:12;
 }
 html:root body.mg-pro.mg-ai-v2:not([data-mode=build]):has(.conversation:not(:empty)) .intro{
   display:flex!important;
@@ -347,7 +364,8 @@ html:root body.mg-pro.mg-ai-v2 .composer-shell .composer-actions{
 }
 @media (max-width:760px){
   html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .conversation{min-height:min(46dvh,26rem)}
-  html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .intro{height:calc(100% - 28px - 13rem)}
+  html:root body.mg-pro.mg-ai-v2:not([data-mode=build]):has(.conversation:not(:empty)) .conversation{min-height:0}
+  html:root body.mg-pro.mg-ai-v2:not([data-mode=build]) .intro{height:calc(100% - 28px - 14rem)}
   html:root body.mg-pro.mg-ai-v2 .composer-shell,
   html:root body.mg-pro.mg-ai-v2 .composer-shell.pro-compact{min-height:112px!important}
 }
