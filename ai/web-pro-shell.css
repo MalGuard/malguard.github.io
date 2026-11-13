@@ -341,3 +341,11 @@ html:root body.mg-pro.mg-ai-v2 #send:disabled:hover{
     min-height:120px!important;
   }
 }
+
+html:root body.mg-pro.mg-ai-v2 .composer-footer,
+html:root body.mg-pro.mg-ai-v2 .composer-shell .composer-footer,
+html:root body.mg-pro.mg-ai-v2 .composer-shell.pro-compact .composer-footer,
+html:root body.mg-pro.mg-ai-v2 .attach-menu{
+  min-height:36px!important;
+  height:36px!important;
+}
