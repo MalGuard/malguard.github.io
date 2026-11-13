@@ -246,11 +246,14 @@ function init(){
  // Theme toggle and language switch live in the header actions.
  const actions=document.querySelector('.header-actions');
  const lang=make('button','pro-lang');lang.type='button';lang.id='pro-language';
- const syncLang=()=>{lang.textContent=fa()?'EN':'فا';lang.title=fa()?'Switch to English':'تغییر به فارسی';lang.setAttribute('aria-label',lang.title);};
+ const syncLang=()=>{lang.textContent=fa()?'EN':'فا';lang.title=fa()?'تغییر زبان به انگلیسی':'Switch to Persian';lang.setAttribute('aria-label',lang.title);};
  lang.onclick=()=>$('language')?.click();syncLang();
  new MutationObserver(()=>{syncLang();document.querySelectorAll('select[data-pro-enhanced]').forEach(s=>s.dispatchEvent(new Event('pro-sync')));}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
  actions?.prepend(lang);
- const moveTheme=()=>{const t=$('mgThemeToggle');if(t&&actions&&t.parentElement!==actions){actions.prepend(t);t.classList.add('pro-theme');}};
+ const THEME_TIPS={auto:['Theme: auto (follows sunrise and sunset). Click for light.','پوسته: خودکار (بر اساس طلوع و غروب). برای روشن کلیک کنید.'],light:['Theme: light. Click for dark.','پوسته: روشن. برای تیره کلیک کنید.'],dark:['Theme: dark. Click for auto.','پوسته: تیره. برای خودکار کلیک کنید.']};
+ const syncThemeTip=()=>{const t=$('mgThemeToggle');if(!t)return;const tip=(THEME_TIPS[t.dataset.mode||'auto']||THEME_TIPS.auto)[fa()?1:0];if(t.title!==tip)t.title=tip;if(t.getAttribute('aria-label')!==tip)t.setAttribute('aria-label',tip);};
+ const moveTheme=()=>{const t=$('mgThemeToggle');if(t&&actions&&t.parentElement!==actions){actions.prepend(t);t.classList.add('pro-theme');}if(t&&!t.dataset.proTip){t.dataset.proTip='1';new MutationObserver(syncThemeTip).observe(t,{attributes:true,attributeFilter:['aria-label','data-mode']});}syncThemeTip();};
+ new MutationObserver(syncThemeTip).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
  moveTheme();new MutationObserver(moveTheme).observe(document.body,{childList:true});
  // Auto-grow composer.
  const msg=$('message');if(msg){const grow=()=>{msg.style.height='auto';msg.style.height=Math.min(msg.scrollHeight,240)+'px';};msg.addEventListener('input',grow);}

@@ -3,7 +3,7 @@ import {createNavigation} from './navigation.mjs?v=web-pro-p0-20261113-r8';
 import {renderResearchEvidence,attachResearchCitations} from './research-ui.mjs?v=web-pro-p0-20261113-r6';
 import {mediaFromCatalog,toMediaPayload,callMedia,MEDIA_LIMIT_BYTES} from './media-client.mjs?v=web-pro-p0-20261113-proxy';
 import {installExperienceV2,syncExperienceV2} from './experience-v2.mjs?v=ux-v3-20261108';
-import {errorMessage} from './error-message.mjs?v=web-pro-p0-20261113-r6';
+import {errorMessage} from './error-message.mjs?v=web-pro-p0-20261113-r9';
 import {publicFailure,retryDetails} from './service-errors.mjs?v=web-pro-p0-20261113-r6';
 import {apiUrl,readStream} from './client.mjs?v=vercel-auth-stable-20261103';
 import {readPermissions,savePermissions,revokePermissions} from './permissions.mjs?v=free-fallback-20261030';
@@ -16,7 +16,7 @@ import {typeText,formatElapsed} from './reply-motion.mjs';
 import {desktopModels,createDesktopChat} from './desktop-models.mjs?v=desktop-pull-20261030';
 import {detectDevice,assessDesktopModel} from './model-compatibility.mjs?v=hardware-check-20261030';
 import {renderRichText} from './code-view.mjs?v=web-pro-p0-20261113';
-import {buildSearchQuery} from './search-query.mjs';
+import {buildSearchQuery} from './search-query.mjs?v=web-pro-p0-20261113-r9';
 import {createAccount} from './account.mjs?v=web-pro-p0-20261113-auth';
 import {createBuilder} from './builder.mjs?v=qwen-coder-restored-20261026';
 import {parseProposal} from './build-project.mjs?v=codex-chat-20261025';
@@ -381,9 +381,23 @@ function noteAutoModel(generated){
  if(!opt||!/_auto$/.test(opt.value)||!generated)return;
  const label=String(generated.auto?.selectedLabel||generated.modelLabel||generated.model||'').slice(0,80);
  if(!label)return;
- autoRealModel[opt.value]=label;opt.dataset.realModel=label;opt.textContent=(chromeLocale()==='fa'?'خودکار':'Auto')+' · '+label;
+ autoRealModel[opt.value]=label;opt.dataset.realModel=label;opt.textContent=autoChoiceLabel(opt.value,opt.textContent);
 }
 const autoRealModel={};
+// The collapsed picker shows only the text before the first " · ", so keep Auto and the model name together there.
+function autoChoiceLabel(id,fallback){
+ const prefix=chromeLocale()==='fa'?'خودکار':'Auto';
+ let real=autoRealModel[id];
+ if(!real){
+  const web=activeWebMode?.()!=='off';
+  const want=web?'groq_gptoss':'groq_gptoss20';
+  const hit=cfModels.find(m=>m.id===want&&m.available);
+  real=hit?hit.label:'';
+ }
+ if(!real)return fallback&&!/^Auto\b/.test(fallback)?fallback:prefix;
+ const [name,...rest]=String(real).split(' · ');
+ return `${prefix}: ${name}`+(rest.length?' · '+rest.join(' · '):'');
+}
 
 function responseIcon(kind){
  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -481,7 +495,7 @@ function renderStatus(){
  if(models.length){
   const choices=[{value:'',label:t('chooseModel'),disabled:true}];
   for(const m of models){
-   const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):/_auto$/.test(m.id)&&autoRealModel[m.id]?(chromeLocale()==='fa'?'خودکار':'Auto')+' · '+autoRealModel[m.id]:m.label;
+   const label=m.id==='local_fast'?t('lightModel'):m.id==='local_medium'?t('strongModel'):/_auto$/.test(m.id)?autoChoiceLabel(m.id,m.label):m.label;
    choices.push({value:m.id,label:isNewCloudModel(m.id)?label+' · NEW':label,disabled:m.state!=='configured'||activeMode==='build'&&m.mode!=='code'&&!Object.hasOwn(desktopModels,m.id),isNew:isNewCloudModel(m.id)});
   }
   choices.push({value:'__downloads',label:t('modelDownloads'),disabled:localOfferPending});
