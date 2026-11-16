@@ -467,7 +467,7 @@ function renderResponse(response,remember=true){
  if(Object.keys(r.metadata).length)info.append(el('h4',t('technical')),el('code',JSON.stringify(r.metadata,null,2)));
  info.append(el('h4',t('limits')));const limits=el('ul');for(const v of r.limitations)limits.append(el('li',v));info.append(limits);card.append(info);$('conversation').append(card);
 }
-const R2_UPLOAD_API='https://models.malguard.site/api/file-uploads';
+const R2_UPLOAD_API='https://malware-ai.malguard-security.workers.dev/api/file-uploads';
 const MAX_UPLOAD_BYTES=200*1024*1024;
 const TEXT_EXTENSIONS=new Set(['txt','md','markdown','csv','tsv','json','jsonl','xml','html','htm','css','js','mjs','cjs','ts','tsx','jsx','py','pyw','java','c','h','cc','cpp','hpp','go','rs','sh','bash','ps1','yaml','yml','toml','ini','conf','log','sql','diff','patch','svg','properties','env.example']);
 function textFileSupported(file){
