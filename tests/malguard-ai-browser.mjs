@@ -112,6 +112,7 @@ try{
  }
  for(const width of [360,390,768,1280]){
   const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[],external=[];
+  const modelPostsBeforeWidth=modelPostRequests;
   await skipWelcome(context);page.on('pageerror',e=>errors.push(e.message));
   await context.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
   await page.goto(base+'/ai/');await page.locator('#send').waitFor({state:'visible'});await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
@@ -181,21 +182,21 @@ try{
   await page.locator('#attach-toggle').click();await page.locator('#attach-chat').click();
   assert.equal(await page.locator('#mode').inputValue(),'chat');assert.equal(await page.locator('#tool').inputValue(),'auto');
   assert.equal(requests,beforeMenu,'Attachment actions must not submit requests');
-   assert.equal(modelPostRequests,0,'Attachment menus cannot send a model request');
+   assert.equal(modelPostRequests,modelPostsBeforeWidth,'Attachment menus cannot send a model request');
   assert.equal(await page.locator('#local-download').isVisible(),false);assert.equal(await page.locator('#local-offer').isVisible(),false,'Attachment actions must not start model downloads');
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   await page.locator('#attach-toggle').click();const choosingFile=page.waitForEvent('filechooser');await page.locator('#attach-file').click();
   await (await choosingFile).setFiles({name:'benign.txt',mimeType:'text/plain',buffer:Buffer.from('Hello, harmless browser fixture.')});
   assert.equal(await page.locator('#attach-options').isVisible(),false);assert.equal(await page.locator('#mode').inputValue(),'worker','Selecting a file moves the composer to Work');
   assert.equal(requests,beforeMenu,'Choosing a file does not upload it');
-  const before=requests;await page.locator('#send').click();assert.equal(requests,before,'no upload without consent');assert.equal(modelPostRequests,0,'no model request without consent');
+  const before=requests;await page.locator('#send').click();assert.equal(requests,before,'no upload without consent');assert.equal(modelPostRequests,modelPostsBeforeWidth,'no model request without consent');
   await grantFileConsent(page);await grantModelConsent(page);await page.locator('#workspace-model').selectOption('cf_qwen3');
   await page.locator('#send').click();
   try{await page.getByText('Benign test reply 0',{exact:true}).waitFor({timeout:15000});}
   catch(error){console.error('Browser failure:',await page.locator('#conversation').innerText(),errors);throw error;}
   assert.equal(await page.locator('#file-consent').isChecked(),true);
   assert.equal(await page.locator('#model-consent').isChecked(),true);
-  assert.equal(modelPostRequests,1,'file content is sent to the selected Work model after consent');
+  assert.equal(modelPostRequests,modelPostsBeforeWidth+1,'file content is sent to the selected Work model after consent');
   assert.match(lastModelMessage,/Hello, harmless browser fixture\./,'the model receives extracted file content, not just its filename');
   assert.match(lastModelMessage,/FILE_CONTENT_START/,'file content is clearly delimited as untrusted input');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`overflow ${width}`);
