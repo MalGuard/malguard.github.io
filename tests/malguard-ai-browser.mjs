@@ -66,7 +66,7 @@ function cfFixture(r){
    :{ok:true};
   return r.fulfill({contentType:'application/json',headers,body:JSON.stringify(response)});
  }
- if(url.pathname==='/__r2-fixture/part/1'&&r.request().method()==='PUT')return route.fulfill({status:200,headers:{...headers,ETag:'"fixture-etag"'}});
+ if(url.pathname==='/__r2-fixture/part/1'&&r.request().method()==='PUT')return r.fulfill({status:200,headers:{...headers,ETag:'"fixture-etag"'}});
  const data=r.request().postDataJSON();
  const reply=data.message==='سلام'?'پاسخ فارسی آزمایشی':`Benign test reply ${data.history.length}`;
  return r.fulfill({contentType:'application/json',headers,body:JSON.stringify({text:reply,provider:'workers_ai',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:data.model,fallback:false})});
