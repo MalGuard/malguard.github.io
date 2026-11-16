@@ -64,7 +64,7 @@ function cfFixture(r){
   const response=data.action==='create'?{key:'temporary/test/fixture',uploadId:'fixture-upload',partSize:16*1024*1024,parts:1}
    :data.action==='sign-part'?{url:`${CLOUD_ORIGIN}/__r2-fixture/part/1`}
    :{ok:true};
-  return route.fulfill({contentType:'application/json',headers,body:JSON.stringify(response)});
+  return r.fulfill({contentType:'application/json',headers,body:JSON.stringify(response)});
  }
  if(url.pathname==='/__r2-fixture/part/1'&&r.request().method()==='PUT')return route.fulfill({status:200,headers:{...headers,ETag:'"fixture-etag"'}});
  const data=r.request().postDataJSON();
