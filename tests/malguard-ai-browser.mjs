@@ -11,7 +11,7 @@ const server=web.listen(0,'127.0.0.1');await new Promise(r=>server.once('listeni
 const base=`http://127.0.0.1:${server.address().port}`;
 const CLOUD_ORIGIN='https://malware-ai.malguard-security.workers.dev';
 const MODELS_ORIGIN='https://models.malguard.site';
-let modelPostRequests=0;
+let modelPostRequests=0,lastModelMessage='';
 const cfFixtures=[
  {id:'chat_granite',mode:'chat',label:'Granite 4 Micro',provider:'workers_ai',available:true},
  {id:'chat_flash',mode:'chat',label:'Gemini Flash-Lite',provider:'gemini',available:true},
@@ -43,6 +43,7 @@ function gatewayFixture(route){
  assert.equal(req.headers().authorization,'Bearer synthetic-session-valid-user');
  const body=req.postDataJSON();
  assert.equal(body.consent?.modelShare,true,'inference must have user consent');
+ lastModelMessage=String(body.message||'');
  const selected=gatewayModels.find(m=>m.id===body.model&&m.mode===body.mode);
  assert.ok(selected,'models from another section must never reach inference');
  modelPostRequests++;
@@ -58,6 +59,14 @@ function cfFixture(r){
  const url=new URL(r.request().url()),headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'POST, OPTIONS'};
  if(r.request().method()==='OPTIONS')return r.fulfill({status:204,headers});
  if(url.pathname==='/api/public-models')return r.fulfill({contentType:'application/json',headers,body:JSON.stringify({models:cfFixtures})});
+ if(url.pathname==='/api/file-uploads'){
+  const data=r.request().postDataJSON();
+  const response=data.action==='create'?{key:'temporary/test/fixture',uploadId:'fixture-upload',partSize:16*1024*1024,parts:1}
+   :data.action==='sign-part'?{url:`${CLOUD_ORIGIN}/__r2-fixture/part/1`}
+   :{ok:true};
+  return route.fulfill({contentType:'application/json',headers,body:JSON.stringify(response)});
+ }
+ if(url.pathname==='/__r2-fixture/part/1'&&r.request().method()==='PUT')return route.fulfill({status:200,headers:{...headers,ETag:'"fixture-etag"'}});
  const data=r.request().postDataJSON();
  const reply=data.message==='سلام'?'پاسخ فارسی آزمایشی':`Benign test reply ${data.history.length}`;
  return r.fulfill({contentType:'application/json',headers,body:JSON.stringify({text:reply,provider:'workers_ai',model:'@cf/ibm-granite/granite-4.0-h-micro',modelId:data.model,fallback:false})});
@@ -177,14 +186,18 @@ try{
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   await page.locator('#attach-toggle').click();const choosingFile=page.waitForEvent('filechooser');await page.locator('#attach-file').click();
   await (await choosingFile).setFiles({name:'benign.txt',mimeType:'text/plain',buffer:Buffer.from('Hello, harmless browser fixture.')});
-  assert.equal(await page.locator('#attach-options').isVisible(),false);assert.equal(requests,beforeMenu,'Choosing a file does not upload it');
-  const before=requests;await page.locator('#send').click();assert.equal(requests,before,'no upload without consent');
-  await grantFileConsent(page);
+  assert.equal(await page.locator('#attach-options').isVisible(),false);assert.equal(await page.locator('#mode').inputValue(),'worker','Selecting a file moves the composer to Work');
+  assert.equal(requests,beforeMenu,'Choosing a file does not upload it');
+  const before=requests;await page.locator('#send').click();assert.equal(requests,before,'no upload without consent');assert.equal(modelPostRequests,0,'no model request without consent');
+  await grantFileConsent(page);await grantModelConsent(page);await page.locator('#workspace-model').selectOption('cf_qwen3');
   await page.locator('#send').click();
-  try{await page.getByRole('heading',{name:'No malicious evidence found in the checks performed.'}).waitFor({timeout:15000});}
+  try{await page.getByText('Benign test reply 0',{exact:true}).waitFor({timeout:15000});}
   catch(error){console.error('Browser failure:',await page.locator('#conversation').innerText(),errors);throw error;}
   assert.equal(await page.locator('#file-consent').isChecked(),true);
-  await page.getByText('Inspection details',{exact:true}).click();assert.match(await page.locator('.result code').last().innerText(),/sha256/);
+  assert.equal(await page.locator('#model-consent').isChecked(),true);
+  assert.equal(modelPostRequests,1,'file content is sent to the selected Work model after consent');
+  assert.match(lastModelMessage,/Hello, harmless browser fixture\./,'the model receives extracted file content, not just its filename');
+  assert.match(lastModelMessage,/FILE_CONTENT_START/,'file content is clearly delimited as untrusted input');
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`overflow ${width}`);
   assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage).sort()),['malguard-ai-permissions-v1','malguard.ai.session.v1','malguard.ai.welcome.v3']);assert.ok(!JSON.stringify(await page.evaluate(()=>({...localStorage}))).includes('benign.txt'));
   assert.equal(await page.locator('#tool option[value="ai_web"]').isDisabled(),true);
