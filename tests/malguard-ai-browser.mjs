@@ -204,7 +204,7 @@ try{
   assert.equal(await page.locator('#tool option[value="ai_web"]').isDisabled(),true);
   assert.equal(await page.locator('#tool option[value="malwarebazaar"]').isDisabled(),true);
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
-  await page.getByRole('heading',{name:'No malicious evidence found in the checks performed.'}).waitFor();
+  assert.equal(await page.getByText('Benign test reply 0',{exact:true}).count(),1,'semantic file analysis displays the selected model response');
   if([390,1280].includes(width)){await mkdir('test-results/malguard-ai',{recursive:true});await page.screenshot({path:`test-results/malguard-ai/${width}.png`,fullPage:true});}
   await newConversation(page);assert.equal(await page.locator('#conversation').innerText(),'');
   if(width===1280){
