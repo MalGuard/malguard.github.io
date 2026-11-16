@@ -56,7 +56,7 @@ function gatewayFixture(route){
 }
 
 function cfFixture(r){
- const url=new URL(r.request().url()),headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type','Access-Control-Allow-Methods':'POST, OPTIONS'};
+ const url=new URL(r.request().url()),headers={'Access-Control-Allow-Origin':base,'Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Allow-Methods':'POST, PUT, OPTIONS','Access-Control-Expose-Headers':'ETag'};
  if(r.request().method()==='OPTIONS')return r.fulfill({status:204,headers});
  if(url.pathname==='/api/public-models')return r.fulfill({contentType:'application/json',headers,body:JSON.stringify({models:cfFixtures})});
  if(url.pathname==='/api/file-uploads'){
