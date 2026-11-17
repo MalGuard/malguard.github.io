@@ -13,7 +13,7 @@ const CATALOG=Object.freeze([
  ['chat_think','chat','GPT-OSS 20B · Deep Chat','workers_ai_rest'],
  ['chat_flash','chat','Gemini 3.5 Flash-Lite','gemini'],
  ['chat_nemotron','chat','Nemotron 3 Super · Chat · Free','openrouter'],
- ['work_qwen','work','Qwen3 30B · Work · Free','openrouter'],
+ ['work_qwen','work','Qwen3.8 27B · Work','workers_ai'],
  ['work_gemma','work','Gemini 3.8 Flash · Work','gemini'],
  ['code_gemini','code','Gemini 3.8 Flash · Coding','gemini'],
  ['code_super','code','Nemotron 3 Super 120B · Free','openrouter'],
@@ -50,7 +50,7 @@ export async function fetchCFModels({fetchImpl=fetch,signal}={}){
   if(m&&IDS.has(m.id)&&!seen.has(m.id)&&["chat","work","code"].includes(m.mode)&&typeof m.available==="boolean"&&typeof m.label==="string")seen.set(m.id,m);
  }
  const models=CATALOG.map(([id,mode,label,provider])=>{
-  const server=seen.get(id),consistent=id==="chat_granite"&&server&&server.mode===mode&&server.provider===provider;
+  const server=seen.get(id),consistent=["chat_granite","work_qwen"].includes(id)&&server&&server.mode===mode&&server.provider===provider;
   return {id,mode,label:consistent?server.label:label,provider,available:!!(consistent&&server.available)};
  });
  Object.defineProperty(models,"accountQuotaEnabled",{value:data.accountQuota?.enabled===true,enumerable:false});
