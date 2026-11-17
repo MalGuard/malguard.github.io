@@ -196,7 +196,7 @@ h1 .accent{background:linear-gradient(100deg,#e8edf2 5%,#8ce9f5 65%,#22d3ee);-we
  const $ = (id) => document.getElementById(id);
  const form=$("composer"), prompt=$("prompt"), send=$("sendBtn"), welcome=$("welcome"), messages=$("messages"), scroll=$("chatScroll");
  const sidebar=$("sidebar"), scrim=$("scrim");
- let busy=false, messageCount=0;
+ let busy=false, messageCount=0, streamTimer=null, pendingTimer=null;
  const canned = (q) => {
    const s=q.toLowerCase();
    if(/کد|code|امنیت|امن|sql|xss|api/.test(s)) return "برای بررسی دقیق، ابتدا ورودی‌ها، مرزهای اعتماد و مسیرهای اجرای داده را مشخص می‌کنیم.\\n\\n۱. اعتبارسنجی ورودی باید سمت سرور انجام شود.\\n۲. دسترسی‌ها باید در هر درخواست بررسی شوند.\\n۳. خطاها نباید اطلاعات داخلی یا اسرار را افشا کنند.\\n\\nاین خروجی صرفاً نمونه‌ی نمایشی است؛ برای نتیجه واقعی باید کد و محیط اجرا بررسی شوند.";
@@ -226,13 +226,13 @@ h1 .accent{background:linear-gradient(100deg,#e8edf2 5%,#8ce9f5 65%,#22d3ee);-we
    for(let i=0;i<3;i++)dots.append(document.createElement("span"));
    card.append(dots); body.append(meta,card); wrap.append(avatar,body); messages.append(wrap); scroll.scrollTop=scroll.scrollHeight;
    const answer=canned(text).replace(/\\n/g,"\n"); let i=0;
-   setTimeout(()=>{card.textContent="";const timer=setInterval(()=>{card.textContent+=answer.slice(i,i+3);i+=3;scroll.scrollTop=scroll.scrollHeight;if(i>=answer.length){clearInterval(timer);busy=false;send.disabled=false;prompt.focus();}},17);},550);
+   pendingTimer=setTimeout(()=>{card.textContent="";streamTimer=setInterval(()=>{card.textContent+=answer.slice(i,i+3);i+=3;scroll.scrollTop=scroll.scrollHeight;if(i>=answer.length){clearInterval(streamTimer);streamTimer=null;pendingTimer=null;busy=false;send.disabled=false;prompt.focus();}},17);},550);
  }
  form.addEventListener("submit",e=>{e.preventDefault();submitMessage(prompt.value);});
  prompt.addEventListener("input",()=>{prompt.style.height="auto";prompt.style.height=Math.min(prompt.scrollHeight,150)+"px";});
  prompt.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit();}});
  document.querySelectorAll("[data-prompt]").forEach(btn=>btn.addEventListener("click",()=>{prompt.value=btn.dataset.prompt;prompt.focus();prompt.dispatchEvent(new Event("input"));}));
- function newChat(){messages.replaceChildren();messages.classList.add("hidden");welcome.classList.remove("hidden");prompt.value="";prompt.focus();messageCount=0;busy=false;send.disabled=false;document.querySelectorAll(".history-item").forEach((x,i)=>x.classList.toggle("active",i===0));closeMenu();}
+ function newChat(){if(pendingTimer!==null)clearTimeout(pendingTimer);if(streamTimer!==null)clearInterval(streamTimer);pendingTimer=null;streamTimer=null;messages.replaceChildren();messages.classList.add("hidden");welcome.classList.remove("hidden");prompt.value="";prompt.focus();messageCount=0;busy=false;send.disabled=false;document.querySelectorAll(".history-item").forEach((x,i)=>x.classList.toggle("active",i===0));closeMenu();}
  $("newChat").addEventListener("click",newChat);$("newChatTop").addEventListener("click",newChat);
  $("historySearch").addEventListener("input",e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll(".history-item").forEach(item=>item.hidden=!item.textContent.toLowerCase().includes(q));});
  document.querySelectorAll(".history-item").forEach(item=>item.addEventListener("click",()=>{document.querySelectorAll(".history-item").forEach(x=>x.classList.remove("active"));item.classList.add("active");prompt.value="";closeMenu();}));
