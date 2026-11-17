@@ -1,6 +1,6 @@
 // Vercel-only model client. Never exposes provider credentials to the browser.
 const ROOT="https://models.malguard.site";
-export const CF_DEFAULTS=Object.freeze({chat:"chat_auto",work:"work_auto",code:"code_auto"});
+export const CF_DEFAULTS=Object.freeze({chat:"chat_granite",work:"work_auto",code:"code_auto"});
 const NEW_MODEL_IDS=new Set(["chat_granite","chat_think","cf_gptoss20","cf_gptoss120","cf_qwen3","cf_gemma4"]);
 export const isNewCloudModel=id=>NEW_MODEL_IDS.has(id);
 // Keep the known catalog visible for debugging; only server-confirmed Vercel models are enabled.
@@ -9,11 +9,11 @@ const CATALOG=Object.freeze([
  ['chat_auto','chat','Auto · smart selection','malguard_auto'],
  ['work_auto','work','Auto · smart selection','malguard_auto'],
  ['code_auto','code','Auto · smart selection','malguard_auto'],
- ['chat_granite','chat','Granite 4 Micro · Efficient','workers_ai_rest'],
+ ['chat_granite','chat','Granite 4 Micro · Efficient','workers_ai'],
  ['chat_think','chat','GPT-OSS 20B · Deep Chat','workers_ai_rest'],
  ['chat_flash','chat','Gemini 3.5 Flash-Lite','gemini'],
  ['chat_nemotron','chat','Nemotron 3 Super · Chat · Free','openrouter'],
- ['work_qwen','work','Qwen3 30B · Work · Free','openrouter'],
+ ['work_qwen','work','Qwen3.8 27B · Work','workers_ai'],
  ['work_gemma','work','Gemini 3.8 Flash · Work','gemini'],
  ['code_gemini','code','Gemini 3.8 Flash · Coding','gemini'],
  ['code_super','code','Nemotron 3 Super 120B · Free','openrouter'],
@@ -50,7 +50,7 @@ export async function fetchCFModels({fetchImpl=fetch,signal}={}){
   if(m&&IDS.has(m.id)&&!seen.has(m.id)&&["chat","work","code"].includes(m.mode)&&typeof m.available==="boolean"&&typeof m.label==="string")seen.set(m.id,m);
  }
  const models=CATALOG.map(([id,mode,label,provider])=>{
-  const server=seen.get(id),consistent=server&&server.mode===mode&&server.provider===provider;
+  const server=seen.get(id),consistent=["chat_granite","work_qwen"].includes(id)&&server&&server.mode===mode&&server.provider===provider;
   return {id,mode,label:consistent?server.label:label,provider,available:!!(consistent&&server.available)};
  });
  Object.defineProperty(models,"accountQuotaEnabled",{value:data.accountQuota?.enabled===true,enumerable:false});
@@ -67,7 +67,7 @@ export async function callCFModel({mode,model,message,history=[],sessionToken,qu
  if(typeof freeFallback!=="boolean"||typeof thinking!=="boolean")throw new Error("invalid_model_request");
  if(!["off","web","research"].includes(webMode)||typeof remoteLookup!=="boolean")throw new Error("invalid_model_request");
  if(webMode!=="off"&&(!remoteLookup||typeof searchQuery!=="string"||!searchQuery.trim()||searchQuery.length>500))throw new Error("web_consent_required");
- const body={mode,model,message,history:history.slice(-6).map(m=>({role:m.role,content:m.content})),consent:{modelShare:true,...(webMode!=="off"?{remoteLookup:true}:{})},...(freeFallback?{freeFallback:true}:{}),...(thinking?{thinking:true}:{}),...(webMode!=="off"?{webMode,searchQuery:searchQuery.trim()}:{})};
+ const body={mode,model,message,history:history.slice(-6).map(m=>({role:m.role,content:m.content})),...(freeFallback?{freeFallback:true}:{})};
  let response;
  try{
   response=await fetchImpl(ROOT+"/api/public-model-chat",{method:"POST",credentials:"omit",cache:"no-store",mode:"cors",signal,headers:{"Content-Type":"application/json",Authorization:"Bearer "+sessionToken},body:JSON.stringify(body)});
