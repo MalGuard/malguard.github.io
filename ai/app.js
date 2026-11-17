@@ -740,7 +740,7 @@ $('media-file').onchange=()=>{
 $('media-draft-remove').onclick=clearMediaDraft;
 function closeAttach(focus=false){$('attach-options').hidden=true;$('attach-toggle').setAttribute('aria-expanded','false');if(focus)$('attach-toggle').focus();}
 $('attach-toggle').onclick=()=>{if(busy)return;const opening=$('attach-options').hidden;$('attach-options').hidden=!opening;$('attach-toggle').setAttribute('aria-expanded',String(opening));};
-$('attach-file').onclick=()=>{closeAttach();$(activeMode==='build'?'build-import':'file').click();};
+$('attach-file').onclick=()=>{if(activeMode!=='worker')switchMode('worker',{carryDraft:true});closeAttach();$('message').placeholder=t('inspectionPlaceholder');$('file').click();};
 function chooseAction(mode,tool){if(busy)return;switchMode(mode,{carryDraft:true});$('tool').value=tool;$('workspace-tool').value=tool;closeAttach();translate();$('message').placeholder=t(tool==='ai_web'?'webPlaceholder':mode==='worker'?'inspectionPlaceholder':'placeholder');$('message').focus();}
 $('attach-chat').onclick=()=>chooseAction('chat','auto');
 $('attach-inspect').onclick=()=>chooseAction('worker','auto');
