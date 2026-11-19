@@ -54,7 +54,7 @@ public final class MainActivity extends Activity {
         String host = uri.getHost();
         return "https".equalsIgnoreCase(uri.getScheme()) && host != null &&
             (host.equals("malguard.site") || host.endsWith(".malguard.site") ||
-             host.equals("game-scam-guard-connected.vercel.app"));
+             host.equals("api.malguard.site"));
     }
 
     private void openExternal(Uri uri) {
