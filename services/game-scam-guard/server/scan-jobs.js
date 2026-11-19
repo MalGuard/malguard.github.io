@@ -33,11 +33,13 @@ function conciseResult(result){
   return copy;
 }
 
-export function startScanJob({id,token,mode='advanced',consent}={}, {readReport=(token,id)=>reportTokens.read(token,id).result,codec=jobTokens,now=Date.now}={}){
+export function startScanJob({id,token,mode='advanced',consent,selectedIds}={}, {readReport=(token,id)=>reportTokens.read(token,id).result,codec=jobTokens,now=Date.now}={}){
   if(consent!==true)throw new ScanError('برای بررسی مقصدهای عمومی لینک، رضایت شما لازم است.',400);
   if(mode!=='advanced')throw new ScanError('حالت بررسی معتبر نیست.',400);
   const report=readReport(token,id);
   if(report.pageFetch?.status==='unavailable')throw new ScanError('محتوای صفحه دریافت نشده است؛ هنوز مقصدی برای ادامهٔ بررسی نداریم.',409);
+  if(selectedIds!==undefined&&(!Array.isArray(selectedIds)||selectedIds.length>MAX_TARGETS||selectedIds.some(id=>typeof id!=='string')))throw new ScanError('انتخاب صفحه‌ها معتبر نیست.',400);
+  const selected=selectedIds===undefined?null:new Set(selectedIds);
   const targets=[];const seen=new Set();let omitted=report.linkInventory?.omitted||0;let excluded=0;
   const add=(item,kind)=>{
     if(!item.url){omitted++;return;}
@@ -48,7 +50,8 @@ export function startScanJob({id,token,mode='advanced',consent}={}, {readReport=
     targets.push({id:item.id||randomUUID(),url,kind,name:(item.name||item.label||new URL(url).pathname.split('/').pop()||'صفحه').slice(0,180),status:'queued'});
   };
   // GameScam Guard is website-only: do not retrieve or analyze file targets.
-  for(const link of report.linkInventory?.links||[])if(link.kind==='page')add(link,'page');else excluded++;
+  for(const link of report.linkInventory?.links||[])if(link.kind==='page'&&(!selected||selected.has(link.id)))add(link,'page');else excluded++;
+  if(selected&&!targets.length)throw new ScanError('حداقل یک صفحهٔ عمومی را انتخاب کنید.',400);
   const parent={...clone(report),files:[]};delete parent.scanToken;delete parent.preview?.image;
   const state={id:randomUUID(),kind:'scan-job',mode,parent,targets,results:[],files:[],next:0,bytesRead:0,omittedTargets:omitted,excludedTargets:excluded,createdAt:new Date(now()).toISOString(),events:[],done:targets.length===0};
   return jobDto(state,codec);
@@ -80,7 +83,7 @@ export async function inspectJobTarget(target,{transport=fetchPublic,urlLookup=l
       onEvent({phase:'content_analysis',message:'تحلیل مستقل صفحهٔ مقصد'});
       if(response.bytes.length>2*1024*1024)throw new ScanError('صفحهٔ مقصد از سقف تحلیل HTML بیشتر است.');
       const page=parsePage(response.bytes,response.url,response.headers);
-      result.title=page.title;result.kind='page';result.linkCount=page.linkCount;result.fileCount=page.fileCount;result.siteAnalysis=page.siteAnalysis;result.analysisEngine=page.analysisEngine;
+      result.title=page.title;result.excerpt=page.excerpt?.slice(0,260);result.kind='page';result.linkCount=page.linkCount;result.fileCount=page.fileCount;result.siteAnalysis=page.siteAnalysis;result.analysisEngine=page.analysisEngine;
       const assessed=assessPage({signals:page.signals,analysisEngine:page.analysisEngine,redirects:response.redirects,reputation:result.reputation,finalReputation:result.finalReputation,urlReputations:result.urlReputations});
       // Keep all bounded HTML findings, including the reason for a redirect or
       // threat verdict; a linked-page report must not silently lose its evidence.
@@ -120,13 +123,13 @@ export async function stepScanJob({id,token}={}, {codec=jobTokens,inspect=inspec
     // public fetch, final-URL lookup, bounded parser and hash intelligence.
     if(state.next>first&&now()-started>85000)break;
     if(signal?.aborted)throw new ScanError('بررسی لغو شد؛ از آخرین مرحلهٔ ذخیره‌شده می‌توانید ادامه دهید.',409);
-    const target=state.targets[state.next];emit({phase:'item_started',message:`بررسی مقصد ${state.next+1} از ${state.targets.length}`,targetId:target.id,completed:state.next,total:state.targets.length});
+    const target=state.targets[state.next];const hostname=new URL(target.url).hostname;emit({phase:'item_started',message:`بررسی مقصد ${state.next+1} از ${state.targets.length}`,targetId:target.id,hostname,completed:state.next,total:state.targets.length});
     let result;
     if(state.bytesRead>=MAX_TOTAL_BYTES)result={...target,status:'budget_exceeded',detail:'سقف مجموع دریافت ۹۶ مگابایت رسیده است؛ این مقصد بررسی نشده است.'};
     else result=await inspect(target,{signal,maxBytes:Math.min(2*1024*1024,MAX_TOTAL_BYTES-state.bytesRead),onEvent:event=>emit({...event,targetId:target.id})});
     state.bytesRead+=result.bytesRead||0;delete result.bytesRead;
 
-    target.status=result.status;if(result.kind==='file'&&result.name)target.name=result.name;const stored={...result};delete stored.url;delete stored.name;state.results.push(stored);emit({phase:'item_finished',message:`نتیجهٔ مقصد ${state.next+1} ثبت شد`,targetId:target.id,status:result.status,completed:state.next+1,total:state.targets.length});
+    target.status=result.status;if(result.kind==='file'&&result.name)target.name=result.name;const stored={...result};delete stored.url;delete stored.name;state.results.push(stored);emit({phase:'item_finished',message:`نتیجهٔ مقصد ${state.next+1} ثبت شد`,targetId:target.id,hostname,title:result.title?.slice(0,140),excerpt:result.excerpt,status:result.status,completed:state.next+1,total:state.targets.length});
   }
   state.done=state.next===state.targets.length;
   emit({phase:state.done?'completed':'batch_completed',message:state.done?'گزارش همهٔ مقصدهای صف آماده شد.':'این دسته بررسی شد؛ دستهٔ بعدی قابل ادامه است.'});
