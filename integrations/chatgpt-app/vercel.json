@@ -1,0 +1,11 @@
+{
+  "$schema":"https://openapi.vercel.sh/vercel.json",
+  "framework":null,
+  "functions":{"api/mcp.mjs":{"maxDuration":60}},
+  "rewrites":[{"source":"/mcp","destination":"/api/mcp"},{"source":"/health","destination":"/api/health"}],
+  "headers":[{"source":"/(.*)","headers":[
+    {"key":"Cache-Control","value":"no-store"},
+    {"key":"X-Content-Type-Options","value":"nosniff"},
+    {"key":"Referrer-Policy","value":"no-referrer"}
+  ]}]
+}
