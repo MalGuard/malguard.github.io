@@ -124,7 +124,7 @@ test('original GTA credential variable is compatible and the new variable takes 
     delete process.env.ABUSECH_AUTH_KEY;
     process.env.MALGUARD_ABUSECH_AUTH_KEY='legacy-fixture';
     assert.equal(abuseAuthKey(),'legacy-fixture');
-    assert.deepEqual(providerStatus(),{urlhaus:true,openphish:process.env.GUARD_OPENPHISH_ENABLED==='true'});
+    assert.deepEqual(providerStatus(),{urlhaus:true,phishdestroy:process.env.GUARD_PHISHDESTROY_ENABLED!=='false'});
     process.env.ABUSECH_AUTH_KEY='new-fixture';
     assert.equal(abuseAuthKey(),'new-fixture');
   } finally {
@@ -146,7 +146,7 @@ test('a separate MalwareBazaar key authenticates hash queries without replacing 
   try {
     for (const key of keys) delete process.env[key];
     process.env.MALWAREBAZAAR_AUTH_KEY = 'bazaar-fixture';
-    assert.deepEqual(providerStatus(),{urlhaus:false,openphish:process.env.GUARD_OPENPHISH_ENABLED==='true'});
+    assert.deepEqual(providerStatus(),{urlhaus:false,phishdestroy:process.env.GUARD_PHISHDESTROY_ENABLED!=='false'});
     let sent;
     const client = createBazaarClient({fetchImpl:async (url,request)=> {
       sent = request.headers['Auth-Key'];
@@ -196,9 +196,9 @@ test('URLhaus can explicitly reuse the existing abuse.ch Bazaar key without chan
     assert.equal(process.env.ABUSECH_AUTH_KEY,'original-fixture');
     assert.equal(malwareBazaarAuthKey(),'valid-shared-fixture');
     delete process.env.ABUSECH_AUTH_KEY;
-    assert.deepEqual(providerStatus(),{urlhaus:true,openphish:process.env.GUARD_OPENPHISH_ENABLED==='true'});
+    assert.deepEqual(providerStatus(),{urlhaus:true,phishdestroy:process.env.GUARD_PHISHDESTROY_ENABLED!=='false'});
     delete process.env.MALWAREBAZAAR_AUTH_KEY;
-    assert.deepEqual(providerStatus(),{urlhaus:false,openphish:process.env.GUARD_OPENPHISH_ENABLED==='true'});
+    assert.deepEqual(providerStatus(),{urlhaus:false,phishdestroy:process.env.GUARD_PHISHDESTROY_ENABLED!=='false'});
     process.env.ABUSECH_AUTH_KEY='original-fixture';
     assert.equal(urlhausAuthKey(),undefined,'Explicit source never silently substitutes another secret');
     delete process.env.URLHAUS_AUTH_KEY_SOURCE;
