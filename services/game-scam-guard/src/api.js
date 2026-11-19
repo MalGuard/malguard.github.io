@@ -2,6 +2,6 @@
 // development and Vercel verification retain their own same-origin API.
 export function apiUrl(endpoint,hostname=globalThis.location?.hostname){
   if(!['health','self-test','account-config','auth/status','auth/availability','auth/start','auth/verify','auth/password','auth/session','scan','scan/live','jobs/start','jobs/step'].includes(endpoint))throw new Error('Unknown API endpoint');
-  const origin=['malguard.site','malguard.github.io'].includes(hostname)?'https://game-scam-guard-connected.vercel.app':'';
+  const origin=['malguard.site','www.malguard.site','malguard.github.io'].includes(hostname)?'https://api.malguard.site':'';
   return `${origin}/api/game-scam-guard/${endpoint}`;
 }
