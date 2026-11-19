@@ -1,0 +1,50 @@
+name: Review MalGuard UI
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ui-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  ui-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Install the pinned Playwright runtime
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Serve the public build and review the homepage and Persian guide
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run build
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
+          (cd _site && exec python3 ../tests/serve-https.py) &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          curl --fail --silent --show-error --insecure --retry 15 --retry-connrefused --retry-delay 1 https://127.0.0.1:8443/ --output /dev/null
+          node tests/ui-review.mjs
+
+      - name: Upload UI screenshots and results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ui-screenshots
+          path: test-results/ui-review/
+          if-no-files-found: error
+          retention-days: 14
