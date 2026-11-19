@@ -31,7 +31,7 @@ test('PWA identity and assets stay inside GameScam Guard path',async()=>{
   assert.ok(source.includes('`${import.meta.env.BASE_URL}sw.js`'));
   assert.ok(source.includes("from './api.js'"));
   const api=await read('services/game-scam-guard/src/api.js');
-  assert.ok(api.includes("'https://game-scam-guard-connected.vercel.app'"));
+  assert.ok(api.includes("'https://api.malguard.site'"));
   assert.ok(api.includes('/api/game-scam-guard/${endpoint}'));
   assert.ok(!source.includes("fetch('/api/health')"));
 });
