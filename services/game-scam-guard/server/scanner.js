@@ -12,7 +12,7 @@ import {analyzeWebsite} from './deep-analysis.js';
 import {inspectRedirectReputation} from './redirect-intel.js';
 const riskyTerms = /crack|keygen|cheat|unlimited\s*(coins|gems)|free\s*(coins|gems)|کرک|چیت|سکه\s*نامحدود|جم\s*رایگان/i;
 const sessions = new Map();
-export const providerStatus = () => ({ urlhaus: Boolean(urlhausAuthKey()),openphish:phishingFeedEnabled() });
+export const providerStatus = () => ({ urlhaus: Boolean(urlhausAuthKey()),phishdestroy:phishingFeedEnabled() });
 
 // Retry only transient page failures, once, within a single overall budget.
 export async function fetchSitePage(url,{transport=fetchPublic,signal,totalTimeout=22000,timeout=11000,now=Date.now}={}) {
