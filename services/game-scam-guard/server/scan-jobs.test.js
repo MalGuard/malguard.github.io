@@ -96,3 +96,20 @@ test('streamed progress counts each processed target before a batch completes an
   assert.deepEqual(events.filter(event=>event.phase==='item_started').map(event=>event.completed),[0,1,2,3,4,5]);
   assert.equal(events.filter(event=>event.phase==='item_finished')[1].status,'unavailable');
 });
+
+test('selected page positions stream the matching destination and keep its text preview',async()=>{
+  const c=codec();
+  const options={codec:c,readReport:()=>base};
+  assert.throws(()=>startScanJob({consent:true,selectedIds:[7]},options),{status:400});
+  const job=startScanJob({consent:true,selectedIds:[2,4,7]},options);
+  assert.deepEqual(job.targets.map(({url})=>url),[pages[1].url,pages[3].url]);
+  const events=[];
+  const result=await stepScanJob({id:job.id,token:job.token},{
+    codec:c,onEvent:event=>events.push(event),
+    inspect:async target=>({...target,status:'limited',title:'Synthetic page',excerpt:'Synthetic page text'})
+  });
+  assert.equal(result.done,true);
+  assert.deepEqual(events.filter(event=>event.phase==='item_started').map(({hostname,completed})=>[hostname,completed]),[['example.com',0],['example.com',1]]);
+  assert.deepEqual(events.filter(event=>event.phase==='item_finished').map(({completed,excerpt})=>[completed,excerpt]),[[1,'Synthetic page text'],[2,'Synthetic page text']]);
+  assert.equal(scanJobReport(result).destinationResults[0].excerpt,'Synthetic page text');
+});
