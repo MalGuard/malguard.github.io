@@ -48,7 +48,7 @@ test('HTTP remains caution while gaming words are context rather than a malware 
 
 test('website provider status exposes configuration flags without credential values', () => {
   assert.equal(typeof providerStatus().urlhaus,'boolean');
-  assert.deepEqual(Object.keys(providerStatus()),['urlhaus','openphish']);
+  assert.deepEqual(Object.keys(providerStatus()),['urlhaus','phishdestroy']);
 });
 
 const sampleHash = 'a'.repeat(64);
