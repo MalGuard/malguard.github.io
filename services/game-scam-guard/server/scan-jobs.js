@@ -38,7 +38,7 @@ export function startScanJob({id,token,mode='advanced',consent,selectedIds}={}, 
   if(mode!=='advanced')throw new ScanError('حالت بررسی معتبر نیست.',400);
   const report=readReport(token,id);
   if(report.pageFetch?.status==='unavailable')throw new ScanError('محتوای صفحه دریافت نشده است؛ هنوز مقصدی برای ادامهٔ بررسی نداریم.',409);
-  if(selectedIds!==undefined&&(!Array.isArray(selectedIds)||selectedIds.length>MAX_TARGETS||selectedIds.some(id=>typeof id!=='string')))throw new ScanError('انتخاب صفحه‌ها معتبر نیست.',400);
+  if(selectedIds!==undefined&&(!Array.isArray(selectedIds)||selectedIds.length>MAX_TARGETS||selectedIds.some(id=>!Number.isSafeInteger(id)||id<1)))throw new ScanError('انتخاب صفحه‌ها معتبر نیست.',400);
   const selected=selectedIds===undefined?null:new Set(selectedIds);
   const targets=[];const seen=new Set();let omitted=report.linkInventory?.omitted||0;let excluded=0;
   const add=(item,kind)=>{
@@ -50,7 +50,7 @@ export function startScanJob({id,token,mode='advanced',consent,selectedIds}={}, 
     targets.push({id:item.id||randomUUID(),url,kind,name:(item.name||item.label||new URL(url).pathname.split('/').pop()||'صفحه').slice(0,180),status:'queued'});
   };
   // GameScam Guard is website-only: do not retrieve or analyze file targets.
-  for(const link of report.linkInventory?.links||[])if(link.kind==='page'&&(!selected||selected.has(link.id)))add(link,'page');else excluded++;
+  for(const link of report.linkInventory?.links||[])if(link.kind==='page'&&(!selected||selected.has(link.position)))add(link,'page');else excluded++;
   if(selected&&!targets.length)throw new ScanError('حداقل یک صفحهٔ عمومی را انتخاب کنید.',400);
   const parent={...clone(report),files:[]};delete parent.scanToken;delete parent.preview?.image;
   const state={id:randomUUID(),kind:'scan-job',mode,parent,targets,results:[],files:[],next:0,bytesRead:0,omittedTargets:omitted,excludedTargets:excluded,createdAt:new Date(now()).toISOString(),events:[],done:targets.length===0};
