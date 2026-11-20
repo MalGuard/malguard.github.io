@@ -1,7 +1,7 @@
 # GameScam Guard site integration
 
 GameScam Guard is a website-only scanner served at
-`https://malguard.site/game-scam-guard/`. The signed Android 1.1.0 app loads this
+`https://malguard.site/game-scam-guard/`. The signed Android app loads this
 first-party interface in a restricted WebView; UI and server fixes reach the
 installed app without replacing its APK. The public APK is linked from
 `https://malguard.site/gamescam-guard-android.html`.

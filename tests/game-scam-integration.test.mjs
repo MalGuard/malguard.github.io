@@ -16,11 +16,12 @@ test('cloud collector identity and server-only artifact boundary are preserved',
 });
 test('public entry opens the first-party GameScam Guard route without embedded access token',async()=>{
   const page=await read('game-scam-guard.html');
+  const release=JSON.parse(await read('release/gamescam-guard-android.json'));
   assert.ok(page.includes('id="gameScamPreview"'));
   assert.ok(page.includes('href="/game-scam-guard/"'));
   assert.ok(!/_vercel_share|protection-bypass|previewPassword/.test(page));
   assert.ok(page.includes('Android signed app'));
-  assert.ok(page.includes('GSG-ANDROID-1.1.0-FA09663'));
+  assert.ok(page.includes(release.releaseCode));
   assert.ok(page.includes('release signing (APK Signature Scheme v2)'));
 });
 test('PWA identity and assets stay inside GameScam Guard path',async()=>{
