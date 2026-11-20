@@ -3,11 +3,13 @@ import {createSupportStore} from './support-store.mjs';
 import {createSupportIdentity} from './support-identity.mjs';
 import {createSupportMailer,createChallengeVerifier} from './support-mail.mjs';
 import {issueEmailLink} from './email-link.mjs';
+import {createUploadService} from './support-upload.mjs';
 import {canAccessTicket,closeTicket,reopenTicket,TicketPolicyError} from './ticket-policy.mjs';
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const KINDS=new Set(['bug','false-positive','feedback']);
-const ENDPOINTS=new Set(['status','create','list','ticket','message','close','reopen','request-link','redeem-link']);
+const ENDPOINTS=new Set(['status','create','list','ticket','message','close','reopen','request-link','redeem-link',
+ 'attachment-list','attachment-start','attachment-chunk','attachment-finish','attachment-approve','attachment-revoke']);
 const ORIGINS=new Set(['https://malguard.site','https://www.malguard.site','https://malguard.github.io']);
 const fail=(status,code)=>Object.assign(new Error(code),{status,code});
 const mail=value=>typeof value==='string'?value.trim().toLowerCase():'';
@@ -25,7 +27,7 @@ const result=(res,status,data)=>{
 };
 
 export function createSupportHandler({
-  store=createSupportStore(),identity=createSupportIdentity(),
+  store=createSupportStore(),upload=createUploadService(),identity=createSupportIdentity(),
   mailer=createSupportMailer(),challenge=createChallengeVerifier(),
   enabled=process.env.SUPPORT_API_ENABLED==='true',
   rateSecret=process.env.SUPPORT_SESSION_SECRET,
@@ -39,8 +41,8 @@ export function createSupportHandler({
     const key=createHmac('sha256',rateSecret).update(value).digest('hex');
     if(await store.takeRate(key,limit,seconds)!==true)throw fail(429,'rate_limited');
   }
-  function bodyOf(req) {
-    const max=16384;
+  function bodyOf(req,endpoint) {
+    const max=endpoint==='attachment-chunk'?750000:16384;
     let raw=req.body;
     if(typeof raw==='string') {
       if(Buffer.byteLength(raw)>max)throw fail(413,'request_too_large');
@@ -70,9 +72,9 @@ export function createSupportHandler({
     await mailer.sendTicketLink({email:row.owner_email,ticketId:row.id,token:issued.token});
   }
   async function dispatch(req,endpoint) {
-    if(endpoint==='status')return {enabled:configured,phase:'ticket-api',turnstileSiteKey:configured?publicSiteKey:null};
+    if(endpoint==='status')return {enabled:configured,attachmentsEnabled:configured&&upload.available,phase:'ticket-api',turnstileSiteKey:configured?publicSiteKey:null};
     if(!configured)throw fail(503,'support_unavailable');
-    const body=bodyOf(req);
+    const body=bodyOf(req,endpoint);
     if(endpoint==='create'){
       if(!KINDS.has(body.kind))throw fail(400,'invalid_report_kind');
       if(!['agent','expert'].includes(body.route))throw fail(400,'invalid_support_route');
@@ -136,6 +138,20 @@ export function createSupportHandler({
       await takeRate('ticket-read:'+actor.email,120,3600);
       return {ticket:outputRow(row),messages:await store.messages(row.id)};
     }
+    if(endpoint.startsWith('attachment-')){
+      if(endpoint==='attachment-list'){
+        await takeRate('attachment-list:'+actor.email,60,3600);
+        return upload.list(row.id);
+      }
+      if(row.status==='closed')throw fail(409,'ticket_closed');
+      await takeRate('attachment-operations:'+actor.email,120,3600);
+      if(endpoint==='attachment-start')return upload.begin(row.id,body);
+      if(endpoint==='attachment-chunk')return upload.chunk(row.id,body);
+      if(endpoint==='attachment-finish')return upload.finish(row.id,body);
+      if(endpoint==='attachment-approve')return upload.approve(row.id,body);
+      if(endpoint==='attachment-revoke')return upload.revoke(row.id,body);
+    }
+
     if(endpoint==='message'){
       if(!nonEmpty(body.message,6000))throw fail(400,'invalid_message');
       if(row.status==='closed')throw fail(409,'ticket_closed');
