@@ -2,7 +2,7 @@
 (() => {
 'use strict';
 const $=id=>document.getElementById(id), FA='fa';
-let lang=FA, accountToken=null, ticketToken=null, currentTicket=null, busy=false, captchaReady=false;
+let lang=FA, accountToken=null, ticketToken=null, adminToken=null, adminChallengeId=null, currentTicket=null, busy=false, captchaReady=false;
 let siteKey=null, captchaCreate=null, captchaLink=null, selectedId=null;
 const publicHosts=new Set(['malguard.site','www.malguard.site','malguard.github.io']);
 const apiBase=publicHosts.has(location.hostname)?'https://api.malguard.site':'';
@@ -87,6 +87,7 @@ async function verifyStatus(){
     const status=await support('status');
     setReady(status.enabled===true);
     aiReady=serviceEnabled&&status.aiEnabled===true;
+    adminAvailable=serviceEnabled&&status.adminEnabled===true;
     if(serviceEnabled && status.attachmentsEnabled===true && !attachmentUi){
       import('/assets/support-attachments-ui.mjs').then(m=>{
         attachmentUi=m.initSupportAttachments({request:support,getTicket:()=>currentTicket,
@@ -115,16 +116,19 @@ function addTurnstile(){
 }
 const challengeToken=widget=>captchaReady&&window.turnstile?window.turnstile.getResponse(widget):'';
 function resetChallenge(widget){if(widget!=null&&captchaReady)try{window.turnstile.reset(widget);}catch{}}
-function token(){return ticketToken||accountToken;}
+function token(){return adminToken||ticketToken||accountToken;}
 function signedIn(){
   $('identity').hidden=false;
-  $('who').textContent=accountToken?$('accountEmail').value:(currentTicket?.id||'Ticket session');
+  $('who').textContent=adminToken?'MalGuard Support Admin':accountToken?$('accountEmail').value:(currentTicket?.id||'Ticket session');
+  $('ownerPanel').hidden=!(accountToken&&adminAvailable&&new URLSearchParams(location.search).has('owner'));
+  $('adminCodeStart').disabled=!serviceEnabled;
   $('accountForm').hidden=!!accountToken;
   $('linkForm').hidden=!!accountToken;
 }
 function signedOut(){
-  accountToken=null;ticketToken=null;selectedId=null;currentTicket=null;
-  $('identity').hidden=true;$('accountForm').hidden=false;$('linkForm').hidden=false;
+  accountToken=null;ticketToken=null;adminToken=null;adminChallengeId=null;selectedId=null;currentTicket=null;
+  $('identity').hidden=true;$('ownerPanel').hidden=true;$('adminVerifyBox').hidden=true;
+  $('adminCode').value='';$('adminState').textContent='';$('accountForm').hidden=false;$('linkForm').hidden=false;
   $('agentAdvice').hidden=true;aiPreviewDigest=null;
   $('ticketList').replaceChildren();$('newTicketPane').hidden=false;$('chatPane').hidden=true;
   $('accountPassword').value='';$('reply').value='';attachmentUi?.hide();
@@ -141,8 +145,8 @@ function renderTickets(rows){
   }
 }
 async function refresh(){
-  if(!accountToken){flash(t('accountFirst'));return;}
-  try{renderTickets((await support('list',{},accountToken)).tickets||[]);}
+  if(!accountToken&&!adminToken){flash(t('accountFirst'));return;}
+  try{renderTickets((await support('list',{},token())).tickets||[]);}
   catch(error){flash(safeError(error),'error');}
 }
 function safeError(error){
@@ -157,7 +161,7 @@ function displayChat(ticket,messages){
   $('selectedTitle').textContent=(ticket.subject||ticket.id)+' · '+ticket.id.slice(0,8);
   $('closeTicket').disabled=ticket.status==='closed';
   $('closeTicket').hidden=ticket.status==='closed';
-  $('reopenTicket').hidden=ticket.status!=='closed';
+  $('reopenTicket').hidden=ticket.status!=='closed'||!!adminToken;
   $('reply').disabled=ticket.status==='closed';
   $('sendReply').disabled=ticket.status==='closed';
   const list=$('messages');list.replaceChildren();
@@ -247,9 +251,15 @@ $('messageForm').addEventListener('submit',async event=>{
   finally{busy=false;$('sendReply').disabled=currentTicket?.status==='closed';}
 });
 $('closeTicket').addEventListener('click',async()=>{
-  if(!currentTicket||!confirm(t('confirmClose'))||busy)return;
+  if(!currentTicket||busy)return;
+  let reason;
+  if(adminToken){
+    reason=prompt(lang==='fa'?'دلیل بسته‌شدن تیکت (اجباری):':'Required reason for closing the ticket:');
+    if(typeof reason!=='string'||reason.trim().length<1||reason.length>500)return;
+  }else if(!confirm(t('confirmClose')))return;
   busy=true;
-  try{await support('close',{ticketId:currentTicket.id},token());await openTicket(currentTicket.id);flash(t('closed'),'success');}
+  try{await support('close',{ticketId:currentTicket.id,...(adminToken?{reason:reason.trim()}:{})},
+    token());await openTicket(currentTicket.id);flash(t('closed'),'success');}
   catch(e){flash(safeError(e),'error');}finally{busy=false;}
 });
 $('reopenTicket').addEventListener('click',async()=>{
@@ -288,7 +298,32 @@ $('agentSend').addEventListener('click',async()=>{
 });
 $('newTicket').addEventListener('click',()=>{currentTicket=null;selectedId=null;$('chatPane').hidden=true;$('newTicketPane').hidden=false;$('ticketState').textContent=t('newTicket');$('agentAdvice').hidden=true;attachmentUi?.hide();flash('');});
 $('refresh').addEventListener('click',refresh);
+$('adminCodeStart').addEventListener('click',async()=>{
+  if(!accountToken||busy)return;
+  busy=true;$('adminCodeStart').disabled=true;
+  try{
+    const result=await support('admin-code-start',{},accountToken);
+    adminChallengeId=result.challengeId;
+    $('adminVerifyBox').hidden=false;
+    $('adminState').textContent=lang==='fa'?'کد موقت به ایمیل مدیر ارسال شد؛ تحویل نهایی تضمین‌شده نیست.':'Code accepted by the provider; delivery is not guaranteed.';
+  }catch(e){$('adminState').textContent=safeError(e);}
+  finally{busy=false;$('adminCodeStart').disabled=false;}
+});
+$('adminCodeVerify').addEventListener('click',async()=>{
+  if(!accountToken||!adminChallengeId||busy)return;
+  busy=true;$('adminCodeVerify').disabled=true;
+  try{
+    const result=await support('admin-code-verify',{challengeId:adminChallengeId,
+      code:$('adminCode').value.trim()},accountToken);
+    if(typeof result.accessToken!=='string'||!result.accessToken.startsWith('mgadm1.'))throw Error('invalid_response');
+    adminToken=result.accessToken;ticketToken=null;adminChallengeId=null;
+    $('adminCode').value='';$('adminVerifyBox').hidden=true;
+    $('adminState').textContent=lang==='fa'?'دسترسی مدیر برای ۱۵ دقیقه فعال شد.':'Owner access is active for 15 minutes.';
+    signedIn();await refresh();
+  }catch(e){$('adminState').textContent=safeError(e);}
+  finally{busy=false;$('adminCodeVerify').disabled=false;}
+});
 $('logout').addEventListener('click',()=>{signedOut();flash('');});
-window.addEventListener('pagehide',()=>{accountToken=null;ticketToken=null;});
+window.addEventListener('pagehide',()=>{accountToken=null;ticketToken=null;adminToken=null;adminChallengeId=null;});
 translate();setReady(false);verifyStatus().then(redeemFragment);
 })();
