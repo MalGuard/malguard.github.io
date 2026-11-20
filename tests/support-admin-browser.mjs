@@ -87,7 +87,7 @@ try{
   await page.fill('#adminCloseReason','Reviewed and reporter notified');
   page.once('dialog',dialog=>dialog.accept());
   await page.click('#adminCloseForm button');
-  await page.waitForSelector('#adminCloseForm[hidden]');
+  await page.locator('#adminCloseForm').waitFor({state:'hidden'});
   assert.equal(closed,true);
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2);
   assert.equal(overflow,false,'overflow at '+width);
