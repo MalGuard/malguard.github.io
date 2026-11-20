@@ -25,6 +25,10 @@
     {
       "source": "/api/malguard-ai/:endpoint",
       "destination": "/api/malguard-ai?endpoint=:endpoint"
+    },
+    {
+      "source": "/api/support/:endpoint",
+      "destination": "/api/support?endpoint=:endpoint"
     }
   ],
   "headers": [
