@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05070a">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="MalGuard Support: private support tickets and conversations.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.malguard.site https://game-scam-guard-connected.vercel.app https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; img-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
+<title>MalGuard Support · تیکت و گفت‌وگو</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/assets/support-agent.css">
+<script defer src="/assets/support-agent.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">پرش به محتوای اصلی</a>
+<header class="top">
+  <a href="/" class="brand"><img src="/assets/fusion/assets/malguard-logo.svg" width="32" height="34" alt="">MalGuard <span class="brand-label">Support</span></a>
+  <nav class="toplinks" aria-label="پیوندهای اصلی"><a href="/support.html">راهنمای پشتیبانی</a><a href="/report.html?kind=security">گزارش امنیتی</a><a href="/ai/">MalGuard AI</a></nav>
+  <button type="button" id="lang" class="quiet" aria-label="Switch language">English</button>
+</header>
+<main id="main" class="layout">
+  <aside class="sidebar" aria-label="بخش‌های پشتیبانی">
+    <div class="heading"><span class="eyebrow" data-i18n="eyebrow">مرکز پشتیبانی</span><h1 data-i18n="headline">مشکل رو دقیق‌تر حل کنیم.</h1><p data-i18n="intro">گزارش خصوصی، سابقه گفتگو و پیگیری مرحله‌به‌مرحله.</p></div>
+    <div id="serviceBanner" class="notice" role="status" aria-live="polite" data-i18n="checking">در حال بررسی دسترسی سرویس…</div>
+    <section class="panel" aria-labelledby="signinHead">
+      <h2 id="signinHead" data-i18n="signInHead">ورود با حساب MalGuard</h2>
+      <p data-i18n="signinHint">ورود فقط برای این صفحه معتبره و چیزی روی دستگاه ذخیره نمی‌شه.</p>
+      <form id="accountForm">
+        <label data-i18n="email">ایمیل</label><input id="accountEmail" autocomplete="email" type="email" required maxlength="254" dir="ltr" placeholder="you@example.com">
+        <label data-i18n="password">رمز عبور</label><input id="accountPassword" autocomplete="current-password" type="password" required maxlength="128">
+        <button type="submit" id="accountSubmit" data-i18n="signinButton">ورود</button>
+      </form>
+      <div class="divider-text"><span data-i18n="or">یا</span></div>
+      <form id="linkForm">
+        <label data-i18n="ticketCode">شناسه تیکت</label><input id="linkTicketId" dir="ltr" required placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" minlength="36" maxlength="36">
+        <label data-i18n="linkEmail">ایمیل ثبت‌شده در تیکت</label><input id="linkEmail" type="email" dir="ltr" required maxlength="254" placeholder="you@example.com">
+        <div id="linkCaptcha" class="captcha"></div>
+        <button type="submit" class="secondary" id="linkSubmit" data-i18n="sendLink">دریافت لینک ورود ایمیلی</button>
+      </form>
+      <div id="identity" class="identity" hidden><span id="who"></span> <button type="button" id="logout" class="quiet" data-i18n="logout">خروج</button></div>
+    </section>
+    <section class="panel">
+      <h2 data-i18n="myTickets">تیکت‌های من</h2>
+      <button id="refresh" type="button" class="secondary" data-i18n="refresh">بروزرسانی</button>
+      <div id="ticketList" class="ticket-list" aria-live="polite"><p class="muted" data-i18n="loginToList">برای مشاهده تیکت‌ها وارد حساب شو.</p></div>
+    </section>
+  </aside>
+  <section class="workspace" aria-label="گفت‌وگو و ارسال گزارش">
+    <div class="workspace-top">
+      <div><span class="eyebrow" data-i18n="privateSupport">PRIVATE · SUPPORT</span><h2 data-i18n="conversation">گزارش و گفتگو</h2></div>
+      <div id="ticketState" class="status-label" data-i18n="newTicket">گزارش جدید</div>
+    </div>
+    <div id="flash" class="flash" role="status" aria-live="polite"></div>
+    <div id="newTicketPane" class="new-ticket">
+      <p class="muted" data-i18n="newIntro">مشکل رو با چند جزئیات توضیح بده. اگه موضوع امنیتیه، از مسیر خصوصی گزارش امنیتی استفاده کن.</p>
+      <form id="createForm">
+        <div class="pair">
+          <label><span data-i18n="kind">نوع گزارش</span>
+            <select id="kind"><option value="bug" data-i18n="bug">باگ</option><option value="false-positive" data-i18n="falsePositive">تشخیص اشتباه</option><option value="feedback" data-i18n="feedback">پیشنهاد یا بازخورد</option></select>
+          </label>
+          <label><span data-i18n="contact">ایمیل تماس (برای مهمان)</span>
+            <input id="guestEmail" type="email" dir="ltr" maxlength="254" autocomplete="email" placeholder="you@example.com">
+          </label>
+        </div>
+        <label><span data-i18n="subject">موضوع</span><input id="subject" maxlength="160" required placeholder="مثلاً خطا در بازکردن اسکن"></label>
+        <label><span data-i18n="details">شرح مشکل</span><textarea id="description" maxlength="6000" rows="5" required placeholder="مراحل بازتولید، رفتار موردانتظار و چیزی که دیدی..."></textarea></label>
+        <fieldset class="support-route"><legend data-i18n="route">مسیر بررسی</legend>
+          <label><input type="radio" name="route" value="agent" checked><span data-i18n="agentRoute">ایجنت پشتیبانی (در صورت فعال بودن)</span></label>
+          <label><input type="radio" name="route" value="expert"><span data-i18n="expertRoute">کارشناس انسانی</span></label>
+        </fieldset>
+        <p class="privacy-note" data-i18n="noSecrets">رمز، توکن، اطلاعات شخصی دیگران یا فایل خطرناک نفرست. پیوست‌ها بعد از آماده‌شدن بررسی امن فایل فعال می‌شن.</p>
+        <div id="createCaptcha" class="captcha"></div>
+        <button type="submit" id="createSubmit" data-i18n="sendReport">ثبت گزارش</button>
+      </form>
+    </div>
+    <div id="chatPane" class="chat-pane" hidden>
+      <div class="chat-toolbar"><strong id="selectedTitle"></strong><div class="toolbar-actions">
+        <button type="button" id="closeTicket" class="secondary" data-i18n="close">بستن</button>
+        <button type="button" id="reopenTicket" class="secondary" hidden data-i18n="reopen">بازگشایی</button>
+        <button type="button" id="newTicket" class="secondary" data-i18n="new">تیکت جدید</button>
+      </div></div>
+      <ol id="messages" class="messages" aria-label="پیام‌های تیکت"></ol>
+      <form id="messageForm" class="composer">
+        <label class="sr-only" for="reply" data-i18n="reply">پاسخ</label>
+        <textarea id="reply" rows="2" maxlength="6000" required data-i18n-placeholder="replyPlaceholder" placeholder="پیامت رو بنویس…"></textarea>
+        <button type="submit" id="sendReply" data-i18n="send">ارسال</button>
+      </form>
+      <p class="privacy-note" data-i18n="disclaimer">پاسخ AI به معنای رفع قطعی باگ نیست. تغییر کد و انتشار نیاز به تأیید مدیر داره.</p>
+    </div>
+    <div class="workspace-foot"><a href="/report.html" data-i18n="existingReport">فرم گزارش فعلی</a><a href="mailto:contact@malguard.site">contact@malguard.site</a></div>
+  </section>
+</main>
+</body></html>
