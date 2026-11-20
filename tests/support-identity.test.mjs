@@ -16,7 +16,7 @@ test('ticket session has valid short TTL and tampering or expiry is rejected',()
   const actor=identity.linkActor(accessToken);
   assert.deepEqual({ticketId:actor.ticketId,email:actor.email,method:actor.method},
     {ticketId:A,email:'owner@example.test',method:'email-link'});
-  assert.throws(()=>identity.linkActor(accessToken.slice(0,-1)+(accessToken.endsWith('x')?'y':'x')),/unauthorized/);
+  assert.throws(()=>identity.linkActor(accessToken.replace(/\.([A-Za-z0-9_-])(?=[A-Za-z0-9_-]{42}$)/,(_,first)=>'.'+(first==='A'?'B':'A'))),/unauthorized/);
   current=start+30*60000;
   assert.throws(()=>identity.linkActor(accessToken),/unauthorized/);
   current=start-1;
