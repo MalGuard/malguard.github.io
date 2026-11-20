@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {createSupportHandler} from '../services/support/server/support-http.mjs';
+import {previewSupportText} from '../services/support/server/support-model.mjs';
 
 const A='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const B='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
@@ -38,6 +39,11 @@ function makeFixture({enabled=true}={}) {
       row.revision++;messages.set(id,[...(messages.get(id)||[]),{content,author_kind:'reporter'}]);
       return {revision:row.revision};
     },
+    async appendAgent(id,revision,content){
+      const row=tickets.get(id);if(row.revision!==revision)throw Error('stale');
+      row.revision++;messages.set(id,[...(messages.get(id)||[]),{author_kind:'support-agent',content}]);
+      return {revision:row.revision};
+    },
     async close(id,revision){
       const row=tickets.get(id);if(row.revision!==revision)throw Error('stale');
       row.status='closed';row.revision++;row.closed_at=new Date(current).toISOString();
@@ -67,7 +73,8 @@ function makeFixture({enabled=true}={}) {
   }};
   const challenge={enabled:true,verify:async(token,action)=>token==='valid-challenge'&&
     ['support_create','support_request_link'].includes(action)};
-  const handler=createSupportHandler({store,identity,mailer,challenge,enabled,rateSecret:'x'.repeat(48),publicSiteKey:'synthetic-site-key',now:()=>current});
+  const model={ready:true,respond:async(content,{approvedSha256})=>({text:'Try safely refreshing the page.',redactedSha256:approvedSha256})};
+  const handler=createSupportHandler({store,identity,mailer,challenge,model,enabled,rateSecret:'x'.repeat(48),publicSiteKey:'synthetic-site-key',now:()=>current});
   async function request(endpoint,body={},token,origin='https://malguard.site'){
     const req={method:endpoint==='status'?'GET':'POST',query:{endpoint},headers:{
       origin,'content-type':'application/json',...(token?{authorization:'Bearer '+token}:{})},body};
@@ -75,7 +82,7 @@ function makeFixture({enabled=true}={}) {
       end(value){this.body=value?JSON.parse(value):null;}};
     await handler(req,res);return res;
   }
-  return {request,store,tickets,storedLinks,sent,
+  return {request,store,tickets,messages,storedLinks,sent,
     clock(v){current=v;}, mailFails(){mailFailure=true;},denyRates(){rateAllowed=false;}};
 }
 
@@ -161,4 +168,18 @@ test('link sessions cannot list account tickets; invalid origins and rate limits
   assert.equal((await f.request('ticket',{ticketId:A},'account-a','https://evil.invalid')).statusCode,403);
   f.denyRates();
   assert.equal((await f.request('message',{ticketId:A,message:'hello'},'account-a')).statusCode,429);
+});
+
+test('consented Support Agent reply binds to the latest user report and never bypasses ticket ownership',async()=>{
+ const f=makeFixture();
+ f.messages.set(A,[{author_kind:'reporter',content:'Scanner stuck for person@example.test'}]);
+ const approved=previewSupportText('Scanner stuck for person@example.test').sha256;
+ assert.equal((await f.request('agent',{ticketId:A,consent:false,previewSha:approved},'account-a')).statusCode,403);
+ assert.equal((await f.request('agent',{ticketId:A,consent:true,previewSha:'a'.repeat(64)},'account-a')).statusCode,409);
+ assert.equal((await f.request('agent',{ticketId:A,consent:true,previewSha:approved},'account-b')).statusCode,404);
+ const result=await f.request('agent',{ticketId:A,consent:true,previewSha:approved},'account-a');
+ assert.equal(result.statusCode,200);
+ assert.match(result.body.text,/refreshing/);
+ assert.equal(f.messages.get(A).at(-1).author_kind,'support-agent');
+ assert.equal((await f.request('agent',{ticketId:A,consent:true,previewSha:approved},'account-a')).statusCode,409);
 });
