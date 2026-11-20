@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">GameScam Guard</string>
     <string name="website_url">https://malguard.site/game-scam-guard/</string>
+    <string name="version_code_action">Version code</string>
+    <string name="copy_version_code">Copy code</string>
+    <string name="check_version_online">Check on website</string>
 </resources>
