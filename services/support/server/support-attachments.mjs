@@ -50,7 +50,8 @@ export function createAttachmentStorage({url=process.env.SUPABASE_URL,
     headers:{apikey:key,authorization:'Bearer '+key,'content-type':contentType},body,
     signal:AbortSignal.timeout(16000)});}
   catch{throw fail(503,'attachment_storage_unavailable');}
-  if(!response.ok)throw fail(503,'attachment_storage_unavailable');
+  if(!response.ok && !(method==='DELETE'&&response.status===404))
+   throw fail(503,'attachment_storage_unavailable');
   return response;
  };
  const encoded=path=>path.split('/').map(encodeURIComponent).join('/');
