@@ -100,6 +100,16 @@
         </div>
         <div id="attachmentNotice" class="privacy-note" role="status" aria-live="polite"></div>
       </section>
+      <section id="agentAdvice" class="attachment-section" hidden aria-labelledby="agentHead">
+        <h3 id="agentHead">MalGuard Support Agent · راهنمایی اولیه</h3>
+        <p class="privacy-note">فقط متن پاک‌سازی‌شده پس از بازبینی و رضایت تو برای مدل ابری ارسال می‌شه؛ هیچ فایل یا کد خصوصی اینجا فرستاده نمی‌شه.</p>
+        <button type="button" id="agentPrepare" class="secondary">پیش‌نمایش پیام مخصوص AI</button>
+        <div id="agentPreviewBox" hidden>
+          <textarea id="agentPreviewText" rows="5" readonly aria-label="متن پاک‌سازی‌شده آماده ارسال به مدل"></textarea>
+          <label class="confirm-preview"><input type="checkbox" id="agentConsent"> نسخه آماده ارسال رو دیدم و با پردازش این متن توسط سرویس AI موافقم.</label>
+          <button type="button" id="agentSend" disabled>درخواست راهنمایی ایجنت</button>
+        </div>
+      </section>
       <form id="messageForm" class="composer">
         <label class="sr-only" for="reply" data-i18n="reply">پاسخ</label>
         <textarea id="reply" rows="2" maxlength="6000" required data-i18n-placeholder="replyPlaceholder" placeholder="پیامت رو بنویس…"></textarea>
