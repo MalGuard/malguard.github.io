@@ -74,7 +74,15 @@ try{
  for(const viewport of [{width:320,height:740},{width:390,height:844},{width:820,height:1080}]){await page.setViewportSize(viewport);assert.equal(await page.locator('.account-modal').evaluate(el=>el.scrollWidth>el.clientWidth),false);}
  await page.getByLabel('First name',{exact:true}).fill('علی');await page.getByLabel('Last name').fill('محمدی');await page.getByLabel('Date of birth').fill('2000-01-01');await page.getByLabel('Username',{exact:true}).fill('player_guard');await page.getByLabel('Email address',{exact:true}).fill('player@example.com');await page.getByLabel('Password',{exact:true}).fill('StrongPass1');await page.getByLabel('Confirm password',{exact:true}).fill('StrongPass1');
  await page.getByRole('button',{name:'Send verification code',exact:true}).click();await page.getByRole('heading',{name:'Enter your code'}).waitFor();await assertLanguage('en');await page.getByRole('button',{name:'Close',exact:true}).click();
- await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'Self-test',exact:true}).click();await assertLanguage('en');await page.getByRole('button',{name:'Run self-test',exact:true}).click();await page.getByRole('heading',{name:'Self-test passed'}).waitFor();await page.locator('.g-self-test > details > summary').click();await assertLanguage('en');await assertReadable('.g-test-checks>div>span:first-child');assert.equal(await page.locator('.g-test-checks>div').count(),38);await page.screenshot({path:'test-results/game-scam-self-test-fa.png',fullPage:true});
+ await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'Self-test',exact:true}).click();await assertLanguage('en');await page.getByRole('button',{name:'Run self-test',exact:true}).click();await page.getByRole('heading',{name:'Self-test passed'}).waitFor();await page.locator('.g-self-test > details > summary').click();await assertLanguage('en');
+ const themeToggle = page.locator('#mgThemeToggle');
+ for (const theme of ['light','dark']) {
+  await themeToggle.click();
+  assert.equal(await themeToggle.getAttribute('data-mode'), theme);
+  await assertReadable('.g-self-test summary,.g-test-result h2,.g-test-result p,.g-test-checks>div>span:first-child');
+ }
+ await themeToggle.click();
+ assert.equal(await page.locator('.g-test-checks>div').count(),38);await page.screenshot({path:'test-results/game-scam-self-test-fa.png',fullPage:true});
  await page.getByRole('button',{name:'Settings',exact:true}).click();await assertLanguage('en');await page.getByRole('button',{name:'History',exact:true}).click();await assertLanguage('en');record('English report, account signup/code, self-test, settings and history');
  await page.getByRole('button',{name:'Scan',exact:true}).click();await page.locator('.g-report-details > summary').click();
  hold=true;await page.locator('.advanced-prompt button').click();await page.getByRole('button',{name:'Scan public pages',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')==='1');assert.equal(await page.getByRole('progressbar').getAttribute('aria-valuemax'),'3');await page.locator('.scan-activity').screenshot({path:'test-results/game-scam-compact-progress.png'});
