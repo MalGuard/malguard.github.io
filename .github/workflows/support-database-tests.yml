@@ -49,6 +49,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f services/support/supabase/support-schema.sql
           psql -v ON_ERROR_STOP=1 -f services/support/supabase/support-rpc.sql
           psql -v ON_ERROR_STOP=1 -f services/support/supabase/support-attachments-rpc.sql
+          psql -v ON_ERROR_STOP=1 -f services/support/supabase/support-ai-rpc.sql
       - name: Verify grants, link replay and ticket transitions
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/support-sql-smoke.sql
