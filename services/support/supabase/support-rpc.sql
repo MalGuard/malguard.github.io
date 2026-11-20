@@ -34,12 +34,12 @@ BEGIN
 END $$;
 
 CREATE OR REPLACE FUNCTION public.support_create_ticket(
-  p_email text,p_account_id uuid,p_kind text,p_subject text,p_message text)
+  p_email text,p_account_id uuid,p_kind text,p_route text,p_subject text,p_message text)
 RETURNS uuid LANGUAGE plpgsql SECURITY INVOKER SET search_path=pg_catalog AS $$
 DECLARE v_id uuid;
 BEGIN
-  INSERT INTO public.support_tickets(owner_email,owner_account_id,kind,subject)
-    VALUES(p_email,p_account_id,p_kind,p_subject)
+  INSERT INTO public.support_tickets(owner_email,owner_account_id,kind,routing,subject)
+    VALUES(p_email,p_account_id,p_kind,p_route,p_subject)
     RETURNING id INTO v_id;
   INSERT INTO public.support_messages(ticket_id,author_kind,content)
     VALUES(v_id,'reporter',p_message);
@@ -124,13 +124,13 @@ BEGIN
 END $$;
 
 REVOKE ALL ON FUNCTION public.support_take_rate(text,integer,integer) FROM PUBLIC,anon,authenticated;
-REVOKE ALL ON FUNCTION public.support_create_ticket(text,uuid,text,text,text) FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.support_create_ticket(text,uuid,text,text,text,text) FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.support_redeem_link(uuid,text) FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.support_append_message(uuid,bigint,text) FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.support_close_ticket(uuid,bigint,text,text) FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION public.support_reopen_ticket(uuid,bigint) FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.support_take_rate(text,integer,integer),
-  public.support_create_ticket(text,uuid,text,text,text),
+  public.support_create_ticket(text,uuid,text,text,text,text),
   public.support_redeem_link(uuid,text),
   public.support_append_message(uuid,bigint,text),
   public.support_close_ticket(uuid,bigint,text,text),
