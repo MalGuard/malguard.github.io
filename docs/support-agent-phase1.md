@@ -117,3 +117,47 @@ These environment variables are server-only and must be configured securely; no 
 **Not yet implemented:** admin close from a securely authenticated administrator, support ticket UI, verified real email delivery, persistent session revocation, attachments and redaction, 30-day cleanup execution, human routing, AI orchestration and private GitHub App approval. The existing account service's previously documented challenge replay/attempt-limit concerns remain an independent security blocker for production rollout. AI model responses do not prove actual repairs.
 
 GitHub PR must stay draft and unmerged until full integration, production-ready auth review, test inspection and owner approval.
+
+
+## November 20 — Implementation update (supersedes the older "not yet implemented" list)
+
+### Completed as **code on this draft PR**, not deployed
+
+- `support-ticket.html`, `assets/support-agent.js` and `assets/support-agent.css`: responsive, bilingual support inbox with account sign-in, ticket-scoped email links, messages, close/reopen and agent consent preview. Existing `/ai/` product remains unchanged.
+- `assets/support-attachments-ui.mjs`, `assets/support-privacy.mjs`, `support-upload.mjs`, `support-attachments.mjs`, `support-attachment-store.mjs`: per-file local redacted candidate preview, screenshot black-box editing, chunked PNG/log-only upload, exact-version analysis consent/revoke and private Storage validation. A filename extension is never proof of the actual file type. Never execute attachments.
+- `services/support/supabase/support-attachments-rpc.sql`: transactional attachment metadata, revisioned consent and deadline deletion marking. `api/support-cleanup.js` and the Vercel daily cron are guarded by server-only secrets. **The retention cron is not evidence that deletion has run in any real environment.**
+- `support-model.mjs`, `support-ai-rpc.sql`: separate, consented troubleshooting responder that can only advise about a redacted, approved report. No direct GitHub, file execution, code writing, merges or deployments. Server independently checks caller ownership and consent before forwarding anything to a model. Model output is not proof that a bug was investigated or fixed.
+- `services/support/server/support-admin.mjs`, `services/support/supabase/support-admin-rpc.sql`: account verification plus separate email OTP, 10-minute one-use challenge (five attempts), 15-minute HMAC-signed admin session, server-derived owner identity, expert message and reasoned admin closure. Owner panel is available on the ticket page with `?owner=1` only after a successful account and OTP check; the URL parameter is **not** authorization.
+- Human route `expert` is stored on the ticket, and a minimal notification can be accepted by the email provider without sending report content or attachments.
+- Tests: policy, auth, model consent, local privacy, file validation, PostgreSQL RPCs, owner second factor, and browser flows at 390 and 1280 px. These are test suites, not independently certified security guarantees.
+
+### Server-only configuration additions
+
+- `SUPPORT_TURNSTILE_SITE_KEY`: public site key passed to browser; pair with `SUPPORT_TURNSTILE_SECRET` server side.
+- `SUPPORT_ATTACHMENTS_ENABLED`: remains off unless a private bucket and migration are verified.
+- `SUPPORT_ATTACHMENT_BUCKET`: explicitly private Supabase Storage bucket.
+- `CRON_SECRET`: required for the daily deletion route.
+- `SUPPORT_AI_ENABLED`: defaults off; enable only after reviewing model-provider privacy and output safety.
+- `SUPPORT_ADMIN_EMAIL`, `SUPPORT_ADMIN_SECRET`: server-bound owner email and independent signing secret; without them administrative operations are unavailable.
+- Existing account API, sender email and Supabase environment variables must be independently verified; credentials must never be placed in client code, test output, README or Git.
+
+### SQL migration order (staging only until owner authorizes production)
+
+1. `support-schema.sql`
+2. `support-rpc.sql`
+3. `support-attachments-rpc.sql`
+4. `support-ai-rpc.sql`
+5. `support-admin-rpc.sql`
+
+Do **not** install on the existing production account database from a passing mocked/local test alone. Verify table definitions and foreign keys against the real `guard_accounts` schema; preview migrations, check RLS and provider Storage permissions, and stage two-account isolation tests. The connected `malguard-auth-staging` project did not expose a `guard_accounts` table in the observed public schema, so do not treat it as a compatible end-to-end staging account database without a separate isolated test schema.
+
+### Explicit remaining blockers to calling this production-ready
+
+- Complete human expert inbox operations, owner review of actual support data permissions and durable audit history.
+- Implement **two independent Security/Quality AI reviewers** tied to an exact approved commit and actual CI evidence. The current pure `readyForRelease` policy is a gate, **not** a running pair of reviewer agents.
+- Implement permission-scoped GitHub App, private repo expiry/revocation, PR creation and independent owner sign-off before merge/deployment. The current responder has **no repo write tools**.
+- Live integrations: mailbox sender verification, Turnstile domain and action checks, production-safe endpoint routing, real storage bucket and authenticated staging environment.
+- Validate image redaction carefully: manual black rectangles are user-controlled and automated secret discovery is not complete. Do not promise that every hidden secret has been detected.
+- Verify entire static site and application regressions on the exact final commit. Do not claim existing Vercel build-rate-limit errors are feature test failures, or vice versa.
+
+**Release policy:** PR #388 remains Draft. Do not merge, deploy, migrate user data or enable feature flags without the project's owner approval and final verified CI on the exact commit.
