@@ -1,0 +1,51 @@
+name: Support Agent PostgreSQL checks
+on:
+  pull_request:
+    paths:
+      - 'services/support/supabase/**'
+      - 'tests/support-sql-smoke.sql'
+      - '.github/workflows/support-database-tests.yml'
+permissions:
+  contents: read
+
+jobs:
+  support-database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: support_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d support_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGDATABASE: support_test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Ensure PostgreSQL client
+        run: command -v psql || (sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client)
+      - name: Create synthetic auth roles and account table
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE anon NOLOGIN;
+          CREATE ROLE authenticated NOLOGIN;
+          CREATE ROLE service_role BYPASSRLS NOLOGIN;
+          CREATE TABLE public.guard_accounts(id uuid PRIMARY KEY);
+          SQL
+      - name: Apply Support Agent schema and atomic functions
+        run: |
+          psql -v ON_ERROR_STOP=1 -f services/support/supabase/support-schema.sql
+          psql -v ON_ERROR_STOP=1 -f services/support/supabase/support-rpc.sql
+      - name: Verify grants, link replay and ticket transitions
+        run: psql -v ON_ERROR_STOP=1 -f tests/support-sql-smoke.sql
