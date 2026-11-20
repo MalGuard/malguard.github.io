@@ -1,4 +1,5 @@
 import {createHash} from 'node:crypto';
+import {redactLog,validateLogText} from '../../../assets/support-privacy.mjs';
 const MAX_IMAGE=5*1024*1024, MAX_LOG=2*1024*1024;
 export const CHUNK_BYTES=512*1024;
 const fail=(status,code)=>Object.assign(new Error(code),{status,code});
@@ -14,21 +15,55 @@ export function validateAttachmentSpec({kind,bytes,partCount,contentType,sha256,
    throw fail(400,'invalid_filename');
  return {kind,bytes,partCount,contentType,sha256,name};
 }
+const PNG_SIGNATURE=Buffer.from([137,80,78,71,13,10,26,10]);
+const PNG_ALLOWED=new Set(['IHDR','IDAT','IEND','sRGB','gAMA','cHRM','pHYs']);
+function crc32(bytes,start,end){
+ let crc=0xffffffff;
+ for(let i=start;i<end;i++){
+  crc^=bytes[i];
+  for(let j=0;j<8;j++)crc=(crc>>>1)^(crc&1?0xedb88320:0);
+ }
+ return (crc^0xffffffff)>>>0;
+}
+function validatePng(bytes){
+ if(bytes.length<45||!bytes.subarray(0,8).equals(PNG_SIGNATURE))
+   throw fail(415,'invalid_png');
+ let pos=8,seenIHDR=false,seenIDAT=false,seenIEND=false;
+ while(pos+12<=bytes.length){
+  const len=bytes.readUInt32BE(pos),type=bytes.toString('ascii',pos+4,pos+8);
+  if(len>bytes.length-pos-12||!PNG_ALLOWED.has(type))
+    throw fail(415,'invalid_png_chunks');
+  const data=pos+8,crc=bytes.readUInt32BE(data+len);
+  if(crc32(bytes,pos+4,data+len)!==crc)throw fail(415,'invalid_png_crc');
+  if(!seenIHDR){
+   if(type!=='IHDR'||len!==13)throw fail(415,'invalid_png_header');
+   const width=bytes.readUInt32BE(data),height=bytes.readUInt32BE(data+4);
+   if(width===0||height===0||width*height>16000000||
+      ![8,16].includes(bytes[data+8])||![0,2,4,6].includes(bytes[data+9])||
+      bytes[data+10]!==0||bytes[data+11]!==0||bytes[data+12]!==0)
+     throw fail(415,'invalid_png_header');
+   seenIHDR=true;
+  }else if(type==='IHDR')throw fail(415,'invalid_png_chunks');
+  if(type==='IDAT')seenIDAT=true;
+  if(type==='IEND'){
+   if(len!==0||!seenIDAT||data+len+4!==bytes.length)
+     throw fail(415,'invalid_png_end');
+   seenIEND=true;break;
+  }
+  pos=data+len+4;
+ }
+ if(!seenIHDR||!seenIDAT||!seenIEND)throw fail(415,'invalid_png');
+}
 export function validateCompletedFile(bytes,spec){
  if(!Buffer.isBuffer(bytes)||bytes.length!==spec.bytes||
     hash(bytes)!==spec.sha256)throw fail(422,'attachment_checksum_failed');
- if(spec.kind==='image'){
-   if(bytes.length<33||!bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))||
-      bytes.toString('ascii',12,16)!=='IHDR')
-      throw fail(415,'invalid_png');
-   const width=bytes.readUInt32BE(16),height=bytes.readUInt32BE(20);
-   if(width===0||height===0||width*height>16000000)
-      throw fail(415,'invalid_image_dimensions');
- } else {
+ if(spec.kind==='image')validatePng(bytes);
+ else {
    const text=bytes.toString('utf8');
-   if(!Buffer.from(text,'utf8').equals(bytes)||text.includes('\0')||
-      /[\x01-\x08\x0b\x0c\x0e-\x1f]/.test(text))
-      throw fail(415,'invalid_log');
+   if(!Buffer.from(text,'utf8').equals(bytes)||!validateLogText(text))
+     throw fail(415,'invalid_log');
+   if(redactLog(text).redacted!==text)
+     throw fail(422,'privacy_redaction_required');
  }
  return hash(bytes);
 }
