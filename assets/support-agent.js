@@ -159,6 +159,7 @@ function displayChat(ticket,messages){
   $('newTicketPane').hidden=true;$('chatPane').hidden=false;
   $('ticketState').textContent=ticket.status;
   $('selectedTitle').textContent=(ticket.subject||ticket.id)+' · '+ticket.id.slice(0,8);
+  $('askExpert').hidden=ticket.status==='closed'||ticket.routing!=='agent';
   $('closeTicket').disabled=ticket.status==='closed';
   $('closeTicket').hidden=ticket.status==='closed';
   $('reopenTicket').hidden=ticket.status!=='closed'||!!adminToken;
@@ -295,6 +296,19 @@ $('agentSend').addEventListener('click',async()=>{
     flash(lang==='fa'?'پاسخ اولیه ایجنت ثبت شد؛ این پاسخ به معنی رفع قطعی باگ نیست.':'Agent guidance was saved; it does not prove the bug is fixed.','success');
   }catch(error){flash(safeError(error),'error');}
   finally{busy=false;}
+});
+$('askExpert').addEventListener('click',async()=>{
+  if(!currentTicket||currentTicket.status==='closed'||currentTicket.routing!=='agent'||busy)return;
+  if(!confirm(lang==='fa'?'این تیکت برای بررسی انسانی به صف کارشناس منتقل بشه؟':'Escalate this ticket for human support?'))return;
+  busy=true;$('askExpert').disabled=true;
+  try{
+    const result=await support('escalate',{ticketId:currentTicket.id},token());
+    await openTicket(currentTicket.id);
+    flash(result.expertNotification==='provider_accepted'
+      ?(lang==='fa'?'درخواست کارشناسی ثبت شد؛ سرویس ایمیل اعلان رو پذیرفت، تحویل قطعی نیست.':'Human support requested; mail provider accepted notification, delivery is unconfirmed.')
+      :(lang==='fa'?'درخواست کارشناسی ثبت شد ولی ارسال اعلان تأیید نشد.':'Human support requested, but delivery of notification was unconfirmed.'),'success');
+  }catch(error){flash(safeError(error),'error');}
+  finally{busy=false;$('askExpert').disabled=false;}
 });
 $('newTicket').addEventListener('click',()=>{currentTicket=null;selectedId=null;$('chatPane').hidden=true;$('newTicketPane').hidden=false;$('ticketState').textContent=t('newTicket');$('agentAdvice').hidden=true;attachmentUi?.hide();flash('');});
 $('refresh').addEventListener('click',refresh);
