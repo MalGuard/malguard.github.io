@@ -110,3 +110,12 @@ test('welcome mail failure still returns a session after the account is created'
   assert.match(verified.sessionToken,/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);assert.equal(calls,2);
 });
 
+test('verification mail retains branded layout and bilingual accessibility',async()=>{
+  const {verificationEmail}=await import('./auth-email-template.js');
+  const mail=verificationEmail('123456');
+  assert.match(mail.htmlContent,/ACCOUNT SECURITY/);
+  assert.match(mail.htmlContent,/lang="fa"/);
+  assert.match(mail.htmlContent,/>123456</);
+  assert.match(mail.textContent,/123456/);
+  assert.match(mail.textContent,/کد تأیید/);
+});
