@@ -5,7 +5,7 @@ import {resolve,extname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 
-const root=fileURLToPath(new URL('../',import.meta.url));
+const root=resolve(fileURLToPath(new URL('../',import.meta.url)));
 const id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 let closed=false,saved=['Report: scanner does not load'],revision=0,enabled=true;
 const ticket=()=>({id,kind:'bug',routing:'agent',subject:'Scanner timeout',status:closed?'closed':'open',
