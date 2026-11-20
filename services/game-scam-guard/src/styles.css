@@ -147,3 +147,14 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,s
  .header-actions{flex:1;justify-content:flex-end}.profile-name{display:block;font-size:12px}.profile-name small{font-size:10px}
  .visual-card{display:none}.verdict strong{font-size:13px}.verdict p{font-size:11px}.signal b{font-size:13px}
 }
+
+
+/* Dice suggestion is a compact, labeled control beside the username title. */
+.account-modal .username-field{display:grid;gap:6px;min-width:0;margin-top:13px}
+.account-modal .username-heading{display:flex;align-items:center;justify-content:flex-start;gap:8px}
+.account-modal .username-heading label{margin:0;display:block;font-size:13px;font-weight:700}
+.account-modal .username-field>input{display:block;width:100%;min-width:0}
+.account-modal .username-heading .username-suggestion{display:inline-grid;place-items:center;flex:0 0 36px;width:36px;height:36px;min-height:36px;padding:0;border-radius:9px}
+.account-modal .username-heading .username-suggestion:disabled{opacity:.55;cursor:wait}
+.account-modal .username-suggestion-feedback{display:block;min-height:1em;color:#aab7c8;font-size:11px;line-height:1.45}
+@media(pointer:coarse){.account-modal .username-heading .username-suggestion{width:44px;height:44px;min-height:44px;flex-basis:44px}}

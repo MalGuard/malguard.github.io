@@ -1,3 +1,4 @@
+import {suggestAvailableUsername} from '../assets/unique-username.mjs';
 // Reuse the existing first-party account API. No provider keys or credentials in storage.
 const PRODUCTION_HOSTS=['malguard.site','www.malguard.site','malguard.github.io'];
 const SESSION_KEY='malguard.ai.session.v1';
@@ -61,7 +62,41 @@ export function createAccount({button,locale=()=> 'en',onChange=()=>{}}){
   if(signup){
    const strength=node('section',null,'account-strength'),meter=node('progress'),caption=node('p'),list=node('ul');meter.max=4;meter.setAttribute('aria-label',text('Password strength','قدرت رمز عبور'));caption.setAttribute('role','status');const ruleNames=[text('At least 10 characters','حداقل ۱۰ کاراکتر'),text('One uppercase letter','یک حرف بزرگ انگلیسی'),text('One lowercase letter','یک حرف کوچک انگلیسی'),text('One number','یک عدد')];const items=ruleNames.map(name=>{const li=node('li',name);list.append(li);return li;});strength.append(meter,caption,list);fields.password.closest('label').after(strength);
    const updateStrength=()=>{const valid=rules(),score=valid.filter(Boolean).length;meter.value=score;strength.dataset.score=String(score);const name=fields.password.value?[text('Weak','ضعیف'),text('Weak','ضعیف'),text('Fair','متوسط'),text('Good','خوب'),text('Requirements met','شرایط کامل است')][score]:text('Choose a password','یک رمز انتخاب کن');if(caption.textContent!==name)caption.textContent=name;items.forEach((li,i)=>{li.textContent=(valid[i]?'✓ ':'○ ')+ruleNames[i];li.className=valid[i]?'valid':'';});updateSubmit();};fields.password.addEventListener('input',updateStrength);fields.confirm.addEventListener('input',updateSubmit);updateStrength();
-   const suggestion=action(fields.username.closest('label'),'Use suggestion','استفاده از پیشنهاد',()=>{fields.username.value=[fields.firstName.value,fields.lastName.value].map(v=>v.trim().replace(/[^\p{L}\p{N}]+/gu,'_').replace(/^_+|_+$/g,'')).filter(Boolean).join('_').slice(0,48)||'Player_Guard';fields.username.dispatchEvent(new Event('input'));});suggestion.className='account-suggestion';fields.username.closest('label').after(suggestion);
+   const usernameLabel=fields.username.closest('label');
+   const usernameField=node('div',null,'username-field');
+   const usernameHeading=node('div',null,'username-heading');
+   const usernameTitle=node('label',text('Username','نام کاربری'));
+   usernameTitle.htmlFor=fields.username.id;
+   usernameLabel.replaceWith(usernameField);
+   usernameField.append(usernameHeading,fields.username);
+   usernameHeading.append(usernameTitle);
+   const suggestionNotice=node('small',null,'username-suggestion-feedback');
+   suggestionNotice.setAttribute('role','status');
+   suggestionNotice.setAttribute('aria-live','polite');
+   usernameField.append(suggestionNotice);
+   const suggestion=action(usernameHeading,'🎲','🎲',async()=>{
+    if(submitting||suggestion.disabled)return;
+    const snapshot={firstName:fields.firstName.value,lastName:fields.lastName.value,username:fields.username.value};
+    suggestion.disabled=true;suggestion.setAttribute('aria-busy','true');
+    suggestionNotice.textContent=text('Checking available usernames…','در حال بررسی نام‌های کاربری آزاد…');
+    try{
+     const next=await suggestAvailableUsername({
+      firstName:snapshot.firstName,lastName:snapshot.lastName,
+      check:async candidate=>(await request('availability',{email:'',username:candidate})).username
+     });
+     if(dialog!==pane||fields.firstName.value!==snapshot.firstName||fields.lastName.value!==snapshot.lastName||fields.username.value!==snapshot.username)return;
+     fields.username.value=next;
+     fields.username.dispatchEvent(new Event('input',{bubbles:true}));
+     availability.username='available';updateSubmit();
+     suggestionNotice.textContent=text('Available now; the final check happens during registration.','اکنون آزاد است؛ هنگام ثبت‌نام دوباره بررسی می‌شود.');
+    }catch{
+     if(dialog===pane)suggestionNotice.textContent=text('Could not verify an available username. Try again.','بررسی نام کاربری آزاد ممکن نشد؛ دوباره تلاش کن.');
+    }finally{suggestion.disabled=false;suggestion.removeAttribute('aria-busy');}
+   });
+   suggestion.className='account-suggestion username-suggestion';
+   suggestion.title=text('Suggest an available handle','ساخت نام کاربری آزاد');
+   suggestion.setAttribute('aria-label',suggestion.title);
+   for(const input of [fields.firstName,fields.lastName,fields.username])input.addEventListener('input',()=>{suggestionNotice.textContent='';});
    for(const key of ['email','username']){const hint=node('small');hint.setAttribute('role','status');fields[key].after(hint);fields[key].addEventListener('input',()=>{availability[key]='';hint.textContent='';updateSubmit();});fields[key].addEventListener('blur',async()=>{if(submitting||!fields[key].value.trim())return;const snapshot={email:fields.email.value.trim(),username:fields.username.value.trim()};hint.textContent=text('Checking…','در حال بررسی…');try{const result=await request('availability',snapshot);if(dialog!==pane||snapshot.email!==fields.email.value.trim()||snapshot.username!==fields.username.value.trim())return;const state=result[key];availability[key]=['available','taken','invalid'].includes(state)?state:'';hint.dataset.state=availability[key];hint.textContent=key==='email'?({available:text('This email is available.','این ایمیل قابل استفاده است.'),taken:text('This email is already registered. Sign in instead.','این ایمیل قبلاً ثبت شده است؛ وارد حساب شو.'),invalid:text('Enter a valid email address.','یک ایمیل معتبر وارد کن.')}[state]||''):({available:text('This username is available.','این نام کاربری قابل استفاده است.'),taken:text('This username is already taken. Choose another one.','این نام کاربری قبلاً انتخاب شده؛ نام دیگری بنویس.'),invalid:text('Use 3–48 letters, numbers, spaces, _ or -.','از ۳ تا ۴۸ حرف، عدد، فاصله، _ یا - استفاده کن.')}[state]||'');}catch{if(dialog===pane)hint.textContent=text('Availability could not be checked; submission will validate it.','بررسی در دسترس نبود؛ هنگام ارسال بررسی می‌شود.');}finally{updateSubmit();}});}
   }
   const controls=node('div',null,'account-actions');pane.append(controls);action(controls,signup?'Back to sign in':'Create account',signup?'بازگشت به ورود':'ساخت حساب',()=>authForm(!signup));

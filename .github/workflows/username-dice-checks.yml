@@ -1,0 +1,29 @@
+name: Username dice checks
+on:
+  pull_request:
+    paths:
+      - 'assets/unique-username.mjs'
+      - 'ai/account.mjs'
+      - 'ai/style.css'
+      - 'ai/pro-ui.css'
+      - 'services/game-scam-guard/src/AccountDialog.jsx'
+      - 'services/game-scam-guard/src/styles.css'
+      - 'tests/unique-username.test.mjs'
+      - '.github/workflows/username-dice-checks.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node --check ai/account.mjs
+      - run: node --test tests/unique-username.test.mjs
+      - run: npm run build:game-scam-guard
