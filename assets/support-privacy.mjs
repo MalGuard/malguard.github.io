@@ -2,7 +2,8 @@
 const MAX_LOG=2*1024*1024;
 const PANIC='[REDACTED]';
 const privateBlock=/-----BEGIN (?:RSA |EC |OPENSSH |ENCRYPTED )?PRIVATE KEY-----[\s\S]*?-----END (?:RSA |EC |OPENSSH |ENCRYPTED )?PRIVATE KEY-----/gi;
-const secretField=/(\b(?:api[_-]?key|access[_-]?token|refresh[_-]?token|password|passwd|secret|authorization|client_secret|private_key)\b\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\r\n\s,}]+)/gi;
+const secretField=/(\b(?:api[_-]?key|access[_-]?token|refresh[_-]?token|token|password|passwd|secret|authorization|client_secret|private_key)\b\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\r\n\s,}]+)/gi;
+const authorizationLine=/(\bauthorization\s*[:=]\s*)[^\r\n]+/gi;
 const authBearer=/\bBearer\s+[A-Za-z0-9_.~-]+/gi;
 const jwt=/\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b/g;
 const email=/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g;
@@ -17,6 +18,7 @@ export function redactLog(input) {
   let changes=0,output=input;
   for(const [pattern,make] of [
     [privateBlock,()=>PANIC],
+    [authorizationLine,match=>match.slice(0,match.search(/[:=]/)+1)+PANIC],
     [secretField,match=>match.slice(0,match.search(/[:=]/)+1)+PANIC],
     [authBearer,()=> 'Bearer '+PANIC],
     [jwt,()=>PANIC],
