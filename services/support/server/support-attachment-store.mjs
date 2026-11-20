@@ -40,7 +40,15 @@ export function createAttachmentStore({url=process.env.SUPABASE_URL,
   if(!Array.isArray(rows))throw fail(502,'attachment_metadata_unavailable');
   return rows;
  }
- return {enabled,get,list,
+ async function consents(ticketId){
+   if(!validId(ticketId))throw fail(400,'invalid_ticket');
+   const rows=await query('support_permissions?ticket_id=eq.'+ticketId+
+     '&kind=eq.attachment_analysis&approved=eq.true&revoked_at=is.null'+
+     '&select=resource_id,approved_redacted_sha256&limit=20');
+   if(!Array.isArray(rows))throw fail(502,'attachment_metadata_unavailable');
+   return rows;
+ }
+ return {enabled,get,list,consents,
   async begin(ticketId,spec){
    if(!validId(ticketId))throw fail(400,'invalid_ticket');
    const id=randomUUID();
