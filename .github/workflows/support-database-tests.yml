@@ -5,6 +5,7 @@ on:
       - 'services/support/supabase/**'
       - 'tests/support-sql-smoke.sql'
       - 'tests/support-attachments-sql-smoke.sql'
+      - 'tests/support-ai-sql-smoke.sql'
       - '.github/workflows/support-database-tests.yml'
 permissions:
   contents: read
@@ -54,3 +55,4 @@ jobs:
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/support-sql-smoke.sql
           psql -v ON_ERROR_STOP=1 -f tests/support-attachments-sql-smoke.sql
+          psql -v ON_ERROR_STOP=1 -f tests/support-ai-sql-smoke.sql
