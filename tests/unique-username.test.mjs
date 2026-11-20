@@ -45,6 +45,7 @@ test('both signup flows show a compact dice beside username label',async()=>{
  ]);
  assert.ok(react.includes('className="username-heading"'));
  assert.ok(react.includes('<Dices size={16}'));
+ assert.ok(react.includes('aria-label="Roll the dice"'));
  assert.ok(react.includes('suggestAvailableUsername({'));
  assert.ok(react.includes("checkAccountAvailability({email:'',username:suggested})"));
  assert.ok(ai.includes("usernameHeading.append(usernameTitle)"));
