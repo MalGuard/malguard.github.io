@@ -138,7 +138,7 @@ export function initSupportAttachments({request,getTicket,getToken,getLanguage=(
    }finally{picker.disabled=false;review.disabled=false;upload.disabled=!review.checked;}
  });
  async function consent(file,approved) {
-   const ticket=getTicket();if(!ticket||ticket.status==='closed')return;
+   const ticket=getTicket();if(!ticket||(ticket.status==='closed'&&approved))return;
    if(approved&&!confirm(message('نسخه پاک‌سازی‌شده این فایل برای Support Agent ارسال و تحلیل بشه؟','Allow Support Agent to analyze this exact redacted file?')))return;
    try{
      await request(approved?'attachment-approve':'attachment-revoke',
@@ -168,8 +168,9 @@ export function initSupportAttachments({request,getTicket,getToken,getLanguage=(
  }
  function show(){
    const ticket=getTicket();
-   section.hidden=!ticket||ticket.status==='closed';
+   section.hidden=!ticket;
    if(!ticket)return;
+   picker.disabled=ticket.status==='closed';
    if(ticket.id!==previewTicket)setInactive();
    refresh();
  }
