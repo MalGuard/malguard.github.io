@@ -12,7 +12,7 @@ const stamp=Date.parse('2026-11-20T08:00:00.000Z');
 function makeFixture({enabled=true}={}) {
   let current=stamp, mailFailure=false, rateAllowed=true;
   const tickets=new Map(), messages=new Map(), storedLinks=[],sent=[];
-  const makeTicket=(id,email)=>({id,owner_email:email,kind:'bug',subject:'Scanner problem',
+  const makeTicket=(id,email)=>({id,owner_email:email,kind:'bug',routing:'agent',subject:'Scanner problem',
     status:'open',revision:0,created_at:new Date(stamp).toISOString(),
     updated_at:new Date(stamp).toISOString(),closed_at:null,attachments_delete_at:null});
   tickets.set(A,makeTicket(A,'one@example.test'));
