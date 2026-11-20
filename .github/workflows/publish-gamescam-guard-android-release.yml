@@ -2,6 +2,9 @@ name: Publish GameScam Guard Android Release
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['apps/gamescam-guard-android/app/build.gradle']
 
 permissions:
   contents: write
@@ -13,8 +16,8 @@ jobs:
       run:
         working-directory: apps/gamescam-guard-android
     env:
-      RELEASE_TAG: gamescam-guard-android-v1.1.0
-      RELEASE_ASSET: GameScam-Guard-1.1.0-android.apk
+      RELEASE_TAG: gamescam-guard-android-v1.2.0
+      RELEASE_ASSET: GameScam-Guard-1.2.0-android.apk
       GSG_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.GSG_ANDROID_KEYSTORE_PASSWORD }}
       GSG_ANDROID_KEY_ALIAS: ${{ secrets.GSG_ANDROID_KEY_ALIAS }}
       GSG_ANDROID_KEY_PASSWORD: ${{ secrets.GSG_ANDROID_KEY_PASSWORD }}
@@ -57,15 +60,17 @@ jobs:
           set -euo pipefail
           apk="app/build/outputs/apk/release/app-release.apk"
           test -s "$apk"
-          "$ANDROID_SDK_ROOT/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$apk"
+          report="$("$ANDROID_SDK_ROOT/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$apk")"
+          printf '%s\n' "$report"
+          signer="$(printf '%s\n' "$report" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')"
+          test "$signer" = cbd07ad5e9def13e22e68a367f48898f0d2f8b7a6c6d7f7615ae0c05490f7845
       - name: Publish signed release asset
         run: |
           set -euo pipefail
           apk="app/build/outputs/apk/release/app-release.apk"
           if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-            gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --title "GameScam Guard Android 1.1.0" --notes "Signed Android 8.0+ direct-install release."
+            gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --title "GameScam Guard Android 1.2.0" --notes "Signed Android 8.0+ direct-install release."
           fi
           release_apk="$RUNNER_TEMP/$RELEASE_ASSET"
           cp "$apk" "$release_apk"
-          gh release delete-asset "$RELEASE_TAG" app-release.apk --yes --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1 || true
-          gh release upload "$RELEASE_TAG" "$release_apk" --clobber --repo "$GITHUB_REPOSITORY"
+          gh release upload "$RELEASE_TAG" "$release_apk" --repo "$GITHUB_REPOSITORY"
