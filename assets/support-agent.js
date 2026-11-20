@@ -50,7 +50,7 @@ const i18n={
 };
 const t=key=>(i18n[key]||[key,key])[lang==='fa'?0:1];
 const isUuid=id=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||'');
-let serviceEnabled=false;
+let serviceEnabled=false,attachmentUi=null;
 function translate(){
   document.documentElement.lang=lang;
   document.documentElement.dir=lang==='fa'?'rtl':'ltr';
@@ -86,6 +86,13 @@ async function verifyStatus(){
   try{
     const status=await support('status');
     setReady(status.enabled===true);
+    if(serviceEnabled && status.attachmentsEnabled===true && !attachmentUi){
+      import('/assets/support-attachments-ui.mjs').then(m=>{
+        attachmentUi=m.initSupportAttachments({request:support,getTicket:()=>currentTicket,
+          getToken:token,getLanguage:()=>lang,onError:error=>flash(safeError(error),'error')});
+        if(currentTicket)attachmentUi.show();
+      }).catch(()=>{flash(t('notAvailable'),'error');});
+    }
     if(serviceEnabled && typeof status.turnstileSiteKey==='string') {
       siteKey=status.turnstileSiteKey;
       addTurnstile();
@@ -118,7 +125,7 @@ function signedOut(){
   accountToken=null;ticketToken=null;selectedId=null;currentTicket=null;
   $('identity').hidden=true;$('accountForm').hidden=false;$('linkForm').hidden=false;
   $('ticketList').replaceChildren();$('newTicketPane').hidden=false;$('chatPane').hidden=true;
-  $('accountPassword').value='';$('reply').value='';
+  $('accountPassword').value='';$('reply').value='';attachmentUi?.hide();
 }
 function renderTickets(rows){
   const el=$('ticketList');el.replaceChildren();
@@ -160,6 +167,7 @@ function displayChat(ticket,messages){
     li.append(content,small);list.append(li);
   }
   list.scrollTop=list.scrollHeight;
+  attachmentUi?.show();
 }
 async function openTicket(id){
   if(!isUuid(id)||!token())return;
@@ -244,7 +252,7 @@ $('reopenTicket').addEventListener('click',async()=>{
   try{await support('reopen',{ticketId:currentTicket.id},token());await openTicket(currentTicket.id);flash(t('reopened'),'success');}
   catch(e){flash(safeError(e),'error');}finally{busy=false;}
 });
-$('newTicket').addEventListener('click',()=>{currentTicket=null;selectedId=null;$('chatPane').hidden=true;$('newTicketPane').hidden=false;$('ticketState').textContent=t('newTicket');flash('');});
+$('newTicket').addEventListener('click',()=>{currentTicket=null;selectedId=null;$('chatPane').hidden=true;$('newTicketPane').hidden=false;$('ticketState').textContent=t('newTicket');attachmentUi?.hide();flash('');});
 $('refresh').addEventListener('click',refresh);
 $('logout').addEventListener('click',()=>{signedOut();flash('');});
 window.addEventListener('pagehide',()=>{accountToken=null;ticketToken=null;});
