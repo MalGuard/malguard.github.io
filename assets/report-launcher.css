@@ -18,5 +18,5 @@ body:has(.g-app [role="dialog"][aria-modal="true"]) #mg-report-launcher{display:
 @media(prefers-reduced-motion:reduce){#mg-report-launcher,#mg-report-launcher :is(a,button){transition:none}}
 
 /* Keep the report control reachable without covering Game Scam Guard actions. */
-body:has(.g-app) #mg-report-launcher{position:static;width:max-content;margin:0 14px 14px auto}
-html[dir="rtl"] body:has(.g-app) #mg-report-launcher{margin:0 auto 14px 14px}
+body:has(.g-app .g-report) #mg-report-launcher{position:static;width:max-content;margin:0 14px 14px auto}
+html[dir="rtl"] body:has(.g-app .g-report) #mg-report-launcher{margin:0 auto 14px 14px}
