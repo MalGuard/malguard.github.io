@@ -62,7 +62,29 @@ export function createSupportMailer({
     if(!response.ok)throw fail(503,'support_mail_unavailable');
     return true;
   }
-  return {enabled,sendTicketLink,sendAdminCode};
+  async function notifyExpert({ticketId}){
+    if(!enabled)throw fail(503,'support_mail_unavailable');
+    if(typeof ticketId!=='string'||!/^[a-f0-9-]{36}$/i.test(ticketId))
+      throw fail(400,'invalid_ticket');
+    let response;
+    try{
+      response=await fetchImpl('https://api.brevo.com/v3/smtp/email',{
+        method:'POST',redirect:'error',cache:'no-store',
+        headers:{'api-key':apiKey,'content-type':'application/json','accept':'application/json'},
+        body:JSON.stringify({
+          sender:{name:'MalGuard Support',email:normalized(fromEmail)},
+          to:[{email:'contact@malguard.site'}],
+          subject:'MalGuard Support: human ticket queued',
+          textContent:'A support ticket needs expert attention. Ticket ID: '+ticketId+
+            '\\nOpen the authenticated MalGuard Support admin panel to review it. '+
+            'Do not request passwords or other secrets.'
+        }),signal:AbortSignal.timeout(10000)
+      });
+    }catch{throw fail(503,'support_mail_unavailable');}
+    if(!response.ok)throw fail(503,'support_mail_unavailable');
+    return true;
+  }
+  return {enabled,sendTicketLink,sendAdminCode,notifyExpert};
 }
 
 export function createChallengeVerifier({
