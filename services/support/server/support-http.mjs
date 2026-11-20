@@ -10,7 +10,7 @@ import {canAccessTicket,closeTicket,reopenTicket,TicketPolicyError} from './tick
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const KINDS=new Set(['bug','false-positive','feedback']);
-const ENDPOINTS=new Set(['status','admin-code-start','admin-code-verify','agent','create','list','ticket','message','close','reopen','request-link','redeem-link',
+const ENDPOINTS=new Set(['escalate','status','admin-code-start','admin-code-verify','agent','create','list','ticket','message','close','reopen','request-link','redeem-link',
  'attachment-list','attachment-start','attachment-chunk','attachment-finish','attachment-approve','attachment-revoke']);
 const ORIGINS=new Set(['https://malguard.site','https://www.malguard.site','https://malguard.github.io']);
 const fail=(status,code)=>Object.assign(new Error(code),{status,code});
@@ -103,14 +103,19 @@ export function createSupportHandler({
       await takeRate('create:'+email,actor?10:3,3600);
       const id=await store.create({email,accountId:actor?.accountId||null,kind:body.kind,route:body.route,
         subject:body.subject.trim(),message:body.message.trim()});
-      if(actor)return {accepted:true,ticketId:id};
+      let expertNotification='not_requested';
+      if(body.route==='expert'){
+        expertNotification='unconfirmed';
+        try{await mailer.notifyExpert({ticketId:id});expertNotification='provider_accepted';}catch{}
+      }
+      if(actor)return {accepted:true,ticketId:id,expertNotification};
       // A confirmed ticket-store write is not proof of email delivery.
       let delivery='unconfirmed';
       try{
         await issueAndSend({id,owner_email:email});
         delivery='provider_accepted';
       }catch{}
-      return {accepted:true,ticketId:id,delivery};
+      return {accepted:true,ticketId:id,delivery,expertNotification};
     }
     if(endpoint==='request-link'){
       if(!UUID.test(body.ticketId||'')||!validEmail(body.email))throw fail(400,'invalid_request');
@@ -165,6 +170,15 @@ export function createSupportHandler({
       if(endpoint==='attachment-revoke')return upload.revoke(row.id,body);
     }
 
+    if(endpoint==='escalate'){
+      if(actor.method==='admin')throw fail(403,'reporter_only');
+      if(row.status==='closed'||row.routing!=='agent')throw fail(409,'escalation_unavailable');
+      await takeRate('expert-handoff:'+actor.email,10,3600);
+      const updated=await store.escalate(row.id,row.revision);
+      let expertNotification='unconfirmed';
+      try{await mailer.notifyExpert({ticketId:row.id});expertNotification='provider_accepted';}catch{}
+      return {ticket:outputRow(updated),expertNotification};
+    }
     if(endpoint==='agent'){
       if(actor.method==='admin')throw fail(403,'reporter_consent_required');
       if(!model.ready)throw fail(503,'support_ai_unavailable');
