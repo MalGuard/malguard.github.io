@@ -1,5 +1,6 @@
 import {createHmac} from 'node:crypto';
 import {createSupportStore} from './support-store.mjs';
+import {createSupportAdmin} from './support-admin.mjs';
 import {createSupportIdentity} from './support-identity.mjs';
 import {createSupportMailer,createChallengeVerifier} from './support-mail.mjs';
 import {issueEmailLink} from './email-link.mjs';
@@ -9,7 +10,7 @@ import {canAccessTicket,closeTicket,reopenTicket,TicketPolicyError} from './tick
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const KINDS=new Set(['bug','false-positive','feedback']);
-const ENDPOINTS=new Set(['status','agent','create','list','ticket','message','close','reopen','request-link','redeem-link',
+const ENDPOINTS=new Set(['status','admin-code-start','admin-code-verify','agent','create','list','ticket','message','close','reopen','request-link','redeem-link',
  'attachment-list','attachment-start','attachment-chunk','attachment-finish','attachment-approve','attachment-revoke']);
 const ORIGINS=new Set(['https://malguard.site','https://www.malguard.site','https://malguard.github.io']);
 const fail=(status,code)=>Object.assign(new Error(code),{status,code});
@@ -29,13 +30,14 @@ const result=(res,status,data)=>{
 
 export function createSupportHandler({
   store=createSupportStore(),upload=createUploadService(),model=createSupportModel(),identity=createSupportIdentity(),
-  mailer=createSupportMailer(),challenge=createChallengeVerifier(),
+  mailer=createSupportMailer(),challenge=createChallengeVerifier(),admin,
   enabled=process.env.SUPPORT_API_ENABLED==='true',
   rateSecret=process.env.SUPPORT_SESSION_SECRET,
   publicSiteKey=process.env.SUPPORT_TURNSTILE_SITE_KEY,
   now=()=>Date.now()
 }={}) {
   const rateReady=typeof rateSecret==='string'&&rateSecret.length>=32;
+  const adminAccess=admin||createSupportAdmin({store,mailer});
   const configured=enabled&&store.enabled&&identity.enabled&&mailer.enabled&&challenge.enabled&&rateReady&&typeof publicSiteKey==='string'&&publicSiteKey.length>=10;
   async function takeRate(value,limit,seconds) {
     if(!rateReady)throw fail(503,'support_unavailable');
@@ -58,7 +60,8 @@ export function createSupportHandler({
     const match=typeof header==='string'?/^Bearer ([^\s]+)$/.exec(header):null;
     if(!match)throw fail(401,'unauthorized');
     const token=match[1];
-    return token.startsWith('mgst1.')?identity.linkActor(token):identity.accountActor(token);
+    return token.startsWith('mgadm1.')?adminAccess.actorFromToken(token):
+      token.startsWith('mgst1.')?identity.linkActor(token):identity.accountActor(token);
   }
   async function privateTicket(id,actor) {
     if(!UUID.test(id||''))throw fail(400,'invalid_ticket');
@@ -73,9 +76,16 @@ export function createSupportHandler({
     await mailer.sendTicketLink({email:row.owner_email,ticketId:row.id,token:issued.token});
   }
   async function dispatch(req,endpoint) {
-    if(endpoint==='status')return {enabled:configured,attachmentsEnabled:configured&&upload.available,aiEnabled:configured&&model.ready,phase:'ticket-api',turnstileSiteKey:configured?publicSiteKey:null};
+    if(endpoint==='status')return {enabled:configured,attachmentsEnabled:configured&&upload.available,aiEnabled:configured&&model.ready,adminEnabled:configured&&adminAccess.enabled,phase:'ticket-api',turnstileSiteKey:configured?publicSiteKey:null};
     if(!configured)throw fail(503,'support_unavailable');
     const body=bodyOf(req,endpoint);
+    if(endpoint==='admin-code-start'||endpoint==='admin-code-verify'){
+      const account=await actorOf(req);
+      if(account.method!=='account')throw fail(403,'account_required');
+      await takeRate('admin-otp:'+account.email,5,3600);
+      if(endpoint==='admin-code-start')return adminAccess.requestCode(account);
+      return adminAccess.verifyCode(account,body.challengeId,body.code);
+    }
     if(endpoint==='create'){
       if(!KINDS.has(body.kind))throw fail(400,'invalid_report_kind');
       if(!['agent','expert'].includes(body.route))throw fail(400,'invalid_support_route');
@@ -129,9 +139,9 @@ export function createSupportHandler({
     }
     const actor=await actorOf(req);
     if(endpoint==='list') {
-      if(actor.method!=='account')throw fail(403,'account_required');
+      if(!['account','admin'].includes(actor.method))throw fail(403,'account_required');
       await takeRate('list:'+actor.email,60,3600);
-      const rows=await store.listByEmail(actor.email);
+      const rows=actor.method==='admin'?await store.listAll():await store.listByEmail(actor.email);
       return {tickets:rows.map(outputRow)};
     }
     const row=await privateTicket(body.ticketId,actor);
@@ -140,6 +150,8 @@ export function createSupportHandler({
       return {ticket:outputRow(row),messages:await store.messages(row.id)};
     }
     if(endpoint.startsWith('attachment-')){
+      if(actor.method==='admin' && !['attachment-list','attachment-revoke'].includes(endpoint))
+        throw fail(403,'reporter_consent_required');
       if(endpoint==='attachment-list'){
         await takeRate('attachment-list:'+actor.email,60,3600);
         return upload.list(row.id);
@@ -154,6 +166,7 @@ export function createSupportHandler({
     }
 
     if(endpoint==='agent'){
+      if(actor.method==='admin')throw fail(403,'reporter_consent_required');
       if(!model.ready)throw fail(503,'support_ai_unavailable');
       if(row.status==='closed'||row.kind!=='bug'||row.routing!=='agent')
         throw fail(409,'agent_not_available_for_ticket');
@@ -176,12 +189,12 @@ export function createSupportHandler({
       if(!nonEmpty(body.message,6000))throw fail(400,'invalid_message');
       if(row.status==='closed')throw fail(409,'ticket_closed');
       await takeRate('message:'+actor.email,40,3600);
-      return {saved:true,...await store.append(row.id,row.revision,body.message.trim())};
+      return {saved:true,...await (actor.method==='admin'?store.appendExpert(row.id,row.revision,body.message.trim()):store.append(row.id,row.revision,body.message.trim()))};
     }
     if(endpoint==='close') {
       closeTicket(policyRow(row),actor,now(),body.reason);
       await takeRate('close:'+actor.email,15,3600);
-      return {ticket:outputRow(await store.close(row.id,row.revision,body.reason))};
+      return {ticket:outputRow(await store.close(row.id,row.revision,body.reason,actor.method==='admin'?'admin':'reporter'))};
     }
     if(endpoint==='reopen'){
       reopenTicket(policyRow(row),actor,now());
