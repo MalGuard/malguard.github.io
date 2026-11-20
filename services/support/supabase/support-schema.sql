@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public.support_tickets (
   owner_email text NOT NULL CHECK (length(owner_email) BETWEEN 3 AND 254 AND owner_email = lower(owner_email)),
   owner_account_id uuid NULL REFERENCES public.guard_accounts(id) ON DELETE SET NULL,
   kind text NOT NULL CHECK (kind IN ('bug','security','false-positive','feedback')),
+  routing text NOT NULL DEFAULT 'agent' CHECK (routing IN ('agent','expert')),
   subject text NOT NULL CHECK (length(subject) BETWEEN 1 AND 160),
   status text NOT NULL DEFAULT 'open' CHECK (status IN
     ('open','investigating','awaiting_approval','testing','resolved','closed')),
