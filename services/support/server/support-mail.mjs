@@ -41,7 +41,28 @@ export function createSupportMailer({
     if(!response.ok)throw fail(503,'support_mail_unavailable');
     return true; // Provider accepted message; this is not proof of delivery.
   }
-  return {enabled,sendTicketLink};
+  async function sendAdminCode({email,code}) {
+    if(!enabled)throw fail(503,'support_mail_unavailable');
+    if(!validEmail(email)||typeof code!=='string'||!/^[0-9]{8}$/.test(code))
+      throw fail(400,'invalid_admin_code_delivery');
+    let response;
+    try{
+      response=await fetchImpl('https://api.brevo.com/v3/smtp/email',{
+        method:'POST',redirect:'error',cache:'no-store',
+        headers:{'api-key':apiKey,'content-type':'application/json','accept':'application/json'},
+        body:JSON.stringify({
+          sender:{name:'MalGuard Support',email:normalized(fromEmail)},
+          to:[{email:normalized(email)}],
+          subject:'MalGuard Support: owner verification',
+          textContent:'MalGuard Support owner verification code: '+code+
+            '\\nExpires in 10 minutes. Do not share it. If you did not request it, ignore this email.'
+        }),signal:AbortSignal.timeout(10000)
+      });
+    }catch{throw fail(503,'support_mail_unavailable');}
+    if(!response.ok)throw fail(503,'support_mail_unavailable');
+    return true;
+  }
+  return {enabled,sendTicketLink,sendAdminCode};
 }
 
 export function createChallengeVerifier({
