@@ -53,6 +53,11 @@ export function createSupportStore({
       if(!Array.isArray(rows)) throw fail(502,'support_store_invalid_response');
       return rows;
     },
+    async listAll(){
+      const rows=await request('/rest/v1/support_tickets?select=id,kind,routing,subject,status,revision,created_at,updated_at,closed_at&order=created_at.desc&limit=50');
+      if(!Array.isArray(rows))throw fail(502,'support_store_invalid_response');
+      return rows;
+    },
     async messages(ticketId){
       if(!UUID.test(ticketId||'')) throw fail(400,'invalid_ticket');
       const rows=await request('/rest/v1/support_messages?ticket_id=eq.'+ticketId+
@@ -84,8 +89,17 @@ export function createSupportStore({
     appendAgent:(ticketId,revision,content)=>rpc('support_append_agent_message',{
       p_ticket_id:ticketId,p_expected_revision:revision,p_content:content
     }),
-    close:(ticketId,revision,reason)=>rpc('support_close_ticket',{
-      p_ticket_id:ticketId,p_expected_revision:revision,p_actor:'reporter',p_reason:reason||null
+    appendExpert:(ticketId,revision,content)=>rpc('support_append_expert_message',{
+      p_ticket_id:ticketId,p_expected_revision:revision,p_content:content
+    }),
+    issueAdminChallenge:(email,hash)=>rpc('support_issue_admin_challenge',{
+      p_email:email,p_code_hash:hash
+    }),
+    redeemAdminChallenge:(id,email,hash)=>rpc('support_redeem_admin_challenge',{
+      p_id:id,p_email:email,p_code_hash:hash
+    }),
+    close:(ticketId,revision,reason,actor='reporter')=>rpc('support_close_ticket',{
+      p_ticket_id:ticketId,p_expected_revision:revision,p_actor:actor,p_reason:reason||null
     }),
     reopen:(ticketId,revision)=>rpc('support_reopen_ticket',{
       p_ticket_id:ticketId,p_expected_revision:revision
