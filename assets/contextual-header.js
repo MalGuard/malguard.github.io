@@ -31,7 +31,7 @@
     ['Home', 'MalGuard overview', '/', 'home malguard'],
     ['Agent Guard', 'Agent security concept — in development', '/products.html#agent-guard', 'agent guard permissions ایجنت دسترسی'],
     ['Products', 'Products and current availability', '/products.html', 'gta guard malguard ai scam guard'],
-    ['Game Scam Guard', 'Online link inspector and signed Android app', '/game-scam-guard.html', 'game gaming scam'],
+    ['Game Scam Guard', 'Online link inspector and signed Android app', '/game-scam-guard.html', 'game gaming scam gamescam'],
     ['iPhone Preview', 'Bounded local mobile inspection', '/ios-preview/', 'iphone ios'],
     ['GTA Guard', 'Clean-room Windows x64 static scanner', '/gta-guard.html', 'mods windows files'],
     ['GTA VI Security Center', 'Fake-download research and local URL warning-sign review', '/gta6-security.html', 'gta 6 gta vi security center fake download scam'],

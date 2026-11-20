@@ -5,3 +5,46 @@
 @media(prefers-reduced-motion:reduce){.g-app *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 .g-brand-logo{display:block;width:38px;height:38px;border-radius:9px;flex-shrink:0;object-fit:contain}.g-dialog-logo{display:block;border-radius:12px}.g-url-sources{padding-top:10px}.g-url-sources>small{color:#a0b3cc}.g-url-sources>p{margin:5px 0;color:#c7d8ed}
+
+/* Theme control shares the public site's preference and solar auto mode. */
+.g-header-actions .mg-theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.mg-theme-toggle svg { width: 18px; height: 18px; }
+.g-url-field:focus-within, .g-search:focus-within { outline: 2px solid #568ad8; outline-offset: 2px; }
+.g-app .g-nav button, .g-app .scan-tabs button { min-height: 44px; font-size: 12px; }
+.g-app .g-mode-note, .g-app .g-footer { font-size: 12px; }
+:root[data-theme=light], :root[data-theme=light] body, :root[data-theme=light] #root {
+  background: #faf9f5;
+  color: #252523;
+}
+html[data-theme=light] .g-app { color: #252523; }
+html[data-theme=light] .g-app :is(.g-nav,.g-scan-card,.g-panel,.modal,.g-search,.g-url-field,.outline-button,.icon-button) {
+  background: #fff;
+  border-color: #bab8b2;
+  color: #252523;
+}
+html[data-theme=light] .g-app :is(.g-brand,.g-brand b,.g-panel h1,.g-panel h2,.g-intro h1,.g-setting b,.modal h2,.modal label,.g-url-field input,.g-search input,.g-history-row) { color: #252523; }
+html[data-theme=light] .g-app :is(.g-brand b span,.g-intro p,.g-section-title p,.g-muted,.g-mode-note,.g-footer,.g-setting small,.g-setting span:not(.status-badge),.modal p,.g-history-row small,.g-url-field svg) { color: #565751; }
+html[data-theme=light] .g-app :is(.g-nav,.scan-tabs) button { color: #454640; }
+html[data-theme=light] .g-app .scan-tabs { background: #f2f1ed; border-color: #bab8b2; }
+html[data-theme=light] .g-app :is(.g-nav,.scan-tabs) button:is(.selected,:hover) { background: #e1e3de; color: #191b18; }
+html[data-theme=light] .g-app .g-url-field input::placeholder { color: #62645e; }
+html[data-theme=light] .g-app .account-modal input { background: white!important; color: #252523!important; border-color: #777!important; color-scheme: light; }
+html[data-theme=light] .g-app :focus-visible { outline-color: #2858b6; }
+html[data-theme=light] .g-self-test :is(summary, .g-test-checks > div > span:first-child) { color: #343630; }
+html[data-theme=light] .g-self-test .g-test-result { background: #e9f4ee; border-color: #809e8c; }
+html[data-theme=light] .g-self-test .g-test-result.failed { background: #f9ebec; border-color: #b38b8f; }
+html[data-theme=light] .g-self-test .g-test-result :is(svg, p) { color: #343630; }
+html[data-theme=light] .g-app .report-card { color: #dce7f7; }
+
+.g-app .primary-button { background: #2857a4; color: white; box-shadow: none; }
+.g-app .primary-button:hover:not(:disabled) { background: #214987; }
+.g-app { font-family: system-ui, "Vazirmatn", sans-serif; }
+html[dir=rtl] .g-app { font-family: "Vazirmatn", system-ui, sans-serif; }

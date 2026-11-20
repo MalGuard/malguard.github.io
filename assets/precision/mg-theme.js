@@ -91,7 +91,7 @@
     root.dataset.themeSource=coordinates?'geolocation':fallbackCoordinates()?'timezone-solar':'local-hour';
     root.style.colorScheme=effective;
     const meta=document.querySelector('meta[name="theme-color"]');
-    if(meta) meta.setAttribute('content', effective==='light' ? '#8EC8EC' : '#050507');
+    if(meta) meta.setAttribute('content', effective==='light' ? '#faf9f5' : '#0e0e0f');
     const btn=document.getElementById('mgThemeToggle');
     if(btn){
       const show=mode||'auto';
@@ -113,7 +113,7 @@
   function cycle(){
     const cur=readMode();
     let idx;
-    if(cur===null) idx=0;
+    if(cur===null) idx=1;
     else idx=(MODES.indexOf(cur)+1)%MODES.length;
     const next=MODES[idx];
     localStorage.setItem(KEY,next);
@@ -127,19 +127,19 @@
     btn.type='button';
     btn.className='mg-theme-toggle';
     btn.addEventListener('click',cycle);
-    document.body.appendChild(btn);
+    (document.querySelector('[data-theme-controls]') || document.body).appendChild(btn);
   }
 
   const initial=readMode();
   apply(initial);
   restoreGrantedLocation();
   // Auto attempts location once per tab; denied/unavailable stays functional via timezone.
-  if((initial===null||initial==='auto')&&navigator.geolocation){
+  if(!document.querySelector('[data-theme-controls]')&&(initial===null||initial==='auto')&&navigator.geolocation){
     try{if(!sessionStorage.getItem('mg-theme-geo-attempt')){
       sessionStorage.setItem('mg-theme-geo-attempt','1');requestLocation();
     }}catch(_){}
   }
-  ensureCss();
+  if (!document.querySelector('[data-theme-controls]')) ensureCss();
   const boot=()=>{ensureToggle();apply(readMode());};
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
