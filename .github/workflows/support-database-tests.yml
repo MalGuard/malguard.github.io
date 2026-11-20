@@ -4,6 +4,7 @@ on:
     paths:
       - 'services/support/supabase/**'
       - 'tests/support-sql-smoke.sql'
+      - 'tests/support-attachments-sql-smoke.sql'
       - '.github/workflows/support-database-tests.yml'
 permissions:
   contents: read
@@ -49,4 +50,6 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f services/support/supabase/support-rpc.sql
           psql -v ON_ERROR_STOP=1 -f services/support/supabase/support-attachments-rpc.sql
       - name: Verify grants, link replay and ticket transitions
-        run: psql -v ON_ERROR_STOP=1 -f tests/support-sql-smoke.sql
+        run: |
+          psql -v ON_ERROR_STOP=1 -f tests/support-sql-smoke.sql
+          psql -v ON_ERROR_STOP=1 -f tests/support-attachments-sql-smoke.sql
