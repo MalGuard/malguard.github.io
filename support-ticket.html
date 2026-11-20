@@ -82,6 +82,24 @@
         <button type="button" id="newTicket" class="secondary" data-i18n="new">تیکت جدید</button>
       </div></div>
       <ol id="messages" class="messages" aria-label="پیام‌های تیکت"></ol>
+      <section id="attachmentSection" class="attachment-section" hidden aria-labelledby="attachmentHead">
+        <div class="attach-head"><h3 id="attachmentHead">پیوست‌های خصوصی · تصاویر و لاگ‌ها</h3>
+          <p>هر فایل اول روی دستگاه پاک‌سازی و پیش‌نمایش می‌شه؛ بدون اجازه جداگانه برای تحلیل، AI بهش دسترسی نداره.</p>
+        </div>
+        <div id="uploadedList" class="uploaded-list" aria-live="polite"></div>
+        <label for="attachmentPick">انتخاب فایل تصویر یا لاگ (PNG/JPG/WebP، TXT/LOG/JSON)
+          <input type="file" id="attachmentPick" accept=".png,.jpg,.jpeg,.webp,.txt,.log,.json,image/png,image/jpeg,image/webp,text/plain" />
+        </label>
+        <p class="privacy-note">تصاویر: حداکثر ۵ مگابایت. لاگ: حداکثر ۲ مگابایت. تصویر پس از بازترسیم در مرورگر، قابل پوشاندن دستی با کشیدن مستطیل سیاهه. شناسایی خودکار تمام اطلاعات محرمانه تضمین‌شده نیست.</p>
+        <div id="attachmentPreview" class="attachment-preview" hidden>
+          <canvas id="attachmentCanvas" class="attachment-canvas" hidden aria-label="پیش‌نمایش تصویر برای پوشاندن اطلاعات خصوصی"></canvas>
+          <textarea id="attachmentLogPreview" rows="7" hidden aria-label="نسخه پاک‌سازی‌شده لاگ برای بازبینی"></textarea>
+          <p id="attachmentDetails" class="muted"></p>
+          <label class="confirm-preview"><input type="checkbox" id="attachmentReviewed" /> نسخه آماده بارگذاری رو دیدم و اطلاعات حساس باقیمانده رو بررسی کردم.</label>
+          <button type="button" id="attachmentUpload" class="secondary" disabled>بارگذاری خصوصی فایل بررسی‌شده</button>
+        </div>
+        <div id="attachmentNotice" class="privacy-note" role="status" aria-live="polite"></div>
+      </section>
       <form id="messageForm" class="composer">
         <label class="sr-only" for="reply" data-i18n="reply">پاسخ</label>
         <textarea id="reply" rows="2" maxlength="6000" required data-i18n-placeholder="replyPlaceholder" placeholder="پیامت رو بنویس…"></textarea>
