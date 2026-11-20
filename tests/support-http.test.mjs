@@ -148,10 +148,10 @@ test('guest create is blocked without consent challenge; account creation uses v
   const f=makeFixture();
   assert.equal((await f.request('create',{kind:'bug',route:'expert',subject:'x',message:'y',email:'visitor@example.test'})).statusCode,403);
   assert.equal((await f.request('create',{kind:'security',route:'agent',subject:'x',message:'y',turnstileToken:'valid-challenge'})).statusCode,400);
-  const result=await f.request('create',{kind:'bug',subject:'x',message:'y',email:'one@example.test'},'account-a');
+  const result=await f.request('create',{kind:'bug',route:'agent',subject:'x',message:'y',email:'one@example.test'},'account-a');
   assert.equal(result.statusCode,200);
   assert.equal(result.body.ticketId,ID_A);
-  assert.equal((await f.request('create',{kind:'bug',subject:'x',message:'y',email:'two@example.test'},'account-a')).statusCode,400);
+  assert.equal((await f.request('create',{kind:'bug',route:'agent',subject:'x',message:'y',email:'two@example.test'},'account-a')).statusCode,400);
 });
 
 test('link sessions cannot list account tickets; invalid origins and rate limits fail closed',async()=>{
