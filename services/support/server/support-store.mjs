@@ -56,9 +56,9 @@ export function createSupportStore({
     async messages(ticketId){
       if(!UUID.test(ticketId||'')) throw fail(400,'invalid_ticket');
       const rows=await request('/rest/v1/support_messages?ticket_id=eq.'+ticketId+
-        '&select=id,author_kind,content,created_at&order=created_at.asc&limit=50');
+        '&select=id,author_kind,content,created_at&order=created_at.desc&limit=50');
       if(!Array.isArray(rows)) throw fail(502,'support_store_invalid_response');
-      return rows;
+      return rows.reverse(); // Most recent 50, presented chronologically.
     },
     async takeRate(hash,limit,seconds){
       return (await rpc('support_take_rate',{p_key:hash,p_limit:limit,p_seconds:seconds}))===true;
