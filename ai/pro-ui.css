@@ -404,3 +404,8 @@ body.mg-pro .ai-account.pro-acct-profile>button:not(.account-close){margin-top:1
  body.mg-pro .ai-account{inset:auto 0 0 0!important;margin:0!important;width:100%!important;max-width:none!important;max-height:min(88dvh,760px)!important;border-radius:22px 22px 0 0!important;border-bottom:0!important;padding:22px 18px calc(18px + env(safe-area-inset-bottom))!important;animation:pro-sheet-up .22s cubic-bezier(.2,.8,.2,1)}
 }
 @media (prefers-reduced-motion:reduce){body.mg-pro .ai-account{animation:none!important}}
+
+
+/* Override the generic full-size dialog button style for the small dice icon. */
+body.mg-pro .ai-account .username-heading .account-suggestion{display:inline-grid!important;place-items:center!important;min-height:36px!important;min-width:36px!important;width:36px!important;height:36px!important;padding:0!important;border-radius:10px!important;font-size:17px!important;line-height:1!important}
+@media(pointer:coarse){body.mg-pro .ai-account .username-heading .account-suggestion{width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important}}
