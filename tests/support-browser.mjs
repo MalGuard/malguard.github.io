@@ -50,8 +50,20 @@ try{
   closed=false;revision=0;saved=['Report: scanner does not load'];enabled=true;
   const context=await browser.newContext({viewport:{width,height:900}});
   const page=await context.newPage();
-  await page.goto('http://127.0.0.1:'+port+'/support-ticket.html');
-  await page.waitForFunction(()=>document.querySelector('#serviceBanner')?.classList.contains('good'));
+  const errors=[];
+  page.on('pageerror',e=>errors.push('pageerror:'+e.message));
+  page.on('requestfailed',r=>errors.push('requestfailed:'+r.url()+' '+r.failure()?.errorText));
+  page.on('console',m=>{if(m.type()==='error')errors.push('console:'+m.text());});
+  const navigation=await page.goto('http://127.0.0.1:'+port+'/support-ticket.html');
+  try {
+    await page.waitForFunction(()=>document.querySelector('#serviceBanner')?.classList.contains('good'),null,{timeout:9000});
+  }catch(error){
+    console.error('Support browser debug',JSON.stringify({http:navigation?.status(),
+      title:await page.title(),status:await page.locator('#serviceBanner').textContent().catch(()=>null),
+      scripts:await page.locator('script[src]').evaluateAll(a=>a.map(x=>x.src)),
+      errors}));
+    throw error;
+  }
   await page.fill('#accountEmail','one@example.test');
   await page.fill('#accountPassword','synthetic-password-not-real');
   await page.click('#accountSubmit');
