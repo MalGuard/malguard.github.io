@@ -241,6 +241,10 @@
       "surface": "preserved content and functional controls"
     },
     {
+      "path": "support-ticket.html",
+      "surface": "New support ticket workspace; server feature flag defaults off and private API is not a static artifact"
+    },
+    {
       "path": "threat-radar.html",
       "surface": "Public GitHub-reviewed advisory viewer with explicit source limitations"
     },
