@@ -11,3 +11,11 @@ a{color:var(--accent)}button,input,textarea,select{font:inherit}button{cursor:po
 @media(max-width:950px){.layout{grid-template-columns:290px 1fr;padding:14px;gap:12px}.top{padding:0 16px}.toplinks{gap:9px}.toplinks a{font-size:.75rem}.new-ticket,.chat-pane{padding:18px}}
 @media(max-width:700px){.top{height:auto;min-height:67px;flex-wrap:wrap;padding:12px 14px}.toplinks{order:3;width:100%;overflow:auto;white-space:nowrap;padding-bottom:4px}.layout{grid-template-columns:1fr;padding:12px}.sidebar{gap:12px}.heading{padding:7px 5px}.workspace{min-height:500px}.workspace-top{padding:16px}.new-ticket,.chat-pane{padding:16px}.new-ticket .pair{grid-template-columns:1fr}.msg{max-width:95%}.chat-toolbar{flex-wrap:wrap}.toolbar-actions button{padding:8px}.composer{grid-template-columns:1fr}.workspace-foot{padding:14px}.support-route{display:grid;gap:12px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+.attachment-section{border:1px solid var(--line);padding:18px;border-radius:16px;display:grid;gap:12px;background:#0c141b}
+.attachment-section[hidden],.attachment-preview[hidden],.attachment-canvas[hidden],#attachmentLogPreview[hidden]{display:none}
+.attachment-section h3{font-size:.96rem;margin:0}.attach-head p{font-size:.79rem;color:var(--muted);line-height:1.7}
+.attachment-preview{display:grid;gap:12px;max-width:100%}.attachment-canvas{width:auto;max-width:100%;height:auto;border:1px solid #284858;touch-action:none;cursor:crosshair;border-radius:10px}
+.confirm-preview{display:flex;align-items:flex-start;gap:9px;line-height:1.7}.confirm-preview input{width:18px;height:18px;flex-shrink:0;margin-top:2px}
+.uploaded-list{display:grid;gap:9px}.uploaded-file{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#111c27;border-radius:12px;border:1px solid var(--line);padding:12px;flex-wrap:wrap;overflow-wrap:anywhere}
+.uploaded-file span{font-size:.8rem;color:var(--muted)}.uploaded-file button{padding:7px 10px;font-size:.77rem}
