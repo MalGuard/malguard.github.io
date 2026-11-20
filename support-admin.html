@@ -1,0 +1,51 @@
+<!doctype html><html lang="fa" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#05070a">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.malguard.site; img-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
+<title>MalGuard · Owner Support Console</title>
+<link rel="stylesheet" href="/assets/support-agent.css">
+<script defer src="/assets/support-admin.js"></script></head>
+<body>
+<header class="top"><a href="/" class="brand">MalGuard <span class="brand-label">Owner Support Console</span></a>
+<nav class="toplinks"><a href="/support-ticket.html">Support</a><a href="/report.html">Reports</a></nav></header>
+<main class="layout" id="main">
+<aside class="sidebar">
+ <div class="heading"><span class="eyebrow">OWNER ONLY · STEP-UP AUTH</span><h1>پشتیبانی و کارشناسی</h1><p>نمایش تیکت‌ها فقط پس از احراز هویت حساب مالک و تأیید ایمیلی دومرحله‌ای.</p></div>
+ <div id="adminNotice" class="notice" role="status" aria-live="polite">در حال بررسی آماده‌بودن سرویس…</div>
+ <section class="panel" id="ownerLogin">
+  <h2>۱. ورود با حساب اصلی MalGuard</h2>
+  <form id="ownerForm"><label>ایمیل حساب مالک<input type="email" id="ownerEmail" dir="ltr" required autocomplete="email"></label>
+  <label>رمز عبور<input type="password" id="ownerPassword" required autocomplete="current-password"></label>
+  <button type="submit">درخواست کد تأیید</button></form>
+ </section>
+ <section class="panel" id="ownerOtp" hidden>
+  <h2>۲. تأیید کد امنیتی</h2>
+  <p>کد ۸رقمی به ایمیل مالکِ تنظیم‌شده در سرور ارسال می‌شه. کد رو اینجا وارد کن.</p>
+  <form id="otpForm"><label>کد تأیید<input type="text" id="otpCode" dir="ltr" inputmode="numeric" pattern="[0-9]{8}" minlength="8" maxlength="8" required autocomplete="one-time-code"></label>
+  <button type="submit">تأیید و ورود به پنل</button></form>
+ </section>
+ <section class="panel" id="ownerList" hidden>
+  <div class="chat-toolbar"><h2>صف کارشناسی</h2><button id="ownerLogout" type="button" class="quiet">خروج</button></div>
+  <button id="ownerRefresh" class="secondary" type="button">تازه‌سازی تیکت‌ها</button>
+  <div id="adminTickets" class="ticket-list"></div>
+ </section>
+</aside>
+<section class="workspace" aria-label="صندوق تیکت مالک">
+ <div class="workspace-top"><div><span class="eyebrow">PRIVATE ADMIN</span><h2>گفت‌وگو با گزارش‌دهنده</h2></div><span id="adminTicketStatus" class="status-label">بدون تیکت</span></div>
+ <div id="adminFlash" class="flash" role="status" aria-live="polite"></div>
+ <div class="chat-pane" id="adminChat" hidden>
+  <div class="chat-toolbar"><strong id="adminTicketTitle"></strong><span id="adminTicketId" class="muted"></span></div>
+  <ol id="adminMessages" class="messages"></ol>
+  <form id="adminReplyForm" class="composer"><label class="sr-only" for="adminReply">پاسخ</label>
+   <textarea id="adminReply" maxlength="6000" required rows="3" placeholder="پاسخ کارشناس به کاربر…"></textarea>
+   <button type="submit">ارسال پاسخ کارشناس</button>
+  </form>
+  <form id="adminCloseForm" class="admin-close"><label>دلیل بستن تیکت
+   <textarea id="adminCloseReason" maxlength="500" rows="2" required placeholder="نتیجه واقعی بررسی رو بنویس…"></textarea></label>
+   <button type="submit" class="secondary">بستن تیکت با ثبت دلیل</button>
+  </form>
+  <p class="privacy-note">اینجا انتشار کد یا تأیید خودکار AI وجود نداره. بستن تیکت زمان حذف ۳۰روزه پیوست‌ها رو شروع می‌کنه.</p>
+ </div>
+ <div id="adminEmpty" class="new-ticket"><p class="muted">برای مشاهده اطلاعات خصوصی ابتدا احراز هویت دومرحله‌ای رو کامل کن.</p></div>
+</section></main></body></html>
