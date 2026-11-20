@@ -143,7 +143,7 @@ export function createSupportHandler({
         await takeRate('attachment-list:'+actor.email,60,3600);
         return upload.list(row.id);
       }
-      if(row.status==='closed')throw fail(409,'ticket_closed');
+      if(row.status==='closed'&&endpoint!=='attachment-revoke')throw fail(409,'ticket_closed');
       await takeRate('attachment-operations:'+actor.email,120,3600);
       if(endpoint==='attachment-start')return upload.begin(row.id,body);
       if(endpoint==='attachment-chunk')return upload.chunk(row.id,body);
