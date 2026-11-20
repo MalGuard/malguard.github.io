@@ -74,7 +74,7 @@ test('chunked upload creates a private, model-denied file with exact-hash AI con
   ready:async(_ticket,_id,digest)=>{state='ready';readySha=digest;return {state};},
   approve:async(_ticket,_id,digest)=>{approved=digest===readySha;return true;},
   revoke:async()=>{revoked=true;return true;},
-  list:async()=>[],
+  list:async()=>[],consents:async()=>[],
   eligibleForCleanup:async()=>[]
  };
  const storage={enabled:true,privateBucket:async()=>{},
