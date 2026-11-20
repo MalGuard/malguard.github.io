@@ -53,7 +53,7 @@ function useAccountDialogTree({modalRef,state,account,onClose,onRetry,onSignedIn
     if(busy||suggesting)return;
     const requestId=++suggestionRequest.current;
     const {firstName,lastName,username}=latestForm.current;
-    setSuggesting(true);setSuggestionNotice('Checking available usernames…');
+    setSuggesting(true);setSuggestionNotice(locale==='fa'?'در حال بررسی نام‌های کاربری آزاد…':'Checking available usernames…');
     try{
       const candidate=await suggestAvailableUsername({
         firstName,lastName,
@@ -63,9 +63,9 @@ function useAccountDialogTree({modalRef,state,account,onClose,onRetry,onSignedIn
       const current=latestForm.current;
       if(current.firstName!==firstName||current.lastName!==lastName||current.username!==username)return;
       update('username',candidate);setAvailability(prev=>({...prev,username:'available'}));
-      setSuggestionNotice('Available now. Final availability is verified when you register.');
+      setSuggestionNotice(locale==='fa'?'این نام فعلاً آزاد است؛ هنگام ثبت‌نام دوباره بررسی می‌شود.':'Available now. Final availability is verified when you register.');
     }catch{
-      if(requestId===suggestionRequest.current)setSuggestionNotice('Could not verify a free username. Try again.');
+      if(requestId===suggestionRequest.current)setSuggestionNotice(locale==='fa'?'بررسی نام کاربری آزاد ممکن نشد؛ دوباره تلاش کن.':'Could not verify a free username. Try again.');
     }finally{if(requestId===suggestionRequest.current)setSuggesting(false);}
   }
   async function submitSignup(event){event.preventDefault();if(busy)return;if(form.password!==form.confirmPassword){setError('Passwords do not match.');return;}setBusy(true);setError('');try{const next=await sendEmailCode({email:form.email.trim(),profile:{firstName:form.firstName,lastName:form.lastName,birthDate:form.birthDate,username:form.username,password:form.password}});setAttempt(next);setStage('code');}catch(err){setError(err.message||'We could not send a code to that email address.');}finally{setBusy(false);}}
