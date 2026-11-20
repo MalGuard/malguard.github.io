@@ -15,7 +15,7 @@ const validEmail=value=>mail(value).length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.te
 const nonEmpty=(value,max)=>typeof value==='string'&&value.trim().length>=1&&value.trim().length<=max;
 const policyRow=row=>({id:row.id,ownerEmail:row.owner_email,status:row.status,revision:row.revision,
   createdAt:row.created_at,closedAt:row.closed_at,attachmentsDeleteAt:row.attachments_delete_at});
-const outputRow=row=>({id:row.id,kind:row.kind,subject:row.subject,status:row.status,
+const outputRow=row=>({id:row.id,kind:row.kind,routing:row.routing,subject:row.subject,status:row.status,
   revision:row.revision,createdAt:row.created_at,updatedAt:row.updated_at,
   closedAt:row.closed_at,attachmentsDeleteAt:row.attachments_delete_at});
 const result=(res,status,data)=>{
@@ -29,10 +29,11 @@ export function createSupportHandler({
   mailer=createSupportMailer(),challenge=createChallengeVerifier(),
   enabled=process.env.SUPPORT_API_ENABLED==='true',
   rateSecret=process.env.SUPPORT_SESSION_SECRET,
+  publicSiteKey=process.env.SUPPORT_TURNSTILE_SITE_KEY,
   now=()=>Date.now()
 }={}) {
   const rateReady=typeof rateSecret==='string'&&rateSecret.length>=32;
-  const configured=enabled&&store.enabled&&identity.enabled&&mailer.enabled&&challenge.enabled&&rateReady;
+  const configured=enabled&&store.enabled&&identity.enabled&&mailer.enabled&&challenge.enabled&&rateReady&&typeof publicSiteKey==='string'&&publicSiteKey.length>=10;
   async function takeRate(value,limit,seconds) {
     if(!rateReady)throw fail(503,'support_unavailable');
     const key=createHmac('sha256',rateSecret).update(value).digest('hex');
@@ -69,11 +70,12 @@ export function createSupportHandler({
     await mailer.sendTicketLink({email:row.owner_email,ticketId:row.id,token:issued.token});
   }
   async function dispatch(req,endpoint) {
-    if(endpoint==='status')return {enabled:configured,phase:'foundation-api'};
+    if(endpoint==='status')return {enabled:configured,phase:'ticket-api',turnstileSiteKey:configured?publicSiteKey:null};
     if(!configured)throw fail(503,'support_unavailable');
     const body=bodyOf(req);
     if(endpoint==='create'){
       if(!KINDS.has(body.kind))throw fail(400,'invalid_report_kind');
+      if(!['agent','expert'].includes(body.route))throw fail(400,'invalid_support_route');
       if(!nonEmpty(body.subject,160)||!nonEmpty(body.message,6000))throw fail(400,'invalid_report');
       const hasAuth=typeof req.headers.authorization==='string'&&req.headers.authorization.length>0;
       let actor=null;
@@ -86,7 +88,7 @@ export function createSupportHandler({
         if(await challenge.verify(body.turnstileToken,'support_create')!==true)throw fail(403,'challenge_failed');
       }
       await takeRate('create:'+email,actor?10:3,3600);
-      const id=await store.create({email,accountId:actor?.accountId||null,kind:body.kind,
+      const id=await store.create({email,accountId:actor?.accountId||null,kind:body.kind,route:body.route,
         subject:body.subject.trim(),message:body.message.trim()});
       if(actor)return {accepted:true,ticketId:id};
       // A confirmed ticket-store write is not proof of email delivery.
@@ -95,7 +97,7 @@ export function createSupportHandler({
         await issueAndSend({id,owner_email:email});
         delivery='provider_accepted';
       }catch{}
-      return {accepted:true,delivery};
+      return {accepted:true,ticketId:id,delivery};
     }
     if(endpoint==='request-link'){
       if(!UUID.test(body.ticketId||'')||!validEmail(body.email))throw fail(400,'invalid_request');
