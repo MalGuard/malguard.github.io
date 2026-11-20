@@ -10,6 +10,9 @@ on:
       - 'assets/support-agent.css'
       - 'support-ticket.html'
       - 'tests/support-browser.mjs'
+      - 'tests/support-admin-browser.mjs'
+      - 'support-admin.html'
+      - 'assets/support-admin.js'
 permissions:
   contents: read
 
@@ -35,6 +38,8 @@ jobs:
           node --check services/support/server/support-model.mjs
           node --check services/support/server/support-review.mjs
           node --check assets/support-agent.js
+          node --check assets/support-admin.js
+          node --check tests/support-admin-browser.mjs
           node --check assets/support-privacy.mjs
           node --check assets/support-attachments-ui.mjs
           node --check tests/support-browser.mjs
@@ -48,4 +53,6 @@ jobs:
       - name: Test support chat and RTL browser flows
         env:
           TEST_CHROMIUM_EXECUTABLE: /usr/bin/google-chrome
-        run: node tests/support-browser.mjs
+        run: |
+          node tests/support-browser.mjs
+          node tests/support-admin-browser.mjs
