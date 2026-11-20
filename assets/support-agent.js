@@ -50,7 +50,7 @@ const i18n={
 };
 const t=key=>(i18n[key]||[key,key])[lang==='fa'?0:1];
 const isUuid=id=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||'');
-let serviceEnabled=false,attachmentUi=null;
+let serviceEnabled=false,attachmentUi=null,aiReady=false,latestReporterText=null,aiPreviewDigest=null;
 function translate(){
   document.documentElement.lang=lang;
   document.documentElement.dir=lang==='fa'?'rtl':'ltr';
@@ -86,6 +86,7 @@ async function verifyStatus(){
   try{
     const status=await support('status');
     setReady(status.enabled===true);
+    aiReady=serviceEnabled&&status.aiEnabled===true;
     if(serviceEnabled && status.attachmentsEnabled===true && !attachmentUi){
       import('/assets/support-attachments-ui.mjs').then(m=>{
         attachmentUi=m.initSupportAttachments({request:support,getTicket:()=>currentTicket,
@@ -124,6 +125,7 @@ function signedIn(){
 function signedOut(){
   accountToken=null;ticketToken=null;selectedId=null;currentTicket=null;
   $('identity').hidden=true;$('accountForm').hidden=false;$('linkForm').hidden=false;
+  $('agentAdvice').hidden=true;aiPreviewDigest=null;
   $('ticketList').replaceChildren();$('newTicketPane').hidden=false;$('chatPane').hidden=true;
   $('accountPassword').value='';$('reply').value='';attachmentUi?.hide();
 }
@@ -167,6 +169,10 @@ function displayChat(ticket,messages){
     li.append(content,small);list.append(li);
   }
   list.scrollTop=list.scrollHeight;
+  latestReporterText=messages.at(-1)?.author_kind==='reporter'?messages.at(-1).content:null;
+  $('agentAdvice').hidden=!(aiReady&&ticket.status!=='closed'&&ticket.kind==='bug'&&ticket.routing==='agent'&&latestReporterText);
+  $('agentPreviewBox').hidden=true;$('agentConsent').checked=false;
+  $('agentSend').disabled=true;aiPreviewDigest=null;
   attachmentUi?.show();
 }
 async function openTicket(id){
@@ -252,7 +258,35 @@ $('reopenTicket').addEventListener('click',async()=>{
   try{await support('reopen',{ticketId:currentTicket.id},token());await openTicket(currentTicket.id);flash(t('reopened'),'success');}
   catch(e){flash(safeError(e),'error');}finally{busy=false;}
 });
-$('newTicket').addEventListener('click',()=>{currentTicket=null;selectedId=null;$('chatPane').hidden=true;$('newTicketPane').hidden=false;$('ticketState').textContent=t('newTicket');attachmentUi?.hide();flash('');});
+
+$('agentPrepare').addEventListener('click',async()=>{
+  if(!latestReporterText||!currentTicket||!aiReady)return;
+  try{
+    const {redactLog}=await import('/assets/support-privacy.mjs');
+    const candidate=redactLog(latestReporterText.slice(0,4000)).redacted;
+    const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(candidate));
+    aiPreviewDigest=Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    $('agentPreviewText').value=candidate;
+    $('agentPreviewBox').hidden=false;
+    $('agentConsent').checked=false;$('agentSend').disabled=true;
+  }catch{flash(t('error'),'error');}
+});
+$('agentConsent').addEventListener('change',()=>{
+  $('agentSend').disabled=!$('agentConsent').checked||!aiPreviewDigest;
+});
+$('agentSend').addEventListener('click',async()=>{
+  if(!aiReady||!latestReporterText||!currentTicket||!aiPreviewDigest||
+     !$('agentConsent').checked||busy)return;
+  busy=true;$('agentSend').disabled=true;
+  try{
+    await support('agent',{ticketId:currentTicket.id,consent:true,
+      previewSha:aiPreviewDigest,locale:lang},token());
+    await openTicket(currentTicket.id);
+    flash(lang==='fa'?'پاسخ اولیه ایجنت ثبت شد؛ این پاسخ به معنی رفع قطعی باگ نیست.':'Agent guidance was saved; it does not prove the bug is fixed.','success');
+  }catch(error){flash(safeError(error),'error');}
+  finally{busy=false;}
+});
+$('newTicket').addEventListener('click',()=>{currentTicket=null;selectedId=null;$('chatPane').hidden=true;$('newTicketPane').hidden=false;$('ticketState').textContent=t('newTicket');$('agentAdvice').hidden=true;attachmentUi?.hide();flash('');});
 $('refresh').addEventListener('click',refresh);
 $('logout').addEventListener('click',()=>{signedOut();flash('');});
 window.addEventListener('pagehide',()=>{accountToken=null;ticketToken=null;});
