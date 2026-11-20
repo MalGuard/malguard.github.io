@@ -31,7 +31,9 @@ export function createUploadService({
  return {
   available,
   async list(ticketId){
-   check();return {attachments:(await meta.list(ticketId)).map(view)};
+   check();const [rows,consents]=await Promise.all([meta.list(ticketId),meta.consents(ticketId)]);
+   return {attachments:rows.map(row=>({ ...view(row), aiApproved:consents.some(c=>
+      c.resource_id===row.id && c.approved_redacted_sha256===row.sanitized_sha256)}))};
   },
   async begin(ticketId,input){
    check();
