@@ -347,3 +347,14 @@ body.auth-required .ai-account>*{width:min(100%,440px);margin-inline:auto}body.a
 /* Prevent the global theme control from covering MalGuard AI's new-conversation/sidebar button. */
 body:has(#navigation-toggle) .mg-theme-toggle{top:78px;left:auto;right:16px;z-index:32}
 @media(max-width:760px){body:has(#navigation-toggle) .mg-theme-toggle{top:68px;left:auto;right:12px}}
+
+
+/* Username generator lives next to the field label (not as a wide button). */
+.ai-account .username-field{display:grid;gap:7px;min-width:0}
+.ai-account .username-heading{display:flex;align-items:center;justify-content:flex-start;gap:8px}
+.ai-account .username-heading label{display:block;font-weight:600}
+.ai-account .username-field>input{display:block;width:100%;min-width:0}
+.ai-account .username-heading .account-suggestion{display:inline-grid;place-items:center;justify-self:auto;width:36px;min-width:36px;height:36px;min-height:36px;padding:0;font-size:17px;line-height:1;border:1px solid var(--line);border-radius:9px}
+.ai-account .username-heading .account-suggestion[aria-busy=true]{opacity:.65}
+.ai-account .username-suggestion-feedback{display:block;min-height:1em;font-size:11px;color:#b9b8ad}
+@media(pointer:coarse){.ai-account .username-heading .account-suggestion{width:44px;min-width:44px;height:44px;min-height:44px}}
