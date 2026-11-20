@@ -81,6 +81,9 @@ export function createSupportStore({
     append:(ticketId,revision,content)=>rpc('support_append_message',{
       p_ticket_id:ticketId,p_expected_revision:revision,p_content:content
     }),
+    appendAgent:(ticketId,revision,content)=>rpc('support_append_agent_message',{
+      p_ticket_id:ticketId,p_expected_revision:revision,p_content:content
+    }),
     close:(ticketId,revision,reason)=>rpc('support_close_ticket',{
       p_ticket_id:ticketId,p_expected_revision:revision,p_actor:'reporter',p_reason:reason||null
     }),
