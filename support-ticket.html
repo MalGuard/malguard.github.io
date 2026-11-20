@@ -39,6 +39,19 @@
         <div id="linkCaptcha" class="captcha"></div>
         <button type="submit" class="secondary" id="linkSubmit" data-i18n="sendLink">دریافت لینک ورود ایمیلی</button>
       </form>
+      <section id="ownerPanel" class="owner-panel" hidden aria-label="تأیید مدیریت پشتیبانی">
+        <h3>مدیریت مال‌گارد · تأیید دومرحله‌ای</h3>
+        <p>فقط حساب مدیر تعیین‌شده روی سرور می‌تونه به تیکت‌های دیگران دسترسی پیدا کنه.</p>
+        <button type="button" id="adminCodeStart" class="secondary">ارسال کد تأیید مدیر</button>
+        <div id="adminVerifyBox" hidden>
+          <label for="adminCode">کد ۸ رقمی ایمیل
+            <input type="text" id="adminCode" inputmode="numeric" maxlength="8"
+              pattern="[0-9]{8}" autocomplete="one-time-code" placeholder="••••••••">
+          </label>
+          <button type="button" id="adminCodeVerify" class="secondary">تأیید و ورود مدیر</button>
+        </div>
+        <p id="adminState" role="status" aria-live="polite"></p>
+      </section>
       <div id="identity" class="identity" hidden><span id="who"></span> <button type="button" id="logout" class="quiet" data-i18n="logout">خروج</button></div>
     </section>
     <section class="panel">
