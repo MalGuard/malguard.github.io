@@ -40,7 +40,7 @@ export function createSupportStore({
   async function ticket(ticketId) {
     if(!UUID.test(ticketId||'')) return null;
     const rows=await request('/rest/v1/support_tickets?id=eq.'+ticketId+
-      '&select=id,owner_email,kind,subject,status,revision,created_at,updated_at,closed_at,attachments_delete_at,closed_by,close_reason&limit=1');
+      '&select=id,owner_email,kind,routing,subject,status,revision,created_at,updated_at,closed_at,attachments_delete_at,closed_by,close_reason&limit=1');
     if(!Array.isArray(rows)) throw fail(502,'support_store_invalid_response');
     return rows[0]||null;
   }
@@ -49,7 +49,7 @@ export function createSupportStore({
     async listByEmail(address){
       if(!validEmail(address)) throw fail(400,'invalid_email');
       const rows=await request('/rest/v1/support_tickets?owner_email=eq.'+encodeURIComponent(address)+
-        '&select=id,kind,subject,status,revision,created_at,updated_at,closed_at&order=created_at.desc&limit=30');
+        '&select=id,kind,routing,subject,status,revision,created_at,updated_at,closed_at&order=created_at.desc&limit=30');
       if(!Array.isArray(rows)) throw fail(502,'support_store_invalid_response');
       return rows;
     },
@@ -63,10 +63,10 @@ export function createSupportStore({
     async takeRate(hash,limit,seconds){
       return (await rpc('support_take_rate',{p_key:hash,p_limit:limit,p_seconds:seconds}))===true;
     },
-    async create({email,accountId,kind,subject,message}){
+    async create({email,accountId,kind,route,subject,message}){
       if(!validEmail(email)) throw fail(400,'invalid_email');
       const id=await rpc('support_create_ticket',{p_email:email,p_account_id:accountId||null,
-        p_kind:kind,p_subject:subject,p_message:message});
+        p_kind:kind,p_route:route,p_subject:subject,p_message:message});
       if(!UUID.test(id||'')) throw fail(502,'support_store_invalid_response');
       return id;
     },
