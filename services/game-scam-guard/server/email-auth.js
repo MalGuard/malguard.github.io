@@ -34,7 +34,7 @@ export function createEmailAuth({apiKey=process.env.BREVO_API_KEY,fromEmail=proc
     return {verificationToken:seal({type:'code',email:address,name:legacyName,profile:pendingProfile,code:encode(code),expiresAt:time+CODE_TTL_MS})};
   }
   async function deliver(address,message){
-    const response=await fetchImpl('https://api.brevo.com/v3/smtp/email',{method:'POST',headers:{'api-key':apiKey,'content-type':'application/json','accept':'application/json'},body:JSON.stringify({sender:{name:'MalGuard',email:fromEmail},to:[{email:address}],...message})});
+    const response=await fetchImpl('https://api.brevo.com/v3/smtp/email',{method:'POST',headers:{'api-key':apiKey,'content-type':'application/json','accept':'application/json'},body:JSON.stringify({sender:{name:'MalGuard Security',email:fromEmail},replyTo:{name:'MalGuard Support',email:'contact@malguard.site'},to:[{email:address}],...message})});
     if(!response.ok)throw error(502,'ارسال کد ایمیل ممکن نشد؛ کمی بعد دوباره تلاش کنید.');
   }
   async function availability({emailAddress,username:user}) {if(!accountStore.enabled)throw error(503,'ثبت‌نام با گذرواژه هنوز آماده نشده است.');const address=email(emailAddress),normalizedUsername=username(user);return {email:!address?'invalid':await accountStore.findByEmail(address)?'taken':'available',username:!normalizedUsername?'invalid':await accountStore.findByUsername(normalizedUsername)?'taken':'available'};}
