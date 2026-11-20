@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="version_code_action">کد نسخه</string>
+    <string name="copy_version_code">کپی کد</string>
+    <string name="check_version_online">بررسی در سایت</string>
+</resources>
