@@ -31,6 +31,7 @@ jobs:
           node --check services/support/server/support-attachments.mjs
           node --check services/support/server/support-attachment-store.mjs
           node --check services/support/server/support-upload.mjs
+          node --check services/support/server/support-model.mjs
           node --check assets/support-agent.js
           node --check assets/support-privacy.mjs
           node --check assets/support-attachments-ui.mjs
@@ -38,7 +39,7 @@ jobs:
           node --check api/support-cleanup.js
           node --check api/support.js
       - name: Run Support Agent foundation tests
-        run: node --test tests/support-ticket-policy.test.mjs tests/support-email-link.test.mjs tests/support-http.test.mjs tests/support-identity.test.mjs tests/support-store.test.mjs tests/support-privacy.test.mjs tests/support-attachments.test.mjs
+        run: node --test tests/support-ticket-policy.test.mjs tests/support-email-link.test.mjs tests/support-http.test.mjs tests/support-identity.test.mjs tests/support-store.test.mjs tests/support-privacy.test.mjs tests/support-attachments.test.mjs tests/support-model.test.mjs
 
       - name: Install UI dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
