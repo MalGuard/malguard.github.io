@@ -50,7 +50,7 @@ const server=createServer(async(req,res)=>{
  let pathname=url.pathname;
  if(pathname==='/')pathname='/support-admin.html';
  const full=resolve(root,'.'+pathname);
- if(!full.startsWith(root+'/')){res.statusCode=403;res.end();return;}
+ if(!full.startsWith(resolve(root)+'/')){res.statusCode=403;res.end();return;}
  try{res.setHeader('content-type',({'.html':'text/html','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml'})[extname(full)]||'application/octet-stream');
   res.end(await readFile(full));
  }catch{res.statusCode=404;res.end('not found');}
