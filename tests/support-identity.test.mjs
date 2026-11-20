@@ -29,16 +29,16 @@ test('accounts must exist in persistent MalGuard account table even with a decry
   let found=true;
   const identity=createSupportIdentity({
     auth:{enabled:true,session:({sessionToken})=>{
-      if(sessionToken!=='valid-session')throw Error('invalid');
+      if(sessionToken!=='valid-synthetic-account-session-0123456789')throw Error('invalid');
       return {email:'owner@example.test',expiresAt:start+5000};
     }},
     accounts:{enabled:true,findByEmail:async()=>found?account:null},
     secret:'s'.repeat(64),now:()=>start
   });
-  assert.equal((await identity.accountActor('valid-session')).accountId,accountId);
+  assert.equal((await identity.accountActor('valid-synthetic-account-session-0123456789')).accountId,accountId);
   found=false;
-  await assert.rejects(identity.accountActor('valid-session'),/unauthorized/);
-  await assert.rejects(identity.accountActor('invalid-session'),/unauthorized/);
+  await assert.rejects(identity.accountActor('valid-synthetic-account-session-0123456789'),/unauthorized/);
+  await assert.rejects(identity.accountActor('invalid-synthetic-account-session-0123456789'),/unauthorized/);
 });
 
 test('public landing URL must be first-party HTTPS; provider acknowledgement is not delivery',async()=>{
