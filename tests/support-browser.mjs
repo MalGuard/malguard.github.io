@@ -7,7 +7,7 @@ import {chromium} from 'playwright';
 
 const root=resolve(fileURLToPath(new URL('../',import.meta.url)));
 const id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-let closed=false,saved=['Report: scanner does not load'],revision=0,enabled=true;
+let closed=false,saved=['Report: scanner does not load'],revision=0,enabled=true,lastAdminCloseReason=null;
 const ticket=()=>({id,kind:'bug',routing:'agent',subject:'Scanner timeout',status:closed?'closed':'open',
  revision,createdAt:'2026-11-20T00:00:00.000Z',closedAt:closed?'2026-11-20T00:01:00.000Z':null});
 const mime={'.js':'text/javascript','.mjs':'text/javascript','.css':'text/css',
@@ -20,13 +20,17 @@ const server=createServer(async(req,res)=>{
     let raw='';req.on('data',c=>raw+=c);req.on('end',()=>{try{done(JSON.parse(raw||'{}'));}catch{done({});}});
    });
    let output={},status=200;
-   if(url.pathname==='/api/support/status')output={enabled,attachmentsEnabled:false,turnstileSiteKey:null};
+   if(url.pathname==='/api/support/status')output={enabled,attachmentsEnabled:false,adminEnabled:true,aiEnabled:false,turnstileSiteKey:null};
    else if(!enabled){status=503;output={error:'support_unavailable'};}
    else if(url.pathname==='/api/game-scam-guard/auth/password')output={sessionToken:'fixture-account-session'};
+   else if(url.pathname==='/api/support/admin-code-start')
+     output={challengeId:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',expiresInSeconds:600};
+   else if(url.pathname==='/api/support/admin-code-verify')
+     output={accessToken:'mgadm1.fixture-step-up-session',expiresAt:'2026-11-20T12:15:00.000Z'};
    else if(url.pathname==='/api/support/list')output={tickets:[ticket()]};
    else if(url.pathname==='/api/support/ticket')output={ticket:ticket(),messages:saved.map(content=>({author_kind:'reporter',content,created_at:'2026-11-20T00:00:00Z'}))};
    else if(url.pathname==='/api/support/message'){saved.push(body.message);revision++;output={saved:true,revision};}
-   else if(url.pathname==='/api/support/close'){closed=true;revision++;output={ticket:ticket()};}
+   else if(url.pathname==='/api/support/close'){closed=true;revision++;lastAdminCloseReason=body.reason||null;output={ticket:ticket()};}
    else if(url.pathname==='/api/support/reopen'){closed=false;revision++;output={ticket:ticket()};}
    else {status=404;output={error:'not_found'};}
    res.statusCode=status;res.end(JSON.stringify(output));return;
@@ -88,6 +92,31 @@ try{
   assert.equal(savedCredential,false);
   await context.close();
  }
+
+ closed=false;revision=0;saved=['Report: scanner does not load'];enabled=true;
+ const ownerPage=await browser.newPage({viewport:{width:390,height:880}});
+ await ownerPage.goto('http://127.0.0.1:'+port+'/support-ticket.html?owner=1');
+ await ownerPage.waitForFunction(()=>document.querySelector('#serviceBanner')?.classList.contains('good'));
+ await ownerPage.fill('#accountEmail','one@example.test');
+ await ownerPage.fill('#accountPassword','synthetic-password-not-real');
+ await ownerPage.click('#accountSubmit');
+ await ownerPage.waitForSelector('#ownerPanel:not([hidden])');
+ await ownerPage.click('#adminCodeStart');
+ await ownerPage.waitForSelector('#adminVerifyBox:not([hidden])');
+ await ownerPage.fill('#adminCode','12345678');
+ await ownerPage.click('#adminCodeVerify');
+ await ownerPage.waitForFunction(()=>document.querySelector('#who')?.textContent==='MalGuard Support Admin');
+ await ownerPage.click('.ticket-choice');
+ await ownerPage.fill('#reply','Our expert needs an OS version');
+ await ownerPage.click('#sendReply');
+ await ownerPage.waitForFunction(()=>document.querySelector('#messages')?.textContent?.includes('Our expert needs an OS version'));
+ ownerPage.once('dialog',dialog=>dialog.accept('Verified by support owner'));
+ await ownerPage.click('#closeTicket');
+ await ownerPage.waitForSelector('#closeTicket[hidden]');
+ assert.equal(lastAdminCloseReason,'Verified by support owner');
+ assert.equal(await ownerPage.locator('#reopenTicket').isHidden(),true);
+ await ownerPage.close();
+
  enabled=false;
  const page=await browser.newPage();
  await page.goto('http://127.0.0.1:'+port+'/support-ticket.html');
