@@ -25,4 +25,4 @@ jobs:
           node --check services/support/server/support-http.mjs
           node --check api/support.js
       - name: Run Support Agent foundation tests
-        run: node --test tests/support-ticket-policy.test.mjs tests/support-email-link.test.mjs tests/support-http.test.mjs tests/support-identity.test.mjs
+        run: node --test tests/support-ticket-policy.test.mjs tests/support-email-link.test.mjs tests/support-http.test.mjs tests/support-identity.test.mjs tests/support-store.test.mjs
