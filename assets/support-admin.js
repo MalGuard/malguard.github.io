@@ -21,7 +21,7 @@ async function initialize(){
  try{
   const state=await support('status');
   available=state.enabled===true&&state.adminEnabled===true;
-  if(available){$('adminNotice').textContent='بخش پشتیبانی مالک آماده ورود است.';$('adminNotice').className='notice good';}
+  if(available){disable($('ownerForm'),false);$('adminNotice').textContent='بخش پشتیبانی مالک آماده ورود است.';$('adminNotice').className='notice good';}
   else setUnavailable('ورود مدیریتی هنوز فعال نیست. هیچ دسترسی خصوصی صادر نمی‌شود.');
  }catch{setUnavailable('اتصال امن پنل تأیید نشد.');}
 }
