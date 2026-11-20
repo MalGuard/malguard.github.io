@@ -67,7 +67,7 @@ function makeFixture({enabled=true}={}) {
   }};
   const challenge={enabled:true,verify:async(token,action)=>token==='valid-challenge'&&
     ['support_create','support_request_link'].includes(action)};
-  const handler=createSupportHandler({store,identity,mailer,challenge,enabled,rateSecret:'x'.repeat(48),now:()=>current});
+  const handler=createSupportHandler({store,identity,mailer,challenge,enabled,rateSecret:'x'.repeat(48),publicSiteKey:'synthetic-site-key',now:()=>current});
   async function request(endpoint,body={},token,origin='https://malguard.site'){
     const req={method:endpoint==='status'?'GET':'POST',query:{endpoint},headers:{
       origin,'content-type':'application/json',...(token?{authorization:'Bearer '+token}:{})},body};
@@ -117,10 +117,11 @@ test('account closes and reopens only inside seven days; messages respect closed
 
 test('email link creation/redeem is ticket-scoped and refuses replay',async()=>{
   const f=makeFixture();
-  const guest=await f.request('create',{kind:'bug',subject:'Crashes',message:'Scanner crashes',
+  const guest=await f.request('create',{kind:'bug',route:'agent',subject:'Crashes',message:'Scanner crashes',
     email:'guest@example.test',turnstileToken:'valid-challenge'});
   assert.equal(guest.statusCode,200);
   assert.equal(guest.body.delivery,'provider_accepted');
+  assert.equal(guest.body.ticketId,ID_A);
   assert.equal(f.sent.length,1);
   const {token,ticketId}=f.sent[0];
   const first=await f.request('redeem-link',{ticketId,token});
@@ -145,8 +146,8 @@ test('invalid request-link details do not disclose ticket ownership',async()=>{
 
 test('guest create is blocked without consent challenge; account creation uses verified identity',async()=>{
   const f=makeFixture();
-  assert.equal((await f.request('create',{kind:'bug',subject:'x',message:'y',email:'visitor@example.test'})).statusCode,403);
-  assert.equal((await f.request('create',{kind:'security',subject:'x',message:'y',turnstileToken:'valid-challenge'})).statusCode,400);
+  assert.equal((await f.request('create',{kind:'bug',route:'expert',subject:'x',message:'y',email:'visitor@example.test'})).statusCode,403);
+  assert.equal((await f.request('create',{kind:'security',route:'agent',subject:'x',message:'y',turnstileToken:'valid-challenge'})).statusCode,400);
   const result=await f.request('create',{kind:'bug',subject:'x',message:'y',email:'one@example.test'},'account-a');
   assert.equal(result.statusCode,200);
   assert.equal(result.body.ticketId,ID_A);
