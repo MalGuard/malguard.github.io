@@ -77,7 +77,7 @@ jobs:
         run: node --test tests/site-report-ai.test.mjs
 
       - name: Validate Support Agent access and retention policy
-        run: node --test tests/support-ticket-policy.test.mjs tests/support-email-link.test.mjs
+        run: node --test tests/support-ticket-policy.test.mjs tests/support-email-link.test.mjs tests/support-http.test.mjs tests/support-identity.test.mjs
 
       - name: Validate download cancellation and integrity using synthetic bytes
         run: node --test tests/public-release/cancellation.test.mjs tests/public-release/model.test.mjs
