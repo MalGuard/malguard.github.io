@@ -54,3 +54,66 @@ Phase 1b: backend with Supabase persistence, existing account validation and tic
 Phase 2: chat UI, attachments, privacy guard, real cleanup scheduling.
 Phase 3: agent orchestration, independent reviewers, permissioned GitHub operations.
 Phase 4: integration/security/browser tests, owner review and separate deployment approval.
+
+
+## Phase 1b implementation (feature-flagged)
+
+The server-only backend is now implemented in `services/support/server/`:
+- `support-http.mjs`: protected JSON HTTP routes, explicit trusted origins, rate limiting and fail-closed error responses.
+- `support-store.mjs`: uses Supabase PostgREST from the server only. It does not expose service-role credentials.
+- `support-identity.mjs`: validates existing Game Scam Guard account sessions and confirms the account still exists in `guard_accounts`; issues 30-minute signed sessions scoped to one ticket following link redemption.
+- `support-mail.mjs`: Brevo link delivery and Cloudflare Turnstile verification for unauthenticated creation and link requests.
+- `api/support.js` and `vercel.json`: dedicated Vercel entry point and rewrite. Account verification stays with the existing MalGuard email identity backend.
+
+### API (not enabled in production)
+
+All operations except status require JSON POST. Read/write operations accept an `Authorization: Bearer <server-issued-session>` header. Do not place account or support session tokens in URLs. Browser origins are restricted to approved first-party hosts; server authentication is enforced separately.
+
+| Path | Contract |
+| --- | --- |
+| `GET /api/support/status` | Config status only, **not** live provider verification |
+| `POST /api/support/create` | `kind,subject,message`, plus account session or guest `email,turnstileToken` |
+| `POST /api/support/list` | Only a verified persistent MalGuard account; account's own tickets |
+| `POST /api/support/ticket` | `ticketId`; authorized ticket + last 50 messages |
+| `POST /api/support/message` | `ticketId,message`; only authorized owner, if open |
+| `POST /api/support/close` | `ticketId`; only verified reporter at this stage |
+| `POST /api/support/reopen` | `ticketId`; reporter only and within seven days |
+| `POST /api/support/request-link` | `ticketId,email,turnstileToken`; non-enumerating response |
+| `POST /api/support/redeem-link` | `ticketId,token`; atomic single-use redemption, 30-minute ticket session |
+
+The security-report kind remains on the existing dedicated private-report path. This API currently accepts bug, false-positive and feedback tickets only; it does not send security disclosures to models.
+
+Magic links contain a secret in the URL **fragment**, not a query parameter; a future `support-ticket.html` page must immediately clear the fragment via `history.replaceState` before the POST redemption call. Account sessions and ticket access sessions must be stored in page memory rather than persistent browser storage.
+
+### Database migration (not applied to production)
+
+1. Review and run `services/support/supabase/support-schema.sql`.
+2. Review and run `services/support/supabase/support-rpc.sql`.
+3. Verify `service_role` grants, RLS/default-deny browser roles, PostgREST exposure, SQL RPC transactionality and security advisors in the **actual intended project** before enabling the API. The scripts are SQL drafts rather than a deployed migration.
+4. Validate 2-account isolation and live provider behavior in an owner-controlled staging environment.
+
+The SQL functions are `SECURITY INVOKER`; `EXECUTE` is restricted to `service_role`. Supabase service-role bypasses RLS, so all browser-facing access MUST be checked in the backend. `support_close_ticket` and `support_reopen_ticket` atomically update status, retention time, revision and audit events; `support_redeem_link` consumes its hash atomically. Read-side actor construction must always derive from trusted session verification.
+
+### Configuration gates
+
+These environment variables are server-only and must be configured securely; no values belong in source control:
+- `SUPPORT_API_ENABLED` = `true` **only after** staged verification. Its default is off.
+- `SUPPORT_SESSION_SECRET`: dedicated cryptographically random secret of at least 32 characters for signed ticket sessions and rate-key HMACs.
+- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`: existing trusted Supabase connection, never the browser.
+- `BREVO_API_KEY`, `AUTH_FROM_EMAIL`: required by existing MalGuard account validation.
+- `SUPPORT_FROM_EMAIL`: a provider-verified support sender, intended `contact@malguard.site`.
+- `SUPPORT_PUBLIC_URL`: approved HTTPS `https://malguard.site/support-ticket.html` after the landing page actually exists.
+- `SUPPORT_TURNSTILE_SECRET`: Turnstile server-side verification key; frontend must use matching `support_create` / `support_request_link` actions.
+
+**Do not enable** before the magic-link landing page, verified mailbox, Turnstile frontend and stage database are wired and tested. Sending a link to a missing page would create a broken user experience.
+
+### Verification evidence and limitations
+
+- `tests/support-http.test.mjs`: isolated HTTP checks for cross-account BOLA/IDOR, replay, abuse limits, untrusted admin fields and state changes.
+- `tests/support-identity.test.mjs`: signed-session integrity/expiry, account backing record, mail and Turnstile boundaries.
+- `tests/support-sql-smoke.sql`: live PostgreSQL checks for revocable role grants, atomic RPCs, link replay, revision state changes and private GitHub grant revocation. CI uses an isolated PostgreSQL 16 service; no production data.
+- `.github/workflows/support-policy-tests.yml` and `.github/workflows/support-database-tests.yml` run these tests.
+
+**Not yet implemented:** admin close from a securely authenticated administrator, support ticket UI, verified real email delivery, persistent session revocation, attachments and redaction, 30-day cleanup execution, human routing, AI orchestration and private GitHub App approval. The existing account service's previously documented challenge replay/attempt-limit concerns remain an independent security blocker for production rollout. AI model responses do not prove actual repairs.
+
+GitHub PR must stay draft and unmerged until full integration, production-ready auth review, test inspection and owner approval.
