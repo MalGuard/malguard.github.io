@@ -166,3 +166,64 @@ html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-
 html:not(#_):not(#_) body:not(.mg-pro) main a.mg-home-product-link{background:transparent!important;color:var(--c-text)!important;font-weight:600!important;border:0!important;border-top:1px solid var(--c-border)!important;border-radius:0!important;box-shadow:none!important}
 html:not(#_):not(#_) body:not(.mg-pro) main a.mg-home-product-link:hover{color:var(--c-muted)!important}
 html:not(#_):not(#_) body:not(.mg-pro) main section.compare{background:var(--c-surface)!important;border:1px solid var(--c-border)!important;border-radius:24px!important;box-shadow:var(--c-shadow)!important}
+
+/* Keep the Android release details and version form on the active palette. */
+html:not(#_):not(#_) .gamescam-android-page :is(.android-specs dt,.android-tags span,.android-list li,.android-version-form [role=status]) {
+  color: var(--c-muted)!important;
+}
+html:not(#_):not(#_) .gamescam-android-page .android-version-form input {
+  background: var(--c-surface);
+  border-color: var(--c-muted);
+  color: var(--c-text);
+  font-size: 16px;
+}
+html:not(#_):not(#_) .gamescam-android-page .android-version-form [role=status] {
+  font-size: 14px;
+}
+
+html[data-theme=light]:not(#_) #navbar #navLinks:not([hidden]),
+html:not(#_):not(#_) #siteSearch .search-dialog {
+  background: var(--c-surface)!important;
+  color: var(--c-text)!important;
+  border-color: var(--c-border-strong)!important;
+}
+html:not(#_):not(#_) #siteSearch :is(h2,strong,.search-close) { color: var(--c-text)!important; }
+html:not(#_):not(#_) #siteSearch :is(.search-hint,small,.search-dialog-heading span) { color: var(--c-muted)!important; }
+html:not(#_):not(#_) #siteSearch :is(input,.site-search-results button) {
+  background: var(--c-surface)!important;
+  color: var(--c-text)!important;
+  border-color: var(--c-border-strong)!important;
+}
+html:not(#_):not(#_) #siteSearch .site-search-results button:is(:hover,:focus-visible) { background: var(--c-hover)!important; }
+
+@media (max-width: 600px) {
+  html:not(#_):not(#_) .gamescam-android-page #mg-report-launcher {
+    position: static;
+    width: fit-content;
+    margin: 1rem;
+    margin-inline-start: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(#_):not(#_) body:not(.mg-pro) :is(a,button):is(.button,.btn,.cta,.ai-product-primary,.nav-download,.nav-icon,.menu-btn,.mg-theme-toggle,.ai-product-header-cta,.quick-suggestion) {
+    transition: none!important;
+  }
+}
+
+html:not(#_):not(#_) #platforms .gamescam-security-notice {
+  margin: 18px 0;
+  padding: 16px 18px;
+  background: var(--c-surface)!important;
+  color: var(--c-text)!important;
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--c-r);
+}
+html:not(#_):not(#_) .mg-card-hero--scam .scam-hero-actions .btn.primary {
+  color: #191919!important;
+  background: #fafafa!important;
+}
+html:not(#_):not(#_) .mg-card-hero--scam .scam-hero-actions .btn.secondary {
+  color: #f5f5f5!important;
+  background: #18191b!important;
+}

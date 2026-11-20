@@ -21,11 +21,11 @@ try{
    await menu.click();
    const state=await page.evaluate(()=>{
     const el=document.querySelector('#navLinks'),style=getComputedStyle(el);
-    return {bg:style.backgroundColor,blur:style.backdropFilter,zIndex:style.zIndex,
+    return {light:document.documentElement.dataset.theme==='light',bg:style.backgroundColor,blur:style.backdropFilter,zIndex:style.zIndex,
       links:[...el.querySelectorAll('a')].map(x=>x.getAttribute('href')),
       overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};
    });
-   assert.equal(state.bg,'rgb(11, 15, 21)','menu translucent or blue');
+   assert.equal(state.bg,state.light?'rgb(255, 255, 255)':'rgb(11, 15, 21)','menu translucent or blue');
    assert.equal(state.blur,'none','old translucent blur leaked through');
    assert.ok(state.links.includes('/gta6-security.html'),'GTA VI missing from hamburger');
    assert.ok(state.overflow<=2,path+' horizontal overflow at '+width);
