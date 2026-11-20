@@ -1,0 +1,19 @@
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@0.0.86", "--headless", "--isolated"]
+env_vars = ["PLAYWRIGHT_MCP_EXECUTABLE_PATH"]
+startup_timeout_sec = 60
+
+[mcp_servers.shadcn]
+command = "npx"
+args = ["-y", "shadcn@4.23.0", "mcp"]
+startup_timeout_sec = 60
+
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp/oauth"
+
+[mcp_servers.figma]
+url = "https://mcp.figma.com/mcp"
+
+[mcp_servers.vercel]
+url = "https://mcp.vercel.com"
