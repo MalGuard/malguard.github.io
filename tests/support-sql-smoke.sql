@@ -60,7 +60,7 @@ BEGIN
   IF v_revoked_at IS NULL THEN RAISE EXCEPTION 'private repository grant remained active'; END IF;
   BEGIN
     PERFORM public.support_append_message(v_id,v_revision+2,'cannot write');
-    RAISE EXCEPTION 'closed ticket accepted new message';
+    RAISE EXCEPTION 'closed ticket accepted new message' USING ERRCODE='P0002';
   EXCEPTION WHEN SQLSTATE 'P0001' THEN NULL;
   END;
   v_row:=public.support_reopen_ticket(v_id,v_revision+2);
