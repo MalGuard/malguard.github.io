@@ -5,7 +5,7 @@ BEGIN
   IF has_table_privilege('anon','public.support_tickets','SELECT') OR
      has_table_privilege('authenticated','public.support_tickets','SELECT') OR
      has_function_privilege('anon','public.support_redeem_link(uuid,text)','EXECUTE') OR
-     has_function_privilege('authenticated','public.support_create_ticket(text,uuid,text,text,text)','EXECUTE')
+     has_function_privilege('authenticated','public.support_create_ticket(text,uuid,text,text,text,text)','EXECUTE')
   THEN RAISE EXCEPTION 'support database grants are too permissive'; END IF;
   IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid='public.support_tickets'::regclass) OR
      NOT (SELECT relrowsecurity FROM pg_class WHERE oid='public.support_access_links'::regclass)
@@ -24,7 +24,9 @@ DECLARE
   v_delete_at timestamptz;
   v_revoked_at timestamptz;
 BEGIN
-  v_id:=public.support_create_ticket('one@example.test',NULL,'bug','Scanner error','Cannot open scan page');
+  v_id:=public.support_create_ticket('one@example.test',NULL,'bug','expert','Scanner error','Cannot open scan page');
+  IF NOT EXISTS(SELECT 1 FROM public.support_tickets WHERE id=v_id AND routing='expert') THEN
+    RAISE EXCEPTION 'human routing choice was lost'; END IF;
   IF NOT EXISTS(SELECT 1 FROM public.support_messages
     WHERE ticket_id=v_id AND content='Cannot open scan page') THEN
     RAISE EXCEPTION 'ticket message is not created atomically';
