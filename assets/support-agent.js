@@ -50,7 +50,7 @@ const i18n={
 };
 const t=key=>(i18n[key]||[key,key])[lang==='fa'?0:1];
 const isUuid=id=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||'');
-let serviceEnabled=false,attachmentUi=null,aiReady=false,latestReporterText=null,aiPreviewDigest=null;
+let serviceEnabled=false,attachmentUi=null,aiReady=false,adminAvailable=false,latestReporterText=null,aiPreviewDigest=null;
 function translate(){
   document.documentElement.lang=lang;
   document.documentElement.dir=lang==='fa'?'rtl':'ltr';
