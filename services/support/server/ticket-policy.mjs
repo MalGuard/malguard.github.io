@@ -3,6 +3,7 @@
 export const REOPEN_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 export const ATTACHMENT_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 const SHA256 = /^[0-9a-f]{64}$/i;
+const GIT_COMMIT_SHA = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/i;
 
 export class TicketPolicyError extends Error {
   constructor(code, status = 403) {
@@ -85,7 +86,7 @@ export function canAnalyzeAttachment(ticket, attachment, consent, actor) {
 
 export function readyForRelease(change) {
   // A UI badge or AI statement must never authorize a deployment by itself.
-  if (!change || !SHA256.test(change.commitSha || '')) return false;
+  if (!change || !GIT_COMMIT_SHA.test(change.commitSha || '')) return false;
   if (change.reporterApproved !== true || change.ownerChangeApproved !== true) return false;
   if (change.ownerDeployApproval?.commitSha !== change.commitSha ||
       change.ownerDeployApproval?.approved !== true) return false;
