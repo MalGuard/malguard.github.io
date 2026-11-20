@@ -62,8 +62,11 @@ CREATE TABLE IF NOT EXISTS public.support_attachment_parts (
   attachment_id uuid NOT NULL REFERENCES public.support_attachments(id) ON DELETE CASCADE,
   part_index integer NOT NULL CHECK (part_index BETWEEN 0 AND 15),
   byte_size integer NOT NULL CHECK (byte_size BETWEEN 1 AND 524288),
-  part_sha256 text NOT NULL CHECK (part_sha256 ~ '^[a-f0-9]{64}
-
+  part_sha256 text NOT NULL CHECK (part_sha256 ~ '^[a-f0-9]{64}$'),
+  object_key text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY(attachment_id,part_index)
+);
 CREATE TABLE IF NOT EXISTS public.support_permissions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   ticket_id uuid NOT NULL REFERENCES public.support_tickets(id) ON DELETE CASCADE,
