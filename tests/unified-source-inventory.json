@@ -245,6 +245,10 @@
       "surface": "New support ticket workspace; server feature flag defaults off and private API is not a static artifact"
     },
     {
+      "path": "support-admin.html",
+      "surface": "Owner-only support admin frontend: noindex; backend requires account plus owner email OTP"
+    },
+    {
       "path": "threat-radar.html",
       "surface": "Public GitHub-reviewed advisory viewer with explicit source limitations"
     },
