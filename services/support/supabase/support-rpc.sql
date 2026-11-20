@@ -13,7 +13,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.support_rate_limits TO service_ro
 GRANT SELECT, INSERT, UPDATE, DELETE ON
   public.support_tickets, public.support_messages, public.support_attachments,
   public.support_permissions, public.support_access_links, public.support_reviews,
-  public.support_audit_events TO service_role;
+  public.support_audit_events, public.support_attachment_parts TO service_role;
 GRANT USAGE, SELECT ON SEQUENCE public.support_audit_events_id_seq TO service_role;
 
 CREATE OR REPLACE FUNCTION public.support_take_rate(p_key text, p_limit integer, p_seconds integer)
