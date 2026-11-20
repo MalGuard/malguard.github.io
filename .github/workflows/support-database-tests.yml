@@ -7,6 +7,7 @@ on:
       - 'tests/support-attachments-sql-smoke.sql'
       - 'tests/support-admin-sql-smoke.sql'
       - 'tests/support-ai-sql-smoke.sql'
+      - 'tests/support-escalation-sql-smoke.sql'
       - '.github/workflows/support-database-tests.yml'
 permissions:
   contents: read
@@ -53,9 +54,11 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f services/support/supabase/support-attachments-rpc.sql
           psql -v ON_ERROR_STOP=1 -f services/support/supabase/support-admin-rpc.sql
           psql -v ON_ERROR_STOP=1 -f services/support/supabase/support-ai-rpc.sql
+          psql -v ON_ERROR_STOP=1 -f services/support/supabase/support-escalate-rpc.sql
       - name: Verify grants, link replay and ticket transitions
         run: |
           psql -v ON_ERROR_STOP=1 -f tests/support-sql-smoke.sql
           psql -v ON_ERROR_STOP=1 -f tests/support-attachments-sql-smoke.sql
           psql -v ON_ERROR_STOP=1 -f tests/support-admin-sql-smoke.sql
           psql -v ON_ERROR_STOP=1 -f tests/support-ai-sql-smoke.sql
+          psql -v ON_ERROR_STOP=1 -f tests/support-escalation-sql-smoke.sql
