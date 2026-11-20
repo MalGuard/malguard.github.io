@@ -1,0 +1,23 @@
+name: Support Agent policy checks
+on:
+  pull_request:
+    paths:
+      - 'services/support/**'
+      - 'tests/support-*.test.mjs'
+      - '.github/workflows/support-policy-tests.yml'
+permissions:
+  contents: read
+
+jobs:
+  support-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Verify source syntax
+        run: |
+          node --check services/support/server/ticket-policy.mjs
+          node --check services/support/server/email-link.mjs
+      - name: Run Support Agent foundation tests
+        run: node --test tests/support-ticket-policy.test.mjs tests/support-email-link.test.mjs
