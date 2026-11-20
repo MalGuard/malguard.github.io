@@ -112,7 +112,7 @@ try{
  await ownerPage.waitForFunction(()=>document.querySelector('#messages')?.textContent?.includes('Our expert needs an OS version'));
  ownerPage.once('dialog',dialog=>dialog.accept('Verified by support owner'));
  await ownerPage.click('#closeTicket');
- await ownerPage.waitForSelector('#closeTicket[hidden]');
+ await ownerPage.locator('#closeTicket').waitFor({state:'hidden'});
  assert.equal(lastAdminCloseReason,'Verified by support owner');
  assert.equal(await ownerPage.locator('#reopenTicket').isHidden(),true);
  await ownerPage.close();
