@@ -134,5 +134,11 @@
     "deploymentEnabled": {
       "feature/malguard-ai-evidence-first": false
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/support-cleanup",
+      "schedule": "0 3 * * *"
+    }
+  ]
 }
