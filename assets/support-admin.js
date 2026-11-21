@@ -36,7 +36,7 @@ function signedOut(){
 $('ownerForm').addEventListener('submit',async event=>{
  event.preventDefault();if(!available||busy)return;busy=true;disable($('ownerForm'),true);feedback('در حال اعتبارسنجی حساب…');
  try{
-  const session=await api('/api/game-scam-guard/auth/password',{
+  const session=await support('auth/password',{
     email:$('ownerEmail').value.trim(),password:$('ownerPassword').value
   });
   if(typeof session.sessionToken!=='string')throw Error('invalid_session');
