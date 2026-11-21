@@ -103,7 +103,7 @@ try{
  await ownerPage.waitForSelector('#ownerPanel:not([hidden])');
  await ownerPage.click('#adminCodeStart');
  await ownerPage.waitForSelector('#adminVerifyBox:not([hidden])');
- await ownerPage.fill('#adminCode','12345678');
+ await ownerPage.fill('#adminCode','123456');
  await ownerPage.click('#adminCodeVerify');
  await ownerPage.waitForFunction(()=>document.querySelector('#who')?.textContent==='MalGuard Support Admin');
  await ownerPage.click('.ticket-choice');
