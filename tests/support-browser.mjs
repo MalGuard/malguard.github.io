@@ -22,7 +22,7 @@ const server=createServer(async(req,res)=>{
    let output={},status=200;
    if(url.pathname==='/api/support/status')output={enabled,attachmentsEnabled:false,adminEnabled:true,aiEnabled:false,turnstileSiteKey:null};
    else if(!enabled){status=503;output={error:'support_unavailable'};}
-   else if(url.pathname==='/api/game-scam-guard/auth/password')output={sessionToken:'fixture-account-session'};
+   else if(url.pathname==='/api/support/auth/password')output={sessionToken:'fixture-account-session'};
    else if(url.pathname==='/api/support/admin-code-start')
      output={challengeId:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',expiresInSeconds:600};
    else if(url.pathname==='/api/support/admin-code-verify')
