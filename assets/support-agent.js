@@ -5,7 +5,9 @@ const $=id=>document.getElementById(id), FA='fa';
 let lang=FA, accountToken=null, ticketToken=null, adminToken=null, adminChallengeId=null, currentTicket=null, busy=false, captchaReady=false;
 let siteKey=null, captchaCreate=null, captchaLink=null, selectedId=null;
 const publicHosts=new Set(['malguard.site','www.malguard.site','malguard.github.io']);
-const apiBase=publicHosts.has(location.hostname)?'https://api.malguard.site':'';
+// Ticket service is hosted on Cloudflare Pages. Do not send report data to
+// unrelated Vercel APIs until an authenticated backend is explicitly connected.
+const apiBase='';
 const authBase=publicHosts.has(location.hostname)?'https://api.malguard.site':'';
 const i18n={
   eyebrow:['مرکز پشتیبانی','Support center'],headline:['مشکل رو دقیق‌تر حل کنیم.','Let’s resolve the issue.'],
@@ -30,7 +32,9 @@ const i18n={
   new:['تیکت جدید','New ticket'],reply:['پاسخ','Reply'],replyPlaceholder:['پیامت رو بنویس…','Write your reply…'],
   send:['ارسال','Send'],disclaimer:['پاسخ AI به معنای رفع قطعی باگ نیست. تغییر کد و انتشار نیاز به تأیید مدیر داره.','AI advice does not prove a fix. Code changes and releases require owner approval.'],
   existingReport:['فرم گزارش فعلی','Existing reporting form'],
-  offline:['سرویس تیکت جدید هنوز فعال نشده. از فرم گزارش فعلی استفاده کن.','The new ticket service is not enabled yet. Use the existing report form.'],
+  offline:['بک‌اند تیکت هنوز به دیتابیس و ایمیل متصل نیست؛ اطلاعاتت رو در فرم فعلی گزارش ثبت کن.','The ticket backend is not yet connected to storage and email. Use the existing report form.'],
+  missingBackend:['صفحه روی Cloudflare آماده‌ست، اما بخش سروری تیکت هنوز پیکربندی نشده.','The Cloudflare page is online, but the ticket backend is not configured yet.'],
+  reportNow:['رفتن به فرم ثبت گزارش','Open the working report form'],
   online:['سرویس تیکت در دسترسه.','Ticket service is available.'],
   loginSuccess:['با موفقیت وارد شدی.','You are signed in.'],
   notAvailable:['این قابلیت در حال حاضر در دسترس نیست.','This feature is currently unavailable.'],
@@ -50,7 +54,7 @@ const i18n={
 };
 const t=key=>(i18n[key]||[key,key])[lang==='fa'?0:1];
 const isUuid=id=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||'');
-let serviceEnabled=false,attachmentUi=null,aiReady=false,adminAvailable=false,latestReporterText=null,aiPreviewDigest=null;
+let serviceReason=null,serviceEnabled=false,attachmentUi=null,aiReady=false,adminAvailable=false,latestReporterText=null,aiPreviewDigest=null;
 function translate(){
   document.documentElement.lang=lang;
   document.documentElement.dir=lang==='fa'?'rtl':'ltr';
@@ -59,10 +63,22 @@ function translate(){
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{el.placeholder=t(el.dataset.i18nPlaceholder);});
 }
 function flash(message,type=''){const el=$('flash');el.textContent=message;el.className='flash '+type;}
-function setReady(ready){
+function setReady(ready,reason=serviceReason){
   serviceEnabled=ready;
-  $('serviceBanner').textContent=t(ready?'online':'offline');
-  $('serviceBanner').className='notice '+(ready?'good':'bad');
+  serviceReason=reason;
+  const banner=$('serviceBanner');
+  banner.replaceChildren();
+  const copy=document.createElement('span');
+  copy.textContent=t(ready?'online':reason==='support_backend_not_connected'?'missingBackend':'offline');
+  banner.append(copy);
+  if(!ready){
+    const link=document.createElement('a');
+    link.href='/report.html?kind=bug';
+    link.textContent=t('reportNow');
+    link.className='service-fallback';
+    banner.append(link);
+  }
+  banner.className='notice '+(ready?'good':'bad');
   for(const id of ['accountSubmit','linkSubmit','createSubmit','refresh'])
     $(id).disabled=!ready;
 }
@@ -85,7 +101,7 @@ const auth=(endpoint,body)=>request(authBase+'/api/game-scam-guard/auth/'+endpoi
 async function verifyStatus(){
   try{
     const status=await support('status');
-    setReady(status.enabled===true);
+    setReady(status.enabled===true,status.reason||null);
     aiReady=serviceEnabled&&status.aiEnabled===true;
     adminAvailable=serviceEnabled&&status.adminEnabled===true;
     if(serviceEnabled && status.attachmentsEnabled===true && !attachmentUi){
