@@ -2,6 +2,7 @@
 // Uses the existing MalGuard email-account API to verify a signed account session.
 // No duplicate account records, no secret API keys in the browser, fail closed on missing DB.
 import {triageSupportCase} from '../server/support-triage.mjs';
+import {handleAdvancedSupport,checkSupportAdmin,supportAdvancedHealth} from './advanced.mjs';
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ALLOWED=new Set(['bug','false-positive','feedback']);
@@ -119,11 +120,19 @@ export async function handleSupport(context,endpoint){
       throw err(503,'account_provider_unavailable');
     return respond(200,{sessionToken:result.sessionToken});
   }
-  if(!['create','list','ticket','message','close','reopen','triage'].includes(endpoint))
+  if(!['create','list','ticket','message','close','reopen','triage','agent','escalate','admin-code-start','admin-code-verify'].includes(endpoint))
     return respond(503,{error:'feature_not_configured'});
   const body=await decodeRequest(request);
   const user=await actor(request);
   await rate(env,request,'tickets',100,3600000);
+  if(['agent','escalate','admin-code-start','admin-code-verify'].includes(endpoint)){
+    const result=await handleAdvancedSupport({db,env,request,endpoint,body,actor:user,
+      lookup,rate,callAuth});
+    return respond(200,result);
+  }
+  const authorization=request.headers.get('authorization')||'';
+  const accountToken=authorization.startsWith('Bearer ')?authorization.slice(7):'';
+  const isAdmin=await checkSupportAdmin(db,env,accountToken,user.email);
   if(endpoint==='create'){
     const kind=body.kind,route=body.route,subject=safeText(body.subject,160),
       message=safeText(body.message,6000,6);
@@ -139,11 +148,17 @@ export async function handleSupport(context,endpoint){
     return respond(200,{accepted:true,ticketId:id,delivery:'account_ticket',email:user.email});
   }
   if(endpoint==='list'){
-    const data=await db.prepare('SELECT * FROM support_tickets WHERE owner_email=? ORDER BY created_at DESC LIMIT 50')
-      .bind(user.email).all();
+    const data=isAdmin?await db.prepare('SELECT * FROM support_tickets ORDER BY created_at DESC LIMIT 50').all():
+      await db.prepare('SELECT * FROM support_tickets WHERE owner_email=? ORDER BY created_at DESC LIMIT 50')
+        .bind(user.email).all();
     return respond(200,{tickets:(data.results||[]).map(projection)});
   }
-  const row=await lookup(db,body.ticketId,user.email);
+  let row;
+  if(isAdmin){
+    if(!UUID.test(body.ticketId||''))throw err(400,'invalid_ticket');
+    row=await db.prepare('SELECT * FROM support_tickets WHERE id=?').bind(body.ticketId).first();
+    if(!row)throw err(404,'ticket_not_found');
+  }else row=await lookup(db,body.ticketId,user.email);
   if(endpoint==='ticket'){
     const data=await db.prepare('SELECT id,author_kind,content,created_at FROM support_messages WHERE ticket_id=? ORDER BY created_at DESC LIMIT 50')
       .bind(row.id).all();
@@ -153,23 +168,26 @@ export async function handleSupport(context,endpoint){
     const text=safeText(body.message,6000);
     if(!text)throw err(400,'invalid_message');
     if(row.status!=='open')throw err(409,'ticket_closed');
-    const time=now();
-    const updated=await db.prepare("UPDATE support_tickets SET revision=revision+1,updated_at=? WHERE id=? AND owner_email=? AND status='open' AND revision=? RETURNING revision")
-      .bind(time,row.id,user.email,row.revision).first();
+    const time=now(),messageId=crypto.randomUUID();
+    const updated=await db.prepare("UPDATE support_tickets SET revision=revision+1,updated_at=? WHERE id=? AND status='open' AND revision=? RETURNING revision")
+      .bind(time,row.id,row.revision).first();
     if(!updated)throw err(409,'ticket_conflict');
     await db.prepare('INSERT INTO support_messages(id,ticket_id,author_kind,content,created_at) VALUES (?,?,?,?,?)')
-      .bind(crypto.randomUUID(),row.id,'reporter',text,time).run();
-    return respond(200,{saved:true,revision:updated.revision});
+      .bind(messageId,row.id,isAdmin?'expert':'reporter',text,time).run();
+    return respond(200,{saved:true,revision:updated.revision,messageId});
   }
   if(endpoint==='close'){
     if(row.status!=='open')throw err(409,'ticket_closed');
+    const reason=isAdmin?safeText(body.reason,500):null;
+    if(isAdmin&&!reason)throw err(400,'admin_close_reason_required');
     const time=now(),deleteAt=new Date(Date.now()+30*86400000).toISOString();
-    const updated=await db.prepare("UPDATE support_tickets SET status='closed',closed_at=?,attachments_delete_at=?,revision=revision+1,updated_at=? WHERE id=? AND owner_email=? AND status='open' AND revision=? RETURNING *")
-      .bind(time,deleteAt,time,row.id,user.email,row.revision).first();
+    const updated=await db.prepare("UPDATE support_tickets SET status='closed',closed_at=?,attachments_delete_at=?,close_reason=?,revision=revision+1,updated_at=? WHERE id=? AND status='open' AND revision=? RETURNING *")
+      .bind(time,deleteAt,reason,time,row.id,row.revision).first();
     if(!updated)throw err(409,'ticket_conflict');
     return respond(200,{ticket:projection(updated)});
   }
   if(endpoint==='reopen'){
+    if(isAdmin)throw err(403,'admin_cannot_reopen_for_reporter');
     if(row.status!=='closed'||!row.closed_at||
        Date.now()-Date.parse(row.closed_at)>7*86400000)throw err(409,'reopen_window_closed');
     const time=now();
@@ -220,6 +238,7 @@ export async function supportHealth(env,{fetchImpl=fetch}={}){
    reason:active?null:'support_backend_not_ready',accountOnly:false,emailCodeEnabled:active,
    guestLinksEnabled:false,attachmentsEnabled:false,aiEnabled:false,adminEnabled:false,
    checks:{config:configurationReady,dbBinding:bindingReady,dbSchema:schemaReady,accountProvider:accountReady,accountProbe},
-   turnstileSiteKey:null
+   turnstileSiteKey:null,
+   ...supportAdvancedHealth(env)
  });
 }
