@@ -6,11 +6,12 @@ import {createSupportMailer,createChallengeVerifier} from './support-mail.mjs';
 import {issueEmailLink} from './email-link.mjs';
 import {createUploadService} from './support-upload.mjs';
 import {createSupportModel,previewSupportText} from './support-model.mjs';
+import {triageSupportCase} from './support-triage.mjs';
 import {canAccessTicket,closeTicket,reopenTicket,TicketPolicyError} from './ticket-policy.mjs';
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const KINDS=new Set(['bug','false-positive','feedback']);
-const ENDPOINTS=new Set(['escalate','status','admin-code-start','admin-code-verify','agent','create','list','ticket','message','close','reopen','request-link','redeem-link',
+const ENDPOINTS=new Set(['triage','escalate','status','admin-code-start','admin-code-verify','agent','create','list','ticket','message','close','reopen','request-link','redeem-link',
  'attachment-list','attachment-start','attachment-chunk','attachment-finish','attachment-approve','attachment-revoke']);
 const ORIGINS=new Set(['https://malguard.site','https://www.malguard.site','https://malguard.github.io']);
 const fail=(status,code)=>Object.assign(new Error(code),{status,code});
@@ -170,6 +171,17 @@ export function createSupportHandler({
       if(endpoint==='attachment-revoke')return upload.revoke(row.id,body);
     }
 
+    if(endpoint==='triage'){
+      await takeRate('triage:'+actor.email,50,3600);
+      const messages=await store.messages(row.id);
+      // Triage remains server-local; no text is sent to an external AI.
+      const latest=[...messages].reverse().find(m=>m?.author_kind==='reporter'&&
+        typeof m.content==='string'&&m.content.trim());
+      if(!latest)throw fail(409,'missing_report_for_triage');
+      return {ticketId:row.id,triage:triageSupportCase({
+        text:latest.content,ticketKind:row.kind,locale:body.locale==='en'?'en':'fa'
+      })};
+    }
     if(endpoint==='escalate'){
       if(actor.method==='admin')throw fail(403,'reporter_only');
       if(row.status==='closed'||row.routing!=='agent')throw fail(409,'escalation_unavailable');
