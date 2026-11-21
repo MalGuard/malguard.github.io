@@ -36,19 +36,20 @@ try {
       while (remaining.length) {
         const path = remaining.pop();
         try {
-          assert.equal((await page.goto(origin+path,{waitUntil:'domcontentloaded'})).status(),200);
+          assert.equal((await page.goto(origin+path,{waitUntil:'load'})).status(),200);
           const toggle=page.locator('#mgThemeToggle');
           await toggle.waitFor({state:'attached'});
           for (const [mode,theme] of [['auto','light'],['light','light'],['dark','dark']]) {
             await page.waitForFunction(([m,t])=>document.documentElement.dataset.themeMode===m &&
               document.documentElement.dataset.theme===t,[mode,theme]);
-            const canvas = await page.locator('html').evaluate(el =>
-              getComputedStyle(el).getPropertyValue('--site-canvas').trim());
-            assert.equal(canvas, theme === 'light' ? '#faf9f5' : '#0e0e0f');
+            const expectedCanvas = theme === 'light' ? '#faf9f5' : '#0e0e0f';
+            await page.waitForFunction(expected =>
+              getComputedStyle(document.documentElement).getPropertyValue('--site-canvas').trim() === expected,
+              expectedCanvas);
             await toggle.click();
           }
         } catch (error) {
-          failures.push([width,path,error.message.split('\n')[0]]);
+          failures.push([width,path,error.message.slice(0,400)]);
           await page.evaluate(()=>localStorage.removeItem('malguard-theme')).catch(()=>{});
         }
       }
