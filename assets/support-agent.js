@@ -14,7 +14,7 @@ const i18n={
   intro:['گزارش خصوصی، سابقه گفتگو و پیگیری مرحله‌به‌مرحله.','Private tickets, conversation history, and clear progress.'],
   checking:['در حال بررسی دسترسی سرویس…','Checking service availability…'],
   signInHead:['ورود با حساب MalGuard','Sign in with MalGuard'],
-  signinHint:['ورود فقط برای این صفحه معتبره و چیزی روی دستگاه ذخیره نمی‌شه.','This page keeps the session in memory only.'],
+  signinHint:['در نسخه فعلی، ثبت تیکت با حساب MalGuard انجام می‌شه. نشست فقط در حافظه همین صفحه نگه داشته می‌شه.','Tickets currently require a MalGuard account. Sessions remain in this page memory only.'],
   email:['ایمیل','Email'],password:['رمز عبور','Password'],signinButton:['ورود','Sign in'],or:['یا','or'],
   ticketCode:['شناسه تیکت','Ticket ID'],linkEmail:['ایمیل ثبت‌شده در تیکت','Ticket email'],
   sendLink:['دریافت لینک ورود ایمیلی','Send an email access link'],logout:['خروج','Sign out'],
@@ -35,7 +35,7 @@ const i18n={
   offline:['بک‌اند تیکت هنوز به دیتابیس و ایمیل متصل نیست؛ اطلاعاتت رو در فرم فعلی گزارش ثبت کن.','The ticket backend is not yet connected to storage and email. Use the existing report form.'],
   missingBackend:['صفحه روی Cloudflare آماده‌ست، اما بخش سروری تیکت هنوز پیکربندی نشده.','The Cloudflare page is online, but the ticket backend is not configured yet.'],
   reportNow:['رفتن به فرم ثبت گزارش','Open the working report form'],
-  online:['سرویس تیکت در دسترسه.','Ticket service is available.'],
+  online:['سرویس تیکت حساب‌های MalGuard فعاله. برای ثبت گزارش وارد حسابت شو.','MalGuard account tickets are available. Sign in to create a report.'],
   loginSuccess:['با موفقیت وارد شدی.','You are signed in.'],
   notAvailable:['این قابلیت در حال حاضر در دسترس نیست.','This feature is currently unavailable.'],
   invalidLogin:['ورود تأیید نشد. ایمیل و رمز رو بررسی کن.','Sign-in failed. Check your email and password.'],
@@ -79,8 +79,11 @@ function setReady(ready,reason=serviceReason){
     banner.append(link);
   }
   banner.className='notice '+(ready?'good':'bad');
+  $('linkForm').hidden=ready;
+  $('guestEmail').disabled=ready;
+  $('guestEmail').closest('label').hidden=ready;
   for(const id of ['accountSubmit','linkSubmit','createSubmit','refresh'])
-    $(id).disabled=!ready;
+    $(id).disabled=!ready||(id==='createSubmit'&&!accountToken);
 }
 async function request(url,body,token){
   const controller=new AbortController();
@@ -97,7 +100,7 @@ async function request(url,body,token){
   } finally{clearTimeout(timeout);}
 }
 const support=(endpoint,body,token)=>request(apiBase+'/api/support/'+endpoint,body,token);
-const auth=(endpoint,body)=>request(authBase+'/api/game-scam-guard/auth/'+endpoint,body);
+const auth=(endpoint,body)=>support('auth/'+endpoint,body);
 async function verifyStatus(){
   try{
     const status=await support('status');
@@ -139,11 +142,12 @@ function signedIn(){
   $('ownerPanel').hidden=!(accountToken&&adminAvailable&&new URLSearchParams(location.search).has('owner'));
   $('adminCodeStart').disabled=!serviceEnabled;
   $('accountForm').hidden=!!accountToken;
+  $('createSubmit').disabled=!serviceEnabled||!accountToken;
   $('linkForm').hidden=!!accountToken;
 }
 function signedOut(){
   accountToken=null;ticketToken=null;adminToken=null;adminChallengeId=null;selectedId=null;currentTicket=null;
-  $('identity').hidden=true;$('ownerPanel').hidden=true;$('adminVerifyBox').hidden=true;
+  $('identity').hidden=true;$('createSubmit').disabled=true;$('ownerPanel').hidden=true;$('adminVerifyBox').hidden=true;
   $('adminCode').value='';$('adminState').textContent='';$('accountForm').hidden=false;$('linkForm').hidden=false;
   $('agentAdvice').hidden=true;$('triagePanel').hidden=true;aiPreviewDigest=null;
   $('ticketList').replaceChildren();$('newTicketPane').hidden=false;$('chatPane').hidden=true;
