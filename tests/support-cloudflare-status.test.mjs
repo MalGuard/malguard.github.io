@@ -1,46 +1,51 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {supportHealth,handleSupport} from '../services/support/cloudflare/ticket-api.mjs';
 
-async function loadPagesModule(path){
-  const content=await readFile(new URL(path,import.meta.url));
-  return import('data:text/javascript;base64,'+content.toString('base64'));
-}
-
-test('Cloudflare Pages status is truthful, private and remains fail-closed',async()=>{
-  const {onRequestGet}=await loadPagesModule('../functions/api/support/status.js');
-  const response=await onRequestGet({env:{SUPPORT_API_ENABLED:'true',SUPABASE_URL:'synthetic'}});
-  assert.equal(response.status,200);
-  assert.equal(response.headers.get('cache-control'),'no-store');
-  const body=await response.json();
-  assert.equal(body.enabled,false);
-  assert.equal(body.reason,'support_backend_not_connected');
-  assert.equal(body.attachmentsEnabled,false);
-  assert.equal(body.aiEnabled,false);
-  assert.equal(body.adminEnabled,false);
-  assert.equal(body.turnstileSiteKey,null);
-  assert.ok(!JSON.stringify(body).includes('synthetic'));
+test('Cloudflare Pages tickets fail closed without database activation',async()=>{
+ const status=await supportHealth({SUPPORT_TICKETS_ENABLED:'false'});
+ assert.equal(status.status,200);
+ const body=await status.json();
+ assert.equal(body.enabled,false);
+ assert.equal(body.reason,'support_database_not_connected');
+ assert.equal(body.aiEnabled,false);
+ assert.equal(body.adminEnabled,false);
+ assert.equal(body.guestLinksEnabled,false);
+ const req=new Request('https://support-preview.malguard.site/api/support/create',{
+   method:'POST',headers:{'content-type':'application/json'},
+   body:JSON.stringify({kind:'bug',subject:'hello',message:'Some issue to report'})
+ });
+ const result=await handleSupport({request:req,env:{SUPPORT_TICKETS_ENABLED:'false'}},'create');
+ assert.equal(result.status,503);
+ assert.ok(!JSON.stringify(await result.json()).includes('Some issue'));
 });
 
-test('Cloudflare ticket mutations refuse writes until authenticated backend exists',async()=>{
-  const {onRequest}=await loadPagesModule('../functions/api/support/[endpoint].js');
-  const result=await onRequest({
-    request:new Request('https://support-preview.malguard.site/api/support/create',{
-      method:'POST',headers:{'content-type':'application/json'},
-      body:JSON.stringify({email:'example@example.test',message:'test'})
-    })
-  });
-  assert.equal(result.status,503);
-  assert.equal(result.headers.get('cache-control'),'no-store');
-  const json=await result.json();
-  assert.equal(json.error,'support_backend_not_connected');
-  assert.equal(JSON.stringify(json).includes('example@example.test'),false);
+test('readiness requires D1 schema plus real account provider health',async()=>{
+ const db={prepare:()=>({first:async()=>({total:3})})};
+ const env={SUPPORT_DB:db,SUPPORT_TICKETS_ENABLED:'true'};
+ const ready=await supportHealth(env,{fetchImpl:async()=>({
+   ok:true,json:async()=>({configured:true,persistentAccounts:true})
+ })});
+ assert.equal((await ready.json()).enabled,true);
+ const broken=await supportHealth(env,{fetchImpl:async()=>({
+   ok:true,json:async()=>({configured:false,persistentAccounts:true})
+ })});
+ assert.equal((await broken.json()).enabled,false);
+ const missing=await supportHealth({
+   SUPPORT_DB:{prepare:()=>({first:async()=>({total:1})})},
+   SUPPORT_TICKETS_ENABLED:'true'
+ },{fetchImpl:async()=>{throw Error('provider should not be called');}});
+ assert.equal((await missing.json()).enabled,false);
 });
 
-test('browser ticket API uses its own same-origin Cloudflare endpoint, never Vercel',async()=>{
-  const code=await readFile(new URL('../assets/support-agent.js',import.meta.url),'utf8');
-  assert.match(code,/const apiBase='';/);
-  assert.match(code,/support_backend_not_connected/);
-  assert.match(code,/\/report\.html\?kind=bug/);
-  assert.doesNotMatch(code,/const apiBase=[^\n]+https:\/\/api\.malguard\.site/);
+test('Cloudflare Pages code routes account tickets same origin only',async()=>{
+ const ui=await readFile(new URL('../assets/support-agent.js',import.meta.url),'utf8');
+ const health=await readFile(new URL('../functions/api/support/status.js',import.meta.url),'utf8');
+ const route=await readFile(new URL('../functions/api/support/[endpoint].js',import.meta.url),'utf8');
+ assert.match(ui,/const apiBase='';/);
+ assert.match(ui,/const auth=\(endpoint,body\)=>support\('auth\/'\+endpoint,body\);/);
+ assert.match(health,/supportHealth/);
+ assert.match(route,/handleSupport/);
+ assert.doesNotMatch(ui,/const apiBase=[^\n]+https:\/\/api\.malguard\.site/);
 });
