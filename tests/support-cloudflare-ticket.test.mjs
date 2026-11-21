@@ -24,7 +24,7 @@ const envFor=()=> {
     if(sql.startsWith('SELECT content FROM support_messages'))return [...messages].reverse().find(x=>x.ticket_id===params[0])||null;
     if(sql.startsWith('UPDATE support_tickets')) {
       const id=params.find(x=>typeof x==='string'&&tickets.has(x)),t=tickets.get(id);
-      if(!t||t.owner_email!==params[params.length-2]||t.revision!==params[params.length-1])return null;
+      if(!t||t.revision!==params[params.length-1]||sql.includes('owner_email=?')&&t.owner_email!==params[params.length-2])return null;
       if(sql.includes("SET status='open'")&&sql.includes('closed_at=NULL')){
         if(t.status!=='closed')return null;t.status='open';t.closed_at=null;t.attachments_delete_at=null;t.updated_at=params[0];}
       else if(sql.includes("SET status='closed'")){if(t.status!=='open')return null;t.status='closed';
