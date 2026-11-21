@@ -1,6 +1,7 @@
 // Cloudflare R2 private, reviewed-only attachment service for MalGuard Support.
 // No public R2 URLs, no executable uploads, no AI access without exact-hash consent.
 import {redactLog,validateLogText} from '../../../assets/support-privacy.mjs';
+import {checkSupportAdmin} from './advanced.mjs';
 
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
 const SHA=/^[a-f0-9]{64}$/;
@@ -86,7 +87,15 @@ export async function handleAttachment({db,env,body,endpoint,actor,lookup,rate,r
  const allowed=new Set(['attachment-start','attachment-chunk','attachment-finish',
   'attachment-list','attachment-approve','attachment-revoke']);
  if(!allowed.has(endpoint))throw error(404,'unsupported_attachment_operation');
- const row=await lookup(db,body.ticketId,actor.email);
+ const bearer=(request.headers.get('authorization')||'').replace(/^Bearer /,'');
+ const isAdmin=await checkSupportAdmin(db,env,bearer,actor.email);
+ if(isAdmin&&endpoint!=='attachment-list')throw error(403,'admin_cannot_grant_reporter_consent');
+ let row;
+ if(isAdmin){
+   if(!UUID.test(body.ticketId||''))throw error(400,'invalid_ticket');
+   row=await db.prepare('SELECT id,status FROM support_tickets WHERE id=?').bind(body.ticketId).first();
+   if(!row)throw error(404,'ticket_not_found');
+ }else row=await lookup(db,body.ticketId,actor.email);
  await rate(env,request,'attachment-ops',120,3600000);
  if(endpoint==='attachment-list'){
    const items=await db.prepare('SELECT id,kind,name,bytes,state,verified_sha256,consent_sha256,revoked_at FROM support_attachments WHERE ticket_id=? ORDER BY created_at DESC LIMIT 20')
