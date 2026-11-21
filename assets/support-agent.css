@@ -25,3 +25,7 @@ a{color:var(--accent)}button,input,textarea,select{font:inherit}button{cursor:po
 .owner-panel[hidden],.owner-panel [hidden]{display:none}
 .owner-panel h3{font-size:.9rem;margin:0}.owner-panel p{font-size:.78rem;color:var(--muted);margin:0;line-height:1.6}
 .owner-panel button{font-size:.82rem;padding:9px}.owner-panel input{margin:8px 0}
+
+/* Clearly separate the usable existing support form from disabled preview controls. */
+.service-fallback{display:inline-block;margin-block-start:9px;padding:8px 11px;border-radius:9px;background:#143044;border:1px solid #23617f;color:#a9e9ff;text-decoration:none;font-weight:650}
+.service-fallback:hover,.service-fallback:focus-visible{background:#17445d;color:#f0fcff}
