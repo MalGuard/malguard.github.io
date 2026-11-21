@@ -27,7 +27,7 @@ const server=createServer(async(req,res)=>{
     if(auth!=='Bearer synthetic-account-token'){code=401;data={error:'unauthorized'};}
     else{requestCount++;data={challengeId:ticketId};}break;
    case '/api/support/admin-code-verify':
-    if(auth!=='Bearer synthetic-account-token'||body.code!=='12345678'){
+    if(auth!=='Bearer synthetic-account-token'||body.code!=='123456'){
      code=401;data={error:'unauthorized'};
     }else{authorized=true;data={accessToken:'synthetic-admin-token'};}break;
    case '/api/support/list':
@@ -71,7 +71,7 @@ try{
   await page.waitForSelector('#ownerOtp:not([hidden])');
   assert.equal(requestCount,1);
   assert.equal(await page.inputValue('#ownerPassword'),'');
-  await page.fill('#otpCode','12345678');
+  await page.fill('#otpCode','123456');
   await page.click('#otpForm button');
   await page.waitForSelector('#ownerList:not([hidden])');
   await page.waitForSelector('.ticket-choice');
