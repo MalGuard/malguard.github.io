@@ -21,7 +21,7 @@ const server=createServer(async(req,res)=>{
   let data={},code=200;
   switch(url.pathname){
    case '/api/support/status':data=status;break;
-   case '/api/game-scam-guard/auth/password':
+   case '/api/support/auth/password':
     data={sessionToken:'synthetic-account-token'};break;
    case '/api/support/admin-code-start':
     if(auth!=='Bearer synthetic-account-token'){code=401;data={error:'unauthorized'};}
