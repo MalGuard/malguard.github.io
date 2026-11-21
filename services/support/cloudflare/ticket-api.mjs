@@ -3,6 +3,7 @@
 // No duplicate account records, no secret API keys in the browser, fail closed on missing DB.
 import {triageSupportCase} from '../server/support-triage.mjs';
 import {handleAdvancedSupport,checkSupportAdmin,supportAdvancedHealth} from './advanced.mjs';
+import {handleAttachment,attachmentHealth} from './attachments.mjs';
 
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ALLOWED=new Set(['bug','false-positive','feedback']);
@@ -120,11 +121,16 @@ export async function handleSupport(context,endpoint){
       throw err(503,'account_provider_unavailable');
     return respond(200,{sessionToken:result.sessionToken});
   }
-  if(!['create','list','ticket','message','close','reopen','triage','agent','escalate','admin-code-start','admin-code-verify'].includes(endpoint))
+  if(!['create','list','ticket','message','close','reopen','triage','agent','escalate','admin-code-start','admin-code-verify',
+     'attachment-start','attachment-chunk','attachment-finish','attachment-list','attachment-approve','attachment-revoke'].includes(endpoint))
     return respond(503,{error:'feature_not_configured'});
-  const body=await decodeRequest(request);
+  const body=await decodeRequest(request,endpoint==='attachment-chunk'?730000:8500);
   const user=await actor(request);
   await rate(env,request,'tickets',100,3600000);
+  if(endpoint.startsWith('attachment-')){
+    const result=await handleAttachment({db,env,request,endpoint,body,actor:user,lookup,rate});
+    return respond(200,result);
+  }
   if(['agent','escalate','admin-code-start','admin-code-verify'].includes(endpoint)){
     const result=await handleAdvancedSupport({db,env,request,endpoint,body,actor:user,
       lookup,rate,callAuth});
@@ -239,6 +245,6 @@ export async function supportHealth(env,{fetchImpl=fetch}={}){
    guestLinksEnabled:false,attachmentsEnabled:false,aiEnabled:false,adminEnabled:false,
    checks:{config:configurationReady,dbBinding:bindingReady,dbSchema:schemaReady,accountProvider:accountReady,accountProbe},
    turnstileSiteKey:null,
-   ...supportAdvancedHealth(env)
+   ...supportAdvancedHealth(env),...attachmentHealth(env)
  });
 }
