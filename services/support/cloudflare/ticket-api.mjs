@@ -100,6 +100,26 @@ export async function handleSupport(context,endpoint){
       throw err(503,'account_provider_unavailable');
     return respond(200,{sessionToken:result.sessionToken});
   }
+  if(endpoint==='auth/start'){
+    const body=await decodeRequest(request,900),address=email(body.email);
+    if(!address)throw err(400,'invalid_email');
+    await rate(env,request,'email-login-start',4,900000);
+    const result=await callAuth('start',{email:address});
+    if(typeof result?.verificationToken!=='string'||result.verificationToken.length<32||
+      result.verificationToken.length>12000)throw err(503,'account_provider_unavailable');
+    return respond(200,{verificationToken:result.verificationToken,delivery:'provider_accepted'});
+  }
+  if(endpoint==='auth/verify'){
+    const body=await decodeRequest(request,14000);
+    if(typeof body.verificationToken!=='string'||body.verificationToken.length<32||
+      body.verificationToken.length>12000||typeof body.code!=='string'||!/^[0-9]{6}$/.test(body.code))
+      throw err(400,'invalid_verification');
+    await rate(env,request,'email-login-verify',10,900000);
+    const result=await callAuth('verify',{verificationToken:body.verificationToken,code:body.code});
+    if(typeof result?.sessionToken!=='string'||result.sessionToken.length<20)
+      throw err(503,'account_provider_unavailable');
+    return respond(200,{sessionToken:result.sessionToken});
+  }
   if(!['create','list','ticket','message','close','reopen','triage'].includes(endpoint))
     return respond(503,{error:'feature_not_configured'});
   const body=await decodeRequest(request);
@@ -192,7 +212,7 @@ export async function supportHealth(env,{fetchImpl=fetch}={}){
  }
  return respond(200,{
    enabled:active,phase:active?'account-tickets-d1':'database_not_connected',
-   reason:active?null:'support_database_not_connected',accountOnly:true,guestLinksEnabled:false,
+   reason:active?null:'support_database_not_connected',accountOnly:false,emailCodeEnabled:active,guestLinksEnabled:false,
    attachmentsEnabled:false,aiEnabled:false,adminEnabled:false,
    turnstileSiteKey:null
  });
