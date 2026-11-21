@@ -19,6 +19,8 @@ try{
    await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true',null,{timeout:12000});
    const menu=page.locator('#menuBtn');
    await menu.click();
+   await page.locator('#navLinks:not([hidden])').waitFor();
+   await page.waitForFunction(() => getComputedStyle(document.querySelector('#navLinks')).backgroundColor !== 'rgba(0, 0, 0, 0)');
    const state=await page.evaluate(()=>{
     const el=document.querySelector('#navLinks'),style=getComputedStyle(el);
     return {light:document.documentElement.dataset.theme==='light',bg:style.backgroundColor,blur:style.backdropFilter,zIndex:style.zIndex,

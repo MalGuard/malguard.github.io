@@ -132,9 +132,9 @@ html:not(#_):not(#_) body.mg-content-page header:not(#navbar) nav a{border-color
 html:not(#_):not(#_) body.mg-content-page main nav a{border-color:var(--c-border-strong)!important;border-radius:999px!important;text-decoration:none!important}
 
 /* ===== Power layer: confident display type, deep black night, crisp contrast ===== */
-html:not(#_):not(#_){--c-bg:#000;--c-surface:#0c0c0d;--c-raised:#141415;--c-border:rgba(255,255,255,.1);--c-border-strong:rgba(255,255,255,.2);--c-text:#fff;--c-muted:#9d9da3;--c-faint:#6e6e74;--c-ink:#000;
+html:not(#_):not(#_){--c-raised:#141415;--c-border:rgba(255,255,255,.1);--c-border-strong:rgba(255,255,255,.2);--c-ink:#000;
  --c-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 12px 32px rgba(0,0,0,.5);--c-lift:0 1px 0 rgba(255,255,255,.06) inset,0 20px 48px rgba(0,0,0,.6)}
-html[data-theme=light]:not(#_):not(#_){--c-text:#141413;--c-muted:#5c5a55;--c-ink:#faf9f5;--c-lift:0 2px 4px rgba(20,20,19,.04),0 18px 40px rgba(20,20,19,.10)}
+html[data-theme=light]:not(#_):not(#_){--c-ink:#faf9f5;--c-lift:0 2px 4px rgba(20,20,19,.04),0 18px 40px rgba(20,20,19,.10)}
 html:not(#_):not(#_) body:not(.mg-pro) main h1{font-size:clamp(3rem,1.4rem + 6.2vw,6.25rem)!important;line-height:.98!important;letter-spacing:-.05em!important;font-weight:650!important}
 html:not(#_):not(#_) body:not(.mg-pro) main h2{font-weight:620!important;letter-spacing:-.035em!important}
 html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero-copy,.mg-page-copy,.ai-product-hero-copy) h2,

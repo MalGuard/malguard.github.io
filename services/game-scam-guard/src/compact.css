@@ -47,3 +47,5 @@ html[data-theme=light] .g-app .report-card { color: #dce7f7; }
 .g-app .primary-button { background: #2857a4; color: white; box-shadow: none; }
 .g-app .primary-button:hover:not(:disabled) { background: #214987; }
 .g-app { font-family: var(--site-font); }
+
+:root[data-theme=dark], :root[data-theme=dark] body, :root[data-theme=dark] #root { background: var(--site-canvas); }

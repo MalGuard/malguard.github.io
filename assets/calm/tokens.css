@@ -1,7 +1,7 @@
 :root {
-  --site-canvas: #0e0e0f;
-  --site-surface: #161617;
-  --site-text: #ececec;
+  --site-canvas: #000000;
+  --site-surface: #0c0c0d;
+  --site-text: #ffffff;
   --site-muted: #a0a0a5;
   --site-scroll-thumb: #85858a;
   --site-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, "Vazirmatn", sans-serif;
@@ -10,7 +10,7 @@
 :root[data-theme="light"] {
   --site-canvas: #faf9f5;
   --site-surface: #fff;
-  --site-text: #1f1e1d;
+  --site-text: #141413;
   --site-muted: #5f5c56;
   --site-scroll-thumb: #74726c;
 }

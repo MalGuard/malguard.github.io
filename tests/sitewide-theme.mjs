@@ -42,9 +42,9 @@ try {
           for (const [mode,theme] of [['auto','light'],['light','light'],['dark','dark']]) {
             await page.waitForFunction(([m,t])=>document.documentElement.dataset.themeMode===m &&
               document.documentElement.dataset.theme===t,[mode,theme]);
-            const expectedCanvas = theme === 'light' ? '#faf9f5' : '#0e0e0f';
+            const expectedCanvas = theme === 'light' ? 'rgb(250, 249, 245)' : 'rgb(0, 0, 0)';
             await page.waitForFunction(expected =>
-              getComputedStyle(document.documentElement).getPropertyValue('--site-canvas').trim() === expected,
+              getComputedStyle(document.querySelector('#root') || document.documentElement).backgroundColor === expected,
               expectedCanvas);
             await toggle.click();
           }
