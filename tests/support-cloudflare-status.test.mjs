@@ -9,7 +9,7 @@ test('Cloudflare Pages tickets fail closed without database activation',async()=
  const body=await status.json();
  assert.equal(body.enabled,false);
  assert.equal(body.reason,'support_backend_not_ready');
- assert.deepEqual(body.checks,{config:false,dbBinding:false,dbSchema:false,accountProvider:false});
+ assert.deepEqual(body.checks,{config:false,dbBinding:false,dbSchema:false,accountProvider:false,accountProbe:'not_checked'});
  assert.equal(body.aiEnabled,false);
  assert.equal(body.adminEnabled,false);
  assert.equal(body.guestLinksEnabled,false);
