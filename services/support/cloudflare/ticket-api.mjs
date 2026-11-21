@@ -44,7 +44,7 @@ async function rate(env,request,action,limit=20,windowMs=60000){
  if((count?.hits||0)>limit)throw err(429,'rate_limited');
 }
 async function callAuth(path,body){
- const url='https://api.malguard.site/api/game-scam-guard/auth/'+path;
+ const url='https://game-scam-guard-connected.vercel.app/api/game-scam-guard/auth/'+path;
  let res;
  try{res=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},
     body:JSON.stringify(body),redirect:'error',cache:'no-store',
@@ -203,7 +203,7 @@ export async function supportHealth(env,{fetchImpl=fetch}={}){
    }catch{schemaReady=false;}
    if(schemaReady){
      try{
-       const response=await fetchImpl('https://api.malguard.site/api/game-scam-guard/auth/status',{
+       const response=await fetchImpl('https://game-scam-guard-connected.vercel.app/api/game-scam-guard/auth/status',{
          method:'GET',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(6000)
        });
        if(response.ok){
