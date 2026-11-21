@@ -1,11 +1,12 @@
+@import url("/assets/calm/tokens.css");
 /* MalGuard AI — standard chat look (Grok night / Claude day). Loads last; presentation only. */
 html:root body.mg-pro{
- --s-bg:#0e0e0f;--s-side:#161617;--s-surface:#1b1b1d;--s-raised:#212124;--s-hover:rgba(255,255,255,.06);--s-border:rgba(255,255,255,.09);
- --s-text:#ececec;--s-muted:#a0a0a5;--s-user:#26262a;--s-accent:#ececec;--s-accent-ink:#0e0e0f;--s-shadow:0 8px 28px rgba(0,0,0,.35);
+ --s-bg:var(--site-canvas);--s-side:#161617;--s-surface:#1b1b1d;--s-raised:#212124;--s-hover:rgba(255,255,255,.06);--s-border:rgba(255,255,255,.09);
+ --s-text:var(--site-text);--s-muted:var(--site-muted);--s-user:#26262a;--s-accent:#ececec;--s-accent-ink:#0e0e0f;--s-shadow:0 8px 28px rgba(0,0,0,.35);
 }
 html.theme-light:root body.mg-pro,html[data-theme=light]:root body.mg-pro{
- --s-bg:#faf9f5;--s-side:#f3f1ea;--s-surface:#ffffff;--s-raised:#ffffff;--s-hover:rgba(31,30,29,.05);--s-border:rgba(31,30,29,.12);
- --s-text:#1f1e1d;--s-muted:#6b6862;--s-user:#efece3;--s-accent:#1f1e1d;--s-accent-ink:#faf9f5;--s-shadow:0 4px 20px rgba(31,30,29,.08);
+ --s-bg:var(--site-canvas);--s-side:#f3f1ea;--s-surface:#ffffff;--s-raised:#ffffff;--s-hover:rgba(31,30,29,.05);--s-border:rgba(31,30,29,.12);
+ --s-text:var(--site-text);--s-muted:var(--site-muted);--s-user:#efece3;--s-accent:#1f1e1d;--s-accent-ink:#faf9f5;--s-shadow:0 4px 20px rgba(31,30,29,.08);
 }
 html:root body.mg-pro{
  --p-bg:var(--s-bg);--p-side:var(--s-side);--p-surface:var(--s-surface);--p-raised:var(--s-raised);--p-hover:var(--s-hover);--p-border:var(--s-border);
@@ -13,7 +14,7 @@ html:root body.mg-pro{
  --ai-surface:var(--s-surface);--ai-raised:var(--s-raised);--ai-raised-hover:var(--s-hover);--ai-stroke:var(--s-border);--ai-stroke-hover:var(--s-border);
  --ai-fg:var(--s-text);--ai-secondary:var(--s-muted);--ai-faint:var(--s-muted);--ai-rail:var(--s-side);--ai-focus:var(--s-muted);--ai-glow:transparent;
  --bg:var(--s-bg);--ink:var(--s-text);--line:var(--s-border);
- font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Vazirmatn",sans-serif;
+ font-family:var(--site-font);
 }
 html[dir=rtl]:root body.mg-pro{font-family:"Vazirmatn",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif}
 /* Flat neutral page: no galaxy, stars or gradients */
@@ -237,7 +238,7 @@ html:root body.mg-pro .composer-shell.pro-compact .pro-in-composer{margin-inline
 
 /* ===== Power: Grok-deep night, confident welcome, refined chips + type ===== */
 html:root body.mg-pro{--s-bg:#000;--s-side:#0a0a0b;--s-surface:#111112;--s-raised:#18181a;--s-border:rgba(255,255,255,.1);--s-text:#fff;--s-muted:#9d9da3;--s-user:#1c1c1f;--s-accent:#fff;--s-accent-ink:#000}
-html.theme-light:root body.mg-pro,html[data-theme=light]:root body.mg-pro{--s-bg:#faf9f5;--s-side:#f3f1ea;--s-surface:#fff;--s-raised:#fff;--s-border:rgba(20,20,19,.12);--s-text:#141413;--s-muted:#5c5a55;--s-user:#efece3;--s-accent:#141413;--s-accent-ink:#faf9f5}
+html.theme-light:root body.mg-pro,html[data-theme=light]:root body.mg-pro{--s-bg:var(--site-canvas);--s-side:#f3f1ea;--s-surface:#fff;--s-raised:#fff;--s-border:rgba(20,20,19,.12);--s-text:#141413;--s-muted:#5c5a55;--s-user:#efece3;--s-accent:#141413;--s-accent-ink:#faf9f5}
 html:root:has(body.mg-pro){background:#000!important}
 html.theme-light:root:has(body.mg-pro),html[data-theme=light]:root:has(body.mg-pro){background:#faf9f5!important}
 /* Welcome: logo mark + large centered greeting */

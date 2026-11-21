@@ -45,6 +45,7 @@ jobs:
           # when an existing page declares upgrade-insecure-requests.
           openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/malguard-test.key -out /tmp/malguard-test.crt -days 1 -subj '/CN=127.0.0.1' -addext 'subjectAltName=IP:127.0.0.1' 2>/dev/null
           (cd _site && exec python3 ../tests/serve-https.py 8462) > /tmp/malguard-theme-test.log 2>&1 &
+          node tests/sitewide-theme.mjs https://127.0.0.1:8462
           node tests/gamescam-theme.mjs https://127.0.0.1:8462
           python3 tests/serve-https.py > /tmp/malguard-site-test.log 2>&1 &
           TEST_BROWSER=webkit xvfb-run --auto-servernum node tests/secure-cinematic.mjs

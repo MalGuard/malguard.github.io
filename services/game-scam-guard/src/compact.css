@@ -21,7 +21,7 @@
 .g-app .g-nav button, .g-app .scan-tabs button { min-height: 44px; font-size: 12px; }
 .g-app .g-mode-note, .g-app .g-footer { font-size: 12px; }
 :root[data-theme=light], :root[data-theme=light] body, :root[data-theme=light] #root {
-  background: #faf9f5;
+  background: var(--site-canvas);
   color: #252523;
 }
 html[data-theme=light] .g-app { color: #252523; }
@@ -46,5 +46,4 @@ html[data-theme=light] .g-app .report-card { color: #dce7f7; }
 
 .g-app .primary-button { background: #2857a4; color: white; box-shadow: none; }
 .g-app .primary-button:hover:not(:disabled) { background: #214987; }
-.g-app { font-family: system-ui, "Vazirmatn", sans-serif; }
-html[dir=rtl] .g-app { font-family: "Vazirmatn", system-ui, sans-serif; }
+.g-app { font-family: var(--site-font); }
