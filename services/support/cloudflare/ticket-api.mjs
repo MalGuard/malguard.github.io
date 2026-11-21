@@ -46,9 +46,8 @@ async function rate(env,request,action,limit=20,windowMs=60000){
 async function callAuth(path,body){
  const url='https://game-scam-guard-connected.vercel.app/api/game-scam-guard/auth/'+path;
  let res;
- try{res=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},
-    body:JSON.stringify(body),redirect:'error',cache:'no-store',
-    signal:AbortSignal.timeout(12000)});}
+ try{res=await fetch(url,{method:'POST',headers:{'content-type':'application/json','cache-control':'no-store'},
+    body:JSON.stringify(body)});}
  catch{throw err(503,'account_provider_unavailable');}
  const raw=await res.text().catch(()=>'');
  if(raw.length>24000)throw err(502,'account_provider_unavailable');
@@ -193,7 +192,7 @@ export async function handleSupport(context,endpoint){
 export async function supportHealth(env,{fetchImpl=fetch}={}){
  const configurationReady=env?.SUPPORT_TICKETS_ENABLED==='true';
  const bindingReady=!!(env?.SUPPORT_DB&&typeof env.SUPPORT_DB.prepare==='function');
- let schemaReady=false,accountReady=false;
+ let schemaReady=false,accountReady=false,accountProbe='not_checked';
  if(configurationReady&&bindingReady){
    try{
      const schema=await env.SUPPORT_DB.prepare(
@@ -204,13 +203,15 @@ export async function supportHealth(env,{fetchImpl=fetch}={}){
    if(schemaReady){
      try{
        const response=await fetchImpl('https://game-scam-guard-connected.vercel.app/api/game-scam-guard/auth/status',{
-         method:'GET',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(6000)
+         method:'GET',headers:{accept:'application/json','cache-control':'no-store'}
        });
+       accountProbe=response.ok?'http_ok':'http_'+String(response.status||'unknown');
        if(response.ok){
          const account=await response.json();
          accountReady=account?.configured===true&&account?.persistentAccounts===true;
+         if(!accountReady)accountProbe='provider_not_configured';
        }
-     }catch{accountReady=false;}
+     }catch{accountReady=false;accountProbe='request_failed';}
    }
  }
  const active=configurationReady&&bindingReady&&schemaReady&&accountReady;
@@ -218,7 +219,7 @@ export async function supportHealth(env,{fetchImpl=fetch}={}){
    enabled:active,phase:active?'account-tickets-d1':'not_ready',
    reason:active?null:'support_backend_not_ready',accountOnly:false,emailCodeEnabled:active,
    guestLinksEnabled:false,attachmentsEnabled:false,aiEnabled:false,adminEnabled:false,
-   checks:{config:configurationReady,dbBinding:bindingReady,dbSchema:schemaReady,accountProvider:accountReady},
+   checks:{config:configurationReady,dbBinding:bindingReady,dbSchema:schemaReady,accountProvider:accountReady,accountProbe},
    turnstileSiteKey:null
  });
 }
