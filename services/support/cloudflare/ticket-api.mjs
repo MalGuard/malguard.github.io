@@ -14,6 +14,7 @@ const headers={'content-type':'application/json; charset=utf-8','cache-control':
  'x-content-type-options':'nosniff','referrer-policy':'no-referrer'};
 const respond=(status,obj)=>new Response(JSON.stringify(obj),{status,headers});
 const getDb=env=>{
+ if(env?.SUPPORT_TICKETS_ENABLED!=='true')throw err(503,'support_not_activated');
  if(!env?.SUPPORT_DB||typeof env.SUPPORT_DB.prepare!=='function')throw err(503,'support_database_unavailable');
  return env.SUPPORT_DB;
 };
@@ -170,7 +171,8 @@ export async function handleSupport(context,endpoint){
  }catch(error){return responseError(error);}
 }
 export function supportHealth(env){
- const active=!!(env?.SUPPORT_DB&&typeof env.SUPPORT_DB.prepare==='function');
+ const active=env?.SUPPORT_TICKETS_ENABLED==='true'&&
+  !!(env?.SUPPORT_DB&&typeof env.SUPPORT_DB.prepare==='function');
  return respond(200,{
    enabled:active,phase:active?'account-tickets-d1':'database_not_connected',
    reason:active?null:'support_database_not_connected',guestLinksEnabled:false,
