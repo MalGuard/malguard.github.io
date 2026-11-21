@@ -15,6 +15,16 @@
   },
   "rewrites": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "support-preview.malguard.site"
+        }
+      ],
+      "destination": "/support-ticket.html"
+    },
+    {
       "source": "/ai-product",
       "destination": "/ai-product.html"
     },
