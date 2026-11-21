@@ -15,6 +15,16 @@
   },
   "rewrites": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "support-preview.malguard.site"
+        }
+      ],
+      "destination": "/support-ticket.html"
+    },
+    {
       "source": "/ai-product",
       "destination": "/ai-product.html"
     },
@@ -25,6 +35,10 @@
     {
       "source": "/api/malguard-ai/:endpoint",
       "destination": "/api/malguard-ai?endpoint=:endpoint"
+    },
+    {
+      "source": "/api/support/:endpoint",
+      "destination": "/api/support?endpoint=:endpoint"
     }
   ],
   "headers": [
@@ -130,5 +144,24 @@
     "deploymentEnabled": {
       "feature/malguard-ai-evidence-first": false
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/support-cleanup",
+      "schedule": "0 3 * * *"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "support-preview.malguard.site"
+        }
+      ],
+      "destination": "/support-ticket.html",
+      "permanent": false
+    }
+  ]
 }

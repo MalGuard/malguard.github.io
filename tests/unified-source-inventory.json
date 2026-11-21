@@ -241,6 +241,14 @@
       "surface": "preserved content and functional controls"
     },
     {
+      "path": "support-ticket.html",
+      "surface": "New support ticket workspace; server feature flag defaults off and private API is not a static artifact"
+    },
+    {
+      "path": "support-admin.html",
+      "surface": "Owner-only support admin frontend: noindex; backend requires account plus owner email OTP"
+    },
+    {
       "path": "threat-radar.html",
       "surface": "Public GitHub-reviewed advisory viewer with explicit source limitations"
     },
@@ -257,7 +265,7 @@
       "surface": "preserved content and functional controls"
     }
   ],
-  "publicRouteCount": 51,
+  "publicRouteCount": 53,
   "unshippedDeveloperPrototypes": "Excluded from Pages exactly as before. No admin/server/download source is published.",
   "functionalRuntimePreserved": [
     "assets/public-release.mjs",
