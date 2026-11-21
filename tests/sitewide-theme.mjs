@@ -35,11 +35,13 @@ try {
       await page.clock.setFixedTime(new Date('2026-11-20T10:00:00Z'));
       while (remaining.length) {
         const path = remaining.pop();
+        let expectedMode;
         try {
           assert.equal((await page.goto(origin+path,{waitUntil:'load'})).status(),200);
           const toggle=page.locator('#mgThemeToggle');
           await toggle.waitFor({state:'attached'});
           for (const [mode,theme] of [['auto','light'],['light','light'],['dark','dark']]) {
+            expectedMode = mode;
             await page.waitForFunction(([m,t])=>document.documentElement.dataset.themeMode===m &&
               document.documentElement.dataset.theme===t,[mode,theme]);
             const expectedCanvas = theme === 'light' ? 'rgb(250, 249, 245)' : 'rgb(0, 0, 0)';
@@ -49,7 +51,12 @@ try {
             await toggle.click();
           }
         } catch (error) {
-          failures.push([width,path,error.message.slice(0,400)]);
+          const state = await page.evaluate(() => ({
+            mode: document.documentElement.dataset.themeMode,
+            theme: document.documentElement.dataset.theme,
+            canvas: getComputedStyle(document.querySelector('#root') || document.documentElement).backgroundColor,
+          })).catch(() => null);
+          failures.push({width, path, expectedMode, state, error: error.message.slice(0, 400)});
           await page.evaluate(()=>localStorage.removeItem('malguard-theme')).catch(()=>{});
         }
       }
