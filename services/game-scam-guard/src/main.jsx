@@ -4,6 +4,7 @@ import {ShieldCheck,ScanLine,History,Settings2,Stethoscope,Globe2,UserRound,Link
 import '../../../assets/report-launcher.js';
 import '../../../assets/report-launcher.css';
 import './styles.css';
+import '../../../assets/calm/tokens.css';
 import './compact.css';
 import {apiUrl} from './api.js';
 import {readHistory} from './history.js';

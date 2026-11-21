@@ -121,6 +121,7 @@ function enhanceSettings(){
  const themeBtns=[];
  const themeMode=()=>{try{return localStorage.getItem('malguard-theme')||'auto';}catch{return 'auto';}};
  const syncThemeSeg=()=>{const cur=themeMode();themeBtns.forEach(b=>{const on=b.dataset.value===cur;b.setAttribute('aria-checked',String(on));b.classList.toggle('is-active',on);});};
+ window.addEventListener('storage',e=>{if(e.key==='malguard-theme'||e.key===null)syncThemeSeg();});
  const applyTheme=mode=>{const btn=$('mgThemeToggle');if(btn){let n=0;while((btn.dataset.mode||'auto')!==mode&&n++<4)btn.click();}else{try{localStorage.setItem('malguard-theme',mode);}catch{}}syncThemeSeg();};
  for(const [value] of themeOpts){const b=make('button','pro-seg-btn');b.type='button';b.dataset.value=value;b.setAttribute('role','radio');b.onclick=()=>applyTheme(value);themeSeg.append(b);themeBtns.push(b);}
  const themeMeta=make('div','pro-set-meta');themeMeta.append(make('div','pro-set-label'),make('p','pro-set-hint'));
