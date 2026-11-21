@@ -101,3 +101,31 @@ test('guest magic-link and admin endpoints stay disabled until separately verifi
  assert.equal(resp.status,503);
  assert.equal((await resp.json()).error,'feature_not_configured');
 });
+
+test('email OTP uses the existing provider and never stores passwords or codes',async()=>{
+ const savedFetch=globalThis.fetch,store=envFor(),env={SUPPORT_DB:store.db,SUPPORT_TICKETS_ENABLED:'true'};
+ const calls=[];
+ globalThis.fetch=async (url,options)=>{
+   calls.push({url,body:JSON.parse(options.body||'{}')});
+   if(String(url).endsWith('/auth/start'))return {ok:true,text:async()=>JSON.stringify({
+     verificationToken:'synthetic-verification-token-xxxxxxxxxxxxxxxx'
+   })};
+   if(String(url).endsWith('/auth/verify'))return {ok:true,text:async()=>JSON.stringify({
+     sessionToken:'synthetic-session-token-xxxxxxxxxxxxxxxxxx'
+   })};
+   return {ok:false,status:404,text:async()=>''};
+ };
+ try{
+   const start=request('auth/start',{email:'guest@example.test'},null);
+   const first=await handleSupport({request:start.request,env},'auth/start');
+   assert.equal(first.status,200);
+   assert.equal((await first.json()).verificationToken.startsWith('synthetic-verification-token'),true);
+   const verify=request('auth/verify',{verificationToken:'synthetic-verification-token-xxxxxxxxxxxxxxxx',code:'123456'},null);
+   const second=await handleSupport({request:verify.request,env},'auth/verify');
+   assert.equal(second.status,200);
+   assert.equal((await second.json()).sessionToken.startsWith('synthetic-session-token'),true);
+   assert.equal(calls.length,2);
+   assert.deepEqual(calls.map(c=>new URL(c.url).pathname.split('/').pop()),['start','verify']);
+   assert.equal(store.tickets.size,0);
+ }finally{globalThis.fetch=savedFetch;}
+});
