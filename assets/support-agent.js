@@ -2,7 +2,7 @@
 (() => {
 'use strict';
 const $=id=>document.getElementById(id), FA='fa';
-let lang=FA, accountToken=null, ticketToken=null, adminToken=null, adminChallengeId=null, currentTicket=null, busy=false, captchaReady=false;
+let lang=FA, accountToken=null, ticketToken=null, adminToken=null, adminChallengeId=null, emailChallenge=null, requestedTicketId=null, currentTicket=null, busy=false, captchaReady=false;
 let siteKey=null, captchaCreate=null, captchaLink=null, selectedId=null;
 const publicHosts=new Set(['malguard.site','www.malguard.site','malguard.github.io']);
 // Ticket service is hosted on Cloudflare Pages. Do not send report data to
@@ -14,10 +14,12 @@ const i18n={
   intro:['گزارش خصوصی، سابقه گفتگو و پیگیری مرحله‌به‌مرحله.','Private tickets, conversation history, and clear progress.'],
   checking:['در حال بررسی دسترسی سرویس…','Checking service availability…'],
   signInHead:['ورود با حساب MalGuard','Sign in with MalGuard'],
-  signinHint:['در نسخه فعلی، ثبت تیکت با حساب MalGuard انجام می‌شه. نشست فقط در حافظه همین صفحه نگه داشته می‌شه.','Tickets currently require a MalGuard account. Sessions remain in this page memory only.'],
+  signinHint:['با حساب MalGuard وارد شو یا با کد ایمیلی، هویتت رو تأیید کن. نشست فقط در حافظه همین صفحه می‌مونه.','Sign in with MalGuard or verify your email with a one-time code. Sessions stay in page memory only.'],
   email:['ایمیل','Email'],password:['رمز عبور','Password'],signinButton:['ورود','Sign in'],or:['یا','or'],
-  ticketCode:['شناسه تیکت','Ticket ID'],linkEmail:['ایمیل ثبت‌شده در تیکت','Ticket email'],
-  sendLink:['دریافت لینک ورود ایمیلی','Send an email access link'],logout:['خروج','Sign out'],
+  ticketCode:['شناسه تیکت (اختیاری)','Ticket ID (optional)'],linkEmail:['ایمیل برای دریافت کد ورود','Email for verification code'],
+  codeLabel:['کد شش‌رقمی ارسال‌شده به ایمیل','Six-digit email verification code'],
+  verifyEmail:['تأیید ایمیل و ورود به تیکت‌ها','Verify email and access tickets'],
+  sendLink:['دریافت کد ایمیلی ۶ رقمی','Send a six-digit email code'],logout:['خروج','Sign out'],
   myTickets:['تیکت‌های من','My tickets'],refresh:['بروزرسانی','Refresh'],
   loginToList:['برای مشاهده تیکت‌ها وارد حساب شو.','Sign in to see your tickets.'],
   privateSupport:['خصوصی · پشتیبانی','PRIVATE · SUPPORT'],conversation:['گزارش و گفتگو','Report and conversation'],
@@ -39,7 +41,7 @@ const i18n={
   loginSuccess:['با موفقیت وارد شدی.','You are signed in.'],
   notAvailable:['این قابلیت در حال حاضر در دسترس نیست.','This feature is currently unavailable.'],
   invalidLogin:['ورود تأیید نشد. ایمیل و رمز رو بررسی کن.','Sign-in failed. Check your email and password.'],
-  sentLink:['اگه اطلاعات مطابقت داشته باشه، لینک دسترسی به ایمیلت ارسال می‌شه.','If the information matches, an access link may arrive by email.'],
+  sentLink:['درخواست ارسال کد پذیرفته شد. ایمیلت رو بررسی کن؛ تحویل قطعی تأیید نشده.','The email provider accepted the code request; delivery is not yet confirmed.'],
   accepted:['تیکت ثبت شد.','Ticket accepted.'],
   deliveryAccepted:['سرویس ایمیل پیام رو پذیرفت؛ تحویل به صندوق دریافت هنوز تأیید نشده.','Mail provider accepted the message; delivery is not confirmed.'],
   deliveryUnknown:['تحویل ایمیل تأیید نشد. شناسه تیکت رو نگه دار و از مسیر فعلی هم پیگیری کن.','Email delivery was not confirmed. Keep your ticket ID and use the existing reporting route if needed.'],
@@ -79,7 +81,7 @@ function setReady(ready,reason=serviceReason){
     banner.append(link);
   }
   banner.className='notice '+(ready?'good':'bad');
-  $('linkForm').hidden=ready;
+  $('linkForm').hidden=!ready||!!accountToken;
   $('guestEmail').disabled=ready;
   $('guestEmail').closest('label').hidden=ready;
   for(const id of ['accountSubmit','linkSubmit','createSubmit','refresh'])
@@ -142,13 +144,14 @@ function signedIn(){
   $('ownerPanel').hidden=!(accountToken&&adminAvailable&&new URLSearchParams(location.search).has('owner'));
   $('adminCodeStart').disabled=!serviceEnabled;
   $('accountForm').hidden=!!accountToken;
+  $('emailVerifyForm').hidden=true;
   $('createSubmit').disabled=!serviceEnabled||!accountToken;
   $('linkForm').hidden=!!accountToken;
 }
 function signedOut(){
-  accountToken=null;ticketToken=null;adminToken=null;adminChallengeId=null;selectedId=null;currentTicket=null;
+  accountToken=null;ticketToken=null;adminToken=null;adminChallengeId=null;emailChallenge=null;requestedTicketId=null;selectedId=null;currentTicket=null;
   $('identity').hidden=true;$('createSubmit').disabled=true;$('ownerPanel').hidden=true;$('adminVerifyBox').hidden=true;
-  $('adminCode').value='';$('adminState').textContent='';$('accountForm').hidden=false;$('linkForm').hidden=false;
+  $('adminCode').value='';$('adminState').textContent='';$('accountForm').hidden=false;$('linkForm').hidden=!serviceEnabled;$('emailVerifyForm').hidden=true;
   $('agentAdvice').hidden=true;$('triagePanel').hidden=true;aiPreviewDigest=null;
   $('ticketList').replaceChildren();$('newTicketPane').hidden=false;$('chatPane').hidden=true;
   $('accountPassword').value='';$('reply').value='';attachmentUi?.hide();
@@ -266,15 +269,36 @@ $('accountForm').addEventListener('submit',async event=>{
 });
 $('linkForm').addEventListener('submit',async event=>{
   event.preventDefault();if(!serviceEnabled||busy)return;
-  const captcha=challengeToken(captchaLink);
-  if(!captcha){flash(t('error'),'error');return;}
+  const id=$('linkTicketId').value.trim();
+  if(id&&!isUuid(id)){flash(t('error'),'error');return;}
   busy=true;$('linkSubmit').disabled=true;flash(t('wait'));
   try{
-    await support('request-link',{ticketId:$('linkTicketId').value.trim(),
-      email:$('linkEmail').value.trim(),turnstileToken:captcha});
+    const result=await auth('start',{email:$('linkEmail').value.trim()});
+    if(typeof result.verificationToken!=='string'||result.verificationToken.length<32)
+      throw Error('invalid_email_response');
+    emailChallenge=result.verificationToken;requestedTicketId=id||null;
+    $('emailVerifyForm').hidden=false;
+    $('emailVerifyCode').value='';
     flash(t('sentLink'),'success');
   }catch(error){flash(safeError(error),'error');}
-  finally{resetChallenge(captchaLink);busy=false;$('linkSubmit').disabled=false;}
+  finally{busy=false;$('linkSubmit').disabled=false;}
+});
+$('emailVerifyForm').addEventListener('submit',async event=>{
+  event.preventDefault();if(!serviceEnabled||busy||!emailChallenge)return;
+  const code=$('emailVerifyCode').value.trim();
+  if(!/^[0-9]{6}$/.test(code)){flash(t('error'),'error');return;}
+  busy=true;$('emailVerifySubmit').disabled=true;flash(t('wait'));
+  try{
+    const result=await auth('verify',{verificationToken:emailChallenge,code});
+    if(typeof result.sessionToken!=='string'||result.sessionToken.length<20)throw Error('invalid_session');
+    accountToken=result.sessionToken;ticketToken=null;emailChallenge=null;
+    $('accountEmail').value=$('linkEmail').value.trim();
+    $('emailVerifyCode').value='';
+    signedIn();flash(t('loginSuccess'),'success');await refresh();
+    if(requestedTicketId)await openTicket(requestedTicketId);
+    requestedTicketId=null;
+  }catch(error){flash(safeError(error),'error');}
+  finally{busy=false;$('emailVerifySubmit').disabled=false;}
 });
 $('createForm').addEventListener('submit',async event=>{
   event.preventDefault();if(!serviceEnabled||busy)return;
