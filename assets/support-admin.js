@@ -30,7 +30,7 @@ function signedOut(){
  $('ownerEmail').value='';$('ownerPassword').value='';$('otpCode').value='';
  $('ownerLogin').hidden=false;$('ownerOtp').hidden=true;$('ownerList').hidden=true;
  $('adminChat').hidden=true;$('adminEmpty').hidden=false;
- $('adminTickets').replaceChildren();$('adminMessages').replaceChildren();
+ $('adminTickets').replaceChildren();$('adminMessages').replaceChildren();$('adminAttachments').replaceChildren();
  feedback('');disable($('ownerForm'),!available);
 }
 $('ownerForm').addEventListener('submit',async event=>{
@@ -75,6 +75,36 @@ async function refresh(){
   }
  }catch{feedback('خواندن فهرست تیکت‌ها تأیید نشد. ممکنه نشست منقضی شده باشه.',true);}
 }
+async function showExpertAttachments(id){
+ const list=$('adminAttachments');list.replaceChildren();
+ if(!adminToken||!id)return;
+ try{
+  const result=await support('attachment-list',{ticketId:id},adminToken);
+  for(const file of result.attachments||[]){
+   const row=document.createElement('div');row.className='uploaded-file';
+   const text=document.createElement('span');text.textContent=(file.name||'Attachment')+' · '+(file.bytes||0)+' bytes';
+   row.append(text);
+   if(file.state==='ready'){
+    const button=document.createElement('button');button.type='button';button.className='secondary';
+    button.textContent='دریافت خصوصی فایل';
+    button.addEventListener('click',async()=>{
+      button.disabled=true;
+      try{
+       const res=await fetch('/api/support/download',{method:'POST',credentials:'omit',
+        headers:{authorization:'Bearer '+adminToken,'content-type':'application/json'},
+        body:JSON.stringify({ticketId:id,attachmentId:file.id}),cache:'no-store'});
+       if(!res.ok)throw Error('not_allowed');
+       const blob=await res.blob(),url=URL.createObjectURL(blob);
+       const link=document.createElement('a');link.href=url;link.download=(file.name||'support-attachment').slice(0,120);
+       link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+      }catch{feedback('دریافت فایل تأیید نشد.',true);}
+      finally{button.disabled=false;}
+    });row.append(button);
+   }
+   list.append(row);
+  }
+ }catch{list.replaceChildren();list.textContent='فهرست پیوست‌ها در دسترس نیست.';}
+}
 async function openTicket(id){
  if(!adminToken||!/^[0-9a-f-]{36}$/i.test(id))return;
  try{
@@ -85,6 +115,7 @@ async function openTicket(id){
   $('adminTicketId').textContent=selected.id;
   $('adminTicketStatus').textContent=selected.status;
   $('adminMessages').replaceChildren();
+  void showExpertAttachments(selected.id);
   for(const m of response.messages||[]){
    const li=document.createElement('li');li.className='msg '+(m.author_kind==='reporter'?'reporter':'');
    const text=document.createElement('div');text.textContent=m.content;
