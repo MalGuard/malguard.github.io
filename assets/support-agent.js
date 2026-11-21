@@ -129,7 +129,7 @@ function signedOut(){
   accountToken=null;ticketToken=null;adminToken=null;adminChallengeId=null;selectedId=null;currentTicket=null;
   $('identity').hidden=true;$('ownerPanel').hidden=true;$('adminVerifyBox').hidden=true;
   $('adminCode').value='';$('adminState').textContent='';$('accountForm').hidden=false;$('linkForm').hidden=false;
-  $('agentAdvice').hidden=true;aiPreviewDigest=null;
+  $('agentAdvice').hidden=true;$('triagePanel').hidden=true;aiPreviewDigest=null;
   $('ticketList').replaceChildren();$('newTicketPane').hidden=false;$('chatPane').hidden=true;
   $('accountPassword').value='';$('reply').value='';attachmentUi?.hide();
 }
@@ -178,13 +178,45 @@ function displayChat(ticket,messages){
   $('agentAdvice').hidden=!(aiReady&&ticket.status!=='closed'&&ticket.kind==='bug'&&ticket.routing==='agent'&&latestReporterText);
   $('agentPreviewBox').hidden=true;$('agentConsent').checked=false;
   $('agentSend').disabled=true;aiPreviewDigest=null;
+  $('triagePanel').hidden=!serviceEnabled;
+  $('triageNotice').textContent='';
+  $('triageDetails').replaceChildren();
   attachmentUi?.show();
+}
+async function showTriage() {
+  const id=currentTicket?.id,locale=lang;
+  if(!serviceEnabled||!isUuid(id)||!token()||$('triagePanel').hidden)return;
+  $('triageRefresh').disabled=true;
+  $('triageNotice').textContent=locale==='fa'?'در حال بررسی محلی اطلاعات تیکت…':'Checking ticket details locally…';
+  try {
+    const data=await support('triage',{ticketId:id,locale},token());
+    if(currentTicket?.id!==id||lang!==locale)return;
+    const triage=data?.triage;
+    if(!triage||triage.source!=='deterministic-server-rule'||!Array.isArray(triage.missingDetails)||
+      !Array.isArray(triage.safeChecks))throw Error('invalid_triage_response');
+    const lines=[];
+    if(triage.notice)lines.push(triage.notice);
+    if(triage.missingDetails.length)lines.push(
+      (locale==='fa'?'اطلاعات تکمیلی: ':'Missing information: ')+triage.missingDetails.join('، '));
+    for(const check of triage.safeChecks)lines.push('• '+check);
+    if(triage.suggestedFollowUp)lines.push(triage.suggestedFollowUp);
+    $('triageDetails').textContent=lines.join('\n');
+    $('triageDetails').style.whiteSpace='pre-wrap';
+    $('triageNotice').textContent=locale==='fa'
+      ?'راهنمای اولیه؛ هیچ مدل خارجی فراخوانی نشد و هیچ تغییری انجام نشد.'
+      :'Initial guidance. No external AI was called and no change was made.';
+  }catch {
+    if(currentTicket?.id===id)$('triageNotice').textContent=locale==='fa'
+      ?'عیب‌یابی محلی تأیید نشد؛ می‌تونی به کارشناس ارجاع بدی.'
+      :'Local triage was unavailable. You can request human support.';
+  }finally{$('triageRefresh').disabled=false;}
 }
 async function openTicket(id){
   if(!isUuid(id)||!token())return;
   try{
     const data=await support('ticket',{ticketId:id},token());
     displayChat(data.ticket,data.messages||[]);
+    void showTriage();
   }catch(error){flash(safeError(error),'error');}
 }
 async function redeemFragment(){
@@ -310,7 +342,8 @@ $('askExpert').addEventListener('click',async()=>{
   }catch(error){flash(safeError(error),'error');}
   finally{busy=false;$('askExpert').disabled=false;}
 });
-$('newTicket').addEventListener('click',()=>{currentTicket=null;selectedId=null;$('chatPane').hidden=true;$('newTicketPane').hidden=false;$('ticketState').textContent=t('newTicket');$('agentAdvice').hidden=true;attachmentUi?.hide();flash('');});
+$('triageRefresh').addEventListener('click',()=>{void showTriage();});
+$('newTicket').addEventListener('click',()=>{currentTicket=null;selectedId=null;$('chatPane').hidden=true;$('newTicketPane').hidden=false;$('ticketState').textContent=t('newTicket');$('agentAdvice').hidden=true;$('triagePanel').hidden=true;attachmentUi?.hide();flash('');});
 $('refresh').addEventListener('click',refresh);
 $('adminCodeStart').addEventListener('click',async()=>{
   if(!accountToken||busy)return;
