@@ -150,5 +150,18 @@
       "path": "/api/support-cleanup",
       "schedule": "0 3 * * *"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "support-preview.malguard.site"
+        }
+      ],
+      "destination": "/support-ticket.html",
+      "permanent": false
+    }
   ]
 }
