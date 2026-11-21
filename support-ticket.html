@@ -34,10 +34,15 @@
       </form>
       <div class="divider-text"><span data-i18n="or">یا</span></div>
       <form id="linkForm">
-        <label data-i18n="ticketCode">شناسه تیکت</label><input id="linkTicketId" dir="ltr" required placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" minlength="36" maxlength="36">
-        <label data-i18n="linkEmail">ایمیل ثبت‌شده در تیکت</label><input id="linkEmail" type="email" dir="ltr" required maxlength="254" placeholder="you@example.com">
+        <label data-i18n="ticketCode">شناسه تیکت (اختیاری)</label><input id="linkTicketId" dir="ltr" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" maxlength="36">
+        <label data-i18n="linkEmail">ایمیل برای دریافت کد ورود</label><input id="linkEmail" type="email" dir="ltr" required maxlength="254" placeholder="you@example.com">
         <div id="linkCaptcha" class="captcha"></div>
-        <button type="submit" class="secondary" id="linkSubmit" data-i18n="sendLink">دریافت لینک ورود ایمیلی</button>
+        <button type="submit" class="secondary" id="linkSubmit" data-i18n="sendLink">دریافت کد ایمیلی ۶ رقمی</button>
+      </form>
+      <form id="emailVerifyForm" hidden>
+        <label data-i18n="codeLabel" for="emailVerifyCode">کد شش‌رقمی ارسال‌شده به ایمیل</label>
+        <input id="emailVerifyCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required dir="ltr" placeholder="123456">
+        <button type="submit" id="emailVerifySubmit" class="secondary" data-i18n="verifyEmail">تأیید ایمیل و ورود به تیکت‌ها</button>
       </form>
       <section id="ownerPanel" class="owner-panel" hidden aria-label="تأیید مدیریت پشتیبانی">
         <h3>مدیریت مال‌گارد · تأیید دومرحله‌ای</h3>
