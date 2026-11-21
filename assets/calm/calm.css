@@ -2,22 +2,22 @@
 /* MalGuard calm layer: one quiet system for the public site (matches /ai standard-ui).
    Presentation only. Loads last; `html:not(#_):not(#_)` lifts specificity over older layers. */
 html:not(#_):not(#_){
- --c-bg:var(--site-canvas);--c-surface:var(--site-surface);--c-raised:#1b1b1d;--c-hover:rgba(255,255,255,.06);
+ --c-bg:var(--site-canvas,#000);--c-surface:var(--site-surface,#0c0c0d);--c-raised:#1b1b1d;--c-hover:rgba(255,255,255,.06);
  --c-border:rgba(255,255,255,.09);--c-border-strong:rgba(255,255,255,.16);
- --c-text:var(--site-text);--c-muted:var(--site-muted);--c-faint:#919196;--c-accent:#5b8cff;--c-ink:#0e0e0f;
+ --c-text:var(--site-text,#fff);--c-muted:var(--site-muted,#a0a0a5);--c-faint:#919196;--c-accent:#5b8cff;--c-ink:#0e0e0f;
  --c-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.22);
  --c-r-sm:8px;--c-r:12px;--c-r-lg:16px;--c-r-xl:20px;--c-ease:cubic-bezier(.2,0,0,1);--c-t:200ms;
- --c-sans:var(--site-font);
+ --c-sans:var(--site-font,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,"Vazirmatn",sans-serif);
  --c-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
  background:var(--c-bg)!important;color-scheme:dark;
 }
 html[data-theme=light]:not(#_):not(#_){
- --c-bg:var(--site-canvas);--c-surface:var(--site-surface);--c-raised:#ffffff;--c-hover:rgba(31,30,29,.05);
+ --c-bg:var(--site-canvas,#faf9f5);--c-surface:var(--site-surface,#fff);--c-raised:#ffffff;--c-hover:rgba(31,30,29,.05);
  --c-border:rgba(31,30,29,.11);--c-border-strong:rgba(31,30,29,.2);
- --c-text:var(--site-text);--c-muted:var(--site-muted);--c-faint:#6f6b64;--c-accent:#2f6bff;--c-ink:#faf9f5;
+ --c-text:var(--site-text,#141413);--c-muted:var(--site-muted,#5f5c56);--c-faint:#6f6b64;--c-accent:#2f6bff;--c-ink:#faf9f5;
  --c-shadow:0 1px 2px rgba(31,30,29,.05),0 6px 20px rgba(31,30,29,.06);color-scheme:light;
 }
-html[dir=rtl]:not(#_):not(#_){--c-sans:var(--site-font)}
+html[dir=rtl]:not(#_):not(#_){--c-sans:var(--site-font,"Vazirmatn",system-ui,Tahoma,sans-serif)}
 
 /* Flat, quiet canvas: no starfields, particles, halos or page gradients */
 html:not(#_):not(#_) body:not(.mg-pro){background:var(--c-bg)!important;background-image:none!important;color:var(--c-text)!important;font-family:var(--c-sans)!important;
@@ -111,7 +111,7 @@ html:not(#_):not(#_) body:not(.mg-pro) footer :is(h2,h3,h4){font-size:13px!impor
 html:not(#_):not(#_) body:not(.mg-pro) footer :is(p,li,a){font-size:14px}
 /* Photo-backed heroes stay dark in both themes so copy keeps its contrast */
 html:not(#_):not(#_) body:not(.mg-pro) :is(.gta-hero,.mg-card-hero,.radar-ai-hero){
- --c-surface:var(--site-surface);--c-raised:#1b1b1d;--c-hover:rgba(255,255,255,.08);--c-border:rgba(255,255,255,.12);--c-border-strong:rgba(255,255,255,.22);
+ --c-surface:var(--site-surface,#fff);--c-raised:#1b1b1d;--c-hover:rgba(255,255,255,.08);--c-border:rgba(255,255,255,.12);--c-border-strong:rgba(255,255,255,.22);
  --c-text:#f2f2f2;--c-muted:#b4b4ba;--c-ink:#0e0e0f;color:var(--c-text)!important;color-scheme:dark}
 html:not(#_):not(#_) body:not(.mg-pro) :is(.gta-hero,.mg-card-hero,.radar-ai-hero) :is(h1,h2,h3,strong,.gta-static-lead){color:var(--c-text)!important}
 html:not(#_):not(#_) body:not(.mg-pro) :is(.gta-hero,.mg-card-hero,.radar-ai-hero) :is(p,small,.eyebrow){color:var(--c-muted)!important}

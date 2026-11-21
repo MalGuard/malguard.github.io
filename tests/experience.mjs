@@ -191,8 +191,8 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     const page=await context.newPage();
     const readBrand = async path => {
       await page.goto(base + path);
-      await page.waitForFunction(() => document.documentElement.dataset.theme &&
-        getComputedStyle(document.body).backgroundColor !== 'rgba(0, 0, 0, 0)');
+      await settle(page);
+      await page.waitForFunction(() => document.documentElement.dataset.theme);
     };
     await readBrand('/products.html');
     const original=await page.evaluate(()=>({
