@@ -191,29 +191,34 @@ export async function handleSupport(context,endpoint){
  }catch(error){return responseError(error);}
 }
 export async function supportHealth(env,{fetchImpl=fetch}={}){
- const binding=env?.SUPPORT_TICKETS_ENABLED==='true'&&
-  !!(env?.SUPPORT_DB&&typeof env.SUPPORT_DB.prepare==='function');
- let active=false;
- if(binding){
+ const configurationReady=env?.SUPPORT_TICKETS_ENABLED==='true';
+ const bindingReady=!!(env?.SUPPORT_DB&&typeof env.SUPPORT_DB.prepare==='function');
+ let schemaReady=false,accountReady=false;
+ if(configurationReady&&bindingReady){
    try{
      const schema=await env.SUPPORT_DB.prepare(
        "SELECT count(*) AS total FROM sqlite_master WHERE type='table' AND name IN ('support_tickets','support_messages','support_rate_limits')"
      ).first();
-     if(schema?.total===3){
+     schemaReady=Number(schema?.total)===3;
+   }catch{schemaReady=false;}
+   if(schemaReady){
+     try{
        const response=await fetchImpl('https://api.malguard.site/api/game-scam-guard/auth/status',{
          method:'GET',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(6000)
        });
        if(response.ok){
          const account=await response.json();
-         active=account?.configured===true&&account?.persistentAccounts===true;
+         accountReady=account?.configured===true&&account?.persistentAccounts===true;
        }
-     }
-   }catch{active=false;}
+     }catch{accountReady=false;}
+   }
  }
+ const active=configurationReady&&bindingReady&&schemaReady&&accountReady;
  return respond(200,{
-   enabled:active,phase:active?'account-tickets-d1':'database_not_connected',
-   reason:active?null:'support_database_not_connected',accountOnly:false,emailCodeEnabled:active,guestLinksEnabled:false,
-   attachmentsEnabled:false,aiEnabled:false,adminEnabled:false,
+   enabled:active,phase:active?'account-tickets-d1':'not_ready',
+   reason:active?null:'support_backend_not_ready',accountOnly:false,emailCodeEnabled:active,
+   guestLinksEnabled:false,attachmentsEnabled:false,aiEnabled:false,adminEnabled:false,
+   checks:{config:configurationReady,dbBinding:bindingReady,dbSchema:schemaReady,accountProvider:accountReady},
    turnstileSiteKey:null
  });
 }
