@@ -1,22 +1,23 @@
+@import url("./tokens.css");
 /* MalGuard calm layer: one quiet system for the public site (matches /ai standard-ui).
    Presentation only. Loads last; `html:not(#_):not(#_)` lifts specificity over older layers. */
 html:not(#_):not(#_){
- --c-bg:#0e0e0f;--c-surface:#161617;--c-raised:#1b1b1d;--c-hover:rgba(255,255,255,.06);
+ --c-bg:var(--site-canvas,#000);--c-surface:var(--site-surface,#0c0c0d);--c-raised:#1b1b1d;--c-hover:rgba(255,255,255,.06);
  --c-border:rgba(255,255,255,.09);--c-border-strong:rgba(255,255,255,.16);
- --c-text:#ececec;--c-muted:#a0a0a5;--c-faint:#76767c;--c-accent:#5b8cff;--c-ink:#0e0e0f;
+ --c-text:var(--site-text,#fff);--c-muted:var(--site-muted,#a0a0a5);--c-faint:#919196;--c-accent:#5b8cff;--c-ink:#0e0e0f;
  --c-shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.22);
  --c-r-sm:8px;--c-r:12px;--c-r-lg:16px;--c-r-xl:20px;--c-ease:cubic-bezier(.2,0,0,1);--c-t:200ms;
- --c-sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Vazirmatn",sans-serif;
+ --c-sans:var(--site-font,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,"Vazirmatn",sans-serif);
  --c-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
  background:var(--c-bg)!important;color-scheme:dark;
 }
 html[data-theme=light]:not(#_):not(#_){
- --c-bg:#faf9f5;--c-surface:#ffffff;--c-raised:#ffffff;--c-hover:rgba(31,30,29,.05);
+ --c-bg:var(--site-canvas,#faf9f5);--c-surface:var(--site-surface,#fff);--c-raised:#ffffff;--c-hover:rgba(31,30,29,.05);
  --c-border:rgba(31,30,29,.11);--c-border-strong:rgba(31,30,29,.2);
- --c-text:#1f1e1d;--c-muted:#5f5c56;--c-faint:#8a867e;--c-accent:#2f6bff;--c-ink:#faf9f5;
+ --c-text:var(--site-text,#141413);--c-muted:var(--site-muted,#5f5c56);--c-faint:#6f6b64;--c-accent:#2f6bff;--c-ink:#faf9f5;
  --c-shadow:0 1px 2px rgba(31,30,29,.05),0 6px 20px rgba(31,30,29,.06);color-scheme:light;
 }
-html[dir=rtl]:not(#_):not(#_){--c-sans:"Vazirmatn",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif}
+html[dir=rtl]:not(#_):not(#_){--c-sans:var(--site-font,"Vazirmatn",system-ui,Tahoma,sans-serif)}
 
 /* Flat, quiet canvas: no starfields, particles, halos or page gradients */
 html:not(#_):not(#_) body:not(.mg-pro){background:var(--c-bg)!important;background-image:none!important;color:var(--c-text)!important;font-family:var(--c-sans)!important;
@@ -110,7 +111,7 @@ html:not(#_):not(#_) body:not(.mg-pro) footer :is(h2,h3,h4){font-size:13px!impor
 html:not(#_):not(#_) body:not(.mg-pro) footer :is(p,li,a){font-size:14px}
 /* Photo-backed heroes stay dark in both themes so copy keeps its contrast */
 html:not(#_):not(#_) body:not(.mg-pro) :is(.gta-hero,.mg-card-hero,.radar-ai-hero){
- --c-surface:#161617;--c-raised:#1b1b1d;--c-hover:rgba(255,255,255,.08);--c-border:rgba(255,255,255,.12);--c-border-strong:rgba(255,255,255,.22);
+ --c-surface:var(--site-surface,#fff);--c-raised:#1b1b1d;--c-hover:rgba(255,255,255,.08);--c-border:rgba(255,255,255,.12);--c-border-strong:rgba(255,255,255,.22);
  --c-text:#f2f2f2;--c-muted:#b4b4ba;--c-ink:#0e0e0f;color:var(--c-text)!important;color-scheme:dark}
 html:not(#_):not(#_) body:not(.mg-pro) :is(.gta-hero,.mg-card-hero,.radar-ai-hero) :is(h1,h2,h3,strong,.gta-static-lead){color:var(--c-text)!important}
 html:not(#_):not(#_) body:not(.mg-pro) :is(.gta-hero,.mg-card-hero,.radar-ai-hero) :is(p,small,.eyebrow){color:var(--c-muted)!important}
@@ -131,9 +132,9 @@ html:not(#_):not(#_) body.mg-content-page header:not(#navbar) nav a{border-color
 html:not(#_):not(#_) body.mg-content-page main nav a{border-color:var(--c-border-strong)!important;border-radius:999px!important;text-decoration:none!important}
 
 /* ===== Power layer: confident display type, deep black night, crisp contrast ===== */
-html:not(#_):not(#_){--c-bg:#000;--c-surface:#0c0c0d;--c-raised:#141415;--c-border:rgba(255,255,255,.1);--c-border-strong:rgba(255,255,255,.2);--c-text:#fff;--c-muted:#9d9da3;--c-faint:#6e6e74;--c-ink:#000;
+html:not(#_):not(#_){--c-raised:#141415;--c-border:rgba(255,255,255,.1);--c-border-strong:rgba(255,255,255,.2);--c-ink:#000;
  --c-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 12px 32px rgba(0,0,0,.5);--c-lift:0 1px 0 rgba(255,255,255,.06) inset,0 20px 48px rgba(0,0,0,.6)}
-html[data-theme=light]:not(#_):not(#_){--c-text:#141413;--c-muted:#5c5a55;--c-ink:#faf9f5;--c-lift:0 2px 4px rgba(20,20,19,.04),0 18px 40px rgba(20,20,19,.10)}
+html[data-theme=light]:not(#_):not(#_){--c-ink:#faf9f5;--c-lift:0 2px 4px rgba(20,20,19,.04),0 18px 40px rgba(20,20,19,.10)}
 html:not(#_):not(#_) body:not(.mg-pro) main h1{font-size:clamp(3rem,1.4rem + 6.2vw,6.25rem)!important;line-height:.98!important;letter-spacing:-.05em!important;font-weight:650!important}
 html:not(#_):not(#_) body:not(.mg-pro) main h2{font-weight:620!important;letter-spacing:-.035em!important}
 html:not(#_):not(#_) body:not(.mg-pro) main :is(.hero-copy,.mg-page-copy,.ai-product-hero-copy) h2,
@@ -226,4 +227,21 @@ html:not(#_):not(#_) .mg-card-hero--scam .scam-hero-actions .btn.primary {
 html:not(#_):not(#_) .mg-card-hero--scam .scam-hero-actions .btn.secondary {
   color: #f5f5f5!important;
   background: #18191b!important;
+}
+
+/* Standalone help and onboarding pages use the public site's theme tokens. */
+html:not(#_):not(#_) .theme-document :is(.card,details,input) {
+  background: var(--c-surface)!important;
+  color: var(--c-text)!important;
+  border-color: var(--c-border-strong)!important;
+}
+html:not(#_):not(#_) .theme-document :is(p,small,li,label) { color: var(--c-muted)!important; }
+html:not(#_):not(#_) .theme-document a:not(.button) { color: var(--c-text)!important; text-underline-offset: .18em; }
+.theme-document header nav { display: flex; align-items: center; flex-wrap: wrap; gap: .5em; }
+.theme-document .mg-theme-toggle { position: static; }
+.theme-document section.grid { grid-template-columns: repeat(auto-fit,minmax(min(100%,260px),1fr)); }
+.theme-document details[hidden] { display: none!important; }
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(#_):not(#_) body:not(.mg-pro) main :is(article.product,article.mg-home-product,.ai-platform-card,.product-art img,.product-art video,.mg-home-product-art img,.mg-home-product-art video) { transition: none!important; transform: none!important; }
 }

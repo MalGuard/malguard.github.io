@@ -103,7 +103,7 @@
     }
   }
   function ensureCss(){
-    if(document.getElementById('mg-theme-css')) return;
+    if(document.querySelector('link[href^="/assets/precision/mg-theme.css"]')) return;
     const link=document.createElement('link');
     link.id='mg-theme-css';
     link.rel='stylesheet';
@@ -144,6 +144,10 @@
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
 
+  window.addEventListener('storage', event => {
+    if (event.key === KEY || event.key === null) apply(readMode());
+  });
+  window.addEventListener('pageshow', () => apply(readMode()));
   setInterval(()=>{
     const mode=readMode();
     if(mode===null||mode==='auto') apply(mode);

@@ -189,13 +189,18 @@ for (const [name, engine, sizes] of browserMatrix.filter(([name])=>!selectedBrow
     const context=await browser.newContext({...fixtureTLS,reducedMotion:'reduce'});
     await context.route('**/*',route=>new URL(route.request().url()).origin===new URL(base).origin?route.continue():route.abort());
     const page=await context.newPage();
-    await page.goto(base+'/products.html');await settle(page);
+    const readBrand = async path => {
+      await page.goto(base + path);
+      await settle(page);
+      await page.waitForFunction(() => document.documentElement.dataset.theme);
+    };
+    await readBrand('/products.html');
     const original=await page.evaluate(()=>({
       body:getComputedStyle(document.body).backgroundColor,
       heading:getComputedStyle(document.querySelector('.product-hero h1')).fontFamily,
       accent:getComputedStyle(document.documentElement).getPropertyValue('--mg-accent').trim()
     }));
-    await page.goto(base+'/threat-radar.html');await settle(page);
+    await readBrand('/threat-radar.html');
     const radar=await page.evaluate(()=>({
       body:getComputedStyle(document.body).backgroundColor,
       heading:getComputedStyle(document.querySelector('.radar-hero h1')).fontFamily,
