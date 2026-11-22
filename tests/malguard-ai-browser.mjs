@@ -89,6 +89,7 @@ try{
    assert.deepEqual(visited,['/ai-product.html','/ai/'],'Product card opens the platform guide, then the web app');
    assert.equal(await page.getByRole('textbox').first().isVisible(),true);
    assert.equal(await page.locator('.mg-card-hero--radar').count(),0);
+   assert.equal(await page.locator('.cards .card').count(),6,'Studio scripts mount all six tools');
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Assistant must fit after navigation');
   }
   for(const path of ['/ai-intelligence.html','/malware-ai.html']){
