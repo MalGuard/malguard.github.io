@@ -12,6 +12,19 @@ const now=()=>new Date().toISOString();
 const email=value=>typeof value==='string'&&value.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)?
   value.toLowerCase():null;
 const err=(status,code)=>Object.assign(new Error(code),{status,code});
+const normalizeCode=value=>typeof value==='string'?
+  Array.from(value.trim(),char=>char>='۰'&&char<='۹'?String(char.charCodeAt(0)-1776):
+    char>='٠'&&char<='٩'?String(char.charCodeAt(0)-1632):char).join(''):null;
+const digest=async data=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',
+  new TextEncoder().encode(data)))).map(byte=>byte.toString(16).padStart(2,'0')).join('');
+async function limitEmailChallenge(db,address) {
+ const key=await digest('support-otp-v1:'+address),future=Date.now()+15*60*1000;
+ await db.prepare('INSERT INTO support_rate_limits(rate_key,hits,expires_at) VALUES (?,1,?) ON CONFLICT(rate_key) DO UPDATE SET hits=CASE WHEN expires_at<? THEN 1 ELSE hits+1 END, expires_at=CASE WHEN expires_at<? THEN excluded.expires_at ELSE expires_at END')
+  .bind(key,future,Date.now(),Date.now()).run();
+ const item=await db.prepare('SELECT hits FROM support_rate_limits WHERE rate_key=?').bind(key).first();
+ if((item?.hits||0)>3)throw err(429,'email_code_rate_limited');
+}
+
 const headers={'content-type':'application/json; charset=utf-8','cache-control':'no-store',
  'x-content-type-options':'nosniff','referrer-policy':'no-referrer'};
 const respond=(status,obj)=>new Response(JSON.stringify(obj),{status,headers});
@@ -34,8 +47,7 @@ async function decodeRequest(request,max=8500){
  return body;
 }
 async function rate(env,request,action,limit=20,windowMs=60000){
- const db=getDb(env),source=request.headers.get('cf-connecting-ip')||
-   request.headers.get('x-real-ip')||'unspecified';
+ const db=getDb(env),source=request.headers.get('cf-connecting-ip')||'unspecified';
  const bytes=new TextEncoder().encode('mg-support-v1:'+action+':'+source);
  const sum=await crypto.subtle.digest('SHA-256',bytes);
  const key=Array.from(new Uint8Array(sum)).map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -53,8 +65,10 @@ async function callAuth(path,body){
  catch{throw err(503,'account_provider_unavailable');}
  const raw=await res.text().catch(()=>'');
  if(raw.length>24000)throw err(502,'account_provider_unavailable');
- if(!res.ok)throw err(res.status===401?401:res.status===429?429:503,
-   res.status===401?'invalid_account_session':'account_provider_unavailable');
+ if(!res.ok){
+   const status=res.status===400||res.status===401?401:res.status===429?429:503;
+   throw err(status,status===401?'invalid_login_or_code':status===429?'rate_limited':'account_provider_unavailable');
+ }
  let data;try{data=JSON.parse(raw);}catch{throw err(502,'account_provider_unavailable');}
  return data;
 }
@@ -105,21 +119,45 @@ export async function handleSupport(context,endpoint){
     const body=await decodeRequest(request,900),address=email(body.email);
     if(!address)throw err(400,'invalid_email');
     await rate(env,request,'email-login-start',4,900000);
+    await limitEmailChallenge(db,address);
     const result=await callAuth('start',{email:address});
     if(typeof result?.verificationToken!=='string'||result.verificationToken.length<32||
       result.verificationToken.length>12000)throw err(503,'account_provider_unavailable');
-    return respond(200,{verificationToken:result.verificationToken,delivery:'provider_accepted'});
+    const challengeId=crypto.randomUUID(),time=Date.now();
+    await db.prepare('INSERT INTO support_email_challenges(id,email,provider_token,expires_at,attempts,created_at) VALUES(?,?,?,?,0,?)')
+      .bind(challengeId,address,result.verificationToken,time+600000,new Date(time).toISOString()).run();
+    return respond(200,{challengeId,expiresInSeconds:600,delivery:'provider_accepted'});
   }
   if(endpoint==='auth/verify'){
-    const body=await decodeRequest(request,14000);
-    if(typeof body.verificationToken!=='string'||body.verificationToken.length<32||
-      body.verificationToken.length>12000||typeof body.code!=='string'||!/^[0-9]{6}$/.test(body.code))
+    const body=await decodeRequest(request,1400),code=normalizeCode(body.code);
+    if(!UUID.test(body.challengeId||'')||!/^[0-9]{6}$/.test(code||''))
       throw err(400,'invalid_verification');
-    await rate(env,request,'email-login-verify',10,900000);
-    const result=await callAuth('verify',{verificationToken:body.verificationToken,code:body.code});
-    if(typeof result?.sessionToken!=='string'||result.sessionToken.length<20)
-      throw err(503,'account_provider_unavailable');
-    return respond(200,{sessionToken:result.sessionToken});
+    await rate(env,request,'email-login-verify',12,900000);
+    const timestamp=Date.now(),leaseUntil=timestamp+30000;
+    const challenge=await db.prepare(
+      'UPDATE support_email_challenges SET attempts=attempts+1,verifying_until=? '+
+      'WHERE id=? AND consumed_at IS NULL AND expires_at>? AND attempts<5 '+
+      'AND (verifying_until IS NULL OR verifying_until<?) RETURNING provider_token,email')
+      .bind(leaseUntil,body.challengeId,timestamp,timestamp).first();
+    if(!challenge)throw err(401,'code_expired_or_too_many_attempts');
+    let session;
+    try{
+      session=await callAuth('verify',{verificationToken:challenge.provider_token,code});
+      if(typeof session?.sessionToken!=='string'||session.sessionToken.length<20)
+        throw err(503,'account_provider_unavailable');
+      const verified=await callAuth('session',{sessionToken:session.sessionToken});
+      if(email(verified?.email)!==challenge.email)throw err(401,'email_identity_mismatch');
+    }catch(cause){
+      await db.prepare('UPDATE support_email_challenges SET verifying_until=NULL WHERE id=? AND verifying_until=? AND consumed_at IS NULL')
+        .bind(body.challengeId,leaseUntil).run().catch(()=>{});
+      throw cause;
+    }
+    const used=await db.prepare(
+      "UPDATE support_email_challenges SET consumed_at=?,provider_token='',verifying_until=NULL "+
+      'WHERE id=? AND verifying_until=? AND consumed_at IS NULL RETURNING id')
+      .bind(Date.now(),body.challengeId,leaseUntil).first();
+    if(!used)throw err(409,'challenge_already_used');
+    return respond(200,{sessionToken:session.sessionToken});
   }
   if(!['create','list','ticket','message','close','reopen','triage','agent','escalate','admin-code-start','admin-code-verify',
      'attachment-start','attachment-chunk','attachment-finish','attachment-list','attachment-approve','attachment-revoke'].includes(endpoint))
@@ -238,10 +276,13 @@ export async function supportHealth(env,{fetchImpl=fetch}={}){
      }catch{accountReady=false;accountProbe='request_failed';}
    }
  }
- const active=configurationReady&&bindingReady&&schemaReady&&accountReady;
+ // Browser availability depends on our own DB and feature flag.
+ // A momentary upstream auth-health outage must not disable ticket UI;
+ // the sign-in request itself will fail closed if the provider is unavailable.
+ const active=configurationReady&&bindingReady&&schemaReady;
  return respond(200,{
    enabled:active,phase:active?'account-tickets-d1':'not_ready',
-   reason:active?null:'support_backend_not_ready',accountOnly:false,emailCodeEnabled:active,
+   reason:active?null:'support_backend_not_ready',accountOnly:false,emailCodeEnabled:active&&accountReady,
    guestLinksEnabled:false,attachmentsEnabled:false,aiEnabled:false,adminEnabled:false,
    checks:{config:configurationReady,dbBinding:bindingReady,dbSchema:schemaReady,accountProvider:accountReady,accountProbe},
    turnstileSiteKey:null,
