@@ -22,7 +22,7 @@ test('Cloudflare Pages tickets fail closed without database activation',async()=
  assert.ok(!JSON.stringify(await result.json()).includes('Some issue'));
 });
 
-test('readiness requires D1 schema plus real account provider health',async()=>{
+test('D1 readiness survives intermittent upstream auth status failures',async()=>{
  const db={prepare:()=>({first:async()=>({total:3})})};
  const env={SUPPORT_DB:db,SUPPORT_TICKETS_ENABLED:'true'};
  const ready=await supportHealth(env,{fetchImpl:async()=>({
@@ -32,7 +32,12 @@ test('readiness requires D1 schema plus real account provider health',async()=>{
  const broken=await supportHealth(env,{fetchImpl:async()=>({
    ok:true,json:async()=>({configured:false,persistentAccounts:true})
  })});
- assert.equal((await broken.json()).enabled,false);
+ const degraded=await broken.json();
+ assert.equal(degraded.enabled,true);
+ assert.equal(degraded.emailCodeEnabled,false);
+ assert.equal(degraded.checks.accountProvider,false);
+ const offline=await supportHealth(env,{fetchImpl:async()=>{throw Error('temporary provider outage');}});
+ assert.equal((await offline.json()).enabled,true);
  const missing=await supportHealth({
    SUPPORT_DB:{prepare:()=>({first:async()=>({total:1})})},
    SUPPORT_TICKETS_ENABLED:'true'
