@@ -41,7 +41,7 @@
       </form>
       <form id="emailVerifyForm" hidden>
         <label data-i18n="codeLabel" for="emailVerifyCode">کد شش‌رقمی ارسال‌شده به ایمیل</label>
-        <input id="emailVerifyCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required dir="ltr" placeholder="123456">
+        <input id="emailVerifyCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9۰-۹٠-٩]{6}" minlength="6" maxlength="6" required dir="ltr" placeholder="123456">
         <button type="submit" id="emailVerifySubmit" class="secondary" data-i18n="verifyEmail">تأیید ایمیل و ورود به تیکت‌ها</button>
       </form>
       <section id="ownerPanel" class="owner-panel" hidden aria-label="تأیید مدیریت پشتیبانی">
@@ -51,7 +51,7 @@
         <div id="adminVerifyBox" hidden>
           <label for="adminCode">کد ۶ رقمی ایمیل
             <input type="text" id="adminCode" inputmode="numeric" maxlength="6"
-              pattern="[0-9]{6}" autocomplete="one-time-code" placeholder="••••••••">
+              pattern="[0-9۰-۹٠-٩]{6}" autocomplete="one-time-code" placeholder="••••••">
           </label>
           <button type="button" id="adminCodeVerify" class="secondary">تأیید و ورود مدیر</button>
         </div>
