@@ -194,3 +194,24 @@ test('a truncated generation retries once with a smaller brief', async t => {
   assert.equal(response.status, 201);
   assert.equal(attempts, 2);
 });
+
+test('Persian greetings stay in Persian and skip search planning', async t => {
+  const prompts = [];
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    if (String(url).startsWith('https://api.malguard.site/')) {
+      return Response.json({email:'tester@example.com',expiresAt:Date.now()+10000});
+    }
+    const payload = JSON.parse(options.body);
+    prompts.push(payload.message);
+    assert.equal(payload.webMode, undefined);
+    return Response.json({text:'سلام! چطور می‌تونم کمکت کنم؟'});
+  });
+  const response = await handle(new Request('https://agent.example/api/chat', {
+    method:'POST',headers:{origin:'https://agent.example','content-type':'application/json',authorization:'Bearer verified-account-fixture'},
+    body:JSON.stringify({prompt:'سلام',webSearch:true,consent:{modelShare:true,remoteLookup:true}})
+  }), {APP_HOST:'agent.example'}, 'chat', fixture());
+  assert.match((await response.json()).text, /^سلام/);
+  assert.equal(prompts.length, 1);
+  assert.match(prompts[0], /Respond in natural Persian/);
+  assert.doesNotMatch(prompts[0], /Respond in English/);
+});

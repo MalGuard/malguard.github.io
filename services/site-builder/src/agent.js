@@ -99,8 +99,17 @@ function historyFor(body) {
     .map(({role, content}) => ({role, content:content.slice(0, 300)})) : [];
 }
 
+function replyInstruction(prompt) {
+  const plain = prompt.replace(/`{3}[\s\S]*?`{3}|`[^`]*`|https?:\/\/\S+/gu, " ");
+  if (/(?:به|زبان)\s*انگلیسی|\b(?:answer|reply|respond|write)\s+in English\b/iu.test(plain)) return "Respond in English.";
+  if (/(?:به|زبان)\s*فارسی|\b(?:answer|reply|respond|write)\s+in (?:Persian|Farsi)\b/iu.test(plain)
+      || /[\u0621-\u063a\u0641-\u064a\u0671-\u06d3]/u.test(plain)) return "Respond in natural Persian (Farsi).";
+  return "Respond in the language of the user's message, unless the user asks for a different language.";
+}
+
 async function runModel(prompt, auth, body, build, progress, brief = "") {
-  const remoteLookup = body.webSearch === true && body.consent.remoteLookup === true;
+  const greeting = /^(?:سلام|درود|hi|hello|hey)[!?.؟\s👋]*$/iu.test(prompt);
+  const remoteLookup = !greeting && body.webSearch === true && body.consent.remoteLookup === true;
   const history = historyFor(body);
   let searchQuery = "";
   if (remoteLookup) {
@@ -126,7 +135,8 @@ async function runModel(prompt, auth, body, build, progress, brief = "") {
 
   const instructions = build
     ? "You are MalGuard AI. Implement a polished and distinctive responsive static website from the design brief. Use at most " + (body.compact ? "850" : "1250") + " output tokens. Avoid decorative boilerplate and redundant CSS. Output only JSON {slug,html}. The HTML must be one complete document with inline CSS and JS and a viewport meta tag. Prioritize typography, deliberate spacing, a coherent palette, semantic sections and accessible focus states. Implement the requested interactions locally and check that each control reaches its target. Include credible topic-specific copy. Draw placeholder artwork with CSS or inline SVG. Do not link to external images or dependencies. Do not collect credentials. Use the selected language and direction. "
-    : "You are MalGuard AI, the coding and data analysis agent. Respond in English. Use fenced code blocks for snippets and cite relevant sources with URLs. Distinguish facts from assumptions. State clearly whether you performed an action. ";
+    : "You are MalGuard AI, the coding and data analysis agent. " + replyInstruction(prompt)
+      + " For a simple greeting, answer warmly in one sentence. Use fenced code blocks for snippets and cite relevant sources with URLs. State clearly whether you performed an action. ";
   const brand = build && brief.includes("MalGuard · Dark violet")
     ? " Use dark navy (#0b091f), luminous violet (#9c6af6) and off-white (#f5f4fc), with translucent panels and subtle borders."
     : "";

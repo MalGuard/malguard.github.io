@@ -34,7 +34,7 @@ function push(chat,role,content,project){if(!chat.title)chat.title=content.slice
 function recentButton(text,click,selected=false){const b=make("button",null,"recent"+(selected?" active":""));b.append(icon("chat"),make("span",text));b.title=text;b.onclick=click;return b;}
 function renderRecent(){const nav=$("#recent");nav.replaceChildren();if(chats.length){chats.forEach(c=>nav.append(recentButton(c.title,()=>{active=c;promptBox.value="";forceBuild=false;showNotice();document.body.classList.remove("mobile-open");render();},c===active)));}else{examples.forEach((s,i)=>{const btn=recentButton(s,()=>usePrompt(s),i===0);btn.title="Start a conversation: "+s;nav.append(btn);});}}
 function updateTime(){document.querySelectorAll("[data-expiry]").forEach(node=>{const remaining=Math.max(0,Math.ceil((Number(node.dataset.expiry)-Date.now())/1000));node.textContent=remaining?"Preview expires in "+Math.floor(remaining/60)+":"+String(remaining%60).padStart(2,"0"):"Preview expired";if(!remaining){node.parentNode.querySelector("a")?.remove();const b=node.parentNode.querySelector("button");if(b)b.disabled=true;}});}
-function render(){document.body.classList.toggle("chat-mode",!!active);const pane=$("#conversation");pane.hidden=!active;pane.replaceChildren();renderRecent();for(const item of active?.messages||[]){const line=make("div",null,"message "+item.role);line.dir="auto";if(item.role==="assistant") appendMessage(line,item.content);else line.textContent=item.content;showSources(line,item.sources);pane.append(line);if(!item.project)continue;const p=item.project,r=make("div",null,"result");line.append(r);if(p.code)line.append(codeBlock(p.code,"html"));if(p.accepted){r.append(make("span","Preview closed · ZIP accepted"));if(Date.now()<p.expiresAt){const again=make("button","Download ZIP again");again.onclick=()=>accept(p,again);r.append(again);}continue;}const a=make("a","Open preview");a.href=p.url;a.target="_blank";a.rel="noopener noreferrer";const b=make("button","Accept & download ZIP");b.onclick=()=>accept(p,b);const t=make("span");t.dataset.expiry=p.expiresAt;r.append(a,b,t);}if(pendingActivity?.chat===active)pane.append(pendingActivity.panel,pendingActivity.draft);updateTime();}
+function render(){document.body.classList.toggle("chat-mode",!!active);const pane=$("#conversation");pane.hidden=!active;pane.replaceChildren();renderRecent();for(const item of active?.messages||[]){const line=make("div",null,"message "+item.role);line.dir="auto";if(item.role==="assistant") appendMessage(line,item.content);else line.textContent=item.content;showSources(line,item.sources);pane.append(line);if(item.activity?.length) pane.append(activityPanel(item.activity));if(!item.project)continue;const p=item.project,r=make("div",null,"result");line.append(r);if(p.code)line.append(codeBlock(p.code,"html"));if(p.accepted){r.append(make("span","Preview closed · ZIP accepted"));if(Date.now()<p.expiresAt){const again=make("button","Download ZIP again");again.onclick=()=>accept(p,again);r.append(again);}continue;}const a=make("a","Open preview");a.href=p.url;a.target="_blank";a.rel="noopener noreferrer";const b=make("button","Accept & download ZIP");b.onclick=()=>accept(p,b);const t=make("span");t.dataset.expiry=p.expiresAt;r.append(a,b,t);}if(pendingActivity?.chat===active)pane.append(pendingActivity.panel,pendingActivity.draft);updateTime();}
 setInterval(updateTime,1000);
 let account;
 const accountReady=import("/ai/account.mjs").then(({createAccount})=>{account=createAccount({button:make("button"),locale:()=>"en",onChange:()=>{}});return account.restore();}).catch(()=>null);
@@ -140,32 +140,71 @@ function appendMessage(container, text) {
   container.append(document.createTextNode(text.slice(cursor)));
 }
 
-function beginActivity(chat) {
+const activityLabels = {
+  connecting:"Connecting", thinking:"Thinking", searching:"Searching",
+  analyzing:"Analyzing", typing:"Typing", complete:"Activity"
+};
+
+function activityPanel(steps, stage = "complete") {
   const panel = make("details", null, "message-activity");
-  const label = make("summary", "Connecting");
-  const log = make("ol");
-  label.setAttribute("aria-live", "polite");
-  panel.append(label, log);
+  panel.dataset.stage = stage;
+  const trigger = make("summary");
+  const emblem = make("span", null, "activity-emblem");
+  emblem.setAttribute("aria-hidden", "true");
+  emblem.append(make("span"));
+  const label = make("span", activityLabels[stage], "activity-label");
+  label.setAttribute("role", "status");
+  const dots = make("span", null, "activity-dots");
+  dots.setAttribute("aria-hidden", "true");
+  dots.append(make("i"), make("i"), make("i"));
+  const chevron = icon("chevron");
+  chevron.classList.add("activity-chevron");
+  trigger.append(emblem, label, dots, chevron);
+
+  const list = make("ol", null, "activity-log");
+  steps.forEach(step => list.append(make("li", step)));
+  panel.append(trigger, list);
+  return panel;
+}
+
+function beginActivity(chat) {
+  const userMessage = chat.messages.at(-1);
+  const steps = [];
+  const panel = activityPanel(steps, "connecting");
   const draft = make("div", null, "message assistant streaming-message");
   draft.hidden = true;
   draft.dir = "auto";
   pendingActivity = {chat, panel, draft};
   render();
   panel.scrollIntoView({block:"nearest"});
-  const labels = {thinking:"Thinking", searching:"Searching", analyzing:"Analyzing"};
-  return ({type, stage, detail, text}) => {
-    if (type === "delta" && typeof text === "string" && text) {
-      if (draft.hidden) {
-        label.textContent = "Typing";
-        log.append(make("li", "Receiving the visible model response."));
-        draft.hidden = false;
-      }
-      draft.append(document.createTextNode(text));
-      return;
+  const label = panel.querySelector(".activity-label");
+  const log = panel.querySelector(".activity-log");
+  const update = (stage, detail) => {
+    if (panel.dataset.stage !== stage) {
+      panel.dataset.stage = stage;
+      label.textContent = activityLabels[stage];
     }
-    if (!Object.hasOwn(labels, stage) || typeof detail !== "string") return;
-    label.textContent = labels[stage];
-    log.append(make("li", detail));
+    if (detail && !steps.includes(detail)) {
+      steps.push(detail);
+      log.append(make("li", detail));
+    }
+  };
+  return {
+    update({type, stage, detail, text}) {
+      if (type === "delta" && typeof text === "string" && text) {
+        if (draft.hidden) {
+          update("typing", "Receiving the model response.");
+          draft.hidden = false;
+        }
+        draft.append(document.createTextNode(text));
+      } else if (Object.hasOwn(activityLabels, stage) && typeof detail === "string") {
+        update(stage, detail);
+      }
+    },
+    finish() {
+      pendingActivity = null;
+      if (steps.length) userMessage.activity = steps;
+    }
   };
 }
 
@@ -235,7 +274,7 @@ async function submit(event) {
   if (!prompt || busy) return;
   setBusy(true);
   showNotice();
-  let chat;
+  let chat, activity;
   const building = forceBuild || wantsSite(prompt);
   try {
     await accountReady;
@@ -251,14 +290,14 @@ async function submit(event) {
     const history = chat.messages.slice(-6).map(({role, content}) => ({role,content:content.slice(0,1000)}));
     push(chat, "user", prompt);
     promptBox.value = "";
-    const progress = beginActivity(chat);
+    activity = beginActivity(chat);
     const response = await fetch(building ? "/api/build" : "/api/chat", {
       method: "POST",
       headers: {"Content-Type":"application/json", Accept:"application/x-ndjson", Authorization:"Bearer " + auth},
       body: JSON.stringify({prompt, brief, history, webSearch:web, consent:{modelShare:true,remoteLookup:web}})
     });
-    const {status, data} = await readAgentResponse(response, progress);
-    pendingActivity = null;
+    const {status, data} = await readAgentResponse(response, activity.update);
+    activity.finish();
     if (status >= 400) throw Error(data.message || data.error || "Request failed.");
     if (building) {
       const url = new URL(data.url);
@@ -276,7 +315,7 @@ async function submit(event) {
     addSources(chat, data.sources);
     forceBuild = false;
   } catch (error) {
-    pendingActivity = null;
+    activity?.finish();
     if (chat) push(chat, "assistant", "Request failed. " + error.message);
     else showNotice(error.message);
     if (chat === active && !promptBox.value) promptBox.value = prompt;
