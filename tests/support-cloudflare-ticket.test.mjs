@@ -4,12 +4,23 @@ import {handleSupport} from '../services/support/cloudflare/ticket-api.mjs';
 
 const A='a'.repeat(44),B='b'.repeat(44);
 const envFor=()=> {
- const tickets=new Map(),messages=[],rates=new Map();
+ const tickets=new Map(),messages=[],rates=new Map(),emailChallenges=new Map();
  function statement(sql,params=[]){
   return {
    bind(...args){return statement(sql,args);},
    async run(){
     if(sql.startsWith('INSERT INTO support_rate_limits')){const value=rates.get(params[0])||0;rates.set(params[0],value+1);return {success:true};}
+    if(sql.startsWith('INSERT INTO support_email_challenges')) {
+      const [id,address,token,expiresAt,createdAt]=params;
+      emailChallenges.set(id,{id,email:address,provider_token:token,expires_at:expiresAt,
+        created_at:createdAt,attempts:0,consumed_at:null,verifying_until:null});
+      return {success:true};
+    }
+    if(sql.startsWith('UPDATE support_email_challenges SET verifying_until=NULL')) {
+      const [id,until]=params,item=emailChallenges.get(id);
+      if(item&&item.verifying_until===until&&!item.consumed_at)item.verifying_until=null;
+      return {success:true};
+    }
     if(sql.startsWith('INSERT INTO support_tickets')){const [id,owner_email,kind,routing,subject,created_at,updated_at]=params;
       tickets.set(id,{id,owner_email,kind,routing,subject,created_at,updated_at,revision:0,status:'open',closed_at:null,attachments_delete_at:null});return {success:true};}
     if(sql.startsWith('INSERT INTO support_messages')){const [id,ticket_id,author_kind,content,created_at]=params;
@@ -18,6 +29,19 @@ const envFor=()=> {
    },
    async first(){
     if(sql.startsWith('SELECT hits FROM support_rate_limits'))return {hits:rates.get(params[0])||0};
+    if(sql.startsWith('UPDATE support_email_challenges SET attempts=attempts+1')) {
+      const [lease,id,nowA,nowB]=params,item=emailChallenges.get(id);
+      if(!item||item.consumed_at||item.expires_at<=nowA||item.attempts>=5||
+        item.verifying_until&&item.verifying_until>=nowB)return null;
+      item.attempts++;item.verifying_until=lease;
+      return {provider_token:item.provider_token,email:item.email};
+    }
+    if(sql.startsWith('UPDATE support_email_challenges SET consumed_at=')) {
+      const [time,id,lease]=params,item=emailChallenges.get(id);
+      if(!item||item.consumed_at||item.verifying_until!==lease)return null;
+      item.consumed_at=time;item.provider_token='';item.verifying_until=null;
+      return {id:item.id};
+    }
     if(sql.startsWith('SELECT * FROM support_tickets WHERE id=')){
       const ticket=tickets.get(params[0]);return ticket?.owner_email===params[1]?{...ticket}:null;
     }
@@ -48,7 +72,7 @@ const envFor=()=> {
    for(const item of items)await item.run();
    return [{success:true},{success:true}];
  }};
- return {db,tickets,messages,rates};
+ return {db,tickets,messages,rates,emailChallenges};
 };
 function request(endpoint,body={},token=A){
  return {endpoint,request:new Request('https://support-preview.malguard.site/api/support/'+endpoint,{
@@ -102,30 +126,48 @@ test('guest magic-link and admin endpoints stay disabled until separately verifi
  assert.equal((await resp.json()).error,'feature_not_configured');
 });
 
-test('email OTP uses the existing provider and never stores passwords or codes',async()=>{
+test('one-use email code is server-bound, supports Persian digits, rejects replay',async()=>{
  const savedFetch=globalThis.fetch,store=envFor(),env={SUPPORT_DB:store.db,SUPPORT_TICKETS_ENABLED:'true'};
  const calls=[];
- globalThis.fetch=async (url,options)=>{
-   calls.push({url,body:JSON.parse(options.body||'{}')});
-   if(String(url).endsWith('/auth/start'))return {ok:true,text:async()=>JSON.stringify({
+ globalThis.fetch=async(url,options)=>{
+   const body=JSON.parse(options.body||'{}');
+   calls.push({path:new URL(url).pathname,body});
+   if(String(url).endsWith('/auth/start'))return {ok:true,status:200,text:async()=>JSON.stringify({
      verificationToken:'synthetic-verification-token-xxxxxxxxxxxxxxxx'
    })};
-   if(String(url).endsWith('/auth/verify'))return {ok:true,text:async()=>JSON.stringify({
-     sessionToken:'synthetic-session-token-xxxxxxxxxxxxxxxxxx'
+   if(String(url).endsWith('/auth/verify'))return body.code==='123456'?
+    {ok:true,status:200,text:async()=>JSON.stringify({
+      sessionToken:'synthetic-session-token-xxxxxxxxxxxxxxxxxx'
+    })}:
+    {ok:false,status:400,text:async()=>JSON.stringify({error:'invalid_code'})};
+   if(String(url).endsWith('/auth/session'))return {ok:true,status:200,text:async()=>JSON.stringify({
+     email:'guest@example.test',expiresAt:Date.now()+600000
    })};
    return {ok:false,status:404,text:async()=>''};
  };
+ const call=async(endpoint,body)=>{
+  const obj=request(endpoint,body,null);
+  const result=await handleSupport({request:obj.request,env},obj.endpoint);
+  return {status:result.status,body:await result.json()};
+ };
  try{
-   const start=request('auth/start',{email:'guest@example.test'},null);
-   const first=await handleSupport({request:start.request,env},'auth/start');
-   assert.equal(first.status,200);
-   assert.equal((await first.json()).verificationToken.startsWith('synthetic-verification-token'),true);
-   const verify=request('auth/verify',{verificationToken:'synthetic-verification-token-xxxxxxxxxxxxxxxx',code:'123456'},null);
-   const second=await handleSupport({request:verify.request,env},'auth/verify');
-   assert.equal(second.status,200);
-   assert.equal((await second.json()).sessionToken.startsWith('synthetic-session-token'),true);
-   assert.equal(calls.length,2);
-   assert.deepEqual(calls.map(c=>new URL(c.url).pathname.split('/').pop()),['start','verify']);
-   assert.equal(store.tickets.size,0);
+  const first=await call('auth/start',{email:'guest@example.test'});
+  assert.equal(first.status,200);
+  assert.match(first.body.challengeId,/^[a-f0-9-]{36}$/);
+  assert.ok(!Object.hasOwn(first.body,'verificationToken'),'never expose provider challenge token');
+  assert.equal(first.body.expiresInSeconds,600);
+  assert.equal(store.emailChallenges.size,1);
+  const challengeId=first.body.challengeId;
+  assert.equal(store.emailChallenges.get(challengeId).email,'guest@example.test');
+  assert.equal((await call('auth/verify',{challengeId,code:'000000'})).status,401);
+  assert.equal(store.emailChallenges.get(challengeId).attempts,1);
+  const verified=await call('auth/verify',{challengeId,code:'۱۲۳۴۵۶'});
+  assert.equal(verified.status,200);
+  assert.equal(verified.body.sessionToken,'synthetic-session-token-xxxxxxxxxxxxxxxxxx');
+  assert.equal(store.emailChallenges.get(challengeId).provider_token,'');
+  assert.equal((await call('auth/verify',{challengeId,code:'123456'})).status,401);
+  assert.equal((await call('auth/verify',{challengeId:'not-a-uuid',code:'123456'})).status,400);
+  assert.deepEqual(calls.map(x=>x.path.split('/').pop()),['start','verify','verify','session']);
+  assert.equal(store.tickets.size,0);
  }finally{globalThis.fetch=savedFetch;}
 });
