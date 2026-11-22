@@ -34,7 +34,11 @@ const i18n={
   new:['تیکت جدید','New ticket'],reply:['پاسخ','Reply'],replyPlaceholder:['پیامت رو بنویس…','Write your reply…'],
   send:['ارسال','Send'],disclaimer:['پاسخ AI به معنای رفع قطعی باگ نیست. تغییر کد و انتشار نیاز به تأیید مدیر داره.','AI advice does not prove a fix. Code changes and releases require owner approval.'],
   existingReport:['فرم گزارش فعلی','Existing reporting form'],
-  offline:['بک‌اند تیکت هنوز به دیتابیس و ایمیل متصل نیست؛ اطلاعاتت رو در فرم فعلی گزارش ثبت کن.','The ticket backend is not yet connected to storage and email. Use the existing report form.'],
+  offline:['در این لحظه اتصال به سرویس تیکت برقرار نشد. دوباره تلاش کن.','Could not reach the ticket service right now. Please retry.'],
+  retry:['بررسی دوباره اتصال','Retry connection'],
+  codeSent:['درخواست کد پذیرفته شد. ایمیلت رو بررسی کن. کد فقط ۱۰ دقیقه اعتبار داره.','Code request was accepted. Check your email; the code expires in 10 minutes.'],
+  codeInvalid:['کد نامعتبر، منقضی یا بیش از حد امتحان شده است. کد جدید درخواست کن.','Code invalid, expired, or tried too many times. Request a new code.'],
+  signInFirst:['اول با حساب MalGuard یا کد ایمیلی وارد شو.','Sign in with MalGuard or an email code first.'],
   missingBackend:['صفحه روی Cloudflare آماده‌ست، اما بخش سروری تیکت هنوز پیکربندی نشده.','The Cloudflare page is online, but the ticket backend is not configured yet.'],
   reportNow:['رفتن به فرم ثبت گزارش','Open the working report form'],
   online:['سرویس تیکت حساب‌های MalGuard فعاله. برای ثبت گزارش وارد حسابت شو.','MalGuard account tickets are available. Sign in to create a report.'],
@@ -56,6 +60,7 @@ const i18n={
 };
 const t=key=>(i18n[key]||[key,key])[lang==='fa'?0:1];
 const isUuid=id=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||'');
+const normalizeOtp=value=>Array.from(String(value||'').trim(),ch=>ch>='۰'&&ch<='۹'?String(ch.charCodeAt(0)-1776):ch>='٠'&&ch<='٩'?String(ch.charCodeAt(0)-1632):ch).join('');
 let serviceReason=null,serviceEnabled=false,attachmentUi=null,aiReady=false,adminAvailable=false,latestReporterText=null,aiPreviewDigest=null;
 function translate(){
   document.documentElement.lang=lang;
@@ -79,6 +84,11 @@ function setReady(ready,reason=serviceReason){
     link.textContent=t('reportNow');
     link.className='service-fallback';
     banner.append(link);
+    const retry=document.createElement('button');
+    retry.type='button';retry.className='secondary service-retry';
+    retry.textContent=t('retry');
+    retry.addEventListener('click',()=>{retry.disabled=true;void verifyStatus();});
+    banner.append(retry);
   }
   banner.className='notice '+(ready?'good':'bad');
   $('linkForm').hidden=!ready||!!accountToken;
@@ -120,7 +130,7 @@ async function verifyStatus(){
       siteKey=status.turnstileSiteKey;
       addTurnstile();
     }
-  }catch{setReady(false);}
+  }catch{setReady(false,'status_request_failed');}
 }
 function addTurnstile(){
   if(!siteKey||captchaReady||document.getElementById('support-turnstile-script'))return;
@@ -274,22 +284,21 @@ $('linkForm').addEventListener('submit',async event=>{
   busy=true;$('linkSubmit').disabled=true;flash(t('wait'));
   try{
     const result=await auth('start',{email:$('linkEmail').value.trim()});
-    if(typeof result.verificationToken!=='string'||result.verificationToken.length<32)
-      throw Error('invalid_email_response');
-    emailChallenge=result.verificationToken;requestedTicketId=id||null;
+    if(!isUuid(result.challengeId))throw Error('invalid_email_response');
+    emailChallenge=result.challengeId;requestedTicketId=id||null;
     $('emailVerifyForm').hidden=false;
     $('emailVerifyCode').value='';
-    flash(t('sentLink'),'success');
+    flash(t('codeSent'),'success');
   }catch(error){flash(safeError(error),'error');}
   finally{busy=false;$('linkSubmit').disabled=false;}
 });
 $('emailVerifyForm').addEventListener('submit',async event=>{
   event.preventDefault();if(!serviceEnabled||busy||!emailChallenge)return;
-  const code=$('emailVerifyCode').value.trim();
-  if(!/^[0-9]{6}$/.test(code)){flash(t('error'),'error');return;}
+  const code=normalizeOtp($('emailVerifyCode').value);
+  if(!/^[0-9]{6}$/.test(code)){flash(t('codeInvalid'),'error');return;}
   busy=true;$('emailVerifySubmit').disabled=true;flash(t('wait'));
   try{
-    const result=await auth('verify',{verificationToken:emailChallenge,code});
+    const result=await auth('verify',{challengeId:emailChallenge,code});
     if(typeof result.sessionToken!=='string'||result.sessionToken.length<20)throw Error('invalid_session');
     accountToken=result.sessionToken;ticketToken=null;emailChallenge=null;
     $('accountEmail').value=$('linkEmail').value.trim();
@@ -297,13 +306,13 @@ $('emailVerifyForm').addEventListener('submit',async event=>{
     signedIn();flash(t('loginSuccess'),'success');await refresh();
     if(requestedTicketId)await openTicket(requestedTicketId);
     requestedTicketId=null;
-  }catch(error){flash(safeError(error),'error');}
+  }catch(error){flash(error?.status===400||error?.status===401||error?.status===409?t('codeInvalid'):safeError(error),'error');}
   finally{busy=false;$('emailVerifySubmit').disabled=false;}
 });
 $('createForm').addEventListener('submit',async event=>{
   event.preventDefault();if(!serviceEnabled||busy)return;
-  const captcha=accountToken?null:challengeToken(captchaCreate);
-  if(!accountToken&&!captcha){flash(t('error'),'error');return;}
+  if(!accountToken){flash(t('signInFirst'),'error');return;}
+  const captcha=null;
   busy=true;$('createSubmit').disabled=true;flash(t('wait'));
   try{
     const payload={kind:$('kind').value,subject:$('subject').value, message:$('description').value,
@@ -316,7 +325,7 @@ $('createForm').addEventListener('submit',async event=>{
     if(accountToken){$('createForm').reset();await refresh();if(isUuid(id))await openTicket(id);}
     else if(isUuid(id)){$('linkTicketId').value=id;$('linkEmail').value=payload.email;}
   }catch(error){flash(safeError(error),'error');}
-  finally{resetChallenge(captchaCreate);busy=false;$('createSubmit').disabled=false;}
+  finally{resetChallenge(captchaCreate);busy=false;$('createSubmit').disabled=!serviceEnabled||!accountToken;}
 });
 $('messageForm').addEventListener('submit',async event=>{
   event.preventDefault();if(!serviceEnabled||busy||!currentTicket)return;
@@ -405,8 +414,8 @@ $('adminCodeVerify').addEventListener('click',async()=>{
   busy=true;$('adminCodeVerify').disabled=true;
   try{
     const result=await support('admin-code-verify',{challengeId:adminChallengeId,
-      code:$('adminCode').value.trim()},accountToken);
-    if(typeof result.accessToken!=='string'||!result.accessToken.startsWith('mgadm1.'))throw Error('invalid_response');
+      code:normalizeOtp($('adminCode').value)},accountToken);
+    if(typeof result.accessToken!=='string'||result.accessToken.length<20)throw Error('invalid_response');
     adminToken=result.accessToken;ticketToken=null;adminChallengeId=null;
     $('adminCode').value='';$('adminVerifyBox').hidden=true;
     $('adminState').textContent=lang==='fa'?'دسترسی مدیر برای ۱۵ دقیقه فعال شد.':'Owner access is active for 15 minutes.';
