@@ -27,3 +27,17 @@ CREATE TABLE IF NOT EXISTS support_rate_limits (
   hits INTEGER NOT NULL DEFAULT 0,
   expires_at INTEGER NOT NULL
 );
+
+-- Ten-minute, one-use email code challenges. Verification token never leaves the server.
+CREATE TABLE IF NOT EXISTS support_email_challenges (
+ id TEXT PRIMARY KEY NOT NULL,
+ email TEXT NOT NULL,
+ provider_token TEXT NOT NULL,
+ expires_at INTEGER NOT NULL,
+ attempts INTEGER NOT NULL DEFAULT 0 CHECK(attempts BETWEEN 0 AND 6),
+ consumed_at INTEGER,
+ verifying_until INTEGER,
+ created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS support_email_challenges_expiry_idx
+ ON support_email_challenges(expires_at);
