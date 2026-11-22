@@ -124,3 +124,46 @@ textarea{resize:none}
   body:not(.chat-mode) #composer,
   body:not(.chat-mode) .quick { margin-top: 13px; }
 }
+
+.message-activity {
+  align-self: flex-start;
+  color: #ddd0f8;
+  padding: 9px 13px;
+  border: 1px solid #4d4067;
+  border-radius: 11px;
+}
+.message-activity summary, .code-block summary { cursor: pointer; }
+.message-activity ol { margin: 8px 0 1px; padding-inline-start: 22px; }
+.message-activity li { margin-block: 5px; line-height: 1.4; }
+.code-block {
+  margin-block: 10px;
+  border: 1px solid #473a60;
+  border-radius: 10px;
+  background: #100e23;
+  text-align: start;
+  direction: ltr;
+}
+.code-block summary { padding: 9px 12px; color: #ded1fb; }
+.code-block pre {
+  max-height: min(260px, 34svh);
+  overflow: auto;
+  margin: 0;
+  padding: 10px 12px;
+  white-space: pre;
+}
+.message-sources { margin: 10px 0 4px; padding-inline-start: 22px; }
+.message-sources a { color: #d8b9ff; }
+.brief-form, .brief-form label { display: grid; gap: 8px; }
+.brief-form { gap: 14px; }
+.brief-form select {
+  font: inherit;
+  width: 100%;
+  min-height: 40px;
+  padding: 7px;
+  border: 1px solid #665775;
+  border-radius: 9px;
+  background: #11101d;
+  color: #f5f4fc;
+}
+.brief-form .dialog-action { justify-self: end; border: 1px solid #a779ee; border-radius: 9px; padding: 9px 13px; }
+#dialog { max-height: 90svh; overflow: auto; }

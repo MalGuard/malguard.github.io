@@ -106,3 +106,44 @@ test('authenticated Persian build sends the selected model and returns a 20-minu
     'https://models.malguard.site/api/public-model-chat'
   ]);
 });
+
+test('the model selects whether to search and supplies the public query', async t => {
+  let searches = [];
+  let shouldSearch = false;
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    if (String(url).startsWith('https://api.malguard.site/')) {
+      return Response.json({email:'tester@example.com', expiresAt:Date.now() + 10000});
+    }
+    const body = JSON.parse(options.body);
+    assert.equal(body.model, 'cf_gptoss120');
+    if (body.message.startsWith('You control the optional web search tool.')) {
+      assert.equal(body.webMode, undefined);
+      return Response.json({text:shouldSearch ? 'latest browser support for CSS grid' : 'NONE'});
+    }
+    if (body.webMode === 'web') searches.push(body.searchQuery);
+    return Response.json({
+      text:'Here is the answer.',
+      ...(body.webMode === 'web' ? {webSearch:{state:'completed',sources:[{url:'https://example.com/ref',title:'Reference'}]}} : {})
+    });
+  });
+  const env = {APP_HOST:'agent.example'};
+  const store = fixture();
+  const send = async prompt => {
+    const stages = [];
+    const response = await handle(new Request('https://agent.example/api/chat', {
+      method:'POST', headers:{origin:'https://agent.example','content-type':'application/json',authorization:'Bearer verified-account-fixture'},
+      body:JSON.stringify({prompt, webSearch:true, consent:{modelShare:true,remoteLookup:true}})
+    }), env, 'chat', store, stage => stages.push(stage));
+    assert.equal(response.status, 200);
+    return {result:await response.json(), stages};
+  };
+  const ordinary = await send('Explain grid layout.');
+  assert.equal(ordinary.result.webStatus, 'off');
+  assert.deepEqual(searches, []);
+  assert.ok(!ordinary.stages.includes('searching'));
+  shouldSearch = true;
+  const fresh = await send('What is the latest browser support for CSS grid?');
+  assert.deepEqual(searches, ['latest browser support for CSS grid']);
+  assert.ok(fresh.stages.includes('searching'));
+  assert.ok(fresh.result.sources.some(source => source.url === 'https://example.com/ref'));
+});

@@ -21,8 +21,7 @@ function dialogButton(title,fn){const b=make("button",title,"dialog-action");b.o
 function dialogLink(title,href){const a=make("a",title,"dialog-action");a.href=href;dialogBody.append(a);}
 dialog.querySelector(".close").onclick=()=>dialog.close();
 const showNotice=(message="")=>{const bar=$("#notice");bar.textContent=message;bar.hidden=!message;bar.dir="auto";};
-const fa=s=>/[؀-ۿ]/u.test(s);
-const local=(s,en,persian)=>fa(s)?persian:en;
+let pendingActivity;
 let active=null,busy=false,web=true,forceBuild=false,allowModel=false,allowSearch=false;
 let chats=[];
 try{chats=JSON.parse(sessionStorage.getItem("malguard.studio.chats")||"[]");if(!Array.isArray(chats))chats=[];}catch{}
@@ -35,10 +34,10 @@ function push(chat,role,content,project){if(!chat.title)chat.title=content.slice
 function recentButton(text,click,selected=false){const b=make("button",null,"recent"+(selected?" active":""));b.append(icon("chat"),make("span",text));b.title=text;b.onclick=click;return b;}
 function renderRecent(){const nav=$("#recent");nav.replaceChildren();if(chats.length){chats.forEach(c=>nav.append(recentButton(c.title,()=>{active=c;promptBox.value="";forceBuild=false;showNotice();document.body.classList.remove("mobile-open");render();},c===active)));}else{examples.forEach((s,i)=>{const btn=recentButton(s,()=>usePrompt(s),i===0);btn.title="Start a conversation: "+s;nav.append(btn);});}}
 function updateTime(){document.querySelectorAll("[data-expiry]").forEach(node=>{const remaining=Math.max(0,Math.ceil((Number(node.dataset.expiry)-Date.now())/1000));node.textContent=remaining?"Preview expires in "+Math.floor(remaining/60)+":"+String(remaining%60).padStart(2,"0"):"Preview expired";if(!remaining){node.parentNode.querySelector("a")?.remove();const b=node.parentNode.querySelector("button");if(b)b.disabled=true;}});}
-function render(){document.body.classList.toggle("chat-mode",!!active);const pane=$("#conversation");pane.hidden=!active;pane.replaceChildren();renderRecent();for(const item of active?.messages||[]){const line=make("div",null,"message "+item.role);line.dir="auto";line.append(document.createTextNode(item.content));pane.append(line);if(!item.project)continue;const p=item.project,r=make("div",null,"result");line.append(r);if(p.accepted){r.append(make("span","Preview closed · ZIP accepted"));if(Date.now()<p.expiresAt){const again=make("button","Download ZIP again");again.onclick=()=>accept(p,again);r.append(again);}continue;}const a=make("a","Open preview");a.href=p.url;a.target="_blank";a.rel="noopener noreferrer";const b=make("button","Accept & download ZIP");b.onclick=()=>accept(p,b);const t=make("span");t.dataset.expiry=p.expiresAt;r.append(a,b,t);}updateTime();}
+function render(){document.body.classList.toggle("chat-mode",!!active);const pane=$("#conversation");pane.hidden=!active;pane.replaceChildren();renderRecent();for(const item of active?.messages||[]){const line=make("div",null,"message "+item.role);line.dir="auto";if(item.role==="assistant") appendMessage(line,item.content);else line.textContent=item.content;showSources(line,item.sources);pane.append(line);if(!item.project)continue;const p=item.project,r=make("div",null,"result");line.append(r);if(p.code)line.append(codeBlock(p.code,"html"));if(p.accepted){r.append(make("span","Preview closed · ZIP accepted"));if(Date.now()<p.expiresAt){const again=make("button","Download ZIP again");again.onclick=()=>accept(p,again);r.append(again);}continue;}const a=make("a","Open preview");a.href=p.url;a.target="_blank";a.rel="noopener noreferrer";const b=make("button","Accept & download ZIP");b.onclick=()=>accept(p,b);const t=make("span");t.dataset.expiry=p.expiresAt;r.append(a,b,t);}if(pendingActivity?.chat===active)pane.append(pendingActivity.panel);updateTime();}
 setInterval(updateTime,1000);
 let account;
-const accountReady=import("/ai/account.mjs").then(({createAccount})=>{account=createAccount({button:make("button"),locale:()=>fa(promptBox.value)?"fa":"en",onChange:()=>{}});return account.restore();}).catch(()=>null);
+const accountReady=import("/ai/account.mjs").then(({createAccount})=>{account=createAccount({button:make("button"),locale:()=>"en",onChange:()=>{}});return account.restore();}).catch(()=>null);
 async function accept(p,btn){btn.disabled=true;try{await accountReady;const headers={"Content-Type":"application/json"};const res=await fetch("/api/accept",{method:"POST",headers,body:JSON.stringify({id:p.id,token:p.token})});if(!res.ok)throw Error(res.status===410?"Preview expired.":"Download could not be completed. Try again.");const blob=await res.blob();const url=URL.createObjectURL(blob),link=make("a");link.href=url;link.download="malguard-site.zip";document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);p.accepted=true;save();render();}catch(e){showNotice(e.message);btn.disabled=false;}}
 function pickFile(type){const input=$("#file");input.accept=type==="csv"?".csv":".txt,.md,.json,.csv,.html,.css,.js";input.click();}
 async function attach(file){if(!file)return;try{if(file.size>1024*1024)throw Error("Choose a file smaller than 1 MiB.");const text=await file.text();if(/\.csv$/i.test(file.name)){const {summarizeCsv}=await import("./data-analysis.mjs");const summary=summarizeCsv(text);const c=entry();push(c,"user",file.name);push(c,"assistant",summary);showNotice();}else{if(promptBox.value.length+file.name.length+text.length+5>4200)throw Error("The attachment exceeds the message limit of 4,200 characters.");promptBox.value+=(promptBox.value?"\n\n":"")+file.name+"\n"+text;promptBox.focus();}}catch(e){showNotice(e.message);}}
@@ -62,15 +61,217 @@ const actions={
 };
 function syncWeb(){const b=$('[data-action="web"]');b.setAttribute("aria-pressed",String(web));b.querySelector(".toggle").classList.toggle("on",web);}
 syncWeb();document.querySelectorAll("[data-action]").forEach(b=>b.onclick=()=>actions[b.dataset.action]());$(".backdrop").onclick=actions.sidebar;
-function consent(s){if(allowModel&&(!web||allowSearch))return Promise.resolve(true);const en=!fa(s);openDialog(en?"Send this request?":"این درخواست ارسال شود؟").append(make("p",en?"Share the message with MalGuard’s model provider."+ (web?" Web Search will also share a query with the search provider.":""):"متن پیام برای ارائه‌دهندهٔ مدل مالگارد ارسال می‌شود."+(web?" با فعال بودن جست‌وجو، عبارت جست‌وجو نیز برای ارائه‌دهندهٔ جست‌وجو ارسال می‌شود.":"")));return new Promise(resolve=>{let confirmed=false;dialog.addEventListener("close",()=>resolve(confirmed),{once:true});dialogButton(en?"Allow and send":"اجازه و ارسال",()=>{confirmed=true;allowModel=true;if(web)allowSearch=true;dialog.close();});dialogButton(en?"Cancel":"لغو",()=>dialog.close());});}
-const wantsSite=s=>/\b(?:website|web\s?page|landing\s?page|web\s?site|web\s?app|microsite|portfolio site)\b|سایت|وبگاه|صفحه[‌ ](?:وب|فرود)/iu.test(s);
-async function submit(e){e.preventDefault();const s=promptBox.value.trim();if(!s||busy)return;setBusy(true);let c=null;const building=forceBuild||wantsSite(s);try{await accountReady;const auth=account?.getToken();if(!auth){showNotice(local(s,"Sign in to send your request. Your draft is saved in the composer.","برای ارسال درخواست وارد حساب شوید. متن شما در کادر پیام باقی می‌ماند."));account?.open();return;}if(!await consent(s))return;c=entry();const history=[...c.messages];push(c,"user",s);promptBox.value="";showNotice(local(s,building?"Building your website…":"Thinking…",building?"در حال ساخت سایت شما…":"در حال بررسی…"));const historyForModel=history.slice(-6).map(({role,content})=>({role,content:content.slice(0,1000)}));
-const res=await fetch(building?"/api/build":"/api/chat",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+auth},body:JSON.stringify({prompt:s,history:historyForModel,webSearch:web,consent:{modelShare:true,remoteLookup:web}})});
-const data=await res.json();if(!res.ok)throw Error(data.message||data.error||"Request failed.");
-if(building){const url=new URL(data.url);const localPreview=["localhost","127.0.0.1"].includes(location.hostname)&&url.origin===location.origin&&url.pathname.startsWith("/preview/");if((url.protocol!=="https:"&&!localPreview)||url.username||url.password||!data.id||!data.token||!Number.isFinite(Number(data.expiresAt)))throw Error("Invalid preview response.");push(c,"assistant",local(s,"Your website is ready to preview.","سایت شما آمادهٔ پیش‌نمایش است."),{id:data.id,token:data.token,url:url.href,expiresAt:Number(data.expiresAt)});}else{
-if(typeof data.text!=="string"||!data.text.trim())throw Error("Empty model response.");
-const sourceList=Array.isArray(data.sources)?data.sources.filter(x=>x&&typeof x.url==="string"&&/^https:\/\//i.test(x.url)).map(x=>(x.title||x.url)+" — "+x.url):[];
-push(c,"assistant",data.text+(sourceList.length?"\n\n"+sourceList.join("\n"):""));}forceBuild=false;showNotice();}catch(error){showNotice(local(s,"Request failed. ","درخواست انجام نشد. ")+error.message);if(c===active&&!promptBox.value)promptBox.value=s;}finally{setBusy(false);}}
+function consent() {
+  if (allowModel && (!web || allowSearch)) return Promise.resolve(true);
+  const message = "Share this message with MalGuard’s model provider." +
+    (web ? " The model can also send a public query to the search provider when needed." : "");
+  openDialog("Send this request?").append(make("p", message));
+  return new Promise(resolve => {
+    let confirmed = false;
+    dialog.addEventListener("close", () => resolve(confirmed), {once:true});
+    dialogButton("Allow and send", () => {
+      confirmed = true;
+      allowModel = true;
+      if (web) allowSearch = true;
+      dialog.close();
+    });
+    dialogButton("Cancel", () => dialog.close());
+  });
+}
+
+const wantsSite = text => /(?:\b(?:build|create|design|generate|make|develop|clone)\b[^.!?]{0,105}\b(?:website|web\s?page|landing\s?page|web\s?site|web\s?app|microsite|portfolio site)\b)|(?:(?:سایت|وبگاه|صفحه[‌ ](?:وب|فرود)).{0,70}(?:بساز|طراحی کن))|(?:(?:بساز|طراحی کن).{0,70}(?:سایت|وبگاه))/iu.test(text);
+
+function projectBrief() {
+  const pane = openDialog("Plan your website");
+  const form = make("form", null, "brief-form");
+  pane.append(form);
+  function field(label, options, placeholder) {
+    const wrapper = make("label", label);
+    const input = make(options ? "select" : "input");
+    if (options) {
+      for (const option of options) input.append(make("option", option));
+    } else {
+      input.placeholder = placeholder;
+      input.maxLength = 230;
+    }
+    wrapper.append(input);
+    form.append(wrapper);
+    return input;
+  }
+  const audience = field("Who is it for?", null, "e.g. prospective clients");
+  const theme = field("Visual style", ["Choose for me", "MalGuard · Dark violet", "Minimal", "Editorial", "Bold and colorful", "Describe below"]);
+  const language = field("Site language", ["English", "Persian", "Other (describe below)"]);
+  const features = field("Sections, features or theme details", null, "e.g. gallery, filters and a contact section");
+  const submit = make("button", "Build website", "dialog-action");
+  submit.type = "submit";
+  form.append(submit);
+  return new Promise(resolve => {
+    let brief = null;
+    form.onsubmit = event => {
+      event.preventDefault();
+      brief = JSON.stringify({
+        audience:audience.value.trim(), theme:theme.value,
+        language:language.value, features:features.value.trim()
+      });
+      dialog.close();
+    };
+    dialog.addEventListener("close", () => resolve(brief), {once:true});
+  });
+}
+
+function codeBlock(source, language) {
+  const block = make("details", null, "code-block");
+  const title = language ? "View " + language + " code" : "View code";
+  const pre = make("pre");
+  pre.tabIndex = 0;
+  pre.append(make("code", source));
+  block.append(make("summary", title), pre);
+  return block;
+}
+
+function appendMessage(container, text) {
+  const code = /`{3}([\w+.#-]*)[ \t]*\r?\n([\s\S]*?)`{3}/g;
+  let cursor = 0;
+  for (const match of text.matchAll(code)) {
+    container.append(document.createTextNode(text.slice(cursor, match.index)));
+    container.append(codeBlock(match[2].trimEnd(), match[1]));
+    cursor = match.index + match[0].length;
+  }
+  container.append(document.createTextNode(text.slice(cursor)));
+}
+
+function beginActivity(chat) {
+  const panel = make("details", null, "message-activity");
+  const label = make("summary", "Connecting");
+  const log = make("ol");
+  label.setAttribute("aria-live", "polite");
+  panel.append(label, log);
+  pendingActivity = {chat, panel};
+  render();
+  panel.scrollIntoView({block:"nearest"});
+  const labels = {thinking:"Thinking", searching:"Searching", analyzing:"Analyzing"};
+  return ({stage, detail}) => {
+    if (!Object.hasOwn(labels, stage) || typeof detail !== "string") return;
+    label.textContent = labels[stage];
+    log.append(make("li", detail));
+  };
+}
+
+async function readAgentResponse(response, progress) {
+  if (!response.headers.get("content-type")?.includes("application/x-ndjson")) {
+    return {status:response.status, data:await response.json()};
+  }
+  const stream = response.body.pipeThrough(new TextDecoderStream()).getReader();
+  let buffer = "", result;
+  try {
+    while (true) {
+      const {value, done} = await stream.read();
+      if (done) break;
+      buffer += value;
+      if (buffer.length > 512000) throw Error("Response is too large.");
+      const lines = buffer.split("\n");
+      buffer = lines.pop();
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        const event = JSON.parse(line);
+        if (event.type === "progress") progress(event);
+        if (event.type === "result") result = event;
+      }
+    }
+  } finally {
+    await stream.cancel().catch(() => {});
+    stream.releaseLock();
+  }
+  if (!result) throw Error("The response was interrupted.");
+  return result;
+}
+
+function addSources(chat, sources) {
+  if (!Array.isArray(sources)) return;
+  const links = sources.flatMap(source => {
+    try {
+      const url = new URL(source.url);
+      return url.protocol === "https:" && !url.username && !url.password
+        ? [{title:String(source.title || url.hostname), url:url.href}] : [];
+    } catch { return []; }
+  });
+  if (!links.length) return;
+  chat.messages.at(-1).sources = links;
+  save();
+  render();
+}
+
+function showSources(line, sources) {
+  if (!Array.isArray(sources) || !sources.length) return;
+  const list = make("ul", null, "message-sources");
+  for (const source of sources) {
+    if (!/^https:\/\//i.test(source.url)) continue;
+    const item = make("li");
+    const link = make("a", source.title);
+    link.href = source.url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    item.append(link);
+    list.append(item);
+  }
+  line.append(list);
+}
+
+async function submit(event) {
+  event.preventDefault();
+  const prompt = promptBox.value.trim();
+  if (!prompt || busy) return;
+  setBusy(true);
+  showNotice();
+  let chat;
+  const building = forceBuild || wantsSite(prompt);
+  try {
+    await accountReady;
+    const auth = account?.getToken();
+    if (!auth) {
+      showNotice("Sign in to send your request. Your draft is still in the composer.");
+      account?.open();
+      return;
+    }
+    const brief = building ? await projectBrief() : "";
+    if (brief === null || !await consent()) return;
+    chat = entry();
+    const history = chat.messages.slice(-6).map(({role, content}) => ({role,content:content.slice(0,1000)}));
+    push(chat, "user", prompt);
+    promptBox.value = "";
+    const progress = beginActivity(chat);
+    const response = await fetch(building ? "/api/build" : "/api/chat", {
+      method: "POST",
+      headers: {"Content-Type":"application/json", Accept:"application/x-ndjson", Authorization:"Bearer " + auth},
+      body: JSON.stringify({prompt, brief, history, webSearch:web, consent:{modelShare:true,remoteLookup:web}})
+    });
+    const {status, data} = await readAgentResponse(response, progress);
+    pendingActivity = null;
+    if (status >= 400) throw Error(data.message || data.error || "Request failed.");
+    if (building) {
+      const url = new URL(data.url);
+      const localPreview = ["localhost","127.0.0.1"].includes(location.hostname)
+        && url.origin === location.origin && url.pathname.startsWith("/preview/");
+      if ((url.protocol !== "https:" && !localPreview) || url.username || url.password
+          || !data.id || !data.token || !Number.isFinite(Number(data.expiresAt))) throw Error("Invalid preview response.");
+      push(chat, "assistant", "Your website is ready to preview.", {
+        id:data.id, token:data.token, url:url.href, expiresAt:Number(data.expiresAt), code:data.code
+      });
+    } else {
+      if (typeof data.text !== "string" || !data.text.trim()) throw Error("Empty model response.");
+      push(chat, "assistant", data.text);
+    }
+    addSources(chat, data.sources);
+    forceBuild = false;
+  } catch (error) {
+    pendingActivity = null;
+    if (chat) push(chat, "assistant", "Request failed. " + error.message);
+    else showNotice(error.message);
+    if (chat === active && !promptBox.value) promptBox.value = prompt;
+  } finally {
+    setBusy(false);
+  }
+}
 $("#composer").onsubmit=submit;promptBox.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("#composer").requestSubmit();}};render();
 
 if (new URLSearchParams(location.search).get("signup") === "1") {

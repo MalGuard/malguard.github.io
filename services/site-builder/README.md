@@ -2,7 +2,7 @@
 
 The public studio lives at `/ai/`. Existing chat, media and local-model tools are available at `/ai/classic.html`. The Vercel functions build static sites, answer coding and data questions, serve time-limited previews and package the approved source as ZIP.
 
-The server verifies existing MalGuard sessions and calls `cf_gptoss120` through `models.malguard.site`. The current gateway output budget favors compact single-page sites. Chat and build prompts receive relevant excerpts from the public site index. Enable web search per request to use Tavily through the model gateway, or configure `EXA_API_KEY` on the server for explicit public reference-page text through Exa. Refresh the public site index with `python3 services/site-builder/knowledge/refresh.py`.
+The server verifies existing MalGuard sessions and calls `cf_gptoss120` through `models.malguard.site`. The current gateway output budget favors compact single-page sites. Chat and build prompts receive relevant excerpts from the public site index. When web search is allowed, GPT-OSS decides whether to search and chooses the query. The existing model gateway executes that query through Tavily and returns sources with the answer. Refresh the public site index with `python3 services/site-builder/knowledge/refresh.py`.
 
 ## Vercel settings
 
