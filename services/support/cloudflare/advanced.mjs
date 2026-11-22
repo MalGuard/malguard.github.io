@@ -10,6 +10,7 @@ const iso=()=>new Date().toISOString();
 const hex=bytes=>Array.from(bytes).map(x=>x.toString(16).padStart(2,'0')).join('');
 const sha=async str=>hex(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str))));
 const clean=value=>typeof value==='string'?value.trim().toLowerCase():'';
+const normalizeCode=value=>typeof value==='string'?Array.from(value.trim(),x=>x>='۰'&&x<='۹'?String(x.charCodeAt(0)-1776):x>='٠'&&x<='٩'?String(x.charCodeAt(0)-1632):x).join(''):'';
 const ownerConfigured=env=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean(env?.SUPPORT_ADMIN_EMAIL))&&env?.SUPPORT_ADMIN_ENABLED==='true';
 const supported=new Set(['agent','escalate','admin-code-start','admin-code-verify']);
 
@@ -125,7 +126,7 @@ export async function handleAdvancedSupport({db,env,request,endpoint,body,actor,
        .bind(id,actor.email,result.verificationToken,time+10*60000,0,iso()).run();
      return {challengeId:id,expiresInSeconds:600,delivery:'provider_accepted'};
    }
-   const id=body.challengeId,code=body.code;
+   const id=body.challengeId,code=normalizeCode(body.code);
    if(!UUID.test(id||'')||typeof code!=='string'||!/^[0-9]{6}$/.test(code))
      throw error(400,'invalid_owner_challenge');
    const row=await db.prepare('SELECT * FROM support_admin_challenges WHERE id=? AND owner_email=? AND consumed_at IS NULL AND expires_at>? AND attempts<5')
