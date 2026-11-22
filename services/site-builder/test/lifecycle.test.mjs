@@ -147,3 +147,27 @@ test('the model selects whether to search and supplies the public query', async 
   assert.ok(fresh.stages.includes('searching'));
   assert.ok(fresh.result.sources.some(source => source.url === 'https://example.com/ref'));
 });
+
+test('typing is emitted only after the upstream model sends visible text', async t => {
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    if (String(url).startsWith('https://api.malguard.site/')) {
+      return Response.json({email:'tester@example.com',expiresAt:Date.now()+10000});
+    }
+    assert.equal(options.headers.Accept, 'application/x-ndjson');
+    const events = [
+      {type:'delta',text:'Hello'},
+      {type:'result',status:200,data:{modelId:'cf_gptoss120',text:'Hello'}}
+    ];
+    return new Response(events.map(event=>JSON.stringify(event)+'\n').join(''), {
+      headers:{'content-type':'application/x-ndjson'}
+    });
+  });
+  const stages = [];
+  const response = await handle(new Request('https://agent.example/api/chat', {
+    method:'POST',headers:{origin:'https://agent.example','content-type':'application/json',authorization:'Bearer verified-account-fixture'},
+    body:JSON.stringify({prompt:'Say hello',consent:{modelShare:true}})
+  }), {APP_HOST:'agent.example'}, 'chat', fixture(), (stage, detail, text)=>stages.push({stage,text}));
+  assert.equal((await response.json()).text, 'Hello');
+  assert.deepEqual(stages.map(event=>event.stage), ['thinking','typing']);
+  assert.equal(stages[1].text, 'Hello');
+});

@@ -27,7 +27,7 @@ export function endpoint(action) {
         else { init.body = request; init.duplex = "half"; }
       }
       const reply = await handle(new Request(url, init), process.env, action, undefined,
-        stream ? (stage, detail) => emit({ type: "progress", stage, detail }) : undefined);
+        stream ? (stage, detail, text) => emit(text ? {type:"delta", text} : {type:"progress", stage, detail}) : undefined);
       if (stream) {
         emit({ type: "result", status: reply.status, data: await reply.json() });
         result.end();

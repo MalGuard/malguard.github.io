@@ -167,3 +167,5 @@ textarea{resize:none}
 }
 .brief-form .dialog-action { justify-self: end; border: 1px solid #a779ee; border-radius: 9px; padding: 9px 13px; }
 #dialog { max-height: 90svh; overflow: auto; }
+
+.streaming-message { max-height: 45svh; overflow: auto; }

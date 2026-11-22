@@ -34,7 +34,7 @@ function push(chat,role,content,project){if(!chat.title)chat.title=content.slice
 function recentButton(text,click,selected=false){const b=make("button",null,"recent"+(selected?" active":""));b.append(icon("chat"),make("span",text));b.title=text;b.onclick=click;return b;}
 function renderRecent(){const nav=$("#recent");nav.replaceChildren();if(chats.length){chats.forEach(c=>nav.append(recentButton(c.title,()=>{active=c;promptBox.value="";forceBuild=false;showNotice();document.body.classList.remove("mobile-open");render();},c===active)));}else{examples.forEach((s,i)=>{const btn=recentButton(s,()=>usePrompt(s),i===0);btn.title="Start a conversation: "+s;nav.append(btn);});}}
 function updateTime(){document.querySelectorAll("[data-expiry]").forEach(node=>{const remaining=Math.max(0,Math.ceil((Number(node.dataset.expiry)-Date.now())/1000));node.textContent=remaining?"Preview expires in "+Math.floor(remaining/60)+":"+String(remaining%60).padStart(2,"0"):"Preview expired";if(!remaining){node.parentNode.querySelector("a")?.remove();const b=node.parentNode.querySelector("button");if(b)b.disabled=true;}});}
-function render(){document.body.classList.toggle("chat-mode",!!active);const pane=$("#conversation");pane.hidden=!active;pane.replaceChildren();renderRecent();for(const item of active?.messages||[]){const line=make("div",null,"message "+item.role);line.dir="auto";if(item.role==="assistant") appendMessage(line,item.content);else line.textContent=item.content;showSources(line,item.sources);pane.append(line);if(!item.project)continue;const p=item.project,r=make("div",null,"result");line.append(r);if(p.code)line.append(codeBlock(p.code,"html"));if(p.accepted){r.append(make("span","Preview closed · ZIP accepted"));if(Date.now()<p.expiresAt){const again=make("button","Download ZIP again");again.onclick=()=>accept(p,again);r.append(again);}continue;}const a=make("a","Open preview");a.href=p.url;a.target="_blank";a.rel="noopener noreferrer";const b=make("button","Accept & download ZIP");b.onclick=()=>accept(p,b);const t=make("span");t.dataset.expiry=p.expiresAt;r.append(a,b,t);}if(pendingActivity?.chat===active)pane.append(pendingActivity.panel);updateTime();}
+function render(){document.body.classList.toggle("chat-mode",!!active);const pane=$("#conversation");pane.hidden=!active;pane.replaceChildren();renderRecent();for(const item of active?.messages||[]){const line=make("div",null,"message "+item.role);line.dir="auto";if(item.role==="assistant") appendMessage(line,item.content);else line.textContent=item.content;showSources(line,item.sources);pane.append(line);if(!item.project)continue;const p=item.project,r=make("div",null,"result");line.append(r);if(p.code)line.append(codeBlock(p.code,"html"));if(p.accepted){r.append(make("span","Preview closed · ZIP accepted"));if(Date.now()<p.expiresAt){const again=make("button","Download ZIP again");again.onclick=()=>accept(p,again);r.append(again);}continue;}const a=make("a","Open preview");a.href=p.url;a.target="_blank";a.rel="noopener noreferrer";const b=make("button","Accept & download ZIP");b.onclick=()=>accept(p,b);const t=make("span");t.dataset.expiry=p.expiresAt;r.append(a,b,t);}if(pendingActivity?.chat===active)pane.append(pendingActivity.panel,pendingActivity.draft);updateTime();}
 setInterval(updateTime,1000);
 let account;
 const accountReady=import("/ai/account.mjs").then(({createAccount})=>{account=createAccount({button:make("button"),locale:()=>"en",onChange:()=>{}});return account.restore();}).catch(()=>null);
@@ -146,11 +146,23 @@ function beginActivity(chat) {
   const log = make("ol");
   label.setAttribute("aria-live", "polite");
   panel.append(label, log);
-  pendingActivity = {chat, panel};
+  const draft = make("div", null, "message assistant streaming-message");
+  draft.hidden = true;
+  draft.dir = "auto";
+  pendingActivity = {chat, panel, draft};
   render();
   panel.scrollIntoView({block:"nearest"});
   const labels = {thinking:"Thinking", searching:"Searching", analyzing:"Analyzing"};
-  return ({stage, detail}) => {
+  return ({type, stage, detail, text}) => {
+    if (type === "delta" && typeof text === "string" && text) {
+      if (draft.hidden) {
+        label.textContent = "Typing";
+        log.append(make("li", "Receiving the visible model response."));
+        draft.hidden = false;
+      }
+      draft.append(document.createTextNode(text));
+      return;
+    }
     if (!Object.hasOwn(labels, stage) || typeof detail !== "string") return;
     label.textContent = labels[stage];
     log.append(make("li", detail));
@@ -174,7 +186,7 @@ async function readAgentResponse(response, progress) {
       for (const line of lines) {
         if (!line.trim()) continue;
         const event = JSON.parse(line);
-        if (event.type === "progress") progress(event);
+        if (event.type === "progress" || event.type === "delta") progress(event);
         if (event.type === "result") result = event;
       }
     }
