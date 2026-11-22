@@ -1,6 +1,7 @@
 // Owner-only support inbox. Sessions and OTPs are held in page memory only.
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
+const normalizeOtp=value=>Array.from(String(value||'').trim(),ch=>ch>='۰'&&ch<='۹'?String(ch.charCodeAt(0)-1776):ch>='٠'&&ch<='٩'?String(ch.charCodeAt(0)-1632):ch).join('');
 const publicHosts=new Set(['malguard.site','www.malguard.site','malguard.github.io']);
 const base=publicHosts.has(location.hostname)?'https://api.malguard.site':'';
 let accountToken=null,adminToken=null,challengeId=null,selected=null,busy=false,available=false;
@@ -52,7 +53,7 @@ $('otpForm').addEventListener('submit',async event=>{
  event.preventDefault();if(!available||busy||!accountToken||!challengeId)return;
  busy=true;disable($('otpForm'),true);feedback('در حال بررسی کد…');
  try{
-  const result=await support('admin-code-verify',{challengeId,code:$('otpCode').value.trim()},accountToken);
+  const result=await support('admin-code-verify',{challengeId,code:normalizeOtp($('otpCode').value)},accountToken);
   if(typeof result.accessToken!=='string')throw Error('invalid_admin_session');
   adminToken=result.accessToken;$('otpCode').value='';challengeId=null;
   $('ownerOtp').hidden=true;$('ownerList').hidden=false;feedback('ورود دومرحله‌ای تأیید شد.','success');
