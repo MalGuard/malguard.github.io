@@ -116,9 +116,11 @@ test('the model selects whether to search and supplies the public query', async 
     }
     const body = JSON.parse(options.body);
     assert.equal(body.model, 'cf_gptoss120');
-    if (body.message.startsWith('You control the optional web search tool.')) {
+    if (body.message.includes('You control the optional web search tool.')) {
       assert.equal(body.webMode, undefined);
-      return Response.json({text:shouldSearch ? 'latest browser support for CSS grid' : 'NONE'});
+      assert.equal(options.headers['X-MalGuard-Tool-Choice'],'web-search');
+      assert.equal(body.consent.remoteLookup,true);
+      return Response.json({text:shouldSearch ? 'latest browser support for CSS grid' : 'NONE',toolDecision:true});
     }
     if (body.webMode === 'web') searches.push(body.searchQuery);
     return Response.json({
@@ -170,4 +172,23 @@ test('typing is emitted only after the upstream model sends visible text', async
   assert.equal((await response.json()).text, 'Hello');
   assert.deepEqual(stages.map(event=>event.stage), ['thinking','typing']);
   assert.equal(stages[1].text, 'Hello');
+});
+
+test('a truncated generation retries once with a smaller brief', async t => {
+  let attempts = 0;
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    if (String(url).startsWith('https://api.malguard.site/')) {
+      return Response.json({email:'tester@example.com',expiresAt:Date.now()+10000});
+    }
+    if (++attempts === 1) return Response.json({error:'provider_unavailable'}, {status:503});
+    const payload = JSON.parse(options.body);
+    assert.match(payload.message, /850 output tokens/);
+    return Response.json({text:JSON.stringify({slug:'museum',html:'<html><body>Exhibition</body></html>'})});
+  });
+  const response = await handle(new Request('https://agent.example/api/build', {
+    method:'POST',headers:{origin:'https://agent.example','content-type':'application/json',authorization:'Bearer verified-account-fixture'},
+    body:JSON.stringify({prompt:'Build a museum exhibition poster',consent:{modelShare:true}})
+  }), {APP_HOST:'agent.example',PREVIEW_ON_APP:'1'}, 'build', fixture());
+  assert.equal(response.status, 201);
+  assert.equal(attempts, 2);
 });

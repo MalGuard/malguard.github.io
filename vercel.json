@@ -13,7 +13,7 @@
       "includeFiles": "services/game-scam-guard/server/{preview-worker.mjs,preview-renderer.mjs,artifact-worker.mjs,artifact-engine.js,cloud-execution-worker.py,vendor/**}"
     },
     "api/build.js": {
-      "maxDuration": 120,
+      "maxDuration": 240,
       "includeFiles": "services/site-builder/knowledge/pages.json"
     },
     "api/chat.js": {

@@ -58,10 +58,11 @@ function gatewayBody(query) {
   return payload;
 }
 
-async function gateway(query, auth, output) {
+async function gateway(query, auth, output, toolChoice) {
   const result = await fetch(modelRoot + "/api/public-model-chat", {
     method: "POST", redirect: "error", signal: AbortSignal.timeout(55000),
-    headers: {...modelHeaders(auth), ...(output ? {Accept:"application/x-ndjson"} : {})}, body: gatewayBody(query)
+    headers: {...modelHeaders(auth), ...(output ? {Accept:"application/x-ndjson"} : {}),
+      ...(toolChoice ? {"X-MalGuard-Tool-Choice":toolChoice} : {})}, body: gatewayBody(query)
   });
   if (!result.ok) throw Object.assign(new Error("Generation unavailable"), { status: result.status });
   const reply = result.headers.get("content-type")?.includes("application/x-ndjson")
@@ -106,11 +107,13 @@ async function runModel(prompt, auth, body, build, progress, brief = "") {
     progress("thinking", "Deciding whether current web information is needed.");
     try {
       const plan = await gateway({
-        message: "You control the optional web search tool. Search only for current or externally verifiable facts, or to inspect a public reference the user provided. Never send personal details, credentials, file contents or private URLs to search. Return ONLY one short public search query on one line, or NONE if search will not improve the answer. Request: " + prompt.slice(0, 900),
-        consent: { modelShare: true }
-      }, auth);
-      const candidate = plan.text.trim();
-      if (!/^none\b/i.test(candidate) && candidate.length <= 180 && !/[\n\r@]/.test(candidate)) searchQuery = candidate;
+        message: "Respond in English. You control the optional web search tool. Search only for current or externally verifiable facts, or to inspect a public reference the user provided. Never send personal details, credentials, file contents or private URLs to search. Return exactly SEARCH: followed by one short public query on one line, or NONE if search will not improve the answer. Request: " + prompt.slice(0, 900),
+        consent: { modelShare:true, remoteLookup:true }
+      }, auth, undefined, "web-search");
+      const lines = plan.text.trim().split(/\r?\n/);
+      const choice = plan.toolDecision ? plan.text.trim()
+        : lines.find(line => /^SEARCH:\s*\S/i.test(line))?.replace(/^SEARCH:\s*/i, "").trim();
+      if (choice && !/^none\b/i.test(choice) && choice.length <= 180 && !/[\n\r@]/.test(choice)) searchQuery = choice;
     } catch (error) {
       if ([401, 403, 429].includes(error.status)) throw error;
     }
@@ -122,7 +125,7 @@ async function runModel(prompt, auth, body, build, progress, brief = "") {
     : "Generating a response with GPT-OSS 120B.");
 
   const instructions = build
-    ? "You are MalGuard AI. Implement a polished and distinctive responsive static website from the design brief. Fit the full response in 1500 tokens. Output only JSON {slug,html}. The HTML must be one complete document with inline CSS and JS and a viewport meta tag. Prioritize typography, deliberate spacing, a coherent palette, semantic sections and accessible focus states. Implement the requested interactions locally. Include credible topic-specific copy. No external dependencies or credential collection. Use the selected language and direction. "
+    ? "You are MalGuard AI. Implement a polished and distinctive responsive static website from the design brief. Use at most " + (body.compact ? "850" : "1250") + " output tokens. Avoid decorative boilerplate and redundant CSS. Output only JSON {slug,html}. The HTML must be one complete document with inline CSS and JS and a viewport meta tag. Prioritize typography, deliberate spacing, a coherent palette, semantic sections and accessible focus states. Implement the requested interactions locally. Include credible topic-specific copy. No external dependencies or credential collection. Use the selected language and direction. "
     : "You are MalGuard AI, the coding and data analysis agent. Respond in English. Use fenced code blocks for snippets and cite relevant sources with URLs. Distinguish facts from assumptions. State clearly whether you performed an action. ";
   const brand = build && brief.includes("MalGuard · Dark violet")
     ? " Use dark navy (#0b091f), luminous violet (#9c6af6) and off-white (#f5f4fc), with translucent panels and subtle borders."
@@ -188,7 +191,7 @@ export async function handle(request, env, action, store = env.BLOB_READ_WRITE_T
     if (typeof body.prompt !== "string" || !body.prompt.trim() || body.prompt.length > 4200)
       return error("Enter a design brief of up to 4,200 characters.", 400);
     const auth = request.headers.get("Authorization") || "";
-    if (!/^Bearer [^\s]{12,4096}$/.test(auth)) return error("Sign in to build a website.", 401);
+    if (!/^Bearer [^\s]{12,4096}$/.test(auth)) return error("Sign in to continue.", 401);
     if (body.consent?.modelShare !== true || (body.webSearch === true && body.consent.remoteLookup !== true))
       return error("Please confirm model and search sharing preferences.", 400);
     let accountKey;
@@ -217,12 +220,19 @@ export async function handle(request, env, action, store = env.BLOB_READ_WRITE_T
     const prompt = body.prompt.trim().slice(0, build ? 3100 : 4200);
     let committed = false;
     try {
-      const reply = await runModel(prompt, auth, body, build, progress, brief);
-      if (!build) { committed = true; return json(reply); }
+      if (!build) {
+        const reply = await runModel(prompt, auth, body, false, progress, brief);
+        committed = true;
+        return json(reply);
+      }
       let site;
-      try { site = parseSite(reply.text); }
-      catch {
-        const retry = {...body, history: [], webSearch:false};
+      try {
+        const reply = await runModel(prompt, auth, body, true, progress, brief);
+        site = parseSite(reply.text);
+      } catch (failure) {
+        if (failure.status && ![502,503].includes(failure.status)) throw failure;
+        progress("analyzing", "Retrying with a shorter implementation that fits the model limit.");
+        const retry = {...body, compact:true, history: [], webSearch:false};
         const repaired = await runModel(prompt.slice(0,2800)
           + "\nRegenerate as a smaller complete JSON document. Fit all markup, styles and interactions into 900 tokens. Close </html> and escape JSON correctly.", auth,retry,true,progress,brief);
         site = parseSite(repaired.text);
