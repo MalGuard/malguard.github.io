@@ -72,3 +72,11 @@ if(typeof data.text!=="string"||!data.text.trim())throw Error("Empty model respo
 const sourceList=Array.isArray(data.sources)?data.sources.filter(x=>x&&typeof x.url==="string"&&/^https:\/\//i.test(x.url)).map(x=>(x.title||x.url)+" — "+x.url):[];
 push(c,"assistant",data.text+(sourceList.length?"\n\n"+sourceList.join("\n"):""));}forceBuild=false;showNotice();}catch(error){showNotice(local(s,"Request failed. ","درخواست انجام نشد. ")+error.message);if(c===active&&!promptBox.value)promptBox.value=s;}finally{setBusy(false);}}
 $("#composer").onsubmit=submit;promptBox.onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();$("#composer").requestSubmit();}};render();
+
+if (new URLSearchParams(location.search).get("signup") === "1") {
+  accountReady.then(() => {
+    if (!account) showNotice("Account service unavailable.");
+    else if (!account.getToken()) account.open(true);
+    else showNotice("You are already signed in.");
+  });
+}

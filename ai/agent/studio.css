@@ -16,3 +16,111 @@ textarea{resize:none}
 .cards{grid-template-columns:repeat(6,minmax(0,1fr))}
 @media(max-width:950px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(min-width:951px){.welcome h1{width:fit-content;max-width:89%;margin-inline:auto}}
+
+/* Keep the welcome screen in one viewport on desktop and tablet. */
+@media (min-width: 721px) and (max-height: 959px) {
+  body:not(.chat-mode) .surface {
+    padding-top: clamp(66px, 10.5svh, 102px);
+    padding-bottom: 24px;
+  }
+
+  body:not(.chat-mode) .hero-brand {
+    width: clamp(148px, 23svh, 225px);
+  }
+
+  body:not(.chat-mode) .welcome h1 {
+    margin-block: 10px 5px;
+    font-size: clamp(28px, 5.4svh, 46px);
+    line-height: 1.12;
+  }
+
+  body:not(.chat-mode) .welcome > p {
+    font-size: clamp(13px, 2.1svh, 18px);
+  }
+
+  body:not(.chat-mode) .cards,
+  body:not(.chat-mode) #composer,
+  body:not(.chat-mode) .quick {
+    margin-top: clamp(13px, 3.2svh, 33px);
+  }
+
+  body:not(.chat-mode) .card {
+    min-height: clamp(85px, 14svh, 140px);
+    padding-block: 10px;
+    gap: 5px;
+  }
+
+  body:not(.chat-mode) .card svg {
+    width: clamp(22px, 4.5svh, 32px);
+    height: clamp(22px, 4.5svh, 32px);
+  }
+
+  body:not(.chat-mode) #composer {
+    padding-block: 10px;
+  }
+
+  body:not(.chat-mode) textarea {
+    min-height: 42px;
+    height: 7svh;
+    padding-bottom: 4px;
+  }
+
+  body:not(.chat-mode) .send {
+    width: clamp(36px, 6svh, 48px);
+    height: clamp(36px, 6svh, 48px);
+  }
+
+  body:not(.chat-mode) .quick button {
+    padding-block: 8px;
+  }
+}
+
+@media (min-width: 721px) and (max-height: 740px) {
+  aside { padding-block: 14px; }
+  .new { margin-block: 15px; }
+  .recent-title { padding-bottom: 6px; }
+  .recent { min-height: 32px; padding-block: 5px; }
+  .side-bottom { padding-top: 8px; }
+  .pro { padding: 10px; }
+  .pro p { margin-block: 7px; }
+  .pro button { height: 34px; }
+  .side-link { padding-block: 6px; }
+  .pro + .side-link { margin-top: 7px; }
+}
+
+@media (min-width: 721px) and (max-width: 950px) {
+  body:not(.chat-mode) .surface { padding-block: 72px 16px; }
+  body:not(.chat-mode) .hero-brand { width: 160px; }
+  body:not(.chat-mode) .card { min-height: 92px; padding-block: 8px; gap: 4px; }
+  body:not(.chat-mode) .card svg { width: 25px; height: 25px; }
+  body:not(.chat-mode) .card small { font-size: 11px; }
+  body:not(.chat-mode) .cards,
+  body:not(.chat-mode) #composer,
+  body:not(.chat-mode) .quick { margin-top: 17px; }
+}
+
+@media (min-width: 951px) and (max-height: 740px) {
+  body:not(.chat-mode) .surface { padding-bottom: 12px; }
+}
+
+@media (min-width: 721px) and (max-width: 950px) {
+  :root { --side: 195px; }
+  aside header { font-size: 17px; }
+  aside header img { width: 32px; height: 28px; }
+  aside header .icon { padding: 5px; }
+  .recent { gap: 8px; font-size: 13px; }
+  body:not(.chat-mode) .welcome > p { font-size: 14px; }
+  body:not(.chat-mode) .toolbar .tool { min-height: 35px; padding: 6px 7px; }
+  body:not(.chat-mode) .tool svg { width: 15px; height: 15px; }
+  body:not(.chat-mode) .quick { gap: 6px; }
+  body:not(.chat-mode) .quick button { padding: 7px 9px; }
+}
+
+@media (721px <= width <= 950px) and (max-height: 800px) {
+  body:not(.chat-mode) .surface { padding-block: 62px 12px; }
+  body:not(.chat-mode) .hero-brand { width: 144px; }
+  body:not(.chat-mode) .card { min-height: 82px; padding-block: 6px; }
+  body:not(.chat-mode) .cards,
+  body:not(.chat-mode) #composer,
+  body:not(.chat-mode) .quick { margin-top: 13px; }
+}
