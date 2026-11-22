@@ -11,3 +11,7 @@ textarea{resize:none}
 @media(prefers-reduced-motion:reduce){aside{transition:none}}
 @media(min-width:951px){.card b{white-space:nowrap;letter-spacing:-.35px;font-weight:650}.card{padding:14px 5px;line-height:1.2}.card small{font-family:"Segoe UI",Arial,sans-serif}.welcome h1{transform:scaleX(1.12);transform-origin:center}.welcome>p{letter-spacing:.12px}.recent-title{padding-bottom:19px}.new{margin-bottom:38px}.quick button{padding-inline:28px}.surface{padding-bottom:8vh}.toolbar .tool:not(.add){padding-inline:19px}}
 @media(min-width:951px) and (max-width:1150px){.card b{white-space:normal}.toolbar .tool:not(.add){padding-inline:7px}}
+/* Keep the composer inside its column while the local font is loading. */
+.toolbar{flex-wrap:wrap;min-width:0}
+.cards{grid-template-columns:repeat(6,minmax(0,1fr))}
+@media(max-width:950px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
