@@ -67,3 +67,42 @@ test('expiry deadline and concurrent free quota are enforced', async () => {
   await store.finish('quota:build:2026-11-22', 'reservation-0', false);
   assert.equal(await store.reserve('quota:build:2026-11-22', 'account', 'new-reservation', 100, 3), true);
 });
+
+test('authenticated Persian build sends the selected model and returns a 20-minute preview', async t => {
+  const now = 1_800_000_000_000;
+  const store = fixture(() => now);
+  const app = 'https://agent.example';
+  const prompt = 'یک سایت برای طراحی لوگو بساز';
+  const html = '<!doctype html><html lang="fa" dir="rtl"><body>طراحی لوگو</body></html>';
+  const seen = [];
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    seen.push(String(url));
+    const payload = JSON.parse(options.body);
+    if (String(url).startsWith('https://api.malguard.site/')) {
+      assert.equal(payload.sessionToken, 'verified-account-fixture');
+      return Response.json({ email: 'tester@example.com', expiresAt: Date.now() + 10000 });
+    }
+    assert.equal(options.headers.Authorization, 'Bearer verified-account-fixture');
+    assert.equal(payload.model, 'cf_gptoss120');
+    assert.equal(payload.mode, 'code');
+    assert.match(payload.message, new RegExp(prompt));
+    assert.equal(payload.consent.modelShare, true);
+    return Response.json({ modelId: 'cf_gptoss120', text: JSON.stringify({ slug: 'logo', html }) });
+  });
+  const env = { APP_HOST: 'agent.example', PREVIEW_ON_APP: '1' };
+  const created = await handle(new Request(app + '/api/build', {
+    method: 'POST', headers: {
+      origin: app, 'content-type': 'application/json', authorization: 'Bearer verified-account-fixture'
+    },
+    body: JSON.stringify({ prompt, consent: { modelShare: true } })
+  }), env, 'build', store);
+  assert.equal(created.status, 201);
+  const preview = await created.json();
+  assert.match(preview.url, /^https:\/\/agent\.example\/preview\/logo-[a-f0-9]{24}$/);
+  assert.equal(preview.expiresAt, now + lifetime);
+  assert.equal(await (await handle(new Request(preview.url), env, 'preview', store)).text(), html);
+  assert.deepEqual(seen, [
+    'https://api.malguard.site/api/game-scam-guard/auth/session',
+    'https://models.malguard.site/api/public-model-chat'
+  ]);
+});
