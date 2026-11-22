@@ -100,7 +100,9 @@ test('authenticated Persian build sends the selected model and returns a 20-minu
   const preview = await created.json();
   assert.match(preview.url, /^https:\/\/agent\.example\/preview\/logo-[a-f0-9]{24}$/);
   assert.equal(preview.expiresAt, now + lifetime);
-  assert.equal(await (await handle(new Request(preview.url), env, 'preview', store)).text(), html);
+  const generated = await (await handle(new Request(preview.url), env, 'preview', store)).text();
+  assert.match(generated, /name="viewport"/);
+  assert.ok(generated.includes('<body>طراحی لوگو</body>'));
   assert.deepEqual(seen, [
     'https://api.malguard.site/api/game-scam-guard/auth/session',
     'https://models.malguard.site/api/public-model-chat'

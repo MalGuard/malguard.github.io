@@ -125,7 +125,7 @@ async function runModel(prompt, auth, body, build, progress, brief = "") {
     : "Generating a response with GPT-OSS 120B.");
 
   const instructions = build
-    ? "You are MalGuard AI. Implement a polished and distinctive responsive static website from the design brief. Use at most " + (body.compact ? "850" : "1250") + " output tokens. Avoid decorative boilerplate and redundant CSS. Output only JSON {slug,html}. The HTML must be one complete document with inline CSS and JS and a viewport meta tag. Prioritize typography, deliberate spacing, a coherent palette, semantic sections and accessible focus states. Implement the requested interactions locally. Include credible topic-specific copy. No external dependencies or credential collection. Use the selected language and direction. "
+    ? "You are MalGuard AI. Implement a polished and distinctive responsive static website from the design brief. Use at most " + (body.compact ? "850" : "1250") + " output tokens. Avoid decorative boilerplate and redundant CSS. Output only JSON {slug,html}. The HTML must be one complete document with inline CSS and JS and a viewport meta tag. Prioritize typography, deliberate spacing, a coherent palette, semantic sections and accessible focus states. Implement the requested interactions locally and check that each control reaches its target. Include credible topic-specific copy. Draw placeholder artwork with CSS or inline SVG. Do not link to external images or dependencies. Do not collect credentials. Use the selected language and direction. "
     : "You are MalGuard AI, the coding and data analysis agent. Respond in English. Use fenced code blocks for snippets and cite relevant sources with URLs. Distinguish facts from assumptions. State clearly whether you performed an action. ";
   const brand = build && brief.includes("MalGuard · Dark violet")
     ? " Use dark navy (#0b091f), luminous violet (#9c6af6) and off-white (#f5f4fc), with translucent panels and subtle borders."
@@ -146,6 +146,14 @@ function parseSite(raw) {
   const site = JSON.parse(raw.trim().replace(/^\x60{3}(?:json)?\s*/i, "").replace(/\s*\x60{3}$/, ""));
   if (typeof site.html !== "string" || !/<html[\s>]/i.test(site.html) || !/<\/html\s*>/i.test(site.html)
       || encoder.encode(site.html).length > 100000) throw new Error("Invalid generated site");
+  if (/<(?:img|script|link|iframe|source|audio|video)\b[^>]*\b(?:src|href|srcset)\s*=\s*["']?\s*(?:https?:)?\/\//i.test(site.html))
+    throw new Error("Generated assets must be embedded");
+  const baseline = '<style>*,*::before,*::after{box-sizing:border-box}img,svg,video{max-inline-size:100%}</style>';
+  const viewport = /<meta\b[^>]*name=["']?viewport\b/i.test(site.html)
+    ? "" : '<meta name="viewport" content="width=device-width,initial-scale=1">';
+  if (/<head\b[^>]*>/i.test(site.html))
+    site.html = site.html.replace(/<head\b[^>]*>/i, tag => tag + viewport + baseline);
+  else site.html = site.html.replace(/<html\b[^>]*>/i, tag => tag + "<head>" + viewport + baseline + "</head>");
   const slug = String(site.slug || "").toLowerCase().replace(/[^a-z0-9]+/g, "-")
     .slice(0, 23).replace(/^-+|-+$/g, "");
   return { html: site.html, slug: /^[a-z]/.test(slug) ? slug : "site" };
