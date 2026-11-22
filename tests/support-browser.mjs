@@ -23,6 +23,16 @@ const server=createServer(async(req,res)=>{
    if(url.pathname==='/api/support/status')output={enabled,attachmentsEnabled:false,adminEnabled:true,aiEnabled:false,turnstileSiteKey:null};
    else if(!enabled){status=503;output={error:'support_unavailable'};}
    else if(url.pathname==='/api/support/auth/password')output={sessionToken:'fixture-account-session'};
+   else if(url.pathname==='/api/support/auth/start'){
+     assert.equal(body.email,'verified@example.test');
+     output={challengeId:'cccccccc-cccc-4ccc-8ccc-cccccccccccc',expiresInSeconds:600,
+       delivery:'provider_accepted'};
+   }
+   else if(url.pathname==='/api/support/auth/verify'){
+     assert.equal(body.challengeId,'cccccccc-cccc-4ccc-8ccc-cccccccccccc');
+     if(body.code==='123456')output={sessionToken:'verified-guest-session-token-from-email'};
+     else{status=401;output={error:'invalid_login_or_code'};}
+   }
    else if(url.pathname==='/api/support/admin-code-start')
      output={challengeId:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',expiresInSeconds:600};
    else if(url.pathname==='/api/support/admin-code-verify')
@@ -92,6 +102,31 @@ try{
   assert.equal(savedCredential,false);
   await context.close();
  }
+
+
+ // Guest email-code login works without persistence or provider OTP leakage.
+ closed=false;revision=0;saved=['Report: scanner does not load'];enabled=true;
+ const guestPage=await browser.newPage({viewport:{width:390,height:880}});
+ const guestErrors=[];
+ guestPage.on('pageerror',e=>guestErrors.push(e.message));
+ await guestPage.goto('http://127.0.0.1:'+port+'/support-ticket.html');
+ await guestPage.waitForFunction(()=>document.querySelector('#serviceBanner')?.classList.contains('good'));
+ assert.equal(await guestPage.locator('#createSubmit').isDisabled(),true);
+ await guestPage.fill('#linkEmail','verified@example.test');
+ await guestPage.click('#linkSubmit');
+ await guestPage.waitForSelector('#emailVerifyForm:not([hidden])');
+ assert.equal(await guestPage.locator('#emailVerifyCode').isVisible(),true);
+ await guestPage.fill('#emailVerifyCode','000000');
+ await guestPage.click('#emailVerifySubmit');
+ await guestPage.waitForFunction(()=>document.querySelector('#flash')?.textContent?.includes('کد نامعتبر'));
+ await guestPage.fill('#emailVerifyCode','۱۲۳۴۵۶');
+ await guestPage.click('#emailVerifySubmit');
+ await guestPage.waitForSelector('.ticket-choice');
+ assert.equal(await guestPage.locator('#emailVerifyForm').isHidden(),true);
+ assert.equal(await guestPage.locator('#createSubmit').isEnabled(),true);
+ assert.deepEqual(guestErrors,[]);
+ assert.equal(await guestPage.evaluate(()=>localStorage.length+sessionStorage.length),0);
+ await guestPage.close();
 
  closed=false;revision=0;saved=['Report: scanner does not load'];enabled=true;
  const ownerPage=await browser.newPage({viewport:{width:390,height:880}});
