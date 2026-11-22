@@ -7,6 +7,10 @@ export default {
     const db=env.SUPPORT_DB,bucket=env.SUPPORT_FILES;
     if(!db||!bucket||typeof bucket.delete!=='function')
       throw Error('private_retention_bindings_unavailable');
+    // Purge expired, provider-encrypted verification challenges without
+    // keeping stale codes or session-bearing email tokens in D1.
+    await db.prepare('DELETE FROM support_email_challenges WHERE expires_at<?')
+      .bind(Date.now()-24*60*60*1000).run();
     const due=await db.prepare(
       "SELECT a.id AS attachment_id,a.ticket_id AS ticket_id FROM support_attachments AS a "+
       "JOIN support_tickets AS t ON t.id=a.ticket_id "+
