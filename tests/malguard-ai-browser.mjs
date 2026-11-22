@@ -85,15 +85,15 @@ try{
    page.on('framenavigated',record);await link.click();await page.waitForURL(base+'/ai-product.html');
    assert.equal(await page.getByRole('heading',{name:'Android · Samsung'}).count(),1);assert.equal(await page.getByRole('heading',{name:'Windows'}).count(),1);
    await page.getByRole('link',{name:/Open web app/}).first().click();await page.waitForURL(base+'/ai/');
-   await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');page.off('framenavigated',record);
+   await page.getByRole('textbox').first().waitFor();page.off('framenavigated',record);
    assert.deepEqual(visited,['/ai-product.html','/ai/'],'Product card opens the platform guide, then the web app');
-   assert.equal(await page.locator('#composer').isVisible(),true);assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
+   assert.equal(await page.getByRole('textbox').first().isVisible(),true);
    assert.equal(await page.locator('.mg-card-hero--radar').count(),0);
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Assistant must fit after navigation');
   }
   for(const path of ['/ai-intelligence.html','/malware-ai.html']){
-   await page.goto(base+path);await page.waitForURL(base+'/ai/');await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
-   assert.equal(await page.locator('#composer').isVisible(),true,'Legacy AI entry opens the current chat');
+   await page.goto(base+path);await page.waitForURL(base+'/ai/');await page.getByRole('textbox').first().waitFor();
+   assert.equal(await page.getByRole('textbox').first().isVisible(),true,'Legacy AI entry opens the current chat');
   }
   await page.goto(base+'/');await page.waitForFunction(()=>document.querySelector('#navbar')?.dataset.navigationReady==='true');
   await page.locator('#menuBtn').click();await page.locator('#navLinks a[href="/ai/"]').click();await page.waitForURL(base+'/ai/');
@@ -105,7 +105,7 @@ try{
   const context=await browser.newContext({viewport:{width,height:1000},reducedMotion:'reduce'}),page=await context.newPage(),errors=[],external=[];
   await skipWelcome(context);page.on('pageerror',e=>errors.push(e.message));
   await context.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();external.push(r.request().url());return r.abort();});
-  await page.goto(base+'/ai/');await page.locator('#send').waitFor({state:'visible'});await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
+  await page.goto(base+'/ai/classic.html');await page.locator('#send').waitFor({state:'visible'});await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
   assert.equal(await page.locator('html').getAttribute('lang'),'en');
   assert.equal(await page.locator('#settings-panel').getAttribute('open'),null);
   assert.equal(await page.locator('#composer #model').count(),1);assert.equal(await page.locator('.pro-model-slot .pro-select-button').first().isVisible(),true,'Custom model picker is the visible control');assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);
@@ -237,7 +237,7 @@ try{
  await context.route('**/api/malguard-ai/status',r=>r.abort());
  await context.route('https://malware-ai.malguard-security.workers.dev/**',r=>cfFixture(r));
   await context.route('https://models.malguard.site/**',r=>gatewayFixture(r));
- await page.goto(base+'/ai/');
+ await page.goto(base+'/ai/classic.html');
  await page.waitForFunction(()=>document.getElementById('entry-gate')?.hidden&&document.getElementById('send')?.dataset.modelReady==='true');
  assert.equal(await page.locator('#send').isDisabled(),true,'An empty message must not be sent even when Cloudflare is available');
  await context.close();console.log('PASS backend outage does not disable Cloudflare-only chat.');
@@ -252,7 +252,7 @@ try{
   window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{generated:{text:'پاسخ محلی آزمایشی',provider:'on_device',model:data.model,securityAnalysis:false}}}),5);}terminate(){}};
  });
  const beforeLocal=requests,localExternal=[];await device.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();localExternal.push(r.request().url());return r.abort();});
- await localPage.goto(base+'/ai/');await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');assert.equal(await localPage.locator('#model').inputValue(),'chat_auto','Prefer automatic available Chat model without downloading');
+ await localPage.goto(base+'/ai/classic.html');await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');assert.equal(await localPage.locator('#model').inputValue(),'chat_auto','Prefer automatic available Chat model without downloading');
  await localPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
  assert.equal(await localPage.locator('#local-welcome').isVisible(),false,'local downloads must remain opt-in');assert.equal(await localPage.evaluate(()=>localWorkerCalls.length),0);
  await selectModel(localPage,'local_fast');
@@ -284,7 +284,7 @@ try{
   window.Worker=class{postMessage(data){window.localWorkerCalls.push(data);setTimeout(()=>this.onmessage?.({data:{prepared:true}}),5);}terminate(){}};
  });
  const downloadExternal=[];await downloadContext.route('**/*',r=>{if(isModelsRoute(r))return gatewayFixture(r);if(isCFRoute(r))return cfFixture(r);if(new URL(r.request().url()).origin===base)return r.continue();downloadExternal.push(r.request().url());return r.abort();});
- await downloadPage.goto(base+'/ai/');await downloadPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
+ await downloadPage.goto(base+'/ai/classic.html');await downloadPage.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
  assert.equal(await downloadPage.locator('#local-welcome').isVisible(),false,'Local downloads remain opt-in');await selectModel(downloadPage,'__downloads');
  await downloadPage.locator('#local-offer').waitFor({state:'visible'});
  await downloadPage.locator('#offer-model').selectOption('local_medium');assert.match(await downloadPage.locator('#offer-size').innerText(),/2268 MB/);
@@ -309,7 +309,7 @@ try{
   }
   return r.abort();
  });
- await workPage.goto(base+'/ai/');await workPage.waitForFunction(()=>document.querySelector('#send').dataset.modelReady==='true');
+ await workPage.goto(base+'/ai/classic.html');await workPage.waitForFunction(()=>document.querySelector('#send').dataset.modelReady==='true');
  assert.equal(await workPage.locator('#model option[value="llama8b"]').count(),0,'unconfigured legacy models must stay hidden');assert.equal(await workPage.locator('#model option[value="chat_granite"]').count(),1,'configured Chat model stays visible');assert.equal(await workPage.locator('#model option[value="cf_gptoss120"]').count(),0,'Code models must never appear in Chat');
  assert.equal(desktopRequests.length,0,'Opening the site must not probe local services');
  await workPage.locator('#message').fill('Chat draft');await openModePicker(workPage);await workPage.locator('#workspace-tab').click();
@@ -332,7 +332,7 @@ try{
  const samsungContext=await browser.newContext({viewport:{width:390,height:844},userAgent:'Mozilla/5.0 (Linux; Android 16; SM-S928B) AppleWebKit/537.36 SamsungBrowser/29.0 Mobile Safari/537.36'});
  await skipWelcome(samsungContext);
  await samsungContext.route('**/*',r=>isModelsRoute(r)?gatewayFixture(r):isCFRoute(r)?cfFixture(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
- const samsungPage=await samsungContext.newPage();await samsungPage.goto(base+'/ai/');await samsungPage.locator('#open-downloads').click();await samsungPage.locator('#hub-desktop').click();
+ const samsungPage=await samsungContext.newPage();await samsungPage.goto(base+'/ai/classic.html');await samsungPage.locator('#open-downloads').click();await samsungPage.locator('#hub-desktop').click();
  await samsungPage.locator('#desktop-models').waitFor({state:'visible'});
  assert.equal(await samsungPage.locator('#desktop-model option').count(),6);
  await samsungPage.locator('#desktop-ram-gb').fill('512');await samsungPage.locator('#desktop-free-gb').fill('1000');

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "start:ai": "node services/malguard-ai/server/index.js",
-    "test:ai": "node --test services/malguard-ai/test/*.test.js",
+    "test:ai": "node --test services/malguard-ai/test/*.test.js && npm --prefix services/site-builder test",
     "test:ai:browser": "node tests/malguard-ai-browser.mjs",
     "test:ai:local": "node tests/malguard-ai-local-onboarding.mjs",
     "check:ai": "node tools/check-malguard-ai.mjs && node --test tests/ai-composer-polish.test.mjs",
@@ -34,6 +34,7 @@
     "@babel/parser": "7.29.9",
     "@clerk/clerk-js": "6.39.0",
     "@mlc-ai/web-llm": "0.2.86",
+    "@vercel/blob": "2.9.0",
     "@vercel/sandbox": "3.6.1",
     "@zip.js/zip.js": "2.23.0",
     "busboy": "1.6.0",

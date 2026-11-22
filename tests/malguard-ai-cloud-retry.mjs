@@ -28,7 +28,7 @@ try{
  const page=await browser.newPage({viewport:{width:390,height:850},reducedMotion:'reduce'});
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.addInitScript(()=>localStorage.setItem('malguard.ai.session.v1','synthetic-session'));
- await page.goto('http://127.0.0.1:'+server.address().port+'/ai/');
+ await page.goto('http://127.0.0.1:'+server.address().port+'/ai/classic.html');
  await page.locator('#entry-gate').waitFor({state:'hidden'});
  await page.locator('#cloud-alert').waitFor({state:'visible'});
  assert.equal(await page.locator('#model option[value=auto]').isDisabled(),true);

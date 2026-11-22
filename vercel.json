@@ -11,9 +11,47 @@
     "api/malguard-ai.js": {
       "maxDuration": 120,
       "includeFiles": "services/game-scam-guard/server/{preview-worker.mjs,preview-renderer.mjs,artifact-worker.mjs,artifact-engine.js,cloud-execution-worker.py,vendor/**}"
+    },
+    "api/build.js": {
+      "maxDuration": 120,
+      "includeFiles": "services/site-builder/knowledge/pages.json"
+    },
+    "api/chat.js": {
+      "maxDuration": 120,
+      "includeFiles": "services/site-builder/knowledge/pages.json"
+    },
+    "api/accept.js": {
+      "maxDuration": 30
+    },
+    "api/preview.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "(?<preview>[a-z][a-z0-9-]{0,22}-[a-f0-9]{24})\\.malguard\\.site"
+        }
+      ],
+      "destination": "/api/preview"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "(?<preview>[a-z][a-z0-9-]{0,22}-[a-f0-9]{24})\\.malguard\\.site"
+        }
+      ],
+      "destination": "/api/preview?invalidPath=1"
+    },
+    {
+      "source": "/preview/:id",
+      "destination": "/api/preview?id=:id"
+    },
     {
       "source": "/ai-product",
       "destination": "/ai-product.html"

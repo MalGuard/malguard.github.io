@@ -53,7 +53,7 @@ try{
     terminate(){clearTimeout(this.timer);this.onmessage=undefined;window.terminated++;}
    };
   });
-  await page.goto(base+'/ai/');await page.waitForFunction(()=>!document.getElementById('manage-models').disabled);
+  await page.goto(base+'/ai/classic.html');await page.waitForFunction(()=>!document.getElementById('manage-models').disabled);
   assert.equal(await page.evaluate(()=>workerCalls.length),0,'First visit must not fetch model weights');
   assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
   assert.equal(await page.locator('#local-welcome').isVisible(),false,'Download invitation must be opt-in');
@@ -99,7 +99,7 @@ try{
  const delayed=await browser.newContext(),delayedPage=await delayed.newPage();
  await delayed.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v2','seen');Object.defineProperty(navigator,'gpu',{value:{requestAdapter:()=>new Promise(resolve=>{window.resolveAdapter=()=>resolve({features:new Set(['shader-f16'])});})}});});
  await delayed.route('**/*',r=>isCF(r)?cfResponse(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
- await delayedPage.goto(base+'/ai/');await delayedPage.waitForFunction(()=>typeof window.resolveAdapter==='function');
+ await delayedPage.goto(base+'/ai/classic.html');await delayedPage.waitForFunction(()=>typeof window.resolveAdapter==='function');
  assert.equal(await delayedPage.locator('#local-welcome').isVisible(),false,'No download prompt before device capability resolves');
  assert.equal(await delayedPage.evaluate(()=>localStorage.getItem('malguard.ai.welcome.v3')),null,'No onboarding flag is written without consent');
  await delayedPage.evaluate(()=>window.resolveAdapter());await delayed.close();console.log('PASS delayed device capability does not force a download prompt');
@@ -109,14 +109,14 @@ try{
   Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>{await new Promise(r=>setTimeout(r,250));return {features:new Set(['shader-f16'])};}}});
  });
  await startup.route('**/api/malguard-ai/status',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({enabled:true,tools:{},model:{state:'configured',defaultModel:'cloud',models:[{id:'cloud',label:'Cloud fixture',state:'configured'}]}})}));
- await startupPage.goto(base+'/ai/');await startupPage.waitForFunction(()=>document.querySelector('#model option[value="local_medium"]')?.disabled===false);
+ await startupPage.goto(base+'/ai/classic.html');await startupPage.waitForFunction(()=>document.querySelector('#model option[value="local_medium"]')?.disabled===false);
  assert.equal(await startupPage.locator('#model').inputValue(),'local_medium','A faster cloud status response must not discard the saved local model');
  await startup.close();console.log('PASS saved local selection survives startup timing differences');
  for(const statusDelay of [0,400]){
   const cloud=await browser.newContext(),cloudPage=await cloud.newPage();
   await cloud.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');Object.defineProperty(navigator,'gpu',{value:{requestAdapter:async()=>({features:new Set(['shader-f16'])})}});});
   await cloud.route('**/api/malguard-ai/status',async r=>{await new Promise(resolve=>setTimeout(resolve,statusDelay));await r.fulfill({contentType:'application/json',body:JSON.stringify({enabled:true,tools:{},model:{state:'configured',defaultModel:'llama70b',models:[{id:'llama70b',label:'Llama',state:'configured'},{id:'cf_gptoss120',label:'GPT-OSS 120B',state:'configured'}]}})});});
-  await cloud.route('**/api/public-models',r=>cfResponse(r,{enabled:true}));await cloudPage.goto(base+'/ai/');await cloudPage.waitForFunction(()=>document.getElementById('model').value==='chat_granite');
+  await cloud.route('**/api/public-models',r=>cfResponse(r,{enabled:true}));await cloudPage.goto(base+'/ai/classic.html');await cloudPage.waitForFunction(()=>document.getElementById('model').value==='chat_granite');
   await selectModel(cloudPage,'local_medium');await toggleSettings(cloudPage);await toggleSettings(cloudPage);assert.equal(await cloudPage.locator('#model').inputValue(),'local_medium','Explicit local choice survives rerender');
   await cloud.close();
  }
@@ -128,7 +128,7 @@ try{
   await autoContext.route('**/api/malguard-ai/status',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({enabled:true,tools:{},model:{state:'configured',defaultModel:'auto',models:[{id:'auto',label:'Auto',state:'configured'}]}})}));
  await autoContext.route('**/api/public-models',r=>cfResponse(r,{enabled:true}));
  await autoContext.route('**/api/public-model-chat',r=>{if(r.request().method()==='POST')autoPosts.push(r.request().postDataJSON());return cfResponse(r,{enabled:true});});
- await autoPage.goto(base+'/ai/');await autoPage.waitForFunction(()=>document.getElementById('model').value==='chat_granite');
+ await autoPage.goto(base+'/ai/classic.html');await autoPage.waitForFunction(()=>document.getElementById('model').value==='chat_granite');
  await grantModelConsent(autoPage);
  await autoPage.locator('#message').fill('سلام');await autoPage.locator('#send').click();await autoPage.locator('.answer').filter({hasText:'سلام! آماده‌ام.'}).waitFor();
  assert.equal(autoPosts.length,1);assert.equal(autoPosts[0].model,'chat_granite');assert.equal(await autoPage.evaluate(()=>autoWorkerCalls.length),0,'Cloudflare Chat must not run a local model');assert.equal(await autoPage.locator('#local-download').isVisible(),false);
@@ -136,7 +136,7 @@ try{
  const context=await browser.newContext(),page=await context.newPage();
  await context.addInitScript(()=>{Object.defineProperty(navigator,'gpu',{value:undefined});window.workerCalls=[];window.Worker=class{postMessage(data){window.workerCalls.push(data);}terminate(){}};});
  await context.route('**/*',r=>isCF(r)?cfResponse(r):new URL(r.request().url()).origin===base?r.continue():r.abort());
- await page.goto(base+'/ai/');await page.waitForFunction(()=>document.getElementById('device-note').textContent.includes('WebGPU'));
+ await page.goto(base+'/ai/classic.html');await page.waitForFunction(()=>document.getElementById('device-note').textContent.includes('WebGPU'));
  assert.equal(await page.locator('#local-welcome').isVisible(),false);assert.equal(await page.locator('#device-note').isVisible(),false);assert.equal(await page.locator('#connection').isVisible(),false);await page.locator('#open-downloads').click();await page.locator('#hub-browser').click();await page.locator('#local-offer').waitFor({state:'visible'});assert.equal(await page.locator('#offer-download-button').isDisabled(),true);assert.match(await page.locator('#offer-compatibility').innerText(),/WebGPU/);await page.locator('#local-offer').evaluate(dialog=>{window.offerClosed=new Promise(resolve=>dialog.addEventListener('close',()=>resolve(),{once:true}));});await page.keyboard.press('Escape');await page.evaluate(()=>window.offerClosed);assert.equal(await page.evaluate(()=>workerCalls.length),0);
  await context.close();assert.ok(external.every(row=>row.url==='https://models.malguard.site/api/public-models'&&row.method==='GET'),'Only public model-catalog reads may be attempted; no provider inference, uploads or downloads');console.log('PASS unsupported-device guidance: public catalog GET allowed, zero external inference/downloads/uploads');
 }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

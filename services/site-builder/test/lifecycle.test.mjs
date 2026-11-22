@@ -1,0 +1,69 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { BlobPreconditionFailedError } from '@vercel/blob';
+import { blobStore } from '../src/blob.js';
+import { handle, lifetime } from '../src/agent.js';
+
+function fixture(now) {
+  const records = new Map();
+  let version = 0;
+  const client = {
+    async get(key, options) {
+      assert.equal(options.access, 'private');
+      assert.equal(options.useCache, false);
+      const record = records.get(key);
+      if (record) return { stream: new Response(record.data).body, blob: { etag: record.etag } };
+      return null;
+    },
+    async put(key, data, options) {
+      const current = records.get(key);
+      if ((options.ifMatch && current?.etag !== options.ifMatch) ||
+          (options.allowOverwrite === false && current)) throw new BlobPreconditionFailedError();
+      assert.equal(options.ttlDays, 1);
+      records.set(key, { data, etag: String(++version) });
+    }
+  };
+  return blobStore('test-token', client, now);
+}
+
+test('preview GET and ZIP acceptance share the same source and prevent further public reads', async () => {
+  const store = fixture();
+  const token = '1'.repeat(64);
+  const id = 'logo-' + '2'.repeat(24);
+  const hash = Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token))).toString('hex');
+  const html = '<html lang="fa" dir="rtl"><p>طراحی لوگو</p></html>';
+  await store.create(id, html, hash, lifetime);
+  const url = 'https://agent.example';
+  const env = { APP_HOST: 'agent.example', PREVIEW_ON_APP: '1' };
+  const preview = () => handle(new Request(url + '/preview/' + id), env, 'preview', store);
+  const accept = value => handle(new Request(url + '/api/accept', {
+    method: 'POST', headers: { origin: url, 'content-type': 'application/json' },
+    body: JSON.stringify({ id, token: value })
+  }), env, 'accept', store);
+  const page = await preview();
+  assert.equal(page.status, 200);
+  assert.match(page.headers.get('content-security-policy'), /sandbox allow-scripts/);
+  assert.equal(await page.text(), html);
+  assert.equal((await accept('0'.repeat(64))).status, 403);
+  const zip = await accept(token);
+  assert.equal(zip.headers.get('content-type'), 'application/zip');
+  const bytes = Buffer.from(await zip.arrayBuffer());
+  assert.equal(bytes.readUInt32LE(0), 0x04034b50);
+  assert.equal(bytes.subarray(40, 40 + Buffer.byteLength(html)).toString(), html);
+  assert.equal((await preview()).status, 410);
+});
+
+test('expiry deadline and concurrent free quota are enforced', async () => {
+  let time = 1000;
+  const store = fixture(() => time);
+  const id = 'logo-' + '2'.repeat(24);
+  assert.equal(await store.create(id, 'source', 'owner', lifetime), time + lifetime);
+  time += lifetime;
+  assert.deepEqual(await store.view(id), [410]);
+  assert.deepEqual(await store.accept(id, 'owner'), [410]);
+  const results = await Promise.all(Array.from({length: 8}, (_, i) =>
+    store.reserve('quota:build:2026-11-22', 'account', 'reservation-' + i, 100, 3)));
+  assert.equal(results.filter(Boolean).length, 3);
+  await store.finish('quota:build:2026-11-22', 'reservation-0', false);
+  assert.equal(await store.reserve('quota:build:2026-11-22', 'account', 'new-reservation', 100, 3), true);
+});

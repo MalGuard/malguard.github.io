@@ -20,7 +20,7 @@ try{
   for(const path of paths){
    const start=errors.length;await page.goto('https://127.0.0.1:8443'+path);
    if(['/ai-intelligence.html','/malware-ai.html'].includes(path)){
-    await page.waitForURL('**/ai/');await page.waitForFunction(()=>!!document.querySelector('#send')?.dataset.state);
+    await page.waitForURL('**/ai/');await page.getByRole('textbox').first().waitFor();
    }
    await page.waitForFunction(()=>document.documentElement.lang==='en');
    assert.equal(await page.locator('html').getAttribute('dir'),'ltr');

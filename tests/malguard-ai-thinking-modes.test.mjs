@@ -53,7 +53,7 @@ test('Thinking is opt-in and included in chat requests only when explicitly enab
 });
 test('site contains a real Thinking button and mode-filtered selector',()=>{
  const app=readFileSync(new URL('../ai/app.js',import.meta.url),'utf8');
- const html=readFileSync(new URL('../ai/index.html',import.meta.url),'utf8');
+ const html=readFileSync(new URL('../ai/classic.html',import.meta.url),'utf8');
  assert.match(html,/id="thinking-toggle"/);
  assert.match(app,/cfModels\.filter\(m=>m\.available&&m\.mode===cfMode\)/);
  assert.match(app,/DESKTOP_MODEL_MODES/);
