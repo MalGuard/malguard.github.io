@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05070a">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="پیش‌نمایش مستقل رابط کاربری جدید MalGuard AI">
+<title>MalGuard AI — Preview</title>
+<style>
+:root{color-scheme:dark;--bg:#05070a;--surface:#0b0f14;--raised:#11161d;--input:#0e1319;--line:#1c242e;--line2:#2a3441;--text:#e8edf2;--muted:#9aa7b4;--faint:#687584;--cyan:#22d3ee;--blue:#0ea5e9;--radius:22px;--ease:220ms cubic-bezier(.2,.75,.25,1)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font-family:Vazirmatn,IRANSansX,"Segoe UI",Tahoma,Arial,sans-serif;font-size:14px;overflow:hidden}
+button,input,textarea{font:inherit}
+button{color:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.app{height:100dvh;display:grid;grid-template-columns:minmax(0,1fr) 278px;grid-template-rows:62px minmax(0,1fr);position:relative;background-image:radial-gradient(rgba(120,150,175,.09) .7px,transparent .7px);background-size:22px 22px}
+.app:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 48% 30%,rgba(14,165,233,.055),transparent 52%);z-index:0}
+.topline{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 3%,#0ea5e9 34%,#22d3ee 53%,transparent 96%);opacity:.8;z-index:5}
+.header{grid-column:1;grid-row:1;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:1px solid rgba(42,52,65,.65);background:rgba(5,7,10,.78);backdrop-filter:blur(18px);z-index:3}
+.header-start,.header-end,.brand,.status{display:flex;align-items:center;gap:12px}
+.brand-mark{width:32px;height:32px;border:1px solid rgba(34,211,238,.42);border-radius:11px;display:grid;place-items:center;color:var(--cyan);font-weight:850;font-size:17px;background:linear-gradient(145deg,rgba(34,211,238,.13),rgba(14,165,233,.025));box-shadow:0 0 22px rgba(34,211,238,.07)}
+.brand-name{font-size:14px;font-weight:800;letter-spacing:-.35px}
+.brand-name span{color:var(--muted);font-weight:500}
+.preview-tag{font-size:10px;color:#9bddec;border:1px solid rgba(34,211,238,.22);background:rgba(34,211,238,.07);border-radius:999px;padding:5px 9px}
+.status{font-size:11px;color:var(--muted);gap:7px}
+.status-dot{width:7px;height:7px;background:#38bdf8;border-radius:50%;box-shadow:0 0 10px rgba(34,211,238,.55)}
+.icon-btn{width:36px;height:36px;border:1px solid transparent;border-radius:12px;background:transparent;display:grid;place-items:center;color:var(--muted);cursor:pointer;transition:var(--ease)}
+.icon-btn:hover{background:var(--raised);border-color:var(--line);color:var(--text)}
+.icon-btn svg{width:17px;height:17px}
+.menu-btn{display:none}
+.sidebar{grid-column:2;grid-row:1/3;z-index:4;background:rgba(8,11,15,.93);border-left:1px solid var(--line);display:flex;flex-direction:column;padding:17px 14px 14px;min-height:0}
+.side-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px;padding:0 4px}
+.side-label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.2px}
+.new-chat{width:100%;height:42px;border:1px solid rgba(34,211,238,.24);border-radius:13px;background:linear-gradient(110deg,rgba(14,165,233,.13),rgba(34,211,238,.055));display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;font-weight:700;color:#dffaff;transition:var(--ease);margin-bottom:13px}
+.new-chat:hover{border-color:rgba(34,211,238,.52);box-shadow:0 0 24px rgba(34,211,238,.08);transform:translateY(-1px)}
+.new-chat svg{width:16px;height:16px;color:var(--cyan)}
+.search-wrap{height:39px;border:1px solid var(--line);background:#090d12;border-radius:11px;display:flex;align-items:center;gap:8px;padding:0 11px;margin-bottom:22px}
+.search-wrap svg{width:15px;height:15px;color:var(--faint);flex:none}
+.search-wrap input{border:0;outline:0;background:transparent;color:var(--text);width:100%;font-size:12px;min-width:0}
+.search-wrap input::placeholder{color:#667381}
+.history-heading{font-size:10px;color:#758391;font-weight:700;padding:0 7px;margin:0 0 8px}
+.history-list{display:flex;flex-direction:column;gap:4px;overflow:auto;min-height:0}
+.history-item{width:100%;text-align:right;border:1px solid transparent;background:transparent;color:#aab5c0;border-radius:10px;padding:10px 11px;cursor:pointer;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:var(--ease)}
+.history-item:hover,.history-item.active{background:#111820;border-color:#1c2934;color:var(--text)}
+.history-item.active:before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--cyan);margin-left:8px;vertical-align:middle}
+.side-footer{margin-top:auto;border-top:1px solid var(--line);padding:13px 4px 2px}
+.account{display:flex;align-items:center;gap:10px;padding:8px 5px}
+.account-avatar{width:31px;height:31px;border-radius:10px;background:#151d26;border:1px solid #293542;display:grid;place-items:center;color:#b7c4cf;font-weight:800;font-size:12px}
+.account-name{font-size:11px;font-weight:700}
+.account-sub{font-size:10px;color:var(--faint);margin-top:3px}
+.main{grid-column:1;grid-row:2;position:relative;z-index:1;min-width:0;min-height:0;display:flex;flex-direction:column}
+.chat-scroll{width:100%;max-width:900px;margin:0 auto;flex:1;min-height:0;overflow:auto;padding:34px 34px 24px;scroll-behavior:smooth}
+.welcome{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px 0 42px;animation:rise .45s ease both}
+.hero-mark{width:70px;height:70px;border-radius:23px;border:1px solid rgba(34,211,238,.33);display:grid;place-items:center;background:linear-gradient(145deg,rgba(34,211,238,.12),rgba(14,165,233,.035));color:var(--cyan);font-size:34px;font-weight:900;box-shadow:0 0 55px rgba(34,211,238,.07),inset 0 0 22px rgba(34,211,238,.035);margin-bottom:26px}
+.eyebrow{font-size:10px;letter-spacing:1.7px;color:#7c9eac;font-weight:800;margin-bottom:13px}
+h1{font-size:clamp(29px,4vw,43px);line-height:1.3;letter-spacing:-1.35px;margin:0;font-weight:850}
+h1 .accent{background:linear-gradient(100deg,#e8edf2 5%,#8ce9f5 65%,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-copy{color:var(--muted);font-size:14px;line-height:1.9;max-width:480px;margin:15px 0 29px}
+.suggestions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;width:min(100%,650px);margin-top:17px}
+.suggestion{min-height:75px;border:1px solid var(--line);background:rgba(11,15,20,.84);border-radius:15px;padding:13px 12px;text-align:right;cursor:pointer;transition:var(--ease)}
+.suggestion:hover{border-color:#344957;background:#101820;transform:translateY(-2px)}
+.suggestion-icon{width:27px;height:27px;border-radius:9px;display:grid;place-items:center;background:#121e27;color:var(--cyan);margin-bottom:8px}
+.suggestion-icon svg{width:15px;height:15px}
+.suggestion strong{font-size:11px;display:block;font-weight:700}
+.suggestion small{display:block;font-size:9px;color:var(--faint);margin-top:4px}
+.composer-area{width:100%;padding:10px 26px max(18px,env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(5,7,10,0),rgba(5,7,10,.94) 22%);z-index:2}
+.composer{width:min(100%,790px);margin:0 auto;border:1px solid #263440;background:rgba(14,19,25,.96);border-radius:20px;padding:13px 14px 10px;box-shadow:0 12px 50px rgba(0,0,0,.25);transition:var(--ease)}
+.composer:focus-within{border-color:rgba(34,211,238,.58);box-shadow:0 0 0 3px rgba(34,211,238,.055),0 12px 55px rgba(0,0,0,.28)}
+.composer textarea{display:block;width:100%;resize:none;min-height:49px;max-height:150px;background:transparent;border:0;outline:0;color:var(--text);font-size:14px;line-height:1.8;padding:4px 5px}
+.composer textarea::placeholder{color:#71808e}
+.composer-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 2px 0}
+.tools,.send-side{display:flex;align-items:center;gap:7px}
+.tool-btn{height:31px;border:1px solid transparent;border-radius:9px;background:transparent;color:#9aa7b4;display:flex;align-items:center;gap:6px;padding:0 9px;font-size:10px;cursor:pointer;transition:var(--ease)}
+.tool-btn:hover{background:#18212a;border-color:#263440;color:var(--text)}
+.tool-btn svg{width:14px;height:14px}
+.mode-pill{font-size:10px;color:#9aa7b4;border-right:1px solid var(--line2);padding-right:12px;margin-right:3px}
+.send-btn{width:39px;height:39px;border:0;border-radius:13px;display:grid;place-items:center;cursor:pointer;color:#041116;background:linear-gradient(135deg,#22d3ee,#0ea5e9);box-shadow:0 4px 20px rgba(14,165,233,.19);transition:var(--ease)}
+.send-btn:hover{transform:translateY(-1px);box-shadow:0 5px 26px rgba(34,211,238,.3)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.send-btn svg{width:17px;height:17px}
+.disclaimer{text-align:center;font-size:9px;color:#65727f;margin:9px auto 0;max-width:790px}
+.messages{display:flex;flex-direction:column;gap:24px;padding:10px 0 28px}
+.message{display:flex;gap:12px;align-items:flex-start;animation:rise .28s ease both}
+.message.user{justify-content:flex-start}
+.message.assistant{justify-content:flex-start}
+.avatar{width:30px;height:30px;flex:none;border-radius:10px;display:grid;place-items:center;font-size:12px;font-weight:900}
+.assistant .avatar{background:#101b23;color:var(--cyan);border:1px solid #263e4a}
+.user .avatar{background:#1a222c;color:#d6e1ea;border:1px solid #303d49}
+.message-body{min-width:0;max-width:min(100%,740px)}
+.message-meta{display:flex;align-items:center;gap:8px;font-size:10px;color:#82909d;margin:0 0 7px}
+.message-card{font-size:14px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}
+.user .message-card{background:#0d151d;border:1px solid rgba(34,211,238,.2);border-radius:16px 5px 16px 16px;padding:11px 15px;color:#e7edf3}
+.assistant .message-card{background:rgba(11,15,20,.75);border:1px solid #1b2630;border-radius:5px 16px 16px 16px;padding:13px 16px;color:#dce4eb}
+.thinking{display:flex;align-items:center;gap:5px;height:20px}
+.thinking span{width:5px;height:5px;border-radius:50%;background:#69d9eb;animation:pulse 1s infinite ease-in-out}
+.thinking span:nth-child(2){animation-delay:.15s}.thinking span:nth-child(3){animation-delay:.3s}
+.demo-note{font-size:9px;color:#667786;text-align:center;margin-top:5px}
+.hidden{display:none!important}
+.scrim{display:none}
+@keyframes rise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,70%,100%{opacity:.28;transform:translateY(0)}35%{opacity:1;transform:translateY(-4px)}}
+@media(max-width:760px){
+ .app{grid-template-columns:minmax(0,1fr);grid-template-rows:58px minmax(0,1fr)}
+ .header{grid-column:1;padding:0 14px}
+ .menu-btn{display:grid}
+ .status{display:none}
+ .sidebar{position:fixed;top:0;bottom:0;right:0;width:min(290px,84vw);transform:translateX(105%);transition:transform var(--ease);box-shadow:-20px 0 50px rgba(0,0,0,.28)}
+ .sidebar.open{transform:translateX(0)}
+ .scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:3;opacity:0;pointer-events:none;transition:opacity var(--ease)}
+ .scrim.show{opacity:1;pointer-events:auto}
+ .main{grid-column:1;grid-row:2}
+ .chat-scroll{padding:22px 16px 18px}
+ .welcome{padding:15px 0 24px;justify-content:center}
+ .hero-mark{width:60px;height:60px;border-radius:20px;margin-bottom:21px}
+ .hero-copy{font-size:12px;margin:12px 0 22px}
+ .suggestions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .suggestion{min-height:69px}
+ .composer-area{padding:8px 12px max(12px,env(safe-area-inset-bottom))}
+ .composer{border-radius:17px;padding:10px 11px 8px}
+ .composer textarea{font-size:13px;min-height:45px}
+ .tool-btn{padding:0 7px}
+ .mode-pill{display:none}
+ .message-card{font-size:13px}
+}
+@media(max-width:370px){.brand-name{font-size:12px}.preview-tag{font-size:9px;padding:4px 7px}.tools{gap:2px}.tool-btn{font-size:9px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<div class="topline"></div>
+<header class="header">
+  <div class="header-start">
+    <button class="icon-btn menu-btn" id="menuToggle" aria-label="باز کردن فهرست گفتگوها"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <div class="brand"><div class="brand-mark" aria-hidden="true">M</div><div class="brand-name">MalGuard <span>AI</span></div></div>
+    <span class="preview-tag">پیش‌نمایش مستقل</span>
+  </div>
+  <div class="header-end">
+    <div class="status"><span class="status-dot"></span>محیط نمایشی فعال</div>
+    <button class="icon-btn" id="newChatTop" aria-label="گفتگوی جدید" title="گفتگوی جدید"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 5v14M5 12h14"/></svg></button>
+  </div>
+</header>
+<aside class="sidebar" id="sidebar" aria-label="نوار گفتگوها">
+  <div class="side-top"><span class="side-label">فضای کاری</span><button class="icon-btn" id="closeSidebar" aria-label="بستن فهرست"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m7 7 10 10M17 7 7 17"/></svg></button></div>
+  <button class="new-chat" id="newChat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>گفتگوی جدید</button>
+  <label class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input id="historySearch" type="search" placeholder="جستجو در گفتگوها…" aria-label="جستجو در گفتگوها"></label>
+  <div class="history-heading">گفتگوهای اخیر</div>
+  <nav class="history-list" id="historyList">
+    <button class="history-item active">بررسی امنیتی یک قطعه کد</button>
+    <button class="history-item">طراحی معماری API</button>
+    <button class="history-item">ترجمه مستندات فنی</button>
+    <button class="history-item">ایده‌های محصول جدید</button>
+    <button class="history-item">تحلیل فایل و هش SHA-256</button>
+  </nav>
+  <div class="side-footer">
+    <div class="account"><div class="account-avatar">M</div><div><div class="account-name">حساب نمایشی</div><div class="account-sub">نسخه مفهومی رابط کاربری</div></div></div>
+  </div>
+</aside>
+<div class="scrim" id="scrim"></div>
+<main class="main">
+  <section class="chat-scroll" id="chatScroll" aria-live="polite">
+    <div class="welcome" id="welcome">
+      <div class="hero-mark" aria-hidden="true">M</div>
+      <div class="eyebrow">INTELLIGENCE · SECURITY · CONTROL</div>
+      <h1>قدرت مصنوعی،<br><span class="accent">زیر کنترل تو.</span></h1>
+      <p class="hero-copy">یک فضای کاری هوشمند برای فکر کردن، ساختن و بررسی کردن؛ با شفافیت بیشتر و کنترل در دست تو.</p>
+      <div class="suggestions">
+        <button class="suggestion" data-prompt="این قطعه کد را از نظر امنیتی بررسی کن و ریسک‌های مهم را توضیح بده."><span class="suggestion-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 4l-4 16"/></svg></span><strong>تحلیل کد</strong><small>بررسی منطق و امنیت</small></button>
+        <button class="suggestion" data-prompt="یک متن حرفه‌ای و کوتاه درباره یک محصول فناوری بنویس."><span class="suggestion-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19.5V4.8A1.8 1.8 0 0 1 5.8 3H20v15H6a2 2 0 0 0-2 2Z"/><path d="M8 7h8M8 11h7"/></svg></span><strong>نوشتن متن</strong><small>شفاف و دقیق</small></button>
+        <button class="suggestion" data-prompt="یک مفهوم پیچیده در هوش مصنوعی را ساده و مرحله‌به‌مرحله توضیح بده."><span class="suggestion-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.6 2.6 0 1 1 4.6 1.7c-1.2 1.1-2.1 1.4-2.1 3M12 17.5h.01"/></svg></span><strong>پرسش سریع</strong><small>پاسخ روشن و کاربردی</small></button>
+        <button class="suggestion" data-prompt="این جمله را به انگلیسی روان و طبیعی ترجمه کن: امنیت باید قابل بررسی باشد."><span class="suggestion-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m5 8 4-4 4 4M9 4v11M19 16l-4 4-4-4M15 20V9"/></svg></span><strong>ترجمه</strong><small>فارسی و انگلیسی</small></button>
+      </div>
+    </div>
+    <div class="messages hidden" id="messages"></div>
+  </section>
+  <div class="composer-area">
+    <form class="composer" id="composer">
+      <textarea id="prompt" rows="1" placeholder="هر چیزی که توی ذهنته، اینجا بنویس…" aria-label="پیام خود را بنویسید"></textarea>
+      <div class="composer-bottom">
+        <div class="tools">
+          <button type="button" class="tool-btn" id="attachBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m20 11.5-8.2 8.2a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/></svg><span id="attachLabel">پیوست</span></button>
+          <input type="file" id="fileInput" hidden>
+          <span class="mode-pill">حالت هوشمند</span>
+        </div>
+        <div class="send-side"><button class="send-btn" id="sendBtn" type="submit" aria-label="ارسال پیام"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 14-7-5 14-2-6-7-1Z"/><path d="m12 13 7-8"/></svg></button></div>
+      </div>
+    </form>
+    <div class="disclaimer">این یک پیش‌نمایش تعاملی است؛ پاسخ‌ها شبیه‌سازی شده‌اند و به مدل واقعی متصل نیستند.</div>
+  </div>
+</main>
+</div>
+<script>
+(() => {
+ const $ = (id) => document.getElementById(id);
+ const form=$("composer"), prompt=$("prompt"), send=$("sendBtn"), welcome=$("welcome"), messages=$("messages"), scroll=$("chatScroll");
+ const sidebar=$("sidebar"), scrim=$("scrim");
+ let busy=false, messageCount=0, streamTimer=null, pendingTimer=null;
+ const canned = (q) => {
+   const s=q.toLowerCase();
+   if(/کد|code|امنیت|امن|sql|xss|api/.test(s)) return "برای بررسی دقیق، ابتدا ورودی‌ها، مرزهای اعتماد و مسیرهای اجرای داده را مشخص می‌کنیم.\\n\\n۱. اعتبارسنجی ورودی باید سمت سرور انجام شود.\\n۲. دسترسی‌ها باید در هر درخواست بررسی شوند.\\n۳. خطاها نباید اطلاعات داخلی یا اسرار را افشا کنند.\\n\\nاین خروجی صرفاً نمونه‌ی نمایشی است؛ برای نتیجه واقعی باید کد و محیط اجرا بررسی شوند.";
+   if(/ترجمه|translate|انگلیسی/.test(s)) return "ترجمه پیشنهادی:\\n“Security should be verifiable.”\\n\\nلحن کوتاه، طبیعی و مناسب متن فنی است.";
+   if(/متن|بنویس|نوشتن/.test(s)) return "امنیت فقط یک قابلیت نیست؛ بخشی از طراحی محصول است. MalGuard AI تلاش می‌کند ابزارهای هوشمند را با شفافیت، کنترل و شواهد قابل بررسی در اختیار کاربر قرار دهد.\\n\\nاین متن نمونه است و می‌توان لحن و طول آن را تغییر داد.";
+   return "متوجه شدم. برای رسیدن به نتیجه بهتر، مسئله را به بخش‌های کوچک‌تر تقسیم می‌کنیم، فرض‌ها را مشخص می‌کنیم و هر نتیجه را با شواهد قابل بررسی می‌سنجیم.\\n\\nاین پاسخ در نسخه پیش‌نمایش شبیه‌سازی شده است و از یک مدل زنده تولید نشده.";
+ };
+ function addMessage(role,text){
+   const wrap=document.createElement("article"); wrap.className="message "+role;
+   const avatar=document.createElement("div"); avatar.className="avatar"; avatar.textContent=role==="assistant"?"M":"ش";
+   const body=document.createElement("div"); body.className="message-body";
+   const meta=document.createElement("div"); meta.className="message-meta"; meta.textContent=role==="assistant"?"MalGuard AI":"شما";
+   const card=document.createElement("div"); card.className="message-card"; card.textContent=text;
+   body.append(meta,card); wrap.append(avatar,body); messages.append(wrap); scroll.scrollTop=scroll.scrollHeight;
+   return card;
+ }
+ function showChat(){welcome.classList.add("hidden");messages.classList.remove("hidden");}
+ function submitMessage(value){
+   const text=value.trim(); if(!text||busy)return;
+   showChat(); addMessage("user",text); prompt.value=""; prompt.style.height="auto"; send.disabled=true; busy=true; messageCount++;
+   const wrap=document.createElement("article"); wrap.className="message assistant";
+   const avatar=document.createElement("div"); avatar.className="avatar"; avatar.textContent="M";
+   const body=document.createElement("div"); body.className="message-body";
+   const meta=document.createElement("div"); meta.className="message-meta"; meta.textContent="MalGuard AI";
+   const card=document.createElement("div"); card.className="message-card";
+   const dots=document.createElement("div"); dots.className="thinking"; dots.setAttribute("aria-label","در حال فکر کردن");
+   for(let i=0;i<3;i++)dots.append(document.createElement("span"));
+   card.append(dots); body.append(meta,card); wrap.append(avatar,body); messages.append(wrap); scroll.scrollTop=scroll.scrollHeight;
+   const answer=canned(text).replace(/\\n/g,"\n"); let i=0;
+   pendingTimer=setTimeout(()=>{card.textContent="";streamTimer=setInterval(()=>{card.textContent+=answer.slice(i,i+3);i+=3;scroll.scrollTop=scroll.scrollHeight;if(i>=answer.length){clearInterval(streamTimer);streamTimer=null;pendingTimer=null;busy=false;send.disabled=false;prompt.focus();}},17);},550);
+ }
+ form.addEventListener("submit",e=>{e.preventDefault();submitMessage(prompt.value);});
+ prompt.addEventListener("input",()=>{prompt.style.height="auto";prompt.style.height=Math.min(prompt.scrollHeight,150)+"px";});
+ prompt.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit();}});
+ document.querySelectorAll("[data-prompt]").forEach(btn=>btn.addEventListener("click",()=>{prompt.value=btn.dataset.prompt;prompt.focus();prompt.dispatchEvent(new Event("input"));}));
+ function newChat(){if(pendingTimer!==null)clearTimeout(pendingTimer);if(streamTimer!==null)clearInterval(streamTimer);pendingTimer=null;streamTimer=null;messages.replaceChildren();messages.classList.add("hidden");welcome.classList.remove("hidden");prompt.value="";prompt.focus();messageCount=0;busy=false;send.disabled=false;document.querySelectorAll(".history-item").forEach((x,i)=>x.classList.toggle("active",i===0));closeMenu();}
+ $("newChat").addEventListener("click",newChat);$("newChatTop").addEventListener("click",newChat);
+ $("historySearch").addEventListener("input",e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll(".history-item").forEach(item=>item.hidden=!item.textContent.toLowerCase().includes(q));});
+ document.querySelectorAll(".history-item").forEach(item=>item.addEventListener("click",()=>{document.querySelectorAll(".history-item").forEach(x=>x.classList.remove("active"));item.classList.add("active");prompt.value="";closeMenu();}));
+ $("attachBtn").addEventListener("click",()=>$("fileInput").click());
+ $("fileInput").addEventListener("change",e=>{const file=e.target.files&&e.target.files[0];if(file){$("attachLabel").textContent=file.name.length>18?file.name.slice(0,15)+"…":file.name;prompt.value+=(prompt.value?"\n":"")+"[پیوست نمایشی: "+file.name+"]";prompt.focus();}});
+ function openMenu(){sidebar.classList.add("open");scrim.classList.add("show");}
+ function closeMenu(){sidebar.classList.remove("open");scrim.classList.remove("show");}
+ $("menuToggle").addEventListener("click",openMenu);$("closeSidebar").addEventListener("click",closeMenu);scrim.addEventListener("click",closeMenu);
+})();
+</script>
+</body>
+</html>
