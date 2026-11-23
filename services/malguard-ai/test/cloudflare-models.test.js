@@ -68,7 +68,7 @@ test('server model identities cannot be changed by untrusted catalog',async()=>{
  assert.ok(unavailableCFModels().every(m=>m.available===false));
 });
 test('standalone Safari app has its own identity and no overlay report button',()=>{
- const html=readFileSync(new URL('../../../ai/index.html',import.meta.url),'utf8');
+ const html=readFileSync(new URL('../../../ai/classic.html',import.meta.url),'utf8');
  const manifest=JSON.parse(readFileSync(new URL('../../../ai/manifest.webmanifest',import.meta.url),'utf8'));
  assert.equal(manifest.display,'standalone');
  assert.equal(manifest.start_url,'/ai/');

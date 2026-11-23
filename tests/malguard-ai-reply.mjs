@@ -25,7 +25,7 @@ try{
   await page.clock.install();
   await context.addInitScript(()=>{localStorage.setItem('malguard.ai.welcome.v3','seen');Object.defineProperty(navigator,'gpu',{value:undefined});});
   await context.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
-  await page.goto(base+'/ai/');await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
+  await page.goto(base+'/ai/classic.html');await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
   const beforeActions=jobs.length;
   await page.locator('#attach-toggle').click();await page.locator('#attach-web').click();
   assert.equal(await page.locator('#mode').inputValue(),'worker');assert.equal(await page.locator('#tool').inputValue(),'ai_web');assert.equal(await page.locator('#workspace-panel').isVisible(),true);
@@ -143,7 +143,7 @@ try{
   window.Worker=class{constructor(){window.localWorker=this;}postMessage(data){window.workerCalls.push(data);}terminate(){window.workerStops++;}};
  });
  await local.route('**/*',r=>new URL(r.request().url()).origin===base?r.continue():r.abort());
- await page.goto(base+'/ai/');await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
+ await page.goto(base+'/ai/classic.html');await page.waitForFunction(()=>document.getElementById('send').dataset.modelReady==='true');
  await selectModel(page,'local_fast');
  const beforeLocal=jobs.length;await page.locator('#message').fill('Hello');await page.locator('#send').click();await page.locator('#local-download button[value="download"]').click();
  await page.waitForFunction(()=>window.workerCalls.length===1);

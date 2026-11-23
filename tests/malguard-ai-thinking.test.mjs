@@ -52,7 +52,7 @@ test('Thinking is boolean, per-request and never automatically enabled in the br
 });
 
 test('Thinking button is keyboard accessible, defaults off and links to a real request field',async()=>{
- const html=await readFile(new URL('../ai/index.html',import.meta.url),'utf8');
+ const html=await readFile(new URL('../ai/classic.html',import.meta.url),'utf8');
  const app=await readFile(new URL('../ai/app.js',import.meta.url),'utf8');
  const css=await readFile(new URL('../ai/style.css',import.meta.url),'utf8');
  assert.match(html,/id="thinking-toggle"[^>]*aria-pressed="false"/);

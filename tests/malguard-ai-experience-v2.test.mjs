@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {EXPERIENCE_PROMPTS,MODE_LINKS} from '../ai/experience-v2.mjs';
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
-const html=read('ai/index.html');
+const html=read('ai/classic.html');
 const app=read('ai/app.js');
 const navigation=read('ai/navigation.mjs');
 const styles=read('ai/experience-v2.css');
