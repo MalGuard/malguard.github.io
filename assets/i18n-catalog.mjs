@@ -1,6 +1,7 @@
 import {
 persian} from './i18n-fa.mjs';
 export const translations = {
+"Star on GitHub":"در گیت‌هاب ستاره بدهید",
 "MalGuard AI":"هوش مصنوعی مالگارد",
 "Open MalGuard AI":"بازکردن هوش مصنوعی مالگارد",
 "CHAT & SECURITY TOOLS":"چت و ابزارهای امنیتی",
