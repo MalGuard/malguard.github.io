@@ -1,0 +1,98 @@
+/* Opt-in styles for XV surfaces. Load after the host theme. */
+.mg-xv {
+  --mg-xv-canvas: var(--site-canvas, #000);
+  --mg-xv-surface: var(--site-surface, #0c0c0d);
+  --mg-xv-text: var(--site-text, #fff);
+  --mg-xv-muted: var(--site-muted, #a0a0a5);
+  --mg-xv-font: var(--site-font, system-ui, sans-serif);
+  --mg-xv-border: #737378;
+  --mg-xv-focus: #6ee7ff;
+  --mg-xv-radius: 0.75rem;
+  --mg-xv-space-1: 0.25rem;
+  --mg-xv-space-2: 0.5rem;
+  --mg-xv-space-3: 0.75rem;
+  --mg-xv-space-4: 1rem;
+  color: var(--mg-xv-text);
+  font-family: var(--mg-xv-font);
+}
+
+:is([data-theme="light"], .theme-light) .mg-xv {
+  --mg-xv-canvas: var(--site-canvas, #faf9f5);
+  --mg-xv-surface: var(--site-surface, #fff);
+  --mg-xv-text: var(--site-text, #141413);
+  --mg-xv-muted: var(--site-muted, #5f5c56);
+  --mg-xv-focus: #005a8c;
+}
+
+.mg-xv .mg-xv-surface,
+.mg-xv .mg-xv-button {
+  border: 1px solid var(--mg-xv-border);
+  border-radius: var(--mg-xv-radius);
+  background: var(--mg-xv-surface);
+  color: var(--mg-xv-text);
+}
+
+.mg-xv .mg-xv-surface {
+  padding: var(--mg-xv-space-4);
+}
+
+.mg-xv .mg-xv-button {
+  min-block-size: 2.75rem;
+  padding: var(--mg-xv-space-2) var(--mg-xv-space-3);
+  font: inherit;
+  cursor: pointer;
+}
+
+.mg-xv .mg-xv-button:focus-visible {
+  outline: 2px solid var(--mg-xv-focus);
+  outline-offset: 3px;
+}
+
+.mg-xv .mg-xv-button:disabled {
+  color: var(--mg-xv-muted);
+  cursor: default;
+}
+
+@media (forced-colors: active) {
+  .mg-xv .mg-xv-button:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* Liquid Glass palette and surface for dark XV environments. */
+:where(.mg-xv, .xv-home) {
+  --xv-night: #020a17;
+  --xv-white: #f4faff;
+  --xv-copy: #d7e6f4;
+  --xv-cyan: #04eaff;
+  --xv-focus: #b8faff;
+  --xv-glass: linear-gradient(163deg, rgb(48 119 165 / .48), rgb(5 32 57 / .81) 40%, rgb(1 22 42 / .76) 72%, rgb(42 116 163 / .58));
+  --xv-glass-shadow: inset 0 1px 1px rgb(221 249 255 / .65), inset 0 0 1.3rem rgb(61 166 252 / .26), 0 7px 22px rgb(0 11 31 / .3);
+  --xv-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+:where(.mg-xv) .xv-liquid {
+  border: 1px solid rgb(112 187 247 / .65);
+  background: var(--xv-glass);
+  box-shadow: var(--xv-glass-shadow);
+}
+:where(.mg-xv) .xv-liquid:is(a,form):hover,
+:where(.mg-xv) .xv-liquid:focus-within { border-color: #9cecff; }
+
+/* One visible keyboard treatment across the cinematic and product surfaces. */
+@layer xv-keyboard {
+  :where(.xv-home, .xvc, .xvc-assistant) :where(a, button, input, textarea, select, summary):focus-visible {
+    outline: 2px solid var(--xv-focus, #a3f8ff) !important;
+    outline-offset: 3px !important;
+  }
+  @media (forced-colors: active) {
+    :where(.xv-home, .xvc, .xvc-assistant) :where(a, button, input, textarea, select, summary):focus-visible {
+      outline-color: Highlight !important;
+    }
+  }
+}
+@media (pointer: coarse) {
+  .xvc :where(.xvc-rail a, .xvc-report-actions a, .xvc-report-actions button, .xvc-pages summary) {
+    min-block-size: 44px;
+  }
+}

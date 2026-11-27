@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 314" fill="none">
+  <defs>
+    <linearGradient id="face" x1="51" y1="32" x2="215" y2="290" gradientUnits="userSpaceOnUse"><stop stop-color="#21bdff" stop-opacity=".28"/><stop offset=".42" stop-color="#021831" stop-opacity=".85"/><stop offset=".7" stop-color="#031229"/><stop offset="1" stop-color="#007fb6" stop-opacity=".72"/></linearGradient>
+    <linearGradient id="rim" x1="29" y1="120" x2="248" y2="176" gradientUnits="userSpaceOnUse"><stop stop-color="#ebffff"/><stop offset=".19" stop-color="#29d1ff"/><stop offset=".39" stop-color="#005baf"/><stop offset=".61" stop-color="#a4faff"/><stop offset=".79" stop-color="#39c9ff"/><stop offset="1" stop-color="#ecffff"/></linearGradient>
+    <linearGradient id="edge" x1="140" y1="4" x2="140" y2="310" gradientUnits="userSpaceOnUse"><stop stop-color="#d8fdff"/><stop offset=".4" stop-color="#078fe5"/><stop offset=".72" stop-color="#459bd4"/><stop offset="1" stop-color="#b9ffff"/></linearGradient>
+    <filter id="halo" x="0" y="0" width="280" height="314" filterUnits="userSpaceOnUse"><feGaussianBlur stdDeviation="5"/></filter>
+    <path id="shape" d="M140 11 258 69c0 98-18 171-118 232C40 240 22 167 22 69L140 11Z"/>
+  </defs>
+  <use href="#shape" stroke="#058aff" stroke-width="16" filter="url(#halo)"/>
+  <use href="#shape" fill="url(#face)" stroke="url(#edge)" stroke-width="3"/>
+  <path d="m140 12 117 58-16 9-101-49L37 80l-14-10 117-58Z" fill="url(#rim)" fill-opacity=".54"/>
+  <path d="M140 30 241 79c-2 91-19 155-101 205C58 234 41 170 37 80l103-50Z" stroke="url(#rim)" stroke-width="1.4"/>
+  <path d="M23 70c0 98 18 171 117 231v-17C58 234 41 170 37 80L23 70Z" fill="url(#rim)" fill-opacity=".28"/>
+  <path d="M258 70c0 98-18 171-118 231v-17c82-50 99-114 101-205l17-9Z" fill="url(#rim)" fill-opacity=".42"/>
+  <path d="M140 12v18M23 70l14 10m221-10-17 9M140 284v17" stroke="#d4ffff" stroke-width="1.5"/>
+</svg>

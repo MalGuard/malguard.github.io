@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="MalGuard document mark">
+<path d="M128 18 91 75 62 49 30 92l34 118 64 28 64-28 34-118-32-43-29 26Z" fill="#07121A" stroke="#E8F7FF" stroke-width="9" stroke-linejoin="round"/>
+<path d="M128 31 108 76 128 101 148 76Z" fill="#E8F7FF"/>
+<path d="M64 77 91 100l37 35 37-35 27-23-14 117-50 22-50-22Z" fill="none" stroke="#E8F7FF" stroke-width="10" stroke-linejoin="round"/>
+<path d="M84 111v66M172 111v66M84 111l44 40 44-40M128 151v45" fill="none" stroke="#E8F7FF" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

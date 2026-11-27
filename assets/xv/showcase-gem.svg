@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
+ <defs>
+  <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#066499" stop-opacity=".55"/><stop offset=".45" stop-color="#01172e" stop-opacity=".96"/><stop offset="1" stop-color="#044d83" stop-opacity=".75"/></linearGradient>
+  <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e8ffff"/><stop offset=".34" stop-color="#148eff"/><stop offset=".7" stop-color="#40c7f8"/><stop offset="1" stop-color="#bdfaff"/></linearGradient>
+  <radialGradient id="flare"><stop stop-color="#d4ffff"/><stop offset=".23" stop-color="#77e8ff" stop-opacity=".85"/><stop offset="1" stop-color="#08caff" stop-opacity="0"/></radialGradient>
+  <linearGradient id="facet"><stop stop-color="#45dfff" stop-opacity=".6"/><stop offset=".27" stop-color="#129aff" stop-opacity=".12"/><stop offset=".54" stop-color="#2ebcff" stop-opacity=".65"/><stop offset="1" stop-color="#5df2ff" stop-opacity=".18"/></linearGradient>
+ </defs>
+ <path d="M110 8 208 46v134l-98 35-98-35V46Z" fill="url(#glass)" stroke="url(#rim)" stroke-width="2.5"/>
+ <path d="m110 27 76 31v109l-76 28-77-28V58Z" fill="none" stroke="#90ddfc" stroke-width="1.5"/>
+ <path d="M110 8v19L33 58v109l-21 13V46Zm98 38v134l-22-13V58l-76-31V8Z" fill="url(#facet)" stroke="#4ddaff" stroke-width="1"/>
+ <path d="m12 180 21-13 77 28 76-28 22 13-98 35Z" fill="url(#facet)" stroke="#a0feff"/>
+ <path d="M110 195v20M33 58 12 46m174 12 22-12" fill="none" stroke="#b1f7ff" stroke-width="1.5"/>
+ <g fill="url(#flare)"><ellipse cx="110" cy="11" rx="34" ry="19"/><ellipse cx="15" cy="48" rx="16" ry="26"/><ellipse cx="204" cy="50" rx="16" ry="26"/><ellipse cx="110" cy="207" rx="49" ry="10"/><ellipse cx="15" cy="169" rx="19" ry="30"/><ellipse cx="205" cy="169" rx="19" ry="30"/></g>
+</svg>

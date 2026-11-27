@@ -1,0 +1,500 @@
+{
+  "version": 2,
+  "scope": "real-local-ui-with-authored-html-and-simulated-threat-responses",
+  "audio": true,
+  "preview": false,
+  "syntheticTestOnly": false,
+  "published": false,
+  "narration": {
+    "engine": "piper-tts@1.8.0",
+    "offline": true,
+    "source": {
+      "repo": "rhasspy/piper-voices",
+      "revision": "5041a7a49ae5b3a0f30e6837769eb03fdbb231bd"
+    },
+    "voices": {
+      "en": {
+        "voice": "LJ Speech (neural English)",
+        "datasetLicense": "public domain",
+        "modelSha256": "5d4f08ba6a2a48c44592eed3ce56bf85e9de3dd4e20df90541ae68a8310c029a",
+        "audioSha256": "eb1161d42d10da7f8976986e4003e5f43423743c1dac24dfef13620f808a68d3"
+      },
+      "fa": {
+        "voice": "Amir (neural Persian)",
+        "datasetLicense": "CC0",
+        "modelSha256": "fb815380d969ea372b0b21b0de14421f58fe481047e153e69685d079b6e1a9d1",
+        "audioSha256": "96b6e1495686aec3fa04dc80b35d5f1bda4f2dfbdb412673a845c5c2145f6eb9"
+      }
+    }
+  },
+  "frameRate": 25,
+  "cursor": "visible arrow with eased motion and click rings",
+  "videos": [
+    {
+      "locale": "en",
+      "duration": 89.184,
+      "captureOffset": 1.123,
+      "captionMatches": [
+        0.992661,
+        0.997447,
+        0.994369,
+        0.995093,
+        0.994082,
+        0.996699,
+        0.996383,
+        0.996988,
+        0.996291
+      ],
+      "chapters": [
+        {
+          "start": 0,
+          "end": 8.743,
+          "title": "Start with a public website",
+          "body": "Paste a public website URL. GameScam Guard inspects received page evidence.",
+          "titleBox": {
+            "x": 501,
+            "y": 904,
+            "width": 278,
+            "height": 40
+          },
+          "narration": "Welcome to GameScam Guard. Follow the pointer through this harmless training example. First, enter a public website address."
+        },
+        {
+          "start": 8.744,
+          "end": 15.166,
+          "title": "Watch the scan",
+          "body": "Progress and the result appear on the same screen.",
+          "titleBox": {
+            "x": 558,
+            "y": 904,
+            "width": 163,
+            "height": 40
+          },
+          "narration": "Select Start scan. Watch the progress here, then read the result on the same screen."
+        },
+        {
+          "start": 15.167,
+          "end": 23.458,
+          "title": "Read the coverage",
+          "body": "One engine performs 20 distinct static checks. It does not execute website scripts.",
+          "titleBox": {
+            "x": 542,
+            "y": 904,
+            "width": 196,
+            "height": 40
+          },
+          "narration": "Open View details, then Coverage. This shows twenty distinct static checks, and which checks completed."
+        },
+        {
+          "start": 23.464,
+          "end": 33.725,
+          "title": "Inspect the whole redirect path",
+          "body": "Threat sources shows observations for the initial, intermediate and final addresses.",
+          "titleBox": {
+            "x": 477,
+            "y": 904,
+            "width": 325,
+            "height": 40
+          },
+          "narration": "Choose Threat sources. Review the submitted address, each redirect, and the final destination separately."
+        },
+        {
+          "start": 33.726,
+          "end": 40.632,
+          "title": "Choose the additional scope",
+          "body": "Confirm linked-page inspection. The submitted-page assessment is preserved.",
+          "titleBox": {
+            "x": 491,
+            "y": 904,
+            "width": 298,
+            "height": 40
+          },
+          "narration": "For a wider inspection, select Inspect linked pages. Read the scope before confirming."
+        },
+        {
+          "start": 40.635,
+          "end": 54.67,
+          "title": "Understand new threat evidence",
+          "body": "This training destination has a simulated report. The expanded assessment explains the change.",
+          "titleBox": {
+            "x": 471,
+            "y": 904,
+            "width": 338,
+            "height": 40
+          },
+          "narration": "Select Scan public pages. This example adds a simulated threat report from a linked destination. The original assessment stays visible, so you can see why the expanded result changes."
+        },
+        {
+          "start": 54.677,
+          "end": 64.508,
+          "title": "Run the built-in self-test",
+          "body": "38 selected harmless fixtures test detection, benign controls and security boundaries.",
+          "titleBox": {
+            "x": 509,
+            "y": 904,
+            "width": 261,
+            "height": 40
+          },
+          "narration": "Open Self-test and select Run self-test. These thirty-eight harmless examples check selected detection rules and security boundaries."
+        },
+        {
+          "start": 64.511,
+          "end": 76.53,
+          "title": "Recognize missing evidence",
+          "body": "A simulated provider outage gives an incomplete result, not a claim of safety.",
+          "titleBox": {
+            "x": 490,
+            "y": 904,
+            "width": 299,
+            "height": 40
+          },
+          "narration": "Back in Scan, this second example simulates a source outage. An incomplete inspection means evidence is missing. Retry later before relying on that result."
+        },
+        {
+          "start": 76.535,
+          "end": 89.184,
+          "title": "Review the source settings",
+          "body": "Know which sources are configured. A completed observation is not a safety guarantee.",
+          "titleBox": {
+            "x": 498,
+            "y": 904,
+            "width": 283,
+            "height": 40
+          },
+          "narration": "Finally, open Settings to review your sources and privacy choices. Use these observations to make an informed decision before signing in, paying, or downloading."
+        }
+      ],
+      "movements": [
+        {
+          "time": 2.04,
+          "action": "click",
+          "x": 563,
+          "y": 365.1484375
+        },
+        {
+          "time": 10.637,
+          "action": "click",
+          "x": 989.5,
+          "y": 365.1484375
+        },
+        {
+          "time": 17.122,
+          "action": "click",
+          "x": 640,
+          "y": 695.09375
+        },
+        {
+          "time": 19.335,
+          "action": "click",
+          "x": 399.109375,
+          "y": 736.6171875
+        },
+        {
+          "time": 25.393,
+          "action": "click",
+          "x": 577.84375,
+          "y": 292.6171875
+        },
+        {
+          "time": 28.253,
+          "action": "point",
+          "x": 307.765625,
+          "y": 405.140625
+        },
+        {
+          "time": 30.455,
+          "action": "point",
+          "x": 296.703125,
+          "y": 565.515625
+        },
+        {
+          "time": 32.622,
+          "action": "point",
+          "x": 306.9375,
+          "y": 725.890625
+        },
+        {
+          "time": 36.457,
+          "action": "click",
+          "x": 979.3828125,
+          "y": 742.140625
+        },
+        {
+          "time": 42.695,
+          "action": "click",
+          "x": 586.671875,
+          "y": 602.796875
+        },
+        {
+          "time": 56.735,
+          "action": "click",
+          "x": 748.875,
+          "y": 129.296875
+        },
+        {
+          "time": 58.936,
+          "action": "click",
+          "x": 989.8984375,
+          "y": 218.40625
+        },
+        {
+          "time": 66.413,
+          "action": "click",
+          "x": 313.375,
+          "y": 129.296875
+        },
+        {
+          "time": 68.518,
+          "action": "click",
+          "x": 563,
+          "y": 365.1484375
+        },
+        {
+          "time": 72.441,
+          "action": "click",
+          "x": 989.5,
+          "y": 365.1484375
+        },
+        {
+          "time": 78.427,
+          "action": "click",
+          "x": 966.625,
+          "y": 129.296875
+        }
+      ]
+    },
+    {
+      "locale": "fa",
+      "duration": 95.83,
+      "captureOffset": 1.082,
+      "captionMatches": [
+        0.994541,
+        0.99344,
+        0.993888,
+        0.992921,
+        0.992649,
+        0.995773,
+        0.989805,
+        0.992123,
+        0.995377
+      ],
+      "chapters": [
+        {
+          "start": 0,
+          "end": 10.597999999999999,
+          "title": "با نشانی عمومی شروع کنید",
+          "body": "لینک عمومی وب‌سایت را وارد کنید. برنامه شواهد محتوای دریافت‌شده را بررسی می‌کند.",
+          "titleBox": {
+            "x": 514,
+            "y": 904,
+            "width": 251,
+            "height": 40
+          },
+          "narration": "به گیم اسکم گارد خوش آمدید. در این نمونهٔ آموزشی بی‌خطر، نشانگر را دنبال کنید. ابتدا نشانی عمومی یک وب‌سایت را وارد کنید."
+        },
+        {
+          "start": 10.600999999999999,
+          "end": 17.265,
+          "title": "پیشرفت بررسی را ببینید",
+          "body": "پیشرفت و نتیجه کنار همان فرم نمایش داده می‌شوند.",
+          "titleBox": {
+            "x": 531,
+            "y": 904,
+            "width": 218,
+            "height": 40
+          },
+          "narration": "شروع بررسی را بزنید. پیشرفت کار را اینجا ببینید و سپس نتیجه را در همین صفحه بخوانید."
+        },
+        {
+          "start": 17.272000000000002,
+          "end": 26.942,
+          "title": "پوشش را بخوانید",
+          "body": "یک موتور بیست بررسی ایستا دارد و اسکریپت وب‌سایت را اجرا نمی‌کند.",
+          "titleBox": {
+            "x": 559,
+            "y": 904,
+            "width": 161,
+            "height": 40
+          },
+          "narration": "نمایش جزئیات و سپس پوشش را باز کنید. این بخش بیست بررسی ایستا و وضعیت تکمیل هرکدام را نشان می‌دهد."
+        },
+        {
+          "start": 26.964000000000002,
+          "end": 37.272999999999996,
+          "title": "کل مسیر انتقال را بررسی کنید",
+          "body": "منابع تهدید، پاسخ نشانی اول، میانی و نهایی را جداگانه نشان می‌دهد.",
+          "titleBox": {
+            "x": 504,
+            "y": 904,
+            "width": 272,
+            "height": 40
+          },
+          "narration": "منابع تهدید را انتخاب کنید. پاسخ نشانی اولیه، انتقال‌های میانی و مقصد نهایی را جداگانه ببینید."
+        },
+        {
+          "start": 37.277,
+          "end": 44.696999999999996,
+          "title": "دامنهٔ بررسی را انتخاب کنید",
+          "body": "بررسی صفحه‌های مرتبط را تأیید کنید. ارزیابی صفحهٔ اولیه حفظ می‌شود.",
+          "titleBox": {
+            "x": 515,
+            "y": 904,
+            "width": 249,
+            "height": 40
+          },
+          "narration": "برای بررسی بیشتر، بررسی صفحه‌های مرتبط را بزنید. پیش از تأیید، دامنهٔ بررسی را بخوانید."
+        },
+        {
+          "start": 44.698,
+          "end": 59.333,
+          "title": "دلیل شاهد تازه را بخوانید",
+          "body": "این مقصد آموزشی گزارش ساختگی دارد. ارزیابی گسترده‌تر دلیل تغییر را توضیح می‌دهد.",
+          "titleBox": {
+            "x": 522,
+            "y": 904,
+            "width": 235,
+            "height": 40
+          },
+          "narration": "بررسی صفحه‌های عمومی را بزنید. در این نمونه، یک مقصد مرتبط گزارش ساختگی تهدید دارد. ارزیابی اولیه حفظ می‌شود تا دلیل تغییر نتیجهٔ گسترده‌تر را ببینید."
+        },
+        {
+          "start": 59.333999999999996,
+          "end": 69.443,
+          "title": "خودآزمایی داخلی را اجرا کنید",
+          "body": "سی‌وهشت نمونهٔ منتخب و بی‌خطر، تشخیص، کنترل بی‌خطر و مرزهای امنیتی را می‌سنجند.",
+          "titleBox": {
+            "x": 508,
+            "y": 904,
+            "width": 264,
+            "height": 40
+          },
+          "narration": "خودآزمایی را باز کنید و اجرای خودآزمایی را بزنید. این سی و هشت نمونهٔ بی‌خطر، قواعد منتخب تشخیص و مرزهای امنیتی را می‌سنجند."
+        },
+        {
+          "start": 69.444,
+          "end": 84.202,
+          "title": "شواهد ناقص را تشخیص دهید",
+          "body": "اختلال ساختگی منبع، نتیجهٔ ناقص می‌دهد و ادعای امنیت تولید نمی‌کند.",
+          "titleBox": {
+            "x": 497,
+            "y": 904,
+            "width": 286,
+            "height": 40
+          },
+          "narration": "به بررسی برگردید. نمونهٔ دوم، اختلال یک منبع را شبیه‌سازی می‌کند. بررسی ناقص یعنی بخشی از شواهد در دسترس نیست. پیش از اتکا به نتیجه، بعداً دوباره تلاش کنید."
+        },
+        {
+          "start": 84.202,
+          "end": 95.83,
+          "title": "وضعیت منابع را ببینید",
+          "body": "منابع پیکربندی‌شده را بشناسید. مشاهدهٔ کامل به معنی تضمین امنیت نیست.",
+          "titleBox": {
+            "x": 536,
+            "y": 904,
+            "width": 207,
+            "height": 40
+          },
+          "narration": "در پایان، تنظیمات را باز کنید و منابع و گزینه‌های حریم خصوصی را ببینید. پیش از ورود، پرداخت یا دانلود، با توجه به این شواهد تصمیم بگیرید."
+        }
+      ],
+      "movements": [
+        {
+          "time": 1.91,
+          "action": "click",
+          "x": 717,
+          "y": 365.1484375
+        },
+        {
+          "time": 12.533999999999999,
+          "action": "click",
+          "x": 290.5,
+          "y": 365.1484375
+        },
+        {
+          "time": 19.28,
+          "action": "click",
+          "x": 640,
+          "y": 695.09375
+        },
+        {
+          "time": 21.408,
+          "action": "click",
+          "x": 926.4921875,
+          "y": 736.6171875
+        },
+        {
+          "time": 28.851000000000003,
+          "action": "click",
+          "x": 764.328125,
+          "y": 292.6171875
+        },
+        {
+          "time": 31.61,
+          "action": "point",
+          "x": 307.765625,
+          "y": 405.140625
+        },
+        {
+          "time": 33.879,
+          "action": "point",
+          "x": 296.703125,
+          "y": 565.515625
+        },
+        {
+          "time": 36.157999999999994,
+          "action": "point",
+          "x": 306.9375,
+          "y": 725.890625
+        },
+        {
+          "time": 40.050999999999995,
+          "action": "click",
+          "x": 300.203125,
+          "y": 742.140625
+        },
+        {
+          "time": 46.772999999999996,
+          "action": "click",
+          "x": 683.578125,
+          "y": 590.453125
+        },
+        {
+          "time": 61.376,
+          "action": "click",
+          "x": 531.125,
+          "y": 129.296875
+        },
+        {
+          "time": 63.684,
+          "action": "click",
+          "x": 293.4453125,
+          "y": 218.40625
+        },
+        {
+          "time": 71.31400000000001,
+          "action": "click",
+          "x": 966.625,
+          "y": 129.296875
+        },
+        {
+          "time": 73.38600000000001,
+          "action": "click",
+          "x": 717,
+          "y": 365.1484375
+        },
+        {
+          "time": 77.239,
+          "action": "click",
+          "x": 290.5,
+          "y": 365.1484375
+        },
+        {
+          "time": 86.16900000000001,
+          "action": "click",
+          "x": 313.375,
+          "y": 129.296875
+        }
+      ]
+    }
+  ]
+}

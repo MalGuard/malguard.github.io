@@ -1,0 +1,23 @@
+/* Shared clarity fixes, followed by the independent WebGL device experience. */
+html,body{overflow-x:clip}
+.scene .t,.lab-copy,#layers .steps,.section-top,.sub,.security-line,footer,.local-tool h3,.local-tool p,.tool-cta,.analysis-result,.face,.trust div,.panel,.vp{text-shadow:none!important}
+.st.act,.evidence-trace .active{background:transparent!important}
+.lab-copy,.steps,.workbench-copy,.section-top{background:transparent!important}
+.stage{position:relative;isolation:isolate}.scene3d{isolation:isolate}
+.scene3d:before{content:'';position:absolute;inset:-65%;border-radius:50%;background:radial-gradient(ellipse,#030711e6 12%,#030711bb 42%,transparent 68%);z-index:-1;pointer-events:none}
+.f{background:linear-gradient(135deg,#0c263351,#11253988);box-shadow:inset 0 0 25px #87cbff0a;color:#b0ddff99;border-color:#91d5ffc0}
+.cube.run .f{animation:none!important;background:linear-gradient(135deg,#0d354966,#09203999);border-color:#adf2ff}
+.cube.run .core{opacity:.45;scale:.75}.laser{border:1px solid #c6f7ff;background:linear-gradient(135deg,#80ddff45,#80ddff08);box-shadow:0 0 20px #8ee6ff66,inset 0 0 15px #a7eaff25}
+.cube.run .laser{animation-duration:1.7s;animation-timing-function:cubic-bezier(.45,0,.55,1)}
+.chamber-sweep{position:absolute;inset:0;pointer-events:none;z-index:4;opacity:0;border-radius:4px;background:linear-gradient(180deg,transparent 45%,#a3edff30 49.5%,#ccfaffb0 50%,transparent 51%);background-size:100% 200%}
+.cube.run .chamber-sweep{opacity:.75;animation:chamber-read 2.2s ease-in-out infinite}
+@keyframes chamber-read{from{background-position:0 100%}to{background-position:0 -100%}}
+.chamber-meter{height:2px;width:100%;background:#7bb2db20;margin-top:9px;overflow:hidden}.chamber-meter i{display:block;width:0;height:100%;background:linear-gradient(90deg,#7cbaff,#c0f6ff);transition:width .8s ease}
+.chamber-result{position:absolute;left:50%;top:50%;translate:-50% -50%;min-width:140px;padding:12px 16px;border:1px solid var(--c);border-radius:10px;background:#06111ded;color:var(--c);text-align:center;font:10px/1.8 'JetBrains Mono',monospace;opacity:0;scale:.85;transition:opacity .5s,scale .5s;z-index:5;pointer-events:none}.cube.show .chamber-result{opacity:1;scale:1}.chamber-result small{display:block;color:#bdd1e0;font-size:7px;letter-spacing:.12em}
+.code-topbar .traffic-lights{gap:8px;flex:none}.traffic-lights{display:flex;align-items:center;gap:7px}.traffic-lights i{display:grid;place-items:center;width:12px;height:12px;border-radius:50%;font:11px/1 Arial,sans-serif;font-style:normal;color:#5f171780;background:#ff5f57;border:1px solid #dc4942}.traffic-lights i:nth-child(2){background:#febc2e;border-color:#dea123;color:#77541280}.traffic-lights i:nth-child(3){background:#28c840;border-color:#1caa30;color:#0c621f80}.traffic-lights:hover i{color:#253043}
+.code-body .scan-beam{height:22px;left:14px;right:14px;border:1px solid #8bdefa45;border-left:2px solid #b1efff;border-bottom-color:#8bdefa45;border-radius:4px;background:linear-gradient(90deg,#75c8ef15,transparent);box-shadow:0 0 12px #80d1ff12;transition:top .12s linear,opacity .4s}
+.code-body .scan-beam:before{content:'READ';position:absolute;right:6px;top:3px;font:7px 'JetBrains Mono',monospace;letter-spacing:.1em;color:#9dddff}
+.code-body pre{padding-left:9px}.code-body{background:linear-gradient(135deg,#15365522,transparent)}
+.scan-findings{display:flex;gap:9px;flex-wrap:wrap;padding:10px 18px;border-top:1px solid #abc9ef13;font:8px 'JetBrains Mono',monospace;color:#97bbd5}.scan-findings span{display:flex;gap:5px;align-items:center}.scan-findings span:before{content:'';width:4px;height:4px;background:#7293ad;border-radius:50%}.scan-findings span.done:before{background:#94e4cb;box-shadow:0 0 6px #94e4cb55}
+#layers:not(.flow-mode) .sticky{position:sticky;top:0;height:100svh;transform:none!important;filter:none!important}
+@media(min-width:601px) and (max-height:720px){#layers:not(.flow-mode) .sticky{grid-template-columns:.85fr 1.15fr;grid-template-rows:1fr;padding:76px 8px 20px;gap:25px}#layers:not(.flow-mode) .stack{width:min(240px,30vw)}#layers:not(.flow-mode) .steps h2{font-size:29px;margin-bottom:12px}#layers:not(.flow-mode) .st{padding:7px 12px}#layers:not(.flow-mode) .st p{font-size:11px}#layers:not(.flow-mode) .approach-link{margin-top:13px}}

@@ -1,0 +1,9 @@
+{
+  "git": {"deploymentEnabled": {"preview/malguard-xv-static": false}},
+  "headers": [
+    {"source": "/(.*)", "headers": [
+      {"key": "X-Robots-Tag", "value": "noindex, nofollow"},
+      {"key": "Content-Security-Policy", "value": "connect-src 'self'; object-src 'none'; frame-ancestors 'none'"}
+    ]}
+  ]
+}

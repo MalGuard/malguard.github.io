@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex,follow">
+<title>MalGuard XV Workspace</title>
+<link rel="icon" href="/assets/fusion/assets/malguard-logo.svg">
+<link rel="stylesheet" href="/assets/xv/foundation.css">
+<link rel="stylesheet" href="/assets/xv/product.css">
+<script type="module" src="./workspace.mjs"></script>
+<script type="module" src="./account-view.mjs"></script>
+</head>
+<body class="xvc">
+<a class="xvc-skip" href="#xvc-main">Skip to content</a>
+<div class="xvc-shell" id="xvc-workspace">
+  <header class="xvc-top">
+    <a class="xvc-brand" href="./"><img src="/assets/fusion/assets/malguard-logo.svg" width="38" height="38" alt="">MalGuard <b>XV</b></a>
+    <a class="xvc-chip xvc-workspace-jump" href="./">App Workspace</a>
+    <form class="xvc-search" id="xvc-search"><label class="xvc-sr" for="xvc-query">Search tools or check a URL</label><svg aria-hidden="true"><use href="/assets/xv/showcase-icons.svg#search"/></svg><input id="xvc-query" placeholder="Search, scan, or analyze anything…" maxlength="2048"><button class="xvc-chip" aria-label="Find tool">Go</button></form>
+    <details class="xvc-pages"><summary>Pages</summary><div><a href="/">Home</a><a href="../?view=xv">AI Assistant</a><a href="?view=report&amp;demo=1">Sample report</a></div></details>
+    <a class="xvc-account-link" href="?view=signin" aria-label="Sign in"><svg aria-hidden="true"><use href="/assets/xv/product-icons.svg#user"/></svg></a>
+  </header>
+  <nav class="xvc-rail" aria-label="Workspace">
+    <a data-page="dashboard" href="./"><svg aria-hidden="true"><use href="/assets/xv/product-icons.svg#home"/></svg>Dashboard</a>
+    <a href="./#xvc-upload"><svg aria-hidden="true"><use href="/assets/xv/showcase-icons.svg#verify"/></svg>New Analysis</a>
+    <a data-page="report" href="?view=report"><svg aria-hidden="true"><use href="/assets/xv/showcase-icons.svg#file"/></svg>Reports</a>
+    <a href="../?view=xv"><svg aria-hidden="true"><use href="/assets/xv/icons.svg#layers"/></svg>AI Models</a>
+    <a href="/tools.html"><svg aria-hidden="true"><use href="/assets/xv/icons.svg#target"/></svg>Tools</a>
+    <a href="/docs.html"><svg aria-hidden="true"><use href="/assets/xv/product-icons.svg#book"/></svg>Documentation</a>
+    <aside class="xvc-lab"><img src="/assets/fusion/assets/malguard-logo.svg" alt="" width="88" height="88"><strong>XV Workspace</strong><small>Local and connected tools</small></aside>
+  </nav>
+  <main id="xvc-main" tabindex="-1">
+    <section id="xvc-dashboard" aria-labelledby="xvc-welcome">
+      <div class="xvc-welcome"><h1 id="xvc-welcome">Welcome to <em>MalGuard XV</em></h1><p>Analysis tools for files, links, and games</p></div>
+      <div class="xvc-grid">
+        <div class="xvc-primary">
+          <section class="xvc-glass xvc-upload" id="xvc-upload" aria-labelledby="xvc-drop-title">
+            <input type="file" id="xvc-file" hidden>
+            <button class="xvc-drop" id="xvc-choose" type="button"><svg aria-hidden="true"><use href="/assets/xv/product-icons.svg#upload"/></svg><strong id="xvc-drop-title">Drop a file here or click to upload</strong><small>Compute SHA-256 locally. Nothing is uploaded.</small><span class="xvc-formats">EXE · ZIP · RAR · MOD · APK · Up to 32 MiB</span></button>
+            <p id="xvc-upload-status" role="status"></p>
+          </section>
+          <div class="xvc-shortcuts">
+            <a class="xvc-glass" href="/scan-url.html"><svg aria-hidden="true"><use href="/assets/xv/showcase-icons.svg#link"/></svg><span><strong>Scan a Link</strong><small>URL Analysis</small></span></a>
+            <a class="xvc-glass" href="/gta-guard.html"><svg aria-hidden="true"><use href="/assets/xv/showcase-icons.svg#game"/></svg><span><strong>Analyze a Game</strong><small>Game / Mod Scan</small></span></a>
+            <a class="xvc-glass" href="../?view=xv"><svg aria-hidden="true"><use href="/assets/xv/showcase-icons.svg#chip"/></svg><span><strong>AI Analysis</strong><small>MalGuard AI</small></span></a>
+          </div>
+          <section class="xvc-glass xvc-recent"><h2><svg aria-hidden="true"><use href="/assets/xv/showcase-icons.svg#file"/></svg>Recent Analyses <a href="?view=report">View all →</a></h2><ul id="xvc-recent"></ul><p id="xvc-recent-empty">Your local reports will appear here.</p></section>
+        </div>
+        <aside class="xvc-secondary" aria-label="Workspace resources">
+          <section class="xvc-glass"><h2><svg aria-hidden="true"><use href="/assets/xv/icons.svg#layers"/></svg>AI Models</h2><p id="xvc-catalog-status" role="status">Availability has not been checked.</p><ul id="xvc-catalog"></ul><button class="xvc-chip" id="xvc-check-models" type="button">Check model availability</button></section>
+          <section class="xvc-glass"><h2><svg aria-hidden="true"><use href="/assets/xv/icons.svg#target"/></svg>Security Tools</h2><div class="xvc-tool-list"><a href="/sandbox-help.html">Isolation</a><a href="/tools.html#file-fingerprint">Hash</a><a href="/scan-url.html">URL</a><a href="/threat-radar.html">Threat Radar</a></div></section>
+          <section class="xvc-glass"><h2><svg aria-hidden="true"><use href="/assets/xv/product-icons.svg#database"/></svg>System Status</h2><dl class="xvc-pairs"><div><dt>Fingerprinting</dt><dd id="xvc-local-status"></dd></div><div><dt>Threat database</dt><dd>Not queried</dd></div></dl></section>
+          <p class="xvc-local-note">File contents stay in your browser. A fingerprint does not determine safety.</p>
+        </aside>
+      </div>
+    </section>
+    <section id="xvc-report" hidden aria-labelledby="xvc-report-title">
+      <div class="xvc-report-heading"><svg aria-hidden="true"><use href="/assets/xv/showcase-icons.svg#file"/></svg><h1 id="xvc-report-title">Analysis Results</h1><span class="xvc-chip" id="xvc-report-kind" hidden></span></div>
+      <div class="xvc-glass xvc-report">
+        <div class="xvc-report-summary">
+          <div class="xvc-report-file"><svg aria-hidden="true"><use href="/assets/xv/showcase-icons.svg#file"/></svg><div><h2 id="xvc-report-name">No report selected</h2><p id="xvc-report-type">Choose a file to calculate a fingerprint.</p></div></div>
+          <div class="xvc-verdict" id="xvc-verdict" hidden><svg aria-hidden="true"><use href="/assets/xv/product-icons.svg#warning"/></svg><div><strong>Inconclusive</strong><p>Additional analysis required.</p></div></div>
+          <dl class="xvc-pairs xvc-report-data"><div><dt>File metadata</dt><dd id="xvc-file-metadata">Not provided</dd></div><div><dt>Static analysis</dt><dd>Not run</dd></div><div><dt>Behavior analysis</dt><dd>Not run</dd></div><div><dt>SHA-256</dt><dd><code id="xvc-sha">Not provided</code></dd></div></dl>
+        </div>
+        <div class="xvc-evidence"><h2><svg aria-hidden="true"><use href="/assets/xv/icons.svg#layers"/></svg>Evidence</h2><dl class="xvc-pairs"><div><dt>URLhaus</dt><dd>Not queried</dd></div><div><dt>MalwareBazaar</dt><dd>Not queried</dd></div><div><dt>Internal rules</dt><dd>Not evaluated</dd></div><div><dt>AI Analysis</dt><dd>Not requested</dd></div></dl><p class="xvc-evidence-limit" id="xvc-evidence-limit">No verified verdict. A fingerprint does not determine whether a file is safe.</p><div class="xvc-report-actions"><button class="xvc-button" id="xvc-download" type="button" disabled><svg aria-hidden="true"><use href="/assets/xv/product-icons.svg#download"/></svg>Download Report</button><a class="xvc-chip" href="./#xvc-upload">＋ New Analysis</a></div><a class="xvc-sample-link" href="?view=report&amp;demo=1">View sample report</a></div>
+      </div>
+    </section>
+  </main>
+</div>
+<section id="xvc-auth" class="xvc-auth" hidden></section>
+<template id="xvc-auth-template">
+    <a class="xvc-auth-back xvc-chip" href="./">← Workspace</a>
+    <div class="xvc-auth-brand">
+      <img src="/assets/fusion/assets/malguard-logo.svg" alt="" width="205" height="205">
+      <p>MalGuard <b>XV</b></p><small>AI CYBER DEFENSE</small>
+      <nav aria-label="MalGuard tools">
+        <a class="xvc-glass" href="./#xvc-upload"><svg aria-hidden="true"><use href="/assets/xv/showcase-icons.svg#verify"/></svg>Scan</a>
+        <a class="xvc-glass" href="./?view=report"><svg aria-hidden="true"><use href="/assets/xv/showcase-icons.svg#file"/></svg>Analyze</a>
+        <a class="xvc-glass" href="../?view=xv"><svg aria-hidden="true"><use href="/assets/xv/icons.svg#target"/></svg>Investigate</a>
+        <a class="xvc-glass" href="../?view=xv"><svg aria-hidden="true"><use href="/assets/xv/showcase-icons.svg#code"/></svg>Build</a>
+      </nav>
+    </div>
+    <div class="xvc-auth-mount" id="xvc-auth-mount"></div>
+    <section class="xvc-verified" id="xvc-verified" aria-labelledby="xvc-verified-title" hidden>
+      <span class="xvc-verified-mark"><svg aria-hidden="true"><use href="/assets/xv/product-icons.svg#check"/></svg></span>
+      <h1 id="xvc-verified-title" tabindex="-1">Your account is <em>verified</em></h1>
+      <p>Your email has been confirmed. You’re ready to get started.</p>
+      <a class="xvc-button" href="./">Enter Workspace <svg aria-hidden="true"><use href="/assets/xv/icons.svg#arrow"/></svg></a>
+    </section>
+    <section class="xvc-policies" id="xvc-policies" aria-labelledby="xvc-policy-title" hidden>
+      <header class="xvc-policy-header"><a class="xvc-brand" href="./"><img src="/assets/fusion/assets/malguard-logo.svg" width="38" height="38" alt="">MalGuard <b>XV</b></a><nav aria-label="Policy navigation"><button type="button" id="xvc-policy-nav-back">← Back to Sign Up</button><a href="/support.html">Help</a></nav></header>
+      <h1 id="xvc-policy-title" tabindex="-1">Terms &amp; <em>Policies</em></h1>
+      <p>Read the policies before creating your account.</p>
+      <div class="xvc-policy-grid">
+        <nav aria-label="Policy topics" class="xvc-policy-topics"></nav>
+        <article class="xvc-glass xvc-policy-panel">
+          <div id="xvc-policy-content"></div>
+          <form class="xvc-policy-actions">
+            <label><input id="xvc-policy-agree" type="checkbox" required> I have read and reviewed the policies</label>
+            <button type="button" class="xvc-chip" id="xvc-policy-back">Back to Sign Up</button>
+            <button class="xvc-button" type="submit">Accept &amp; Continue →</button>
+          </form>
+        </article>
+      </div>
+    </section>
+</template>
+<noscript>JavaScript is required for local file reports. <a href="/tools.html">Open MalGuard tools</a>.</noscript>
+</body>
+</html>
