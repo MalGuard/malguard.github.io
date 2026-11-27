@@ -63,13 +63,31 @@ function loadXV() {
   setLayout();
   for (const query of [mobile, drawer, landscape]) query.addEventListener('change', setLayout);
 
-  for (const path of ['foundation.css', 'product.css', 'assistant.css']) {
+  for (const path of ['foundation.css', 'product.css', 'assistant.css', 'conversation.css']) {
     const css = element('link');
     css.rel = 'stylesheet';
     css.href = '/assets/xv/' + path;
     document.head.append(css);
   }
   body.classList.add('xvc-assistant');
+
+  const log = byId('conversation');
+  const conversationHeader = element('header', 'xvc-chat-header');
+  const conversationTitle = element('h1', '', 'Conversation');
+  conversationTitle.id = 'xvc-chat-title';
+  const modelPicker = element('select', 'xvc-chat-model');
+  modelPicker.setAttribute('aria-label', 'Conversation model');
+  modelPicker.addEventListener('change', () => selectModel(modelPicker.value));
+  conversationHeader.append(conversationTitle, modelPicker);
+  log.before(conversationHeader);
+  log.tabIndex = 0;
+  new MutationObserver(() => {
+    if (log.children.length) {
+      intro.parentElement.setAttribute('aria-labelledby', conversationTitle.id);
+    } else {
+      refresh();
+    }
+  }).observe(log, { childList: true });
 
   // On iOS the keyboard can shrink the visual viewport without resizing the
   // document. Give the focused composer scroll room only while it's occluded.
@@ -87,6 +105,7 @@ function loadXV() {
           return;
         }
         body.style.setProperty('--xvc-ai-keyboard-inset', `${Math.ceil(inset)}px`);
+        if (log.children.length && body.dataset.projectOpen !== 'true') return;
         const below = byId('composer').getBoundingClientRect().bottom - visual.offsetTop - visual.height + 12;
         if (below > 0) window.scrollBy(0, Math.ceil(below));
       });
@@ -143,6 +162,12 @@ function loadXV() {
   badgeTitle.append(element('b', '', 'XV'));
   badge.append(image(logo, 66), badgeTitle, element('small', '', 'AI Cyber Defense'));
   sidebar.prepend(rail, badge);
+  sidebar.addEventListener('click', event => {
+    if (!drawer.matches || !event.target.closest('.history-open') || log.getAttribute('aria-busy') === 'true') return;
+    if (!body.classList.contains('navigation-closed')) sidebarToggle.click();
+    body.classList.remove('xvc-ai-searching');
+    sidebarToggle.focus({preventScroll:true});
+  });
   const closeSearch = element('button', 'xvc-ai-search-close', 'Back to navigation');
   closeSearch.type = 'button';
   sidebar.prepend(closeSearch);
@@ -154,7 +179,7 @@ function loadXV() {
   });
   function dismissSearch() {
     document.body.classList.remove('xvc-ai-searching');
-    if (drawer.matches && !body.classList.contains('navigation-closed')) sidebarToggle.click();
+    if (!body.classList.contains('navigation-closed') && (drawer.matches || log.children.length)) sidebarToggle.click();
     search.focus();
   }
   closeSearch.addEventListener('click', dismissSearch);
@@ -216,7 +241,7 @@ function loadXV() {
     } else if (more.open) {
       more.open = false;
       openModels.focus();
-    } else if (drawer.matches && !body.classList.contains('navigation-closed')) {
+    } else if ((drawer.matches || log.children.length) && !body.classList.contains('navigation-closed')) {
       sidebarToggle.click();
       sidebarToggle.focus();
     }
@@ -279,9 +304,20 @@ function loadXV() {
         choices.append(button);
       }
     }
+    if (modelPicker.dataset.options !== signature) {
+      modelPicker.dataset.options = signature;
+      modelPicker.replaceChildren(...options.map(option => {
+        const copy = element('option', '', option.textContent);
+        copy.value = option.value;
+        return copy;
+      }));
+    }
+    modelPicker.value = select.value;
+    modelPicker.disabled = select.disabled || options.length === 0;
     const isChat = document.body.dataset.mode === 'chat';
-    intro.parentElement.setAttribute('aria-labelledby', isChat ? title.id : 'title');
-    if (isChat && input.placeholder !== prompt) input.placeholder = prompt;
+    intro.parentElement.setAttribute('aria-labelledby', log.children.length ? conversationTitle.id : isChat ? title.id : 'title');
+    const label = log.children.length && byId('media-draft').hidden ? 'Message MalGuard XV…' : prompt;
+    if (isChat && byId('media-draft').hidden && input.placeholder !== label) input.placeholder = label;
   }
   const observer = new MutationObserver(refresh);
   observer.observe(select, { childList: true, attributes: true, subtree: true });

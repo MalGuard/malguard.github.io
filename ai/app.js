@@ -19,6 +19,7 @@ import {renderRichText} from './code-view.mjs?v=codex-chat-20261025';
 import {createAccount} from './account.mjs?v=vercel-auth-stable-20261103';
 import {createBuilder} from './builder.mjs?v=qwen-coder-restored-20261026';
 import {parseProposal} from './build-project.mjs?v=codex-chat-20261025';
+import {attachmentThumbnail, assistantIdentity, conversationAction, fileSize, streamReply, userTurn} from './xv/conversation.mjs';
 const staticXV = new URLSearchParams(location.search).get('view') === 'xv';
 const $=id=>document.getElementById(id);
 const names={gta_guard:'GTA Guard',game_scam_guard:'Game Scam Guard',ai_web:'AI Web',malwarebazaar:'MalwareBazaar',urlhaus:'URLhaus',file_sandbox:'File sandbox',url_sandbox:'Link sandbox'};
@@ -49,7 +50,7 @@ const account=createAccount({button:$('account'),locale:()=>locale,onChange:prof
 const navigation=createNavigation({account,onLanguage:()=>{locale='en';translate();}});
 $('entry-signin').onclick=()=>account.open(false);$('entry-signup').onclick=()=>account.open(true);
 $('entry-retry').onclick=async()=>{$('entry-retry').disabled=true;try{const restored=await account.restore();$('entry-retry').hidden=restored||!account.hasSavedSession();}finally{$('entry-retry').disabled=false;}};
-const library=createChatLibrary({account,snapshot:()=>({mode:activeMode,title:(history.find(item=>item.bubble)?.bubble||'New chat').slice(0,100),messages:history.flatMap(item=>item.bubble?[{role:'user',text:String(item.bubble).slice(0,12000)}]:item.response?.generated?.text?[{role:'assistant',text:item.response.generated.text.slice(0,12000)}]:[]).slice(-64)}),restore:chat=>{switchMode(chat.mode);history.length=0;modelHistory.length=0;for(const message of chat.messages){if(message.role==='user')history.push({bubble:message.text});else history.push({response:{generated:{text:message.text,provider:'Saved chat',model:'History'}}});modelHistory.push({role:message.role,content:message.text.slice(0,2000)});}modelHistory.splice(0,Math.max(0,modelHistory.length-8));$('message').value='';translate();}});
+const library=createChatLibrary({account,resume:staticXV,snapshot:()=>({mode:activeMode,title:(history.find(item=>item.bubble)?.bubble||'New chat').slice(0,100),messages:history.flatMap(item=>item.bubble?[{role:'user',text:String(item.bubble).slice(0,12000)}]:item.response?.generated?.text&&!(staticXV&&(item.response.interrupted||item.response.incomplete))?[{role:'assistant',text:item.response.generated.text.slice(0,12000)}]:[]).slice(-64)}),restore:chat=>{switchMode(chat.mode);history.length=0;modelHistory.length=0;for(const message of chat.messages){if(message.role==='user')history.push({bubble:message.text});else history.push({response:{generated:{text:message.text,provider:'Saved chat',model:'History'}}});modelHistory.push({role:message.role,content:message.text.slice(0,2000)});}modelHistory.splice(0,Math.max(0,modelHistory.length-8));$('message').value='';translate();if(staticXV)$('conversation').scrollTop=$('conversation').scrollHeight;}});
 let desktopConnecting=false,desktopDownloading=false,desktopDownloadController;
 const permissionInputs={fileUpload:'file-consent',websiteFetch:'website-consent',remoteLookup:'lookup-consent',modelShare:'model-consent'};
 const copy={
@@ -193,9 +194,25 @@ async function connectDesktop(){
  finally{desktopConnecting=false;renderStatus();}
 }
 async function runDesktop(model,message){
- const turn=beginTurn('thinking');history.push({bubble:message});$('conversation').append(el('div',message,'bubble'));
- try{const generated=await desktopChat.respond({model,message,locale:replyLanguage(message,locale,modelHistory),history:modelHistory.slice(-8),signal:turn.controller.signal});await presentResponse({generated},turn);modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-8));if($('message').value.trim()===message)$('message').value='';}
- catch{if(turn.controller.signal.aborted)stopped(turn);else showError('desktopFailed');}finally{endTurn(turn);}
+ const turn=beginTurn('thinking');addUser(message);
+ const stream=staticXV?streamReply($('conversation'),followReply):null;
+ try{
+  const generated=await desktopChat.respond({model,message,locale:replyLanguage(message,locale,modelHistory),history:modelHistory.slice(-8),signal:turn.controller.signal,onDelta:stream?text=>{setActivity('receiving');stream.update(text);}:undefined});
+  if(stream){stream.finish(()=>renderResponse({generated}));turn.completed=true;}
+  else await presentResponse({generated},turn);
+  modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.slice(0,2000)});
+  modelHistory.splice(0,Math.max(0,modelHistory.length-8));
+  if($('message').value.trim()===message)$('message').value='';
+ }catch{
+  if(stream)stream.finish(()=>{
+   if(stream.text()){
+    const interrupted=turn.controller.signal.aborted;
+    renderResponse({generated:{text:stream.text(),model:desktopModels[model].model,provider:'ollama'},interrupted,incomplete:!interrupted});
+    turn.partial=true;
+   }
+  });
+  if(turn.controller.signal.aborted)stopped(turn);else showError('desktopFailed');
+ }finally{endTurn(turn);}
 }
 Object.assign(copy.en,{hideProject:'Back to conversation',buildIntroTitle:'What shall we build?',showProject:'Files and preview',buildStartHint:'Talk through an idea, then say “build it”. I will create project files and run the web preview.',autoBuild:'Apply and preview explicit build requests automatically, with Undo.',buildTab:'Build and code',projectTitle:'My project',chatChoice:'Questions and conversation',workChoice:'File, link and web tools',buildChoice:'Edit files, preview and export',buildHint:'Talk or plan here, then ask me to build. Review the proposed code, apply it to files, then run the preview.',exportProject:'Download ZIP',projectFile:'Project file',newFile:'New file',addFile:'Add file',importCode:'Import files',undoProject:'Undo apply',codeEditor:'Code editor',projectPreview:'Project preview',runPreview:'Run preview',stopPreview:'Stop preview',previewOutput:'Preview output',previewEmpty:'Run preview to see your project.',shareCode:'Include the currently selected file in my next model request.',buildLimit:'Files stay in page memory; export before leaving. Local HTML/CSS/JS preview has no network access. Run backend code and packages in your own development environment after export.',buildPlaceholder:'Describe what to build or change…',buildTooLarge:'This request and shared file exceed the coding model input budget. Shorten the request or share a smaller file.',buildNoModel:'Choose an enabled coding model or connect an installed desktop model.',buildUnstructured:'The model returned a text answer. No project files were changed; ask for a smaller, complete file proposal.'});
 Object.assign(copy.fa,{hideProject:'برگشت به گفت‌وگو',buildIntroTitle:'چه چیزی بسازیم؟',showProject:'فایل‌ها و پیش‌نمایش',buildStartHint:'ایده‌ات را بگو، درباره‌اش گفت‌وگو کن و بعد بگو «حالا بسازش». فایل‌های پروژه و پیش‌نمایش همین‌جا ساخته می‌شوند.',autoBuild:'درخواست صریح ساخت را خودکار در فایل‌ها اعمال و پیش‌نمایش را اجرا کن؛ قابل برگرداندن.',buildTab:'ساخت و کدنویسی',projectTitle:'پروژهٔ من',chatChoice:'پرسش و گفت‌وگوی روزمره',workChoice:'ابزارهای فایل، لینک و سرچ وب',buildChoice:'ویرایش فایل، پیش‌نمایش و خروجی پروژه',buildHint:'در گفت‌وگو بگو چه بسازیم؛ کد پیشنهادی را بررسی کن، در فایل‌ها اعمال کن و پیش‌نمایش را اجرا کن.',exportProject:'دانلود ZIP پروژه',projectFile:'فایل پروژه',newFile:'فایل جدید',addFile:'افزودن فایل',importCode:'وارد کردن فایل',undoProject:'برگرداندن',codeEditor:'ویرایشگر کد',projectPreview:'پیش‌نمایش پروژه',runPreview:'اجرای پیش‌نمایش',stopPreview:'توقف',previewOutput:'خروجی پیش‌نمایش',previewEmpty:'برای دیدن نتیجه، پیش‌نمایش را اجرا کن.',shareCode:'برای اصلاح دقیق، فایل انتخاب‌شده را به درخواست بعدی پیوست کن.',buildLimit:'فایل‌ها در حافظهٔ صفحه‌اند؛ قبل از خروج دانلود کن. پیش‌نمایش HTML/CSS/JS بدون دسترسی شبکه اجرا می‌شود. کد بک‌اند و بسته‌ها را پس از دانلود در محیط توسعهٔ خودت اجرا کن.',buildPlaceholder:'بگو چه بسازیم یا کدام بخش را تغییر بدهیم…',buildTooLarge:'درخواست و کد پیوست از ظرفیت ورودی این مسیر مدل بیشتر است؛ متن درخواست یا فایل را کوتاه‌تر کن.',buildNoModel:'یک مدل کدنویسی فعال انتخاب کن یا مدل نصب‌شدهٔ دسکتاپ را متصل کن.',buildUnstructured:'مدل پاسخ متنی داده است؛ فایل‌های پروژه تغییر نکردند. یک پیشنهاد کوچک‌تر با فایل کامل بخواه.'});
@@ -214,7 +231,9 @@ function renderTiming(timing){
  $('conversation').append(node);
 }
 function activityLabel(key,detail){
- if(key==='running')return detail.map(id=>id==='chat'?t('thinking'):id==='ai_web'?t('searching'):id==='game_scam_guard'?t('readingWebsite'):id==='gta_guard'?t('checkingFile'):`${t('checking')} · ${names[id]}`).join(' · ');
+ if(staticXV&&key==='thinking')return 'Waiting for response';
+ if(staticXV&&key==='receiving')return 'Receiving response';
+ if(key==='running')return detail.map(id=>id==='chat'?(staticXV?'Model request started':t('thinking')):id==='ai_web'?t('searching'):id==='game_scam_guard'?t('readingWebsite'):id==='gta_guard'?t('checkingFile'):`${t('checking')} · ${names[id]}`).join(' · ');
  return detail?`${t(key)} · ${detail}`:t(key);
 }
 function setActivity(key,detail=''){
@@ -239,7 +258,7 @@ function beginTurn(stage,{recordTiming=true}={}){
 function endTurn(turn){
  freezeElapsed(turn);
  if(activeTurn!==turn)return;
- if(turn.recordTiming){const timing={elapsedMs:turn.elapsedMs,label:turn.controller.signal.aborted?'stoppedAfter':turn.completed?'respondedIn':'elapsedTime'};history.push({timing});renderTiming(timing);}
+ if(turn.recordTiming){const timing={elapsedMs:turn.elapsedMs,label:turn.controller.signal.aborted?'stoppedAfter':turn.completed?'respondedIn':'elapsedTime'};history.push({timing});if(staticXV)followReply(()=>renderTiming(timing));else renderTiming(timing);}
  $('activity').hidden=true;delete $('activity').dataset.label;
  activeTurn=undefined;busy=false;library.capture();$('conversation').setAttribute('aria-busy','false');resizeComposerInput();renderStatus();
 }
@@ -252,13 +271,25 @@ function stopped(turn){
  if(turn.partial)return;
  const response={message:t('stopped'),interrupted:true};history.push({response});renderResponse(response,false);
 }
-function followReply(update){
+function followReply(update, force=false){
+ if(staticXV&&!(activeMode==='build'&&projectOpen&&matchMedia('(min-width:901px)').matches)){
+  const log=$('conversation');
+  const follow=force||log.scrollHeight-log.scrollTop-log.clientHeight<=96;
+  update();
+  if(follow)log.scrollTop=log.scrollHeight;
+  return;
+ }
  if(activeMode==='build'&&projectOpen&&matchMedia('(min-width:901px)').matches){const log=$('conversation'),follow=log.scrollTop+log.clientHeight>=log.scrollHeight-120;update();if(follow)log.scrollTop=log.scrollHeight;return;}
  const follow=innerHeight+scrollY>=document.documentElement.scrollHeight-160;
  update();if(follow)scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'});
 }
 async function presentResponse(response,turn){
  turn.controller.signal.throwIfAborted();
+ if(staticXV){
+  followReply(()=>renderResponse(response));
+  turn.completed=!response.error;
+  return;
+ }
  if(response.buildProposal||!response.generated){if(response.buildProposal)followReply(()=>renderResponse(response));else renderResponse(response);turn.completed=!response.error;return;}
  const display={...response,generated:{...response.generated,text:''}},card=renderResponse(display,false),answer=card.querySelector('.answer'),actions=card.querySelector('.response-actions');
  card.classList.add('is-typing');actions.hidden=true;setActivity('typing');
@@ -275,6 +306,31 @@ async function presentResponse(response,turn){
    history.push({response:display});
   }else card.remove();
  }
+}
+function editDraft(text){
+ if(busy)return;
+ const field=$('message');
+ field.value=text;
+ field.dispatchEvent(new Event('input',{bubbles:true}));
+ field.focus({preventScroll:true});
+}
+function renderUser(entry){
+ $('conversation').append(staticXV?userTurn(entry,editDraft):el('div',entry.bubble,'bubble'));
+}
+function addUser(text,file){
+ const entry={bubble:text,...(staticXV&&file?{attachment:{name:file.name,size:file.size}}:{})};
+ history.push(entry);
+ followReply(()=>renderUser(entry),true);
+}
+function renderRetry(card){
+ const last=history.findLast(entry=>entry.bubble);
+ if(!activeTurn||!last||last.attachment||activeMode!=='chat')return;
+ const retry=conversationAction('Retry message',()=>{
+  if(busy||!card.isConnected||history.findLast(entry=>entry.bubble)!==last)return;
+  editDraft(last.bubble);
+  if(!$('send').disabled)$('composer').requestSubmit();
+ });
+ card.append(retry);
 }
 function el(tag,value,className){const node=document.createElement(tag);if(value!==undefined)node.textContent=value;if(className)node.className=className;return node;}
 function responseIcon(kind){
@@ -295,7 +351,7 @@ function translate(){
   return;
  }
  $('conversation').replaceChildren();
- for(const item of history){if(item.response)renderResponse(item.response,false);else if(item.error)showError(item.error,false);else if(item.timing)renderTiming(item.timing);else $('conversation').append(el('div',item.bubble,'bubble'));}
+ for(const item of history){if(item.response)renderResponse(item.response,false);else if(item.error)showError(item.error,false);else if(item.timing)renderTiming(item.timing);else renderUser(item);}
 }
 const DESKTOP_MODEL_MODES=Object.freeze({native_qwen8:'chat',native_gpt20:'chat',native_qwen32:'work',native_qwen235:'work',native_deepseek671:'work',native_gpt120:'code'});
 function resizeComposerInput(){
@@ -438,24 +494,24 @@ function renderStatus(){
     (webMode==='research'?'Research':'Web search')+' is on · sourced answers';
 
 }
-function showError(key,remember=true){if(remember)history.push({error:key});const card=el('article',undefined,'result error'),text=typeof key==='object'?errorMessage(key,locale):t(key),heading=el('h3',text,'outcome');card.append(heading);card.setAttribute('role','alert');$('conversation').append(card);if(remember&&!staticXV&&!matchMedia('(prefers-reduced-motion: reduce)').matches){heading.setAttribute('aria-label',text);const ink=el('span',text);ink.setAttribute('aria-hidden','true');heading.replaceChildren(ink);typeText(text,value=>{ink.textContent=value;},{charactersPerSecond:130}).catch(()=>{ink.textContent=text;});}}
+function showError(key,remember=true,retry=remember){if(remember)history.push({error:key});const card=el('article',undefined,'result error'),text=typeof key==='object'?errorMessage(key,locale):t(key),heading=el('h3',text,'outcome');card.append(heading);card.setAttribute('role','alert');if(staticXV){if(retry)renderRetry(card);followReply(()=>$('conversation').append(card));}else $('conversation').append(card);if(remember&&!staticXV&&!matchMedia('(prefers-reduced-motion: reduce)').matches){heading.setAttribute('aria-label',text);const ink=el('span',text);ink.setAttribute('aria-hidden','true');heading.replaceChildren(ink);typeText(text,value=>{ink.textContent=value;},{charactersPerSecond:130}).catch(()=>{ink.textContent=text;});}}
 function renderResponse(response,remember=true){
  if(remember)history.push({response});
- if(response.error){showError(publicFailure(response),false);return;}
+ if(response.error){showError(publicFailure(response),false,remember);return;}
  if(response.buildProposal){const card=builder.proposal(response.buildProposal,response.generated);$('conversation').append(card);return card;}
  if(response.workPlan){const plan=el('article',undefined,'result workspace-plan');plan.append(el('div',t('workPlan'),'eyebrow'),el('p',response.workPlan.text,'answer'),el('p',`${response.workPlan.provider} · ${response.workPlan.model}`,'muted'));$('conversation').append(plan);}else if(response.workPlanError){$('conversation').append(el('p',t('workPlanUnavailable')+' '+errorMessage(response.workPlanError,locale),'muted'));}
  if(response.results){for(const result of response.results)renderResponse({result},false);if(response.message){const n=el('article',undefined,'result');n.append(el('p',response.message));$('conversation').append(n);}return;}
  if(response.message){const n=el('article',undefined,response.interrupted?'reply-stopped':'result');n.append(el('p',response.interrupted?t('stopped'):response.message));$('conversation').append(n);return;}
  if(response.generated){
-  const n=el('article',undefined,'result assistant-message'),answer=el('div',undefined,'answer');renderRichText(answer,response.generated.text,locale);answer.dir='auto';n.ariaLabel='MalGuard AI';
+  const n=el('article',undefined,'result assistant-message'),answer=el('div',undefined,'answer');renderRichText(answer,response.generated.text,locale);answer.dir='auto';n.ariaLabel='MalGuard AI';if(staticXV)n.append(assistantIdentity());
   const actions=el('div',undefined,'response-actions'),details=el('details',undefined,'response-details'),summary=el('summary'),detailLabel=el('span',t('responseDetails'),'sr-only');detailLabel.dataset.i18n='responseDetails';summary.title=t('responseDetails');summary.append(responseIcon('details'),detailLabel);details.append(summary,el('p',t('generated')),el('p',`${response.generated.provider} · ${response.generated.model}`));
    if(response.generated.webSearch?.sources?.length)details.append(el('p',t('researchLimit')));
    if(response.generated.auto?.selectedModelId)details.append(el('p',(locale==='fa'?'مدل خودکار: ':'Auto model: ')+(response.generated.auto.selectedLabel||response.generated.auto.selectedModelId)));
   const copy=el('button',undefined,'copy-response'),copyLabel=el('span',t('copy'),'sr-only');copyLabel.dataset.i18n='copy';copy.type='button';copy.title=t('copy');copy.append(responseIcon('copy'),copyLabel);copy.onclick=async()=>{try{await navigator.clipboard.writeText(response.generated.text);copyLabel.textContent=t('copied');copy.title=t('copied');setTimeout(()=>{copyLabel.textContent=t('copy');copy.title=t('copy');},1800);}catch{copyLabel.textContent=t('copy');}};
    const evidence=renderResearchEvidence(response.generated.webSearch,locale);
-   if(evidence)n.append(evidence);
+   if(evidence&&!staticXV)n.append(evidence);
    attachResearchCitations(answer,response.generated.webSearch);
-   actions.append(copy,details);n.append(answer,actions);if(response.interrupted)n.append(el('p',t('stopped'),'reply-stopped'));$('conversation').append(n);return n;
+   actions.append(copy,details);n.append(answer);if(evidence&&staticXV)n.append(evidence);n.append(actions);if(response.interrupted)n.append(el('p',t('stopped'),'reply-stopped'));if(response.incomplete)n.append(el('p','Incomplete response','reply-stopped'));$('conversation').append(n);return n;
  }
  const r=response.result;if(!r){showError('streamError',false);return;}
  const card=el('article',undefined,`result ${r.outcome}`);card.append(el('div',names[r.tool],'eyebrow'),el('h3',t(r.outcome),'outcome'));
@@ -472,7 +528,7 @@ async function fileData(file){const bytes=new Uint8Array(await file.arrayBuffer(
 $('language').onclick=()=>{if(busy||staticXV)return;locale=locale==='fa'?'en':'fa';try{localStorage.setItem('malguard.ai.locale.v1',locale);}catch{}translate();};
 $('clear').onclick=()=>{if(!busy){library.capture();library.fresh();history.length=0;modelHistory.length=0;$('conversation').replaceChildren();$('message').value='';resizeComposerInput();refreshComposerInputState();$('message').focus({preventScroll:true});}};
 $('remove-file').onclick=()=>{$('file').value='';$('filename').textContent='';$('remove-file').hidden=true;refreshComposerInputState();};
-$('file').onchange=()=>{const f=$('file').files[0];if(f&&(!f.size||f.size>1048576)){$('remove-file').click();showError('fileTooLarge');return;}$('filename').textContent=f?.name||'';$('remove-file').hidden=!f;if(f){$('isolation-consent').checked=false;switchMode('worker',{carryDraft:true});if(!['gta_guard','file_sandbox'].includes($('workspace-tool').value))$('workspace-tool').value='auto';$('tool').value=$('workspace-tool').value;renderStatus();}};
+$('file').onchange=()=>{const f=$('file').files[0];if(f&&(!f.size||f.size>1048576)){$('remove-file').click();showError('fileTooLarge');return;}$('filename').textContent=f?(staticXV?f.name+' · '+fileSize(f.size):f.name):'';$('remove-file').hidden=!f;if(f){$('isolation-consent').checked=false;switchMode('worker',{carryDraft:true});if(!['gta_guard','file_sandbox'].includes($('workspace-tool').value))$('workspace-tool').value='auto';$('tool').value=$('workspace-tool').value;renderStatus();}};
 function downloadInfo(model){
  const m=localModels[model];
  const use=locale==='fa'?(model==='local_fast'?'سبک‌تر؛ برای سلام‌واحوال‌پرسی، پرسش کوتاه و نوشتن ساده. ':'قوی‌تر از مدل ۱٫۷B این فهرست؛ برای توضیح، نوشتن و کمک به کدنویسی کوتاه، با نیاز حافظهٔ بیشتر. '):(model==='local_fast'?'Light; for short everyday questions and simple writing. ':'Larger than this list’s 1.7B model; for explanations, writing and short coding help, with higher memory needs. ');
@@ -519,7 +575,7 @@ async function runLocal(model,message,consent){
  if(research&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  if(!await allowDownload(model))return;
  const turn=beginTurn(research?'searching':'thinking');
- history.push({bubble:message});$('conversation').append(el('div',message,'bubble'));
+ addUser(message);
  try{
   let search,sources=[],prompt=message;
   if(research){
@@ -555,7 +611,7 @@ async function runBuild(message){
  if(!native&&!$('model-consent').checked){if(!await requestModelShare()||activeMode!=='build'||$('message').value.trim()!==message||$('model').value!==selected)return;}
  const contextHistory=modelHistory.slice(-6),revision=builder.revision;
  if(!native&&activeWebMode()!=='off'&&!$('lookup-consent').checked){if(!await requestSearchConsent()||activeMode!=='build'||$('message').value.trim()!==message)return;}
- builder.consumeShare();const turn=beginTurn('thinking');history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
+ builder.consumeShare();const turn=beginTurn('thinking');addUser(message);
  try{let generated;if(native)generated=await desktopChat.respond({model:selected,message:prompt,locale:replyLanguage(message,locale,contextHistory),history:contextHistory,signal:turn.controller.signal});
  else{generated=await callCFModel({mode:'code',model:selected,message:prompt,history:contextHistory,sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled&&cfThinkingByMode.code,...webOptions(message),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});if(generated.usage){accountUsage=generated.usage;renderStatus();}}
  if(!generated?.text)throw new Error('missing_response');turn.controller.signal.throwIfAborted();const proposal=parseProposal(generated.text);await presentResponse({generated,...(proposal?{buildProposal:proposal}:{})},turn);if(!proposal)$('build-status').textContent=/<(?:file|summary)\b/.test(generated.text)?t('buildUnstructured'):'';if(proposal){setProjectOpen(true);const explicit=/(?:^|[\s،])(?:بساز(?:ش|ید)?|پیاده\s*کن|اجرا\s*کن|تغییر\s*بده|درستش\s*کن|build|create|implement|make|edit|fix|run)(?:$|[\s،.!؟?])/iu.test(message)&&!/^(?:how|why|what|چطور|چگونه|چرا|توضیح)/iu.test(message);if(explicit&&$('build-auto-run').checked&&revision===builder.revision&&builder.apply(proposal)){if(Object.keys(proposal.files).some(name=>/\.(html|css|js)$/.test(name)))builder.run();}}modelHistory.push({role:'user',content:message.slice(0,2000)},{role:'assistant',content:generated.text.length<=2000?generated.text:proposal?('Proposal: '+proposal.summary+'; files: '+Object.keys(proposal.files).join(', ')).slice(0,2000):generated.text.slice(0,2000)});modelHistory.splice(0,Math.max(0,modelHistory.length-6));if($('message').value.trim()===message)$('message').value='';
@@ -606,14 +662,20 @@ function clearMediaDraft(){
  mediaAction='off';mediaFile=null;
  $('media-file').value='';
  $('media-draft').hidden=true;
+ $('media-draft').querySelector('.xvc-attachment-thumbnail')?.remove();
  $('media-draft-description').textContent='';
  $('message').placeholder=t('placeholder');
  renderStatus();
 }
 function showMediaDraft(){
  $('media-draft').hidden=mediaAction==='off';
+ $('media-draft').querySelector('.xvc-attachment-thumbnail')?.remove();
+ if(staticXV&&mediaAction==='analyze'&&mediaFile){
+  const thumbnail=attachmentThumbnail(mediaFile);
+  if(thumbnail)$('media-draft').prepend(thumbnail);
+ }
  $('media-draft-description').textContent=mediaAction==='analyze'?
-   (locale==='fa'?'تحلیل تصویر: ':'Analyze image: ')+(mediaFile?.name||''):
+   (locale==='fa'?'تحلیل تصویر: ':'Analyze image: ')+(mediaFile?(staticXV?mediaFile.name+' · '+fileSize(mediaFile.size):mediaFile.name):''):
    mediaAction==='generate'?(locale==='fa'?'ایجاد تصویر با هوش مصنوعی':'Create image with AI'):'';
  $('message').placeholder=mediaAction==='generate'?
    (locale==='fa'?'تصویری که می‌خوای رو توصیف کن…':'Describe an image to create…'):
@@ -639,8 +701,7 @@ async function runMedia(message){
   if(action==='analyze')image=await toMediaPayload(file);
  }catch{showError('mediaInvalid');return;}
  const turn=beginTurn(action==='analyze'?'readingFile':'thinking');
- history.push({bubble:message||file?.name||requestPrompt});
- followReply(()=>$('conversation').append(el('div',message||file?.name||requestPrompt,'bubble')));
+ addUser(message||file?.name||requestPrompt,file);
  try{
   const output=await callMedia({action,prompt:requestPrompt,...(image?{image}:{}),sessionToken:account.getToken(),
    signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(57000)])});
@@ -726,8 +787,7 @@ $('composer').onsubmit=async event=>{
     const identity=answerIdentityQuestion(message,modelHistory);
     if(identity){
       const turn=beginTurn('thinking');
-      history.push({bubble:message});
-      followReply(()=>$('conversation').append(el('div',message,'bubble')));
+      addUser(message);
       try{
         const generated={text:identity.text,provider:'malguard',model:'product_identity',securityAnalysis:false};
         await presentResponse({generated},turn);
@@ -756,7 +816,7 @@ $('composer').onsubmit=async event=>{
    if(!await requestModelShare()||activeMode!==mode||$('message').value.trim()!==message)return;
   }
   const turn=beginTurn('thinking');
-  history.push({bubble:message});followReply(()=>$('conversation').append(el('div',message,'bubble')));
+  addUser(message);
   try{
    const generated=await callCFModel({mode:directMode,model:chosen,message,history:modelHistory.slice(-6),sessionToken:account.getToken(),quotaEnabled:cfQuotaEnabled,freeFallback:$('free-fallback-consent').checked,thinking:thinkingEnabled&&cfThinkingByMode[directMode],...webOptions(message),signal:AbortSignal.any([turn.controller.signal,AbortSignal.timeout(50000)])});
     if(generated.usage){accountUsage=generated.usage;renderStatus();}
@@ -773,7 +833,7 @@ $('composer').onsubmit=async event=>{
  if(effective==='model'&&(plan?.needsWeb||['gemini_flash','groq_qwen','groq_gptoss'].includes(selected)&&planChat(message,modelHistory).needsWeb)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  if(['game_scam_guard','url_sandbox'].includes(effective)&&!consent.websiteFetch||['malwarebazaar','urlhaus','ai_web'].includes(effective)&&!consent.remoteLookup){showError('consentMissing');$('settings-panel').open=true;$('permissions').open=true;return;}
  if(effective==='model'&&mode==='chat'&&service.model.state==='configured'&&!consent.modelShare){if(!await requestModelShare()||activeMode!==mode||$('message').value.trim()!==message||$('model').value!==selected)return;consent.modelShare=true;}
- const turn=beginTurn('connecting');history.push({bubble:message||file.name});followReply(()=>$('conversation').append(el('div',message||file.name,'bubble')));
+ const turn=beginTurn('connecting');addUser(message||file.name,file);
  try{
   if(file){setActivity('readingFile');input={file:await fileData(file)};setActivity('connecting');}
   turn.controller.signal.throwIfAborted();

@@ -106,16 +106,19 @@ export function installExperienceV2(){
    requestAnimationFrame(()=>{
     scheduled=false;
     const scrolling=document.scrollingElement||document.documentElement;
-    const remaining=scrolling.scrollHeight-scrolling.scrollTop-window.innerHeight;
+    const viewport=document.body.classList.contains('xvc-assistant')&&conversation.clientHeight<conversation.scrollHeight?conversation:scrolling;
+    const remaining=viewport.scrollHeight-viewport.scrollTop-(viewport===conversation?conversation.clientHeight:window.innerHeight);
     jump.hidden=conversation.children.length===0||remaining<220;
    });
   };
   jump.addEventListener('click',()=>{
    const newest=conversation.lastElementChild;
    if(!newest)return;
-   newest.scrollIntoView({block:'end',behavior:document.body.classList.contains('xvc-assistant')?'instant':matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+   if(document.body.classList.contains('xvc-assistant')&&conversation.scrollHeight>conversation.clientHeight)conversation.scrollTop=conversation.scrollHeight;
+   else newest.scrollIntoView({block:'end',behavior:document.body.classList.contains('xvc-assistant')?'instant':matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
    jump.hidden=true;
   });
+  conversation.addEventListener('scroll',refreshJump,{passive:true});
   window.addEventListener('scroll',refreshJump,{passive:true});
   window.addEventListener('resize',refreshJump,{passive:true});
   new MutationObserver(refreshJump).observe(conversation,{childList:true});

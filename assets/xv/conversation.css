@@ -1,0 +1,272 @@
+/* XV conversation styles become active only after the transcript exists. */
+.xvc-chat-header { display:none; }
+
+@layer xvc-assistant-skin {
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) main:not(.entry-gate) {
+    --xvc-chat-background:#07121f;
+    --xvc-chat-panel:#0b1b2b;
+    --xvc-chat-edge:#2c4c65;
+    --xvc-chat-content:54rem;
+    --xvc-chat-gutter:clamp(18px,4vw,54px);
+    background:radial-gradient(ellipse at 46% -50%,#102943 0%,transparent 79%),var(--xvc-chat-background)!important;
+    min-height:0!important;
+    padding:0!important;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) main:not(.entry-gate)::before { display:none!important; }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) .intro { display:none!important; }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)):not([data-project-open=true]) .workspace {
+    display:flex!important;
+    flex-direction:column;
+    align-items:stretch;
+    height:calc(100dvh - var(--xvc-ai-header) - env(safe-area-inset-top) - var(--xvc-ai-keyboard-inset,0px));
+    min-height:0!important;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) #conversation {
+    display:block!important;
+    flex:1 1 auto;
+    min-height:0!important;
+    width:100%!important;
+    max-width:none!important;
+    box-sizing:border-box;
+    margin:0!important;
+    padding:clamp(18px,3.5vh,38px) max(var(--xvc-chat-gutter),calc((100% - var(--xvc-chat-content))/2)) 24px!important;
+    overflow:auto;
+    overscroll-behavior:contain;
+    scrollbar-width:thin;
+    scrollbar-color:#365670 transparent;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) .conversation .result {
+    width:100%;
+    max-width:100%;
+    margin:0 0 18px!important;
+    padding:15px 17px!important;
+    background:var(--xvc-chat-panel)!important;
+    border:1px solid var(--xvc-chat-edge)!important;
+    border-radius:14px!important;
+    box-shadow:none!important;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) .conversation .assistant-message {
+    padding:4px 0 8px!important;
+    background:none!important;
+    border:none!important;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) .conversation .bubble {
+    width:fit-content;
+    max-width:100%;
+    margin:0!important;
+    padding:12px 15px!important;
+    background:linear-gradient(145deg,#124166,#102d4a)!important;
+    color:#f5fbff!important;
+    border:1px solid #32648b!important;
+    border-radius:17px 17px 5px 17px!important;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) .conversation .result .answer {
+    color:#e1edf7!important;
+    font:400 clamp(15px,1.05vw,17px)/1.62 var(--xvc-font);
+    overflow-wrap:anywhere;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) .composer-area {
+    flex:none;
+    position:relative!important;
+    bottom:auto!important;
+    background:#081522!important;
+    border-block-start:1px solid #284459;
+    padding:10px max(var(--xvc-chat-gutter),calc((100% - var(--xvc-chat-content))/2)) max(8px,env(safe-area-inset-bottom))!important;
+    box-shadow:none!important;
+    box-sizing:border-box;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty))[data-mode=chat] #composer {
+    width:100%!important;
+    max-width:none!important;
+    translate:none;
+    margin:0!important;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) .composer-shell {
+    background:#102131!important;
+    border:1px solid #385873!important;
+    border-radius:16px!important;
+    box-shadow:inset 0 1px 0 #94caff12!important;
+    backdrop-filter:none!important;
+    min-height:0!important;
+    padding:8px!important;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty))[data-mode=chat] .composer-shell {
+    display:grid!important;
+    grid-template-columns:44px minmax(0,1fr) 48px!important;
+    grid-template-areas:none!important;
+    align-items:center;
+    gap:5px!important;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty))[data-mode=chat] .composer-shell :is(.composer-footer,.composer-actions) { display:contents!important; }
+  html:root body.xvc-assistant:has(#conversation:not(:empty))[data-mode=chat] .composer-shell .attach-menu { grid-area:1/1!important; width:44px!important; height:44px!important; }
+  html:root body.xvc-assistant:has(#conversation:not(:empty))[data-mode=chat] .composer-shell #message {
+    grid-area:1/2!important;
+    height:auto;
+    min-height:44px!important;
+    max-height:clamp(72px,22dvh,160px)!important;
+    padding:10px 7px!important;
+    font-size:16px!important;
+    line-height:1.35!important;
+    color:#edf8ff!important;
+    overflow:auto!important;
+    white-space:pre-wrap!important;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty))[data-mode=chat] .composer-shell #send {
+    grid-area:1/3!important;
+    min-width:44px!important;
+    width:44px!important;
+    height:44px!important;
+    border-radius:12px!important;
+    background:#75d9ff!important;
+    box-shadow:none!important;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) .composer-shell #attach-toggle { width:44px!important; height:44px!important; border-color:#325471!important; border-radius:12px!important; }
+  html:root body.xvc-assistant:has(#conversation:not(:empty))[data-mode=chat] .composer-shell :is(.model-select-wrap,.pro-model-slot) { display:none!important; }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) .composer-shell #web-search-controls {
+    grid-area:3/2!important;
+    justify-self:start;
+    margin:0;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) .composer-shell #thinking-toggle {
+    grid-area:3/3!important;
+    justify-self:end;
+    margin:0;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) .composer-shell :is(#thinking-toggle:disabled,#web-search-controls:not(:has(button:not(:disabled)))) {
+    display:none!important;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) .composer-shell #attach-options { inset-block:auto calc(100% + 10px)!important; max-width:min(78vw,292px); }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) #navigation-toggle { display:grid!important; order:-1; place-items:center; width:44px!important; height:44px!important; margin-inline-end:8px!important; }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) #navigation > .xvc-ai-legacy { display:revert!important; }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) #navigation :is(.xvc-ai-rail,.xvc-ai-badge,.navigation-heading,.xvc-ai-search-close) { display:none!important; }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) #navigation {
+    padding:14px 10px!important;
+    gap:7px!important;
+    --s-text:#e0effb;
+    --s-muted:#a9c1d7;
+    --s-hover:#14324b;
+    --s-border:#32516a;
+  }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)).navigation-closed #navigation { visibility:hidden; pointer-events:none; }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) .attachment:not(:has(#filename:not(:empty))) { display:none!important; }
+}
+
+.xvc-assistant:has(#conversation:not(:empty)) .xvc-ai-top { display:none; }
+.xvc-assistant:has(#conversation:not(:empty)) .xvc-chat-header {
+  display:flex;
+  flex:none;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-height:60px;
+  padding:6px var(--xvc-chat-gutter);
+  border-block-end:1px solid #284459;
+}
+.xvc-chat-header h1 { margin:0; font:650 clamp(16px,1.4vw,20px)/1.2 var(--xvc-font); }
+.xvc-chat-header .xvc-chat-model {
+  min-height:44px;
+  width:min(47vw,244px);
+  margin:0;
+  padding:6px 9px;
+  border:1px solid #3f6684;
+  border-radius:10px;
+  background:#102338;
+  color:#e9f7ff;
+  font:500 16px/1.15 var(--xvc-font);
+  text-overflow:ellipsis;
+}
+.xvc-assistant[data-mode=worker] .xvc-chat-model { display:none; }
+.xvc-turn-user {
+  display:grid;
+  justify-items:end;
+  width:min(88%,40rem);
+  margin:0 0 18px auto;
+}
+.xvc-turn-actions { display:flex; flex-wrap:wrap; gap:3px; margin-block-start:5px; }
+.xvc-turn-action {
+  min-height:36px;
+  padding:4px 10px;
+  border:1px solid transparent;
+  border-radius:8px;
+  background:transparent;
+  color:#bddbf1;
+  font:520 .78rem/1.2 var(--xvc-font);
+  cursor:pointer;
+}
+.xvc-turn-action:hover { background:#102c43; border-color:#2f536f; }
+.xvc-turn-identity { display:flex; align-items:center; gap:8px; margin:0 0 10px; color:#eef8ff; }
+.xvc-turn-identity img { display:block; flex:none; }
+.xvc-turn-file {
+  display:grid;
+  gap:4px;
+  margin-block-start:9px;
+  padding:8px 10px;
+  border:1px solid #6293b36b;
+  border-radius:9px;
+  color:#e2f5ff;
+  overflow-wrap:anywhere;
+}
+.xvc-turn-file small { color:#b3cbe1; }
+.xvc-stream-reply .answer { white-space:pre-wrap; }
+.xvc-assistant:has(#conversation:not(:empty)) :is(.md-table-wrap,.code-block,.code-block pre) { min-width:0; max-width:100%; overflow-x:auto; }
+.xvc-assistant:has(#conversation:not(:empty)) .code-block pre { scrollbar-width:thin; }
+.xvc-assistant:has(#conversation:not(:empty)) .research-evidence { margin-block:14px; }
+.xvc-assistant:has(#conversation:not(:empty)) .composer-area :is(#disclaimer,#save-state) {
+  font-size:.73rem;
+  line-height:1.3;
+  margin:4px 0 0;
+  color:#afc7db!important;
+  text-align:center;
+}
+.xvc-assistant:has(#conversation:not(:empty)) #activity { margin:0; padding:4px var(--xvc-chat-gutter); min-height:26px; color:#b3cfe7; }
+.xvc-assistant:has(#conversation:not(:empty)) #activity .activity-orbit { display:none; }
+.xvc-assistant:has(#conversation:not(:empty)) .reply-stopped { color:#aad1eb; }
+
+@media (pointer:coarse) {
+  .xvc-assistant:has(#conversation:not(:empty)) :is(.xvc-turn-action,.response-actions button,.response-actions summary,.code-copy) { min-height:44px; min-width:44px; }
+}
+@media (max-width:635px) {
+  .xvc-assistant:has(#conversation:not(:empty)) main:not(.entry-gate) { --xvc-chat-gutter:14px; }
+  .xvc-assistant:has(#conversation:not(:empty)) .xvc-chat-header { min-height:52px; }
+  .xvc-turn-user { width:min(94%,32rem); }
+}
+@media (orientation:landscape) and (max-height:650px) {
+  .xvc-assistant:has(#conversation:not(:empty)) .xvc-chat-header { min-height:48px; padding-block:2px; }
+}
+
+.xvc-assistant:has(#conversation:not(:empty)) .composer-area :is(#cloud-alert,.attachment:has(#filename:not(:empty))) {
+  margin:6px 0;
+  padding:8px 10px;
+  border:1px solid #32516a;
+  border-radius:9px;
+  background:#112538;
+  color:#e0effb!important;
+  overflow-wrap:anywhere;
+}
+.xvc-assistant:has(#conversation:not(:empty)) #activity[hidden] { display:block!important; visibility:hidden; }
+.xvc-assistant:has(#conversation:not(:empty)) .code-block { border:1px solid #304d65; background:#07131e; }
+.xvc-assistant:has(#conversation:not(:empty)) .code-block :is(.code-block-header,pre) { background:#0b1a29; }
+.xvc-assistant:has(#conversation:not(:empty)) .code-copy { color:#b9dcf4; }
+.xvc-assistant:has(#conversation:not(:empty)) .research-source { border-color:#3a5b73; background:#102538; }
+.xvc-assistant #media-draft:not([hidden]) {
+  align-items:center;
+  overflow-wrap:anywhere;
+}
+.xvc-assistant .xvc-attachment-thumbnail {
+  flex:none;
+  width:48px;
+  height:36px;
+  border-radius:6px;
+}
+@layer xvc-assistant-skin {
+  html:root body.xvc-assistant #media-draft:not([hidden]) { display:flex!important; }
+  html:root body.xvc-assistant:has(#conversation:not(:empty)) #save-state {
+    position:static!important;
+    width:auto!important;
+    height:auto!important;
+    clip:auto!important;
+    clip-path:none!important;
+    overflow:visible!important;
+    white-space:normal!important;
+  }
+}

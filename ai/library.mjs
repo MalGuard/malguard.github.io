@@ -1,9 +1,20 @@
-export function createChatLibrary({account,restore,snapshot}){
+export function createChatLibrary({account,restore,snapshot,resume=false}){
  const $=id=>document.getElementById(id),make=(tag,text)=>{const n=document.createElement(tag);if(text)n.textContent=text;return n;};
  let data={chats:[],notes:[]},generation=0,connected=false,showArchived=false,ids={chat:crypto.randomUUID(),worker:crypto.randomUUID(),build:crypto.randomUUID()},activeId=ids.chat,queue=Promise.resolve();
  const saveState=make('p');saveState.id='save-state';saveState.className='muted small';saveState.setAttribute('role','status');document.querySelector('.composer-area').append(saveState);
  const STATUS_FA={'Saving…':'در حال ذخیره…','Saved to your account':'در حساب شما ذخیره شد','Loading your chats…':'در حال بارگذاری گفتگوها…','Sign in to save and revisit your chats.':'برای ذخیره و دیدن دوبارهٔ گفتگوها وارد شوید.','Chats are saved to your account. Sign in again after reopening this page.':'گفتگوها در حساب شما ذخیره می‌شوند. پس از بازکردن دوبارهٔ صفحه دوباره وارد شوید.','Not saved. Check your connection and sign in again if needed.':'ذخیره نشد. اتصال را بررسی کنید و در صورت نیاز دوباره وارد شوید.','Account storage is unavailable. This chat is not saved.':'فضای حساب در دسترس نیست. این گفتگو ذخیره نشد.','30-chat limit reached. Export or reuse a saved chat.':'به سقف ۳۰ گفتگو رسیدید. یک گفتگوی ذخیره‌شده را خروجی بگیرید یا دوباره استفاده کنید.'};
  let lastStatus='';const status=text=>{lastStatus=text;const shown=fa()?(STATUS_FA[text]||text):text;$('history-status').textContent=shown;saveState.textContent=shown;};
+ function setLocation(id){
+  if(!resume)return;
+  const url=new URL(location.href);
+  if(id)url.searchParams.set('chat',id);else url.searchParams.delete('chat');
+  history.replaceState(history.state,'',url);
+ }
+ function openChat(chat){
+  activeId=ids[chat.mode]=chat.id;
+  restore(chat);
+  setLocation(chat.id);
+ }
  new MutationObserver(()=>{if(lastStatus)status(lastStatus);}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
  async function request(value){
   const token=account.getToken();if(!token)throw Error('sign_in_required');
@@ -29,14 +40,14 @@ export function createChatLibrary({account,restore,snapshot}){
   const list=$('saved-chats');list.replaceChildren();openMenu=null;const query=$('chat-search').value.toLowerCase();let lastGroup='';
   for(const chat of data.chats.filter(c=>c.archived===showArchived&&c.title.toLowerCase().includes(query)).sort((a,b)=>b.updatedAt-a.updatedAt)){
    const group=bucket(chat.updatedAt||0);if(group!==lastGroup){lastGroup=group;const heading=make('p',group);heading.className='history-group';list.append(heading);}
-   const row=make('div');row.className='history-row';row.dataset.mode=chat.mode||'chat';const button=make('button',chat.title||'New chat');button.type='button';button.className='history-open';button.dir='auto';button.title=chat.title;button.setAttribute('aria-current',String(chat.id===activeId));button.onclick=()=>{if(document.querySelector('#conversation').getAttribute('aria-busy')==='true')return;activeId=chat.id;ids[chat.mode]=chat.id;restore(chat);render();};
+   const row=make('div');row.className='history-row';row.dataset.mode=chat.mode||'chat';const button=make('button',chat.title||'New chat');button.type='button';button.className='history-open';button.dir='auto';button.title=chat.title;button.setAttribute('aria-current',String(chat.id===activeId));button.onclick=()=>{if(document.querySelector('#conversation').getAttribute('aria-busy')==='true')return;openChat(chat);render();};
    const more=make('button');more.type='button';more.className='history-more';more.setAttribute('aria-haspopup','menu');more.setAttribute('aria-expanded','false');more.setAttribute('aria-label',`${tr('Options for','گزینه‌های')} ${chat.title}`);more.title=tr('More','بیشتر');
    const dots=document.createElementNS('http://www.w3.org/2000/svg','svg');dots.setAttribute('viewBox','0 0 24 24');dots.setAttribute('aria-hidden','true');for(const cx of [5,12,19]){const c=document.createElementNS(dots.namespaceURI,'circle');c.setAttribute('cx',cx);c.setAttribute('cy','12');c.setAttribute('r','1.7');c.setAttribute('fill','currentColor');dots.append(c);}more.append(dots);
    const menu=make('div');menu.className='history-menu';menu.setAttribute('role','menu');menu.hidden=true;
    const item=(label,cls,action)=>{const b=make('button',label);b.type='button';b.setAttribute('role','menuitem');b.className=cls;b.onclick=event=>{event.stopPropagation();action(b);};menu.append(b);return b;};
    item(tr('Rename','تغییر نام'),'history-rename-action',()=>{closeMenus();rename(chat,row,button);});
    const archive=item(showArchived?tr('Restore','بازگردانی'):tr('Archive','بایگانی'),'history-archive',()=>{chat.archived=!chat.archived;save();render();});archive.setAttribute('aria-label',`${showArchived?'Restore':'Archive'} ${chat.title}`);
-   item(tr('Delete','حذف'),'history-delete danger',b=>{if(b.dataset.confirm!=='true'){b.dataset.confirm='true';b.textContent=tr('Confirm delete','تأیید حذف');return;}data.chats=data.chats.filter(c=>c!==chat);if(activeId===chat.id){activeId=ids[chat.mode]=crypto.randomUUID();}save();render();});
+   item(tr('Delete','حذف'),'history-delete danger',b=>{if(b.dataset.confirm!=='true'){b.dataset.confirm='true';b.textContent=tr('Confirm delete','تأیید حذف');return;}data.chats=data.chats.filter(c=>c!==chat);if(activeId===chat.id){activeId=ids[chat.mode]=crypto.randomUUID();setLocation(null);}save();render();});
    more.onclick=event=>{event.stopPropagation();const wasOpen=!menu.hidden;closeMenus();if(!wasOpen){menu.hidden=false;more.setAttribute('aria-expanded','true');openMenu=menu;menu.querySelector('button')?.focus();}};
    menu.onkeydown=event=>{const items=[...menu.querySelectorAll('button')];const at=items.indexOf(document.activeElement);if(event.key==='ArrowDown'){event.preventDefault();items[(at+1)%items.length].focus();}else if(event.key==='ArrowUp'){event.preventDefault();items[(at-1+items.length)%items.length].focus();}};
    row.append(button,more,menu);list.append(row);
@@ -52,8 +63,14 @@ export function createChatLibrary({account,restore,snapshot}){
  };
  $('chat-search').oninput=render;
  return {
-  async profile(profile){generation++;connected=false;data={chats:[],notes:[]};ids={chat:crypto.randomUUID(),worker:crypto.randomUUID(),build:crypto.randomUUID()};activeId=ids.chat;render();if(!profile){status('Sign in to save and revisit your chats.');return;}const version=generation;status('Loading your chats…');try{const result=await request();if(version!==generation)return;if(!Array.isArray(result.chats)||!Array.isArray(result.notes))throw Error();data=result;connected=true;status('Chats are saved to your account. Sign in again after reopening this page.');render();}catch{if(version===generation)status('Account storage is unavailable. This chat is not saved.');}},
-  capture(){if(!connected)return;const chat=snapshot();if(!chat.messages.length)return;activeId=ids[chat.mode];const existing=data.chats.find(c=>c.id===activeId);const value={...chat,id:activeId,updatedAt:Date.now(),archived:false};if(existing)Object.assign(existing,{...value,title:existing.title||value.title});else{if(data.chats.length>=30){status('30-chat limit reached. Export or reuse a saved chat.');return;}data.chats.push(value);}render();save();},
-  fresh(){const mode=snapshot().mode;activeId=ids[mode]=crypto.randomUUID();render();}
+  async profile(profile){generation++;connected=false;data={chats:[],notes:[]};ids={chat:crypto.randomUUID(),worker:crypto.randomUUID(),build:crypto.randomUUID()};activeId=ids.chat;render();if(!profile){setLocation(null);status('Sign in to save and revisit your chats.');return;}const version=generation;status('Loading your chats…');try{const result=await request();if(version!==generation)return;if(!Array.isArray(result.chats)||!Array.isArray(result.notes))throw Error();data=result;connected=true;status(resume?'Chats are saved to your account.':'Chats are saved to your account. Sign in again after reopening this page.');
+   if(resume&&!$('conversation').children.length&&$('conversation').getAttribute('aria-busy')!=='true'){
+    const id=new URL(location.href).searchParams.get('chat');
+    const chat=id&&data.chats.find(item=>item.id===id);
+    if(chat)openChat(chat);else if(id)setLocation(null);
+   }
+   render();}catch{if(version===generation)status('Account storage is unavailable. This chat is not saved.');}},
+  capture(){if(!connected)return;const chat=snapshot();if(!chat.messages.length)return;activeId=ids[chat.mode];const existing=data.chats.find(c=>c.id===activeId);const value={...chat,id:activeId,updatedAt:Date.now(),archived:false};if(existing)Object.assign(existing,{...value,title:existing.title||value.title});else{if(data.chats.length>=30){status('30-chat limit reached. Export or reuse a saved chat.');return;}data.chats.push(value);}setLocation(activeId);render();save();},
+  fresh(){const mode=snapshot().mode;activeId=ids[mode]=crypto.randomUUID();setLocation(null);render();}
  };
 }

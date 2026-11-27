@@ -1,4 +1,5 @@
 import {PRODUCT_IDENTITY_POLICY} from './identity.mjs';
+import {readNDJSON} from './client.mjs';
 
 export const desktopModels=Object.fromEntries([
  ['native_qwen8','Qwen3 8B','qwen3:8b',5.2],
@@ -21,15 +22,33 @@ async function readJSON(response,signal){
  const bytes=new Uint8Array(total);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
  try{return JSON.parse(new TextDecoder().decode(bytes));}catch{throw fail('desktop_invalid_response');}
 }
+async function desktopStream(response,signal,model,onDelta){
+ if(!response.ok)throw fail('desktop_unavailable');
+ let text='',final;
+ await readNDJSON(response,item=>{
+  signal.throwIfAborted();
+  const message=item.message;
+  if(item.error||item.model!==model||typeof item.done!=='boolean'||message?.role!=='assistant'||typeof message.content!=='string')throw fail('desktop_invalid_response');
+  text+=message.content;
+  if(text.length>16000||/<\/?think>/i.test(text))throw fail('desktop_incomplete_response');
+  if(item.done){final={...item,message:{...message,content:text}};return;}
+  // Hold a trailing prefix so a split reasoning tag is never displayed.
+  const tagStart=text.lastIndexOf('<');
+  const tail=tagStart<0?'':text.slice(tagStart).toLowerCase();
+  const visible=tail&&['<think>','</think>'].some(tag=>tag.startsWith(tail))?text.slice(0,tagStart):text;
+  if(visible)onDelta(visible);
+ },{maxBytes:MAX_BYTES,terminal:item=>item.done===true||item.error});
+ return final;
+}
 export function createDesktopChat({fetchImpl=globalThis.fetch,connectTimeout=5000,responseTimeout=120000}={}){
  let available=false,installedIDs=[],active;
  const snapshot=()=>({available,installedIDs:[...installedIDs],models:installedIDs.map(id=>desktopModels[id])});
- async function request(path,options,signal,timeout){
+ async function request(path,options,signal,timeout,read=readJSON){
   if(active)throw fail('desktop_busy');
   const controller=new AbortController();active=controller;
   const abort=()=>controller.abort(signal.reason);if(signal?.aborted)abort();else signal?.addEventListener('abort',abort,{once:true});
   const timer=setTimeout(()=>controller.abort(new DOMException('Desktop request timed out','TimeoutError')),timeout);
-  try{controller.signal.throwIfAborted();const response=await fetchImpl(BASE+path,{...options,redirect:'error',credentials:'omit',cache:'no-store',signal:controller.signal});return await readJSON(response,controller.signal);}
+  try{controller.signal.throwIfAborted();const response=await fetchImpl(BASE+path,{...options,redirect:'error',credentials:'omit',cache:'no-store',signal:controller.signal});return await read(response,controller.signal);}
   finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);if(active===controller)active=undefined;}
  }
  return {
@@ -92,13 +111,14 @@ export function createDesktopChat({fetchImpl=globalThis.fetch,connectTimeout=500
    installedIDs=Object.values(desktopModels).filter(model=>data.models.some(row=>row&&row.name===model.model)).map(model=>model.id);
    available=true;return snapshot();
   },
-  async respond({model,message,locale='en',history=[],signal}){
+  async respond({model,message,locale='en',history=[],signal,onDelta}){
    if(!Object.hasOwn(desktopModels,model))throw fail('invalid_desktop_model');
    if(!available||!installedIDs.includes(model))throw fail('desktop_model_not_installed');
    if(typeof message!=='string'||!message.trim()||message.length>5000||!['en','fa'].includes(locale)||!Array.isArray(history)||history.length>8||history.some(row=>!row||!['user','assistant'].includes(row.role)||typeof row.content!=='string'||row.content.length>2000))throw fail('desktop_invalid_input');
    const policy=locale==='fa'?'فقط به فارسی روان و طبیعی پاسخ بده. نتیجهٔ بررسی امنیتی یا جست‌وجوی وب جعل نکن. اطلاعات محرمانه نخواه.':'Reply in concise natural English. Never invent security checks, scan results or web searches. Never request secrets.';
    const selected=desktopModels[model];
-   const data=await request('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:selected.model,stream:false,think:false,keep_alive:'5m',messages:[{role:'system',content:policy+' '+PRODUCT_IDENTITY_POLICY},...history.map(({role,content})=>({role,content})),{role:'user',content:message}],options:{num_predict:2048,num_ctx:8192}})},signal,responseTimeout);
+   const stream=typeof onDelta==='function';
+   const data=await request('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:selected.model,stream,think:false,keep_alive:'5m',messages:[{role:'system',content:policy+' '+PRODUCT_IDENTITY_POLICY},...history.map(({role,content})=>({role,content})),{role:'user',content:message}],options:{num_predict:2048,num_ctx:8192}})},signal,responseTimeout,stream?(response,abort)=>desktopStream(response,abort,selected.model,onDelta):readJSON);
    if(data.model!==selected.model||data.done!==true||data.done_reason&&data.done_reason!=='stop'||data.message?.role!=='assistant'||typeof data.message.content!=='string'||!data.message.content.trim()||data.message.content.length>16000||/<\/?think>/i.test(data.message.content))throw fail('desktop_incomplete_response');
    return {text:data.message.content,model:selected.model,selectedModel:model,provider:'ollama',securityAnalysis:false};
   }
